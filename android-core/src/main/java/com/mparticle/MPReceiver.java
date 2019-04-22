@@ -36,14 +36,14 @@ import com.mparticle.messaging.ProviderCloudMessage;
  *          <!-- Use your application's package name as the category -->
  *          <category android:name="<YOUR_PACKAGE_NAME_HERE>" />
  *      </intent-filter>
- *      <!-- The GCM registration ID could change on an app upgrade, this filter will allow mParticle to re-register for push notifications if necessary. -->
+ *      <!-- The FCM registration ID could change on an app upgrade, this filter will allow mParticle to re-register for push notifications if necessary. -->
  *      <intent-filter>
  *          <action android:name="android.intent.action.PACKAGE_REPLACED" />
  *          <!-- Use your application's package name as the path -->
  *          <data android:path="<YOUR_PACKAGE_NAME_HERE>"
  *              android:scheme="package" />
  *      </intent-filter>
- *      <!-- The GCM registration ID could change if the device's Android version changes, this filter will allow mParticle to re-register for push notifications if necessary. -->
+ *      <!-- The FCM registration ID could change if the device's Android version changes, this filter will allow mParticle to re-register for push notifications if necessary. -->
  *      <intent-filter>
  *          <action android:name="android.intent.action.BOOT_COMPLETED" />
  *      </intent-filter>

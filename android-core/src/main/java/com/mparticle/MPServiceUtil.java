@@ -159,7 +159,7 @@ public class MPServiceUtil {
                         cloudMessage.setDisplayed(handled);
                         broadcastNotificationReceived(cloudMessage);
                     } catch (Exception e) {
-                        Logger.warning("GCM parsing error: " + e.toString());
+                        Logger.warning("FCM parsing error: " + e.toString());
                     }
                 }
             };
@@ -167,7 +167,7 @@ public class MPServiceUtil {
             MParticle.start(MParticleOptions.builder(mContext).build());
 
         } catch (Exception e) {
-            Logger.warning("GCM parsing error: " + e.toString());
+            Logger.warning("FCM parsing error: " + e.toString());
         }
     }
 

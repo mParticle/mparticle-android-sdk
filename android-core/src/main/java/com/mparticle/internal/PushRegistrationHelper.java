@@ -4,11 +4,8 @@ import android.content.Context;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 
-import com.google.android.gms.iid.InstanceID;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.mparticle.MParticle;
-
-import static com.mparticle.internal.MPUtility.getAvailableInstanceId;
 
 public class PushRegistrationHelper {
 
@@ -21,23 +18,15 @@ public class PushRegistrationHelper {
     }
 
     public static void requestInstanceId(final Context context, final String senderId) {
-        if (!ConfigManager.getInstance(context).isPushRegistrationFetched() && MPUtility.isInstanceIdAvailable()) {
+        if (!ConfigManager.getInstance(context).isPushRegistrationFetched() && MPUtility.isFirebaseAvailable()) {
             final Runnable instanceRunnable = new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        String instanceId = null;
-                        switch (getAvailableInstanceId()) {
-                            case GCM:
-                                instanceId =  InstanceID.getInstance(context).getToken(senderId, "GCM");
-                                break;
-                            case FCM:
-                                instanceId = FirebaseInstanceId.getInstance().getToken(senderId, "FCM");
-                                break;
-                        }
+                        String instanceId = FirebaseInstanceId.getInstance().getToken(senderId, "FCM");
                         setPushRegistration(context, instanceId, senderId);
                     } catch (Exception ex) {
-                        Logger.error("Error registering for GCM Instance ID: ", ex.getMessage());
+                        Logger.error("Error registering for FCM Instance ID: ", ex.getMessage());
                     }
                 }
             };
@@ -46,7 +35,6 @@ public class PushRegistrationHelper {
             }else{
                 instanceRunnable.run();
             }
-
         }
     }
 

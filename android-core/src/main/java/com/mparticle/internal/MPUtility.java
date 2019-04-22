@@ -488,31 +488,7 @@ public class MPUtility {
         return false;
     }
 
-    public enum MessagingService {FCM, GCM, NONE}
-
-    public static MessagingService getAvailableInstanceId() {
-        if (isFCMInstanceIdAvailable()) {
-            return MessagingService.FCM;
-        } else if (isGCMInstanceIdAvailable()) {
-            return MessagingService.GCM;
-        } else {
-            return MessagingService.NONE;
-        }
-    }
-
-    public static boolean isInstanceIdAvailable() {
-        return isFCMInstanceIdAvailable() || isGCMInstanceIdAvailable();
-    }
-
-    private static boolean isGCMInstanceIdAvailable() {
-        try {
-            Class.forName("com.google.android.gms.iid.InstanceID");
-            return true;
-        } catch (Exception ignore) { }
-        return false;
-    }
-
-    private static boolean isFCMInstanceIdAvailable() {
+    public static Boolean isFirebaseAvailable() {
         try {
             Class.forName("com.google.firebase.iid.FirebaseInstanceIdService");
             return true;

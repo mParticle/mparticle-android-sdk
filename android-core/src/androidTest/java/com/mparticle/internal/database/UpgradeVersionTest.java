@@ -12,7 +12,7 @@ import org.junit.Test;
 public class UpgradeVersionTest extends BaseTableTest {
     private MParticleDatabaseHelper helper = new MParticleDatabaseHelper(InstrumentationRegistry.getContext());
 
-    protected interface GcmMessageTableColumns {
+    protected interface FcmMessageTableColumns {
         String CONTENT_ID = "content_id";
         String CAMPAIGN_ID = "campaign_id";
         String TABLE_NAME = "gcm_messages";
@@ -25,20 +25,20 @@ public class UpgradeVersionTest extends BaseTableTest {
     }
 
     static final String CREATE_GCM_MSG_DDL =
-            "CREATE TABLE IF NOT EXISTS " + GcmMessageTableColumns.TABLE_NAME + " (" + GcmMessageTableColumns.CONTENT_ID +
+            "CREATE TABLE IF NOT EXISTS " + FcmMessageTableColumns.TABLE_NAME + " (" + FcmMessageTableColumns.CONTENT_ID +
                     " INTEGER PRIMARY KEY, " +
-                    GcmMessageTableColumns.PAYLOAD + " TEXT NOT NULL, " +
-                    GcmMessageTableColumns.APPSTATE + " TEXT NOT NULL, " +
-                    GcmMessageTableColumns.CREATED_AT + " INTEGER NOT NULL, " +
-                    GcmMessageTableColumns.EXPIRATION + " INTEGER NOT NULL, " +
-                    GcmMessageTableColumns.BEHAVIOR + " INTEGER NOT NULL," +
-                    GcmMessageTableColumns.CAMPAIGN_ID + " TEXT NOT NULL, " +
-                    GcmMessageTableColumns.DISPLAYED_AT + " INTEGER NOT NULL " +
+                    FcmMessageTableColumns.PAYLOAD + " TEXT NOT NULL, " +
+                    FcmMessageTableColumns.APPSTATE + " TEXT NOT NULL, " +
+                    FcmMessageTableColumns.CREATED_AT + " INTEGER NOT NULL, " +
+                    FcmMessageTableColumns.EXPIRATION + " INTEGER NOT NULL, " +
+                    FcmMessageTableColumns.BEHAVIOR + " INTEGER NOT NULL," +
+                    FcmMessageTableColumns.CAMPAIGN_ID + " TEXT NOT NULL, " +
+                    FcmMessageTableColumns.DISPLAYED_AT + " INTEGER NOT NULL " +
                     ");";
 
     @Test
-    public void testDropGcmMessageTable() throws InterruptedException {
-        //test to make sure it doesn't crash when there is a GcmMessages table to delete
+    public void testDropFcmMessageTable() throws InterruptedException {
+        //test to make sure it doesn't crash when there is an FcmMessages table to delete
         runTest(new SQLiteOpenHelperWrapper() {
             @Override
             public void onCreate(SQLiteDatabase database) {
@@ -53,7 +53,7 @@ public class UpgradeVersionTest extends BaseTableTest {
         }, 7);
         deleteTestingDatabase();
 
-        //test to make sure it doesn't crash when there is NO GcmMessages table to delete
+        //test to make sure it doesn't crash when there is NO FcmMessages table to delete
         runTest(helper, 7);
     }
 }

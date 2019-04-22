@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 
 /**
- * <code>BroadcastReceiver</code> to be used to listen for, manipulate, and react to GCM notifications.
+ * <code>BroadcastReceiver</code> to be used to listen for, manipulate, and react to FCM notifications.
  *
  * In order to use this class:
  *

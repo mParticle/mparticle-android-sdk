@@ -1061,12 +1061,8 @@ public class MParticle {
     public void logNotification(@NonNull Intent intent) {
         InternalListenerManager.getListener().onApiCalled(intent);
         if (mConfigManager.isEnabled()) {
-            try {
-                ProviderCloudMessage message = ProviderCloudMessage.createMessage(intent, ConfigManager.getPushKeys(mAppContext));
-                mMessageManager.logNotification(message, getAppState());
-            } catch (ProviderCloudMessage.InvalidGcmMessageException e) {
-                e.printStackTrace();
-            }
+            ProviderCloudMessage message = ProviderCloudMessage.createMessage(intent, ConfigManager.getPushKeys(mAppContext));
+            mMessageManager.logNotification(message, getAppState());
         }
     }
 
@@ -1094,12 +1090,8 @@ public class MParticle {
      */
     public void logNotificationOpened(@NonNull Intent intent) {
         InternalListenerManager.getListener().onApiCalled(intent);
-        try {
-            logNotification(ProviderCloudMessage.createMessage(intent, ConfigManager.getPushKeys(mAppContext)),
-                    true, MParticle.getAppState(), ProviderCloudMessage.FLAG_READ | ProviderCloudMessage.FLAG_DIRECT_OPEN);
-        } catch (ProviderCloudMessage.InvalidGcmMessageException e) {
-            e.printStackTrace();
-        }
+        logNotification(ProviderCloudMessage.createMessage(intent, ConfigManager.getPushKeys(mAppContext)),
+                true, MParticle.getAppState(), ProviderCloudMessage.FLAG_READ | ProviderCloudMessage.FLAG_DIRECT_OPEN);
     }
 
     @NonNull

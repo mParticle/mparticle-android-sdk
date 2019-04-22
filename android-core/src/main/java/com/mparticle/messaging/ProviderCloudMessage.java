@@ -28,7 +28,7 @@ import java.util.Set;
 import static com.mparticle.MPServiceUtil.NOTIFICATION_CHANNEL;
 
 /**
- * Representation of a GCM/push sent by a 3rd party such as Urban Airship or Mixpanel.
+ * Representation of an FCM/push sent by a 3rd party such as Urban Airship or Mixpanel.
  */
 public class ProviderCloudMessage implements Parcelable {
     public static final int FLAG_RECEIVED = 1;
@@ -140,7 +140,7 @@ public class ProviderCloudMessage implements Parcelable {
     }
 
     @NonNull
-    public static ProviderCloudMessage createMessage(@NonNull Intent intent, @Nullable JSONArray keys) throws InvalidGcmMessageException {
+    public static ProviderCloudMessage createMessage(@NonNull Intent intent, @Nullable JSONArray keys) {
         return new ProviderCloudMessage(intent.getExtras(), keys);
     }
 
@@ -151,12 +151,6 @@ public class ProviderCloudMessage implements Parcelable {
         intent.putExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA, message);
 
         return PendingIntent.getService(context, id.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
-    }
-
-    public static class InvalidGcmMessageException extends Exception {
-        public InvalidGcmMessageException(String detailMessage) {
-            super(detailMessage);
-        }
     }
 
     @Nullable

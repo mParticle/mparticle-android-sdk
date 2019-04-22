@@ -40,7 +40,7 @@ public class  AppStateManager {
     private String mCurrentActivityName;
     /**
      * This boolean is important in determining if the app is running due to the user opening the app,
-     * or if we're running due to the reception of a Intent such as a GCM message.
+     * or if we're running due to the reception of a Intent such as an FCM message.
      */
     public static boolean mInitialized;
 

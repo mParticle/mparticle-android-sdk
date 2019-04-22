@@ -107,9 +107,8 @@ task coreSdkJavadocs(type: Javadoc) {
 }
 
 dependencies {
-    compileOnly 'com.google.android.gms:play-services-gcm:10.2.1'
     compileOnly 'com.google.android.gms:play-services-ads:10.2.1'
-    compileOnly 'com.google.firebase:firebase-messaging:[9.4.0, 17.6.0)'
+    compileOnly 'com.google.firebase:firebase-messaging:[9.4.0, )'
     compileOnly 'com.android.support:support-v4:27.1.1'
     compileOnly 'com.android.installreferrer:installreferrer:[1.0, )'
     compileOnly 'com.google.android.instantapps:instantapps:[1.0, )'

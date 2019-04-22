@@ -511,7 +511,7 @@ public abstract class KitIntegration {
          * push messages. This method will be call on app startup and repetitively to aggressively
          * sync tokens as they're updated.
          *
-         * @param instanceId the device instance ID registered with the GCM scope
+         * @param instanceId the device instance ID registered with the FCM scope
          * @param senderId the senderid with permissions for this instanceId
          * @return true if the push registration was processed.
          */
