@@ -21,12 +21,11 @@ public class UserStorageTest extends BaseCleanStartedEachTest {
 
     @Test
     public void testSetFirstSeenTime() throws InterruptedException {
-        UserStorage storage = UserStorage.create(mContext, 1);
-        long firstSeen = System.currentTimeMillis();
-        storage.setFirstSeenTime(firstSeen);
+        long startTime = System.currentTimeMillis();
+        UserStorage storage = UserStorage.create(mContext, ran.nextLong());
+        long firstSeen = storage.getFirstSeenTime();
 
-
-        assertEquals(storage.getFirstSeenTime(), firstSeen);
+        assertTrue(firstSeen >= startTime && firstSeen <= System.currentTimeMillis());
 
         //make sure that the firstSeenTime does not update if it has already been set
         storage.setFirstSeenTime(10L);
