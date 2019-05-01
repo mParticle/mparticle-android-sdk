@@ -294,7 +294,7 @@ public class UploadHandlerTest {
         PowerMockito.mockStatic(MPUtility.class);
         Mockito.when(MPUtility.isAppDebuggable(Mockito.any(Context.class))).thenReturn(true);
         final AndroidUtils.Mutable<AliasResponse> capturedResponse = new AndroidUtils.Mutable<AliasResponse>(null);
-        SdkListener sdkListener = new AbstractSdkListener() {
+        SdkListener sdkListener = new SdkListener() {
             @Override
             public void onAliasRequestFinished(@NonNull AliasResponse aliasResponse) {
                 capturedResponse.value = aliasResponse;
@@ -355,19 +355,5 @@ public class UploadHandlerTest {
         assertFalse(capturedResponse.value.willRetry());
         assertEquals(aliasRequest, capturedResponse.value.getRequest());
         assertEquals(aliasRequestMessage.getRequestId(), capturedResponse.value.getRequestId());
-    }
-
-    class AbstractSdkListener implements SdkListener {
-        public void onApiCalled(@NonNull String apiName, @NonNull List<Object> objects, boolean isExternal) { }
-        public void onEntityStored(@NonNull DatabaseTable tableName, @NonNull long primaryKey, @NonNull JSONObject message) { }
-        public void onNetworkRequestStarted(@NonNull Endpoint type, @NonNull String url, @NonNull JSONObject body) { }
-        public void onNetworkRequestFinished(@NonNull Endpoint type, @NonNull String url, @Nullable JSONObject response, int responseCode) { }
-        public void onKitApiCalled(int kitId, @NonNull String apiName, @Nullable String invokingMethodName, @Nullable String kitManagerMethodName, @NonNull List<Object> objects, boolean used) { }
-        public void onKitDetected(int kitId) { }
-        public void onKitConfigReceived(int kitId, @NonNull JSONObject configuration) { }
-        public void onKitStarted(int kitId) { }
-        public void onKitExcluded(int kitId, @NonNull String reason) { }
-        public void onSessionUpdated(@Nullable InternalSession session) { }
-        public void onAliasRequestFinished(@NonNull AliasResponse aliasResponse) { }
     }
 }

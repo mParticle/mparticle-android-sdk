@@ -19,8 +19,8 @@ import java.util.List;
  * SdkListener is a new feature which enables updates on and visibility into internal Events occuring
  * inside the SDK.
  */
-public interface SdkListener {
-    String ERROR_MESSAGE = "message";
+public class SdkListener {
+    public static final String ERROR_MESSAGE = "message";
 
     /**
      * Indicates that an API method was called. This includes invocations both from external sources (your code)
@@ -29,7 +29,9 @@ public interface SdkListener {
      * @param objects the arguments used in the invocation
      * @param isExternal true, if the call originated from outside of the SDK
      */
-    void onApiCalled(@NonNull String apiName, @NonNull List<Object> objects, boolean isExternal);
+    public void onApiCalled(@NonNull String apiName, @NonNull List<Object> objects, boolean isExternal) {
+
+    }
 
     /**
      * Indicates that a new Database entry has been created
@@ -37,7 +39,9 @@ public interface SdkListener {
      * @param primaryKey a unique identifier for the database row
      * @param message the database entry in JSON form
      */
-    void onEntityStored(@NonNull DatabaseTable tableName, @NonNull long primaryKey, @NonNull JSONObject message);
+    public void onEntityStored(@NonNull DatabaseTable tableName, @NonNull long primaryKey, @NonNull JSONObject message) {
+
+    }
 
     /**
      * Indicates that a Network Request has been started. Network Requests for a given {@link Endpoint} are performed
@@ -47,7 +51,9 @@ public interface SdkListener {
      * @param url the URL of the request
      * @param body the response body in JSON form
      */
-    void onNetworkRequestStarted(@NonNull Endpoint type, @NonNull String url, @NonNull JSONObject body);
+    public void onNetworkRequestStarted(@NonNull Endpoint type, @NonNull String url, @NonNull JSONObject body) {
+
+    }
 
     /**
      * Indicates that a Network Request has completed. Network Requests for a given {@link Endpoint} are performed
@@ -58,7 +64,9 @@ public interface SdkListener {
      * @param response the response body in JSON form
      * @param responseCode the HTTP response code
      */
-    void onNetworkRequestFinished(@NonNull Endpoint type, @NonNull String url, @Nullable JSONObject response, int responseCode);
+    public void onNetworkRequestFinished(@NonNull Endpoint type, @NonNull String url, @Nullable JSONObject response, int responseCode) {
+
+    }
 
     /**
      * Indicates that a Kit method was invoked.
@@ -69,26 +77,34 @@ public interface SdkListener {
      * @param objects the arguments passed
      * @param used whether a {@link com.mparticle.internal.database.services.ReportingService.ReportingMessage} was generated as a result of the invocation. {@link com.mparticle.internal.database.services.ReportingService.ReportingMessage} indicate that an argument was consumed by the Kit
      */
-    void onKitApiCalled(int kitId, @NonNull String apiName, @Nullable String invokingMethodName, @Nullable String kitManagerMethodName, @NonNull List<Object> objects, boolean used);
+    public void onKitApiCalled(int kitId, @NonNull String apiName, @Nullable String invokingMethodName, @Nullable String kitManagerMethodName, @NonNull List<Object> objects, boolean used) {
+
+    }
 
     /**
      * Indicates that a Kit module, with kitId, is present in the classpath
      * @param kitId the id of the kit, corresponse with a {@link com.mparticle.MParticle.ServiceProviders}
      */
-    void onKitDetected(int kitId);
+    public void onKitDetected(int kitId) {
+
+    }
 
     /**
      * Indicates that a Configuration for a kit with kitId is being applied
      * @param kitId the id of the kit, corresponse with a {@link com.mparticle.MParticle.ServiceProviders}
      * @param configuration the configuration in JSON form
      */
-    void onKitConfigReceived(int kitId, @NonNull JSONObject configuration);
+    public void onKitConfigReceived(int kitId, @NonNull JSONObject configuration) {
+
+    }
 
     /**
      * Indicates that a kit with kitId was successfully started
      * @param kitId the id of the kit, corresponse with a {@link com.mparticle.MParticle.ServiceProviders}
      */
-    void onKitStarted(int kitId);
+    public void onKitStarted(int kitId) {
+
+    }
 
     /**
      * Indicates that either an attempt to start a kit was unsuccessful, or a started kit was stopped.
@@ -98,21 +114,25 @@ public interface SdkListener {
      * @param kitId the id of the kit, corresponse with a {@link com.mparticle.MParticle.ServiceProviders}
      * @param reason a message containing the reason a kit was stopped
      */
-    void onKitExcluded(int kitId, @NonNull String reason);
+    public void onKitExcluded(int kitId, @NonNull String reason) {
+
+    }
 
     /**
      * Indicates that state of a Session may have changed
      * @param session the current {@link InternalSession} instance
      */
-    void onSessionUpdated(@Nullable InternalSession session);
+    public void onSessionUpdated(@Nullable InternalSession session) {
+
+    }
 
     /**
-     * Callback for {@link com.mparticle.identity.IdentityApi#aliasUsers(AliasRequest)} calls.
+     * Callback for {@link com.mparticle.identity.IdentityApi#aliasUsers(AliasRequest)} results.
      * @param aliasResponse
      */
-    void onAliasRequestFinished(AliasResponse aliasResponse);
+    public void onAliasRequestFinished(AliasResponse aliasResponse) { }
 
-    enum Endpoint {
+    public enum Endpoint {
         IDENTITY_LOGIN,
         IDENTITY_LOGOUT,
         IDENTITY_IDENTIFY,
@@ -122,7 +142,7 @@ public interface SdkListener {
         CONFIG
     }
 
-    enum DatabaseTable {
+    public enum DatabaseTable {
         ATTRIBUTES,
         BREADCRUMBS,
         MESSAGES,

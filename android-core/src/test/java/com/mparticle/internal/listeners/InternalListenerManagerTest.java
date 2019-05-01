@@ -53,7 +53,7 @@ public class InternalListenerManagerTest {
         assertEquals(InternalListenerManager.getListener(), InternalListener.EMPTY);
         assertFalse(InternalListenerManager.isEnabled());
 
-        SdkListener listener = new MockSdkListener();
+        SdkListener listener = new SdkListener();
         manager.addListener(listener);
 
         //manager should now be active, since a listener was added
@@ -124,21 +124,6 @@ public class InternalListenerManagerTest {
         public String getPackageName() {
             return "test.package.name";
         }
-    }
-
-    class MockSdkListener implements SdkListener {
-
-        public void onApiCalled(@NonNull String apiName, @NonNull List<Object> objects, boolean isExternal) { }
-        public void onEntityStored(@NonNull DatabaseTable tableName, @NonNull long primaryKey, @NonNull JSONObject message) { }
-        public void onNetworkRequestStarted(@NonNull Endpoint type, @NonNull String url, @NonNull JSONObject body) { }
-        public void onNetworkRequestFinished(@NonNull Endpoint type, @NonNull String url, @Nullable JSONObject response, int responseCode) { }
-        public void onKitApiCalled(int kitId, @NonNull String apiName, @Nullable String invokingMethodName, @Nullable String kitManagerMethodName, @NonNull List<Object> objects, boolean used) { }
-        public void onKitDetected(int kitId) { }
-        public void onKitConfigReceived(int kitId, @NonNull JSONObject configuration) { }
-        public void onKitStarted(int kitId) { }
-        public void onKitExcluded(int kitId, @NonNull String reason) { }
-        public void onSessionUpdated(@Nullable InternalSession session) { }
-        public void onAliasRequestFinished(@NonNull AliasResponse aliasResponse) { }
     }
 }
 
