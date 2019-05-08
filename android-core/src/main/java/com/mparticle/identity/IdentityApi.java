@@ -101,20 +101,7 @@ public class IdentityApi {
         for (Long mpid: mpids) {
             users.add(MParticleUserImpl.getInstance(mContext, mpid, mUserDelegate));
         }
-        Collections.sort(users, new Comparator<MParticleUser>() {
-            @Override
-            public int compare(MParticleUser user1, MParticleUser user2) {
-                long lst1 = user1.getLastSeenTime();
-                long lst2 = user2.getLastSeenTime();
-                if (lst1 < lst2) {
-                    return -1;
-                } else if (lst1 > lst2) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            }
-        });
+        sortUsers(users);
         return users;
     }
 
@@ -319,6 +306,23 @@ public class IdentityApi {
     @NonNull
     public Internal Internal() {
         return mInternal;
+    }
+
+    void sortUsers(List<MParticleUser> users) {
+        Collections.sort(users, new Comparator<MParticleUser>() {
+            @Override
+            public int compare(MParticleUser user1, MParticleUser user2) {
+                long lst1 = user1.getLastSeenTime();
+                long lst2 = user2.getLastSeenTime();
+                if (lst1 > lst2) {
+                    return -1;
+                } else if (lst1 < lst2) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
+        });
     }
 
     private void reset() {
