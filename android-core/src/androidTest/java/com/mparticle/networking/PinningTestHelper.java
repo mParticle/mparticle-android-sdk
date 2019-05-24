@@ -75,10 +75,10 @@ public class PinningTestHelper {
 
     /**
      * The only way I have been able to find if we are pinning certificates or not, is to test
-     * whether the HttpsURLConnection is using it's origin SSLSocketFactory or not. This does not
+     * whether the HttpsURLConnection is using its origin SSLSocketFactory or not. This does not
      * tell us if it actually has certificates pinned, but rather, if it has ever been set. Not the
-     * best approach, but there is not easier way, without doing some Reflection, which we should
-     * eventually do
+     * best approach, but there is no easier way, without doing some Reflection, which we should
+     * eventually do.
      */
     private boolean isPinned(HttpsURLConnection connection) {
         return connection.getSSLSocketFactory() != SSLSocketFactory.getDefault();

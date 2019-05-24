@@ -54,7 +54,7 @@ public class BreadcrumbService extends BreadcrumbTable {
     };
 
     /**
-     * for testing only
+     * For testing only.
      */
     static int getBreadcrumbCount(MPDatabase db, Long mpid) {
         Cursor rawIds = null;

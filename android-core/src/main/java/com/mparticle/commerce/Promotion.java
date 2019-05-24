@@ -31,12 +31,12 @@ import org.json.JSONObject;
 public class Promotion {
 
     /**
-     * The Promotion action constant used to track when a user taps or clicks on a Promotion
+     * The Promotion action constant used to track when a user taps or clicks on a Promotion.
      *
      */
     @NonNull public static final String CLICK = "click";
     /**
-     * The Promotion action constant used to track when a user views a Promotion
+     * The Promotion action constant used to track when a user views a Promotion.
      *
      */
     @NonNull public static final String VIEW = "view";
@@ -48,14 +48,14 @@ public class Promotion {
 
     /**
      * Create an empty Promotion. You should typically at least
-     * set the ID or Name of a Promotion
+     * set the ID or Name of a Promotion.
      */
     public Promotion() {
         super();
     }
 
     /**
-     * Copy constructor to duplicate an existing Promotion
+     * Copy constructor to duplicate an existing Promotion.
      *
      * @param promotion return the duplicated Promotion object
      */
@@ -69,7 +69,7 @@ public class Promotion {
     }
 
     /**
-     * Get the description of the creative in this Promotion
+     * Get the description of the creative in this Promotion.
      *
      * @return returns the name of the creative associated with this Promotion
      */
@@ -79,7 +79,7 @@ public class Promotion {
     }
 
     /**
-     * Set the name of the creative to associate with this Promotion
+     * Set the name of the creative to associate with this Promotion.
      *
      * @param creative
      * @return returns this Promotion object for easy method chaining
@@ -91,7 +91,7 @@ public class Promotion {
     }
 
     /**
-     * Get the unique ID of this Promotion
+     * Get the unique ID of this Promotion.
      *
      * @return
      */
@@ -101,7 +101,7 @@ public class Promotion {
     }
 
     /**
-     * Set a unique ID to associate with this Promotion
+     * Set a unique ID to associate with this Promotion.
      *
      * @param id
      * @return returns this Promotion object for easy method chaining
@@ -113,7 +113,7 @@ public class Promotion {
     }
 
     /**
-     * Get the name associated with this Promotion
+     * Get the name associated with this Promotion.
      *
      * @return
      */
@@ -123,7 +123,7 @@ public class Promotion {
     }
 
     /**
-     * Set a name to associate with this Promotion
+     * Set a name to associate with this Promotion.
      *
      * @param name
      * @return returns this Promotion object for easy method chaining
@@ -135,7 +135,7 @@ public class Promotion {
     }
 
     /**
-     * Get the position of this Promotion on the page
+     * Get the position of this Promotion on the page.
      *
      * @return
      */
@@ -145,7 +145,7 @@ public class Promotion {
     }
 
     /**
-     * Set the description of the position of this Promotion on the page
+     * Set the description of the position of this Promotion on the page.
      *
      * @param position
      * @return returns this Promotion object for easy method chaining

@@ -96,7 +96,7 @@ final class CustomMappingMatch {
     }
 
     /**
-     * This is an optimization - check the basic stuff to see if we have a match before actually trying to do the projection
+     * This is an optimization - check the basic stuff to see if we have a match before actually trying to do the projection.
      */
     public boolean isMatch(EventWrapper eventWrapper) {
         if (eventWrapper.getMessageType() != mMessageType) {

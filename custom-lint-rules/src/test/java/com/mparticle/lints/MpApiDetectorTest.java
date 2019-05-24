@@ -102,10 +102,10 @@ public class MpApiDetectorTest extends LintDetectorTest {
 
     /**
      * We want to make sure that we are have a limit on how deep down the AST we will look for the start
-     * call, otherwise, we might have cases where this method could cause a hang if the AST has backlinks
+     * call, otherwise, we might have cases where this method could cause a hang if the AST has backlinks.
      *
      * currently, this test that we will not try to go beyond 4 levels of nested calls. This test has
-     * MParticle.start() in the 5th level, and should fail, as "Not Found"
+     * MParticle.start() in the 5th level, and should fail, as "Not Found".
      * @throws Exception
      */
     @Test
@@ -216,7 +216,7 @@ public class MpApiDetectorTest extends LintDetectorTest {
      * This test guarantees that we are searching for start() calls in the correct order within onCreate(),
      * which should the order in which they will be executed. To attain this we need to keep a DFS.
      * This does not account for multiple children of android.app.Application and chained constructors.
-     * In that case, order cannot be guaranteed
+     * In that case, order cannot be guaranteed.
      * @throws Exception
      */
     @Test

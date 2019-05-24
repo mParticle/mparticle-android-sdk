@@ -66,7 +66,7 @@ import java.util.Set;
 
 /**
  * The primary access point to the mParticle SDK. In order to use this class, you must first call {@link #start(MParticleOptions)}. You can then retrieve a reference
- * to an instance of this class via {@link #getInstance()}
+ * to an instance of this class via {@link #getInstance()}.
  *
  */
 @ApiClass
@@ -156,7 +156,7 @@ public class MParticle {
                     Context originalContext = context;
                     context = context.getApplicationContext();
                     if (!MPUtility.checkPermission(context, Manifest.permission.INTERNET)) {
-                        Logger.error("mParticle requires android.permission.INTERNET permission");
+                        Logger.error("mParticle requires android.permission.INTERNET permission.");
                     }
 
                     instance = new MParticle(options);
@@ -181,7 +181,7 @@ public class MParticle {
                         instance.mAttributionListener = options.getAttributionListener();
                     }
 
-                    //there are a number of settings that don't need to be enabled right away
+                    //There are a number of settings that don't need to be enabled right away
                     //queue up a delayed init and let the start() call return ASAP.
                     instance.mMessageManager.initConfigDelayed();
                     instance.mInternal.getAppStateManager().init(Build.VERSION.SDK_INT);
@@ -195,7 +195,7 @@ public class MParticle {
                     if (pushRegistration != null) {
                         instance.logPushRegistration(pushRegistration.instanceId, pushRegistration.senderId);
                     } else {
-                        //check if Push InstanceId was updated since we last started the SDK and send corresponding modify() request
+                        //Check if Push InstanceId was updated since we last started the SDK and send corresponding modify() request.
                         String oldInstanceId = instance.mConfigManager.getPushInstanceIdBackground();
                         if (oldInstanceId != null) {
                             String newInstanceId = instance.mConfigManager.getPushInstanceId();
@@ -335,7 +335,7 @@ public class MParticle {
     }
 
     /**
-     * Retrieve the current install referrer, if it has been set
+     * Retrieve the current install referrer, if it has been set.
      *
      * @return The current Install Referrer
      */
@@ -345,7 +345,7 @@ public class MParticle {
     }
 
     /**
-     * Log an event with an {@link MPEvent} object
+     * Log an event with an {@link MPEvent} object.
      *
      * @param event the event object to log
      */
@@ -360,7 +360,7 @@ public class MParticle {
     }
 
     /**
-     * Log an e-Commerce related event with a {@link CommerceEvent} object
+     * Log an e-Commerce related event with a {@link CommerceEvent} object.
      *
      * @param event the event to log
      *
@@ -419,7 +419,7 @@ public class MParticle {
     }
 
     /**
-     * Logs a screen view event
+     * Logs a screen view event.
      *
      * @param screenName the name of the screen to be tracked
      */
@@ -428,7 +428,7 @@ public class MParticle {
     }
 
     /**
-     * Logs a screen view event
+     * Logs a screen view event.
      *
      * @param screenName the name of the screen to be tracked
      * @param eventData  a Map of data attributes to associate with this screen view
@@ -439,14 +439,14 @@ public class MParticle {
 
 
     /**
-     * Logs a screen view event
+     * Logs a screen view event.
      *
      * @param screenEvent an event object, the name of the event will be used as the screen name
      */
     public void logScreen(@NonNull MPEvent screenEvent) {
         screenEvent.setScreenEvent(true);
         if (MPUtility.isEmpty(screenEvent.getEventName())) {
-            Logger.error( "screenName is required for logScreen");
+            Logger.error( "screenName is required for logScreen.");
             return;
         }
         if (screenEvent.getEventName().length() > Constants.LIMIT_ATTR_KEY) {
@@ -478,7 +478,7 @@ public class MParticle {
     public void leaveBreadcrumb(@NonNull String breadcrumb) {
         if (mConfigManager.isEnabled()) {
             if (MPUtility.isEmpty(breadcrumb)) {
-                Logger.error( "breadcrumb is required for leaveBreadcrumb");
+                Logger.error( "breadcrumb is required for leaveBreadcrumb.");
                 return;
             }
             if (breadcrumb.length() > Constants.LIMIT_ATTR_KEY) {
@@ -493,7 +493,7 @@ public class MParticle {
     }
 
     /**
-     * Logs an error event
+     * Logs an error event.
      *
      * @param message the name of the error event to be tracked
      */
@@ -510,7 +510,7 @@ public class MParticle {
     public void logError(@NonNull String message, @Nullable Map<String, String> errorAttributes) {
         if (mConfigManager.isEnabled()) {
             if (MPUtility.isEmpty(message)) {
-                Logger.error( "message is required for logErrorEvent");
+                Logger.error( "message is required for logErrorEvent.");
                 return;
             }
             mAppStateManager.ensureActiveSession();
@@ -537,7 +537,7 @@ public class MParticle {
     }
 
     /**
-     * Logs an Exception
+     * Logs an Exception.
      *
      * @param exception an Exception
      */
@@ -546,7 +546,7 @@ public class MParticle {
     }
 
     /**
-     * Logs an Exception
+     * Logs an Exception.
      *
      * @param exception an Exception
      * @param eventData a Map of data attributes
@@ -556,14 +556,14 @@ public class MParticle {
     }
 
     /**
-     * Clears the current Attribution Listener
+     * Clears the current Attribution Listener.
      */
     public void removeAttributionListener() {
         mAttributionListener = null;
     }
 
     /**
-     * Retrieve the current attribution listener
+     * Retrieve the current Attribution Listener.
      *
      */
     @Nullable
@@ -572,7 +572,7 @@ public class MParticle {
     }
 
     /**
-     * Queries the attribution results
+     * Queries the attribution results.
      *
      * @return the current attribution results
      */
@@ -583,7 +583,7 @@ public class MParticle {
 
 
     /**
-     * Logs an Exception
+     * Logs an Exception.
      *
      * @param exception an Exception
      * @param eventData a Map of data attributes
@@ -620,7 +620,7 @@ public class MParticle {
             try {
                 LocationManager locationManager = (LocationManager) mAppContext.getSystemService(Context.LOCATION_SERVICE);
                 if (!locationManager.isProviderEnabled(provider)) {
-                    Logger.error( "That requested location provider is not available");
+                    Logger.error( "That requested location provider is not available.");
                     return;
                 }
 
@@ -628,8 +628,8 @@ public class MParticle {
                     if (null == mLocationListener) {
                         mLocationListener = new MPLocationListener(this);
                     } else {
-                        // clear the location listener, so it can be added again
-                        //noinspection MissingPermission
+                        // Clear the location listener, so it can be added again
+                        //noinspection MissingPermission.
                         locationManager.removeUpdates(mLocationListener);
                     }
                     //noinspection MissingPermission
@@ -645,13 +645,13 @@ public class MParticle {
                         .apply();
 
             } catch (SecurityException e) {
-                Logger.error( "The app must require the appropriate permissions to track location using this provider");
+                Logger.error( "The app must require the appropriate permissions to track location using this provider.");
             }
         }
     }
 
     /**
-     * Disables any mParticle location tracking that had been started
+     * Disables any mParticle location tracking that had been started.
      */
     @SuppressLint("MissingPermission")
     public void disableLocationTracking() {
@@ -682,7 +682,7 @@ public class MParticle {
     }
 
     /**
-     * Retrieves the current setting of location tracking
+     * Retrieves the current setting of location tracking.
      *
      */
     public boolean isLocationTrackingEnabled() {
@@ -804,14 +804,14 @@ public class MParticle {
     }
 
     /**
-     * Enable mParticle exception handling to automatically log events on uncaught exceptions
+     * Enable mParticle exception handling to automatically log events on uncaught exceptions.
      */
     public void enableUncaughtExceptionLogging() {
         mConfigManager.enableUncaughtExceptionLogging(true);
     }
 
     /**
-     * Disables mParticle exception handling and restores the original UncaughtExceptionHandler
+     * Disables mParticle exception handling and restores the original UncaughtExceptionHandler.
      */
     public void disableUncaughtExceptionLogging() {
         mConfigManager.disableUncaughtExceptionLogging(true);
@@ -900,7 +900,7 @@ public class MParticle {
     }
 
     /**
-     * Entry point to the Messaging APIs
+     * Entry point to the Messaging APIs.
      *
      * @return a helper object that allows for interaction with the Messaging APIs
      */
@@ -936,7 +936,7 @@ public class MParticle {
     }
 
     /**
-     * Entry point to the Media APIs
+     * Entry point to the Media APIs.
      *
      * @return a helper object that allows for interaction with the Media APIs
      */
@@ -1010,7 +1010,7 @@ public class MParticle {
 
     /**
      * Retrieve the underlying object for the given Kit Id for direct calls. Results will be null if
-     * kit is not active, or if the application just started, and the kit has not yet been initialized
+     * kit is not active, or if the application just started, and the kit has not yet been initialized.
      *
      * @param kitId
      * @return The Kit object, may be null if kit is not available
@@ -1031,7 +1031,7 @@ public class MParticle {
     }
 
     /**
-     * Logs a Push Notification displayed to the User
+     * Logs a Push Notification displayed to the User.
      * @param intent
      */
     public void logNotification(@NonNull Intent intent) {
@@ -1060,7 +1060,7 @@ public class MParticle {
     }
 
     /**
-     * Logs a Push Notification has been tapped or opened
+     * Logs a Push Notification has been tapped or opened.
      * @param intent
      */
     public void logNotificationOpened(@NonNull Intent intent) {
@@ -1112,13 +1112,13 @@ public class MParticle {
 
     /**
      * This method will permanently remove ALL MParticle data from the device, included SharedPreferences and Database,
-     * and halt any upload or download behavior that may be in process
+     * and halt any upload or download behavior that may be in process.
      *
      * If you have any reference to the MParticle instance, you must remove your reference by setting it to "null",
-     * in order to avoid any unexpected behavior
+     * in order to avoid any unexpected behavior.
      *
      * The SDK will be shut down and MParticle.getInstance() will return null. MParticle can be restarted by
-     * calling MParticle.start()
+     * calling MParticle.start().
      *
      * @param context
      */
@@ -1126,7 +1126,7 @@ public class MParticle {
         synchronized (MParticle.class) {
             //"commit" will force all async writes stemming from an "apply" call to finish. We need to do this
             //because we need to ensure that the "getMpids()" call is returning all calls that have been made
-            // up to this point, otherwise we will miss deleting some files
+            // up to this point, otherwise we will miss deleting some files.
             context.getSharedPreferences(ConfigManager.PREFERENCES_FILE, Context.MODE_PRIVATE).edit().commit();
             if (instance != null) {
                 if (instance.isLocationTrackingEnabled()) {
@@ -1137,7 +1137,7 @@ public class MParticle {
                 MParticle.setInstance(null);
             }
 
-            //delete all SharedPreferences files
+            //Delete all SharedPreferences files.
             Set<String> prefFiles = new HashSet<String>();
             prefFiles.add(ConfigManager.PREFERENCES_FILE);
             prefFiles.add(Constants.PREFS_FILE);
@@ -1168,14 +1168,14 @@ public class MParticle {
     }
 
     /**
-     *  This method will permanently remove ALL MParticle data from the device, included SharedPreferences and Database,
-     * and halt any upload or download behavior that may be in process
+     * This method will permanently remove ALL MParticle data from the device, included SharedPreferences and Database,
+     * and halt any upload or download behavior that may be in process.
      *
      * If you have any reference to the MParticle instance, you must remove your reference by setting it to "null",
-     * in order to avoid any unexpected behavior
+     * in order to avoid any unexpected behavior.
      *
      * The SDK will be shut down and MParticle.getInstance() will return null. MParticle can be restarted by
-     * calling MParticle.start()
+     * calling MParticle.start().
      *
      * @param context
      * @param callback A callback that will trigger when the SDK has been fully reset
@@ -1199,7 +1199,7 @@ public class MParticle {
     }
 
     /**
-     * note: Experimental feature, adding a Listener will slow down the SDK, and should be used only
+     * NOTE: Experimental feature, adding a Listener will slow down the SDK, and should be used only
      * for development purposes. By default, InternalListeners will automatically disable in release builds.
      * In order to override this behavior, use the following adb shell command:
      *
@@ -1217,7 +1217,7 @@ public class MParticle {
     }
 
     /**
-     * Remove an instance of {@link SdkListener}
+     * Remove an instance of {@link SdkListener}.
      */
     public static void removeListener(SdkListener listener) {
         InternalListenerManager manager = InternalListenerManager.start(null);
@@ -1241,13 +1241,13 @@ public class MParticle {
     }
 
     /**
-     * To be used when initializing MParticle
+     * To be used when initializing MParticle.
      *
      * @see MParticleOptions
      */
     public enum InstallType {
         /**
-         * This is the default value. Using this value will rely on the mParticle SDK to differentiate a new install vs. an upgrade
+         * This is the default value. Using this value will rely on the mParticle SDK to differentiate a new install vs. an upgrade.
          */
         AutoDetect,
         /**
@@ -1255,7 +1255,7 @@ public class MParticle {
          */
         KnownInstall,
         /**
-         * In the case where you app has seen this user before
+         * In the case where you app has seen this user before.
          */
         KnownUpgrade;
 
@@ -1396,11 +1396,11 @@ public class MParticle {
          */
         DEBUG(Log.DEBUG),
         /*
-         * Used to relay fine-grained issues with the usage of the SDK
+         * Used to relay fine-grained issues with the usage of the SDK.
          */
         VERBOSE(Log.VERBOSE),
         /*
-         * Used to communicate
+         * Used to communicate.
          */
         INFO(Log.INFO);
 
@@ -1413,7 +1413,7 @@ public class MParticle {
     void logUnhandledError(Throwable t) {
         if (mConfigManager.isEnabled()) {
             mMessageManager.logErrorEvent(t != null ? t.getMessage() : null, t, null, false);
-            //we know that the app is about to crash and therefore exit
+            //we know that the app is about to crash and therefore exit.
             mAppStateManager.logStateTransition(Constants.StateTransitionType.STATE_TRANS_EXIT, mAppStateManager.getCurrentActivityName());
             mAppStateManager.getSession().mLastEventTime = System.currentTimeMillis();
             mAppStateManager.endSession();
@@ -1432,20 +1432,20 @@ public class MParticle {
         } else {
             if (mDeferredModifyPushRegistrationListener != null) {
                 Identity().removeIdentityStateListener(mDeferredModifyPushRegistrationListener);
-                Logger.verbose("Removed deferred logPushRegistration Modify request");
+                Logger.verbose("Removed deferred logPushRegistration Modify request.");
             }
             mDeferredModifyPushRegistrationListener = new IdentityStateListener() {
                 @Override
                 public void onUserIdentified(MParticleUser user, MParticleUser previousUser) {
                     if (user != null) {
                         Identity().removeIdentityStateListener(this);
-                        Logger.verbose("Sending previously deferred logPushRegistration Modify request");
+                        Logger.verbose("Sending previously deferred logPushRegistration Modify request.");
                         sendPushTokenModifyRequest(user, newInstanceId, oldInstanceId);
                     }
                 }
             };
             Identity().addIdentityStateListener(mDeferredModifyPushRegistrationListener);
-            Logger.verbose("Deferred logPushRegistration Modify request, MParticleUser not present");
+            Logger.verbose("Deferred logPushRegistration Modify request, MParticleUser not present.");
         }
     }
 
@@ -1554,7 +1554,7 @@ public class MParticle {
      */
     public interface UserAttributes {
         /**
-         * A special attribute string to specify the mobile number of the consumer's device
+         * A special attribute string to specify the mobile number of the consumer's device.
          */
         @NonNull String MOBILE_NUMBER = "$Mobile";
         /**

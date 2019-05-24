@@ -38,7 +38,7 @@ public abstract class BaseStartupTest {
     protected Context mContext;
 
     /**
-     * To pull the startup file from the file dir, use
+     * To pull the startup file from the file dir, use:
      *
      * adb pull /storage/emulated/0/Android/data/com.mparticle.testutils.test/files/startupTimes.txt
      * adb pull /storage/emulated/0/Android/data/com.mparticle.testutils.test/files/legacyStartupTimes.txt

@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Helper class that is used to access Identity endpoints to manage User's Attributes and Identities
+ * Helper class that is used to access Identity endpoints to manage User's Attributes and Identities.
  */
 @ApiClass
 public class IdentityApi {
@@ -66,7 +66,7 @@ public class IdentityApi {
 
     /**
      * return the MParticleUser with the current MPID, even if an Identity request,
-     * which might cause the MPID to change, is currently in progress
+     * which might cause the MPID to change, is currently in progress.
      *
      * @see IdentityStateListener
      */
@@ -81,8 +81,8 @@ public class IdentityApi {
     }
 
     /**
-     * return the MParticleUser with the specified MPID, if it exists. If an MParticleUser with the
-     * specified MPID does not exist, or the specifid MPID is 0, this will return null
+     * Return the MParticleUser with the specified MPID, if it exists. If an MParticleUser with the
+     * specified MPID does not exist, or the specifid MPID is 0, this will return null.
      *
      * @param mpid the desired MParticleUser's MPID
      */
@@ -118,7 +118,7 @@ public class IdentityApi {
     }
 
     /**
-     * adds a global listener which will be invoked when the MPID or "logged in" status changes for the current user
+     * Adds a global listener which will be invoked when the MPID or "logged in" status changes for the current user.
      * @param listener callback for Identity State changes
      *
      * @see IdentityStateListener
@@ -128,7 +128,7 @@ public class IdentityApi {
     }
 
     /**
-     * removes an instance of a global listener by reference
+     * Removes an instance of a global listener by reference.
      * @param listener callback for Identity State changes
      *
      * @see IdentityStateListener
@@ -138,7 +138,7 @@ public class IdentityApi {
     }
 
     /**
-     * calls the Identity Logout endpoint with an empty IdentityApiRequest
+     * Calls the Identity Logout endpoint with an empty IdentityApiRequest.
      *
      * @return an MParticleTask<IdentityApiResult> to handle the Asynchronous results
      *
@@ -176,7 +176,7 @@ public class IdentityApi {
     }
 
     /**
-     * calls the Identity Login endpoint with an empty IdentityApiRequest
+     * Calls the Identity Login endpoint with an empty IdentityApiRequest.
      *
      * @return an MParticleTask<IdentityApiResult> to handle the Asynchronous results
      *
@@ -189,9 +189,9 @@ public class IdentityApi {
     }
 
     /**
+     * Calls the Identity Login endpoint.
      * @see IdentityApiRequest
      *
-     * calls the Identity Login endpoint
      *
      * @return an MParticleTask<IdentityApiResult> to handle the Asynchronous results
      *
@@ -214,9 +214,9 @@ public class IdentityApi {
     }
 
     /**
+     * Calls the Identity Identify endpoint.
      * @see IdentityApiRequest
      *
-     * calls the Identity Identify endpoint
      *
      * @return an MParticleTask<IdentityApiResult> to handle the Asynchronous results
      *
@@ -239,10 +239,11 @@ public class IdentityApi {
     }
 
     /**
+     * Calls the Identity Modify endpoint. This should be used in place of the pre-version-5
+     * MParticle.setUserAttribute() and MParticle.setUserIdentity() methods.
+     * 
      * @see IdentityApiRequest
      *
-     * calls the Identity Modify endpoint. This should be used in place of the pre-version-5
-     * MParticle.setUserAttribute() and MParticle.setUserIdentity() methods
      *
      * @return an MParticleTask<IdentityApiResult> to handle the Asynchronous results
      *
@@ -267,7 +268,7 @@ public class IdentityApi {
             updateRequest.mpid = mConfigManager.getMpid();
         }
         if (Constants.TEMPORARY_MPID.equals(updateRequest.mpid)) {
-            String message = "modify() requires a non-zero MPID, please make sure a MParticleUser is present before making a modify request";
+            String message = "modify() requires a non-zero MPID, please make sure a MParticleUser is present before making a modify request.";
             if (devMode) {
                 throw new IllegalArgumentException(message);
             } else {
@@ -415,7 +416,7 @@ public class IdentityApi {
     }
 
     /**
-     * this should only be used for testing
+     * This should only be used for testing.
      */
     void setApiClient(MParticleIdentityClient client) {
         mApiClient = client;

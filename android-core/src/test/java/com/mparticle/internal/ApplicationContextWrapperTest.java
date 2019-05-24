@@ -28,6 +28,15 @@ import static org.mockito.Mockito.mock;
  * Created by wpassidomo on 2/21/17.
  */
 
+/**
+ *  Test that if you add a bunch on mock activiies that it will play back in the same order.
+ *  Test that it won't crash if there aren't anuy activiies added.
+ *  Test that it will max out at 10.
+ *  Test that it will take wierd, out of order combinations.
+ *  Test that it will ONLY replay activies that match current activity.
+ *  Test that if you call stopRecordLifecycles, you will not record anymore lifecycles.
+ */
+
 public class ApplicationContextWrapperTest {
     MParticle instance;
     Activity activity1 = mock(Activity.class);
@@ -209,14 +218,5 @@ public class ApplicationContextWrapperTest {
     }
 }
 
-
-/**
- *  test that if you add a bunch on mock activiies that it will play back in the same order.
- *  test that it won't crash if there aren't anuy activiies added
- *  test that it will max out at 10
- *  test that it will take wierd, out of order combinations
- *  test that it will ONLY replay activies that match current activity
- *  test that if you call stopRecordLifecycles, you will not record anymore lifecycles
- */
 
 

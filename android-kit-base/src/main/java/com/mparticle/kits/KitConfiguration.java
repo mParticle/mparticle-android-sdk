@@ -57,7 +57,7 @@ public class KitConfiguration {
     private final static String KEY_CONSENT_FORWARDING_RULES_VALUE_HASH = "h";
     private final static String KEY_EXCLUDE_ANONYMOUS_USERS = "eau";
 
-    //If set to true, our sdk honor user's optout wish. If false, we still collect data on opt-ed out users, but only for reporting
+    //If set to true, our sdk honor user's optout wish. If false, we still collect data on opt-ed out users, but only for reporting.
     private final static String HONOR_OPT_OUT = "honorOptOut";
     private final static String KEY_PROJECTIONS = "pr";
     private boolean avfIsActive = false;
@@ -280,7 +280,7 @@ public class KitConfiguration {
 
     /**
      * This method indicates if the given consent state matches any of the Consent
-     * forwarding rules
+     * forwarding rules.
      *
      * @param consentState
      * @return

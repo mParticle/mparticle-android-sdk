@@ -281,7 +281,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                     JSONObject firstRunMessage = createFirstRunMessage();
                     mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, firstRunMessage));
                 } catch (JSONException e) {
-                    Logger.warning("Failed to create First Run Message");
+                    Logger.warning("Failed to create First Run Message.");
                 }
             }else{
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.END_ORPHAN_SESSIONS, mConfigManager.getMpid()));
@@ -293,7 +293,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             mConfigManager.getUserStorage().incrementSessionCounter();
             return message;
         } catch (JSONException e) {
-            Logger.warning("Failed to create mParticle start session message");
+            Logger.warning("Failed to create mParticle start session message.");
             return null;
         }
     }
@@ -304,7 +304,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             mMessageHandler
                     .sendMessage(mMessageHandler.obtainMessage(MessageHandler.UPDATE_SESSION_END, session));
         } catch (Exception e) {
-            Logger.warning("Failed to send update session end message");
+            Logger.warning("Failed to send update session end message.");
         }
     }
 
@@ -353,7 +353,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
                 return message;
             } catch (JSONException e) {
-                Logger.warning("Failed to create mParticle log event message");
+                Logger.warning("Failed to create mParticle log event message.");
             }
         }
         return null;
@@ -374,7 +374,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
                 return message;
             } catch (JSONException e) {
-                Logger.warning("Failed to create mParticle log event message");
+                Logger.warning("Failed to create mParticle log event message.");
             }
         }
         return null;
@@ -396,7 +396,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
                 return message;
             } catch (JSONException e) {
-                Logger.warning("Failed to create mParticle log event message");
+                Logger.warning("Failed to create mParticle log event message.");
             }
         }
         return null;
@@ -416,7 +416,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_BREADCRUMB, message));
                 return message;
             } catch (JSONException e) {
-                Logger.warning("Failed to create mParticle breadcrumb message");
+                Logger.warning("Failed to create mParticle breadcrumb message.");
 
             }
         }
@@ -432,7 +432,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
             return message;
         } catch (JSONException e) {
-            Logger.warning("Failed to create mParticle opt out message");
+            Logger.warning("Failed to create mParticle opt out message.");
             return null;
         }
     }
@@ -464,7 +464,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             }
             return message;
         } catch (JSONException e) {
-            Logger.warning("Failed to create mParticle error message");
+            Logger.warning("Failed to create mParticle error message.");
         }
         return null;
     }
@@ -486,7 +486,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
                 return message;
             } catch (JSONException e) {
-                Logger.warning("Failed to create mParticle network performance message");
+                Logger.warning("Failed to create mParticle network performance message.");
             }
         }
         return null;
@@ -507,7 +507,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
                 return message;
             } catch (JSONException e) {
-                Logger.warning("Failed to create mParticle push registration message");
+                Logger.warning("Failed to create mParticle push registration message.");
             }
         }
         return null;
@@ -523,7 +523,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.UPDATE_SESSION_ATTRIBUTES,
                         sessionAttributes));
             } catch (JSONException e) {
-                Logger.warning("Failed to send update session attributes message");
+                Logger.warning("Failed to send update session attributes message.");
             }
         }
     }
@@ -628,7 +628,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
                 return message;
             } catch (JSONException e) {
-                Logger.warning("Failed to create mParticle state transition message");
+                Logger.warning("Failed to create mParticle state transition message.");
             }
         }
         return null;
@@ -693,7 +693,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
-            Logger.warning("Failed to create mParticle log event message");
+            Logger.warning("Failed to create mParticle log event message.");
         }
     }
 
@@ -720,7 +720,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             }
             return message;
         } catch (JSONException e) {
-            Logger.warning("Failed to create mParticle user-identity-change message");
+            Logger.warning("Failed to create mParticle user-identity-change message.");
         } finally {
             mConfigManager.saveUserIdentityJson(userIdentities, mpId);
         }
@@ -765,7 +765,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             mMessageHandler.handleMessageImpl(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
             return message;
         } catch (JSONException e) {
-            Logger.warning("Failed to create mParticle user-attribute-change message");
+            Logger.warning("Failed to create mParticle user-attribute-change message.");
         }
         return null;
     }

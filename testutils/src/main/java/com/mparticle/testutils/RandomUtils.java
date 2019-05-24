@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * Utilities for generating tests with Randomness
+ * Utilities for generating tests with Randomness.
  */
 public class RandomUtils {
     private static final String sAlpha = "abcdefghijklmnopqrstuvwxyzABC";
@@ -82,7 +82,7 @@ public class RandomUtils {
         return builder.toString();
     }
 
-    //inclusive of low range, less than high range
+    //Inclusive of low range, less than high range.
     public int randomInt(int from, int to) {
         int random = Math.abs(new Random().nextInt());
         int range = random % (to - from);
@@ -91,10 +91,10 @@ public class RandomUtils {
 
     public Set<Integer> randomIntSet(int fromRange, int toRange, int num) {
         if (toRange < fromRange) {
-            throw new IllegalArgumentException("toRange must be greater than fromRange");
+            throw new IllegalArgumentException("toRange must be greater than fromRange.");
         }
         if (toRange - fromRange < num) {
-            throw new IllegalArgumentException("range must be grater than num, since a Set may only contain one instance of an Entry, you will be unable to fill the Set with these parameters");
+            throw new IllegalArgumentException("Range must be grater than num, since a Set may only contain one instance of an Entry, you will be unable to fill the Set with these parameters.");
         }
         Set<Integer> set = new TreeSet<Integer>();
         for (int i = 0; i < num; i++) {

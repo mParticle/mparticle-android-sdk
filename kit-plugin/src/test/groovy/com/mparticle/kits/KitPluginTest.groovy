@@ -13,7 +13,7 @@ class KitPluginTest {
 
         project.pluginManager.apply 'com.mparticle.kit'
 
-        project.mparticle.kitDescription = 'this is a sample kit description'
+        project.mparticle.kitDescription = 'This is a sample kit description.'
 
     }
 }

@@ -354,7 +354,7 @@ public class MockServer {
 
 
     /**
-     * This WILL block
+     * This WILL block.
      */
     public void waitForVerify(Matcher matcher) throws InterruptedException {
         CountDownLatch latch = new MPLatch(1);
@@ -363,7 +363,7 @@ public class MockServer {
     }
 
     /**
-     * These WILL NOT block
+     * These WILL NOT block.
      */
     public void waitForVerify(Matcher matcher, final CountDownLatch latch) {
         waitForVerify(matcher, new RequestReceivedCallback() {
@@ -449,7 +449,7 @@ public class MockServer {
 
     //This does 2 things to clean up the logic before we can test it against the request
     //1) it reverses it, so we prioritize which "logic" gets the match by which one was set most
-    //recently
+    //recently.
     //2) we update the request which have the SDK "key" in their URL to match the current Key. Usually
     //the server is started before MParticle.start() is called, which means the urls in the "logic"
     //might not contain the same SDK key that was set later in MParticle.start()

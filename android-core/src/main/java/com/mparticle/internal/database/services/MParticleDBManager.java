@@ -53,7 +53,7 @@ public class MParticleDBManager {
     }
 
     /**
-     * Creates a new SQLiteDatabase instance, if the Database has not been opened yet, and returns
+     * Creates a new SQLiteDatabase instance, if the Database has not been opened yet, it returns
      * an instance. Each instance is a singleton, per thread.
      * @return
      */
@@ -76,7 +76,7 @@ public class MParticleDBManager {
     /**
      *
      *
-     * Breadcumb Service Methods
+     * Breadcumb Service Methods.
      *
      *
      */
@@ -96,7 +96,7 @@ public class MParticleDBManager {
     /**
      *
      *
-     * Message Service Methods
+     * Message Service Methods.
      *
      *
      */
@@ -129,7 +129,7 @@ public class MParticleDBManager {
     /**
      *
      *
-     * Prepare Messages for Upload
+     * Prepare Messages for Upload.
      *
      *
      */
@@ -244,10 +244,10 @@ public class MParticleDBManager {
             highestUploadedMessageId = readyMessage.getMessageId();
         }
         if (markAsUpload) {
-            //else mark the messages as uploaded, so next time around it'll be included in session history
+            //Else mark the messages as uploaded, so next time around it'll be included in session history.
             MessageService.markMessagesAsUploaded(db, highestUploadedMessageId);
         } else {
-            //if this is a session-less message, or if session history is disabled, just delete it
+            //If this is a session-less message, or if session history is disabled, just delete it.
             MessageService.deleteMessages(db, highestUploadedMessageId);
         }
         return uploadMessagesBySessionMpid;
@@ -263,7 +263,7 @@ public class MParticleDBManager {
                 MessageBatch uploadMessage = mpidMessage.getValue();
                 if (uploadMessage != null) {
                     String sessionId = session.getKey();
-                    //for upgrade scenarios, there may be no device or app info associated with the session, so create it now.
+                    //For upgrade scenarios, there may be no device or app info associated with the session, so create it now.
                     if (uploadMessage.getAppInfo() == null) {
                         uploadMessage.setAppInfo(deviceAttributes.getAppInfo(mContext));
                     }
@@ -283,7 +283,7 @@ public class MParticleDBManager {
                     UploadService.insertUpload(db, uploadMessage, configManager.getApiKey());
                     //if this was to process session history, or
                     //if we're never going to process history AND
-                    //this batch contains a previous session, then delete the session
+                    //this batch contains a previous session, then delete the session.
                     if (!historyMessages && !sessionHistoryEnabled && !sessionId.equals(currentSessionId)) {
                         SessionService.deleteSessions(db, currentSessionId);
                     }
@@ -293,7 +293,7 @@ public class MParticleDBManager {
     }
 
     /**
-     * Look for the last UAC message to find the end-state of user attributes
+     * Look for the last UAC message to find the end-state of user attributes.
      */
     private JSONObject findUserAttributeState(JSONArray messages, long mpId) {
         JSONObject userAttributes = null;
@@ -319,7 +319,7 @@ public class MParticleDBManager {
     }
 
     /**
-     * Look for the last UIC message to find the end-state of user identities
+     * Look for the last UIC message to find the end-state of user identities.
      */
     private JSONArray findIdentityState(ConfigManager configManager, JSONArray messages, long mpId) {
         JSONArray identities = null;
@@ -383,7 +383,7 @@ public class MParticleDBManager {
                     sessionAttributes = new JSONObject(attributes);
                 }
 
-                // create a session-end message
+                // Create a session-end message.
                 endMessage = createMessageSessionEnd(sessionId, start, end, foregroundLength,
                         sessionAttributes, location, mpIds);
                 endMessage.put(Constants.MessageKey.ID, UUID.randomUUID().toString());
@@ -406,7 +406,7 @@ public class MParticleDBManager {
         JSONArray spanningMpids = new JSONArray();
         long storageMpid = Constants.TEMPORARY_MPID;
         for (Long mpid: mpIds) {
-            //we do not need to associate a SessionEnd message with any particular MPID, as long as it is not == Constants.TEMPORARY_MPID
+            //We do not need to associate a SessionEnd message with any particular MPID, as long as it is not == Constants.TEMPORARY_MPID.
             if (mpid != Constants.TEMPORARY_MPID) {
                 spanningMpids.put(mpid);
                 storageMpid = mpid;

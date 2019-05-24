@@ -120,7 +120,7 @@ public class DeviceAttributes {
             attributes.put(MessageKey.FIRST_SEEN_INSTALL, install);
             editor.putBoolean(PrefKeys.FIRST_RUN_INSTALL, false);
         } catch (Exception e) {
-            // again difference devices can do terrible things, make sure that we don't bail out completely
+            // again different devices can do terrible things, make sure that we don't bail out completely
             // and return at least what we've built so far.
         } finally {
             editor.apply();

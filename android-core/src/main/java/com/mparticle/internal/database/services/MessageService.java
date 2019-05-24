@@ -80,8 +80,8 @@ public class MessageService extends MessageTable {
     }
 
     /**
-     * will return all Messages for upload, except for those with MP_ID == Constants.TEMPORARY_MPID,
-     * useful in non-testing context;
+     * Will return all Messages for upload, except for those with MP_ID == Constants.TEMPORARY_MPID,
+     * useful in non-testing context.
      */
     public static List<ReadyMessage> getMessagesForUpload(MPDatabase database) {
         return getMessagesForUpload(database, false, Constants.TEMPORARY_MPID);
@@ -147,7 +147,7 @@ public class MessageService extends MessageTable {
     }
 
     /**
-     * Delete a message that has been uploaded in session history
+     * Delete a message that has been uploaded in session history.
      */
     public static int deleteMessages(MPDatabase database, int messageId) {
         String[] whereArgs = new String[]{Integer.toString(messageId), String.valueOf(Constants.TEMPORARY_MPID)};
@@ -172,7 +172,7 @@ public class MessageService extends MessageTable {
         contentValues.put(MessageTableColumns.MESSAGE, messageString);
 
         if (Constants.MessageType.FIRST_RUN.equals(message.getString(Constants.MessageKey.TYPE))) {
-            // Force the first run message to be parsed immediately
+            // Force the first run message to be parsed immediately.
             contentValues.put(MessageTableColumns.STATUS, Constants.Status.BATCH_READY);
         } else {
             contentValues.put(MessageTableColumns.STATUS, Constants.Status.READY);

@@ -12,7 +12,7 @@ The platform has grown to support 100+ partners in the ecosystem, including deve
 
 mParticle's Android integration is powered by a Core library, which supports mParticle's server-side integrations and audience platform.
 
-You can grab the Core SDK via Maven Central. Please reference the badge above and follow the [releases page](https://github.com/mParticle/mparticle-android-sdk/releases) to stay up to date with the latest version.
+You can grab the Core SDK via Maven Central. Please see the badge above and follow the [releases page](https://github.com/mParticle/mparticle-android-sdk/releases) to stay up to date with the latest version.
 
 ```groovy
 dependencies {

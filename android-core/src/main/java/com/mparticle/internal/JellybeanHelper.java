@@ -16,7 +16,7 @@ public class JellybeanHelper {
                 return stat.getAvailableBlocksLong() * stat.getBlockSizeLong();
             }
         }catch (Exception e) {
-            //for some reason, it appears some devices even in jelly bean don't have this method.
+            //For some reason, it appears some devices even in jelly bean don't have this method.
         }
 
         return 0;

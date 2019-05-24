@@ -8,7 +8,7 @@ import android.content.pm.ApplicationInfo;
 import com.mparticle.internal.ApplicationContextWrapper;
 
 /**
- * Utility methods for manipulating the Android sdk state for testing purposes
+ * Utility methods for manipulating the Android sdk state for testing purposes.
  */
 public class AndroidUtils {
 

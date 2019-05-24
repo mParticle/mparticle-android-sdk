@@ -86,7 +86,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
     /**
      * These tests are to make sure that we are not missing any instances of the InstallReferrer
      * being set at any of the entry points, without the corresponding installReferrerUpdated() calls
-     * being made
+     * being made.
      * @throws Exception
      */
     @Test
@@ -106,7 +106,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
             }
         };
 
-        //test when the InstallReferrer is set directly on the InstallReferrerHelper
+        //Test when the InstallReferrer is set directly on the InstallReferrerHelper.
         String installReferrer = mRandomUtils.getAlphaNumericString(10);
         InstallReferrerHelper.setInstallReferrer(mContext, installReferrer);
 
@@ -115,7 +115,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
 
         Arrays.fill(called, false);
 
-        //test when it is set through the MParticle object in the public API
+        //Test when it is set through the MParticle object in the public API.
         installReferrer = mRandomUtils.getAlphaNumericString(10);
         MParticle.getInstance().setInstallReferrer(installReferrer);
 
@@ -124,7 +124,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
 
         Arrays.fill(called, false);
 
-        //test when it is received via the ReferrerReceiver Receiver
+        //Test when it is received via the ReferrerReceiver Receiver.
         installReferrer = mRandomUtils.getAlphaNumericString(10);
         ReferrerReceiver.setInstallReferrer(mContext, ReferrerReceiver.getMockInstallReferrerIntent(installReferrer));
 
@@ -133,7 +133,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
 
         Arrays.fill(called, false);
 
-        //test when it is received through the MPReceiver Receiver
+        //Test when it is received through the MPReceiver Receiver.
         installReferrer = mRandomUtils.getAlphaNumericString(10);
         new MPReceiver().onReceive(mContext, ReferrerReceiver.getMockInstallReferrerIntent(installReferrer));
 
@@ -142,7 +142,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
 
         Arrays.fill(called, false);
 
-        //just a sanity check, if Context is null, it should not set mark the InstallReferrer as updated
+        //Just a sanity check, if Context is null, it should not set mark the InstallReferrer as updated.
         installReferrer = mRandomUtils.getAlphaNumericString(10);
         InstallReferrerHelper.setInstallReferrer(null, installReferrer);
 
@@ -268,7 +268,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
 
 
     /**
-     * Test that Identity calls in progress will exit gracefully, and not trigger any callbacks
+     * Test that Identity calls in progress will exit gracefully, and not trigger any callbacks.
      */
     public void testResetIdentityCall(Runnable resetRunnable) throws InterruptedException {
         final boolean[] called = new boolean[2];
@@ -333,8 +333,8 @@ public class MParticleTest extends BaseCleanStartedEachTest {
                             JSONObject identityChange = identityChanges.getJSONObject(0);
                             String failureMessage = "When " + oldRegistration + " set with: " + setPush.getName();
 
-                            //this is a wierd case. We might be setting the old pushRegistration with "logPushRegistration()",
-                            //which will kick of it's own modify request. We want to ignore this if this is the case :)
+                            //This is a wierd case. We might be setting the old pushRegistration with "logPushRegistration()",
+                            //which will kick of its own modify request. We want to ignore this if this is the case.
                             if (identityChange.getString("new_value").equals(oldRegistration.instanceId)) {
                                 return false;
                             }
@@ -381,25 +381,25 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         assertTrue(10 < MParticle.getInstance().Internal().getConfigManager().getMpids().size());
 
         //Set strict mode, so if we get any warning or error messages during the reset/restart phase,
-        //it will throw an exception
+        //it will throw an exception.
         TestingUtils.setStrictMode(MParticle.LogLevel.WARNING);
 
         resetRunnable.run();
         assertSDKGone();
 
-        //restart the SDK, to the point where the initial Identity call returns, make sure there are no errors on startup
+        //Restart the SDK, to the point where the initial Identity call returns, make sure there are no errors on startup.
         TestingUtils.setStrictMode(MParticle.LogLevel.WARNING, "Failed to get MParticle instance, getInstance() called prior to start().");
         beforeBase();
     }
 
     private void assertSDKGone() {
-        //check post-reset state
+        //Check post-reset state:
         //should be 2 entries in default SharedPreferences (the install boolean and the original install time)
-        //and 0 other SharedPreferences tables
-        //make sure the 2 entries in default SharedPreferences are the correct values
-        //0 tables should exist
-        //then we call DatabaseHelper.getInstance(Context).openDatabase, which should create the database,
-        //and make sure it is created without an error message, and that all the tables are empty
+        //and 0 other SharedPreferences tables.
+        //Make sure the 2 entries in default SharedPreferences are the correct values.
+        //0 tables should exist.
+        //Then we call DatabaseHelper.getInstance(Context).openDatabase, which should create the database,
+        //and make sure it is created without an error message, and that all the tables are empty.
         String sharedPrefsDirectory = mContext.getFilesDir().getPath().replace("files", "shared_prefs/");
         File[] files = new File(sharedPrefsDirectory).listFiles();
         for (File file : files) {

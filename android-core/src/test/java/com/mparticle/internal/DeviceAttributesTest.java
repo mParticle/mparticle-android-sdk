@@ -57,7 +57,7 @@ public class DeviceAttributesTest {
     @Test
     public void testAppInfoLaunchCount() throws Exception {
         Context context = new MockContext();
-        // clear out the stored data for the current user, so we don't get any launches from previous tests
+        // Clear out the stored data for the current user, so we don't get any launches from previous tests.
         new ConfigManager(context, null, null, null).deleteUserStorage(context, ConfigManager.getMpid(context));
         JSONObject appInfo = null;
         int launchCount = 20;

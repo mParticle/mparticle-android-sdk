@@ -125,7 +125,7 @@ public class ConfigManager {
     }
 
     /**
-     * The is called on startup. The only thing that's completely necessary is that we fire up kits.
+     * This called on startup. The only thing that's completely necessary is that we fire up kits.
      */
     public JSONArray getLatestKitConfiguration() {
         String oldConfig = sPreferences.getString(CONFIG_JSON, null);

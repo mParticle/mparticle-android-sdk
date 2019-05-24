@@ -109,7 +109,7 @@ class ProviderPersistence extends JSONObject{
     private static final String MACRO_GUID_LEAST_SIG = "%glsb%";
 
     /**
-     * Macros are used so that the /config API call can come from a CDN (not user-specific)
+     * Macros are used so that the /config API call can come from a CDN (not user-specific).
      */
     private static String applyMacro(String defaultString) {
         if (!MPUtility.isEmpty(defaultString) && defaultString.startsWith("%")){

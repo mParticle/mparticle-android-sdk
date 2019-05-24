@@ -13,7 +13,8 @@ import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.PushRegistrationHelper;
 
 /**
- * Utility class to enable and adjust push notification behavior. Do not directly instantiate this class.
+ * DO NOT DIRECTLY INSTANTIATE THIS CLASS!
+ * Utility class to enable and adjust push notification behavior. 
  *
  * @see com.mparticle.MParticle#Messaging()
  *
@@ -51,7 +52,7 @@ public class MPMessagingAPI {
     }
 
     /**
-     * Register the application for FCM notifications
+     * Register the application for FCM notifications.
      *
      * @param senderId the SENDER_ID for the application
      */
@@ -60,16 +61,16 @@ public class MPMessagingAPI {
         if (!MPUtility.isFirebaseAvailable()) {
             Logger.error("Push is enabled but Firebase Cloud Messaging library not found - you must add com.google.firebase:firebase-messaging:7.5 or later to your application.");
         }else if (!MPUtility.isServiceAvailable(mContext, MPService.class)){
-            Logger.error("Push is enabled but you have not added <service android:name=\"com.mparticle.MPService\" /> to the <application> section of your AndroidManifest.xml");
+            Logger.error("Push is enabled but you have not added <service android:name=\"com.mparticle.MPService\" /> to the <application> section of your AndroidManifest.xml.");
         }else if (!MPUtility.checkPermission(mContext, "com.google.android.c2dm.permission.RECEIVE")){
-            Logger.error("Attempted to enable push notifications without required permission: ", "\"com.google.android.c2dm.permission.RECEIVE\"");
+            Logger.error("Attempted to enable push notifications without required permission: ", "\"com.google.android.c2dm.permission.RECEIVE\".");
         }else {
             PushRegistrationHelper.requestInstanceId(mContext, senderId);
         }
     }
 
     /**
-     * Unregister the application for FCM notifications
+     * Unregister the application for FCM notifications.
      */
     public void disablePushNotifications() {
         MParticle.getInstance().Internal().getConfigManager().clearPushRegistration();
@@ -81,7 +82,7 @@ public class MPMessagingAPI {
 
     /**
      * Register a custom implementation of PushAnalyticsReceiver, which will provide callbacks when
-     * push messages are received
+     * push messages are received.
      * @param receiver the implementation of PushAnalyticsReceiver to be registered
      *
      * @see PushAnalyticsReceiver

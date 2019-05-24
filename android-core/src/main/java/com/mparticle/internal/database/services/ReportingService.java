@@ -28,8 +28,8 @@ public class ReportingService extends ReportingTable {
     }
 
     /**
-     * will return all ReportingMessages, except for those with MP_ID == Constants.TEMPORARY_MPID,
-     * useful in non-testing context;
+     * Will return all ReportingMessages, except for those with MP_ID == Constants.TEMPORARY_MPID,
+     * useful in non-testing context.
      */
     public static List<ReportingMessage> getReportingMessagesForUpload(MPDatabase database) throws JSONException {
         return getReportingMessagesForUpload(database, false, Constants.TEMPORARY_MPID);

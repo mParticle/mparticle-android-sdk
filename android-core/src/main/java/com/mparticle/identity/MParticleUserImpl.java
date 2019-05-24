@@ -15,7 +15,7 @@ import com.mparticle.segmentation.SegmentListener;
 import java.util.Map;
 
 /**
- * a class which represents a User
+ * A class which represents a User.
  */
 @ApiClass
 public class MParticleUserImpl implements MParticleUser {
@@ -52,7 +52,7 @@ public class MParticleUserImpl implements MParticleUser {
     }
 
     /**
-     * query the attributes of the User asynchronously
+     * Query the attributes of the User asynchronously.
      *
      * @param listener a callback for querying User's attributes
      *

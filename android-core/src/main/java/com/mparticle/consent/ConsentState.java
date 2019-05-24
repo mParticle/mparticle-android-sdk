@@ -48,7 +48,7 @@ public final class ConsentState {
 
     /**
      * When comparing consent values for duplication with string fields:
-     * 1) casing doesn't matter. "foo" and "Foo" are the same;
+     * 1) case doesn't matter. "foo" and "Foo" are the same;
      * 2) null, empty, and whitespace are all the same - nothing;
      * 3) leading or training whitespace is ignored. "foo   ", "    foo", and "foo" are the same;
      */
@@ -63,10 +63,10 @@ public final class ConsentState {
     /**
      * Retrieve the current GDPR consent state for this user.
      * <p>
-     * Note that all purpose keys will be lower-cased and trimmed.
+     * Note that all purpose keys will be lower-case and trimmed.
      *
      * @return returns an unmodifiable Map. Attempted mutation will
-     * result in an <tt>UnsupportedOperationException</tt>.
+     * result in an <code>UnsupportedOperationException</code>.
      */
     @Nullable
     public Map<String, GDPRConsent> getGDPRConsentState() {

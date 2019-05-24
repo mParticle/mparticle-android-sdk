@@ -81,8 +81,8 @@ public class SessionService extends SessionTable {
             selectCursor = db.query(TABLE_NAME, sessionColumns,
                     SessionTableColumns.API_KEY + "= ? and " + SessionTableColumns.STATUS + " IS NULL",
                     selectionArgs, null, null, null);
-            // NOTE: there should be at most one orphan per api key - but
-            // process any that are found
+            // NOTE: There should be at most one orphan per API key - but
+            // process any that are found.
             while (selectCursor.moveToNext()) {
                 sessionIds.add(selectCursor.getString(0));
             }

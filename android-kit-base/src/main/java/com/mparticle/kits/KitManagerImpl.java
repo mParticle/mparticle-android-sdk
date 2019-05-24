@@ -152,7 +152,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     /**
      * Update the current list of active kits based on server (or cached) configuration.
      * <p>
-     * Note: This method is meant to always be run on the main thread
+     * Note: This method is meant to always be run on the main thread.
      */
     protected void configureKits(JSONArray kitConfigs) {
         MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
@@ -166,7 +166,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     int currentModuleID = configuration.getKitId();
                     mCoreCallbacks.getKitListener().kitConfigReceived(currentModuleID, configuration.toString());
                     if (configuration.shouldExcludeUser(user)) {
-                        mCoreCallbacks.getKitListener().kitExcluded(currentModuleID, "User was required to be known, but was not");
+                        mCoreCallbacks.getKitListener().kitExcluded(currentModuleID, "User was required to be known, but was not.");
                         continue;
                     }
                     if (!mKitIntegrationFactory.isSupported(configuration.getKitId())) {
@@ -1159,7 +1159,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
     @Override
     public void onConsentStateUpdated(final ConsentState oldState, final ConsentState newState, final long mpid) {
-        //due to consent forwarding rules we need to re-initialize kits whenever the user changes
+        //Due to consent forwarding rules we need to re-initialize kits whenever the user changes.
         updateKits(mCoreCallbacks.getLatestKitConfiguration());
         Runnable runnable = new Runnable() {
             @Override
@@ -1175,7 +1175,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 }
             }
         };
-        //this needs to be run on the main thread, after kit configuration/consent forwarding rules, which also happen on the main thread.
+        //This needs to be run on the main thread, after kit configuration/consent forwarding rules, which also happen on the main thread.
         if (Looper.getMainLooper() != Looper.myLooper()) {
             Handler handler = new Handler(getContext().getMainLooper());
             handler.post(runnable);

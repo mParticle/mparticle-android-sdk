@@ -25,7 +25,7 @@ public abstract class BaseNetworkConnection {
     public void setNextAllowedRequestTime(MPConnection connection, MParticleBaseClientImpl.Endpoint endpoint) {
         long throttle = NetworkConnection.DEFAULT_THROTTLE_MILLIS;
         if (connection != null) {
-            //most HttpUrlConnectionImpl's are case insensitive, but the interface
+            //Most HttpUrlConnectionImpl's are case insensitive, but the interface
             //doesn't actually restrict it so let's be safe and check.
             String retryAfter = connection.getHeaderField("Retry-After");
             if (MPUtility.isEmpty(retryAfter)) {

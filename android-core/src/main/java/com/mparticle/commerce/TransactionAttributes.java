@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 /**
- * Class encaspulating the parameters of a given Product CommerceEvent
+ * Class encaspulating the parameters of a given Product CommerceEvent.
  *
  */
 public class TransactionAttributes {

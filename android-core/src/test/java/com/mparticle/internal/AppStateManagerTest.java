@@ -122,7 +122,7 @@ public class AppStateManagerTest {
     }
 
     /**
-     * This tests what happens if we're started in something other than the launch Activity
+     * This tests what happens if we're started in something other than the launch Activity.
      *
      * @throws Exception
      */
@@ -222,7 +222,7 @@ public class AppStateManagerTest {
         assertFalse(manager.shouldEndSession());
 
         MParticle.setInstance(null);
-        //make sure it doesn't crash
+        //Make sure it doesn't crash.
         assertTrue(manager.shouldEndSession());
 
     }

@@ -42,9 +42,9 @@ public final class CommerceEventUtils {
         }
         if (productAction.equalsIgnoreCase(Product.PURCHASE) || productAction.equalsIgnoreCase(Product.REFUND)) {
             MPEvent.Builder plusOne = new MPEvent.Builder(String.format(PLUSONE_NAME, event.getProductAction()), MParticle.EventType.Transaction);
-            //set all product action fields to attributes
+            //Set all product action fields to attributes.
             Map<String, String> attributes = new HashMap<String, String>();
-            //start with the custom attributes then overwrite with action fields
+            //Start with the custom attributes then overwrite with action fields.
             if (event.getCustomAttributes() != null) {
                 attributes.putAll(event.getCustomAttributes());
             }

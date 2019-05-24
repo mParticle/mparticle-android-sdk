@@ -15,7 +15,7 @@ import com.mparticle.networking.NetworkOptions;
 import com.mparticle.networking.NetworkOptionsManager;
 
 /**
- * class used for passing optional settings to the SDK when it is started
+ * class used for passing optional settings to the SDK when it is started.
  */
 public class MParticleOptions {
     private static final String PREFKEY_API_KEY = "mp_key";
@@ -71,14 +71,14 @@ public class MParticleOptions {
         }
         if (builder.uploadInterval != null) {
             if (builder.uploadInterval <= 0) {
-                Logger.warning("Upload Interval must be a positive number, disregarding value");
+                Logger.warning("Upload Interval must be a positive number, disregarding value.");
             } else {
                 this.mUploadInterval = builder.uploadInterval;
             }
         }
         if (builder.sessionTimeout != null) {
             if (builder.sessionTimeout <= 0) {
-                Logger.warning("Session Timeout must be a positive number, disregarding value");
+                Logger.warning("Session Timeout must be a positive number, disregarding value.");
             } else {
                 this.mSessionTimeout = builder.sessionTimeout;
             }
@@ -120,7 +120,7 @@ public class MParticleOptions {
     }
 
     /**
-     * query the InstallType
+     * Query the InstallType.
      */
     @NonNull
     public MParticle.InstallType getInstallType() {
@@ -128,7 +128,7 @@ public class MParticleOptions {
     }
 
     /**
-     * query the Environment
+     * Query the Environment.
      * @return
      */
     @NonNull
@@ -137,7 +137,7 @@ public class MParticleOptions {
     }
 
     /**
-     * query the Api Key
+     * Query the API Key.
      * @return
      */
     @NonNull
@@ -146,7 +146,7 @@ public class MParticleOptions {
     }
 
     /**
-     * query the Api Secret
+     * Query the API Secret.
      * @return
      */
     @NonNull
@@ -155,7 +155,7 @@ public class MParticleOptions {
     }
 
     /**
-     * query the Identify Request
+     * Query the Identify Request.
      * @return
      */
     @Nullable
@@ -164,7 +164,7 @@ public class MParticleOptions {
     }
 
     /**
-     * query whether device performance metrics are enabled or disabled
+     * Query whether device performance metrics are enabled or disabled.
      * @return true if the are disabled, false if they are enabled
      */
     @NonNull
@@ -173,7 +173,7 @@ public class MParticleOptions {
     }
 
     /**
-     * query whether Android Id collection is enabled or disabled
+     * Query whether Android Id collection is enabled or disabled.
      * @return true if collection is disabled, false if it is enabled
      */
     @NonNull
@@ -182,7 +182,7 @@ public class MParticleOptions {
     }
 
     /**
-     * query the uploadInterval
+     * Query the uploadInterval.
      * @return the upload interval, in seconds
      * @return the upload interval, in seconds
      */
@@ -265,8 +265,8 @@ public class MParticleOptions {
         }
 
         /**
-         * register an Api Key and Secret to be used for the SDK. This is a required field, and your
-         * app will not function properly if you do not provide a valid Key and Secret
+         * Register an Api Key and Secret to be used for the SDK. This is a required field, and your
+         * app will not function properly if you do not provide a valid Key and Secret.
          * @param apiKey the Api Key
          * @param apiSecret the Api Secret
          *
@@ -280,8 +280,8 @@ public class MParticleOptions {
         }
 
         /**
-         * indicate a known {@link com.mparticle.MParticle.InstallType}. If this method is not used,
-         * a default type of MParticle.InstallType.AutoDetect will be used
+         * Indicate a known {@link com.mparticle.MParticle.InstallType}. If this method is not used,
+         * a default type of MParticle.InstallType.AutoDetect will be used.
          *
          * @param installType
          *
@@ -296,8 +296,8 @@ public class MParticleOptions {
         }
 
         /**
-         * indicate a known {@link com.mparticle.MParticle.Environment} the Application will be running in. If this method is not used.
-         * a default Environment of MParticle.Environment.AutoDetect will be used
+         * Indicate a known {@link com.mparticle.MParticle.Environment} the Application will be running in. If this method is not used.
+         * a default Environment of MParticle.Environment.AutoDetect will be used.
          * @param environment
          * @return
          */
@@ -308,12 +308,12 @@ public class MParticleOptions {
         }
 
         /**
-         * register an IdentityApiRequest which will be passed to an {@link com.mparticle.identity.IdentityApi#identify(IdentityApiRequest)}
+         * Register an IdentityApiRequest which will be passed to an {@link com.mparticle.identity.IdentityApi#identify(IdentityApiRequest)}
          * request when the SDK starts in order to interact with the results of this call, without registering
          * a global listener in {@link com.mparticle.identity.IdentityApi#addIdentityStateListener(IdentityStateListener)}, register
          * a BaseIdentityTask with {@link #identifyTask(BaseIdentityTask)}. If this method is not called,
          * an Identify request using the most recent current user will be used, or if this is a first-run,
-         * and empty request will be used
+         * and empty request will be used.
          *
          * @param identifyRequest
          *
@@ -328,8 +328,8 @@ public class MParticleOptions {
         }
 
         /**
-         * register an BaseIdentityTask, which can be used to interact with the asynchronous results
-         * of an {@link #identify(IdentityApiRequest)} request
+         * Register an BaseIdentityTask, which can be used to interact with the asynchronous results
+         * of an {@link #identify(IdentityApiRequest)} request.
          *
          * @param task
          *
@@ -387,7 +387,7 @@ public class MParticleOptions {
         /**
          * Set the user session timeout interval.
          * <p></p>
-         * A session has ended once the application has been in the background for more than this timeout
+         * A session has ended once the application has been in the background for more than this timeout.
          *
          * @param sessionTimeout Session timeout in seconds
          *
@@ -400,7 +400,7 @@ public class MParticleOptions {
         }
 
         /**
-         * Enable or disable mParticle exception handling to automatically log events on uncaught exceptions
+         * Enable or disable mParticle exception handling to automatically log events on uncaught exceptions.
          *
          * @return the instance of the builder, for chaining calls
          */
@@ -429,7 +429,7 @@ public class MParticleOptions {
         }
 
         /**
-         * Register a callback for when an attribution is received
+         * Register a callback for when an attribution is received.
          * @param attributionListener an instance of the AttributionListener callback
          *
          * @return the instance of the builder, for chaining calls
@@ -443,7 +443,7 @@ public class MParticleOptions {
         }
 
         /**
-         * disables Location tracking
+         * Disables Location tracking.
          *
          * @return the instance of the builder, for chaining calls
          */
@@ -470,7 +470,7 @@ public class MParticleOptions {
         }
 
         /**
-         * Manually log a push registration
+         * Manually log a push registration.
          * @param instanceId the Instance Id of the push token
          * @param senderId the Sender Id of the push token
          *
@@ -485,7 +485,7 @@ public class MParticleOptions {
         /**
          * Set the user connection timeout interval.
          * <p></p>
-         * A connection to the server closes after this timeout expires, for each call
+         * A connection to the server closes after this timeout expires, for each call.
          *
          * @param  identityConnectionTimeout the connection timeout for Identity server calls, in seconds
          *
@@ -504,7 +504,7 @@ public class MParticleOptions {
         }
 
         /**
-         * Builds this Builder into an MParticleOptions object which can be used to start the SDK
+         * Builds this Builder into an MParticleOptions object which can be used to start the SDK.
          *
          * @return MParticleOptions instance
          */

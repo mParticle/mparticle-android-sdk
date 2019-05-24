@@ -39,8 +39,8 @@ public class MParticleUserTest {
     }
 
     /**
-     * this tests that when you add a call setUserIdentity, with a user name and id that already exists,
-     * we will not log it
+     * This tests that when you add a call setUserIdentity, with a user name and id that already exists,
+     * we will not log it.
      */
     @Test
     public void testAddExistingUserIdentity() throws Exception {

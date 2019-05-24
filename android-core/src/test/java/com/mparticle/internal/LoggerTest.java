@@ -40,9 +40,9 @@ public class LoggerTest {
 
     @Test
     public void testLogHandler() {
-        //set Logger to lowest level, so it prints everything by default
+        //Set Logger to lowest level, so it prints everything by default.
         MParticle.setLogLevel(MParticle.LogLevel.VERBOSE);
-        //set environment to Development. Pretty hacky, but the easiest way
+        //Set environment to Development. Pretty hacky, but the easiest way.
         new ConfigManager(new MockContext(), MParticle.Environment.Development, null, null);
 
         assertNotNull(Logger.getLogHandler());

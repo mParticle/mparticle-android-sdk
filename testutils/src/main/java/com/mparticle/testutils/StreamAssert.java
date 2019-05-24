@@ -65,7 +65,7 @@ public class StreamAssert<T> {
 
 
     /**
-     * returns a boolean based on whether or not all the assertions have been met by the collection
+     * Returns a boolean based on whether or not all the assertions have been met by the collection.
      *
      * @return
      */
@@ -87,20 +87,20 @@ public class StreamAssert<T> {
             boolean passed;
             do {
                 if (index >= collectionCopy.size() && assertions.size() > 0) {
-                    ///ran out of collected items to test against assertion
+                    ///Ran out of collected items to test against assertion.
                     if (throwException) {
-                        fail("timed out, object not found to meet Stream Assertions");
+                        fail("Timed out, object not found to meet Stream Assertions.");
                     }
                     return false;
                 }
 
                 // We have to test both conditions in the Assert interface. The idea is, either on
-                // of them should be implemented. passing is either
+                // of them should be implemented. passing is either:
                 // - assertTrueI returning true OR
                 // - assertObject not throwing a runtime exception
                 // we are going to be eating a lot of runtime exceptions in this code.. just eat it
                 // and count it as a not pass.. on the last run, when "throwException" is true,
-                // we will let the exception go, so the user will know where the real condition failed
+                // we will let the exception go, so the user will know where the real condition failed.
                 passed = false;
                 T item = collectionCopy.get(index++);
                 try {
@@ -130,7 +130,7 @@ public class StreamAssert<T> {
         }
         if (collection.size() < assertions.size()) {
             if (throwException) {
-                fail("timed out, object not found to meet Stream Assertions");
+                fail("Timed out, object not found to meet Stream Assertions.");
             }
             return false;
         }

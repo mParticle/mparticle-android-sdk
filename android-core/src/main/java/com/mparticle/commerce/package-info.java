@@ -1,6 +1,6 @@
 /**
  *
- * Package containing the mParticle eCommerce APIs
+ * Package containing the mParticle eCommerce APIs.
  *
  */
 package com.mparticle.commerce;

@@ -51,7 +51,7 @@ public class Segment {
     }
 
     /**
-     * Retrieve the endpoint IDs to which this Segment is configured to forward
+     * Retrieve the endpoint IDs to which this Segment is configured to forward.
      *
      * @return an array of IDs
      */
@@ -65,7 +65,7 @@ public class Segment {
     }
 
     /**
-     * Retrieve a readable summary of this Segment
+     * Retrieve a readable summary of this Segment.
      *
      * @return Segment summary
      */
@@ -74,6 +74,6 @@ public class Segment {
     public String toString() {
         return "Segment ID:  " + id + ", " +
                "Name: " + name + ", " +
-               "Endpoints: " + ((endpoints != null && endpoints.length > 0) ? Arrays.toString(endpoints) : "None specified");
+               "Endpoints: " + ((endpoints != null && endpoints.length > 0) ? Arrays.toString(endpoints) : "None specified.");
     }
 }

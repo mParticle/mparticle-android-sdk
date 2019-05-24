@@ -317,8 +317,8 @@ public class UserStorage {
         mPreferences.edit().putLong(LAST_SEEN_TIME, time).apply();
     }
 
-    //set a default "lastSeenTime" for migration to SDK versions with MParticleUser.getLastSeenTime(),
-    //where some users will not have a value for the field
+    //Set a default "lastSeenTime" for migration to SDK versions with MParticleUser.getLastSeenTime(),
+    //where some users will not have a value for the field.
     private void setDefaultSeenTime() {
         SharedPreferences preferences = getMParticleSharedPrefs(mContext);
         if (!preferences.contains(DEFAULT_SEEN_TIME)) {
@@ -392,7 +392,7 @@ public class UserStorage {
      *
      * If we have a temporary UserConfig object, and the user sets a number of fields on it, we can
      * use this method to apply those fields to this new UserConfig, by passing the temporary UserConfig
-     * object here
+     * object here.
      */
     void merge(UserStorage userStorage) {
         if (userStorage.hasDeletedUserAttributes()) {
@@ -443,7 +443,7 @@ public class UserStorage {
      * Migrate SharedPreferences from old interface, in which all the values in UserStorage were
      * kept application-wide, to the current interface, which stores the values by MPID. The migration
      * process will associate all current values covered by UserStorage to the current MPID, which should
-     * be passed into the parameter "currentMpId"
+     * be passed into the parameter "currentMpId".
      *
      **/
 
@@ -455,9 +455,9 @@ public class UserStorage {
         private String apiKey;
 
         /**
-         * Don't change these values, ever..you don't know when some device is going to update a version
+         * DO NOT CHANGE THESE VALUES! You don't know when some device is going to update a version
          * and need to migrate from the previous (db version < 7) SharedPreferences schema to the current
-         * one. If we change these names, the migration will not work, and we will lose some data
+         * one. If we change these names, the migration will not work, and we will lose some data.
          */
         private interface LegacySharedPreferencesKeys {
             String SESSION_COUNTER = "mp::breadcrumbs::sessioncount";
@@ -557,8 +557,8 @@ public class UserStorage {
         }
 
         /**
-         * check if we have need to migrate from the old SharedPreferences schema. We will only need
-         * to trigger a migration, if the flag is explicitly set to true
+         * Check if we have need to migrate from the old SharedPreferences schema. We will only need
+         * to trigger a migration, if the flag is explicitly set to true.
          * @param context
          * @return
          */

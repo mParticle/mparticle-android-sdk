@@ -53,7 +53,7 @@ public interface MParticleUser {
      *
      * @param userAttributes the attributes to be set
      *
-     * @return whether the attributes where successfully set
+     * @return whether the attributes were successfully set
      */
     boolean setUserAttributes(@NonNull Map<String, Object> userAttributes);
 
@@ -72,17 +72,17 @@ public interface MParticleUser {
      * @param key the key of the attribute
      * @param value the value of the attribute
      *
-     * @return whether the attributes where successfully set
+     * @return whether the attributes were successfully set
      */
     boolean setUserAttribute(@NonNull String key, @NonNull Object value);
 
     /**
-     * set a single attribute for the user whos value is an Object, not just a String
+     * set a single attribute for the user whose value is an Object, not just a String
      *
      * @param key the key of the attribute
      * @param value the value of the attribute
      *
-     * @return whether the attributes where successfully set
+     * @return whether the attributes were successfully set
      */
     boolean setUserAttributeList(@NonNull String key, @NonNull Object value);
 
@@ -92,7 +92,7 @@ public interface MParticleUser {
      * @param key the key of the attribute
      * @param value the value of the attribute
      *
-     * @return whether the attributes where successfully set
+     * @return whether the attributes were successfully set
      */
     boolean incrementUserAttribute(@NonNull String key, int value);
 
@@ -101,7 +101,7 @@ public interface MParticleUser {
      *
      * @param key the key of the attribute which is to be removed
      *
-     * @return whether the attributes where successfully removed
+     * @return whether the attributes were successfully removed
      */
     boolean removeUserAttribute(@NonNull String key);
 

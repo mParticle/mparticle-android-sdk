@@ -17,7 +17,7 @@ public class SegmentMembership {
     }
 
     /**
-     The list of user segment ids
+     The list of user segment IDs.
      */
     @NonNull
     public ArrayList<Segment> getSegments() {
@@ -25,7 +25,7 @@ public class SegmentMembership {
     }
 
     /**
-     Returns a String with a comma separated list of user segment ids.
+     Returns a String with a comma separated list of user segment IDs.
      */
     @Override
     @NonNull
@@ -34,7 +34,7 @@ public class SegmentMembership {
     }
 
     /**
-     Returns a String with a comma separated list of user segment ids.
+     Returns a String with a comma separated list of user segment IDs.
      */
     @NonNull
     public String getCommaSeparatedIds() {

@@ -125,7 +125,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
             if (System.currentTimeMillis() - mConfigLastFetched > MIN_CONFIG_REQUEST_INTERVAL) {
                 mConfigLastFetched = System.currentTimeMillis();
             } else {
-                Logger.verbose("Config request deferred, not enough time has elapsed since last request");
+                Logger.verbose("Config request deferred, not enough time has elapsed since last request.");
                 return;
             }
         }
@@ -193,14 +193,14 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
             }else if (connection.getResponseCode() == 400) {
                 throw new MPConfigException();
             } else if (connection.getResponseCode() == 304) {
-                Logger.verbose("Config request deferred, configuration already up-to-date");
+                Logger.verbose("Config request deferred, configuration already up-to-date.");
             } else {
                 Logger.error("Config request failed- " + connection.getResponseCode() + ": " + connection.getResponseMessage());
             }
         } catch (MalformedURLException e) {
-            Logger.error("Error constructing config service URL");
+            Logger.error("Error constructing config service URL.");
         } catch (JSONException e) {
-            Logger.error("Config request failed to process response message JSON");
+            Logger.error("Config request failed to process response message JSON.");
         } catch (AssertionError e) {
             //some devices do not have MD5, and therefore cannot process SSL certificates
             //there's not much to do in that case except catch the error
@@ -399,7 +399,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
     }
 
     public static final class MPNoConfigException extends Exception {
-        MPNoConfigException() {super("No API key and/or API secret"); }
+        MPNoConfigException() {super("No API key and/or API secret."); }
     }
 
     void checkThrottleTime(Endpoint endpoint) throws MPThrottleException {

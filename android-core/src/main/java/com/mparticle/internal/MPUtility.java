@@ -281,7 +281,7 @@ public class MPUtility {
 
     public static String getTimeZone() {
         try {
-            //Some Android 8 devices crash here for no clear reason
+            //Some Android 8 devices crash here for no clear reason.
             return TimeZone.getDefault().getDisplayName(false, 0);
         }
         catch (Exception ignored){ }
@@ -383,7 +383,7 @@ public class MPUtility {
         try {
             return UUID.nameUUIDFromBytes(versionCode.getBytes()).toString();
         }catch (AssertionError e) {
-            //some devices do not have MD5 and will throw a NoSuchAlgorithmException
+            //Some devices do not have MD5 and will throw a NoSuchAlgorithmException.
             return DeviceAttributes.UNKNOWN;
         }
     }
@@ -410,7 +410,7 @@ public class MPUtility {
 
     public static boolean isPhoneRooted() {
 
-        // get from build info
+        // Get from build info.
         String buildTags = android.os.Build.TAGS;
         if (buildTags != null && buildTags.contains("test-keys")) {
             return true;
@@ -589,8 +589,8 @@ public class MPUtility {
 
     /**
      * This method makes sure the constraints on event attributes are enforced. A JSONObject version
-     * of the attributes is return with data that exceeds the limits removed. NOTE: Non-string
-     * attributes are not converted to strings, currently.
+     * of the attributes is return with data that exceeds the limits removed. 
+     * NOTE: Non-string attributes are not converted to strings, currently.
      *
      * @param attributes the user-provided JSONObject
      * @return a cleansed copy of the JSONObject
@@ -698,7 +698,7 @@ public class MPUtility {
         } catch (RuntimeException ignore) {
             //At this point we should be able to conclude that the implementation of the map does
             //not allow for null keys, if you get an exception when you check for a null key, but
-            //there is no guarantee in the Map documentation, so we still have to check by hand
+            //there is no guarantee in the Map documentation, so we still have to check by hand.
             for (Map.Entry entry : new ArrayList<Map.Entry>(map.entrySet())) {
                 if (entry.getKey() == null) {
                     return true;

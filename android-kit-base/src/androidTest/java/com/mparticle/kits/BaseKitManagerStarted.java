@@ -64,8 +64,8 @@ public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
         latch.await();
     }
 
-    //implementing this method will both register your custom kit, and start it via modifying the
-    //config response to contains an "eks" message with the kit's id
+    //Implementing this method will both register your custom kit, and start it via modifying the
+    //config response to contains an "eks" message with the kit's ID.
     protected abstract Map<String, JSONObject> registerCustomKits();
 
     protected void setKitStartedListener(KitStartedListener kitStartedListener) {
@@ -94,11 +94,11 @@ public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
             JSONObject configObject = new JSONObject().put("eks", eks);
             mServer.setupConfigResponse(configObject.toString());
         } catch (JSONException e) {
-            throw new RuntimeException("Error sending custom eks to config");
+            throw new RuntimeException("Error sending custom eks to config.");
         }
     }
 
-    //this is a non-anonymous class only for the purpose of debugging
+    //This is a non-anonymous class only for the purpose of debugging.
     class CustomKitManagerImpl extends KitManagerImpl {
 
         private KitStartedListener kitsStartedListener;

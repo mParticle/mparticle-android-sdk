@@ -36,7 +36,7 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
      */
     public static final int UPLOAD_MESSAGES = 1;
     /**
-     * Message that triggers much of the same logic as above, but is specifically for session-history. Typically the SDK will upload all messages
+     * Message that triggers much of the same logic as above, but is specifically for session-history. Typically, the SDK will upload all messages
      * in a given batch that are ready for upload. But, some service-providers such as Flurry need to be sent all of the session information at once
      * With *history*, the SDK will package all of the messages that occur in a particular session.
      */
@@ -72,7 +72,7 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
 
     /**
      *
-     * Only used for unit testing
+     * Only used for unit testing.
      */
     UploadHandler(Context context, ConfigManager configManager, AppStateManager appStateManager, MessageManager messageManager, MParticleDBManager mparticleDBManager) {
         mConfigManager = configManager;
@@ -85,9 +85,9 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
         try {
             setApiClient(new MParticleApiClientImpl(configManager, mPreferences, context));
         } catch (MalformedURLException e) {
-            //this should never happen - the URLs are created by constants.
+            //This should never happen - the URLs are created by constants.
         } catch (MParticleApiClientImpl.MPNoConfigException e) {
-            Logger.error("Unable to process uploads, API key and/or API Secret are missing");
+            Logger.error("Unable to process uploads, API key and/or API Secret are missing.");
         }
     }
 
@@ -104,9 +104,9 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
         try {
             setApiClient(new MParticleApiClientImpl(configManager, mPreferences, context));
         } catch (MalformedURLException e) {
-            //this should never happen - the URLs are created by constants.
+            //This should never happen - the URLs are created by constants.
         } catch (MParticleApiClientImpl.MPNoConfigException e) {
-            Logger.error("Unable to process uploads, API key and/or API Secret are missing");
+            Logger.error("Unable to process uploads, API key and/or API Secret are missing.");
         }
     }
 
@@ -202,13 +202,13 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
             }
             final boolean includeSessionHistory = mConfigManager.getIncludeSessionHistory();
             for (MParticleDBManager.ReadyUpload readyUpload : readyUploads) {
-                //this case actually shouldn't be needed anymore except for upgrade scenarios.
-                //as of version 4.9.0, upload batches for session history shouldn't even be created.
+                //This case actually shouldn't be needed anymore except for upgrade scenarios.
+                //As of version 4.9.0, upload batches for session history shouldn't even be created.
                 if (history && !includeSessionHistory) {
                     mParticleDBManager.deleteUpload(readyUpload.getId());
                 } else {
                     if (!history) {
-                        // if message is the MessageType.SESSION_END, then remember so the session history can be triggered
+                        // If message is the MessageType.SESSION_END, then remember so the session history can be triggered.
                         if (!processingSessionEnd && readyUpload.getMessage().contains(containsClause)) {
                             processingSessionEnd = true;
                         }
@@ -228,7 +228,7 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
         } catch (MParticleApiClientImpl.MPConfigException e) {
             Logger.error("Bad API request - is the correct API key and secret configured?");
         } catch (Exception e) {
-            Logger.error(e, "Error processing batch uploads in mParticle DB");
+            Logger.error(e, "Error processing batch uploads in mParticle DB.");
         }
         return processingSessionEnd;
     }
@@ -242,7 +242,7 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
             sampling = true;
             Logger.debug("This device is being sampled.");
         } catch (AssertionError e) {
-            //some devices do not have MD5, and therefore cannot process SSL certificates,
+            //Some devices do not have MD5, and therefore cannot process SSL certificates,
             //and will throw an AssertionError containing an NoSuchAlgorithmException
             //there's not much to do in that case except catch the error and discard the data.
             Logger.error("API request failed " + e.toString());
@@ -294,7 +294,7 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
     }
 
     /*
-     * Used by the test suite for mocking
+     * Used by the test suite for mocking.
      */
     void setApiClient(MParticleApiClient apiClient) {
         mApiClient = apiClient;

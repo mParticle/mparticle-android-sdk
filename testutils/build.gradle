@@ -5,7 +5,7 @@ android {
     buildToolsVersion '29.0.0'
 
     defaultConfig {
-        //this is set to 21 to avoid slow multidex
+        //This is set to 21 to avoid slow multidex.
         minSdkVersion 21
         targetSdkVersion 29
         versionCode 1

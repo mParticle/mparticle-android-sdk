@@ -209,7 +209,7 @@ public class MPEvent {
 
     /**
      * Retrieve the custom flags set on this event. Custom Flags are used to send data or trigger behavior
-     * to individual 3rd party services that you have enabled for your app. By default, flags are not forwarded
+     * to individual 3rd-party services that you have enabled for your app. By default, flags are not forwarded
      * to any providers.
      *
      * @see com.mparticle.MPEvent.Builder#addCustomFlag(String, String)
@@ -298,7 +298,7 @@ public class MPEvent {
         }
 
         /**
-         * the name of the event to be tracked, required not null.
+         * The name of the event to be tracked, required not null.
          *
          * @param eventName
          * @return returns this builder for easy method chaining
@@ -312,7 +312,7 @@ public class MPEvent {
         }
 
         /**
-         * the type of the event to be tracked
+         * The type of the event to be tracked.
          *
          * @param eventType
          * @return returns this builder for easy method chaining
@@ -349,7 +349,7 @@ public class MPEvent {
 
         /**
          *
-         * The Google Analytics category with which to associate this event
+         * The Google Analytics category with which to associate this event.
          *
          * @param category
          * @return returns this builder for easy method chaining
@@ -361,7 +361,7 @@ public class MPEvent {
         }
 
         /**
-         * The total length of this event in milliseconds.
+         * The total length of this event, in milliseconds.
          *
          * This will override {@link #startTime(double)} and {@link #endTime(double)}.
          *
@@ -375,7 +375,7 @@ public class MPEvent {
         }
 
         /**
-         * Data attributes to associate with the event
+         * Data attributes to associate with the event.
          *
          * @param info
          * @return returns this builder for easy method chaining
@@ -387,7 +387,7 @@ public class MPEvent {
         }
 
         /**
-         * Manually set the time when this event started - should be epoch time milliseconds.
+         * Manually set the time when this event started - should be epoch time in milliseconds.
          *
          * Note that by using {@link #duration(double)}, this value will be ignored.
          *
@@ -442,7 +442,7 @@ public class MPEvent {
 
         /**
          *
-         * Beta API, subject to change. Used internally to signify if a user is entering or exiting a screen
+         * Beta API, subject to change. Used internally to signify if a user is entering or exiting a screen.
          *
          *
          * @param entering True if a user is navigating to a screen, False when navigating away

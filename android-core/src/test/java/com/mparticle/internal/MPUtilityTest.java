@@ -140,7 +140,7 @@ public class MPUtilityTest {
             try {
                 Object obj1Val = object1.get(key);
                 Object obj2Val = object2.get(key);
-                //dealing with nested JSONObjects, not going to deal with nested JSONArray's
+                //Dealing with nested JSONObjects, not going to deal with nested JSONArray's.
                 if (obj1Val instanceof JSONObject && obj2Val instanceof JSONObject) {
                     assertUnorderedJsonEqual((JSONObject)obj1Val, (JSONObject)obj2Val);
                 } else {

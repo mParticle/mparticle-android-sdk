@@ -10,7 +10,7 @@ public class MPMessagingRouter {
     /**
      * Parses the incoming intent and delegates functionality to the given {@code callback} if appropriate. This implementation checks for
      * MParticle-specific actions and will not handle messages outside of that scope. MParticle actions can be found in
-     * {@link MPMessagingAPI} {@code BROADCAST_*} constants
+     * {@link MPMessagingAPI} {@code BROADCAST_*} constants.
      *
      * @param context
      * @param intent

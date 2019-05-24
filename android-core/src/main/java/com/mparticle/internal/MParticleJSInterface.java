@@ -473,7 +473,7 @@ public class MParticleJSInterface {
                 try {
                     parsedAttributes.put(key, attributes.getString(key));
                 } catch (JSONException e) {
-                    Logger.warning("Could not parse event attribute value");
+                    Logger.warning("Could not parse event attribute value.");
                 }
             }
 

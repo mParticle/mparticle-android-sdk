@@ -100,7 +100,7 @@ public class ProviderCloudMessage implements Parcelable {
     }
 
     /**
-     * Note that the actual message is stripped from the extras bundle in findProviderMessage()
+     * Note that the actual message is stripped from the extras bundle in findProviderMessage().
      *
      * @return
      */

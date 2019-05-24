@@ -198,7 +198,7 @@ public class KitFrameworkWrapper implements KitManager {
         if (eventQueue == null) {
             eventQueue = new ConcurrentLinkedQueue<Object>();
         }
-        //it's an edge case to even need this, so 10
+        //It's an edge case to even need this, so 10
         //should be enough.
         if (eventQueue.size() < 10) {
             Logger.debug("Queuing Kit event while waiting for initial configuration.");

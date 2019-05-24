@@ -38,7 +38,7 @@ public class MPServiceUtil {
     {   // This a required workaround for a bug in AsyncTask in the Android framework.
         // AsyncTask.java has code that needs to run on the main thread,
         // but that is not guaranteed since it will be initialized on whichever
-        // thread happens to cause the class to run its static initializers.
+        // thread happens to cause the class to run its static initializers. See, 
         // https://code.google.com/p/android/issues/detail?id=20915
         Looper looper = Looper.getMainLooper();
         Handler handler = new Handler(looper);

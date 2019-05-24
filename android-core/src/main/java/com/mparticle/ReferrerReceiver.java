@@ -43,11 +43,11 @@ public class ReferrerReceiver extends BroadcastReceiver {
 
     static void setInstallReferrer(Context context, Intent intent) {
         if (context == null) {
-            Logger.error("ReferrerReceiver Context can not be null");
+            Logger.error("ReferrerReceiver Context can not be null.");
             return;
         }
         if (intent == null) {
-            Logger.error("ReferrerReceiver intent can not be null");
+            Logger.error("ReferrerReceiver intent can not be null.");
             return;
         }
         if ("com.android.vending.INSTALL_REFERRER".equals(intent.getAction())) {

@@ -46,7 +46,7 @@ public class NetworkConnection extends BaseNetworkConnection {
     public MPConnection makeUrlRequest(MParticleBaseClientImpl.Endpoint endpoint, MPConnection connection, String payload, boolean identity) throws IOException {
         try {
 
-            //gingerbread seems to dislike pinning w/ godaddy. Being that GB is near-dead anyway, just disable pinning for it.
+            //Gingerbread seems to dislike pinning w/ godaddy. Being that GB is near-dead anyway, just disable pinning for it.
             if (isPostGingerBread() && connection.isHttps() && !shouldDisablePinning()) {
                 try {
                     connection.setSSLSocketFactory(getSocketFactory(endpoint));

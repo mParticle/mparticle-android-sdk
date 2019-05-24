@@ -48,7 +48,7 @@ public class PushRegistrationHelper {
                 MParticle.getInstance().logPushRegistration(instanceId, senderId);
             } else {
                 //If the SDK isn't started, log the push notification in the ConfigManager
-                //so we will know to send a IdentityApi.modify() call when it starts up
+                //so we will know to send a IdentityApi.modify() call when it starts up.
                 ConfigManager.getInstance(context).setPushRegistrationInBackground(new PushRegistration(instanceId, senderId));
             }
         }

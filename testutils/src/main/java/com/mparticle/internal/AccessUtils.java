@@ -76,13 +76,13 @@ public class AccessUtils {
 
     /**
      * This method will block the current thread until Upload messages, which are tied to the mpid parameter,
-     * or are UploadTriggerMessages, are cleared from the Handler's queue
+     * or are UploadTriggerMessages, are cleared from the Handler's queue.
      *
      * Upload essages which are tied to an MPID, are ones originating from MParticle.getInstance().upload() calls,
-     * and initial upload messages
+     * and initial upload messages.
      *
      * the fact that these messages are tied into an MPID is an artifact from a defunct implementation
-     * of the UploadHandler, but it is really useful for this use case,
+     * of the UploadHandler, but it is really useful for this use case.
      * @throws InterruptedException
      */
     public static void awaitUploadHandler() throws InterruptedException {
@@ -144,7 +144,7 @@ public class AccessUtils {
         MParticle.getInstance().Identity().removeIdentityStateListener((IdentityStateListener)kitFrameworkWrapper.mKitManager);
         final CountDownLatch latch = new MPLatch(1);
         //Need to do this since the KitManager instance in KitFrameworkWrapper is not threadsafe. If
-        //it is in mid-loadKitLibrary, then the instance you set could be overwritten
+        //it is in mid-loadKitLibrary, then the instance you set could be overwritten.
         getUploadHandler().post(new Runnable() {
             @Override
             public void run() {

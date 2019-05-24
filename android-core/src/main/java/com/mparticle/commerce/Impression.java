@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Class representing an impression of one of more {@link Product} objects
+ * Class representing an impression of one of more {@link Product} objects.
  *
  */
 public class Impression {

@@ -45,7 +45,7 @@ public class MPDatabaseImpl implements MPDatabase {
             if (columnIndex >= 0 && cursor.getCount() > 0) {
                 cursor.moveToFirst();
                 while (!cursor.isAfterLast()) {
-                    //just a note, the Cursor is composited based on it's current position, not the entire object
+                    //Just a note, the Cursor is composited based on it's current position, not the entire object.
                     InternalListenerManager.getListener().onCompositeObjects(table + cursor.getInt(columnIndex), cursor);
                     cursor.moveToNext();
                 }

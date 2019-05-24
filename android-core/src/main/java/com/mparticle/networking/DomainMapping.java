@@ -153,7 +153,7 @@ public class DomainMapping {
                     certificates.add(certificate);
                 }
             } else {
-                String message = "NetworkOptions issue: Certificate is null, cannot be added";
+                String message = "NetworkOptions issue: Certificate is null, cannot be added.";
                 if (MPUtility.isDevEnv()) {
                     throw new IllegalArgumentException(message);
                 } else {

@@ -39,8 +39,8 @@ public class MpApiDetector extends Detector implements Detector.JavaPsiScanner {
 
     public static final Issue ISSUE = Issue.create(
             "MParticleInitialization",
-            "MParticle is being started improperly",
-            "MParticle.start() is not called on mParticle in onCreate method of Application",
+            "MParticle is being started improperly.",
+            "MParticle.start() is not called on mParticle in onCreate method of Application.",
             Category.MESSAGES,
             10,
             Severity.WARNING,
@@ -77,9 +77,9 @@ public class MpApiDetector extends Detector implements Detector.JavaPsiScanner {
 
     private void visitMethodDefinition(JavaContext context, PsiMethod method) {
         if (method == null) { return; }
-        //make sure we are not looking in the onCreate() method of a subclass of android.app.Application,
-        // and not the actual android.app.Application class ..sometimes the search will take you into
-        // the sdk's Application class, particularly in testing
+        //Make sure we are not looking in the onCreate() method of a subclass of android.app.Application,
+        //and not the actual android.app.Application class ..sometimes the search will take you into
+        //the SDK's Application class, particularly in testing.
         if (TARGET_ORIGINATION_METHOD_NAME.equals(method.getName()) && isApplicationClassCall(context, method) && !method.getContainingClass().getQualifiedName().contains("android.app.Application")) {
             hasApplicationOnCreateMethod = true;
                 properMethodCalls = findMethodCalledFrom(TARGET_METHOD_QUALIFIED_NAME, method, MAX_AST_DEPTH);
@@ -133,7 +133,7 @@ public class MpApiDetector extends Detector implements Detector.JavaPsiScanner {
         return findMethodCalledFrom(qualifiedTargetMethodName, method, maxDepth, new ArrayList<>());
     }
 
-    //DFS for the target method
+    //DFS for the target method.
     private List<PsiMethodCallExpression> findMethodCalledFrom(String qualifiedTargetMethodName, PsiMethod method, int maxDepth, List<PsiMethodCallExpression> foundMethodCalls) {
         if (maxDepth <= 0) {
             return foundMethodCalls;
@@ -152,18 +152,18 @@ public class MpApiDetector extends Detector implements Detector.JavaPsiScanner {
         for (PsiElement element : body.getChildren()) {
             PsiMethodCallExpression methodFound = findMethodCall(element);
 
-            //check the method we found, if it passes, return true, else find the file it is declared in,
+            //Check the method we found, if it passes, return true, else find the file it is declared in,
             //find the PsiMethod object in that file, and add it to the list to check!
             if (methodFound == null) {
                 continue;
             }
             //TODO
-            // pull Arguments (parameters) and check to make sure we have the correct method, rather than an overloaded alternative
+            // Pull Arguments (parameters) and check to make sure we have the correct method, rather than an overloaded alternative.
             String foundMethodName = methodFound.getMethodExpression().getQualifiedName();
             if (qualifiedTargetMethodName.endsWith(foundMethodName)) {
                 foundMethodCalls.add(methodFound);
             } else {
-                //chase the method down and see if the target method is called in that method body
+                //Chase the method down and see if the target method is called in that method body.
                 PsiMethod psiMethod = methodFound.resolveMethod();
                 PsiClass clazz = psiMethod.getContainingClass();
                 for (PsiMethod classMethod : clazz.getMethods()) {
@@ -177,7 +177,7 @@ public class MpApiDetector extends Detector implements Detector.JavaPsiScanner {
     }
 
     private PsiMethodCallExpression findMethodCall(PsiElement element) {
-        // This covers the case if there is a method being used to initialize a variable..
+        // This covers the case if there is a method being used to initialize a variable.
         // i.e int a = random();
         if (element instanceof PsiDeclarationStatement) {
             PsiDeclarationStatement declarationStatement = (PsiDeclarationStatement) element;

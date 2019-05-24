@@ -48,7 +48,7 @@ public class InternalListenerManagerTest {
         InternalListenerManager manager = InternalListenerManager.start(mockContext);
         assertNotNull(manager);
 
-        //manager is started, but should still be a brick until an SdkListener is added
+        //Manager is started, but should still be a brick until an SdkListener is added.
         assertNotNull(InternalListenerManager.getListener());
         assertEquals(InternalListenerManager.getListener(), InternalListener.EMPTY);
         assertFalse(InternalListenerManager.isEnabled());
@@ -56,14 +56,14 @@ public class InternalListenerManagerTest {
         SdkListener listener = new SdkListener();
         manager.addListener(listener);
 
-        //manager should now be active, since a listener was added
+        //Manager should now be active, since a listener was added.
         assertNotNull(InternalListenerManager.getListener());
         assertNotEquals(InternalListenerManager.getListener(), InternalListener.EMPTY);
         assertTrue(InternalListenerManager.isEnabled());
 
         manager.removeListener(listener);
 
-        //manager should go back to being a brick, since it's listener was removed
+        //Manager should go back to being a brick, since it's listener was removed.
         assertNotNull(InternalListenerManager.getListener());
         assertEquals(InternalListenerManager.getListener(), InternalListener.EMPTY);
         assertFalse(InternalListenerManager.isEnabled());
@@ -80,7 +80,7 @@ public class InternalListenerManagerTest {
 
         InternalListenerManager manager = InternalListenerManager.start(context);
 
-        //brick instance of InternalListenerManager should act like a brick
+        //Brick instance of InternalListenerManager should act like a brick.
         assertNotNull(InternalListenerManager.getListener());
         assertEquals(InternalListenerManager.getListener(), InternalListener.EMPTY);
         assertFalse(InternalListenerManager.isEnabled());

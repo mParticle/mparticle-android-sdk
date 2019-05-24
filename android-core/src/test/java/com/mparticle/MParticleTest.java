@@ -240,7 +240,7 @@ public class MParticleTest {
             assertTrue(called.value);
         }
 
-        //test that we override the token stored in the ConfigManager, if the Client provides a token
+        //Test that we override the token stored in the ConfigManager, if the Client provides a token.
         for (final String value: values) {
             Mockito.when(mp.Internal().getConfigManager().getWorkspaceToken()).thenReturn(value);
             final Mutable<Boolean> called = new Mutable<Boolean>(false);

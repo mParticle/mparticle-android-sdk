@@ -25,7 +25,7 @@ public class GradleBuildDetectorTest extends LintDetectorTest {
 
     // This one inherently can't happen, since the lint.jar file is in the mParticle dependency, but
     // we should test it anyway, in case there might be a weird case where the lint.jar get's cached,
-    // and we should make sure we aren't breaking any project's lints
+    // and we should make sure we aren't breaking any project's lints.
     @Test
     public void testNoDependency() throws Exception {
         String source =

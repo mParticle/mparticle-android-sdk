@@ -87,7 +87,7 @@ public class MPConnectionTestImpl implements MPConnection {
         if (requestProperties.containsKey(key)) {
             List<String> strings = requestProperties.get(key);
             if (strings.size() > 1) {
-                throw new RuntimeException("multiple header fields, not implemented");
+                throw new RuntimeException("Multiple header fields, not implemented.");
             }
             if (strings.size() == 1) {
                 return strings.get(0);

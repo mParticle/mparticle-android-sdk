@@ -79,8 +79,8 @@ public class Logger {
 
 
     /**
-     * Testing method. Use this method to intercept Logs, or customize what happens when something is logged,
-     * for example you can use this method to throw an exception everytime an "error" log is called
+     * Testing method. Use this method to intercept Logs, or customize what happens when something is logged.
+     * For example, you can use this method to throw an exception every time an "error" log is called.
      * @param logListener
      */
     public static void setLogHandler(AbstractLogHandler logListener) {
@@ -121,7 +121,7 @@ public class Logger {
             boolean isAPILoggable = logLevel >= Logger.sMinLogLevel.logLevel;
             boolean isADBLoggable;
 
-            //this block will catch the exception that is thrown during testing
+            //This block will catch the exception that is thrown during testing.
             try {
                 isADBLoggable = isADBLoggable(Constants.LOG_TAG, logLevel);
             }

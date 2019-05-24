@@ -32,7 +32,7 @@ import java.util.Map;
 
 
 public class GradleBuildDetector extends Detector implements GradleScanner {
-    public static final String MESSAGE_DONT_MIX_PLUSES = "Additionally, it is highly recommended to avoid mixing explicit version numbers and version numbers containing \'+\'. They may be the same version today, but in the future could become mismatched";
+    public static final String MESSAGE_DONT_MIX_PLUSES = "Additionally, it is highly recommended to avoid mixing explicit version numbers and version numbers containing \'+\'. They may be the same version today, but in the future could become mismatched.";
     public static final String MESSAGE_INCONSISTENCY_IN_VERSIONS_DETECTED = "Inconsistency in version numbers detected across MParticle build.gradle dependencies. packages:";
 
     private static final String MPARTICLE_PACKAGE = "com.mparticle";
@@ -40,8 +40,8 @@ public class GradleBuildDetector extends Detector implements GradleScanner {
 
     public static final Issue ISSUE = Issue.create(
             "MParticle_Dependency_Version_Inconsistency",
-            "MParticle module Gradle dependencies should not have different versions",
-            "There are multiple dependencies from 'com.mparticle', and they do not all have the same version code. In order for the MParticle SDK to function properly, all Gradle dependencies must be the same version. \n\n hint: If you are using kits, you do not need to include a dependency for 'com.mparticle:android-core', it will automatically be included with your kit dependency",
+            "MParticle module Gradle dependencies should not have different versions.",
+            "There are multiple dependencies from 'com.mparticle', and they do not all have the same version code. In order for the MParticle SDK to function properly, all Gradle dependencies must be the same version. \n\n hint: If you are using kits, you do not need to include a dependency for 'com.mparticle:android-core', it will automatically be included with your kit dependency.",
             Category.USABILITY,
             9,
             Severity.ERROR,
@@ -55,7 +55,7 @@ public class GradleBuildDetector extends Detector implements GradleScanner {
 
     @Override
     public void afterCheckProject(Context context) {
-        // Check for inconsistent versions across MParticle dependencies (Core, Kits, etc)
+        // Check for inconsistent versions across MParticle dependencies (Core, Kits, etc).
         String currentVersion = null;
         for (MPDependency mpDependency: mMPDependencies) {
             if (currentVersion == null) {
@@ -92,13 +92,13 @@ public class GradleBuildDetector extends Detector implements GradleScanner {
     }
 
     // This method is meant to be added to, if we would like to investigate more block's child properties
-    // in the isInterestingProperty() method
+    // in the isInterestingProperty() method.
     private boolean isInterestingBlock(String parent) {
         return "dependencies".equals(parent);
     }
 
     //This method is meant to be added to, if we want to add more properties we would like to inspect
-    // in the checkDslPropertyAssignment() method
+    // in the checkDslPropertyAssignment() method.
     private boolean isInterestingProperty(String property, String parent) {
         return isDependencyLine(parent, property);
     }
@@ -226,7 +226,7 @@ public class GradleBuildDetector extends Detector implements GradleScanner {
         }
     }
 
-    //This method was inspired by the source code for GroovyGradleDetector in package 'com.android.build.gradle.tasks'
+    //This method was inspired by the source code for GroovyGradleDetector in package 'com.android.build.gradle.tasks'.
     @NonNull
     private static Pair<Integer, Integer> getOffsets(ASTNode node, Context context) {
         if (node.getLastLineNumber() == -1 && node instanceof TupleExpression) {

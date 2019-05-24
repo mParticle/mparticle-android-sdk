@@ -37,7 +37,7 @@ public class Session {
     }
 
     /**
-     * Query for the hashed session ID
+     * Query for the hashed session ID.
      *
      * @return returns the fnv1a 64-bit hash of the session ID utf-16le bytes.
      */

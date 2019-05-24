@@ -81,7 +81,7 @@ public class MPEventTests  {
 
     @Test
     public void testCopyConstructor () {
-        //test the most basic event - there was a bug when there were no attributes.
+        //Test the most basic event - there was a bug when there were no attributes.
         MPEvent event = new MPEvent.Builder("test name", MParticle.EventType.Other).build();
         MPEvent copiedEvent = new MPEvent(event);
         assertEquals(event.getEventName(), copiedEvent.getEventName());

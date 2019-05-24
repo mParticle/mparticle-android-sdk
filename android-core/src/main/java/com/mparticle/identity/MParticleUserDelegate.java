@@ -196,7 +196,7 @@ import java.util.Map;
 
     public boolean setUserAttributeList(String key, Object value, long userMpId) {
         if (value == null) {
-            Logger.warning("setUserAttributeList called with null list, this is a no-op.");
+            Logger.warning("setUserAttributeList called with a null list, this is a no-op.");
             return false;
         }
         return setUserAttribute(key, value, userMpId);
@@ -204,7 +204,7 @@ import java.util.Map;
 
     public boolean incrementUserAttribute(String key, int value, long userMpId) {
         if (key == null) {
-            Logger.warning("incrementUserAttribute called with null key. Ignoring...");
+            Logger.warning("incrementUserAttribute called with a null key. Ignoring...");
             return false;
         }
         Logger.debug("Incrementing user attribute: " + key + " with value " + value);
@@ -214,7 +214,7 @@ import java.util.Map;
 
     public boolean removeUserAttribute(String key, long userMpId) {
         if (MPUtility.isEmpty(key)) {
-            Logger.debug("removeUserAttribute called with empty key.");
+            Logger.debug("removeUserAttribute called with an empty key.");
             return false;
         }
         Logger.debug("Removing user attribute: \"" + key + "\" for mpId: " + userMpId);

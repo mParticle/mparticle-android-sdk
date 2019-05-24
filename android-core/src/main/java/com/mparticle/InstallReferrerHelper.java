@@ -57,20 +57,20 @@ public class InstallReferrerHelper {
                                             }
                                             mReferrerClient.endConnection();
                                         } catch (RemoteException e) {
-                                            Logger.warning("InstallReferrer Remote Exception, using InstallReferrer from intent");
+                                            Logger.warning("InstallReferrer Remote Exception, using InstallReferrer from intent.");
                                             callback.onFailed();
                                         }
                                         break;
                                     case InstallReferrerClient.InstallReferrerResponse.FEATURE_NOT_SUPPORTED:
-                                        Logger.warning("InstallReferrer not supported, using InstallReferrer from intent");
+                                        Logger.warning("InstallReferrer not supported, using InstallReferrer from intent.");
                                         callback.onFailed();
                                         break;
                                     case InstallReferrerClient.InstallReferrerResponse.SERVICE_UNAVAILABLE:
-                                        Logger.warning("Unable to connect to InstallReferrer service, using InstallReferrer from intent");
+                                        Logger.warning("Unable to connect to InstallReferrer service, using InstallReferrer from intent.");
                                         callback.onFailed();
                                         break;
                                     default:
-                                        Logger.warning("InstallReferrer responseCode not found, using InstallReferrer from intent");
+                                        Logger.warning("InstallReferrer responseCode not found, using InstallReferrer from intent.");
                                         callback.onFailed();
                                 }
                             }

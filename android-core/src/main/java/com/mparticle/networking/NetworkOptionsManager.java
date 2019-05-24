@@ -18,7 +18,7 @@ public class NetworkOptionsManager {
         if (networkOptions == null) {
             return defaultNetworkOptions();
         }
-        //only take the endpoints we care about
+        //Only take the endpoints we care about.
         for (Endpoint endpoint: Endpoint.values()) {
             if (endpoint == Endpoint.ALIAS) {
                 //no special endpoint for Alias, uses the same as EVENTS

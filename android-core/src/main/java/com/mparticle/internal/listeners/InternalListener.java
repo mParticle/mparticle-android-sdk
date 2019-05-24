@@ -18,7 +18,7 @@ public interface InternalListener {
 
     /**
      * This method should be called within the body of a public API method. Generally
-     * we only want to instrument API methods which "do something", i.e log an event or change
+     * we only want to instrument API methods which "do something", i.e., log an event or change
      * a User's state, not simple getters
      *
      * @param objects the arguments passed into the API method
@@ -26,7 +26,7 @@ public interface InternalListener {
     void onApiCalled(Object... objects);
 
     /**
-     * to be called when a Kit's API method is invoked. This overloaded variant should be used when
+     * To be called when a Kit's API method is invoked. This overloaded variant should be used when
      * the name of the method containing this method's invocation (in KitManagerImpl) matches the name of the
      * Kit's method being invoked
      * @param kitId the Id of the kit

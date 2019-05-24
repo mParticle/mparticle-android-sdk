@@ -63,7 +63,7 @@ import java.util.UUID;
         try {
             return mMParticleDBManager.getDatabase() != null;
         } catch (Exception ex) {
-            Logger.error("Database unavailable");
+            Logger.error("Database unavailable.");
             return false;
         }
     }
@@ -84,8 +84,8 @@ import java.util.UUID;
                     MessageManager.BaseMPMessage message = (MessageManager.BaseMPMessage) msg.obj;
                     message.put(MessageKey.STATE_INFO_KEY, MessageManager.getStateInfo());
                     String messageType = message.getString(MessageKey.TYPE);
-                    // handle the special case of session-start by creating the
-                    // session record first
+                    // Handle the special case of session-start by creating the
+                    // session record first.
                     if (MessageType.SESSION_START.equals(messageType)) {
                         dbInsertSession(message);
                     }else{
@@ -98,7 +98,7 @@ import java.util.UUID;
                     try {
                         mMParticleDBManager.insertMessage(mMessageManagerCallbacks.getApiKey(), message);
                     } catch (MParticleApiClientImpl.MPNoConfigException e) {
-                        Logger.error("Unable to process uploads, API key and/or API Secret are missing");
+                        Logger.error("Unable to process uploads, API key and/or API Secret are missing.");
                         return;
                     }
                     mMessageManagerCallbacks.checkForTrigger(message);
@@ -129,7 +129,7 @@ import java.util.UUID;
                     InternalSession session = (InternalSession) msg.obj;
                     mMParticleDBManager.updateSessionEndTime(session.mSessionID, session.mLastEventTime, session.getForegroundTime());
                 } catch (Exception e) {
-                    Logger.error(e, "Error updating session end time in mParticle DB");
+                    Logger.error(e, "Error updating session end time in mParticle DB.");
                 }
                 break;
             case CREATE_SESSION_END_MESSAGE:
@@ -140,7 +140,7 @@ import java.util.UUID;
                    try {
                        endMessage = mMParticleDBManager.getSessionForSessionEndMessage(sessionId, ((MessageManager)mMessageManagerCallbacks).getLocation(), entry.getValue());
                    }catch (JSONException jse){
-                       Logger.warning("Failed to create mParticle session end message");
+                       Logger.warning("Failed to create mParticle session end message.");
                    }
                    if (endMessage != null) {
                        try {
@@ -148,19 +148,19 @@ import java.util.UUID;
                            mMParticleDBManager.insertMessage(mMessageManagerCallbacks.getApiKey(), endMessage);
                            mMParticleDBManager.updateSessionStatus(sessionId, SessionTable.SessionStatus.CLOSED);
                        } catch (MParticleApiClientImpl.MPNoConfigException e) {
-                           Logger.error("Unable to process uploads, API key and/or API Secret are missing");
+                           Logger.error("Unable to process uploads, API key and/or API Secret are missing.");
                            return;
                        }
 
                     } else {
-                        Logger.error("Error creating session end, no entry for sessionId in mParticle DB");
+                        Logger.error("Error creating session end, no entry for sessionId in mParticle DB.");
                     }
                     //1 means this came from ending the session
                     if (msg.arg1 == 1){
                         mMessageManagerCallbacks.endUploadLoop();
                     }
                 } catch (Exception e) {
-                    Logger.error(e, "Error creating session end message in mParticle DB");
+                    Logger.error(e, "Error creating session end message in mParticle DB.");
                 }finally {
 
                 }
@@ -168,7 +168,7 @@ import java.util.UUID;
             case END_ORPHAN_SESSIONS:
                 try {
                     Logger.verbose("Ending orphaned sessions.");
-                    // find left-over sessions that exist during startup and end them
+                    // Find left-over sessions that exist during startup and end them.
                     Long mpid = (Long)msg.obj;
                     List<String> sessionIds = mMParticleDBManager.getOrphanSessionIds(mMessageManagerCallbacks.getApiKey());
                     for (String sessionId: sessionIds) {
@@ -176,9 +176,9 @@ import java.util.UUID;
                         sendMessage(obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, 0, 0, entry));
                     }
                 } catch (MParticleApiClientImpl.MPNoConfigException ex) {
-                    Logger.error("Unable to process initialization, API key and or API Secret is missing");
+                    Logger.error("Unable to process initialization, API key and or API Secret is missing.");
                 } catch (Exception e) {
-                    Logger.error(e, "Error processing initialization in mParticle DB");
+                    Logger.error(e, "Error processing initialization in mParticle DB.");
                 }
                 break;
             case STORE_BREADCRUMB:
@@ -188,10 +188,10 @@ import java.util.UUID;
                     try {
                         mMParticleDBManager.insertBreadcrumb(message, mMessageManagerCallbacks.getApiKey());
                     } catch (MParticleApiClientImpl.MPNoConfigException ex) {
-                        Logger.error("Unable to process uploads, API key and/or API Secret are missing");
+                        Logger.error("Unable to process uploads, API key and/or API Secret are missing.");
                     }
                 } catch (Exception e) {
-                    Logger.error(e, "Error saving breadcrumb to mParticle DB");
+                    Logger.error(e, "Error saving breadcrumb to mParticle DB.");
                 }
                 break;
             case STORE_REPORTING_MESSAGE_LIST:
@@ -290,7 +290,7 @@ import java.util.UUID;
             DeviceAttributes deviceAttributes =  mMessageManagerCallbacks.getDeviceAttributes();
             mMParticleDBManager.insertSession(message, mMessageManagerCallbacks.getApiKey(), deviceAttributes.getAppInfo(mContext), deviceAttributes.getDeviceInfo(mContext));
         } catch (MParticleApiClientImpl.MPNoConfigException ex) {
-            Logger.error("Unable to process uploads, API key and/or API Secret are missing");
+            Logger.error("Unable to process uploads, API key and/or API Secret are missing.");
         }
     }
 

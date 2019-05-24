@@ -76,7 +76,7 @@ public final class Product {
 
     /**
      * Optionally customize the EqualityComparator. If the comparator is null, the default comparator
-     * will be restored. The default comparator compares Products by their toString() value
+     * will be restored. The default comparator compares Products by their toString() value.
      *
      * @param comparator
      */
@@ -115,7 +115,7 @@ public final class Product {
                 Logger.error(message);
             }
         } else if (MPUtility.isEmpty(mSku)) {
-            String message = "Product sku is required.";
+            String message = "Product SKU is required.";
             if (devMode) {
                 throw new IllegalArgumentException(message);
             } else {
@@ -368,10 +368,10 @@ public final class Product {
 
         /**
          * Create a Product.Builder. The parameters of this method are all
-         * required for a valid product
+         * required for a valid product.
          *
          * @param name a description/name for the Product
-         * @param sku a SKU or ID that unique identifies this Product
+         * @param sku a SKU or ID that uniquely identifies this Product
          * @param unitPrice the cost of a single Product
          */
         public Builder(@NonNull String name, @NonNull String sku, double unitPrice) {
@@ -417,7 +417,7 @@ public final class Product {
         }
 
         /**
-         * Sets the category associate with the Product
+         * Sets the category associated with the Product.
          *
          * @param category the Product's category
          * @return returns this Builder object for use in method chaining
@@ -430,7 +430,7 @@ public final class Product {
 
         /**
          *
-         * Sets the coupon code to associate with this Product
+         * Sets the coupon code to associate with this Product.
          *
          * @param couponCode the Product's coupon code
          * @return returns this Builder object for use in method chaining
@@ -442,7 +442,7 @@ public final class Product {
         }
 
         /**
-         * Change unique SKU or ID to associate with this Product
+         * Change unique SKU or ID to associate with this Product.
          *
          * @param sku the Product's SKU or ID
          * @return returns this Builder object for use in method chaining
@@ -454,7 +454,7 @@ public final class Product {
         }
 
         /**
-         * Change the name/description to associate with this Product
+         * Change the name/description to associate with this Product.
          *
          * @param name the Product's name
          * @return returns this Builder object for use in method chaining
@@ -466,7 +466,7 @@ public final class Product {
         }
 
         /**
-         * Sets the position of the product on the page or product impression list
+         * Sets the position of the product on the page or product impression list.
          *
          * @param position the Products position
          * @return returns this Builder object for use in method chaining
@@ -478,7 +478,7 @@ public final class Product {
         }
 
         /**
-         * Sets the unit price to associate with this Product
+         * Sets the unit price to associate with this Product.
          *
          * @param price the Product's price
          * @return returns this Builder object for use in method chaining
@@ -492,7 +492,7 @@ public final class Product {
         /**
          * Sets the quantity to associate with this Product.
          *
-         * This field with default to 1
+         * This field defaults to 1
          *
          * @param quantity the Product's quantity
          * @return returns this Builder object for use in method chaining
@@ -504,7 +504,7 @@ public final class Product {
         }
 
         /**
-         * Sets the brand to associate with this Product
+         * Sets the brand to associate with this Product.
          *
          * @param brand the Product's brand
          * @return returns this Builder object for use in method chaining
@@ -516,7 +516,7 @@ public final class Product {
         }
 
         /**
-         * Sets the variant to associate with this Product
+         * Sets the variant to associate with this Product.
          *
          * @param variant the Product's variant
          * @return returns this Builder object for use in method chaining
@@ -528,7 +528,7 @@ public final class Product {
         }
 
         /**
-         * Build the Product object
+         * Build the Product object.
          *
          * @return a Product object to be added to a {@link CommerceEvent} or to the {@link Cart}
          */

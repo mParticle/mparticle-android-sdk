@@ -83,9 +83,9 @@ public final class CommerceEvent {
                 && MPUtility.isEmpty(mPromotionAction)
                 && (mImpressions == null || mImpressions.size() == 0)) {
             if (devMode) {
-                throw new IllegalStateException("CommerceEvent must be created with either a product action. promotion action, or an impression");
+                throw new IllegalStateException("CommerceEvent must be created with either a product action, promotion action, or an impression.");
             } else {
-                Logger.error("CommerceEvent must be created with either a product action, promotion action, or an impression");
+                Logger.error("CommerceEvent must be created with either a product action, promotion action, or an impression.");
             }
         }
 
@@ -279,9 +279,9 @@ public final class CommerceEvent {
      *
      * Retrieve the Map of custom attributes of the event.
      *
-     * @return returns a Map of custom attributes, or null if no custom attributes are set
+     * @return returns a Map of custom attributes, or null if no custom attributes are set.
      *
-     * @see com.mparticle.commerce.CommerceEvent.Builder#customAttributes(Map)
+     * @see com.mparticle.commerce.CommerceEvent.Builder#customAttributes(Map).
      */
     @Nullable
     public Map<String, String> getCustomAttributes() {
@@ -290,12 +290,12 @@ public final class CommerceEvent {
 
     /**
      * Retrieve the custom flags set on this event. Custom Flags are used to send data or trigger behavior
-     * to individual 3rd party services that you have enabled for your app. By default, flags are not forwarded
+     * to individual 3rd-party services that you have enabled for your app. By default, flags are not forwarded
      * to any providers.
      *
-     * @see com.mparticle.MPEvent.Builder#addCustomFlag(String, String)
+     * @see com.mparticle.MPEvent.Builder#addCustomFlag(String, String).
      *
-     * @return returns the map of custom flags, or null if none are set
+     * @return returns the map of custom flags, or null if none are set.
      */
     @Nullable
     public Map<String,String> getCustomFlags() {
@@ -304,11 +304,11 @@ public final class CommerceEvent {
 
 
     /**
-     * Retrieve the Screen where the event occurred
+     * Retrieve the Screen where the event occurred.
      *
-     * @return the String descriptor/name of the Screen where this event occurred, or null if this is not set
+     * @return the String descriptor/name of the Screen where this event occurred, or null if this is not set.
      *
-     * @see com.mparticle.commerce.CommerceEvent.Builder#screen(String)
+     * @see com.mparticle.commerce.CommerceEvent.Builder#screen(String).
      */
     @Nullable
     public String getScreen() {
@@ -316,11 +316,11 @@ public final class CommerceEvent {
     }
 
     /**
-     * Retrieve the boolean indicating if the event was triggered by a user
+     * Retrieve the boolean indicating if the event was triggered by a user.
      *
-     * @return a Boolean indicating if this event was triggered by a user, or null if not set
+     * @return a Boolean indicating if this event was triggered by a user, or null if not set.
      *
-     * @see com.mparticle.commerce.CommerceEvent.Builder#nonInteraction(boolean)
+     * @see com.mparticle.commerce.CommerceEvent.Builder#nonInteraction(boolean).
      *
      */
     @Nullable
@@ -332,10 +332,10 @@ public final class CommerceEvent {
      * Retrieve the Product action of the event. CommerceEvents are either Product, Promotion, or Impression based. The Product Action
      * will be null in the case of Promotion and Impression CommerceEvents.
      *
-     * @return a String indicating the Product action, or null if this is not a Product-based CommerceEvent
+     * @return a String indicating the Product action, or null if this is not a Product-based CommerceEvent.
      *
-     * @see <code><a href="CommerceEvent.Builder.html#CommerceEvent.Builder(java.lang.String,%20com.mparticle.commerce.Product)">Builder(java.lang.String, com.mparticle.commerce.Product)</a></code>
-     * @see Product
+     * @see <code><a href="CommerceEvent.Builder.html#CommerceEvent.Builder(java.lang.String,%20com.mparticle.commerce.Product)">Builder(java.lang.String, com.mparticle.commerce.Product)</a></code>.
+     * @see Product.
      */
     @Nullable
     public String getProductAction() {
@@ -345,7 +345,7 @@ public final class CommerceEvent {
     /**
      * Retrieve the Checkout Step of the CommerceEvent. This should typically only be set in the case of a {@link Product#CHECKOUT} CommerceEvent.
      *
-     * @return an Integer representing the step, or null if none is set
+     * @return an Integer representing the step, or null if none is set.
      */
     @Nullable
     public Integer getCheckoutStep() {
@@ -355,7 +355,7 @@ public final class CommerceEvent {
     /**
      * Retrieve the Checkout options of the CommerceEvent. This describes custom options that a user may select at particular steps in the checkout process.
      *
-     * @return a String describing any checkout options, or null if none are set
+     * @return a String describing any checkout options, or null if none are set.
      */
     @Nullable
     public String getCheckoutOptions() {
@@ -367,7 +367,7 @@ public final class CommerceEvent {
      *
      * @return the product list name, or null if not set.
      *
-     * @see com.mparticle.commerce.CommerceEvent.Builder#productListName(String)
+     * @see com.mparticle.commerce.CommerceEvent.Builder#productListName(String).
      */
     @Nullable
     public String getProductListName() {
@@ -379,7 +379,7 @@ public final class CommerceEvent {
      *
      * @return the product list source, or null if not set.
      *
-     * @see com.mparticle.commerce.CommerceEvent.Builder#productListSource(String)
+     * @see com.mparticle.commerce.CommerceEvent.Builder#productListSource(String).
      */
     @Nullable
     public String getProductListSource() {
@@ -387,11 +387,11 @@ public final class CommerceEvent {
     }
 
     /**
-     * Retrieve the {@link TransactionAttributes} object associated with the CommerceEvent
+     * Retrieve the {@link TransactionAttributes} object associated with the CommerceEvent.
      *
      * @return the TransactionAttributes object, or null if not set.
      *
-     * @see com.mparticle.commerce.CommerceEvent.Builder#transactionAttributes(TransactionAttributes)
+     * @see com.mparticle.commerce.CommerceEvent.Builder#transactionAttributes(TransactionAttributes).
      */
     @Nullable
     public TransactionAttributes getTransactionAttributes() {
@@ -399,13 +399,13 @@ public final class CommerceEvent {
     }
 
     /**
-     * Retrieve the list of Products to which the CommerceEvent applies. This should only be set for Product-type CommerceEvents
+     * Retrieve the list of Products to which the CommerceEvent applies. This should only be set for Product-type CommerceEvents.
      *
      * @return the list of Products, or null if not set.
      *
-     * @see <code><a href="CommerceEvent.Builder.html#CommerceEvent.Builder(java.lang.String,%20com.mparticle.commerce.Product)">Builder(java.lang.String, com.mparticle.commerce.Product)</a></code>
-     * @see com.mparticle.commerce.CommerceEvent.Builder#addProduct(Product)
-     * @see com.mparticle.commerce.CommerceEvent.Builder#products(List)
+     * @see <code><a href="CommerceEvent.Builder.html#CommerceEvent.Builder(java.lang.String,%20com.mparticle.commerce.Product)">Builder(java.lang.String, com.mparticle.commerce.Product)</a></code>.
+     * @see com.mparticle.commerce.CommerceEvent.Builder#addProduct(Product).
+     * @see com.mparticle.commerce.CommerceEvent.Builder#products(List).
      */
     @Nullable
     public List<Product> getProducts() {
@@ -419,10 +419,10 @@ public final class CommerceEvent {
      * Retrieve the Promotion action of the CommerceEvent. CommerceEvents are either Product, Promotion, or Impression based. The Promotion Action
      * will be null in the case of Product and Impression CommerceEvents.
      *
-     * @return a String indicating the Promotion action, or null if this is not a Promotion-based CommerceEvent
+     * @return a String indicating the Promotion action, or null if this is not a Promotion-based CommerceEvent.
      *
      * @see <code><a href="CommerceEvent.Builder.html#CommerceEvent.Builder(java.lang.String,%20com.mparticle.commerce.Promotion)">Builder(java.lang.String, com.mparticle.commerce.Promotion)</a></code>
-     * @see Promotion for supported product actions
+     * @see Promotion for supported product actions.
      */
     @Nullable
     public String getPromotionAction() {
@@ -432,11 +432,11 @@ public final class CommerceEvent {
     /**
      * Retrieve the {@link Promotion} list associated with the CommerceEvent.
      *
-     * @return returns an unmodifiable List of Promotions, or null if this is a {@link Product} or {@link Impression} based {@link CommerceEvent}
+     * @return returns an unmodifiable List of Promotions, or null if this is a {@link Product} or {@link Impression} based {@link CommerceEvent}.
      *
-     * @see <code><a href="CommerceEvent.Builder.html#CommerceEvent.Builder(java.lang.String,%20com.mparticle.commerce.Promotion)">Builder(java.lang.String, com.mparticle.commerce.Promotion)</a></code>
-     * @see com.mparticle.commerce.CommerceEvent.Builder#addPromotion(Promotion)
-     * @see com.mparticle.commerce.CommerceEvent.Builder#promotions(List)
+     * @see <code><a href="CommerceEvent.Builder.html#CommerceEvent.Builder(java.lang.String,%20com.mparticle.commerce.Promotion)">Builder(java.lang.String, com.mparticle.commerce.Promotion)</a></code>.
+     * @see com.mparticle.commerce.CommerceEvent.Builder#addPromotion(Promotion).
+     * @see com.mparticle.commerce.CommerceEvent.Builder#promotions(List).
      */
     @Nullable
     public List<Promotion> getPromotions() {
@@ -462,11 +462,11 @@ public final class CommerceEvent {
     /**
      * Retrieve the {@link Impression} list associated with the CommerceEvent.
      *
-     * @return returns an unmodifiable List of Impressions, or null if this is a {@link Product} or {@link Promotion} based {@link CommerceEvent}
+     * @return returns an unmodifiable List of Impressions, or null if this is a {@link Product} or {@link Promotion} based {@link CommerceEvent}.
      *
-     * @see <code><a href="CommerceEvent.Builder.html#CommerceEvent.Builder(java.lang.String,%20com.mparticle.commerce.Impression)">Builder(java.lang.String, com.mparticle.commerce.Impression)</a></code>
-     * @see com.mparticle.commerce.CommerceEvent.Builder#addImpression(Impression)
-     * @see com.mparticle.commerce.CommerceEvent.Builder#impressions(List)
+     * @see <code><a href="CommerceEvent.Builder.html#CommerceEvent.Builder(java.lang.String,%20com.mparticle.commerce.Impression)">Builder(java.lang.String, com.mparticle.commerce.Impression)</a></code>.
+     * @see com.mparticle.commerce.CommerceEvent.Builder#addImpression(Impression).
+     * @see com.mparticle.commerce.CommerceEvent.Builder#impressions(List).
      */
     @Nullable
     public List<Impression> getImpressions() {
@@ -609,7 +609,7 @@ public final class CommerceEvent {
         }
 
         /**
-         * Constructor for a {@link Impression}-based CommerceEvent
+         * Constructor for a {@link Impression}-based CommerceEvent.
          *
          * @param impression the impression to associate with this event. Must not be null.
          */
@@ -662,7 +662,7 @@ public final class CommerceEvent {
         }
 
         /**
-         * Set the screen to associate with this event
+         * Set the screen to associate with this event.
          *
          * @param screenName a String name or description of the screen where this event occurred.
          * @return returns this Builder for easy method chaining.
@@ -676,7 +676,7 @@ public final class CommerceEvent {
         /**
          * Add a {@link Product} to this CommerceEvent.
          *
-         * <i>This should only be called for {@link Product}-based CommerceEvents created with <code><a href="CommerceEvent.Builder.html#CommerceEvent.Builder(java.lang.String,%20com.mparticle.commerce.Product)">Builder(java.lang.String, com.mparticle.commerce.Product)</a></code> </i>
+         * <i>This should only be called for {@link Product}-based CommerceEvents created with <code><a href="CommerceEvent.Builder.html#CommerceEvent.Builder(java.lang.String,%20com.mparticle.commerce.Product)">Builder(java.lang.String, com.mparticle.commerce.Product)</a></code> </i>.
          *
          * @param product the {@link Product} to add to this CommerceEvent.
          * @return returns this Builder for easy method chaining.
@@ -693,7 +693,7 @@ public final class CommerceEvent {
         /**
          * Associate a {@link TransactionAttributes} object with this event. This will typically be used with {@link Product}-based CommerceEvents.
          *
-         * <i>For {@link Product#PURCHASE} and {@link Product#REFUND} CommerceEvents, this is required to be set.t</i>
+         * <i>For {@link Product#PURCHASE} and {@link Product#REFUND} CommerceEvents, this is required to be set.</i>
          *
          * @param attributes the {@link TransactionAttributes} object
          * @return returns this Builder for easy method chaining.

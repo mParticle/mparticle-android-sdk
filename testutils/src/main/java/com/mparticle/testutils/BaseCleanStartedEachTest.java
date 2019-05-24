@@ -16,7 +16,7 @@ import org.junit.Before;
  * or in your tests.
  *
  * If you want to test the behavior that occurs during initialization, you should either invoke
- * MParticle.setInstance(null), or use BaseCleanInstallEachTest as your base class
+ * MParticle.setInstance(null), or use BaseCleanInstallEachTest as your base class.
  */
 public class BaseCleanStartedEachTest extends BaseAbstractTest {
 

@@ -11,10 +11,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * class that represents observed changes in user state, can be used as a parameter in an Identity Request.
+ * Class that represents observed changes in user state, can be used as a parameter in an Identity Request.
  * To instantiate an IdentityApiRequest, you must use a {@link IdentityApiRequest.Builder} which can be
  * retrieved by calling {@link IdentityApiRequest#withEmptyUser()} or {@link IdentityApiRequest#withUser(MParticleUser)}
- * if you would like to use a current user's Identities in the request
+ * if you would like to use a current user's Identities in the request.
  *
  * @see IdentityApi#login(IdentityApiRequest)
  * @see IdentityApi#logout(IdentityApiRequest)
@@ -48,7 +48,7 @@ public final class IdentityApiRequest {
     }
 
     /**
-     * instantiate an IdentityApiRequest.Builder() with no existing state (no UserIdentities)
+     * Instantiate an IdentityApiRequest.Builder() with no existing state (no UserIdentities).
      *
      *  @return an IdentityApiRequest.Builder
      *
@@ -60,7 +60,7 @@ public final class IdentityApiRequest {
     }
 
     /**
-     * instantiate an IdentityApiRequest.Builder() with an existing user's UserIdentities
+     * instantiate an IdentityApiRequest.Builder() with an existing user's UserIdentities.
      *
      * @param currentUser an MParticleUser
      *
@@ -103,7 +103,7 @@ public final class IdentityApiRequest {
     }
 
     /**
-     * a class used for constructing IdentityApiRequest
+     * A class used for constructing IdentityApiRequest.
      */
     public static class Builder {
         private Long mpid;
@@ -124,7 +124,7 @@ public final class IdentityApiRequest {
         }
 
         /**
-         * set the IdentityType MParticle.IdentityType.Email
+         * Set the IdentityType MParticle.IdentityType.Email.
          *
          * @param email the email to be set
          *
@@ -136,7 +136,7 @@ public final class IdentityApiRequest {
         }
 
         /**
-         * set the IdentityType MParticle.IdentityType.CustomerId
+         * Set the IdentityType MParticle.IdentityType.CustomerId.
          *
          * @param customerId the customerId to be set
          *
@@ -168,7 +168,7 @@ public final class IdentityApiRequest {
         }
 
         /**
-         * set the value for the provided IdentityType key
+         * Set the value for the provided IdentityType key.
          *
          * @param identityType the IdentityType to be set
          * @param identityValue the value the IdentityType should be set to
@@ -187,7 +187,7 @@ public final class IdentityApiRequest {
         }
 
         /**
-         * set IdentityTypes in bulk
+         * Set IdentityTypes in bulk.
          *
          * @param userIdentities the IdentityTypes to be set
          *
@@ -204,7 +204,7 @@ public final class IdentityApiRequest {
         }
 
         /**
-         * transform this class into an IdentityApiRequest which can be used with {@link IdentityApi} request
+         * Transform this class into an IdentityApiRequest which can be used with {@link IdentityApi} request.
          *
          * @return an IdentityApiRequest
          */
