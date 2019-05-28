@@ -50,9 +50,11 @@ public class ConfigManager {
     private static final String KEY_INCLUDE_SESSION_HISTORY = "inhd";
     private static final String KEY_DEVICE_PERFORMANCE_METRICS_DISABLED = "dpmd";
     public static final String WORKSPACE_TOKEN = "wst";
+    static final String ALIAS_MAX_WINDOW = "alias_max_window";
     static final String KEY_RAMP = "rp";
 
     private static final int DEVMODE_UPLOAD_INTERVAL_MILLISECONDS = 10 * 1000;
+    private static final int DEFAULT_MAX_ALIAS_WINDOW_DAYS = 90;
     private Context mContext;
     private static NetworkOptions sNetworkOptions;
 
@@ -253,6 +255,11 @@ public class ConfigManager {
             editor.putString(WORKSPACE_TOKEN, responseJSON.getString(WORKSPACE_TOKEN));
         } else {
             editor.remove(WORKSPACE_TOKEN);
+        }
+        if (responseJSON.has(ALIAS_MAX_WINDOW)) {
+            editor.putInt(ALIAS_MAX_WINDOW, responseJSON.getInt(ALIAS_MAX_WINDOW));
+        } else {
+            editor.remove(ALIAS_MAX_WINDOW);
         }
         editor.apply();
         applyConfig();
@@ -616,23 +623,22 @@ public class ConfigManager {
         return mProviderPersistence;
     }
 
-    public void setMpid(long mpid, boolean isLoggedInUser) {
-        long currentMpid = getMpid();
+    public void setMpid(long newMpid, boolean isLoggedInUser) {
+        long previousMpid = getMpid();
         boolean currentLoggedInUser = false;
         if (mUserStorage != null) {
             mUserStorage.setLastSeenTime(System.currentTimeMillis());
             currentLoggedInUser = mUserStorage.isLoggedIn();
         }
-        UserStorage userStorage = UserStorage.create(mContext, mpid);
+        UserStorage userStorage = UserStorage.create(mContext, newMpid);
         userStorage.setLoggedInUser(isLoggedInUser);
 
-        sPreferences.edit().putLong(Constants.PrefKeys.MPID, mpid).apply();
-        if (mUserStorage == null || mUserStorage.getMpid() != mpid) {
+        sPreferences.edit().putLong(Constants.PrefKeys.MPID, newMpid).apply();
+        if (mUserStorage == null || mUserStorage.getMpid() != newMpid) {
             mUserStorage = userStorage;
         }
-
-        if ((currentMpid != mpid || currentLoggedInUser != isLoggedInUser)) {
-            triggerMpidChangeListenerCallbacks(mpid);
+        if ((previousMpid != newMpid || currentLoggedInUser != isLoggedInUser)) {
+            triggerMpidChangeListenerCallbacks(newMpid, previousMpid);
         }
     }
 
@@ -1040,13 +1046,13 @@ public class ConfigManager {
         mpIdChangeListeners.add(listener);
     }
 
-    private void triggerMpidChangeListenerCallbacks(long mpid) {
+    private void triggerMpidChangeListenerCallbacks(long mpid, long previousMpid) {
         if (MPUtility.isEmpty(mpIdChangeListeners)) {
             return;
         }
         for (IdentityApi.MpIdChangeListener listenerRef: new ArrayList<IdentityApi.MpIdChangeListener>(mpIdChangeListeners)) {
             if (listenerRef != null) {
-                listenerRef.onMpIdChanged(mpid);
+                listenerRef.onMpIdChanged(mpid, previousMpid);
             }
         }
     }
@@ -1079,6 +1085,14 @@ public class ConfigManager {
     @NonNull
     public String getWorkspaceToken() {
         return sPreferences.getString(WORKSPACE_TOKEN, "");
+    }
+
+    /**
+     * the maximum allowed age of "start_time" in an AliasRequest, in days
+     * @return
+     */
+    public int getAliasMaxWindow() {
+        return sPreferences.getInt(ALIAS_MAX_WINDOW, DEFAULT_MAX_ALIAS_WINDOW_DAYS);
     }
 
     private int getAppVersion() {

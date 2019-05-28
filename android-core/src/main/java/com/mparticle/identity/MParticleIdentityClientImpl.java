@@ -43,7 +43,6 @@ import java.util.UUID;
     static final String CONTEXT = "context";
     static final String ENVIRONMENT = "environment";
     static final String REQUEST_TIMESTAMP_MS = "request_timestamp_ms";
-    static final String REQUEST_ID = "request_id";
 
     static final String ANDROID_AAID = "android_aaid";
     static final String PUSH_TOKEN = "push_token";

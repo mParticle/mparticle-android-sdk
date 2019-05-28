@@ -87,6 +87,9 @@ public class NetworkOptions {
     }
 
     DomainMapping getDomain(Endpoint endpoint) {
+        if (endpoint == Endpoint.ALIAS) {
+            endpoint = Endpoint.EVENTS;
+        }
         return domainMappings.get(endpoint);
     }
 

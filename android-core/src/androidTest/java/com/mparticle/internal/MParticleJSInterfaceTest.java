@@ -43,6 +43,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
+import static com.mparticle.testutils.TestingUtils.assertJsonEqual;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
@@ -307,7 +308,7 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
                     if (jsonObject.getInt(JS_KEY_EVENT_DATATYPE) == JS_MSG_TYPE_PE) {
                         assertEquals(jsonObject.getInt(JS_KEY_EVENT_CATEGORY), MParticle.EventType.Navigation.ordinal());
                         JSONObject receivedCustomAttributes = jsonObject.getJSONObject(JS_KEY_EVENT_ATTRIBUTES);
-                        assertUnorderedJsonEqual(customAttributes, receivedCustomAttributes);
+                        assertJsonEqual(customAttributes, receivedCustomAttributes);
                         called.value = true;
                         latch.countDown();
                     }
@@ -335,7 +336,7 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
             public void logout(String json) {
                 super.logout(json);
                 try {
-                    assertUnorderedJsonEqual(new JSONObject(json), userIdentityMapToJsonJsSdkStyle(userIdentityMap));
+                    assertJsonEqual(new JSONObject(json), userIdentityMapToJsonJsSdkStyle(userIdentityMap));
                     called.value = true;
                     latch.countDown();
                 } catch (JSONException e) {
@@ -387,7 +388,7 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
             public void login(String json) {
                 super.login(json);
                 try {
-                    assertUnorderedJsonEqual(new JSONObject(json), userIdentityMapToJsonJsSdkStyle(userIdentityMap));
+                    assertJsonEqual(new JSONObject(json), userIdentityMapToJsonJsSdkStyle(userIdentityMap));
                     called.value = true;
                     latch.countDown();
                 } catch (JSONException e) {
@@ -439,7 +440,7 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
             public void modify(String json) {
                 super.modify(json);
                 try {
-                    assertUnorderedJsonEqual(new JSONObject(json), userIdentityMapToJsonJsSdkStyle(userIdentities));
+                    assertJsonEqual(new JSONObject(json), userIdentityMapToJsonJsSdkStyle(userIdentities));
                     called.value = true;
                     latch.countDown();
                 } catch (JSONException e) {
@@ -534,66 +535,6 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
         }
         return new JSONObject()
                 .put("UserIdentities", userIdentityJson);
-    }
-
-    private void assertUnorderedJsonEqual(JSONObject object1, JSONObject object2) {
-        if (object1 == object2) {
-            return;
-        }
-        assertEquals(object1.length(), object2.length());
-        Iterator<String> keys = object1.keys();
-        while (keys.hasNext()) {
-            String key = keys.next();
-            try {
-                Object obj1Val = object1.get(key);
-                Object obj2Val = object2.get(key);
-                //dealing with nested JSONObjects, not going to deal with nested JSONArray's
-                if (obj1Val instanceof JSONObject && obj2Val instanceof JSONObject) {
-                    assertUnorderedJsonEqual((JSONObject) obj1Val, (JSONObject) obj2Val);
-                } else if (obj1Val instanceof JSONArray && obj2Val instanceof JSONArray) {
-                    assertJsonArrayEqual((JSONArray) obj1Val, (JSONArray) obj2Val);
-                } else {
-                    assertEquals(obj1Val, obj2Val);
-                }
-            } catch (JSONException jse) {
-                fail(jse.getMessage());
-            }
-        }
-    }
-
-    // This method does NOT account for repeated elements in the JSONArray.
-    // We don't need to for our current use case, but keep this in mind if the
-    // method is going to be ported for a more general use case
-    private void assertJsonArrayEqual(JSONArray jsonArray1, JSONArray jsonArray2) {
-        if (jsonArray1 == jsonArray2) {
-            return;
-        }
-        assertEquals(jsonArray1.length(), jsonArray2.length());
-        JSONObject jsonObject1 = new JSONObject();
-        JSONObject jsonObject2 = new JSONObject();
-        for (int i = 0; i < jsonArray1.length(); i++) {
-            Object object1 = jsonArray1.opt(i);
-            Object object2 = jsonArray2.opt(i);
-            try {
-                jsonObject1.put(object1 == null ? null : object1.toString(), object1);
-            }
-            catch (JSONException jse) {
-                jse.printStackTrace();
-            }
-            try {
-                jsonObject2.put(object2 == null ? null : object2.toString(), object2);
-            }
-            catch (JSONException jse) {
-                jse.printStackTrace();
-            }
-        }
-        assertUnorderedJsonEqual(jsonObject1, jsonObject2);
-    }
-
-    static class JavascriptBuilder {
-        StringBuilder builder = new StringBuilder();
-
-
     }
 
     static class OptionsAllowResponse {

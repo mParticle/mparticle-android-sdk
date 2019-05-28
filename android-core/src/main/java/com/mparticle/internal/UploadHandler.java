@@ -6,14 +6,17 @@ import android.os.Looper;
 import android.os.Message;
 
 import com.mparticle.MParticle;
+import com.mparticle.identity.AliasRequest;
+import com.mparticle.identity.AliasResponse;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.listeners.InternalListenerManager;
 import com.mparticle.segmentation.SegmentListener;
 
+import org.json.JSONException;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
-
 
 import javax.net.ssl.SSLHandshakeException;
 
@@ -23,7 +26,6 @@ import static com.mparticle.networking.NetworkConnection.HTTP_TOO_MANY_REQUESTS;
  * Primary queue handler which is responsible for querying, packaging, and uploading data.
  */
 public class UploadHandler extends BaseHandler implements BackgroundTaskHandler {
-
     private final Context mContext;
     MParticleDBManager mParticleDBManager;
     private final AppStateManager mAppStateManager;
@@ -55,7 +57,6 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
     public static final int INIT_CONFIG = 6;
 
     private final SharedPreferences mPreferences;
-
     private final SegmentDatabase audienceDB;
 
     /**
@@ -124,7 +125,7 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
                 case UPLOAD_MESSAGES:
                 case UPLOAD_TRIGGER_MESSAGES:
                     long uploadInterval = mConfigManager.getUploadInterval();
-                    if (isNetworkConnected && !mApiClient.isThrottled()) {
+                    if (isNetworkConnected) {
                         if (uploadInterval > 0 || msg.arg1 == 1) {
                             prepareMessageUploads(false);
                             boolean needsHistory = upload(false);
@@ -214,7 +215,11 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
                     }
                     String message = readyUpload.getMessage();
                     InternalListenerManager.getListener().onCompositeObjects(readyUpload, message);
-                    uploadMessage(readyUpload.getId(), message);
+                    if (readyUpload.isAliasRequest()) {
+                        uploadAliasRequest(readyUpload.getId(), message);
+                    } else {
+                        uploadMessage(readyUpload.getId(), message);
+                    }
                 }
             }
         } catch (MParticleApiClientImpl.MPThrottleException e) {
@@ -251,8 +256,40 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
         }
     }
 
+    void uploadAliasRequest(int id, String aliasRequestMessage) throws IOException, MParticleApiClientImpl.MPThrottleException {
+        MParticleApiClient.AliasNetworkResponse response = new MParticleApiClientImpl.AliasNetworkResponse(-1);
+        boolean sampling = false;
+
+        try {
+            response = mApiClient.sendAliasRequest(aliasRequestMessage);
+        } catch (JSONException e) {
+            response.setErrorMessage("Unable to deserialize Alias Request");
+            Logger.error(response.getErrorMessage());
+        } catch (MParticleApiClientImpl.MPRampException e) {
+            sampling = true;
+            response.setErrorMessage("This device is being sampled.");
+            Logger.debug(response.getErrorMessage());
+        }
+
+        boolean shouldDelete = sampling || shouldDelete(response.getResponseCode());
+        if (shouldDelete) {
+            mParticleDBManager.deleteUpload(id);
+        } else {
+            Logger.warning("Alias Request will be retried");
+        }
+        try {
+            MessageManager.MPAliasMessage mpAliasMessage = new MessageManager.MPAliasMessage(aliasRequestMessage);
+            AliasRequest aliasRequest = mpAliasMessage.getAliasRequest();
+            String requestId = mpAliasMessage.getRequestId();
+            AliasResponse aliasResponse = new AliasResponse(response, aliasRequest, requestId, !shouldDelete);
+            InternalListenerManager.getListener().onAliasRequestFinished(aliasResponse);
+        } catch (JSONException ignore) {
+            Logger.warning("Unable to deserialize AliasRequest, SdkListener.onAliasRequestFinished will not be called");
+        }
+    }
+
     public boolean shouldDelete(int statusCode) {
-        return statusCode != HTTP_TOO_MANY_REQUESTS && (202 == statusCode ||
+        return statusCode != HTTP_TOO_MANY_REQUESTS && (200 == statusCode || 202 == statusCode ||
                 (statusCode >= 400 && statusCode < 500));
     }
 
@@ -283,4 +320,5 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
     public void executeNetworkRequest(Runnable runnable) {
         post(runnable);
     }
+
 }

@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.mparticle.SdkListener;
+import com.mparticle.identity.AliasResponse;
 import com.mparticle.internal.InternalSession;
 import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.internal.MPUtility;
@@ -291,6 +292,16 @@ public class InternalListenerManager implements InternalListener {
             @Override
             public void run(SdkListener listener) {
                 listener.onKitStarted(kitId);
+            }
+        });
+    }
+
+    @Override
+    public void onAliasRequestFinished(final AliasResponse aliasResponse) {
+        broadcast(new SdkListenerRunnable() {
+            @Override
+            public void run(SdkListener listener) {
+                listener.onAliasRequestFinished(aliasResponse);
             }
         });
     }

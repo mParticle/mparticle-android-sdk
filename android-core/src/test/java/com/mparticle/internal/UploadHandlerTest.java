@@ -5,12 +5,21 @@ package com.mparticle.internal;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Message;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.mparticle.MParticle;
 import com.mparticle.MockMParticle;
+import com.mparticle.SdkListener;
+import com.mparticle.identity.AliasRequest;
+import com.mparticle.identity.AliasResponse;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.mock.MockContext;
+import com.mparticle.testutils.AndroidUtils;
+import com.mparticle.testutils.RandomUtils;
+import com.mparticle.testutils.TestingUtils;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,11 +29,14 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -41,7 +53,6 @@ public class UploadHandlerTest {
         AppStateManager stateManager = Mockito.mock(AppStateManager.class);
         mConfigManager = MParticle.getInstance().Internal().getConfigManager();
         handler = new UploadHandler(new MockContext(), mConfigManager, stateManager, Mockito.mock(MessageManager.class), Mockito.mock(MParticleDBManager.class));
-        handler.mParticleDBManager = Mockito.mock(MParticleDBManager.class);
     }
 
     @Test
@@ -80,8 +91,11 @@ public class UploadHandlerTest {
     @Test
     public void testShouldDelete() throws Exception {
         for (int i = 0 ; i < 202; i++){
-            assertFalse(handler.shouldDelete(i));
+            if (i != 200) {
+                assertFalse(handler.shouldDelete(i));
+            }
         }
+        assertTrue(handler.shouldDelete(200));
         assertTrue(handler.shouldDelete(202));
         for (int i = 203 ; i < 400; i++){
             assertFalse(handler.shouldDelete(i));
@@ -179,12 +193,7 @@ public class UploadHandlerTest {
         Mockito.when(mockCursor.moveToNext()).thenReturn(true, false);
         Mockito.when(mockCursor.getInt(Mockito.anyInt())).thenReturn(123);
         Mockito.when(mockCursor.getString(Mockito.anyInt())).thenReturn("cool message batch!");
-//        Mockito.when(mockDatabase.query(MParticleSQLiteOpenHelper.UploadTable.TABLE_NAME, handler.uploadColumns,
-//                null, null, null, null, MParticleSQLiteOpenHelper.UploadTable.CREATED_AT)).thenReturn(mockCursor);
-        String[] whereArgs = {Long.toString(123)};
         handler.upload(true);
-//        Mockito.verify(mockDatabase).delete(Mockito.eq(MParticleSQLiteOpenHelper.UploadTable.TABLE_NAME),
-//                Mockito.eq( "_id=?"), Mockito.eq(whereArgs));
     }
 
     @Test
@@ -194,7 +203,7 @@ public class UploadHandlerTest {
         Mockito.when(handler.mParticleDBManager.getReadyUploads())
                 .thenReturn(new ArrayList<MParticleDBManager.ReadyUpload>(){
                     {
-                        add(new MParticleDBManager.ReadyUpload(123, "a message batch"));
+                        add(new MParticleDBManager.ReadyUpload(123, false, "a message batch"));
                     }
                 });
         MParticleApiClient mockApiClient = Mockito.mock(MParticleApiClient.class);
@@ -203,5 +212,162 @@ public class UploadHandlerTest {
         Mockito.when(mockCursor.moveToNext()).thenReturn(true, false);
         handler.upload(true);
         Mockito.verify(mockApiClient).sendMessageBatch(Mockito.eq("a message batch"));
+    }
+
+    @Test
+    public void testRetryLogic() throws IOException, MParticleApiClientImpl.MPThrottleException, JSONException, MParticleApiClientImpl.MPRampException {
+        final AndroidUtils.Mutable<Integer> deleteId = new AndroidUtils.Mutable<Integer>(null);
+
+        MParticleDBManager database = new MParticleDBManager(new MockContext()) {
+
+            @Override
+            public int deleteUpload(int id) {
+                deleteId.value = id;
+                return id;
+            }
+        };
+
+        UploadHandler uploadHandler = new UploadHandler(new MockContext(),
+                Mockito.mock(ConfigManager.class),
+                Mockito.mock(AppStateManager.class),
+                Mockito.mock(MessageManager.class),
+                database) {
+            @Override
+            public boolean shouldDelete(int statusCode) {
+                return false;
+            }
+        };
+
+        MParticleApiClient mockApiClient = Mockito.mock(MParticleApiClient.class);
+        Mockito.when(mockApiClient.sendAliasRequest(Mockito.any(String.class))).thenReturn(new MParticleApiClient.AliasNetworkResponse(0));
+        uploadHandler.setApiClient(mockApiClient);
+
+        assertNull(deleteId.value);
+
+        AliasRequest aliasRequest = TestingUtils.getInstance().getRandomAliasRequest();
+        JSONObject request = new MessageManager.MPAliasMessage(aliasRequest, "das","apiKey");
+        uploadHandler.uploadAliasRequest(1, request.toString());
+
+        assertNull(deleteId.value);
+    }
+
+    @Test
+    public void testDeleteLogic() throws IOException, MParticleApiClientImpl.MPThrottleException, JSONException, MParticleApiClientImpl.MPRampException {
+        final AndroidUtils.Mutable<Integer> deletedUpload = new AndroidUtils.Mutable<Integer>(null);
+
+        MParticleDBManager database = new MParticleDBManager(new MockContext()) {
+            @Override
+            public int deleteUpload(int id) {
+                deletedUpload.value = id;
+                return id;
+            }
+        };
+
+        UploadHandler uploadHandler = new UploadHandler(new MockContext(),
+                Mockito.mock(ConfigManager.class),
+                Mockito.mock(AppStateManager.class),
+                Mockito.mock(MessageManager.class),
+                database) {
+            @Override
+            public boolean shouldDelete(int statusCode) {
+                return true;
+            }
+        };
+
+        MParticleApiClient mockApiClient = Mockito.mock(MParticleApiClient.class);
+        Mockito.when(mockApiClient.sendAliasRequest(Mockito.any(String.class))).thenReturn(new MParticleApiClient.AliasNetworkResponse(0));
+        uploadHandler.setApiClient(mockApiClient);
+
+
+        assertNull(deletedUpload.value);
+
+        AliasRequest aliasRequest = TestingUtils.getInstance().getRandomAliasRequest();
+
+        uploadHandler.uploadAliasRequest(1, new MessageManager.MPAliasMessage(aliasRequest, "das", "apiKey").toString());
+
+        assertNotNull(deletedUpload.value);
+    }
+
+    @PrepareForTest({MPUtility.class})
+    public void testAliasCallback() throws MParticleApiClientImpl.MPRampException, MParticleApiClientImpl.MPThrottleException, JSONException, IOException {
+        RandomUtils ran = new RandomUtils();
+        PowerMockito.mockStatic(MPUtility.class);
+        Mockito.when(MPUtility.isAppDebuggable(Mockito.any(Context.class))).thenReturn(true);
+        final AndroidUtils.Mutable<AliasResponse> capturedResponse = new AndroidUtils.Mutable<AliasResponse>(null);
+        SdkListener sdkListener = new AbstractSdkListener() {
+            @Override
+            public void onAliasRequestFinished(@NonNull AliasResponse aliasResponse) {
+                capturedResponse.value = aliasResponse;
+            }
+        };
+
+        MParticle.addListener(new MockContext(), sdkListener);
+        MParticleApiClient mockApiClient = Mockito.mock(MParticleApiClient.class);
+        handler.setApiClient(mockApiClient);
+
+        //test successful request
+        Mockito.when(mockApiClient.sendAliasRequest(Mockito.any(String.class))).thenReturn(new MParticleApiClient.AliasNetworkResponse(202));
+
+        assertNull(capturedResponse.value);
+
+        AliasRequest aliasRequest = TestingUtils.getInstance().getRandomAliasRequest();
+        MessageManager.MPAliasMessage aliasRequestMessage = new MessageManager.MPAliasMessage(aliasRequest, "das", "apiKey");
+        handler.uploadAliasRequest(1, aliasRequestMessage.toString());
+
+        assertTrue(capturedResponse.value.isSuccessful());
+        assertNull(capturedResponse.value.getErrorResponse());
+        assertFalse(capturedResponse.value.willRetry());
+        assertEquals(aliasRequest, capturedResponse.value.getRequest());
+        assertEquals(202, capturedResponse.value.getResponseCode());
+        assertEquals(aliasRequestMessage.getRequestId(), capturedResponse.value.getRequestId());
+        capturedResponse.value = null;
+
+
+        //test retry request
+        Mockito.when(mockApiClient.sendAliasRequest(Mockito.any(String.class))).thenReturn(new MParticleApiClient.AliasNetworkResponse(429));
+
+        assertNull(capturedResponse.value);
+
+        aliasRequest = TestingUtils.getInstance().getRandomAliasRequest();
+        aliasRequestMessage = new MessageManager.MPAliasMessage(aliasRequest, "das", "apiKey");
+        handler.uploadAliasRequest(2, aliasRequestMessage.toString());
+
+        assertFalse(capturedResponse.value.isSuccessful());
+        assertNull(capturedResponse.value.getErrorResponse());
+        assertTrue(capturedResponse.value.willRetry());
+        assertEquals(aliasRequest, capturedResponse.value.getRequest());
+        assertEquals(429, capturedResponse.value.getResponseCode());
+        assertEquals(aliasRequestMessage.getRequestId(), capturedResponse.value.getRequestId());
+        capturedResponse.value = null;
+
+        //test error message present
+        String error = ran.getAlphaNumericString(20);
+        Mockito.when(mockApiClient.sendAliasRequest(Mockito.any(String.class))).thenReturn(new MParticleApiClient.AliasNetworkResponse(400, error));
+
+        assertNull(capturedResponse.value);
+
+        aliasRequest = TestingUtils.getInstance().getRandomAliasRequest();
+        aliasRequestMessage = new MessageManager.MPAliasMessage(aliasRequest, "das", "apiKey");
+        handler.uploadAliasRequest(3, aliasRequestMessage.toString());
+
+        assertFalse(capturedResponse.value.isSuccessful());
+        assertEquals(capturedResponse.value.getErrorResponse(), error);
+        assertFalse(capturedResponse.value.willRetry());
+        assertEquals(aliasRequest, capturedResponse.value.getRequest());
+        assertEquals(aliasRequestMessage.getRequestId(), capturedResponse.value.getRequestId());
+    }
+
+    class AbstractSdkListener implements SdkListener {
+        public void onApiCalled(@NonNull String apiName, @NonNull List<Object> objects, boolean isExternal) { }
+        public void onEntityStored(@NonNull DatabaseTable tableName, @NonNull long primaryKey, @NonNull JSONObject message) { }
+        public void onNetworkRequestStarted(@NonNull Endpoint type, @NonNull String url, @NonNull JSONObject body) { }
+        public void onNetworkRequestFinished(@NonNull Endpoint type, @NonNull String url, @Nullable JSONObject response, int responseCode) { }
+        public void onKitApiCalled(int kitId, @NonNull String apiName, @Nullable String invokingMethodName, @Nullable String kitManagerMethodName, @NonNull List<Object> objects, boolean used) { }
+        public void onKitDetected(int kitId) { }
+        public void onKitConfigReceived(int kitId, @NonNull JSONObject configuration) { }
+        public void onKitStarted(int kitId) { }
+        public void onKitExcluded(int kitId, @NonNull String reason) { }
+        public void onSessionUpdated(@Nullable InternalSession session) { }
+        public void onAliasRequestFinished(@NonNull AliasResponse aliasResponse) { }
     }
 }

@@ -128,19 +128,4 @@ public class PinningTest extends BaseCleanStartedEachTest {
         latch.await();
         assertTrue(called.value);
     }
-
-    @Test
-    public void testMParticleClientFetchAudience() throws Exception {
-        new PinningTestHelper(mContext, "/audience", new PinningTestHelper.Callback() {
-            @Override
-            public void onPinningApplied(boolean pinned) {
-                assertEquals(shouldPin(), pinned);
-                called.value = true;
-                latch.countDown();
-            }
-        });
-        com.mparticle.internal.AccessUtils.getApiClient().fetchAudiences();
-        latch.await();
-        assertTrue(called.value);
-    }
 }

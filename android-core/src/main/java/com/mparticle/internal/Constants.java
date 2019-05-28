@@ -359,6 +359,19 @@ public class Constants {
         String CONSENT_STATE_GDPR_TIMESTAMP = "ts";
         String CONSENT_STATE_GDPR_LOCATION = "l";
         String CONSENT_STATE_GDPR_HARDWARE_ID = "h";
+
+        //alias request
+        String SOURCE_MPID = "source_mpid";
+        String DESTINATION_MPID = "destination_mpid";
+        String START_TIME = "start_unixtime_ms";
+        String END_TIME = "end_unixtime_ms";
+        String DEVICE_APPLICATION_STAMP_ALIAS = "device_application_stamp";
+        String ENVIRONMENT_ALIAS = "environment";
+        String REQUEST_ID = "request_id";
+        String REQUEST_TYPE = "request_type";
+        String API_KEY = "api_key";
+        String DATA = "data";
+        String ALIAS_REQUEST_TYPE = "alias";
     }
 
     public interface Commerce {

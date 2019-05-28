@@ -22,7 +22,7 @@ public abstract class BaseNetworkConnection {
         this.mPreferences = sharedPreferences;
     }
 
-    public void setNextAllowedRequestTime(MPConnection connection) {
+    public void setNextAllowedRequestTime(MPConnection connection, MParticleBaseClientImpl.Endpoint endpoint) {
         long throttle = NetworkConnection.DEFAULT_THROTTLE_MILLIS;
         if (connection != null) {
             //most HttpUrlConnectionImpl's are case insensitive, but the interface
@@ -42,10 +42,10 @@ public abstract class BaseNetworkConnection {
         }
 
         long nextTime = System.currentTimeMillis() + throttle;
-        setNextRequestTime(nextTime);
+        setNextRequestTime(endpoint, nextTime);
     }
 
-    public void setNextRequestTime(long timeMillis) {
-        mPreferences.edit().putLong(Constants.PrefKeys.NEXT_REQUEST_TIME, timeMillis).apply();
+    public void setNextRequestTime(MParticleBaseClientImpl.Endpoint endpoint, long timeMillis) {
+        mPreferences.edit().putLong(endpoint.name() + ":" + Constants.PrefKeys.NEXT_REQUEST_TIME, timeMillis).apply();
     }
 }

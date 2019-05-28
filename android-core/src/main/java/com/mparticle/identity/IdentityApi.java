@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.mparticle.MParticleTask;
+import com.mparticle.SdkListener;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.BaseHandler;
 import com.mparticle.internal.ConfigManager;
@@ -93,6 +94,11 @@ public class IdentityApi {
         }
     }
 
+    /**
+     * returns a list of {@link MParticleUser}s that have been seen by this device. The collection
+     * is ordered by {@link MParticleUser#getLastSeenTime()}, from most to least recent
+     * @return a collection of {@link MParticleUser} ordered by descending {@link MParticleUser#getLastSeenTime()}
+     */
     @NonNull
     public List<MParticleUser> getUsers() {
         List<MParticleUser> users = new ArrayList<MParticleUser>();
@@ -287,7 +293,7 @@ public class IdentityApi {
                         task.setFailed(result);
                     } else {
                         MParticleUserDelegate.setUserIdentities(mUserDelegate, updateRequest.getUserIdentities(), updateRequest.mpid);
-                        task.setSuccessful(new IdentityApiResult(getUser(updateRequest.mpid)));
+                        task.setSuccessful(new IdentityApiResult(getUser(updateRequest.mpid), null));
                         new Handler(Looper.getMainLooper()).post(new Runnable() {
                             @Override
                             public void run() {
@@ -301,6 +307,35 @@ public class IdentityApi {
             }
         });
         return task;
+    }
+
+    /**
+     * Initiate an Alias request. Retries are handled internally, so one an {@link AliasRequest} is submitted,
+     * it will be retried unless there are unrecoverable errors. To listen for updates submit an
+     * implementation of {@link com.mparticle.SdkListener} to {@link com.mparticle.MParticle#addListener(Context, SdkListener)}
+     * @param aliasRequest
+     * @return
+     */
+    public boolean aliasUsers(@NonNull AliasRequest aliasRequest) {
+        InternalListenerManager.getListener().onApiCalled(aliasRequest);
+        if (aliasRequest.getDestinationMpid() == 0 || aliasRequest.getSourceMpid() == 0) {
+            Logger.error("AliasRequest does not have a valid destinationMpid and a valid sourceMpid");
+            return false;
+        }
+        if (aliasRequest.getDestinationMpid() == aliasRequest.getSourceMpid()) {
+            Logger.error("AliasRequest cannot have the same value for destinationMpid and sourceMpid");
+            return false;
+        }
+        if (aliasRequest.getEndTime() == 0 || aliasRequest.getStartTime() == 0) {
+            Logger.error("AliasRequest must have both a startTime and an endTime");
+            return false;
+        }
+        if (aliasRequest.getEndTime() < aliasRequest.getStartTime()) {
+            Logger.error("AliasRequest cannot have an startTime that is greater than its endTime");
+            return false;
+        }
+        mMessageManager.logAliasRequest(aliasRequest);
+        return true;
     }
 
     @NonNull
@@ -361,11 +396,12 @@ public class IdentityApi {
                             boolean isLoggedIn = result.isLoggedIn();
                             ConfigManager.setIdentityRequestInProgress(false);
                             mUserDelegate.setUser(mContext, startingMpid, newMpid, identityApiRequest.getUserIdentities(), identityApiRequest.getUserAliasHandler(), isLoggedIn);
-                            task.setSuccessful(new IdentityApiResult(getUser(newMpid)));
+                            final MParticleUser previousUser = startingMpid != newMpid ? getUser(startingMpid) : null;
+                            task.setSuccessful(new IdentityApiResult(getUser(newMpid), previousUser));
                             new Handler(Looper.getMainLooper()).post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    networkRequest.onPostExecute(new IdentityApiResult(getCurrentUser()));
+                                    networkRequest.onPostExecute(new IdentityApiResult(getCurrentUser(), previousUser));
                                 }
                             });
                         }
@@ -399,33 +435,42 @@ public class IdentityApi {
     }
 
     public interface MpIdChangeListener {
-        void onMpIdChanged(long mpid);
+        void onMpIdChanged(long newMpid, long previousMpid);
     }
 
     class IdentityStateListenerManager implements MpIdChangeListener {
 
         @Override
-        public void onMpIdChanged(long mpid) {
-            final MParticleUser user = MParticleUserImpl.getInstance(mContext, mpid, mUserDelegate);
+        public void onMpIdChanged(long newMpid, final long previousMpid) {
+            final MParticleUser user = MParticleUserImpl.getInstance(mContext, newMpid, mUserDelegate);
             if (identityStateListeners != null && identityStateListeners.size() > 0) {
                 if (mMainHandler == null) {
                     mMainHandler = new BaseHandler(Looper.getMainLooper());
                 }
-                mMainHandler.post(new Runnable() {
+                MParticleUser previousUser = previousMpid != 0 ? MParticleUserImpl.getInstance(mContext, previousMpid, mUserDelegate) : null;
+                mMainHandler.post(new BroadcastRunnable(identityStateListeners, user, previousUser));
+            }
+        }
 
-                    @Override
-                    public void run() {
-                        try {
-                            for (IdentityStateListener listener : new HashSet<IdentityStateListener>(identityStateListeners)) {
-                                if (listener != null) {
-                                    listener.onUserIdentified(user);
-                                }
-                            }
-                        } catch (Exception e) {
-                            Logger.error(e.toString());
-                        }
+        private class BroadcastRunnable implements Runnable {
+            Set<IdentityStateListener> identityListeners;
+            MParticleUser newUser;
+            MParticleUser previousUser;
+
+            private BroadcastRunnable(Set<IdentityStateListener> listeners, MParticleUser newUser, MParticleUser previousUser) {
+                this.identityListeners = new HashSet<IdentityStateListener>(listeners);
+                this.newUser = newUser;
+                this.previousUser = previousUser;
+            }
+
+            public void run() {
+                try {
+                    for (IdentityStateListener listener : identityListeners) {
+                        listener.onUserIdentified(newUser, previousUser);
                     }
-                });
+                } catch (Exception e) {
+                    Logger.error(e.toString());
+                }
             }
         }
     }

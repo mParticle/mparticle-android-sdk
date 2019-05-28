@@ -6,8 +6,10 @@ import android.content.SharedPreferences;
 import com.mparticle.MParticle;
 import com.mparticle.MockMParticle;
 import com.mparticle.identity.IdentityApi;
+import com.mparticle.testutils.AndroidUtils;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -531,7 +533,7 @@ public class ConfigManagerTest {
 
         ConfigManager.addMpIdChangeListener(new IdentityApi.MpIdChangeListener() {
             @Override
-            public void onMpIdChanged(long mpid) {
+            public void onMpIdChanged(long mpid, long previousMpid) {
                 callbackResult.value = mpid;
             }
         });
@@ -580,18 +582,25 @@ public class ConfigManagerTest {
         assertEquals("instanceId2", manager.getPushInstanceId());
     }
 
-    private Mutable<Long> callbackResult = new Mutable<Long>(null);
+    @Test
+    public void testMaxAliasWindow() throws JSONException {
+        //test default value
+        assertEquals(90, manager.getAliasMaxWindow());
+
+        //test set via config
+        int maxWindow = ran.nextInt();
+        JSONObject jsonObject = new JSONObject()
+                .put(ConfigManager.ALIAS_MAX_WINDOW, maxWindow);
+        manager.updateConfig(jsonObject, true);
+
+        assertEquals(maxWindow, manager.getAliasMaxWindow());
+    }
+
+    private AndroidUtils.Mutable<Long> callbackResult = new AndroidUtils.Mutable<Long>(null);
     private Long getCallbackResult() {
         Long result = callbackResult.value;
         callbackResult.value = null;
         return result;
     }
 
-
-    public static class Mutable<T> {
-        public T value;
-        public Mutable(T value) {
-            this.value = value;
-        }
-    }
 }

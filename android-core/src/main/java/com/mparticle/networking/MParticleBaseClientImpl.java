@@ -27,8 +27,11 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
     private SharedPreferences mPreferences;
     private String mApiKey;
 
-    private static final String SERVICE_VERSION_1 = "/v2";
+    private static final String SERVICE_VERSION_1 = "/v1";
+    private static final String SERVICE_VERSION_2 = "/v2";
     private static final String SERVICE_VERSION_4 = "/v4";
+
+    protected static final String REQUEST_ID = "request_id";
 
     public MParticleBaseClientImpl(Context context, ConfigManager configManager) {
         mContext = context;
@@ -82,8 +85,8 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
         return MPUtility.hmacSha256Encode(apiSecret, hashString.toString());
     }
 
-    public long getNextRequestTime() {
-        return mPreferences.getLong(Constants.PrefKeys.NEXT_REQUEST_TIME, 0);
+    public long getNextRequestTime(Endpoint endpoint) {
+        return mPreferences.getLong(endpoint.name() + ":" + Constants.PrefKeys.NEXT_REQUEST_TIME, 0);
     }
 
     protected MPUrl getUrl(Endpoint endpoint) throws MalformedURLException {
@@ -112,7 +115,14 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
                 uri = new Uri.Builder()
                         .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
-                        .path(SERVICE_VERSION_1 + "/" + mApiKey + "/events")
+                        .path(SERVICE_VERSION_2 + "/" + mApiKey + "/events")
+                        .build();
+                return MPUrl.getUrl(uri.toString());
+            case ALIAS:
+                uri = new Uri.Builder()
+                        .scheme(BuildConfig.SCHEME)
+                        .encodedAuthority(url)
+                        .path(SERVICE_VERSION_1 + "/identity/" + mApiKey + "/alias")
                         .build();
                 return MPUrl.getUrl(uri.toString());
             case IDENTITY:
@@ -126,7 +136,7 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
                 uri = new Uri.Builder()
                         .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
-                        .path(SERVICE_VERSION_1 + "/" + mApiKey + "/audience?mpID=" + mConfigManager.getMpid())
+                        .path(SERVICE_VERSION_2 + "/" + mApiKey + "/audience?mpID=" + mConfigManager.getMpid())
                         .build();
                 return MPUrl.getUrl(uri.toString());
             default:
@@ -134,12 +144,13 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
         }
     }
 
-    protected enum Endpoint {
+    public enum Endpoint {
         CONFIG(1),
         IDENTITY(2),
         EVENTS(3),
-        AUDIENCE(4);
-        
+        AUDIENCE(4),
+        ALIAS(5);
+
         public int value;
 
         Endpoint(int value) {
@@ -156,6 +167,8 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
                     return EVENTS;
                 case 4:
                     return AUDIENCE;
+                case 5:
+                    return ALIAS;
                 default:
                     return null;
             }

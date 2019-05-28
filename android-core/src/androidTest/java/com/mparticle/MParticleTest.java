@@ -273,7 +273,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         final boolean[] called = new boolean[2];
         IdentityStateListener crashListener = new IdentityStateListener() {
             @Override
-            public void onUserIdentified(MParticleUser user) {
+            public void onUserIdentified(MParticleUser user, MParticleUser previousUser) {
                 assertTrue(called[0]);
                 throw new IllegalStateException("Should not be getting callbacks after reset");
             }

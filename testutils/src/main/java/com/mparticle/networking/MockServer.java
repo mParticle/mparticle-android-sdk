@@ -1,12 +1,9 @@
 package com.mparticle.networking;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
 
 import com.mparticle.MParticle;
 import com.mparticle.identity.AccessUtils;
-import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.testutils.MPLatch;
@@ -26,8 +23,11 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
+import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.ALIAS;
+import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.AUDIENCE;
 import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.CONFIG;
 import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.EVENTS;
+import static org.junit.Assert.fail;
 
 public class MockServer {
 
@@ -35,7 +35,7 @@ public class MockServer {
 
     private Context context;
     private List<MPConnectionTestImpl> requests = new LinkedList<>();
-    private LinkedHashMap<Matcher, Response> serverLogic = new LinkedHashMap<>();
+    private LinkedHashMap<Matcher, Object> serverLogic = new LinkedHashMap<>();
     private Map<Matcher, CountDownLatch> blockers = new HashMap<>();
     private MParticleBaseClientImpl baseClient;
     private Random ran = new Random();
@@ -89,7 +89,8 @@ public class MockServer {
         setupHappyLogin();
         setupHappyLogout();
         setupHappyModify();
-
+        setupHappyAlias();
+        setupHappyAudience();
     }
 
     public Endpoints Endpoints() {
@@ -104,22 +105,36 @@ public class MockServer {
         requests.add(mockConnection);
 
         boolean foundMatch = false;
-        List<Map.Entry<Matcher, Response>> logicList = new ArrayList<>(serverLogic.entrySet());
+        List<Map.Entry<Matcher, Object>> logicList = new ArrayList<>(serverLogic.entrySet());
         //try to get a match FILO style
         reverseAndUpdateKey(logicList);
         long delay = 0;
-        for (Map.Entry<Matcher, Response> entry: logicList) {
+        boolean found = false;
+        for (Map.Entry<Matcher, Object> entry: logicList) {
             if (entry.getKey().isMatch(mockConnection)) {
-                Response response = entry.getValue();
-                response.setRequest(mockConnection);
-                mockConnection.response = entry.getValue().responseBody;
-                mockConnection.responseCode = entry.getValue().responseCode;
-                if (!entry.getKey().keepAfterMatch) {
-                    serverLogic.remove(entry.getKey());
+                if (entry.getValue() instanceof Response) {
+                    Response response = (Response) entry.getValue();
+                    response.setRequest(mockConnection);
+                    mockConnection.response = response.responseBody;
+                    mockConnection.responseCode = response.responseCode;
+                    if (!entry.getKey().keepAfterMatch) {
+                        serverLogic.remove(entry.getKey());
+                    }
+                    delay = response.delay;
+                    found = true;
+                    break;
                 }
-                delay = response.delay;
-                break;
+                if (entry.getValue() instanceof CallbackResponse) {
+                    CallbackResponse callbackResponse = (CallbackResponse) entry.getValue();
+                    callbackResponse.invokeCallback(mockConnection);
+                    if (!entry.getKey().keepAfterMatch) {
+                        serverLogic.remove(entry.getKey());
+                    }
+                }
             }
+        }
+        if (!found) {
+           Logger.error("response not found for request: " + mockConnection.url.toString());
         }
 
         for (Map.Entry<Matcher, CountDownLatch> entry: new HashSet<>(blockers.entrySet())) {
@@ -161,6 +176,7 @@ public class MockServer {
         Matcher match = new Matcher(getUrl(CONFIG));
         match.keepAfterMatch = true;
         Response response = new Response();
+        response.responseCode = 200;
         response.responseBody = responseString;
         serverLogic.put(match, response);
         return this;
@@ -245,17 +261,13 @@ public class MockServer {
         match.urlMatcher = new UrlMatcher() {
             @Override
             public boolean isMatch(MPUrl url) {
-                if (MParticle.getInstance() == null || !url.getFile().contains(MODIFY)) {
+                if (!url.getFile().contains(MODIFY)) {
                     return false;
                 }
-                for (MParticleUser user: MParticle.getInstance().Identity().getUsers()) {
-                    if (url.equals(getUrl(MODIFY, user.getId()))) {
-                        return true;
-                    }
-                }
-                return false;
+                return true;
             }
         };
+        match.keepAfterMatch = true;
         Response response = new Response(new JSONObject().toString());
         if (delay > 0) {
             response.delay = delay;
@@ -264,6 +276,21 @@ public class MockServer {
         return this;
     }
 
+    public MockServer setupHappyAlias() {
+        Matcher matcher = new Matcher(getUrl(ALIAS));
+        matcher.keepAfterMatch = true;
+        Response response = new Response(200, new JSONObject().toString());
+        serverLogic.put(matcher, response);
+        return this;
+    }
+
+    public MockServer setupHappyAudience() {
+        Matcher matcher = new Matcher(getUrl(AUDIENCE));
+        matcher.keepAfterMatch = true;
+        Response response = new Response(200, new JSONObject().toString());
+        serverLogic.put(matcher, response);
+        return this;
+    }
     
     public MockServer addConditionalIdentityResponse(long ifMpid, long thenMpid) {
         return addConditionalIdentityResponse(ifMpid, thenMpid, ran.nextBoolean(), 0);
@@ -318,6 +345,13 @@ public class MockServer {
         return this;
     }
 
+    public void setupAliasResponse(int responseCode) {
+        Matcher match = new Matcher(getUrl(ALIAS));
+        match.keepAfterMatch = true;
+        Response response = new Response(responseCode, new JSONObject().toString());
+        serverLogic.put(match, response);
+    }
+
 
     /**
      * This WILL block
@@ -341,18 +375,7 @@ public class MockServer {
     }
 
     public void waitForVerify(Matcher matcher, final RequestReceivedCallback callback) {
-        Response response = new Response();
-        response.onRequestCallback = new OnRequestCallback() {
-            
-            public void onRequest(Response response, final MPConnectionTestImpl connection) {
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    
-                    public void run() {
-                        callback.onRequestReceived(new Request(connection));
-                    }
-                });
-            }
-        };
+        CallbackResponse response = new CallbackResponse(callback);
         serverLogic.put(matcher, response);
     }
 
@@ -430,19 +453,22 @@ public class MockServer {
     //2) we update the request which have the SDK "key" in their URL to match the current Key. Usually
     //the server is started before MParticle.start() is called, which means the urls in the "logic"
     //might not contain the same SDK key that was set later in MParticle.start()
-    private void reverseAndUpdateKey(List<Map.Entry<Matcher, Response>> logic) {
+    private void reverseAndUpdateKey(List<Map.Entry<Matcher, Object>> logic) {
         Collections.reverse(logic);
-        String apiKey = MParticle.getInstance().Internal().getConfigManager().getApiKey();
+        String apiKey = ConfigManager.getInstance(context).getApiKey();
         try {
-            for (Map.Entry<Matcher, Response> entry : logic) {
+            for (Map.Entry<Matcher, Object> entry : logic) {
                 String url = entry.getKey().url;
                 if (url != null) {
                     if (url.contains(NetworkOptionsManager.MP_CONFIG_URL) && !url.contains(apiKey)) {
                         entry.getKey().url = getUrl(MParticleBaseClientImpl.Endpoint.CONFIG).getFile();
-                        Logger.error("New Url: " + url);
+                        Logger.error("New Url: " + url + " -> " + entry.getKey().url);
                     }
                     if (url.contains(NetworkOptionsManager.MP_URL) && !url.contains(apiKey)) {
                         entry.getKey().url = getUrl(MParticleBaseClientImpl.Endpoint.EVENTS).getFile();
+                    }
+                    if (url.contains("/alias") && !url.contains(apiKey)) {
+                        entry.getKey().url = getUrl(MParticleBaseClientImpl.Endpoint.ALIAS).getFile();
                     }
                 }
             }
@@ -573,6 +599,10 @@ public class MockServer {
 
         public MPUrl getConfigUrl() {
             return getUrl(MParticleBaseClientImpl.Endpoint.CONFIG);
+        }
+
+        public MPUrl getAliasUrl() {
+            return getUrl(MParticleBaseClientImpl.Endpoint.ALIAS);
         }
 
     }

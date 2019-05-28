@@ -2,16 +2,17 @@ package com.mparticle.internal;
 
 import android.content.Context;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 
 import com.mparticle.MParticle;
 import com.mparticle.identity.IdentityStateListener;
 import com.mparticle.internal.database.tables.MParticleDatabaseHelper;
 import com.mparticle.networking.BaseNetworkConnection;
-import com.mparticle.networking.MParticleBaseClientImpl;
 import com.mparticle.testutils.MPLatch;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -113,13 +114,13 @@ public class AccessUtils {
         }
 
         @Override
-        public boolean isThrottled() {
-            return false;
+        public JSONObject getCookies() {
+            return null;
         }
 
         @Override
-        public JSONObject getCookies() {
-            return null;
+        public AliasNetworkResponse sendAliasRequest(@NonNull String request) throws JSONException, IOException, MParticleApiClientImpl.MPThrottleException, MParticleApiClientImpl.MPRampException {
+            return new AliasNetworkResponse(0);
         }
 
         @Override

@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.mparticle.SdkListener;
+import com.mparticle.identity.AliasResponse;
 import com.mparticle.internal.InternalSession;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.mock.MockContext;
@@ -137,6 +138,7 @@ public class InternalListenerManagerTest {
         public void onKitStarted(int kitId) { }
         public void onKitExcluded(int kitId, @NonNull String reason) { }
         public void onSessionUpdated(@Nullable InternalSession session) { }
+        public void onAliasRequestFinished(@NonNull AliasResponse aliasResponse) { }
     }
 }
 

@@ -144,6 +144,9 @@
 -keep class com.mparticle.identity.TaskSuccessListener { *; }
 -keep class com.mparticle.identity.TaskFailureListener { *; }
 -keep class com.mparticle.identity.BaseIdentityTask { *; }
+-keep class com.mparticle.identity.AliasRequest { *; }
+-keep class com.mparticle.identity.AliasRequest$Builder { *; }
+-keep class com.mparticle.identity.AliasResponse { *; }
 
 -keep class com.mparticle.messaging.InstanceIdService { *; }
 

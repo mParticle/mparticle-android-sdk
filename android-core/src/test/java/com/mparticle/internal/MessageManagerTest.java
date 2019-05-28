@@ -9,13 +9,16 @@ import com.mparticle.MParticle;
 import com.mparticle.MockMParticle;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Product;
+import com.mparticle.identity.AliasRequest;
 import com.mparticle.identity.IdentityApi;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockSharedPreferences;
 import com.mparticle.mock.utils.RandomUtils;
+import com.mparticle.testutils.TestingUtils;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -566,5 +569,12 @@ public class MessageManagerTest {
         }
 
         assertEquals(null, new MessageManager().toStringListMap(null));
+    }
+
+    @Test
+    public void testAliasRequestSerialization() throws JSONException {
+        AliasRequest request = TestingUtils.getInstance().getRandomAliasRequest();
+        MessageManager.MPAliasMessage aliasMessage = new MessageManager.MPAliasMessage(request, "das", "apiKey");
+        assertEquals(request, aliasMessage.getAliasRequest());
     }
 }

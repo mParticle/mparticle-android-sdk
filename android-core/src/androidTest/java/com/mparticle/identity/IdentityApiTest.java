@@ -3,6 +3,8 @@ package com.mparticle.identity;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.mparticle.MParticle;
 import com.mparticle.MParticleTask;
@@ -76,7 +78,7 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
 
         MParticle.getInstance().Identity().addIdentityStateListener(new IdentityStateListener() {
             @Override
-            public void onUserIdentified(MParticleUser user) {
+            public void onUserIdentified(MParticleUser user, MParticleUser previousUser) {
                 if (user.getId() == mpid1) {
                     try {
                         com.mparticle.internal.AccessUtils.awaitMessageHandler();
@@ -97,6 +99,7 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
             @Override
             public void onSuccess(IdentityApiResult identityApiResult) {
                 assertMParticleUserEquals(identityApiResult.getUser(), mpid1, identities, null, isLoggedIn);
+                assertEquals(identityApiResult.getPreviousUser().getId(), mStartingMpid.longValue());
                 latch.countDown();
             }
         });
@@ -122,7 +125,7 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
 
         MParticle.getInstance().Identity().addIdentityStateListener(new IdentityStateListener() {
             @Override
-            public void onUserIdentified(final MParticleUser user) {
+            public void onUserIdentified(final MParticleUser user, MParticleUser previousUser) {
                 if (user != null && user.getId() == mpid1) {
                     user1Called.value = true;
                     latch.countDown();
@@ -142,6 +145,7 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
             @Override
             public void onSuccess(IdentityApiResult identityApiResult) {
                 assertEquals(identityApiResult.getUser().getId(), mpid1);
+                assertEquals(identityApiResult.getPreviousUser().getId(), mStartingMpid.longValue());
             }
         });
 
@@ -155,6 +159,7 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
             public void onSuccess(IdentityApiResult identityApiResult) {
                 assertEquals(identityApiResult.getUser().getId(), mpid2);
                 assertEquals(identityApiResult.getUser().getId(), MParticle.getInstance().Identity().getCurrentUser().getId());
+                assertEquals(identityApiResult.getPreviousUser().getId(), mpid1);
                 latch.countDown();
                 user3Called.value = true;
             }
@@ -173,21 +178,21 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
 
         MParticle.getInstance().Identity().addIdentityStateListener(new IdentityStateListener() {
             @Override
-            public void onUserIdentified(final MParticleUser user) {
+            public void onUserIdentified(final MParticleUser user, MParticleUser previousUser) {
                 latch.countDown();
             }
         });
 
         MParticle.getInstance().Identity().addIdentityStateListener(new IdentityStateListener() {
             @Override
-            public void onUserIdentified(final MParticleUser user) {
+            public void onUserIdentified(final MParticleUser user, MParticleUser previousUser) {
                 latch.countDown();
             }
         });
 
         MParticle.getInstance().Identity().addIdentityStateListener(new IdentityStateListener() {
             @Override
-            public void onUserIdentified(MParticleUser user) {
+            public void onUserIdentified(MParticleUser user, MParticleUser previousUser) {
                 latch.countDown();
             }
         });
@@ -225,11 +230,11 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
 
         IdentityStateListener keptIdStateListener = new IdentityStateListener() {
             @Override
-            public void onUserIdentified(final MParticleUser user) {
-                if (user.getId() == mpid1) {
+            public void onUserIdentified(final MParticleUser user, MParticleUser previousUser) {
+                if (user.getId() == mpid1 && previousUser.getId() == mStartingMpid) {
                     mpid1Latch.countDown();
                 }
-                if (user.getId() == mpid2) {
+                if (user.getId() == mpid2 && previousUser.getId() == mpid1) {
                     mpid2Latch.countDown();
                 }
             }
@@ -237,23 +242,23 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
 
         IdentityStateListener removeIdStateListener1 = new IdentityStateListener() {
             @Override
-            public void onUserIdentified(final MParticleUser user) {
-                if (user.getId() != mpid1) {
+            public void onUserIdentified(final MParticleUser user, MParticleUser previousUser) {
+                if (user.getId() != mpid1 || previousUser.getId() != mStartingMpid) {
                     fail("IdentityStateListener failed to be removed");
                 }
             }
         };
         IdentityStateListener removeIdStateListener2 = new IdentityStateListener() {
             @Override
-            public void onUserIdentified(final MParticleUser user) {
-                if (user.getId() != mpid1) {
+            public void onUserIdentified(final MParticleUser user, MParticleUser previousUser) {
+                if (user.getId() != mpid1 || previousUser.getId() != mStartingMpid) {
                     fail("IdentityStateListener failed to be removed");
                 }            }
         };
         IdentityStateListener removeIdStateListener3 = new IdentityStateListener() {
             @Override
-            public void onUserIdentified(final MParticleUser user) {
-                if (user.getId() != mpid1) {
+            public void onUserIdentified(final MParticleUser user, MParticleUser previousUser) {
+                if (user.getId() != mpid1 || previousUser.getId() != mStartingMpid) {
                     fail("IdentityStateListener failed to be removed");
                 }
             }
@@ -294,7 +299,7 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
             public void run() {
                 MParticle.getInstance().Identity().addIdentityStateListener(new IdentityStateListener() {
                     @Override
-                    public void onUserIdentified(MParticleUser user) {
+                    public void onUserIdentified(MParticleUser user, MParticleUser previousUser) {
                         assertEquals(Looper.getMainLooper(), Looper.myLooper());
                         assertEquals(user.getId(), MParticle.getInstance().Identity().getCurrentUser().getId());
                         called.value = true;
@@ -304,6 +309,25 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
                 MParticle.getInstance().Internal().getConfigManager().setMpid(mpid1, ran.nextBoolean());
             }
         });
+        latch.await();
+        assertTrue(called.value);
+    }
+
+    @Test
+    public void testIdentityTransitionListener() throws InterruptedException {
+        mServer.addConditionalLoginResponse(mStartingMpid, mpid1);
+        final CountDownLatch latch = new MPLatch(1);
+        final Mutable<Boolean> called = new Mutable<Boolean>(false);
+        MParticle.getInstance().Identity().addIdentityStateListener(new IdentityStateListener() {
+            @Override
+            public void onUserIdentified(@NonNull MParticleUser newUser, @Nullable MParticleUser previousUser) {
+                assertEquals(mStartingMpid.longValue(), previousUser.getId());
+                assertEquals(mpid1, newUser.getId());
+                called.value = true;
+                latch.countDown();
+            }
+        });
+        MParticle.getInstance().Identity().login();
         latch.await();
         assertTrue(called.value);
     }
@@ -319,9 +343,10 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
 
         MParticle.getInstance().Identity().addIdentityStateListener(new IdentityStateListener() {
             @Override
-            public void onUserIdentified(MParticleUser user) {
+            public void onUserIdentified(MParticleUser user, MParticleUser previousUser) {
                 assertEquals(mpid1, MParticle.getInstance().Identity().getCurrentUser().getId());
                 assertEquals(mpid1, user.getId());
+                assertEquals(mStartingMpid.longValue(), previousUser.getId());
                 called1.value = true;
                 latch.countDown();
             }
@@ -333,6 +358,7 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
                     public void onSuccess(IdentityApiResult result) {
                         assertEquals(mpid1, MParticle.getInstance().Identity().getCurrentUser().getId());
                         assertEquals(mpid1, result.getUser().getId());
+                        assertEquals(mStartingMpid.longValue(), result.getPreviousUser().getId());
                         called2.value = true;
                         latch.countDown();
                     }

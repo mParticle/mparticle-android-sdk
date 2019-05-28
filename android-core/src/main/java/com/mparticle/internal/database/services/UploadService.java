@@ -9,10 +9,13 @@ import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.tables.UploadTable;
 import com.mparticle.internal.listeners.InternalListenerManager;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class UploadService extends UploadTable {
+
     public static int cleanupUploadMessages(MPDatabase database) {
         return database.delete(UploadTableColumns.TABLE_NAME, "length(" + UploadTableColumns.MESSAGE + ") > " + Constants.LIMIT_MAX_UPLOAD_SIZE, null);
     }
@@ -28,6 +31,7 @@ public class UploadService extends UploadTable {
         contentValues.put(UploadTableColumns.API_KEY, apiKey);
         contentValues.put(UploadTableColumns.CREATED_AT, message.optLong(Constants.MessageKey.TIMESTAMP, System.currentTimeMillis()));
         contentValues.put(UploadTableColumns.MESSAGE, message.toString());
+        contentValues.put(UploadTableColumns.REQUEST_TYPE, UploadTable.UPLOAD_REQUEST);
         InternalListenerManager.getListener().onCompositeObjects(message, contentValues);
         database.insert(UploadTableColumns.TABLE_NAME, null, contentValues);
     }
@@ -36,12 +40,13 @@ public class UploadService extends UploadTable {
         List<MParticleDBManager.ReadyUpload> readyUploads = new ArrayList<MParticleDBManager.ReadyUpload>();
         Cursor readyUploadsCursor = null;
         try {
-            readyUploadsCursor = database.query(UploadTableColumns.TABLE_NAME, new String[]{"_id", UploadTableColumns.MESSAGE},
+            readyUploadsCursor = database.query(UploadTableColumns.TABLE_NAME, new String[]{"_id", UploadTableColumns.MESSAGE, UploadTableColumns.REQUEST_TYPE},
                     null, null, null, null, UploadTableColumns.CREATED_AT);
             int messageIdIndex = readyUploadsCursor.getColumnIndex(UploadTableColumns._ID);
             int messageIndex = readyUploadsCursor.getColumnIndex(UploadTableColumns.MESSAGE);
+            int requestTypeIndex = readyUploadsCursor.getColumnIndex(UploadTableColumns.REQUEST_TYPE);
             while (readyUploadsCursor.moveToNext()) {
-                MParticleDBManager.ReadyUpload readyUpload = new MParticleDBManager.ReadyUpload(readyUploadsCursor.getInt(messageIdIndex), readyUploadsCursor.getString(messageIndex));
+                MParticleDBManager.ReadyUpload readyUpload = new MParticleDBManager.ReadyUpload(readyUploadsCursor.getInt(messageIdIndex), UploadTable.ALIAS_REQUEST.equals(readyUploadsCursor.getString(requestTypeIndex)), readyUploadsCursor.getString(messageIndex));
                 readyUploads.add(readyUpload);
                 InternalListenerManager.getListener().onCompositeObjects(readyUploadsCursor, readyUpload);
             }
@@ -64,5 +69,15 @@ public class UploadService extends UploadTable {
     public static int deleteUpload(MPDatabase database, int id) {
         String[] whereArgs = {Long.toString(id)};
         return database.delete(UploadTableColumns.TABLE_NAME, "_id=?", whereArgs);
+    }
+
+    public static long insertAliasRequest(MPDatabase database, String apiKey, JSONObject request) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(UploadTableColumns.API_KEY, apiKey);
+        contentValues.put(UploadTableColumns.CREATED_AT, System.currentTimeMillis());
+        contentValues.put(UploadTableColumns.MESSAGE, request.toString());
+        contentValues.put(UploadTableColumns.REQUEST_TYPE, UploadTable.ALIAS_REQUEST);
+        InternalListenerManager.getListener().onCompositeObjects(request, contentValues);
+        return database.insert(UploadTableColumns.TABLE_NAME, null, contentValues);
     }
 }

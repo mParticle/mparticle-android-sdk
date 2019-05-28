@@ -1465,7 +1465,7 @@ public class MParticle {
             }
             mDeferredModifyPushRegistrationListener = new IdentityStateListener() {
                 @Override
-                public void onUserIdentified(MParticleUser user) {
+                public void onUserIdentified(MParticleUser user, MParticleUser previousUser) {
                     if (user != null) {
                         Identity().removeIdentityStateListener(this);
                         Logger.verbose("Sending previously deferred logPushRegistration Modify request");

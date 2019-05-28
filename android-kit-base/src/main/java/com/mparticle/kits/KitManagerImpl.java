@@ -1090,7 +1090,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     // IdentityListener forwarding
     //================================================================================
     @Override
-    public void onUserIdentified(MParticleUser mParticleUser) {
+    public void onUserIdentified(MParticleUser mParticleUser, MParticleUser previousUser) {
         //due to consent forwarding rules we need to re-verify kits whenever the user changes
         updateKits(mCoreCallbacks.getLatestKitConfiguration());
         for (KitIntegration provider : providers.values()) {

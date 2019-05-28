@@ -80,10 +80,10 @@ public abstract class BaseAbstractTest {
         });
 
         options.identifyTask(identityTask);
-        MParticle.start(com.mparticle.AccessUtils.setCredentialsIfEmpty(options).build());
         if (mServer == null) {
             mServer = MockServer.getNewInstance(mContext);
         }
+        MParticle.start(com.mparticle.AccessUtils.setCredentialsIfEmpty(options).build());
         mServer.setupHappyIdentify(mStartingMpid);
         latch.await();
         assertTrue(called.value);

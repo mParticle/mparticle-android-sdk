@@ -1,9 +1,10 @@
 package com.mparticle;
 
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.mparticle.identity.AliasRequest;
+import com.mparticle.identity.AliasResponse;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.InternalSession;
 
@@ -19,6 +20,8 @@ import java.util.List;
  * inside the SDK.
  */
 public interface SdkListener {
+    String ERROR_MESSAGE = "message";
+
     /**
      * Indicates that an API method was called. This includes invocations both from external sources (your code)
      * and those which originated from within the SDK
@@ -103,11 +106,18 @@ public interface SdkListener {
      */
     void onSessionUpdated(@Nullable InternalSession session);
 
+    /**
+     * Callback for {@link com.mparticle.identity.IdentityApi#aliasUsers(AliasRequest)} calls.
+     * @param aliasResponse
+     */
+    void onAliasRequestFinished(AliasResponse aliasResponse);
+
     enum Endpoint {
         IDENTITY_LOGIN,
         IDENTITY_LOGOUT,
         IDENTITY_IDENTIFY,
         IDENTITY_MODIFY,
+        IDENTITY_ALIAS,
         EVENTS,
         CONFIG
     }

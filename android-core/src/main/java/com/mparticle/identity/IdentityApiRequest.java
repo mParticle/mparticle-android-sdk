@@ -210,6 +210,17 @@ public final class IdentityApiRequest {
             return new IdentityApiRequest(this);
         }
 
+        /**
+         * Deprecated. To easily migrate your existing code, add a success listener
+         * to the {@link BaseIdentityTask} that is being returned from this method ){@link BaseIdentityTask#addSuccessListener(TaskSuccessListener)}. Within the
+         * {@link IdentityApiResult} returned by the success listener, you can run the same code you do
+         * in you {@link UserAliasHandler}, using the {@link MParticleUser}s returned by
+         * {@link IdentityApiResult#getUser()} and {@link IdentityApiResult#getPreviousUser()} in place
+         * of "newUser" and "previousUser" respectively
+         * @param userAliasHandler
+         * @return
+         */
+        @Deprecated
         @NonNull
         public Builder userAliasHandler(@Nullable UserAliasHandler userAliasHandler) {
             this.userAliasHandler = userAliasHandler;

@@ -25,7 +25,7 @@ import java.util.UUID;
 
     private final Context mContext;
 
-    private MParticleDBManager mMParticleDBManager;
+    MParticleDBManager mMParticleDBManager;
 
     public static final int STORE_MESSAGE = 0;
     public static final int UPDATE_SESSION_ATTRIBUTES = 1;
@@ -39,8 +39,18 @@ import java.util.UUID;
     public static final int INCREMENT_USER_ATTRIBUTE = 12;
     public static final int INSTALL_REFERRER_UPDATED = 13;
     public static final int CLEAR_MESSAGES_FOR_UPLOAD = 14;
+    public static final int STORE_ALIAS_MESSAGE = 15;
 
     private final MessageManagerCallbacks mMessageManagerCallbacks;
+
+    /**
+     * for unit testing only
+     */
+    MessageHandler(MessageManagerCallbacks messageManager, Context context, MParticleDBManager dbManager) {
+        mMessageManagerCallbacks = messageManager;
+        mContext = context;
+        mMParticleDBManager = dbManager;
+    }
 
     public MessageHandler(Looper looper, MessageManagerCallbacks messageManager, Context context, MParticleDBManager dbManager) {
         super(looper);
@@ -49,7 +59,7 @@ import java.util.UUID;
         mMParticleDBManager = dbManager;
     }
 
-    private boolean databaseAvailable() {
+    boolean databaseAvailable() {
         try {
             return mMParticleDBManager.getDatabase() != null;
         } catch (Exception ex) {
@@ -71,7 +81,6 @@ import java.util.UUID;
         switch (msg.what) {
             case STORE_MESSAGE:
                 try {
-
                     MessageManager.BaseMPMessage message = (MessageManager.BaseMPMessage) msg.obj;
                     message.put(MessageKey.STATE_INFO_KEY, MessageManager.getStateInfo());
                     String messageType = message.getString(MessageKey.TYPE);
@@ -217,6 +226,19 @@ import java.util.UUID;
                 break;
             case CLEAR_MESSAGES_FOR_UPLOAD:
                 mMessageManagerCallbacks.messagesClearedForUpload();
+                break;
+            case STORE_ALIAS_MESSAGE:
+                try {
+                    MessageManager.MPAliasMessage aliasMessage = (MessageManager.MPAliasMessage) msg.obj;
+                    mMParticleDBManager.insertAliasRequest(mMessageManagerCallbacks.getApiKey(), aliasMessage);
+                    if (MParticle.getInstance() != null) {
+                        MParticle.getInstance().upload();
+                    }
+                } catch (MParticleApiClientImpl.MPNoConfigException ex) {
+                    Logger.error("Unable to Alias Request, API key and or API Secret is missing");
+                } catch (Exception ex) {
+                    Logger.error("Error sending Alias Request");
+                }
                 break;
         }
     }

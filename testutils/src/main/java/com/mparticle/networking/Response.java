@@ -2,6 +2,10 @@ package com.mparticle.networking;
 
 class Response {
 
+    int responseCode = 200;
+    String responseBody = "";
+    long delay;
+
     Response() { }
 
     Response(String responseBody) {
@@ -14,10 +18,6 @@ class Response {
     }
 
     MockServer.OnRequestCallback onRequestCallback;
-
-    int responseCode = 200;
-    String responseBody = "";
-    long delay;
 
     void setRequest(MPConnectionTestImpl connection) {
         if (onRequestCallback != null) {

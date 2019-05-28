@@ -20,6 +20,10 @@ public class NetworkOptionsManager {
         }
         //only take the endpoints we care about
         for (Endpoint endpoint: Endpoint.values()) {
+            if (endpoint == Endpoint.ALIAS) {
+                //no special endpoint for Alias, uses the same as EVENTS
+                continue;
+            }
             DomainMapping domainMapping = networkOptions.domainMappings.get(endpoint);
             if (domainMapping == null) {
                 networkOptions.domainMappings.put(endpoint, DomainMapping.withEndpoint(endpoint)
@@ -51,7 +55,6 @@ public class NetworkOptionsManager {
                         .setCertificates(defaultCertificates)
                         .build())
                 .addDomainMapping(DomainMapping.audienceMapping(getDefaultUrl(Endpoint.AUDIENCE))
-
                         .setCertificates(defaultCertificates)
                         .build())
                 .build();
@@ -76,6 +79,7 @@ public class NetworkOptionsManager {
             case IDENTITY:
                 return MPUtility.isEmpty(BuildConfig.MP_IDENTITY_URL) ? MP_IDENTITY_URL : BuildConfig.MP_IDENTITY_URL;
             case EVENTS:
+            case ALIAS:
             case AUDIENCE:
                 return MPUtility.isEmpty(BuildConfig.MP_URL) ? MP_URL : BuildConfig.MP_URL;
             default:

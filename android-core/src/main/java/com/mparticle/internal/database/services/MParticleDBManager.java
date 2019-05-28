@@ -12,13 +12,13 @@ import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.DatabaseHelper;
 import com.mparticle.internal.DeviceAttributes;
+import com.mparticle.internal.InternalSession;
 import com.mparticle.internal.JsonReportingMessage;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MessageBatch;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.MessageManagerCallbacks;
-import com.mparticle.internal.InternalSession;
 import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.MPDatabaseImpl;
 import com.mparticle.internal.listeners.InternalListenerManager;
@@ -39,6 +39,10 @@ public class MParticleDBManager {
     private SharedPreferences mPreferences;
     private Context mContext;
     private DatabaseHelper mDatabaseHelper;
+
+    MParticleDBManager() {
+        //for unit testing
+    }
 
     public MParticleDBManager(Context context) {
         this.mContext = context;
@@ -481,7 +485,9 @@ public class MParticleDBManager {
         return UploadService.deleteUpload(getDatabase(), id);
     }
 
-
+    public void insertAliasRequest(String apiKey, JSONObject request) {
+        UploadService.insertAliasRequest(getDatabase(), apiKey, request);
+    }
 
     /**
      *
@@ -696,10 +702,12 @@ public class MParticleDBManager {
     public static class ReadyUpload {
         private int id;
         private String message;
+        private boolean isAliasRequest;
 
-        public ReadyUpload(int id, String message) {
+        public ReadyUpload(int id, boolean isAliasRequest, String message) {
             this.id = id;
             this.message = message;
+            this.isAliasRequest = isAliasRequest;
         }
 
 
@@ -709,6 +717,10 @@ public class MParticleDBManager {
 
         public String getMessage() {
             return message;
+        }
+
+        public boolean isAliasRequest() {
+            return isAliasRequest;
         }
     }
 

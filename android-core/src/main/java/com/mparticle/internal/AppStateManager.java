@@ -86,9 +86,9 @@ public class  AppStateManager {
         mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         ConfigManager.addMpIdChangeListener(new IdentityApi.MpIdChangeListener() {
             @Override
-            public void onMpIdChanged(long mpid) {
+            public void onMpIdChanged(long newMpid, long previousMpid) {
                 if (mCurrentSession != null) {
-                    mCurrentSession.addMpid(mpid);
+                    mCurrentSession.addMpid(newMpid);
                 }
             }
         });

@@ -1,22 +1,26 @@
 package com.mparticle.testutils;
 
-import android.content.Context;
-
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
-import com.mparticle.internal.AccessUtils;
-import com.mparticle.internal.Constants;
+import com.mparticle.identity.AliasRequest;
 import com.mparticle.internal.Logger;
-import com.mparticle.internal.MParticleApiClientImpl;
 
-import java.net.MalformedURLException;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 
+import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 public class TestingUtils {
-    private RandomUtils mRandom = new RandomUtils();
+    private RandomUtils randomUtils = new RandomUtils();
+    Random random = new Random();
     private static TestingUtils instance;
     private static boolean firebasePresent = false;
 
@@ -66,7 +70,7 @@ public class TestingUtils {
 
 
     private MPEvent.Builder getRandomMPEventBuilder() {
-        return new MPEvent.Builder(mRandom.getAlphaNumericString(mRandom.randomInt(1,55)), MParticle.EventType.values()[mRandom.randomInt(0, MParticle.EventType.values().length - 1)]);
+        return new MPEvent.Builder(randomUtils.getAlphaNumericString(randomUtils.randomInt(1,55)), MParticle.EventType.values()[randomUtils.randomInt(0, MParticle.EventType.values().length - 1)]);
     }
 
     public MPEvent getRandomMPEventSimple() {
@@ -75,12 +79,11 @@ public class TestingUtils {
 
     public MPEvent getRandomMPEventRich() {
         MPEvent.Builder builder = getRandomMPEventBuilder();
-        Random random = new Random();
         if (random.nextBoolean()) {
-            builder.category(mRandom.getAlphaNumericString(mRandom.randomInt(5, 55)));
+            builder.category(randomUtils.getAlphaNumericString(randomUtils.randomInt(5, 55)));
         }
         if (random.nextBoolean()) {
-            builder.duration(mRandom.randomLong(1000, 1000 * 100));
+            builder.duration(randomUtils.randomLong(1000l, 1000l * 100));
         }
         if (random.nextBoolean()) {
             builder.startTime();
@@ -90,9 +93,9 @@ public class TestingUtils {
         }
         if (random.nextBoolean()) {
             Map<String, String> infoMap = new HashMap<String, String>();
-            for (int i = 0; i < mRandom.randomInt(-5, 20); i++) {
-                String key = mRandom.getAlphaNumericString(mRandom.randomInt(0, 55));
-                String value = mRandom.getAlphaNumericString(mRandom.randomInt(0, 55));
+            for (int i = 0; i < randomUtils.randomInt(-5, 20); i++) {
+                String key = randomUtils.getAlphaNumericString(randomUtils.randomInt(0, 55));
+                String value = randomUtils.getAlphaNumericString(randomUtils.randomInt(0, 55));
                 // 50/50 chance, that if the string is shorter than 5 characters, we will replace it with "null"
                 infoMap.put(key.length() <= 5 && random.nextBoolean() ? null : key, value.length() < 5 && random.nextBoolean() ? null : value);
             }
@@ -103,9 +106,9 @@ public class TestingUtils {
             builder.info(infoMap);
         }
         if (random.nextBoolean()) {
-            for (int i = 0; i < mRandom.randomInt(0, 10); i++) {
-                String key = mRandom.getAlphaNumericString(mRandom.randomInt(0, 55));
-                String value = mRandom.getAlphaNumericString(mRandom.randomInt(0, 55));
+            for (int i = 0; i < randomUtils.randomInt(0, 10); i++) {
+                String key = randomUtils.getAlphaNumericString(randomUtils.randomInt(0, 55));
+                String value = randomUtils.getAlphaNumericString(randomUtils.randomInt(0, 55));
                 // 50/50 chance, that if the string is shorter than 5 characters, we will replace it with "null"
                 builder.addCustomFlag(key.length() <= 5 && random.nextBoolean() ? null : key, value.length() < 5 && random.nextBoolean() ? null : value);
             }
@@ -114,5 +117,72 @@ public class TestingUtils {
             builder.internalNavigationDirection(random.nextBoolean());
         }
         return builder.build();
+    }
+
+    public AliasRequest getRandomAliasRequest() {
+        final Long destinationMpid = random.nextLong();
+        final Long sourceMpid = random.nextLong();
+        final Long startTime = randomUtils.randomLong(0, System.currentTimeMillis());
+        final Long endTime = randomUtils.randomLong(startTime, System.currentTimeMillis());
+        return AliasRequest.builder()
+                .destinationMpid(destinationMpid)
+                .sourceMpid(sourceMpid)
+                .sourceMpid(startTime)
+                .endTime(endTime)
+                .build();
+    }
+
+    public static void assertJsonEqual(JSONObject object1, JSONObject object2) {
+        if (object1 == object2) {
+            return;
+        }
+        assertEquals(object1.length(), object2.length());
+        Iterator<String> keys = object1.keys();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            try {
+                Object obj1Val = object1.get(key);
+                Object obj2Val = object2.get(key);
+                //dealing with nested JSONObjects, not going to deal with nested JSONArray's
+                if (obj1Val instanceof JSONObject && obj2Val instanceof JSONObject) {
+                    assertJsonEqual((JSONObject) obj1Val, (JSONObject) obj2Val);
+                } else if (obj1Val instanceof JSONArray && obj2Val instanceof JSONArray) {
+                    assertJsonArrayEqual((JSONArray) obj1Val, (JSONArray) obj2Val);
+                } else {
+                    assertEquals(obj1Val, obj2Val);
+                }
+            } catch (JSONException jse) {
+                fail(jse.getMessage());
+            }
+        }
+    }
+
+    // This method does NOT account for repeated elements in the JSONArray.
+    // We don't need to for our current use case, but keep this in mind if the
+    // method is going to be ported for a more general use case
+    public static void assertJsonArrayEqual(JSONArray jsonArray1, JSONArray jsonArray2) {
+        if (jsonArray1 == jsonArray2) {
+            return;
+        }
+        assertEquals(jsonArray1.length(), jsonArray2.length());
+        JSONObject jsonObject1 = new JSONObject();
+        JSONObject jsonObject2 = new JSONObject();
+        for (int i = 0; i < jsonArray1.length(); i++) {
+            Object object1 = jsonArray1.opt(i);
+            Object object2 = jsonArray2.opt(i);
+            try {
+                jsonObject1.put(object1 == null ? null : object1.toString(), object1);
+            }
+            catch (JSONException jse) {
+                fail(jse.getMessage());
+            }
+            try {
+                jsonObject2.put(object2 == null ? null : object2.toString(), object2);
+            }
+            catch (JSONException jse) {
+                fail(jse.getMessage());
+            }
+        }
+        assertJsonEqual(jsonObject1, jsonObject2);
     }
 }

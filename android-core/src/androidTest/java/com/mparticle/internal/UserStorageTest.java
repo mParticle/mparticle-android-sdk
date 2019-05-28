@@ -48,6 +48,9 @@ public class UserStorageTest extends BaseCleanStartedEachTest {
         }
     }
 
+    ConfigManagerMigrationTest.UserStorageFields fields1;
+    ConfigManagerMigrationTest.UserStorageFields fields2;
+
     private void testRandomMigration() {
         int numberFieldsChanged = mRandomUtils.randomInt(0, 11);
         Set<Integer> indexsToSetProfile1Field = new HashSet<Integer>();
@@ -63,13 +66,13 @@ public class UserStorageTest extends BaseCleanStartedEachTest {
             }
         }
 
-        ConfigManagerMigrationTest.refreshProfile1();
-        ConfigManagerMigrationTest.refreshProfile2();
+        fields1 = new ConfigManagerMigrationTest.UserStorageFields();
+        fields2 = new ConfigManagerMigrationTest.UserStorageFields();
 
         UserStorage subjectUserStorage = UserStorage.create(mContext, ran.nextLong());
         UserStorage targetUserStorage = UserStorage.create(mContext, ran.nextLong());
 
-        ConfigManagerMigrationTest.setProfile2(targetUserStorage);
+        ConfigManagerMigrationTest.setProfile(targetUserStorage, fields2);
 
         //set the random number of fields in the subjectUserCondif
         for (Integer index: indexsToSetProfile1Field) {
@@ -100,73 +103,73 @@ public class UserStorageTest extends BaseCleanStartedEachTest {
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    userStorage.setBreadcrumbLimit(ConfigManagerMigrationTest.breadcrumbLimit);
+                    userStorage.setBreadcrumbLimit(fields1.breadcrumbLimit);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    userStorage.setPreviousSessionForeground(ConfigManagerMigrationTest.previousForeground);
+                    userStorage.setPreviousSessionForeground(fields1.previousForeground);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    userStorage.setDeletedUserAttributes(ConfigManagerMigrationTest.deletedUserAttributes);
+                    userStorage.setDeletedUserAttributes(fields1.deletedUserAttributes);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    userStorage.setLastUseDate(ConfigManagerMigrationTest.lastUseDate);
+                    userStorage.setLastUseDate(fields1.lastUseDate);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    userStorage.setPreviousSessionId(ConfigManagerMigrationTest.previousSessionId);
+                    userStorage.setPreviousSessionId(fields1.previousSessionId);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    userStorage.setPreviousSessionStart(ConfigManagerMigrationTest.previousStart);
+                    userStorage.setPreviousSessionStart(fields1.previousStart);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    userStorage.setLtv(ConfigManagerMigrationTest.ltv);
+                    userStorage.setLtv(fields1.ltv);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    userStorage.setTotalRuns(ConfigManagerMigrationTest.totalRuns);
+                    userStorage.setTotalRuns(fields1.totalRuns);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    userStorage.setCookies(ConfigManagerMigrationTest.cookies);
+                    userStorage.setCookies(fields1.cookies);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    userStorage.setLaunchesSinceUpgrade(ConfigManagerMigrationTest.launchesSinceUpgrade);
+                    userStorage.setLaunchesSinceUpgrade(fields1.launchesSinceUpgrade);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    userStorage.setUserIdentities(ConfigManagerMigrationTest.userIdentities);
+                    userStorage.setUserIdentities(fields1.userIdentities);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    userStorage.setLoggedInUser(ConfigManagerMigrationTest.knownIdentity);
+                    userStorage.setLoggedInUser(fields1.knownIdentity);
                 }
             }
     };
@@ -175,73 +178,73 @@ public class UserStorageTest extends BaseCleanStartedEachTest {
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    assertEquals(userStorage.getBreadcrumbLimit(), ConfigManagerMigrationTest.breadcrumbLimit);
+                    assertEquals(userStorage.getBreadcrumbLimit(), fields1.breadcrumbLimit);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    assertEquals(userStorage.getPreviousSessionForegound(), ConfigManagerMigrationTest.previousForeground);
+                    assertEquals(userStorage.getPreviousSessionForegound(), fields1.previousForeground);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    assertEquals(userStorage.getDeletedUserAttributes(), ConfigManagerMigrationTest.deletedUserAttributes);
+                    assertEquals(userStorage.getDeletedUserAttributes(), fields1.deletedUserAttributes);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    assertEquals(userStorage.getLastUseDate(), ConfigManagerMigrationTest.lastUseDate);
+                    assertEquals(userStorage.getLastUseDate(), fields1.lastUseDate);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    assertEquals(userStorage.getPreviousSessionId(), ConfigManagerMigrationTest.previousSessionId);
+                    assertEquals(userStorage.getPreviousSessionId(), fields1.previousSessionId);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    assertEquals(userStorage.getPreviousSessionStart(-1), ConfigManagerMigrationTest.previousStart);
+                    assertEquals(userStorage.getPreviousSessionStart(-1), fields1.previousStart);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    assertEquals(userStorage.getLtv(), ConfigManagerMigrationTest.ltv);
+                    assertEquals(userStorage.getLtv(), fields1.ltv);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    assertEquals(userStorage.getTotalRuns(-1), ConfigManagerMigrationTest.totalRuns);
+                    assertEquals(userStorage.getTotalRuns(-1), fields1.totalRuns);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    assertEquals(userStorage.getCookies(), ConfigManagerMigrationTest.cookies);
+                    assertEquals(userStorage.getCookies(), fields1.cookies);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    assertEquals(userStorage.getLaunchesSinceUpgrade(), ConfigManagerMigrationTest.launchesSinceUpgrade);
+                    assertEquals(userStorage.getLaunchesSinceUpgrade(), fields1.launchesSinceUpgrade);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    assertEquals(userStorage.getUserIdentities(), ConfigManagerMigrationTest.userIdentities);
+                    assertEquals(userStorage.getUserIdentities(), fields1.userIdentities);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    assertEquals(userStorage.isLoggedIn(), ConfigManagerMigrationTest.knownIdentity);
+                    assertEquals(userStorage.isLoggedIn(), fields1.knownIdentity);
                 }
             }
     };
@@ -250,73 +253,73 @@ public class UserStorageTest extends BaseCleanStartedEachTest {
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    assertEquals(userStorage.getBreadcrumbLimit(), ConfigManagerMigrationTest.breadcrumbLimit2);
+                    assertEquals(userStorage.getBreadcrumbLimit(), fields2.breadcrumbLimit);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    assertEquals(userStorage.getPreviousSessionForegound(), ConfigManagerMigrationTest.previousForeground2);
+                    assertEquals(userStorage.getPreviousSessionForegound(), fields2.previousForeground);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    assertEquals(userStorage.getDeletedUserAttributes(), ConfigManagerMigrationTest.deletedUserAttributes2);
+                    assertEquals(userStorage.getDeletedUserAttributes(), fields2.deletedUserAttributes);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    assertEquals(userStorage.getLastUseDate(), ConfigManagerMigrationTest.lastUseDate2);
+                    assertEquals(userStorage.getLastUseDate(), fields2.lastUseDate);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    assertEquals(userStorage.getPreviousSessionId(), ConfigManagerMigrationTest.previousSessionId2);
+                    assertEquals(userStorage.getPreviousSessionId(), fields2.previousSessionId);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    assertEquals(userStorage.getPreviousSessionStart(-1), ConfigManagerMigrationTest.previousStart2);
+                    assertEquals(userStorage.getPreviousSessionStart(-1), fields2.previousStart);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    assertEquals(userStorage.getLtv(), ConfigManagerMigrationTest.ltv2);
+                    assertEquals(userStorage.getLtv(), fields2.ltv);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    assertEquals(userStorage.getTotalRuns(-1), ConfigManagerMigrationTest.totalRuns2);
+                    assertEquals(userStorage.getTotalRuns(-1), fields2.totalRuns);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    assertEquals(userStorage.getCookies(), ConfigManagerMigrationTest.cookies2);
+                    assertEquals(userStorage.getCookies(), fields2.cookies);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    assertEquals(userStorage.getLaunchesSinceUpgrade(), ConfigManagerMigrationTest.launchesSinceUpgrade2);
+                    assertEquals(userStorage.getLaunchesSinceUpgrade(), fields2.launchesSinceUpgrade);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    assertEquals(userStorage.getUserIdentities(), ConfigManagerMigrationTest.userIdentities2);
+                    assertEquals(userStorage.getUserIdentities(), fields2.userIdentities);
                 }
             },
             new UserConfigRunnable() {
                 @Override
                 public void run(UserStorage userStorage) {
-                    assertEquals(userStorage.isLoggedIn(), ConfigManagerMigrationTest.knownIdentity);
+                    assertEquals(userStorage.isLoggedIn(), fields2.knownIdentity);
                 }
             }
     };

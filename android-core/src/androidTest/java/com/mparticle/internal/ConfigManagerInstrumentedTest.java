@@ -49,15 +49,26 @@ public class ConfigManagerInstrumentedTest extends BaseAbstractTest {
     }
 
     @Test
-    public void testParseWebViewBridgeToken() throws JSONException, InterruptedException {
+    public void testConfigParsing() throws JSONException, InterruptedException {
         String token = mRandomUtils.getAlphaNumericString(20);
-        mServer.setupConfigResponse(new JSONObject().put("wst", token).toString());
+        int aliasMaxWindow = ran.nextInt();
+
+        JSONObject config = new JSONObject()
+                .put("wst", token)
+                .put(ConfigManager.ALIAS_MAX_WINDOW, aliasMaxWindow);
+
+        mServer.setupConfigResponse(config.toString());
+
         startMParticle();
         assertEquals(token, MParticle.getInstance().Internal().getConfigManager().getWorkspaceToken());
+        assertEquals(aliasMaxWindow, MParticle.getInstance().Internal().getConfigManager().getAliasMaxWindow());
 
+        //test set defaults when fields are not present
         MParticle.setInstance(null);
         mServer.setupConfigResponse(new JSONObject().toString());
         startMParticle();
         assertEquals("", MParticle.getInstance().Internal().getConfigManager().getWorkspaceToken());
+        assertEquals(90, MParticle.getInstance().Internal().getConfigManager().getAliasMaxWindow());
+
     }
 }

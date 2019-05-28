@@ -71,7 +71,7 @@ public class NetworkConnection extends BaseNetworkConnection {
                     Logger.error("Bad API request - is the correct API key and secret configured?");
                 }
                 if ((statusCode == 503 || statusCode == HTTP_TOO_MANY_REQUESTS) && !BuildConfig.MP_DEBUG) {
-                    setNextAllowedRequestTime(connection);
+                    setNextAllowedRequestTime(connection, endpoint);
                 }
             }
         }

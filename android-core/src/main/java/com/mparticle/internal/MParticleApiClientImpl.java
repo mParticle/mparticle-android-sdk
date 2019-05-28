@@ -53,10 +53,16 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
      */
     private static final String CONSUMER_INFO = "ci";
 
+    /**
+     * Human readable error message field for "alias" responses
+     */
+    private static final String ALIAS_ERROR_MESSAGE = "message";
+
     private final ConfigManager mConfigManager;
     private final String mApiSecret;
     private MPUrl mConfigUrl;
     private MPUrl mEventUrl;
+    private MPUrl mAliasUrl;
     private final String mUserAgent;
     private final SharedPreferences mPreferences;
     private final String mApiKey;
@@ -226,18 +232,8 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         return response;
     }
 
-    @Override
-    public boolean isThrottled() {
-        try {
-            checkThrottleTime();
-        }catch (MPThrottleException t){
-            return true;
-        }
-        return false;
-    }
-
     public int sendMessageBatch(String message) throws IOException, MPThrottleException, MPRampException {
-        checkThrottleTime();
+        checkThrottleTime(Endpoint.EVENTS);
         checkRampValue();
         if (mEventUrl == null){
             mEventUrl = getUrl(Endpoint.EVENTS);
@@ -291,10 +287,53 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         } else {
             Logger.error("Upload request failed- " + responseCode + ": " + connection.getResponseMessage());
             try {
-                InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.EVENTS, connection.getURL().getFile(), new JSONObject().put("message", connection.getResponseMessage()), responseCode);
+                InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.EVENTS, connection.getURL().getFile(), new JSONObject().put(SdkListener.ERROR_MESSAGE, connection.getResponseMessage()), responseCode);
             } catch (Exception e) { }
         }
         return connection.getResponseCode();
+    }
+    
+    @Override
+    public AliasNetworkResponse sendAliasRequest(String message) throws IOException, MPThrottleException, MPRampException {
+        checkThrottleTime(Endpoint.ALIAS);
+        Logger.verbose("Identity alias request:\n" + message);
+
+        if (mAliasUrl == null) {
+            mAliasUrl = getUrl(Endpoint.ALIAS);
+        }
+        MPConnection connection = mAliasUrl.openConnection();
+        connection.setConnectTimeout(mConfigManager.getConnectionTimeout());
+        connection.setReadTimeout(mConfigManager.getConnectionTimeout());
+        connection.setDoOutput(true);
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setRequestProperty("Content-Encoding", "gzip");
+        connection.setRequestProperty("User-Agent", mUserAgent);
+        addMessageSignature(connection, message);
+
+        String url = "";
+        try {
+            url = connection.getURL().getFile();
+            InternalListenerManager.getListener().onNetworkRequestStarted(SdkListener.Endpoint.EVENTS, url, new JSONObject(message), message);
+        } catch (Exception ignore) {}
+
+        connection = makeUrlRequest(Endpoint.ALIAS, connection, message, false);
+        int responseCode = connection.getResponseCode();
+        String error = "";
+        JSONObject response = new JSONObject();
+        if (responseCode >= 200 && responseCode < 300) {
+            Logger.verbose("Alias Request response: \n " +
+                    connection.getResponseCode() + ": " +
+                    connection.getResponseMessage());
+        } else {
+            response = MPUtility.getJsonResponse(connection);
+            if (response != null) {
+                error = response.optString(ALIAS_ERROR_MESSAGE);
+            }
+            Logger.error("Alias Request failed- " + responseCode + ": " + error);
+        }
+        InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.EVENTS, url, response, responseCode);
+        return new AliasNetworkResponse(responseCode, error);
     }
 
     private void logUpload(String message) {
@@ -363,8 +402,8 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         MPNoConfigException() {super("No API key and/or API secret"); }
     }
 
-    void checkThrottleTime() throws MPThrottleException {
-        if (System.currentTimeMillis() < getNextRequestTime()){
+    void checkThrottleTime(Endpoint endpoint) throws MPThrottleException {
+        if (System.currentTimeMillis() < getNextRequestTime(endpoint)){
             throw new MPThrottleException();
         }
     }

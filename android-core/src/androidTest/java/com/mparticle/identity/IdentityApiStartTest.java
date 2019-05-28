@@ -88,16 +88,6 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
      */
     @Test
     public void testLogNotificationBackgroundTest() throws InterruptedException {
-        startMParticle();
-        mServer.waitForVerify(new Matcher(mServer.Endpoints().getModifyUrl(mStartingMpid)),
-                new MockServer.RequestReceivedCallback() {
-                    @Override
-                    public void onRequestReceived(Request request) {
-                        fail("should not have modify request for this user!");
-                    }
-                });
-        MParticle.setInstance(null);
-
         assertNull(ConfigManager.getInstance(mContext).getPushInstanceId());
         final String instanceId = mRandomUtils.getAlphaNumericString(10);
         com.mparticle.internal.AccessUtils.setPushInPushRegistrationHelper(mContext, instanceId, mRandomUtils.getAlphaNumericString(15));
@@ -217,7 +207,7 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
 
         MParticle.getInstance().Identity().addIdentityStateListener(new IdentityStateListener() {
             @Override
-            public void onUserIdentified(MParticleUser user) {
+            public void onUserIdentified(MParticleUser user, MParticleUser previousUser) {
                 assertTrue(logPushRegistrationCalled.value);
                 latch.countDown();
                 MParticle.getInstance().Identity().removeIdentityStateListener(this);
@@ -251,7 +241,7 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
      * on the applications initial install
      */
     @Test
-    public void testPushRegistrationInMParticleOptions() throws InterruptedException {
+    public void testPushRegistrationInMParticleOptions() {
         Exception ex = null;
         try {
             startMParticle(MParticleOptions

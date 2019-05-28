@@ -729,7 +729,7 @@ public class MParticleJSInterface {
     abstract class SingleUserIdentificationCallback implements IdentityStateListener {
 
         @Override
-        public void onUserIdentified(MParticleUser user) {
+        public void onUserIdentified(MParticleUser user, MParticleUser previousUser) {
             MParticle.getInstance().Identity().removeIdentityStateListener(this);
             onUserFound(user);
         }

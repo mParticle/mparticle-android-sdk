@@ -244,7 +244,7 @@ public class KitManagerImplTest {
 
         Mockito.when(mockUser.isLoggedIn()).thenReturn(true);
         Mockito.when(manager.mCoreCallbacks.getLatestKitConfiguration()).thenReturn(kitConfiguration);
-        manager.onUserIdentified(mockUser);
+        manager.onUserIdentified(mockUser, null);
         assertEquals(3, manager.providers.size());
     }
 
@@ -280,7 +280,7 @@ public class KitManagerImplTest {
 
         Mockito.when(mockUser.isLoggedIn()).thenReturn(false);
         Mockito.when(mockCoreCallbacks.getLatestKitConfiguration()).thenReturn(kitConfiguration);
-        manager.onUserIdentified(mockUser);
+        manager.onUserIdentified(mockUser, null);
         assertEquals(0, manager.providers.size());
     }
     

@@ -47,7 +47,7 @@ public class MPLatch extends CountDownLatch {
         if (count == countDowned) {
             return;
         }
-        mHandler.postDelayed(timeoutRunnable, timeoutTimeMs);
+        mHandler.postDelayed(timeoutRunnable, timeoutTimeMs - 100L);
         this.await(timeoutTimeMs, TimeUnit.MILLISECONDS);
         if (timedOut.value) {
             fail("timed out");
