@@ -10,6 +10,7 @@ import com.mparticle.SdkListener;
 import com.mparticle.identity.AliasResponse;
 import com.mparticle.internal.InternalSession;
 import com.mparticle.internal.KitFrameworkWrapper;
+import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 
 import org.json.JSONException;
@@ -28,7 +29,7 @@ public class InternalListenerManager implements InternalListener {
     private Context context;
     final List<WeakReference<SdkListener>> sdkListeners = new ArrayList<WeakReference<SdkListener>>();
     final List<WeakReference<GraphListener>> graphListeners = new ArrayList<WeakReference<GraphListener>>();
-
+    private boolean thrown = false;
 
     private InternalListenerManager(Context context) {
         this.context = context;
@@ -84,26 +85,38 @@ public class InternalListenerManager implements InternalListener {
 
     @Override
     public void onApiCalled(final Object... objects) {
-        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-        int index = -1;
-        for (int i = 0; i < stackTrace.length; i++) {
-            StackTraceElement element = stackTrace[i];
-            if (element.getClassName().equals(getClass().getName())) {
-                index = i;
-                break;
+        try {
+            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+            int index = -1;
+            for (int i = 0; i < stackTrace.length; i++) {
+                StackTraceElement element = stackTrace[i];
+                if (element.getClassName().equals(getClass().getName())) {
+                    index = i;
+                    break;
+                }
+            }
+            //move to call after the last call in this class;
+            index++;
+            while (stackTrace[index].getClassName().equals(ListenerHook.class.getName())) {
+                index++;
+            }
+            StackTraceElement apiCall = stackTrace[index];
+            StackTraceElement calledFrom = stackTrace[index + 1];
+            final boolean isExternalApiInvocation = isExternalApiInvocation(calledFrom);
+            final String apiName = getApiName(apiCall);
+
+            broadcast(new SdkListenerRunnable() {
+                @Override
+                public void run(SdkListener listener) {
+                    listener.onApiCalled(apiName, Arrays.asList(objects), isExternalApiInvocation);
+                }
+            });
+        } catch (Exception ex) {
+            if (!thrown) {
+                thrown = true;
+                Logger.error("SdkListener failed onApiCalled!\n" + ex.getMessage());
             }
         }
-        StackTraceElement apiCall = stackTrace[index + 1];
-        StackTraceElement calledFrom = stackTrace[index + 2];
-        final boolean isExternalApiInvocation = isExternalApiInvocation(calledFrom);
-        final String apiName = getApiName(apiCall);
-
-        broadcast(new SdkListenerRunnable() {
-            @Override
-            public void run(SdkListener listener) {
-                listener.onApiCalled(apiName, Arrays.asList(objects), isExternalApiInvocation);
-            }
-        });
     }
 
     @Override
@@ -339,13 +352,16 @@ public class InternalListenerManager implements InternalListener {
 
     private String getApiName(StackTraceElement element) {
         String classNameString = getClassName(element.getClassName(), element.getMethodName());
+        return getApiFormattedName(classNameString, element.getMethodName());
+    }
+
+    public static String getApiFormattedName(String className, String methodName) {
         return new StringBuilder()
-                .append(classNameString)
+                .append(className)
                 .append(".")
-                .append(element.getMethodName())
+                .append(methodName)
                 .append("()")
                 .toString();
-
     }
 
     private String getClassName(String className, String methodName) {
@@ -382,7 +398,8 @@ public class InternalListenerManager implements InternalListener {
 
     private boolean isExternalApiInvocation(StackTraceElement element) {
         return !element.getClassName().startsWith("com.mparticle") ||
-                element.getClassName().startsWith(context.getApplicationContext().getPackageName());
+                (element.getClassName().startsWith(context.getApplicationContext().getPackageName()) &&
+                        context.getApplicationContext().getPackageName().length() > 1);
     }
 
     private boolean hasListeners() {

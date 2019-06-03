@@ -4,7 +4,9 @@ ext {
 
 apply plugin: 'com.android.library'
 apply from: '../scripts/maven.gradle'
+apply plugin: 'com.archinamon.aspectj'
 
+def javaVersion = JavaVersion.VERSION_1_6
 
 android {
     compileSdkVersion 28
@@ -13,8 +15,8 @@ android {
         exclude 'META-INF/LICENSE'
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_6
-        targetCompatibility JavaVersion.VERSION_1_6
+        sourceCompatibility javaVersion
+        targetCompatibility javaVersion
     }
 
     String url = '\"\"'
@@ -124,6 +126,7 @@ dependencies {
     testImplementation 'com.android.support:support-v4:27.1.1'
     testImplementation project(':testutils')
 
+    androidTestImplementation 'org.mockito:mockito-android:2.18.3'
     androidTestImplementation project(':testutils')
     if (useOrchestrator()) {
         androidTestUtil 'com.android.support.test:orchestrator:1.0.2'
@@ -155,3 +158,9 @@ boolean useOrchestrator() {
     return project.hasProperty('orchestrator') ? project.property('orchestrator') : false
 }
 
+aspectj {
+    breakOnError true
+    compileTests false
+    buildTimeLog false
+    java javaVersion
+}

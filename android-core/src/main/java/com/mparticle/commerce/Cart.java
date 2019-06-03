@@ -9,6 +9,7 @@ import com.mparticle.MParticle;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Logger;
+import com.mparticle.internal.listeners.ApiClass;
 import com.mparticle.internal.listeners.InternalListenerManager;
 
 import org.json.JSONArray;
@@ -34,6 +35,7 @@ import java.util.List;
  * You should not instantiate this class directly
  * <p></p>
  */
+@ApiClass
 public final class Cart {
 
     private final List<Product> productList;
@@ -46,7 +48,7 @@ public final class Cart {
         mContext = context;
         productList = new LinkedList<Product>();
         this.userId = userId;
-        loadFromString(ConfigManager.getUserStorage(context, this.userId).getSerializedCart());
+        loadCart(ConfigManager.getUserStorage(context, this.userId).getSerializedCart());
     }
 
     /**
@@ -66,19 +68,7 @@ public final class Cart {
      * @param cartJson a JSON-encoded string acquired from {@link #toString()}
      */
     public synchronized void loadFromString(@NonNull String cartJson) {
-        if (cartJson != null) {
-            try {
-                JSONObject cartJsonObject = new JSONObject(cartJson);
-                JSONArray products = cartJsonObject.getJSONArray("pl");
-                clear();
-                for (int i = 0; i < products.length() && i < MAXIMUM_PRODUCT_COUNT; i++) {
-                    productList.add(Product.fromJson(products.getJSONObject(i)));
-                }
-                save();
-            } catch (JSONException jse) {
-
-            }
-        }
+        loadCart(cartJson);
     }
 
     /**
@@ -260,7 +250,6 @@ public final class Cart {
      */
     @NonNull
     public synchronized Cart add(@NonNull Product product) {
-        InternalListenerManager.getListener().onApiCalled(product);
         return add(product, true);
     }
 
@@ -279,7 +268,6 @@ public final class Cart {
      */
     @NonNull
     public synchronized Cart add(@NonNull Product product, boolean logEvent) {
-        InternalListenerManager.getListener().onApiCalled(product, logEvent);
         if (product != null && productList.size() < MAXIMUM_PRODUCT_COUNT && !productList.contains(product)) {
             product.updateTimeAdded();
             productList.add(product);
@@ -309,11 +297,10 @@ public final class Cart {
                     .checkoutOptions(options)
                     .products(productList)
                     .build();
-            InternalListenerManager.getListener().onApiCalled(step, options, event);
+            InternalListenerManager.getListener().onCompositeObjects(options, event);
             MParticle.getInstance().logEvent(event);
         } else {
             Logger.error("checkout() called but there are no Products in the Cart, no event was logged.");
-            InternalListenerManager.getListener().onApiCalled(step, options);
 
         }
     }
@@ -349,7 +336,6 @@ public final class Cart {
      * @param attributes the attributes to associate with this purchase
      */
     public void purchase(@NonNull TransactionAttributes attributes) {
-        InternalListenerManager.getListener().onApiCalled(attributes);
         purchase(attributes, false);
     }
 
@@ -363,7 +349,6 @@ public final class Cart {
      * @param clearCart boolean determining if the cart should remove its contents after the purchase
      */
     public synchronized void purchase(@NonNull TransactionAttributes attributes, boolean clearCart) {
-        InternalListenerManager.getListener().onApiCalled(attributes, clearCart);
         if (productList != null && productList.size() > 0) {
             CommerceEvent event = new CommerceEvent.Builder(Product.PURCHASE, productList.get(0))
                     .products(productList)
@@ -386,7 +371,6 @@ public final class Cart {
      * @param attributes the attributes to associate with this refund. Typically at least the transaction ID is required.
      */
     public void refund(@NonNull TransactionAttributes attributes, boolean clearCart) {
-        InternalListenerManager.getListener().onApiCalled(attributes, clearCart);
         if (productList != null && productList.size() > 0) {
             CommerceEvent event = new CommerceEvent.Builder(Product.REFUND, productList.get(0))
                     .products(productList)
@@ -399,6 +383,22 @@ public final class Cart {
             InternalListenerManager.getListener().onCompositeObjects(attributes, event);
         } else {
             Logger.error("refund() called but there are no Products in the Cart, no event was logged.");
+        }
+    }
+
+    private void loadCart(@NonNull String cartJson) {
+        if (cartJson != null) {
+            try {
+                JSONObject cartJsonObject = new JSONObject(cartJson);
+                JSONArray products = cartJsonObject.getJSONArray("pl");
+                clear();
+                for (int i = 0; i < products.length() && i < MAXIMUM_PRODUCT_COUNT; i++) {
+                    productList.add(Product.fromJson(products.getJSONObject(i)));
+                }
+                save();
+            } catch (JSONException jse) {
+
+            }
         }
     }
 }

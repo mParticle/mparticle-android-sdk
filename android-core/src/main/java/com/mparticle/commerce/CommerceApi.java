@@ -10,6 +10,8 @@ import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
+import com.mparticle.internal.listeners.ApiClass;
+import com.mparticle.internal.listeners.InternalListenerManager;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -17,6 +19,7 @@ import java.util.List;
 /**
  * Helper class used to access the shopping Cart and to log CommerceEvents
  */
+@ApiClass
 public class CommerceApi {
 
     private CommerceApi(){}
@@ -72,6 +75,7 @@ public class CommerceApi {
      *
      */
     public synchronized void checkout() {
+        InternalListenerManager.getListener().onApiCalled("checkout");
         Cart cart = cart();
         if (cart == null) {
             Logger.error("Unable to log checkout event - no mParticle user identified.");
@@ -82,6 +86,7 @@ public class CommerceApi {
             CommerceEvent event = new CommerceEvent.Builder(Product.CHECKOUT, productList.get(0))
                     .products(productList)
                     .build();
+            InternalListenerManager.getListener().onCompositeObjects("checkout", event);
             MParticle.getInstance().logEvent(event);
         }else {
             Logger.error("checkout() called but there are no Products in the Cart, no event was logged.");

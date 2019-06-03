@@ -5,6 +5,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath 'com.archinamon:android-gradle-aspectj:3.3.11'
     }
 }
 
