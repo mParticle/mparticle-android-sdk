@@ -1650,5 +1650,10 @@ public class MParticle {
             return mKitManager;
         }
 
+        @NonNull
+        public MessageManager getMessageManager() {
+            return mMessageManager;
+        }
+
     }
 }

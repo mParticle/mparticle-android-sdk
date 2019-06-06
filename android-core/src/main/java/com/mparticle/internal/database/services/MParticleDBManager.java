@@ -5,8 +5,10 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.location.Location;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.os.Looper;
 
+import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
@@ -563,22 +565,22 @@ public class MParticleDBManager {
             }
             return allUserAttributes;
         }else {
-            new AsyncTask<Void, Void, UserAttributeResponse>() {
-                @Override
-                protected UserAttributeResponse doInBackground(Void... params) {
-                    UserAttributeResponse response = new UserAttributeResponse();
-                    response.attributeSingles = getUserAttributeSingles(mpId);
-                    response.attributeLists = getUserAttributeLists(mpId);
-                    return response;
-                }
-
-                @Override
-                protected void onPostExecute(UserAttributeResponse attributes) {
-                    if (listener != null) {
-                        listener.onUserAttributesReceived(attributes.attributeSingles, attributes.attributeLists, mpId);
+            MParticle instance = MParticle.getInstance();
+            if (instance != null) {
+                instance.Internal().getMessageManager().getMessageHandler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        final Map<String, String> attributeSingles = getUserAttributeSingles(mpId);
+                        final Map<String, List<String>> attributeLists = getUserAttributeLists(mpId);
+                        new Handler(Looper.getMainLooper()).post(new Runnable() {
+                            @Override
+                            public void run() {
+                                listener.onUserAttributesReceived(attributeSingles, attributeLists, mpId);
+                            }
+                        });
                     }
-                }
-            }.execute();
+                });
+            }
             return null;
         }
     }

@@ -12,6 +12,7 @@ import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.BatteryManager;
+import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.Process;
@@ -1025,6 +1026,10 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public BackgroundTaskHandler getTaskHandler() {
         return mUploadHandler;
+    }
+
+    public Handler getMessageHandler() {
+        return mMessageHandler;
     }
 
     public MParticleDBManager getMParticleDBManager() {

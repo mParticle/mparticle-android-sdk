@@ -1,19 +1,31 @@
 package com.mparticle.identity;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.mparticle.MParticle;
+import com.mparticle.UserAttributeListener;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.consent.GDPRConsent;
 import com.mparticle.internal.AccessUtils;
 import com.mparticle.internal.ConfigManager;
+import com.mparticle.testutils.AndroidUtils;
+import com.mparticle.testutils.AndroidUtils.Mutable;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
+import com.mparticle.testutils.MPLatch;
+import com.mparticle.testutils.TestingUtils;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.CountDownLatch;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -47,10 +59,10 @@ public class MParticleUserDelegateTest extends BaseCleanStartedEachTest {
 
         Map<Long, Map<MParticle.IdentityType, String>> storedUsersTemp = new HashMap<Long, Map<MParticle.IdentityType, String>>();
 
-        for (Map.Entry<Long, Map<MParticle.IdentityType, String>> user : attributes.entrySet()) {
+        for (Entry<Long, Map<MParticle.IdentityType, String>> user : attributes.entrySet()) {
             Map<MParticle.IdentityType, String> storedUserAttributes = mUserDelegate.getUserIdentities(user.getKey());
             storedUsersTemp.put(user.getKey(), storedUserAttributes);
-            for (Map.Entry<MParticle.IdentityType, String> pairs : user.getValue().entrySet()) {
+            for (Entry<MParticle.IdentityType, String> pairs : user.getValue().entrySet()) {
                 Object currentAttribute = storedUserAttributes.get(pairs.getKey());
                 if (currentAttribute == null) {
                     Log.e("Stuff", "more stuff");
@@ -79,25 +91,25 @@ public class MParticleUserDelegateTest extends BaseCleanStartedEachTest {
         AccessUtils.awaitMessageHandler();
 
         // retrieve and compare
-        for (Map.Entry<Long, Map<String, String>> user : attributes.entrySet()) {
+        for (Entry<Long, Map<String, String>> user : attributes.entrySet()) {
             Map<String, Object> storedUserAttributes = mUserDelegate.getUserAttributes(user.getKey());
-            for (Map.Entry<String, String> pairs : user.getValue().entrySet()) {
+            for (Entry<String, String> pairs : user.getValue().entrySet()) {
                 assertEquals(storedUserAttributes.get(pairs.getKey()).toString(), pairs.getValue());
             }
         }
 
         // delete
-        for (Map.Entry<Long, Map<String, String>> userAttributes : attributes.entrySet()) {
-            for (Map.Entry<String, String> attribute : userAttributes.getValue().entrySet()) {
+        for (Entry<Long, Map<String, String>> userAttributes : attributes.entrySet()) {
+            for (Entry<String, String> attribute : userAttributes.getValue().entrySet()) {
                 assertTrue(mUserDelegate.removeUserAttribute(attribute.getKey(), userAttributes.getKey()));
             }
         }
 
         AccessUtils.awaitMessageHandler();
 
-        for (Map.Entry<Long, Map<String, String>> userAttributes : attributes.entrySet()) {
+        for (Entry<Long, Map<String, String>> userAttributes : attributes.entrySet()) {
             Map<String, Object> storedUserAttributes = mUserDelegate.getUserAttributes(userAttributes.getKey());
-            for (Map.Entry<String, String> attribute : userAttributes.getValue().entrySet()) {
+            for (Entry<String, String> attribute : userAttributes.getValue().entrySet()) {
                 assertNull(storedUserAttributes.get(attribute.getKey()));
             }
         }
@@ -142,5 +154,69 @@ public class MParticleUserDelegateTest extends BaseCleanStartedEachTest {
         assertTrue(mUserDelegate.getConsentState(mpid).getGDPRConsentState().containsKey("foo"));
         mUserDelegate.setConsentState(null, mpid);
         assertEquals(0, mUserDelegate.getConsentState(mpid).getGDPRConsentState().size());
+    }
+
+    @Test
+    public void testGetUserAttributesListener() throws InterruptedException {
+        Map<String, String> attributeSingles = mRandomUtils.getRandomAttributes(5, false);
+
+        Map<String, List<String>> attributeLists = new HashMap<String, List<String>>();
+        for (Entry<String, String> entry: attributeSingles.entrySet()) {
+            attributeLists.put(entry.getKey() + entry.getValue(), Collections.singletonList(entry.getValue() + entry.getKey()));
+        }
+
+        for (Entry<String, List<String>> entry: attributeLists.entrySet()) {
+            mUserDelegate.setUserAttributeList(entry.getKey(), entry.getValue(), mStartingMpid);
+        }
+        for (Entry<String, String> entry: attributeSingles.entrySet()) {
+            mUserDelegate.setUserAttribute(entry.getKey(), entry.getValue(), mStartingMpid);
+        }
+        AccessUtils.awaitMessageHandler();
+
+        final Mutable<Map<String, String>> userAttributesResults = new Mutable<Map<String, String>>(null);
+        final Mutable<Map<String, List<String>>> userAttributeListResults = new Mutable<Map<String, List<String>>>(null);
+
+        //fetch on the current (non-main) thread
+        mUserDelegate.getUserAttributes(new UserAttributeListener() {
+            @Override
+            public void onUserAttributesReceived(@Nullable Map<String, String> userAttributes, @Nullable Map<String, List<String>> userAttributeLists, @Nullable Long mpid) {
+                userAttributesResults.value = userAttributes;
+                userAttributeListResults.value = userAttributeLists;
+            }
+        }, mStartingMpid);
+
+        assertMapEquals(attributeSingles, userAttributesResults.value);
+        assertMapEquals(attributeLists, userAttributeListResults.value);
+
+        userAttributesResults.value = null;
+        userAttributeListResults.value = null;
+
+        //fetch on the main thread (seperate code path)
+        final CountDownLatch latch = new MPLatch(1);
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                mUserDelegate.getUserAttributes(new UserAttributeListener() {
+                    @Override
+                    public void onUserAttributesReceived(@Nullable Map<String, String> userAttributes, @Nullable Map<String, List<String>> userAttributeLists, @Nullable Long mpid) {
+                        userAttributesResults.value = userAttributes;
+                        userAttributeListResults.value = userAttributeLists;
+                        latch.countDown();
+                    }
+                }, mStartingMpid);
+            }
+        });
+        latch.await();
+
+        assertMapEquals(attributeSingles, userAttributesResults.value);
+        assertMapEquals(attributeLists, userAttributeListResults.value);
+    }
+
+    private void assertMapEquals(Map map1, Map map2) {
+        assertEquals(map1.toString() + "\n\nvs" + map2.toString(), map1.size(), map2.size());
+        for (Object obj: map1.entrySet()) {
+            Entry entry = (Entry)obj;
+            assertEquals(entry.getValue(), map2.get(entry.getKey()));
+        }
     }
 }

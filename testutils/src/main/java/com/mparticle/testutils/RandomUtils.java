@@ -34,16 +34,20 @@ public class RandomUtils {
     }
 
     public Map<String, String> getRandomAttributes(int count) {
+        return getRandomAttributes(count, true);
+    }
+
+    public Map<String, String> getRandomAttributes(int count, boolean allowNull) {
         Map<String, String> attributes = new HashMap<String, String>();
         for (int i = 0; i < count; i++) {
             String key = "";
             String value = "";
-            if (randomInt(0, 5) == 0) {
+            if (randomInt(0, 5) == 0 && allowNull) {
                 key = null;
             } else {
                 key = getAlphaNumericString(20);
             }
-            if (randomInt(0, 5) == 0) {
+            if (randomInt(0, 5) == 0 && allowNull) {
                 value = null;
             } else {
                 value = getAlphaNumericString(20);
