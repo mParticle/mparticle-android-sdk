@@ -1,5 +1,6 @@
 package com.mparticle.networking;
 
+import android.support.test.InstrumentationRegistry;
 import android.util.MutableBoolean;
 
 import com.mparticle.MParticle;
@@ -10,6 +11,7 @@ import com.mparticle.testutils.TestingUtils;
 
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.mparticle.testutils.MPLatch;
@@ -25,6 +27,11 @@ public class PinningTest extends BaseCleanStartedEachTest {
 
     protected boolean shouldPin() {
         return true;
+    }
+
+    @BeforeClass
+    public static void beforeClass() {
+        MParticle.reset(InstrumentationRegistry.getContext());
     }
 
     @Before

@@ -26,7 +26,7 @@ public class BaseTableTest extends BaseCleanInstallEachTest {
         InstrumentationRegistry.getTargetContext().deleteDatabase(DB_NAME);
         SQLiteDatabase baseDatabase = new BaseDatabase(helper, DB_NAME, timer, oldVersion).getWritableDatabase();
         timer.await(5, TimeUnit.SECONDS);
-        baseDatabase = new BaseDatabase(helper, DB_NAME, timer, MParticleDatabaseHelper.DB_VERSION).getWritableDatabase();
+        baseDatabase.setVersion(MParticleDatabaseHelper.DB_VERSION);
         timer.await(5, TimeUnit.SECONDS);
         InstrumentationRegistry.getTargetContext().deleteDatabase(DB_NAME);
     }
