@@ -30,7 +30,7 @@ public final class IdentityApiResult {
      * @return
      */
     @Nullable
-    MParticleUser getPreviousUser() {
+    public MParticleUser getPreviousUser() {
         return previousUser;
     }
 }
