@@ -155,7 +155,7 @@ public class MyApplication extends Application {
         super.onCreate();
         MParticleOptions options = MParticleOptions.builder(this)
             .credentials("REPLACE ME WITH KEY","REPLACE ME WITH SECRET")
-            .setLogLevel(MParticle.LogLevel.VERBOSE)
+            .logLevel(MParticle.LogLevel.VERBOSE)
             .identify(identifyRequest)
             .identifyTask(
                 new BaseIdentityTask()
