@@ -9,8 +9,8 @@ apply plugin: 'com.archinamon.aspectj'
 def javaVersion = JavaVersion.VERSION_1_6
 
 android {
-    compileSdkVersion 28
-    buildToolsVersion '28.0.3'
+    compileSdkVersion 29
+    buildToolsVersion '29.0.0'
     packagingOptions {
         exclude 'META-INF/LICENSE'
     }
@@ -46,7 +46,7 @@ android {
 
     defaultConfig {
         minSdkVersion 9
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionName project.version.toString().replace('-SNAPSHOT', '')
         versionCode Integer.parseInt(new Date().format('yyyyMMdd'))
 
@@ -130,27 +130,6 @@ dependencies {
     if (useOrchestrator()) {
         androidTestUtil 'com.android.support.test:orchestrator:1.0.2'
     }
-}
-
-configurations {
-    lintJarImport
-}
-
-task copyLintJar(type: Copy) {
-
-    from(configurations.lintJarImport) {
-        rename {
-            String fileName ->
-                'lint.jar'
-        }
-    }
-    into 'build/intermediates/lint/'
-}
-
-
-project.afterEvaluate {
-    def compileLintTask = project.tasks.find { it.name == 'compileLint' }
-    compileLintTask.dependsOn(copyLintJar)
 }
 
 boolean useOrchestrator() {
