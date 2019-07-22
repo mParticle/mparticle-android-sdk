@@ -141,7 +141,7 @@ public class ConfigManager {
     }
 
     public UserStorage getUserStorage() {
-        return mUserStorage;
+        return getUserStorage(getMpid());
     }
 
     public UserStorage getUserStorage(long mpId) {
@@ -626,9 +626,10 @@ public class ConfigManager {
     public void setMpid(long newMpid, boolean isLoggedInUser) {
         long previousMpid = getMpid();
         boolean currentLoggedInUser = false;
-        if (mUserStorage != null) {
-            mUserStorage.setLastSeenTime(System.currentTimeMillis());
-            currentLoggedInUser = mUserStorage.isLoggedIn();
+        UserStorage currentUserStorage = getUserStorage();
+        if (currentUserStorage != null) {
+            currentUserStorage.setLastSeenTime(System.currentTimeMillis());
+            currentLoggedInUser = currentUserStorage.isLoggedIn();
         }
         UserStorage userStorage = UserStorage.create(mContext, newMpid);
         userStorage.setLoggedInUser(isLoggedInUser);
@@ -636,6 +637,7 @@ public class ConfigManager {
         sPreferences.edit().putLong(Constants.PrefKeys.MPID, newMpid).apply();
         if (mUserStorage == null || mUserStorage.getMpid() != newMpid) {
             mUserStorage = userStorage;
+            mUserStorage.setFirstSeenTime(System.currentTimeMillis());
         }
         if ((previousMpid != newMpid || currentLoggedInUser != isLoggedInUser)) {
             triggerMpidChangeListenerCallbacks(newMpid, previousMpid);

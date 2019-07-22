@@ -82,9 +82,6 @@ public class UserStorage {
             new SharedPreferencesMigrator(context).migrate(this);
         }
         this.messageManagerSharedPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-        if (!hasBeenSeen()) {
-            setFirstSeenTime(System.currentTimeMillis());
-        }
         setDefaultSeenTime();
     }
 
@@ -303,12 +300,8 @@ public class UserStorage {
         return mPreferences.getLong(FIRST_SEEN_TIME, getDefaultSeenTime());
     }
 
-    public boolean hasBeenSeen() {
-        return mPreferences.contains(FIRST_SEEN_TIME);
-    }
-
     public void setFirstSeenTime(Long time) {
-        if (!hasBeenSeen()) {
+        if (!mPreferences.contains(FIRST_SEEN_TIME)) {
             mPreferences.edit().putLong(FIRST_SEEN_TIME, time).apply();
         }
     }
