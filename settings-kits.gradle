@@ -1,5 +1,4 @@
 include (
-        ':kits:kahuna-kit',
         ':kits:adjust-kit',
         ':kits:comscore-kit',
         ':kits:kochava-kit',
