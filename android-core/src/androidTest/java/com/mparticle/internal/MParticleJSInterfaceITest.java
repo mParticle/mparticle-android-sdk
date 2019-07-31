@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
 import android.util.MutableBoolean;
 import android.webkit.CookieManager;
@@ -19,6 +20,7 @@ import com.mparticle.WebViewActivity;
 import com.mparticle.identity.AccessUtils;
 import com.mparticle.test.R;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
+import com.mparticle.testutils.BuildConfig;
 import com.mparticle.testutils.MPLatch;
 import com.mparticle.testutils.RandomUtils;
 
@@ -32,13 +34,14 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -46,9 +49,8 @@ import java.util.concurrent.CountDownLatch;
 import static com.mparticle.testutils.TestingUtils.assertJsonEqual;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
 
-public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
+public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
 
     @Rule
     public ActivityTestRule<WebViewActivity> rule = new ActivityTestRule<WebViewActivity>(WebViewActivity.class);
@@ -153,33 +155,45 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
             "</html>";
 
     @BeforeClass
-    public static void beforeClass() throws Exception {
+    public static void beforeClass() {
         try {
-            URLConnection connection = new URL("https://jssdkcdns.mparticle.com/js/v2/mparticle.js").openConnection();
-            StringBuilder document = new StringBuilder();
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String line;
-            while ((line = in.readLine()) != null) {
-                document.append(line + '\n');
+            if (BuildConfig.JS_TEST_SDK) {
+                InputStream inputStream = InstrumentationRegistry.getContext().getResources().openRawResource(R.raw.mparticle_js_sdk);
+                //add in all the basic configuration stuff the server would send with a production sdk fetch from the url
+                jsSdk = new StringBuilder()
+                        .append("window.mParticle = window.mParticle || {};;\n" +
+                                "window.mParticle.config = window.mParticle.config || {};;\n" +
+                                "window.mParticle.config.serviceUrl = 'jssdk.mparticle.com/v2/JS/';;\n" +
+                                "window.mParticle.config.secureServiceUrl = 'jssdks.mparticle.com/v2/JS/';;\n" +
+                                "window.mParticle.config.minWebviewBridgeVersion = 1;\n" +
+                                "window.mParticle.config.aliasMaxWindow = 90;\n" +
+                                "window.mParticle.config.kitConfigs = window.mParticle.config.kitConfigs || [];;\n" +
+                                "window.mParticle.config.pixelConfigs = window.mParticle.config.pixelConfigs || [];;")
+                        .append(toString(inputStream))
+                        .append("window.mParticle.config.requestConfig = false;;\n" +
+                                "mParticle.init(null, window.mParticle.config);;")
+                        .toString();
+            } else {
+                URLConnection connection = new URL("https://jssdkcdns.mparticle.com/js/v2/mparticle.js").openConnection();
+                jsSdk = toString(connection.getInputStream());
             }
-            in.close();
-
-            jsSdk = document.toString()
-                    .replace("jssdk.mparticle.com/v2/JS/", "http://localhost:8080/v2")//; console.log(\"replaced url V2 single\");")
+            sdkFetchedSuccessfully = true;
+        } catch (Exception ex) {
+            sdkFetchedSuccessfully = false;
+        }
+        if (sdkFetchedSuccessfully) {
+            jsSdk = jsSdk.replace("jssdk.mparticle.com/v2/JS/", "http://localhost:8080/v2")//; console.log(\"replaced url V2 single\");")
                     .replace("jssdks.mparticle.com/v2/JS/", "http://localhost:8080/v2")//; console.log(\"replaced url V2 plural\");")
                     .replace("jssdks.mparticle.com/v1/JS/", "http://localhost:8080/v1")//; console.log(\"replaced url V1 plural\");")
                     .replace("jssdk.mparticle.com/v1/JS/", "http://localhost:8080/v1")//; console.log(\"replaced url V1 single\");")
                     .replace("https://identity.mparticle.com/v1/", "http://localhost:8080/v1/")//; console.log(\"replaced url Identity\");")
                     .replace("//  jQuery v1.10.2 | (c) 2005, 2013 jQuery Foundation, Inc. | jquery.org/license", "console.log(\"starting sdk\")")
                     .replace("window.mParticle.config.minWebviewBridgeVersion = 1", "window.mParticle.config.minWebviewBridgeVersion = " + bridgeVersion);
-            sdkFetchedSuccessfully = true;
-        } catch (Exception ex) {
-            sdkFetchedSuccessfully = false;
         }
     }
 
     @Before
-    public void before() throws Exception {
+    public void before() {
         Assume.assumeTrue(sdkFetchedSuccessfully);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -535,6 +549,17 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
         }
         return new JSONObject()
                 .put("UserIdentities", userIdentityJson);
+    }
+
+    private static String toString(InputStream inputStream) throws IOException {
+        BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
+        StringBuilder document = new StringBuilder();
+        String line;
+        while ((line = in.readLine()) != null) {
+            document.append(line + '\n');
+        }
+        in.close();
+        return document.toString();
     }
 
     static class OptionsAllowResponse {

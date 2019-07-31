@@ -17,6 +17,17 @@ android {
         } else {
             testInstrumentationRunnerArgument 'notAnnotation', 'com.mparticle.LegacyOnly'
         }
+
+        file("../android-core/src/androidTest/res/raw").mkdir()
+        def file = file("../android-core/src/androidTest/res/raw/mparticle_js_sdk")
+        file.createNewFile()
+        if (project.hasProperty('js-sdk-file')) {
+            file.text = new File(project.property('js-sdk-file')).text
+            buildConfigField 'boolean', 'JS_TEST_SDK', 'true'
+        } else {
+            buildConfigField 'boolean', 'JS_TEST_SDK', 'false'
+        }
+
     }
 
     buildTypes {
