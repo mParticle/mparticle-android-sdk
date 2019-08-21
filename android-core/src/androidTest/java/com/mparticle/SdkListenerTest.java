@@ -1,49 +1,22 @@
 package com.mparticle;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 
-import com.mparticle.commerce.Cart;
-import com.mparticle.commerce.CommerceApi;
-import com.mparticle.commerce.CommerceEvent;
-import com.mparticle.commerce.Product;
-import com.mparticle.consent.ConsentState;
-import com.mparticle.identity.IdentityApi;
-import com.mparticle.identity.IdentityApiRequest;
-import com.mparticle.identity.MParticleUserImpl;
-import com.mparticle.internal.MessageManager;
-import com.mparticle.internal.listeners.ApiClass;
-import com.mparticle.testutils.AndroidUtils;
 import com.mparticle.testutils.AndroidUtils.Mutable;
-import com.mparticle.testutils.BaseAbstractTest;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.testutils.MPLatch;
 import com.mparticle.testutils.TestingUtils;
 
 import org.junit.Test;
-import org.mockito.Mockito;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-
-import dalvik.system.DexFile;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class SdkListenerTest extends BaseCleanStartedEachTest {
 

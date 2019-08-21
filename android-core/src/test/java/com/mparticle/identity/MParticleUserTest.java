@@ -162,7 +162,7 @@ public class MParticleUserTest {
     public void testAddUserIdentity() throws Exception {
         JSONArray identities = new JSONArray();
         identities.put(new JSONObject("{ \"n\": 7, \"i\": \"email value 1\", \"dfs\": 1473869816521, \"f\": true }"));
-        Mockito.when(mp.Identity().mMessageManager.getUserIdentityJson(Mockito.anyInt())).thenReturn(identities);
+        Mockito.when(mp.Identity().mMessageManager.getUserIdentityJson(Mockito.anyLong())).thenReturn(identities);
         ((MParticleUserImpl)id.getCurrentUser()).setUserIdentity(MParticle.IdentityType.Alias, "alias test");
         ArgumentCaptor<JSONObject> argument2 = ArgumentCaptor.forClass(JSONObject.class);
         ArgumentCaptor<JSONArray> argument3 = ArgumentCaptor.forClass(JSONArray.class);

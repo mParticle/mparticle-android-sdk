@@ -76,6 +76,8 @@ public class MessageManagerTest {
                 Mockito.mock(MParticleDBManager.class),
                 messageHandler,
                 uploadHandler);
+        Mockito.when(messageHandler.obtainMessage(Mockito.anyInt(), Mockito.any())).thenReturn(new Message());
+        Mockito.when(messageHandler.obtainMessage(Mockito.anyInt())).thenReturn(new Message());
     }
 
     @Test

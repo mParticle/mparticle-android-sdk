@@ -89,6 +89,7 @@ public class KitFrameworkWrapperTest {
                 mockBackgroundTaskHandler,
                 true);
         Mockito.when(wrapper.mCoreCallbacks.getPushInstanceId()).thenReturn("instanceId");
+        Mockito.when(wrapper.mCoreCallbacks.getPushSenderId()).thenReturn("1234545");
         MParticle.setInstance(new MockMParticle());
         wrapper.replayEvents();
         KitManager mockKitManager = Mockito.mock(KitManager.class);
