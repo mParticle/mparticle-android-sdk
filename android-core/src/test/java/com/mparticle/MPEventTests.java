@@ -5,7 +5,6 @@ package com.mparticle;
 import com.mparticle.internal.Constants;
 
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import java.util.HashMap;
 import java.util.List;
@@ -94,7 +93,7 @@ public class MPEventTests  {
         event = new MPEvent.Builder("another name", MParticle.EventType.Social)
                 .category("category")
                 .duration(12345)
-                .info(attributes)
+                .customAttributes(attributes)
                 .addCustomFlag("cool flag key", "flag 1 value 1")
                 .addCustomFlag("cool flag key", "flag 1 value 2")
                 .addCustomFlag("cool flag key 2", "flag 2 value 1")
@@ -104,8 +103,8 @@ public class MPEventTests  {
         assertEquals("another name", copiedEvent.getEventName());
         assertEquals(MParticle.EventType.Social, copiedEvent.getEventType());
         assertEquals("category", copiedEvent.getCategory());
-        assertEquals("value 1", copiedEvent.getInfo().get("key 1"));
-        assertEquals("value 2", copiedEvent.getInfo().get("key 2"));
+        assertEquals("value 1", copiedEvent.getCustomAttributes().get("key 1"));
+        assertEquals("value 2", copiedEvent.getCustomAttributes().get("key 2"));
         Map<String, List<String>> flags = copiedEvent.getCustomFlags();
         assertEquals(flags.get("cool flag key").size(), 2);
         assertEquals(flags.get("cool flag key 2").size(), 1);

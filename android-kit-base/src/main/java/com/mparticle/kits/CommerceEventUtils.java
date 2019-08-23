@@ -49,7 +49,7 @@ public final class CommerceEventUtils {
                 attributes.putAll(event.getCustomAttributes());
             }
             extractActionAttributes(event, attributes);
-            events.add(plusOne.info(attributes).build());
+            events.add(plusOne.customAttributes(attributes).build());
         }
         List<Product> products = event.getProducts();
         if (products != null) {
@@ -59,7 +59,7 @@ public final class CommerceEventUtils {
                 extractProductFields(products.get(i), attributes);
                 extractProductAttributes(products.get(i), attributes);
                 extractTransactionId(event, attributes);
-                events.add(itemEvent.info(attributes).build());
+                events.add(itemEvent.customAttributes(attributes).build());
             }
         }
         return events;
@@ -171,7 +171,7 @@ public final class CommerceEventUtils {
                     attributes.putAll(event.getCustomAttributes());
                 }
                 extractPromotionAttributes(promotions.get(i), attributes);
-                events.add(itemEvent.info(attributes).build());
+                events.add(itemEvent.customAttributes(attributes).build());
             }
         }
         return events;
@@ -212,7 +212,7 @@ public final class CommerceEventUtils {
                     extractProductAttributes(products.get(i), attributes);
                     extractProductFields(products.get(i), attributes);
                     extractImpressionAttributes(impressions.get(i), attributes);
-                    events.add(itemEvent.info(attributes).build());
+                    events.add(itemEvent.customAttributes(attributes).build());
                 }
             }
         }

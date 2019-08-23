@@ -12,6 +12,7 @@ import android.os.Looper;
 import com.mparticle.AttributionError;
 import com.mparticle.AttributionListener;
 import com.mparticle.AttributionResult;
+import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.ReferrerReceiver;
@@ -368,12 +369,31 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         return mKitIntegrationFactory.getSupportedKits();
     }
 
+    @Override
+    public void logEvent(BaseEvent event) {
+        for (KitIntegration provider: providers.values()) {
+            try {
+                List<ReportingMessage> messages = provider.logEvent(event);
+                mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), !MPUtility.isEmpty(messages), event);
+                mReportingManager.logAll(messages);
+            } catch (Exception e) {
+                Logger.warning("Failed to call logMPEvent for kit: " + provider.getName() + ": " + e.getMessage());
+                mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), false, event, e);
+            }
+            if (event instanceof MPEvent) {
+                logMPEvent((MPEvent) event);
+            }
+            if (event instanceof CommerceEvent) {
+                logCommerceEvent((CommerceEvent) event);
+            }
+        }
+    }
+
     //================================================================================
     // KitIntegration.CommerceListener forwarding
     //================================================================================
 
-    @Override
-    public void logCommerceEvent(CommerceEvent event) {
+    protected void logCommerceEvent(CommerceEvent event) {
         for (KitIntegration provider : providers.values()) {
             try {
                 if (!provider.isDisabled()) {
@@ -395,12 +415,12 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                                     if (result.getMPEvent() != null) {
                                         MPEvent projectedEvent = projectedEvents.get(i).getMPEvent();
                                         report = ((KitIntegration.EventListener) provider).logEvent(projectedEvent);
-                                        mCoreCallbacks.getKitListener().onKitApiCalled("logEvent()", provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), projectedEvent);
+                                        mCoreCallbacks.getKitListener().onKitApiCalled("logMPEvent()", provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), projectedEvent);
                                         messageType = ReportingMessage.MessageType.EVENT;
                                     } else {
                                         CommerceEvent projectedEvent = projectedEvents.get(i).getCommerceEvent();
                                         report = ((KitIntegration.CommerceListener) provider).logEvent(projectedEvent);
-                                        mCoreCallbacks.getKitListener().onKitApiCalled("logEvent()", provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), projectedEvent);
+                                        mCoreCallbacks.getKitListener().onKitApiCalled("logMPEvent()", provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), projectedEvent);
                                         messageType = ReportingMessage.MessageType.COMMERCE_EVENT;
                                     }
                                     if (report != null && report.size() > 0) {
@@ -420,7 +440,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                                 }
                             } else {
                                 List<ReportingMessage> reporting = ((KitIntegration.CommerceListener) provider).logEvent(filteredEvent);
-                                mCoreCallbacks.getKitListener().onKitApiCalled("logEvent()", provider.getConfiguration().getKitId(), !MPUtility.isEmpty(reporting), filteredEvent);
+                                mCoreCallbacks.getKitListener().onKitApiCalled("logMPEvent()", provider.getConfiguration().getKitId(), !MPUtility.isEmpty(reporting), filteredEvent);
                                 if (reporting != null && reporting.size() > 0) {
                                     getReportingManager().log(
                                             ReportingMessage.fromEvent(provider, filteredEvent)
@@ -433,7 +453,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                             if (events != null) {
                                 for (MPEvent expandedEvent: events) {
                                     List<ReportingMessage> reporting = ((KitIntegration.EventListener) provider).logEvent(expandedEvent);
-                                    mCoreCallbacks.getKitListener().onKitApiCalled("logEvent()", provider.getConfiguration().getKitId(), !MPUtility.isEmpty(reporting), expandedEvent);
+                                    mCoreCallbacks.getKitListener().onKitApiCalled("logMPEvent()", provider.getConfiguration().getKitId(), !MPUtility.isEmpty(reporting), expandedEvent);
                                     forwarded = forwarded || (reporting != null && reporting.size() > 0);
                                 }
                             }
@@ -718,13 +738,17 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         return mCoreCallbacks.getCurrentActivity();
     }
 
-    @Override
-    public void logEvent(MPEvent event) {
+
+    protected void logMPEvent(MPEvent event) {
+        if (event.isScreenEvent()) {
+            logScreen(event);
+            return;
+        }
         for (KitIntegration provider : providers.values()) {
             try {
                 if (provider instanceof KitIntegration.EventListener && !provider.isDisabled() && provider.getConfiguration().shouldLogEvent(event)) {
                     MPEvent eventCopy = new MPEvent(event);
-                    eventCopy.setInfo(
+                    eventCopy.setCustomAttributes(
                             provider.getConfiguration().filterEventAttributes(eventCopy)
                     );
                     List<CustomMapping.ProjectionResult> projectedEvents = CustomMapping.projectEvents(
@@ -735,14 +759,14 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     List<ReportingMessage> reportingMessages = new LinkedList<ReportingMessage>();
                     if (projectedEvents == null) {
                         List<ReportingMessage> messages = null;
-                        if (eventCopy.getInfo() != null
-                                && eventCopy.getInfo().containsKey(METHOD_NAME)
-                                && eventCopy.getInfo().get(METHOD_NAME).equals(LOG_LTV)) {
+                        if (eventCopy.getCustomAttributes() != null
+                                && eventCopy.getCustomAttributes().containsKey(METHOD_NAME)
+                                && eventCopy.getCustomAttributes().get(METHOD_NAME).equals(LOG_LTV)) {
                             messages = ((KitIntegration.CommerceListener) provider).logLtvIncrease(
-                                    new BigDecimal(eventCopy.getInfo().get(RESERVED_KEY_LTV)),
-                                    new BigDecimal(eventCopy.getInfo().get(RESERVED_KEY_LTV)),
+                                    new BigDecimal(eventCopy.getCustomAttributes().get(RESERVED_KEY_LTV)),
+                                    new BigDecimal(eventCopy.getCustomAttributes().get(RESERVED_KEY_LTV)),
                                     eventCopy.getEventName(),
-                                    eventCopy.getInfo());
+                                    eventCopy.getCustomAttributes());
                         } else {
                             messages = ((KitIntegration.EventListener) provider).logEvent(eventCopy);
                             mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), !MPUtility.isEmpty(messages), eventCopy);
@@ -779,7 +803,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     getReportingManager().logAll(reportingMessages);
                 }
             } catch (Exception e) {
-                Logger.warning("Failed to call logEvent for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call logMPEvent for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -835,7 +859,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             try {
                 if (provider instanceof KitIntegration.EventListener && !provider.isDisabled() && provider.getConfiguration().shouldLogScreen(screenEvent.getEventName())) {
                     MPEvent filteredEvent = new MPEvent.Builder(screenEvent)
-                            .info(provider.getConfiguration().filterScreenAttributes(null, screenEvent.getEventName(), screenEvent.getInfo()))
+                            .customAttributes(provider.getConfiguration().filterScreenAttributes(null, screenEvent.getEventName(), screenEvent.getCustomAttributes()))
                             .build();
 
                     List<CustomMapping.ProjectionResult> projectedEvents = CustomMapping.projectEvents(
@@ -846,7 +870,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                             provider.getConfiguration().getDefaultScreenCustomMapping());
                     if (projectedEvents == null) {
                         String eventName = filteredEvent.getEventName();
-                        Map<String, String> eventInfo = filteredEvent.getInfo();
+                        Map<String, String> eventInfo = filteredEvent.getCustomAttributes();
                         List<ReportingMessage> report = ((KitIntegration.EventListener) provider).logScreen(eventName, eventInfo);
                         mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), eventName, eventInfo);
                         if (report != null && report.size() > 0) {
@@ -860,11 +884,11 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                         ReportingMessage masterMessage = new ReportingMessage(provider,
                                 ReportingMessage.MessageType.SCREEN_VIEW,
                                 System.currentTimeMillis(),
-                                filteredEvent.getInfo());
+                                filteredEvent.getCustomAttributes());
                         boolean forwarded = false;
                         for (CustomMapping.ProjectionResult projectedEvent: projectedEvents) {
                             List<ReportingMessage> report = ((KitIntegration.EventListener) provider).logEvent(projectedEvent.getMPEvent());
-                            mCoreCallbacks.getKitListener().onKitApiCalled("logEvent()", provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), projectedEvent);
+                            mCoreCallbacks.getKitListener().onKitApiCalled("logMPEvent()", provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), projectedEvent);
                             if (report != null && report.size() > 0) {
                                 forwarded = true;
                                 for (ReportingMessage message : report) {

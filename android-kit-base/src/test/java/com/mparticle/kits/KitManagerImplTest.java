@@ -1,20 +1,16 @@
 package com.mparticle.kits;
 
-import android.content.Context;
-
+import com.mparticle.BaseEvent;
 import com.mparticle.MParticle;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.consent.GDPRConsent;
 import com.mparticle.identity.IdentityApi;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.CoreCallbacks;
-import com.mparticle.internal.KitFrameworkWrapper;
-import com.mparticle.mock.MockCoreCallbacks;
+import com.mparticle.mock.MockKit;
 import com.mparticle.mock.MockKitManagerImpl;
 import com.mparticle.mock.MockMParticle;
-import com.mparticle.internal.ReportingManager;
 import com.mparticle.internal.BackgroundTaskHandler;
-import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockKitConfiguration;
 
 import junit.framework.Assert;

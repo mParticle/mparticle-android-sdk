@@ -7,7 +7,10 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
+import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
@@ -16,6 +19,7 @@ import com.mparticle.identity.MParticleUser;
 
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -248,6 +252,11 @@ public abstract class KitIntegration {
     public final KitIntegration setKitManager(KitManagerImpl kitManager) {
         this.kitManager = kitManager;
         return this;
+    }
+
+    @Nullable
+    public List<ReportingMessage> logEvent(@NonNull BaseEvent baseEvent) {
+        return Collections.emptyList();
     }
 
     /**

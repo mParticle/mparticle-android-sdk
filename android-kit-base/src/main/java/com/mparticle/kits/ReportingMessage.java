@@ -3,6 +3,7 @@ package com.mparticle.kits;
 
 import android.content.Intent;
 
+import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.internal.JsonReportingMessage;
@@ -87,16 +88,16 @@ public class ReportingMessage implements JsonReportingMessage {
         return this;
     }
 
-    public static ReportingMessage fromEvent(KitIntegration provider, MPEvent event) {
-        ReportingMessage message = new ReportingMessage(provider, MessageType.EVENT, System.currentTimeMillis(), event.getInfo());
-        message.eventType = event.getEventType().name();
-        message.eventName = event.getEventName();
-        return message;
-    }
-
-    public static ReportingMessage fromEvent(KitIntegration provider, CommerceEvent commerceEvent) {
-        ReportingMessage message = new ReportingMessage(provider, MessageType.COMMERCE_EVENT, System.currentTimeMillis(), commerceEvent.getCustomAttributes());
-        message.eventType = CommerceEventUtils.getEventTypeString(commerceEvent);
+    public static ReportingMessage fromEvent(KitIntegration provider, BaseEvent event) {
+        ReportingMessage message = new ReportingMessage(provider, event.getType().getMessageType(), System.currentTimeMillis(), event.getCustomAttributes());
+        if (event instanceof MPEvent) {
+            MPEvent mpEvent = (MPEvent)event;
+            message.eventType = mpEvent.getEventType().name();
+            message.eventName = mpEvent.getEventName();
+        } else if (event instanceof CommerceEvent) {
+            CommerceEvent commerceEvent = (CommerceEvent)event;
+            message.eventType = CommerceEventUtils.getEventTypeString(commerceEvent);
+        }
         return message;
     }
 

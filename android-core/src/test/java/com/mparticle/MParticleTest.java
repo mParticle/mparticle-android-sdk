@@ -276,4 +276,21 @@ public class MParticleTest {
         }
         assertEquals("Unexpected Modify Request", ex.getMessage());
     }
+
+    @Test
+    public void testLogBaseEvent() {
+        MParticle instance = new MockMParticle();
+
+        Mockito.when(instance.mConfigManager.isEnabled()).thenReturn(true);
+        instance.logEvent(Mockito.mock(BaseEvent.class));
+
+        Mockito.verify(instance.mKitManager, Mockito.times(1)).logEvent(Mockito.any(BaseEvent.class));
+
+        instance = new MockMParticle();
+        Mockito.when(instance.mConfigManager.isEnabled()).thenReturn(false);
+        instance.logEvent(Mockito.mock(BaseEvent.class));
+        instance.logEvent(Mockito.mock(MPEvent.class));
+
+        Mockito.verify(instance.mKitManager, Mockito.times(0)).logEvent(Mockito.any(BaseEvent.class));
+    }
 }

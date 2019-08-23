@@ -8,9 +8,9 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import com.mparticle.AttributionResult;
+import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
-import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
@@ -149,8 +149,8 @@ public class KitFrameworkWrapper implements KitManager {
                     } else {
                         mKitManager.logEvent(mpEvent);
                     }
-                } else if (event instanceof CommerceEvent) {
-                    mKitManager.logCommerceEvent((CommerceEvent) event);
+                } else if (event instanceof BaseEvent) {
+                    mKitManager.logEvent((BaseEvent) event);
                 }
             }
         }
@@ -282,16 +282,9 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     @Override
-    public void logEvent(MPEvent event) {
+    public void logEvent(BaseEvent event) {
         if (!queueEvent(event) && mKitManager != null) {
             mKitManager.logEvent(event);
-        }
-    }
-
-    @Override
-    public void logCommerceEvent(CommerceEvent event) {
-        if (!queueEvent(event) && mKitManager != null) {
-            mKitManager.logCommerceEvent(event);
         }
     }
 

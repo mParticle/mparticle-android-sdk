@@ -344,12 +344,26 @@ public class MParticle {
         return InstallReferrerHelper.getInstallReferrer(mAppContext);
     }
 
+    public void logEvent(@NonNull BaseEvent event) {
+        if (event instanceof MPEvent) {
+            logMPEvent((MPEvent)event);
+        } else if (event instanceof CommerceEvent) {
+            logCommerceEvent((CommerceEvent)event);
+        } else {
+            if (mConfigManager.isEnabled()) {
+                mAppStateManager.ensureActiveSession();
+                Logger.debug("Logged event - \n", event.toString());
+                mKitManager.logEvent(event);
+            }
+        }
+    }
+
     /**
      * Log an event with an {@link MPEvent} object.
      *
      * @param event the event object to log
      */
-    public void logEvent(@NonNull MPEvent event) {
+    public void logMPEvent(@NonNull MPEvent event) {
         if (mConfigManager.isEnabled() && checkEventLimit()) {
             mAppStateManager.ensureActiveSession();
             mMessageManager.logEvent(event, mAppStateManager.getCurrentActivityName());
@@ -366,7 +380,7 @@ public class MParticle {
      *
      * @see CommerceEvent
      */
-    public void logEvent(@NonNull CommerceEvent event) {
+    private void logCommerceEvent(@NonNull CommerceEvent event) {
         if (mConfigManager.isEnabled() && checkEventLimit()) {
             MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
             if (user != null) {
@@ -389,7 +403,7 @@ public class MParticle {
             mAppStateManager.ensureActiveSession();
             mMessageManager.logEvent(event);
             Logger.debug("Logged commerce event - \n", event.toString());
-            mKitManager.logCommerceEvent(event);
+            mKitManager.logEvent(event);
         }   
     }
 
@@ -413,7 +427,7 @@ public class MParticle {
         contextInfo.put(Constants.MethodName.METHOD_NAME, Constants.MethodName.LOG_LTV);
         logEvent(
                 new MPEvent.Builder(eventName == null ? "Increase LTV" : eventName, EventType.Transaction)
-                        .info(contextInfo)
+                        .customAttributes(contextInfo)
                         .build()
         );
     }
@@ -434,7 +448,7 @@ public class MParticle {
      * @param eventData  a Map of data attributes to associate with this screen view
      */
     public void logScreen(@NonNull String screenName, @Nullable Map<String, String> eventData) {
-        logScreen(new MPEvent.Builder(screenName).info(eventData).build().setScreenEvent(true));
+        logScreen(new MPEvent.Builder(screenName).customAttributes(eventData).build().setScreenEvent(true));
     }
 
 
@@ -458,7 +472,7 @@ public class MParticle {
             if (mConfigManager.isEnabled()) {
                 mMessageManager.logScreen(screenEvent, screenEvent.getNavigationDirection());
 
-                if (null == screenEvent.getInfo()) {
+                if (null == screenEvent.getCustomAttributes()) {
                     Logger.debug("Logged screen: ", screenEvent.toString());
                 }
 
@@ -1227,9 +1241,9 @@ public class MParticle {
     }
 
     /**
-     * Event type to use when logging events.
+     * Event type to use when logging {@link MPEvent}s.
      *
-     * @see #logEvent(MPEvent)
+     * @see #logEvent(BaseEvent)
      */
     public enum EventType {
         Unknown, Navigation, Location, Search, Transaction, UserContent, UserPreference, Social, Other;

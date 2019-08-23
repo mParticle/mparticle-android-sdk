@@ -4,7 +4,9 @@ import com.mparticle.MParticle;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -18,6 +20,7 @@ import static junit.framework.Assert.assertTrue;
 public class RandomUtils {
     private static final String sAlpha = "abcdefghijklmnopqrstuvwxyzABC ,.";
     private static final String sNumbers = "0123456789";
+    private Random random = new Random();
 
     private static RandomUtils instance;
 
@@ -39,6 +42,24 @@ public class RandomUtils {
         }
         randomIdentities.remove(MParticle.IdentityType.Alias);
         return randomIdentities;
+    }
+
+    public Map<String, List<String>> getRandomCustomFlags(int count) {
+        Map<String, List<String>> customFlags = new HashMap<>();
+        for (Map.Entry<String, String> entry: getRandomAttributes(count).entrySet()) {
+            List<String> flags = new ArrayList<>();
+            if (entry.getValue() != null) {
+                flags.add(entry.getValue());
+                flags.add(getAlphaNumericString(20));
+                flags.add(getAlphaNumericString(20));
+                customFlags.put(entry.getKey(), flags);
+            } else {
+                List<String> nullList = new ArrayList<>();
+                nullList.add(null);
+                customFlags.put(entry.getKey(), nullList);
+            }
+        }
+        return customFlags;
     }
 
     public Map<String, String> getRandomAttributes(int count) {
@@ -76,8 +97,8 @@ public class RandomUtils {
 
     //inclusive of low range, less than high range
     public int randomInt(int from, int to) {
-        int random = Math.abs(new Random().nextInt());
-        int range = random % (to - from);
+        int randomInt = Math.abs(random.nextInt());
+        int range = randomInt % (to - from);
         return (range) + from;
     }
 
@@ -104,18 +125,13 @@ public class RandomUtils {
         return sAlpha + sNumbers;
     }
 
-    public long randomLong(long from, long to) {
-        long random = Math.abs(new Random().nextLong());
-        long range = random % (to - from);
-        return range + from;
-    }
 
     @Test
     public void testRandomInt() throws Exception {
         for (int i = 0; i < 50; i++) {
-            int random = randomInt(-10, 10);
-            assertTrue(random >= -10);
-            assertTrue(random <= 10);
+            int randomInt = randomInt(-10, 10);
+            assertTrue(randomInt >= -10);
+            assertTrue(randomInt <= 10);
         }
     }
 }

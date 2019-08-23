@@ -263,7 +263,8 @@ public class MParticleDBManager {
                 MessageBatch uploadMessage = mpidMessage.getValue();
                 if (uploadMessage != null) {
                     String sessionId = session.getKey();
-                    //For upgrade scenarios, there may be no device or app info associated with the session, so create it now.
+
+                    //For upgrade scenarios, there may be no device or app customAttributes associated with the session, so create it now.
                     if (uploadMessage.getAppInfo() == null) {
                         uploadMessage.setAppInfo(deviceAttributes.getAppInfo(mContext));
                     }

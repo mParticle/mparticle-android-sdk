@@ -10,7 +10,6 @@ import com.mparticle.MockMParticle;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Product;
 import com.mparticle.identity.AliasRequest;
-import com.mparticle.identity.IdentityApi;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockSharedPreferences;
@@ -200,7 +199,7 @@ public class MessageManagerTest {
         Map<String, String> info = new HashMap<String, String>(1);
         info.put("test key", "test value");
         MPEvent event = new MPEvent.Builder("test event name", MParticle.EventType.Location).duration(100).addCustomFlag("flag 1", "value 1")
-                .addCustomFlag("flag 1", "value 2").addCustomFlag("flag 2", "value 3").info(info).build();
+                .addCustomFlag("flag 1", "value 2").addCustomFlag("flag 2", "value 3").customAttributes(info).build();
         MessageManager.BaseMPMessage message = manager.logEvent(event, "test screen name");
         assertNotNull(message);
         assertEquals(Constants.MessageType.EVENT, message.getMessageType());
@@ -247,7 +246,7 @@ public class MessageManagerTest {
         Map<String, String> info = new HashMap<String, String>();
         info.put("test key", "test value");
         MessageManager.BaseMPMessage message = manager.logScreen(new MPEvent.Builder("screen name").addCustomFlag("flag 1", "value 1")
-                .addCustomFlag("flag 1", "value 2").addCustomFlag("flag 2", "value 3").info(info).build(), true);
+                .addCustomFlag("flag 1", "value 2").addCustomFlag("flag 2", "value 3").customAttributes(info).build(), true);
         assertNotNull(message);
         assertEquals(Constants.MessageType.SCREEN_VIEW, message.getMessageType());
         assertEquals(appStateManager.getSession().mSessionID, message.getSessionId());
@@ -266,7 +265,7 @@ public class MessageManagerTest {
         assertNotNull(attrs);
         assertEquals("test value", attrs.getString("test key"));
         assertEquals("screen name", message.getName());
-        message = manager.logScreen(new MPEvent.Builder("screen name 2").info(info).build(), false);
+        message = manager.logScreen(new MPEvent.Builder("screen name 2").customAttributes(info).build(), false);
         assertEquals(message.getString(Constants.MessageKey.SCREEN_STARTED), "activity_stopped");
         Mockito.verify(messageHandler, Mockito.times(3)).sendMessage(Mockito.any(Message.class));
     }

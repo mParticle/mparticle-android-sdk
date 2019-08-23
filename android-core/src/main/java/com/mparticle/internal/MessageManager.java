@@ -124,7 +124,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
      */
     private static double sBatteryLevel;
     /**
-     * The app-info dictionary in each batch need to know the runtime of the SDK/app itself.
+     * The app-customAttributes dictionary in each batch need to know the runtime of the SDK/app itself.
      */
     private static long sStartTime = MPUtility.millitime();
     /**
@@ -336,7 +336,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                         .timestamp(mAppStateManager.getSession().mLastEventTime)
                         .length(event.getLength())
                         .flags(event.getCustomFlags())
-                        .attributes(MPUtility.enforceAttributeConstraints(event.getInfo()))
+                        .attributes(MPUtility.enforceAttributeConstraints(event.getCustomAttributes()))
                         .build();
                 message.put(MessageKey.EVENT_TYPE, event.getEventType());
                 message.put(MessageKey.EVENT_START_TIME, message.getTimestamp());
@@ -369,7 +369,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 }
                 BaseMPMessage message = new MPCommerceMessage.Builder(event, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid(), cart)
                         .timestamp(mAppStateManager.getSession().mLastEventTime)
-                        .flags(toStringListMap(event.getCustomFlags()))
+                        .flags(event.getCustomFlags())
                         .build();
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
                 return message;
@@ -387,7 +387,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                         .timestamp(mAppStateManager.getSession().mLastEventTime)
                         .name(event.getEventName())
                         .flags(event.getCustomFlags())
-                        .attributes(MPUtility.enforceAttributeConstraints(event.getInfo()))
+                        .attributes(MPUtility.enforceAttributeConstraints(event.getCustomAttributes()))
                         .build();
 
                 message.put(MessageKey.EVENT_START_TIME, mAppStateManager.getSession().mLastEventTime);

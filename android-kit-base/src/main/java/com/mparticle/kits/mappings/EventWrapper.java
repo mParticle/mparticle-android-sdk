@@ -5,7 +5,6 @@ import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.Promotion;
 import com.mparticle.kits.CommerceEventUtils;
-import com.mparticle.internal.MPUtility;
 import com.mparticle.kits.KitUtils;
 
 import java.util.AbstractMap;
@@ -211,8 +210,8 @@ abstract class EventWrapper {
         public Map<Integer, String> getAttributeHashes() {
             if (attributeHashes == null) {
                 attributeHashes = new HashMap<Integer, String>();
-                if (mEvent.getInfo() != null) {
-                    for (Map.Entry<String, String> entry : mEvent.getInfo().entrySet()) {
+                if (mEvent.getCustomAttributes() != null) {
+                    for (Map.Entry<String, String> entry : mEvent.getCustomAttributes().entrySet()) {
                         int hash = KitUtils.hashForFiltering(getEventTypeOrdinal() + mEvent.getEventName() + entry.getKey());
                         attributeHashes.put(hash, entry.getKey());
                     }
@@ -252,10 +251,10 @@ abstract class EventWrapper {
 
         public Map.Entry<String, String> findAttribute(String propertyType, String keyName, Product product, Promotion promotion) {
             if (CustomMapping.PROPERTY_LOCATION_EVENT_ATTRIBUTE.equalsIgnoreCase(propertyType)) {
-                if (getEvent().getInfo() == null) {
+                if (getEvent().getCustomAttributes() == null) {
                     return null;
                 }
-                String value = getEvent().getInfo().get(keyName);
+                String value = getEvent().getCustomAttributes().get(keyName);
                 if (value != null) {
                     return new AbstractMap.SimpleEntry<String, String>(keyName, value);
                 }
@@ -267,7 +266,7 @@ abstract class EventWrapper {
             if (CustomMapping.PROPERTY_LOCATION_EVENT_ATTRIBUTE.equalsIgnoreCase(propertyType)) {
                 String key = getAttributeHashes().get(hash);
                 if (key != null) {
-                    return new AbstractMap.SimpleEntry<String, String>(key, mEvent.getInfo().get(key));
+                    return new AbstractMap.SimpleEntry<>(key, mEvent.getCustomAttributes().get(key));
                 }
             }
             return null;

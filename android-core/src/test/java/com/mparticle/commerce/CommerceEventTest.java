@@ -7,7 +7,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -151,12 +153,25 @@ public class CommerceEventTest {
         CommerceEvent event = builder.build();
         assertEquals(null, event.getCustomFlags());
 
-        Map<String, String> attributes = RandomUtils.getInstance().getRandomAttributes(RandomUtils.getInstance().randomInt(1, 10));
-        for (Map.Entry<String, String> attribute: attributes.entrySet()) {
-            builder.addCustomFlag(attribute.getKey(), attribute.getValue());
+        Map<String, List<String>> attributes = RandomUtils.getInstance().getRandomCustomFlags(RandomUtils.getInstance().randomInt(1, 10));
+        for (Map.Entry<String, List<String>> attribute: attributes.entrySet()) {
+            for (String value : attribute.getValue()) {
+                builder.addCustomFlag(attribute.getKey(), value);
+            }
         }
         event = builder.build();
         attributes.remove(null);
+        assertEquals(attributes.size(), event.getCustomFlags().size());
+        for (Map.Entry<String, List<String>> entry: attributes.entrySet()) {
+            if (entry.getValue() != null) {
+                Collections.sort(entry.getValue());
+                List<String> customFlagValues = event.getCustomFlags().get(entry.getKey());
+                Collections.sort(customFlagValues);
+                assertEquals(entry.getValue(), customFlagValues);
+            } else {
+                assertEquals(entry.getValue(), event.getCustomFlags().get(entry.getKey()));
+            }
+        }
         assertEquals(attributes, event.getCustomFlags());
     }
 }

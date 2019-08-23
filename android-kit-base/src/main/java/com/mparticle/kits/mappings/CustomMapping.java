@@ -131,7 +131,7 @@ public class CustomMapping {
         String eventName = MPUtility.isEmpty(mProjectedEventName) ? event.getEventName() : mProjectedEventName;
         MPEvent.Builder builder = new MPEvent.Builder(event);
         builder.eventName(eventName);
-        builder.info(null);
+        builder.customAttributes(null);
 
         Map<String, String> newAttributes = new HashMap<String, String>();
         Set<String> usedAttributes = new HashSet<String>();
@@ -147,8 +147,8 @@ public class CustomMapping {
         }
         if (mAppendUnmappedAsIs && mMaxCustomParams > 0 && newAttributes.size() < mMaxCustomParams) {
             Map<String, String> originalAttributes;
-            if (event.getInfo() != null) {
-                originalAttributes = new HashMap<String, String>(event.getInfo());
+            if (event.getCustomAttributes() != null) {
+                originalAttributes = new HashMap<String, String>(event.getCustomAttributes());
             } else {
                 originalAttributes = new HashMap<String, String>();
             }
@@ -161,7 +161,7 @@ public class CustomMapping {
                 }
             }
         }
-        builder.info(newAttributes);
+        builder.customAttributes(newAttributes);
         return new ProjectionResult(builder.build(), mID);
     }
     public List<ProjectionResult> project(EventWrapper.CommerceEventWrapper commerceEventWrapper) {
@@ -328,7 +328,7 @@ public class CustomMapping {
         }else {
             return new ProjectionResult(
                     new MPEvent.Builder(mProjectedEventName, MParticle.EventType.Transaction)
-                            .info(mappedAttributes)
+                            .customAttributes(mappedAttributes)
                             .build(),
                     mID
             );

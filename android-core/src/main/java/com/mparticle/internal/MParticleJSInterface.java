@@ -1,7 +1,6 @@
 package com.mparticle.internal;
 
 
-import android.os.Build;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
@@ -181,7 +180,7 @@ public class MParticleJSInterface {
             switch (messageType){
                 case JS_MSG_TYPE_PE:
                     MParticle.getInstance().logEvent(new MPEvent.Builder(name,
-                            eventType).info(
+                            eventType).customAttributes(
                             eventAttributes).build());
                     break;
                 case JS_MSG_TYPE_PV:

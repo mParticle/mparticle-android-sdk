@@ -190,7 +190,7 @@ public class Constants {
         String IDENTITY_DATE_FIRST_SEEN = "dfs";
         String IDENTITY_FIRST_SEEN = "f";
 
-        // application info
+        // application customAttributes
         String APP_NAME = "an";
         String APP_VERSION = "av";
         String APP_PACKAGE_NAME = "apn";
@@ -204,7 +204,7 @@ public class Constants {
         String LAUNCH_COUNT = "lc";
         String LAUNCH_COUNT_SINCE_UPGRADE = "lcu";
         String LAST_USE_DATE = "lud";
-        // device info
+        // device customAttributes
         String BUILD_ID = "bid";
         String BRAND = "b";
         String PRODUCT = "p";
@@ -237,7 +237,7 @@ public class Constants {
         String LIMIT_AD_TRACKING = "lat";
         String DEVICE_IMEI = "imei";
 
-        // state info
+        // state customAttributes
         String STATE_INFO_KEY = "cs";
         String STATE_INFO_AVAILABLE_MEMORY = "sma";
         String STATE_INFO_TOTAL_MEMORY = "tsm";

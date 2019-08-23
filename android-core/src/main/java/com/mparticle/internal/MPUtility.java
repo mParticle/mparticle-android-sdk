@@ -410,7 +410,7 @@ public class MPUtility {
 
     public static boolean isPhoneRooted() {
 
-        // Get from build info.
+        // Get from build customAttributes
         String buildTags = android.os.Build.TAGS;
         if (buildTags != null && buildTags.contains("test-keys")) {
             return true;

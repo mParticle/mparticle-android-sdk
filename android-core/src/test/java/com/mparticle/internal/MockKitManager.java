@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import com.mparticle.AttributionResult;
+import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
@@ -35,12 +36,7 @@ public class MockKitManager implements KitManager {
     }
 
     @Override
-    public void logEvent(MPEvent event) {
-
-    }
-
-    @Override
-    public void logCommerceEvent(CommerceEvent event) {
+    public void logEvent(BaseEvent event) {
 
     }
 

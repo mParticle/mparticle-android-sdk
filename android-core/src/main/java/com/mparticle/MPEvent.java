@@ -28,22 +28,23 @@ import java.util.Map;
  *
  * <code>MPEvent</code> implements the Builder pattern, see {@link com.mparticle.MPEvent.Builder} for more information.
  *
- * @see com.mparticle.MParticle#logEvent(MPEvent)
+ * @see com.mparticle.MParticle#logEvent(BaseEvent)
  *
  */
-public class MPEvent {
+public class MPEvent extends BaseEvent {
     private MParticle.EventType eventType;
     private String eventName;
     private String category;
-    private Map<String, String> info;
     private Double duration = null, startTime = null, endTime = null;
     private int eventHash;
-    private Map<String, List<String>> customFlags;
     private boolean entering = true;
     private boolean screenEvent;
 
-    private MPEvent(){}
+    private MPEvent(){
+        super(Type.EVENT);
+    }
     private MPEvent(Builder builder){
+        super(Type.EVENT);
         if (builder.eventType == null){
             Logger.error("MPEvent created with no event type!");
         } else {
@@ -62,14 +63,14 @@ public class MPEvent {
         }
 
         entering = builder.entering;
-        setInfo(builder.info);
+        setCustomAttributes(builder.customAttributes);
 
         if (builder.category != null){
             category = builder.category;
-            if (info == null){
-                info = new HashMap<String, String>();
+            if (getCustomAttributes() == null){
+                setCustomAttributes(new HashMap<String, String>());
             }
-            info.put(Constants.MessageKey.EVENT_CATEGORY, builder.category);
+            getCustomAttributes().put(Constants.MessageKey.EVENT_CATEGORY, builder.category);
         }
         if (builder.duration != null){
             duration = builder.duration;
@@ -91,29 +92,36 @@ public class MPEvent {
         return super.equals(o) || (o != null && this.toString().equals(o.toString()));
     }
 
+    /**
+     * @deprecated use {@link MPEvent#setCustomAttributes(Map)} instead
+     * @param info
+     */
+    @Deprecated
     public void setInfo(@Nullable Map<String, String> info){
-        if (info != null && MPUtility.containsNullKey(info)) {
-            Logger.warning(String.format("disregarding \"MPEvent.customFlag\" value of \"%s\". Key was found to be null", info.get(null)));
-            info.remove(null);
-        }
-        this.info = info;
+        setCustomAttributes(info);
+    }
+
+    @Override
+    public void setCustomAttributes(@Nullable Map<String, String> customAttributes) {
+        super.setCustomAttributes(customAttributes);
     }
 
     public MPEvent(@NonNull MPEvent mpEvent) {
+        super(Type.EVENT);
         eventType = mpEvent.eventType;
         eventName = mpEvent.eventName;
-        if (mpEvent.info != null) {
+        if (mpEvent.getCustomAttributes() != null) {
             Map<String, String> shallowCopy = new HashMap<String, String>();
-            shallowCopy.putAll(mpEvent.info);
-            setInfo(shallowCopy);
+            shallowCopy.putAll(mpEvent.getCustomAttributes());
+            setCustomAttributes(shallowCopy);
         }else {
-            setInfo(null);
+            setCustomAttributes(null);
         }
         category = mpEvent.category;
         duration = mpEvent.duration;
         endTime = mpEvent.endTime;
         startTime = mpEvent.startTime;
-        setCustomFlags(mpEvent.customFlags);
+        setCustomFlags(mpEvent.getCustomFlags());
         entering = mpEvent.entering;
         screenEvent = mpEvent.screenEvent;
         InternalListenerManager.getListener().onCompositeObjects(mpEvent, this);
@@ -139,21 +147,21 @@ public class MPEvent {
                     .append(length).append("ms")
                     .append("\n");
         }
-        if (info != null){
-            builder.append("info:\n");
-            List<String> sortedKeys = new ArrayList(info.keySet());
+        if (getCustomAttributes() != null){
+            builder.append("customAttributes:\n");
+            List<String> sortedKeys = new ArrayList(getCustomAttributes().keySet());
             Collections.sort(sortedKeys);
             for (String key : sortedKeys)
             {
                 builder.append(key)
                 .append(":")
-                .append(info.get(key))
+                .append(getCustomAttributes().get(key))
                 .append("\n");
             }
         }
-        if (customFlags != null) {
+        if (getCustomFlags() != null) {
             builder.append("custom flags:\n");
-            builder.append(customFlags.toString());
+            builder.append(getCustomFlags().toString());
         }
         return builder.toString();
     }
@@ -170,6 +178,7 @@ public class MPEvent {
 
     MPEvent setScreenEvent(boolean screenEvent) {
         this.screenEvent = screenEvent;
+        setType(screenEvent ? Type.SCREEN_VIEW : Type.EVENT);
         return this;
     }
 
@@ -185,9 +194,14 @@ public class MPEvent {
         return category;
     }
 
+    /**
+     * @deprecated use {@link MPEvent#getCustomAttributes()} instead
+     * @return
+     */
+    @Deprecated
     @Nullable
     public Map<String, String> getInfo() {
-        return info;
+        return getCustomAttributes();
     }
 
     @NonNull
@@ -207,30 +221,8 @@ public class MPEvent {
         return null;
     }
 
-    /**
-     * Retrieve the custom flags set on this event. Custom Flags are used to send data or trigger behavior
-     * to individual 3rd-party services that you have enabled for your app. By default, flags are not forwarded
-     * to any providers.
-     *
-     * @see com.mparticle.MPEvent.Builder#addCustomFlag(String, String)
-     *
-     * @return returns the map of custom flags, or null if none are set
-     */
-    @Nullable
-    public Map<String,List<String>> getCustomFlags() {
-        return customFlags;
-    }
-
     boolean getNavigationDirection() {
         return entering;
-    }
-
-    private void setCustomFlags(Map<String, List<String>> flags) {
-        if (flags != null && MPUtility.containsNullKey(flags)) {
-            Logger.warning(String.format("disregarding \"MPEvent.customFlag\" value of %s. Key was found to be null", new JSONArray(flags.get(null))));
-            flags.remove(null);
-        }
-        customFlags = flags;
     }
 
     /**
@@ -243,7 +235,7 @@ public class MPEvent {
         private MParticle.EventType eventType;
         private String eventName;
         private String category;
-        private Map<String, String> info;
+        private Map<String, String> customAttributes;
         private Double duration = null, startTime = null, endTime = null;
         private Map<String, List<String>> customFlags = null;
         private boolean entering = true;
@@ -288,7 +280,7 @@ public class MPEvent {
             this.eventName = event.getEventName();
             this.eventType = event.getEventType();
             this.category = event.getCategory();
-            this.info = event.getInfo();
+            this.customAttributes = event.getCustomAttributes();
             this.duration = event.duration;
             this.startTime = event.startTime;
             this.endTime = event.endTime;
@@ -375,14 +367,23 @@ public class MPEvent {
         }
 
         /**
+         * @deprecated user {@link MPEvent.Builder#customAttributes} instead
+         *
          * Data attributes to associate with the event.
          *
          * @param info
          * @return returns this builder for easy method chaining
          */
+        @Deprecated
         @NonNull
         public Builder info(@Nullable Map<String, String> info){
-            this.info = info;
+            this.customAttributes = info;
+            return this;
+        }
+
+        @NonNull
+        public Builder customAttributes(@Nullable Map<String, String> customAttributes) {
+            this.customAttributes = customAttributes;
             return this;
         }
 
@@ -498,7 +499,7 @@ public class MPEvent {
                         String key = (String)keys.next();
                         info.put(key, infoObject.getString(key));
                     }
-                    builder.info = info;
+                    builder.customAttributes = info;
                 }
                 if (json.has(EVENT_CUSTOM_FLAGS)) {
                     JSONObject flags = json.getJSONObject(EVENT_CUSTOM_FLAGS);
@@ -528,7 +529,7 @@ public class MPEvent {
         private final static String EVENT_NAME = "eventName";
         private final static String EVENT_CATEGORY = "category";
         private final static String EVENT_DURATION = "duration";
-        private final static String EVENT_INFO = "info";
+        private final static String EVENT_INFO = "customAttributes";
         private final static String EVENT_START_TIME= "startTime";
         private final static String EVENT_END_TIME= "endTime";
 
@@ -551,9 +552,9 @@ public class MPEvent {
                 if (duration != null){
                     jsonObject.put(EVENT_DURATION, duration);
                 }
-                if (info != null){
+                if (customAttributes != null){
                     JSONObject jsonInfo = new JSONObject();
-                    for (Map.Entry<String, String> entry : info.entrySet())
+                    for (Map.Entry<String, String> entry : customAttributes.entrySet())
                     {
                         jsonInfo.put(entry.getKey(), entry.getValue());
                     }

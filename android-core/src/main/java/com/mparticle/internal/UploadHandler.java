@@ -160,7 +160,7 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
      * - query messages that have been persisted but not marked as uploaded
      * - group them into upload batches objects, one per session
      * - query reporting messages and add them to their respective batches
-     * - query app and device info, and add them to their respective batches
+     * - query app and device customAttributes, and add them to their respective batches
      * - persist all of the resulting upload batch objects
      * - mark the messages as having been uploaded.
      */

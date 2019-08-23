@@ -49,7 +49,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
     private static final String HEADER_BUNDLED_KITS = "x-mp-bundled-kits";
 
     /**
-     * Wrapper around cookies, MPID, and other server-response info that requires parsing.
+     * Wrapper around cookies, MPID, and other server-response customAttributes that requires parsing.
      */
     private static final String CONSUMER_INFO = "ci";
 

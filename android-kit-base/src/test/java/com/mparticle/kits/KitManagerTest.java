@@ -9,7 +9,6 @@ import android.os.Looper;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
-import com.mparticle.internal.CoreCallbacks;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockCoreCallbacks;
 import com.mparticle.mock.MockKitConfiguration;

@@ -103,7 +103,7 @@ public class TestingUtils {
             if (infoMap.isEmpty() && random.nextBoolean()) {
                 infoMap = null;
             }
-            builder.info(infoMap);
+            builder.customAttributes(infoMap);
         }
         if (random.nextBoolean()) {
             for (int i = 0; i < randomUtils.randomInt(0, 10); i++) {

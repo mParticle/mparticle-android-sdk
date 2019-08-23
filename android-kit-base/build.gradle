@@ -60,4 +60,5 @@ dependencies {
     testImplementation project(':testutils')
 
     androidTestImplementation project(':testutils')
+    implementation 'com.android.support:support-annotations:28.0.0'
 }

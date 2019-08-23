@@ -44,6 +44,6 @@ public class SessionServiceTest extends BaseMPServiceTest {
                 cursor.close();
             }
         }
-        Assert.fail("Failed to find updated app info object.");
+        Assert.fail("Failed to find updated app customAttributes object.");
     }
 }

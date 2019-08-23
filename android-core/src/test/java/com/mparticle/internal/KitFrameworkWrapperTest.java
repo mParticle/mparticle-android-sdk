@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 
+import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MockMParticle;
@@ -121,7 +122,7 @@ public class KitFrameworkWrapperTest {
         wrapper.logEvent(event);
         wrapper.logEvent(screenEvent);
         wrapper.setUserAttribute("a key", "a value", 1);
-        wrapper.logCommerceEvent(commerceEvent);
+        wrapper.logEvent(commerceEvent);
         Mockito.verify(
                 mockKitManager, Mockito.times(0)
         ).logEvent(Mockito.any(MPEvent.class));
@@ -130,7 +131,7 @@ public class KitFrameworkWrapperTest {
         ).logScreen(Mockito.any(MPEvent.class));
         Mockito.verify(
                 mockKitManager, Mockito.times(0)
-        ).logCommerceEvent(Mockito.any(CommerceEvent.class));
+        ).logEvent(Mockito.any(CommerceEvent.class));
         Mockito.verify(
                 mockKitManager, Mockito.times(0)
         ).setUserAttribute(Mockito.anyString(), Mockito.anyString(), Mockito.anyLong());
@@ -145,7 +146,7 @@ public class KitFrameworkWrapperTest {
         ).logScreen(Mockito.any(MPEvent.class));
         Mockito.verify(
                 mockKitManager, Mockito.times(1)
-        ).logCommerceEvent(Mockito.any(CommerceEvent.class));
+        ).logEvent(Mockito.any(CommerceEvent.class));
         Mockito.verify(
                 mockKitManager, Mockito.times(1)
         ).setUserAttribute(Mockito.eq("a key"), Mockito.eq("a value"), Mockito.anyLong());
@@ -345,30 +346,68 @@ public class KitFrameworkWrapperTest {
         assertNull(wrapper.getEventQueue());
         wrapper.setKitsLoaded(false);
         CommerceEvent event = Mockito.mock(CommerceEvent.class);
-        wrapper.logCommerceEvent(event);
+        wrapper.logEvent(event);
         assertEquals(wrapper.getEventQueue().peek(), event);
 
         for (int i = 0 ; i < 50; i++) {
-            wrapper.logCommerceEvent(event);
+            wrapper.logEvent(event);
         }
         assertEquals(10, wrapper.getEventQueue().size());
 
         wrapper.setKitsLoaded(true);
 
-        wrapper.logCommerceEvent(event);
+        wrapper.logEvent(event);
 
         KitManager mockKitManager = Mockito.mock(KitManager.class);
         wrapper.setKitManager(mockKitManager);
 
         Mockito.verify(
                 mockKitManager, Mockito.times(0)
-        ).logCommerceEvent(Mockito.any(CommerceEvent.class));
+        ).logEvent(Mockito.any(CommerceEvent.class));
 
-        wrapper.logCommerceEvent(event);
+        wrapper.logEvent(event);
 
         Mockito.verify(
                 mockKitManager, Mockito.times(1)
-        ).logCommerceEvent(Mockito.any(CommerceEvent.class));
+        ).logEvent(Mockito.any(CommerceEvent.class));
+    }
+
+    @Test
+    @PrepareForTest({CommerceEvent.class})
+    public void testLogBaseEvent() {
+        KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
+                Mockito.mock(ReportingManager.class),
+                Mockito.mock(ConfigManager.class),
+                Mockito.mock(AppStateManager.class),
+                mockBackgroundTaskHandler,
+                true);
+        assertNull(wrapper.getEventQueue());
+        wrapper.setKitsLoaded(false);
+        BaseEvent event = Mockito.mock(BaseEvent.class);
+        wrapper.logEvent(event);
+        assertEquals(wrapper.getEventQueue().peek(), event);
+
+        for (int i = 0 ; i < 50; i++) {
+            wrapper.logEvent(event);
+        }
+        assertEquals(10, wrapper.getEventQueue().size());
+
+        wrapper.setKitsLoaded(true);
+
+        wrapper.logEvent(event);
+
+        KitManager mockKitManager = Mockito.mock(KitManager.class);
+        wrapper.setKitManager(mockKitManager);
+
+        Mockito.verify(
+                mockKitManager, Mockito.times(0)
+        ).logEvent(Mockito.any(BaseEvent.class));
+
+        wrapper.logEvent(event);
+
+        Mockito.verify(
+                mockKitManager, Mockito.times(1)
+        ).logEvent(Mockito.any(BaseEvent.class));
     }
 
     @Test

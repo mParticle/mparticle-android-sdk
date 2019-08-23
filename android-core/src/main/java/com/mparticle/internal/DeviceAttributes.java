@@ -254,7 +254,7 @@ public class DeviceAttributes {
                     message = "Successfully collected Google Play Advertising ID.";
                 }
             }catch (JSONException jse) {
-                Logger.debug("Failed while building device-info object: ", jse.toString());
+                Logger.debug("Failed while building device-customAttributes object: ", jse.toString());
             }
         }
         if (firstCollection) {
@@ -272,7 +272,7 @@ public class DeviceAttributes {
             deviceInfo.put(Constants.MessageKey.PUSH_SOUND_ENABLED, MParticle.getInstance().Internal().getConfigManager().isPushSoundEnabled());
             deviceInfo.put(Constants.MessageKey.PUSH_VIBRATION_ENABLED, MParticle.getInstance().Internal().getConfigManager().isPushVibrationEnabled());
         } catch (JSONException jse) {
-            Logger.debug("Failed while building device-info object: ", jse.toString());
+            Logger.debug("Failed while building device-customAttributes object: ", jse.toString());
         }
     }
 

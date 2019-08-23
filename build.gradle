@@ -1,4 +1,6 @@
 buildscript {
+    ext.kotlin_version = '1.3.31'
+
     repositories {
         jcenter()
         google()
@@ -6,6 +8,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:3.4.1'
         classpath 'com.archinamon:android-gradle-aspectj:3.3.11'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 

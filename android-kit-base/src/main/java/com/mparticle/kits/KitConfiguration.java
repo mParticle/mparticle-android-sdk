@@ -401,7 +401,7 @@ public class KitConfiguration {
     }
 
     public final Map<String, String> filterEventAttributes(MPEvent event) {
-        return filterEventAttributes(event.getEventType(), event.getEventName(), mAttributeFilters, event.getInfo());
+        return filterEventAttributes(event.getEventType(), event.getEventName(), mAttributeFilters, event.getCustomAttributes());
     }
 
     public final Map<String, String> filterScreenAttributes(MParticle.EventType eventType, String eventName, Map<String, String> eventAttributes) {
@@ -541,7 +541,7 @@ public class KitConfiguration {
 
 
     protected boolean shouldLogEvent(MPEvent event) {
-        if (!shouldIncludeFromAttributeValueFiltering(event.getInfo())) {
+        if (!shouldIncludeFromAttributeValueFiltering(event.getCustomAttributes())) {
             return false;
         }
         int typeHash = KitUtils.hashForFiltering(event.getEventType().ordinal() + "");

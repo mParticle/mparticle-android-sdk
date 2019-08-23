@@ -19,6 +19,7 @@ public class ProductTest {
 
     @Test
     public void testDefaultEqualityComparator() {
+        Product.setEqualityComparator(null);
         Product product1 = new Product.Builder("name", "sku",2).brand("cool brand!").build();
         Product product2 = new Product.Builder("cool brand!", "sku",2).brand("cool brand!adsflkjh").build();
         Product product2Copy = new Product.Builder(product2).build();

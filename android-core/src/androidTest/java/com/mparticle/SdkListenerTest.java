@@ -46,7 +46,7 @@ public class SdkListenerTest extends BaseCleanStartedEachTest {
 
         //invoke an API method from an external package ;)
         MParticle mParticle = MParticle.getInstance();
-        Method method = mParticle.getClass().getMethod("logEvent", MPEvent.class);
+        Method method = mParticle.getClass().getMethod("logEvent", BaseEvent.class);
         try {
             method.invoke(mParticle, mpEvent);
         } catch (Exception ignore) {

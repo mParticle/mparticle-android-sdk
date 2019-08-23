@@ -8,13 +8,12 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import com.mparticle.AttributionResult;
+import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
-import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
-import com.mparticle.identity.MParticleUserImpl;
 
 import org.json.JSONArray;
 
@@ -27,9 +26,7 @@ public interface KitManager {
 
     WeakReference<Activity> getCurrentActivity();
 
-    void logEvent(MPEvent event);
-
-    void logCommerceEvent(CommerceEvent event);
+    void logEvent(BaseEvent event);
 
     void logScreen(MPEvent screenEvent);
 

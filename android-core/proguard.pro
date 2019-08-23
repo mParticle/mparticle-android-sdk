@@ -108,6 +108,9 @@
 -keep class com.mparticle.ReferrerReceiver { *; }
 -keep class com.mparticle.kits.ForeseeKit { *; }
 -keep class com.mparticle.UserAttributeListener { *; }
+-keep class com.mparticle.BaseEvent { *; }
+-keep class com.mparticle.BaseEvent$Type { *; }
+-keep class com.mparticle.BaseEvent$MessageType { *; }
 
 -keep class com.mparticle.consent.ConsentState { *; }
 -keep class com.mparticle.consent.ConsentState$Builder { *; }
@@ -130,7 +133,6 @@
 -keep class com.mparticle.internal.Logger { *; }
 -keep class com.mparticle.internal.Logger$* { *; }
 -keep class com.mparticle.internal.BackgroundTaskHandler { *; }
-
 
 -keep class com.mparticle.identity.IdentityApi { *; }
 -keep class com.mparticle.identity.IdentityApiRequest { *; }

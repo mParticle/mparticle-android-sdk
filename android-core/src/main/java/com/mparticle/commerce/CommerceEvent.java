@@ -4,6 +4,7 @@ package com.mparticle.commerce;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.mparticle.BaseEvent;
 import com.mparticle.MParticle;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
@@ -29,16 +30,14 @@ import java.util.Map;
  * for you.
  *
  * @see com.mparticle.commerce.CommerceEvent.Builder
- * @see MParticle#logEvent(CommerceEvent)
+ * @see MParticle#logEvent(BaseEvent)
  *
  */
-public final class CommerceEvent {
+public final class CommerceEvent extends BaseEvent {
     private String mEventName;
     private List<Impression> mImpressions;
     private String mProductAction;
     private String mPromotionAction;
-    private Map<String, String> customAttributes;
-    private Map<String, String> customFlags;
     private List<Promotion> promotionList;
     private List<Product> productList;
     private Integer mCheckoutStep;
@@ -51,10 +50,10 @@ public final class CommerceEvent {
     private Boolean mNonIteraction;
 
     private CommerceEvent(Builder builder) {
-        super();
+        super(Type.COMMERCE_EVENT);
         mProductAction = builder.mProductAction;
         mPromotionAction = builder.mPromotionAction;
-        customAttributes = builder.customAttributes;
+        setCustomAttributes(builder.customAttributes);
         if (!MPUtility.isEmpty(builder.promotionList)) {
             builder.promotionList.removeAll(Collections.singleton(null));
         }
@@ -174,7 +173,7 @@ public final class CommerceEvent {
     }
 
     private CommerceEvent() {
-
+        super(Type.COMMERCE_EVENT);
     }
 
     @Override
@@ -276,34 +275,6 @@ public final class CommerceEvent {
     }
 
     /**
-     *
-     * Retrieve the Map of custom attributes of the event.
-     *
-     * @return returns a Map of custom attributes, or null if no custom attributes are set.
-     *
-     * @see com.mparticle.commerce.CommerceEvent.Builder#customAttributes(Map).
-     */
-    @Nullable
-    public Map<String, String> getCustomAttributes() {
-        return customAttributes;
-    }
-
-    /**
-     * Retrieve the custom flags set on this event. Custom Flags are used to send data or trigger behavior
-     * to individual 3rd-party services that you have enabled for your app. By default, flags are not forwarded
-     * to any providers.
-     *
-     * @see com.mparticle.MPEvent.Builder#addCustomFlag(String, String).
-     *
-     * @return returns the map of custom flags, or null if none are set.
-     */
-    @Nullable
-    public Map<String,String> getCustomFlags() {
-        return customFlags;
-    }
-
-
-    /**
      * Retrieve the Screen where the event occurred.
      *
      * @return the String descriptor/name of the Screen where this event occurred, or null if this is not set.
@@ -335,7 +306,7 @@ public final class CommerceEvent {
      * @return a String indicating the Product action, or null if this is not a Product-based CommerceEvent.
      *
      * @see <code><a href="CommerceEvent.Builder.html#CommerceEvent.Builder(java.lang.String,%20com.mparticle.commerce.Product)">Builder(java.lang.String, com.mparticle.commerce.Product)</a></code>.
-     * @see Product.
+     * @see Product
      */
     @Nullable
     public String getProductAction() {
@@ -446,14 +417,6 @@ public final class CommerceEvent {
         return Collections.unmodifiableList(promotionList);
     }
 
-    private void setCustomFlags(Map<String, String> flags) {
-        if (flags != null && MPUtility.containsNullKey(flags)) {
-            Logger.warning(String.format("disregarding \"MPEvent.customFlag\" value of %s. Key was found to be null", flags.get(null)));
-            flags.remove(null);
-        }
-        customFlags = flags;
-    }
-
     @Override
     public boolean equals(@Nullable Object o) {
         return o != null && o.toString().equals(toString());
@@ -562,7 +525,7 @@ public final class CommerceEvent {
         private Boolean mNonIteraction;
         private List<Impression> mImpressions;
         private String mEventName;
-        private Map<String, String> mCustomFlags = null;
+        private Map<String, List<String>> mCustomFlags = null;
 
         private Builder() {
             mProductAction = mPromotionAction = null;
@@ -751,9 +714,12 @@ public final class CommerceEvent {
         @NonNull
         public Builder addCustomFlag(@Nullable String key, @Nullable String value) {
             if (mCustomFlags == null) {
-                mCustomFlags = new HashMap<String, String>();
+                mCustomFlags = new HashMap<String, List<String>>();
             }
-            mCustomFlags.put(key, value);
+            if (!mCustomFlags.containsKey(key)) {
+                mCustomFlags.put(key, new LinkedList<String>());
+            }
+            mCustomFlags.get(key).add(value);
             return this;
         }
 

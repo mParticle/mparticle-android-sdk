@@ -5,7 +5,6 @@ import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.Promotion;
 import com.mparticle.kits.CommerceEventUtils;
-import com.mparticle.internal.MPUtility;
 import com.mparticle.kits.KitUtils;
 
 import org.json.JSONArray;
@@ -125,9 +124,9 @@ final class CustomMappingMatch {
             return true;
         } else if (mMatchType.startsWith(MATCH_TYPE_STRING) &&
                 event.getEventName().equalsIgnoreCase(mEventName) &&
-                event.getInfo() != null &&
-                event.getInfo().containsKey(mAttributeKey) &&
-                getAttributeValues().contains(event.getInfo().get(mAttributeKey).toLowerCase(Locale.US))) {
+                event.getCustomAttributes() != null &&
+                event.getCustomAttributes().containsKey(mAttributeKey) &&
+                getAttributeValues().contains(event.getCustomAttributes().get(mAttributeKey).toLowerCase(Locale.US))) {
             return true;
         } else {
             return false;
