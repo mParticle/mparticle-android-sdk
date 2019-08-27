@@ -225,10 +225,6 @@ public class MParticleOptions {
         return mLocationTracking;
     }
 
-    public boolean hasPushRegistration() {
-        return mPushRegistration != null;
-    }
-
     @Nullable
     public PushRegistrationHelper.PushRegistration getPushRegistration() {
         return mPushRegistration;

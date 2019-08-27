@@ -152,6 +152,9 @@ public final class IdentityApiRequest {
             if (MPUtility.isEmpty(oldPushToken)) {
                 oldPushToken = null;
             }
+            if (MPUtility.isEmpty(newPushToken)) {
+                newPushToken = null;
+            }
             otherOldIdentities.put("push_token", oldPushToken);
             otherNewIdentities.put("push_token", newPushToken);
             return this;

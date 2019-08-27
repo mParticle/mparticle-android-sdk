@@ -3,6 +3,7 @@ package com.mparticle.internal;
 import android.content.Context;
 import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.mparticle.MParticle;
@@ -54,10 +55,10 @@ public class PushRegistrationHelper {
     }
 
     public static class PushRegistration {
-        @NonNull public String senderId;
-        @NonNull public String instanceId;
+        @Nullable public String senderId;
+        @Nullable public String instanceId;
 
-        public PushRegistration(@NonNull String instanceId, @NonNull String senderId) {
+        public PushRegistration(@Nullable String instanceId, @Nullable String senderId) {
             this.instanceId = instanceId;
             this.senderId = senderId;
         }
@@ -65,7 +66,7 @@ public class PushRegistrationHelper {
         @Override
         @NonNull
         public String toString() {
-            return "[" + senderId + ", " + instanceId + "]";
+            return "[" + (senderId == null ? "null" : senderId) + ", " + (instanceId == null ? "null" : instanceId) + "]";
         }
     }
 }

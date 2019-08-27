@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.location.Location;
 import android.os.Handler;
 import android.os.Looper;
 import android.webkit.WebView;
@@ -357,6 +358,15 @@ public class MParticleTest extends BaseCleanStartedEachTest {
             MParticle.getInstance().logPushRegistration(newPushRegistration.instanceId, newPushRegistration.senderId);
             latch.await();
         }
+    }
+
+    @Test
+    public void testSetLocation() {
+        Location location = new Location("");
+        MParticle.getInstance().setLocation(location);
+        assertEquals(location, MParticle.getInstance().mMessageManager.getLocation());
+        MParticle.getInstance().setLocation(null);
+        assertNull(MParticle.getInstance().mMessageManager.getLocation());
     }
 
     private void testReset(Runnable resetRunnable) throws JSONException, InterruptedException {

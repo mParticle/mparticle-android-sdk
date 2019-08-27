@@ -107,7 +107,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
      * Used to communicate the current location at the time of message generation. Can be set
      * manually by the customer, or automatically via our our location listener, if enabled.
      */
-    private Location mLocation;
+    private @Nullable Location mLocation;
     /**
      * This broadcast receiver is used to determine the current state of connectivity and battery level.
      * We could query these things every time a message is generated, but this should be more performant.
@@ -546,7 +546,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     }
 
 
-    public void setLocation(Location location) {
+    public void setLocation(@Nullable Location location) {
         mLocation = location;
         Logger.debug("Received location update: " + location);
     }
@@ -1237,7 +1237,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
         public static class Builder extends BaseMPMessageBuilder {
 
-            public Builder(String messageType, InternalSession session, Location location, long mpId) {
+            public Builder(String messageType, InternalSession session, @Nullable Location location, long mpId) {
                 super(messageType, session, location, mpId);
             }
         }
@@ -1255,7 +1255,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         Map<String, List<String>> mCustomFlags;
         long mpid;
 
-        protected BaseMPMessageBuilder(String messageType, InternalSession session, Location location, long mpId) {
+        protected BaseMPMessageBuilder(String messageType, InternalSession session, @Nullable Location location, long mpId) {
             mMessageType = messageType;
             mSession = new InternalSession(session);
             mLocation = location;

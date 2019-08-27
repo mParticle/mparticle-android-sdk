@@ -191,8 +191,8 @@ public class MParticle {
                     if (originalContext instanceof Activity) {
                         instance.mAppStateManager.onActivityResumed((Activity) originalContext);
                     }
-                    if (options.hasPushRegistration()) {
-                        PushRegistrationHelper.PushRegistration pushRegistration = options.getPushRegistration();
+                    PushRegistrationHelper.PushRegistration pushRegistration = options.getPushRegistration();
+                    if (pushRegistration != null) {
                         instance.logPushRegistration(pushRegistration.instanceId, pushRegistration.senderId);
                     } else {
                         //check if Push InstanceId was updated since we last started the SDK and send corresponding modify() request
@@ -694,7 +694,7 @@ public class MParticle {
      *
      * @param location
      */
-    public void setLocation(@NonNull Location location) {
+    public void setLocation(@Nullable Location location) {
         mMessageManager.setLocation(location);
         mKitManager.setLocation(location);
 
@@ -1020,7 +1020,7 @@ public class MParticle {
         return mKitManager.getKitInstance(kitId);
     }
 
-    public void logPushRegistration(@NonNull String instanceId, @NonNull String senderId) {
+    public void logPushRegistration(@Nullable String instanceId, @Nullable String senderId) {
         mAppStateManager.ensureActiveSession();
         PushRegistrationHelper.PushRegistration registration = new PushRegistrationHelper.PushRegistration(instanceId, senderId);
         String oldInstanceId = mConfigManager.getPushInstanceId();
@@ -1425,7 +1425,7 @@ public class MParticle {
         mKitManager.installReferrerUpdated();
     }
 
-    private void updatePushToken(final String newInstanceId, final String oldInstanceId) {
+    private void updatePushToken(@Nullable final String newInstanceId, @Nullable final String oldInstanceId) {
         MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
         if (user != null) {
             sendPushTokenModifyRequest(user, newInstanceId, oldInstanceId);
@@ -1449,7 +1449,7 @@ public class MParticle {
         }
     }
 
-    private void sendPushTokenModifyRequest(MParticleUser user, String instanceId, String oldInstanceId) {
+    private void sendPushTokenModifyRequest(MParticleUser user, @Nullable String instanceId, @Nullable String oldInstanceId) {
         Identity().modify(new Builder(user)
                 .pushToken(instanceId, oldInstanceId)
                 .build());
@@ -1462,7 +1462,7 @@ public class MParticle {
         Builder() { super(); }
 
         @Override
-        protected IdentityApiRequest.Builder pushToken(String newPushToken, String oldPushToken) {
+        @NonNull protected IdentityApiRequest.Builder pushToken(@Nullable String newPushToken, @Nullable String oldPushToken) {
             return super.pushToken(newPushToken, oldPushToken);
         }
     }

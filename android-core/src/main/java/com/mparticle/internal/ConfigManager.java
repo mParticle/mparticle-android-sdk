@@ -407,7 +407,7 @@ public class ConfigManager {
         }
     }
 
-    public String getPushInstanceId() {
+    public @Nullable String getPushInstanceId() {
         PushRegistrationHelper.PushRegistration pushRegistration = getPushRegistration();
         if (pushRegistration != null) {
             return pushRegistration.instanceId;
@@ -457,7 +457,7 @@ public class ConfigManager {
                 .apply();
     }
 
-    public void setPushInstanceId(String token) {
+    public void setPushInstanceId(@Nullable String token) {
         sPreferences.edit().putString(Constants.PrefKeys.PUSH_INSTANCE_ID, token).apply();
     }
 
