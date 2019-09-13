@@ -490,7 +490,7 @@ public class MPUtility {
 
     public static Boolean isFirebaseAvailable() {
         try {
-            Class.forName("com.google.firebase.iid.FirebaseInstanceIdService");
+            Class.forName("com.google.firebase.iid.FirebaseInstanceId");
             return true;
         }
         catch (Exception ignore) { }
