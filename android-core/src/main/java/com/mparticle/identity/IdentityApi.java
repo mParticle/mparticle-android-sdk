@@ -286,7 +286,7 @@ public class IdentityApi {
                         task.setFailed(result);
                     } else {
                         MParticleUserDelegate.setUserIdentities(mUserDelegate, updateRequest.getUserIdentities(), updateRequest.mpid);
-                        task.setSuccessful(new IdentityApiResult(getUser(updateRequest.mpid), null));
+                        task.setSuccessful(new IdentityApiResult(MParticleUserImpl.getInstance(mContext, updateRequest.mpid, mUserDelegate), null));
                         new Handler(Looper.getMainLooper()).post(new Runnable() {
                             @Override
                             public void run() {
@@ -389,7 +389,7 @@ public class IdentityApi {
                             ConfigManager.setIdentityRequestInProgress(false);
                             mUserDelegate.setUser(mContext, startingMpid, newMpid, identityApiRequest.getUserIdentities(), identityApiRequest.getUserAliasHandler(), isLoggedIn);
                             final MParticleUser previousUser = startingMpid != newMpid ? getUser(startingMpid) : null;
-                            task.setSuccessful(new IdentityApiResult(getUser(newMpid), previousUser));
+                            task.setSuccessful(new IdentityApiResult(MParticleUserImpl.getInstance(mContext, newMpid, mUserDelegate), previousUser));
                             new Handler(Looper.getMainLooper()).post(new Runnable() {
                                 @Override
                                 public void run() {

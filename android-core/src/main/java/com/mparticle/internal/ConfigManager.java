@@ -863,6 +863,7 @@ public class ConfigManager {
         return getUserIdentityJson(getMpid());
     }
 
+    @NonNull
     public JSONArray getUserIdentityJson(long mpId) {
         JSONArray userIdentities = null;
         String userIds = getUserStorage(mpId).getUserIdentities();
