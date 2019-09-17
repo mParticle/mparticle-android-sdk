@@ -37,6 +37,8 @@ Kits are deployed as individual artifacts in Maven Central, and each has a dedic
 
 Kit | Maven Artifact 
 ----|---------
+[Adobe](https://github.com/mparticle-integrations/mparticle-android-integration-adobe)                |  [`android-adobe-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-adobe-kit%22)
+[AdobeMedia](https://github.com/mparticle-integrations/mparticle-android-integration-adobe-media)                |  [`android-adobemedia-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-adobemedia-kit%22)
 [Adjust](https://github.com/mparticle-integrations/mparticle-android-integration-adjust)                |  [`android-adjust-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-adjust-kit%22)
 [Appboy](https://github.com/mparticle-integrations/mparticle-android-integration-appboy)                |  [`android-appboy-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-appboy-kit%22)
 [Appsee](https://github.com/mparticle-integrations/mparticle-android-integration-appsee)          |  [`android-appsee-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-appsee-kit%22)

@@ -97,3 +97,6 @@
 [submodule "kits/onetrust-kit"]
 	path = kits/onetrust-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-onetrust.git
+[submodule "kits/adobemedia-kit"]
+	path = kits/adobemedia-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-adobe-media.git
