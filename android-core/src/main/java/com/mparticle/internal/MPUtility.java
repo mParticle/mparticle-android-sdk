@@ -165,6 +165,9 @@ public class MPUtility {
 
     public static long getAvailableExternalDisk(Context context) {
         File path = context.getExternalFilesDir(null);
+        if (path == null) {
+            return 0;
+        }
         return getDiskSpace(context, path);
     }
 
