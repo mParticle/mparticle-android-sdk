@@ -30,10 +30,7 @@ include (
         ':kits:clevertap-kit',
         ':kits:googleanalyticsfirebase-kit',
         ':kits:pilgrim-kit',
-        ':kits:onetrust-kit',
-	    ':testutils',
-        ':android-core',
-        ':android-kit-base'
+        ':kits:onetrust-kit'
 )
 project(':kits').getChildren().each {
     proj -> proj.name = 'android-' + proj.name
