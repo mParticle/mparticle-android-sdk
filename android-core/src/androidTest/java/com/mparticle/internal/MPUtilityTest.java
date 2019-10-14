@@ -40,9 +40,4 @@ public class MPUtilityTest extends BaseCleanInstallEachTest {
         map = new LinkedHashMap(map);
         assertFalse(MPUtility.containsNullKey(map));
     }
-
-    @Test
-    public void testExteralStorageSize() {
-        assertTrue(MPUtility.getAvailableExternalDisk(mContext) > 0);
-    }
 }
