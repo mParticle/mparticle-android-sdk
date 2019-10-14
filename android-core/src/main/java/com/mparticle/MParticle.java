@@ -1246,7 +1246,7 @@ public class MParticle {
      * @see #logEvent(BaseEvent)
      */
     public enum EventType {
-        Unknown, Navigation, Location, Search, Transaction, UserContent, UserPreference, Social, Other;
+        Unknown, Navigation, Location, Search, Transaction, UserContent, UserPreference, Social, Other, Media;
 
         @NonNull
         public String toString() {

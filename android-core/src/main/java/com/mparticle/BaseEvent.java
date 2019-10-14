@@ -90,7 +90,9 @@ public class BaseEvent {
         NETWORK_PERFORMNACE("npe"),
         PROFILE("pro"),
         USER_ATTRIBUTE_CHANGE("uac"),
-        USER_IDENTITY_CHANGE("uic");
+        USER_IDENTITY_CHANGE("uic"),
+        //place holder, should NOT be sent to server
+        MEDIA("media_event");
 
         private String messageType;
 

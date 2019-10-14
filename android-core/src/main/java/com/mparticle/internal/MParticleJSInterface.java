@@ -500,6 +500,8 @@ public class MParticleJSInterface {
                 return EventType.UserPreference;
             case 7:
                 return EventType.Social;
+            case 8:
+                return EventType.Media;
             default:
                 return EventType.Other;
         }
