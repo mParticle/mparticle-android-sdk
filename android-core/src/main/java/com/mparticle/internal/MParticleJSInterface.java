@@ -509,7 +509,8 @@ public class MParticleJSInterface {
         //try to instantiate CommerceEvent with a Product and add Products
         JSONObject productActionObj = jsonObject.optJSONObject(PRODUCT_ACTION);
         if (productActionObj != null) {
-            String productAction = productActionObj.optString(PRODUCT_ACTION_TYPE);
+            String productActionEnum = productActionObj.optString(PRODUCT_ACTION_TYPE);
+            String productAction = getProductAction(productActionEnum);
             JSONArray productArray = productActionObj.optJSONArray(PRODUCT_LIST);
             if (productAction != null && productArray != null) {
                 for (int i = 0; i < productArray.length(); i++) {
@@ -535,7 +536,8 @@ public class MParticleJSInterface {
         //try and instantiate CommerceEvent with a Promotion or add Promotions
         JSONObject promotionActionObj = jsonObject.optJSONObject(PROMOTION_ACTION);
         if (promotionActionObj != null) {
-            String promotionAction = promotionActionObj.optString(PROMOTION_ACTION_TYPE);
+            String promotionActionEnum = promotionActionObj.optString(PROMOTION_ACTION_TYPE);
+            String promotionAction = getPromotionAction(promotionActionEnum);
             JSONArray promotionArray = promotionActionObj.optJSONArray(PROMOTION_LIST);
             if (promotionAction != null && promotionArray != null) {
                 for (int i = 0; i < promotionArray.length(); i++) {
@@ -576,6 +578,56 @@ public class MParticleJSInterface {
         builder.currency(jsonObject.optString(CURRENCY_CODE, null));
         builder.internalEventName(jsonObject.optString(EVENT_NAME));
         return builder.build();
+    }
+
+    String getProductAction(String productActionEnum) {
+        try {
+            int productActionInt = Integer.parseInt(productActionEnum);
+            switch (productActionInt) {
+                case 0:
+                    return "unknown";
+                case 1:
+                    return Product.ADD_TO_CART;
+                case 2:
+                    return Product.REMOVE_FROM_CART;
+                case 3:
+                    return Product.CHECKOUT;
+                case 4:
+                    return Product.CHECKOUT_OPTION;
+                case 5:
+                    return Product.CLICK;
+                case 6:
+                    return Product.DETAIL;
+                case 7:
+                    return Product.PURCHASE;
+                case 8:
+                    return Product.REFUND;
+                case 9:
+                    return Product.ADD_TO_WISHLIST;
+                case 10:
+                    return Product.REMOVE_FROM_WISHLIST;
+            }
+        } catch (Exception ex) {
+            Logger.warning("unable to match ProductAction for value " + productActionEnum);
+        }
+        return productActionEnum;
+    }
+
+    String getPromotionAction(String promotionActionEnum) {
+        try {
+            int promotionActionInt = Integer.parseInt(promotionActionEnum);
+            switch (promotionActionInt) {
+                case 0:
+                    return "unknown";
+                case 1:
+                    return Promotion.VIEW;
+                case 2:
+                    return Promotion.CLICK;
+            }
+        } catch (Exception ex) {
+            Logger.warning("unable to match ProductAction for value " + promotionActionEnum);
+        }
+        return promotionActionEnum;
     }
     
     private TransactionAttributes getTransactionAttributes(JSONObject jsonObject) {

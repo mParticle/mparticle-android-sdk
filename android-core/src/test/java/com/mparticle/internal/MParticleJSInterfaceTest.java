@@ -134,7 +134,7 @@ public class MParticleJSInterfaceTest extends MParticleJSInterface {
     public void unpackSimpleCommerceEvent() throws Exception {
         JSONObject object = new JSONObject(sampleCommerceEvent1);
         CommerceEvent commerceEvent = toCommerceEvent(object);
-        assertEquals(commerceEvent.getProductAction(), "6");
+        assertEquals(commerceEvent.getProductAction(), Product.DETAIL);
         assertEquals(commerceEvent.getProducts().size(), 1);
         Product product = commerceEvent.getProducts().get(0);
         assertEquals(commerceEvent.getEventName(), ("eCommerce - ViewDetail"));
@@ -202,7 +202,7 @@ public class MParticleJSInterfaceTest extends MParticleJSInterface {
         assertEquals(product3.getName(), "iPhone");
         assertEquals(product4.getName(), "Android");
         assertEquals(commerceEvent.getEventName(), "eCommerce - Purchase");
-        assertEquals(commerceEvent.getProductAction(), "7");
+        assertEquals(commerceEvent.getProductAction(), Product.PURCHASE);
         assertEquals(commerceEvent.getTransactionAttributes().getId(), "12345");
     }
 
@@ -212,7 +212,7 @@ public class MParticleJSInterfaceTest extends MParticleJSInterface {
         CommerceEvent commerceEvent = toCommerceEvent(object);
 
         assertEquals(commerceEvent.getEventName(), "eCommerce - Refund");
-        assertEquals(commerceEvent.getProductAction(), "8");
+        assertEquals(commerceEvent.getProductAction(), Product.REFUND);
         assertEquals(commerceEvent.getProducts().size(), 2);
     }
 
@@ -221,7 +221,7 @@ public class MParticleJSInterfaceTest extends MParticleJSInterface {
         JSONObject object = new JSONObject(sampleCommerceEvent7);
         CommerceEvent commerceEvent = toCommerceEvent(object);
 
-        assertEquals(commerceEvent.getPromotionAction(), "2");
+        assertEquals(commerceEvent.getPromotionAction(), Promotion.CLICK);
         assertEquals(commerceEvent.getPromotions().size(), 1);
         Promotion promotion = commerceEvent.getPromotions().get(0);
         assertEquals(promotion.getCreative(), "my-creative");
@@ -257,7 +257,7 @@ public class MParticleJSInterfaceTest extends MParticleJSInterface {
         CommerceEvent commerceEvent = toCommerceEvent(object);
 
         assertEquals(commerceEvent.getEventName(), "eCommerce - Refund");
-        assertEquals(commerceEvent.getProductAction(), "8");
+        assertEquals(commerceEvent.getProductAction(), Product.REFUND);
         assertEquals(commerceEvent.getTransactionAttributes().getId(), "12345");
         assertEquals(commerceEvent.getProducts().size(), 0);
     }
@@ -268,7 +268,7 @@ public class MParticleJSInterfaceTest extends MParticleJSInterface {
         CommerceEvent commerceEvent = toCommerceEvent(object);
 
         assertEquals(commerceEvent.getEventName(), "eCommerce - Checkout");
-        assertEquals(commerceEvent.getProductAction(), "3");
+        assertEquals(commerceEvent.getProductAction(), Product.CHECKOUT);
         assertEquals(commerceEvent.getCheckoutStep().intValue(), 1);
         assertEquals(commerceEvent.getCheckoutOptions(), "Visa");
     }
