@@ -4,6 +4,8 @@ package com.mparticle.internal;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
+import androidx.annotation.Nullable;
+
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticle.EventType;
@@ -509,7 +511,7 @@ public class MParticleJSInterface {
         //try to instantiate CommerceEvent with a Product and add Products
         JSONObject productActionObj = jsonObject.optJSONObject(PRODUCT_ACTION);
         if (productActionObj != null) {
-            String productActionEnum = productActionObj.optString(PRODUCT_ACTION_TYPE);
+            String productActionEnum = productActionObj.optString(PRODUCT_ACTION_TYPE, null);
             String productAction = getProductAction(productActionEnum);
             JSONArray productArray = productActionObj.optJSONArray(PRODUCT_LIST);
             if (productAction != null && productArray != null) {
@@ -576,11 +578,15 @@ public class MParticleJSInterface {
             builder.customAttributes(customAttributes);
         }
         builder.currency(jsonObject.optString(CURRENCY_CODE, null));
-        builder.internalEventName(jsonObject.optString(EVENT_NAME));
+        builder.internalEventName(jsonObject.optString(EVENT_NAME, null));
         return builder.build();
     }
 
+    @Nullable
     String getProductAction(String productActionEnum) {
+        if (productActionEnum == null) {
+            return null;
+        }
         try {
             int productActionInt = Integer.parseInt(productActionEnum);
             switch (productActionInt) {
@@ -613,7 +619,11 @@ public class MParticleJSInterface {
         return productActionEnum;
     }
 
+    @Nullable
     String getPromotionAction(String promotionActionEnum) {
+        if (promotionActionEnum == null) {
+            return null;
+        }
         try {
             int promotionActionInt = Integer.parseInt(promotionActionEnum);
             switch (promotionActionInt) {
@@ -721,10 +731,10 @@ public class MParticleJSInterface {
             return null;
         }
         return new Promotion()
-                .setName(jsonObject.optString(PROMOTION_NAME))
-                .setCreative(jsonObject.optString(PROMOTION_CREATIVE))
-                .setId(jsonObject.optString(PROMOTION_ID))
-                .setPosition(jsonObject.optString(PROMOTION_POSITION));
+                .setName(jsonObject.optString(PROMOTION_NAME, null))
+                .setCreative(jsonObject.optString(PROMOTION_CREATIVE, null))
+                .setId(jsonObject.optString(PROMOTION_ID, null))
+                .setPosition(jsonObject.optString(PROMOTION_POSITION, null));
     }
 
     protected IdentityApiRequest getIdentityApiRequest(JSONObject jsonObject) {

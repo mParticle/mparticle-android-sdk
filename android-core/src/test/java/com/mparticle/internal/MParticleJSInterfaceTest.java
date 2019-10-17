@@ -25,7 +25,6 @@ import org.mockito.Mockito;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static java.lang.Double.NaN;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -181,9 +180,9 @@ public class MParticleJSInterfaceTest extends MParticleJSInterface {
         JSONObject object = new JSONObject(sampleCommerceEvent4);
         CommerceEvent commerceEvent = toCommerceEvent(object);
 
-        assertEquals(commerceEvent.getTransactionAttributes().getShipping(), NaN);
-        assertEquals(commerceEvent.getTransactionAttributes().getTax(), NaN);
-        assertEquals(commerceEvent.getTransactionAttributes().getRevenue(), NaN);
+        assertEquals(commerceEvent.getTransactionAttributes().getShipping(), null);
+        assertEquals(commerceEvent.getTransactionAttributes().getTax(), null);
+        assertEquals(commerceEvent.getTransactionAttributes().getRevenue(), 0.0);
         assertEquals(commerceEvent.getProducts().size(), 1);
         Product product2 = commerceEvent.getProducts().get(0);
         assertEquals(product2.getUnitPrice(), 0.0, .001);

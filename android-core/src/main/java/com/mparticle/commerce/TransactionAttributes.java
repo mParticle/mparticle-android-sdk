@@ -76,6 +76,9 @@ public class TransactionAttributes {
 
     @NonNull
     public TransactionAttributes setTax(@Nullable Double tax) {
+        if (tax != null && tax.equals(Double.NaN)) {
+            tax = null;
+        }
         this.mTax = tax;
         return this;
     }
@@ -87,6 +90,9 @@ public class TransactionAttributes {
 
     @NonNull
     public TransactionAttributes setShipping(@Nullable Double shipping) {
+        if (shipping != null && shipping.equals(Double.NaN)) {
+            shipping = null;
+        }
         this.mShipping = shipping;
         return this;
     }
@@ -98,6 +104,9 @@ public class TransactionAttributes {
 
     @NonNull
     public TransactionAttributes setRevenue(@Nullable Double revenue) {
+        if (revenue != null && revenue.equals(Double.NaN)) {
+            revenue = null;
+        }
         this.mRevenue = revenue;
         return this;
     }
