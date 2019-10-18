@@ -177,7 +177,7 @@ import java.util.UUID;
         jsonObject.put(KNOWN_IDENTITIES, identitiesJson);
 
         Long mpId = mConfigManager.getMpid();
-        if (mpId != null && mpId != Constants.TEMPORARY_MPID) {
+        if (!mpId.equals(Constants.TEMPORARY_MPID)) {
             jsonObject.put(PREVIOUS_MPID, mpId);
         }
         return jsonObject;

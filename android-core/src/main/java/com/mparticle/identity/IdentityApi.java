@@ -254,16 +254,6 @@ public class IdentityApi {
         boolean devMode = MPUtility.isDevEnv() || MPUtility.isAppDebuggable(mContext);
         final BaseIdentityTask task = new BaseIdentityTask();
 
-        if (updateRequest == null) {
-            String message = "modify() requires a valid IdentityApiRequest";
-            if (devMode) {
-                throw new IllegalArgumentException(message);
-            } else {
-                Logger.error(message);
-            }
-            task.setFailed(new IdentityHttpResponse(IdentityApi.UNKNOWN_ERROR, message));
-            return task;
-        }
         if (updateRequest.mpid == null) {
             updateRequest.mpid = mConfigManager.getMpid();
         }

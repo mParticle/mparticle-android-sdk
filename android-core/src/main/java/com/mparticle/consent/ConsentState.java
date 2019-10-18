@@ -68,7 +68,7 @@ public final class ConsentState {
      * @return returns an unmodifiable Map. Attempted mutation will
      * result in an <code>UnsupportedOperationException</code>.
      */
-    @Nullable
+    @NonNull
     public Map<String, GDPRConsent> getGDPRConsentState() {
         return Collections.unmodifiableMap(gdprConsentState);
     }
@@ -153,10 +153,6 @@ public final class ConsentState {
             String normalizedPurpose = ConsentState.canonicalizeForDeduplication(purpose);
             if (MPUtility.isEmpty(normalizedPurpose)) {
                 Logger.error("Cannot set GDPR Consent with null or empty purpose.");
-                return this;
-            }
-            if (consent == null) {
-                Logger.error("Cannot set GDPR Consent with null or empty GDPRConsent object.");
                 return this;
             }
             if (gdprConsentState == null) {

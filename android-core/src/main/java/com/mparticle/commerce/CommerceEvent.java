@@ -422,6 +422,11 @@ public final class CommerceEvent extends BaseEvent {
         return o != null && o.toString().equals(toString());
     }
 
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
+
     /**
      * Retrieve the {@link Impression} list associated with the CommerceEvent.
      *
