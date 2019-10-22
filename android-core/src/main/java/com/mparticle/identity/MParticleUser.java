@@ -27,6 +27,7 @@ public interface MParticleUser {
      *
      * @see Cart
      */
+    @Deprecated
     @NonNull
     Cart getCart();
 

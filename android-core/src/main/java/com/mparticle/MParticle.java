@@ -939,11 +939,14 @@ public class MParticle {
     }
 
     /**
+     * @deprecated use {@link CommerceEvent} with the proper {@link Product} action with the {@link MParticle#logEvent(BaseEvent)} api instead
+     *
      * Retrieve an instance of the {@link CommerceApi} helper class, used to access the {@link Cart} and as a helper class to log {@link CommerceEvent} events
      * with the {@link Product} objects currently in the Cart.
      *
      * @return returns a global CommerceApi instance.
      */
+    @Deprecated
     @NonNull
     public CommerceApi Commerce() {
         return mCommerce;

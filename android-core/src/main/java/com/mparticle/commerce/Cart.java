@@ -5,6 +5,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.mparticle.BaseEvent;
 import com.mparticle.MParticle;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.ConfigManager;
@@ -21,6 +22,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
+ * @deprecated use {@link CommerceEvent} in conjunction with {@link MParticle#logEvent(BaseEvent)} to
+ * track commerce related events
+ *
  * The Cart has a one-to-one relationship with MParticleUsers.
  * <p></p>
  * The Cart will persist state across app-restarts.
@@ -36,6 +40,7 @@ import java.util.List;
  * <p></p>
  */
 @ApiClass
+@Deprecated
 public final class Cart {
 
     private final List<Product> productList;
@@ -44,6 +49,7 @@ public final class Cart {
     private long userId;
     private Context mContext;
 
+    @Deprecated
     public Cart(@NonNull Context context, long userId) {
         mContext = context;
         productList = new LinkedList<Product>();
@@ -57,6 +63,7 @@ public final class Cart {
      *
      * @param maximum
      */
+    @Deprecated
     public static void setMaximumProductCount(final int maximum) {
         MAXIMUM_PRODUCT_COUNT = maximum;
     }
@@ -67,6 +74,7 @@ public final class Cart {
      *
      * @param cartJson a JSON-encoded string acquired from {@link #toString()}
      */
+    @Deprecated
     public synchronized void loadFromString(@NonNull String cartJson) {
         loadCart(cartJson);
     }
@@ -102,6 +110,7 @@ public final class Cart {
      *
      * @return the Cart object for method chaining
      */
+    @Deprecated
     @NonNull
     public synchronized Cart clear() {
         productList.clear();
@@ -120,6 +129,7 @@ public final class Cart {
      * @param name the product name
      * @return a Product object, or null if no matching Products were found.
      */
+    @Deprecated
     @Nullable
     public synchronized Product getProduct(@Nullable String name) {
         for (int i = 0; i < productList.size(); i++) {
@@ -138,12 +148,15 @@ public final class Cart {
      *
      * @return an {@code UnmodifiableCollection} of Products in the Cart
      */
+    @Deprecated
     @NonNull
     public List<Product> products() {
         return Collections.unmodifiableList(productList);
     }
 
     /**
+     * @deprecated use {@link CommerceApi#} {@link CommerceEvent} with the {@link Product#REMOVE_FROM_CART} action with the {@link MParticle#logEvent(BaseEvent)} api instead
+     *
      * Remove one or more products from the Cart and log a {@link CommerceEvent}.
      * <p></p>
      * This method will log a {@link CommerceEvent} with the {@link Product#REMOVE_FROM_CART} action.
@@ -154,12 +167,15 @@ public final class Cart {
      * @return the Cart object, useful for chaining several commands
      *
      */
+    @Deprecated
     @NonNull
     public synchronized Cart remove(@NonNull Product product) {
         return remove(product, true);
     }
 
     /**
+     * @deprecated use {@link CommerceApi#} {@link CommerceEvent} with the {@link Product#REMOVE_FROM_CART} action with the {@link MParticle#logEvent(BaseEvent)} api instead
+     *
      * Remove one or more products from the Cart and log a {@link CommerceEvent}.
      * <p></p>
      * This method will log a {@link CommerceEvent} with the {@link Product#REMOVE_FROM_CART} action.
@@ -170,6 +186,7 @@ public final class Cart {
      * @return the Cart object, useful for chaining several commands
      *
      */
+    @Deprecated
     @NonNull
     public synchronized Cart remove(@NonNull Product product, boolean logEvent) {
         if (product != null && productList.remove(product)) {
@@ -183,6 +200,8 @@ public final class Cart {
     }
 
     /**
+     * @deprecated use {@link CommerceApi#} {@link CommerceEvent} with the {@link Product#REMOVE_FROM_CART} action with the {@link MParticle#logEvent(BaseEvent)} api instead
+     *
      * Remove a product from the Cart by index and log a {@link CommerceEvent}.
      * <p></p>
      * This method will log a {@link CommerceEvent} with the {@link Product#REMOVE_FROM_CART} action.
@@ -191,6 +210,7 @@ public final class Cart {
      * @return boolean determining if a product was actually removed.
      * @see #products()
      */
+    @Deprecated
     public synchronized boolean remove(int index) {
         boolean removed = false;
         if (index >= 0 && productList.size() > index) {
@@ -204,6 +224,8 @@ public final class Cart {
     }
 
     /**
+     * @deprecated use {@link CommerceApi#} {@link CommerceEvent} with the {@link Product#ADD_TO_CART} action with the {@link MParticle#logEvent(BaseEvent)} api instead
+     *
      * Add one or more products to the Cart and optionally log a {@link CommerceEvent}.
      * <p></p>
      * This method will log a {@link CommerceEvent} with the {@link Product#ADD_TO_CART} action based on the logEvent parameter. Products added here
@@ -215,6 +237,7 @@ public final class Cart {
      * @return the Cart object, useful for chaining several commands
      *
      */
+    @Deprecated
     @NonNull
     public synchronized Cart addAll(@NonNull List<Product> newProducts, boolean logEvent) {
         if (newProducts != null && newProducts.size() > 0 && productList.size() < MAXIMUM_PRODUCT_COUNT) {
@@ -236,6 +259,8 @@ public final class Cart {
     }
 
     /**
+     * @deprecated use {@link CommerceApi#} {@link CommerceEvent} with the {@link Product#ADD_TO_CART} action with the {@link MParticle#logEvent(BaseEvent)} api instead
+     *
      * Add one or more products to the Cart and log a {@link CommerceEvent}.
      * <p></p>
      * This method will log a {@link CommerceEvent} with the {@link Product#ADD_TO_CART} action. Products added here
@@ -248,12 +273,15 @@ public final class Cart {
      * @return the Cart object, useful for chaining several commands
      *
      */
+    @Deprecated
     @NonNull
     public synchronized Cart add(@NonNull Product product) {
         return add(product, true);
     }
 
     /**
+     * @deprecated use {@link CommerceApi#} {@link CommerceEvent} with the {@link Product#ADD_TO_CART} action with the {@link MParticle#logEvent(BaseEvent)} api instead
+     *
      * Add one or more products to the Cart and log a {@link CommerceEvent}.
      * <p></p>
      * This method will log a {@link CommerceEvent} with the {@link Product#ADD_TO_CART} action. Products added here
@@ -266,6 +294,7 @@ public final class Cart {
      * @return the Cart object, useful for chaining several commands
      *
      */
+    @Deprecated
     @NonNull
     public synchronized Cart add(@NonNull Product product, boolean logEvent) {
         if (product != null && productList.size() < MAXIMUM_PRODUCT_COUNT && !productList.contains(product)) {
@@ -282,6 +311,8 @@ public final class Cart {
     }
 
     /**
+     * @deprecated use {@link CommerceApi#} {@link CommerceEvent} with the {@link Product#CHECKOUT} action with the {@link MParticle#logEvent(BaseEvent)} api instead
+     *
      * Log a {@link CommerceEvent} with the {@link Product#CHECKOUT} action, including the Products that are
      * currently in the Cart.
      *
@@ -290,6 +321,7 @@ public final class Cart {
      * @param step the checkout progress/step for apps that have a multi-step checkout process
      * @param options a label to associate with the checkout event
      */
+    @Deprecated
     public synchronized void checkout(int step, @Nullable String options) {
         if (productList != null && productList.size() > 0) {
             CommerceEvent event = new CommerceEvent.Builder(Product.CHECKOUT, productList.get(0))
@@ -306,12 +338,15 @@ public final class Cart {
     }
 
     /**
+     * @deprecated use {@link CommerceApi#} {@link CommerceEvent} with the {@link Product#CHECKOUT} action with the {@link MParticle#logEvent(BaseEvent)} api instead
+     *
      * Log a {@link CommerceEvent} with the {@link Product#CHECKOUT} action, including the Products that are
      * currently in the Cart.
      *
      * You should call {@link Cart#add(Product)} prior to this method.
      *
      */
+    @Deprecated
     public synchronized void checkout() {
         InternalListenerManager.getListener().onApiCalled("checkout");
         if (productList != null && productList.size() > 0) {
@@ -326,6 +361,8 @@ public final class Cart {
     }
 
     /**
+     * @deprecated use {@link CommerceApi#} {@link CommerceEvent} with the {@link Product#PURCHASE} action with the {@link MParticle#logEvent(BaseEvent)} api instead
+     *
      * Log a {@link CommerceEvent} with the {@link Product#PURCHASE} action for the Products that are
      * currently in the Cart.
      *
@@ -335,11 +372,14 @@ public final class Cart {
      *
      * @param attributes the attributes to associate with this purchase
      */
+    @Deprecated
     public void purchase(@NonNull TransactionAttributes attributes) {
         purchase(attributes, false);
     }
 
     /**
+     * @deprecated use {@link CommerceApi#} {@link CommerceEvent} with the {@link Product#PURCHASE} action with the {@link MParticle#logEvent(BaseEvent)} api instead
+     *
      * Log a {@link CommerceEvent} with the {@link Product#PURCHASE} action for the Products that are
      * currently in the Cart.
      *
@@ -348,6 +388,7 @@ public final class Cart {
      * @param attributes the attributes to associate with this purchase
      * @param clearCart boolean determining if the cart should remove its contents after the purchase
      */
+    @Deprecated
     public synchronized void purchase(@NonNull TransactionAttributes attributes, boolean clearCart) {
         if (productList != null && productList.size() > 0) {
             CommerceEvent event = new CommerceEvent.Builder(Product.PURCHASE, productList.get(0))
@@ -365,11 +406,14 @@ public final class Cart {
     }
 
     /**
+     * @deprecated use {@link CommerceApi#} {@link CommerceEvent} with the {@link Product#REFUND} action with the {@link MParticle#logEvent(BaseEvent)} api instead
+     *
      * Log a {@link CommerceEvent} with the {@link Product#REFUND} action for the Products that are
      * currently in the Cart.
      *
      * @param attributes the attributes to associate with this refund. Typically at least the transaction ID is required.
      */
+    @Deprecated
     public void refund(@NonNull TransactionAttributes attributes, boolean clearCart) {
         if (productList != null && productList.size() > 0) {
             CommerceEvent event = new CommerceEvent.Builder(Product.REFUND, productList.get(0))
