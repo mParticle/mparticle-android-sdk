@@ -363,7 +363,7 @@ public class MParticle {
      *
      * @param event the event object to log
      */
-    public void logMPEvent(@NonNull MPEvent event) {
+    private void logMPEvent(@NonNull MPEvent event) {
         if (mConfigManager.isEnabled() && checkEventLimit()) {
             mAppStateManager.ensureActiveSession();
             mMessageManager.logEvent(event, mAppStateManager.getCurrentActivityName());
