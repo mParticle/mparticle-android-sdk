@@ -31,27 +31,25 @@ public class MessageServiceTest extends BaseMPServiceTest {
     @Test
     public void testMessagesForUploadByMpid() throws Exception {
         for (int i = 0; i < 20; i++) {
-            MessageService.insertMessage(database, "apiKey", getMpMessage(), mpid1);
+            MessageService.insertMessage(database, "apiKey", getMpMessage(), mpid1, null, null);
         }
         assertEquals(MessageService.getMessagesForUpload(database, true, mpid1).size(), 20);
         assertEquals(MessageService.getMessagesForUpload(database, true, Constants.TEMPORARY_MPID).size(), 0);
         assertEquals(MessageService.getMessagesForUpload(database).size(), 20);
         for (int i = 0; i < 30; i++) {
-            MessageService.insertMessage(database, "apiKey", getMpMessage(), Constants.TEMPORARY_MPID);
+            MessageService.insertMessage(database, "apiKey", getMpMessage(), Constants.TEMPORARY_MPID, null, null);
         }
         assertEquals(MessageService.getMessagesForUpload(database, true, mpid1).size(), 20);
         assertEquals(MessageService.getMessagesForUpload(database, true, mpid2).size(), 0);
         assertEquals(MessageService.getMessagesForUpload(database, true, Constants.TEMPORARY_MPID).size(), 30);
         assertEquals(MessageService.getMessagesForUpload(database).size(), 20);
         for (int i = 0; i < 35; i++) {
-            MessageService.insertMessage(database, "apiKey", getMpMessage(), mpid2);
+            MessageService.insertMessage(database, "apiKey", getMpMessage(), mpid2, null, null);
         }
         assertEquals(MessageService.getMessagesForUpload(database, true, mpid1).size(), 20);
         assertEquals(MessageService.getMessagesForUpload(database, true, mpid2).size(), 35);
         assertEquals(MessageService.getMessagesForUpload(database, true, Constants.TEMPORARY_MPID).size(), 30);
         assertEquals(MessageService.getMessagesForUpload(database).size(), 55);
-
-
 
         assertEquals(MessageService.markMessagesAsUploaded(database, Integer.MAX_VALUE), 55);
         assertEquals(MessageService.getMessagesForUpload(database, true, mpid1).size(), 0);
@@ -65,13 +63,13 @@ public class MessageServiceTest extends BaseMPServiceTest {
         String currentSession = UUID.randomUUID().toString();
         String previousSession = UUID.randomUUID().toString();
         for (int i = 0; i < 20; i++) {
-            MessageService.insertMessage(database, "apiKey", getMpMessage(currentSession), mpid1);
+            MessageService.insertMessage(database, "apiKey", getMpMessage(currentSession), mpid1, null, null);
         }
         for (int i = 0; i < 30; i++) {
-            MessageService.insertMessage(database, "apiKey", getMpMessage(currentSession), Constants.TEMPORARY_MPID);
+            MessageService.insertMessage(database, "apiKey", getMpMessage(currentSession), Constants.TEMPORARY_MPID, null, null);
         }
         for (int i = 0; i < 35; i++) {
-            MessageService.insertMessage(database, "apiKey", getMpMessage(currentSession), mpid2);
+            MessageService.insertMessage(database, "apiKey", getMpMessage(currentSession), mpid2, null, null);
         }
         assertEquals(MessageService.markMessagesAsUploaded(database, Integer.MAX_VALUE), 55);
         assertEquals(MessageService.getSessionHistory(database, previousSession).size(), 55);
@@ -93,7 +91,7 @@ public class MessageServiceTest extends BaseMPServiceTest {
             testMpid = mpids[mRandomUtils.randomInt(0, 3)];
             testMessage = getMpMessage(currentSession, testMpid);
             testMessages.put(testMessage.toString(), testMessage);
-            MessageService.insertMessage(database, "apiKey",testMessage , testMpid);
+            MessageService.insertMessage(database, "apiKey",testMessage , testMpid, null, null);
         }
         assertEquals(MessageService.markMessagesAsUploaded(database, Integer.MAX_VALUE), 100);
         List<MessageService.ReadyMessage> readyMessages = MessageService.getSessionHistory(database, previousSession, false, Constants.TEMPORARY_MPID);
@@ -111,7 +109,7 @@ public class MessageServiceTest extends BaseMPServiceTest {
     @Test
     public void testMessageFlow() throws JSONException {
         for (int i = 0; i < 10; i++) {
-            MessageService.insertMessage(database, "apiKey", getMpMessage(), 1);
+            MessageService.insertMessage(database, "apiKey", getMpMessage(), 1, "dataplan1", 1);
         }
         List<MessageService.ReadyMessage> messageList = MessageService.getMessagesForUpload(database);
         assertEquals(messageList.size(), 10);
@@ -127,7 +125,7 @@ public class MessageServiceTest extends BaseMPServiceTest {
     @Test
     public void testMessageFlowMax() throws JSONException {
         for (int i = 0; i < 110; i++) {
-            MessageService.insertMessage(database, "apiKey", getMpMessage(), 1);
+            MessageService.insertMessage(database, "apiKey", getMpMessage(), 1, null, null);
         }
         List<MessageService.ReadyMessage> messages = MessageService.getMessagesForUpload(database);
         assertEquals(messages.size(), 100);
@@ -150,7 +148,7 @@ public class MessageServiceTest extends BaseMPServiceTest {
         String currentSession = UUID.randomUUID().toString();
         String newSession = UUID.randomUUID().toString();
         for (int i = 0; i < 10; i++) {
-            MessageService.insertMessage(database, "apiKey", getMpMessage(currentSession), 1);
+            MessageService.insertMessage(database, "apiKey", getMpMessage(currentSession), 1, null, null);
         }
         assertEquals(MessageService.markMessagesAsUploaded(database, 10), 10);
         assertEquals(MessageService.getMessagesForUpload(database).size(), 0);
@@ -165,7 +163,7 @@ public class MessageServiceTest extends BaseMPServiceTest {
     @Test
     public void testMessagesMaxSize() throws JSONException {
         for (int i = 0; i < 10; i++) {
-            MessageService.insertMessage(database, "apiKey", getMpMessage(), 1);
+            MessageService.insertMessage(database, "apiKey", getMpMessage(), 1, "a", 1);
         }
         assertEquals(MessageService.getMessagesForUpload(database).size(), 10);
 
@@ -174,11 +172,11 @@ public class MessageServiceTest extends BaseMPServiceTest {
             builder.append("ab");
         }
         MessageManager.BaseMPMessage message = new MessageManager.BaseMPMessage.Builder(builder.toString(), new InternalSession(), new Location("New York City"), 1).build();
-        MessageService.insertMessage(database, "apiKey", message, 1);
+        MessageService.insertMessage(database, "apiKey", message, 1, "b", 2);
 
         assertEquals(MessageService.getMessagesForUpload(database).size(), 10);
         for (int i = 0; i < 10; i++) {
-            MessageService.insertMessage(database, "apiKey", getMpMessage(), 1);
+            MessageService.insertMessage(database, "apiKey", getMpMessage(), 1, "c", 3);
         }
         assertEquals(MessageService.getMessagesForUpload(database).size(), 20);
     }

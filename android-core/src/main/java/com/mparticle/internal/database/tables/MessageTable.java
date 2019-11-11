@@ -4,12 +4,17 @@ import android.provider.BaseColumns;
 
 public class MessageTable extends MpIdDependentTable {
 
+    public static final String ADD_DATAPLAN_VERSION_COLUMN = "ALTER TABLE " + MessageTableColumns.TABLE_NAME +
+            " ADD COLUMN " + MessageTableColumns.DATAPLAN_VERSION + " NUMBER";
+    public static final String ADD_DATAPLAN_ID_COLUMN = "ALTER TABLE " + MessageTableColumns.TABLE_NAME +
+            " ADD COLUMN " + MessageTableColumns.DATAPLAN_ID + " TEXT";
+
     @Override
     public String getTableName() {
         return MessageTableColumns.TABLE_NAME;
     }
 
-    protected interface MessageTableColumns extends BaseColumns {
+    public interface MessageTableColumns extends BaseColumns {
         String TABLE_NAME = "messages";
         String SESSION_ID = "session_id";
         String API_KEY = "api_key";
@@ -19,6 +24,8 @@ public class MessageTable extends MpIdDependentTable {
         String MESSAGE_TYPE = "message_type";
         String CF_UUID = "cfuuid";
         String MP_ID = MpIdDependentTable.MP_ID;
+        String DATAPLAN_VERSION = "dataplan_version";
+        String DATAPLAN_ID = "dataplan_id";
     }
 
     static String getAddMpIdColumnString(String defaultValue) {
@@ -35,7 +42,9 @@ public class MessageTable extends MpIdDependentTable {
                     MessageTableColumns.CREATED_AT + " INTEGER NOT NULL, " +
                     MessageTableColumns.MESSAGE_TYPE + " TEXT, " +
                     MessageTableColumns.CF_UUID + " TEXT, " +
-                    MessageTableColumns.MP_ID + " INTEGER" +
+                    MessageTableColumns.MP_ID + " INTEGER, " +
+                    MessageTableColumns.DATAPLAN_ID + " TEXT," +
+                    MessageTableColumns.DATAPLAN_VERSION + " INTEGER" +
                     ");";
 
 }

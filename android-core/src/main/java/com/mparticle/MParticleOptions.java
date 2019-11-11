@@ -39,6 +39,8 @@ public class MParticleOptions {
     private PushRegistrationHelper.PushRegistration mPushRegistration;
     private Integer mIdentityConnectionTimeout = ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS;
     private NetworkOptions mNetworkOptions;
+    private String mDataplanId;
+    private Integer mDataplanVersion;
 
     private MParticleOptions() {
     }
@@ -104,6 +106,8 @@ public class MParticleOptions {
             Logger.warning(String.format("Connection Timeout milliseconds must be a positive number, greater than %s second. Defaulting to %s seconds", String.valueOf(ConfigManager.MINIMUM_CONNECTION_TIMEOUT_SECONDS), String.valueOf(ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS)));
         }
         this.mNetworkOptions = NetworkOptionsManager.validateAndResolve(builder.networkOptions);
+        this.mDataplanId = builder.dataplanId;
+        this.mDataplanVersion = builder.dataplanVersion;
     }
 
     /**
@@ -115,7 +119,8 @@ public class MParticleOptions {
         return new Builder(context);
     }
 
-    Context getContext() {
+    @NonNull
+    public Context getContext() {
         return mContext;
     }
 
@@ -239,6 +244,16 @@ public class MParticleOptions {
         return mNetworkOptions;
     }
 
+    @Nullable
+    public String getDataplanId() {
+        return mDataplanId;
+    }
+
+    @Nullable
+    public Integer getDataplanVersion() {
+        return mDataplanVersion;
+    }
+
     public static class Builder {
         private Context context;
         String apiKey;
@@ -259,6 +274,8 @@ public class MParticleOptions {
         private PushRegistrationHelper.PushRegistration pushRegistration;
         private Integer identityConnectionTimeout = null;
         private NetworkOptions networkOptions;
+        private String dataplanId;
+        private Integer dataplanVersion;
 
         private Builder(Context context) {
             this.context = context;
@@ -500,6 +517,13 @@ public class MParticleOptions {
         @NonNull
         public Builder networkOptions(@Nullable NetworkOptions networkOptions) {
             this.networkOptions = networkOptions;
+            return this;
+        }
+
+        @NonNull
+        public Builder dataplan(@Nullable String dataplanId, @Nullable Integer dataplanVersion) {
+            this.dataplanId = dataplanId;
+            this.dataplanVersion = dataplanVersion;
             return this;
         }
 

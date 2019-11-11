@@ -122,7 +122,7 @@ public class MParticle {
             disableUncaughtExceptionLogging();
         }
         mCommerce = new CommerceApi(options.getContext());
-        mMessageManager = new MessageManager(options.getContext(), configManager, options.getInstallType(), appStateManager, sDevicePerformanceMetricsDisabled, mDatabaseManager);
+        mMessageManager = new MessageManager(configManager, appStateManager, sDevicePerformanceMetricsDisabled, mDatabaseManager, options);
         mConfigManager.setNetworkOptions(options.getNetworkOptions());
         mPreferences = options.getContext().getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
     }

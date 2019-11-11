@@ -3,6 +3,9 @@ package com.mparticle.internal.database.services;
 import android.content.ContentValues;
 import android.database.Cursor;
 
+import androidx.annotation.Nullable;
+
+import com.google.android.gms.common.internal.Objects;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MessageManager;
@@ -17,7 +20,7 @@ import java.util.List;
 
 public class MessageService extends MessageTable {
 
-    private final static String[] prepareSelection = new String[]{"_id", MessageTableColumns.MESSAGE, MessageTableColumns.CREATED_AT, MessageTableColumns.STATUS, MessageTableColumns.SESSION_ID, MessageTableColumns.MP_ID};
+    private final static String[] prepareSelection = new String[]{"_id", MessageTableColumns.MESSAGE, MessageTableColumns.CREATED_AT, MessageTableColumns.STATUS, MessageTableColumns.SESSION_ID, MessageTableColumns.MP_ID, MessageTableColumns.DATAPLAN_ID, MessageTableColumns.DATAPLAN_VERSION};
     private final static String prepareOrderBy =  MessageTableColumns._ID + " asc";
 
     private static String getSessionHistorySelection(boolean includesMpid) {
@@ -53,12 +56,19 @@ public class MessageService extends MessageTable {
             int messageIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.MESSAGE);
             int sessionIdIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.SESSION_ID);
             int messageMpidIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.MP_ID);
+            int dataplanIdIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.DATAPLAN_ID);
+            int dataplanVersinIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.DATAPLAN_VERSION);
             while (readyMessagesCursor.moveToNext()) {
                 String sessionId = readyMessagesCursor.getString(sessionIdIndex);
                 int messageId = readyMessagesCursor.getInt(messageIdIndex);
                 String message = readyMessagesCursor.getString(messageIndex);
                 long messageMpid = readyMessagesCursor.getLong(messageMpidIndex);
-                ReadyMessage readyMessage = new ReadyMessage(messageMpid, sessionId, messageId, message);
+                String dataplanId = readyMessagesCursor.getString(dataplanIdIndex);
+                Integer dataplanVersion = null;
+                if (!readyMessagesCursor.isNull(dataplanVersinIndex)) {
+                    dataplanVersion = readyMessagesCursor.getInt(dataplanVersinIndex);
+                }
+                ReadyMessage readyMessage = new ReadyMessage(messageMpid, sessionId, messageId, message, dataplanId, dataplanVersion);
                 InternalListenerManager.getListener().onCompositeObjects(readyMessagesCursor, readyMessage);
                 readyMessages.add(readyMessage);
             }
@@ -103,12 +113,19 @@ public class MessageService extends MessageTable {
             int messageIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.MESSAGE);
             int sessionIdIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.SESSION_ID);
             int messageMpidIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.MP_ID);
+            int dataplanIdIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.DATAPLAN_ID);
+            int dataplanVersinIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.DATAPLAN_VERSION);
             while (readyMessagesCursor.moveToNext()) {
                 String sessionId = readyMessagesCursor.getString(sessionIdIndex);
                 int messageId = readyMessagesCursor.getInt(messageIdIndex);
                 String message = readyMessagesCursor.getString(messageIndex);
                 long messageMpid = readyMessagesCursor.getLong(messageMpidIndex);
-                ReadyMessage readyMessage  = new ReadyMessage(messageMpid, sessionId, messageId, message);
+                String dataplanId = readyMessagesCursor.getString(dataplanIdIndex);
+                Integer dataplanVersion = null;
+                if (!readyMessagesCursor.isNull(dataplanVersinIndex)) {
+                    dataplanVersion = readyMessagesCursor.getInt(dataplanVersinIndex);
+                }
+                ReadyMessage readyMessage = new ReadyMessage(messageMpid, sessionId, messageId, message, dataplanId, dataplanVersion);
                 InternalListenerManager.getListener().onCompositeObjects(readyMessagesCursor, readyMessage);
                 readyMessages.add(readyMessage);
             }
@@ -154,13 +171,15 @@ public class MessageService extends MessageTable {
         return database.delete(MessageTableColumns.TABLE_NAME, MessageTableColumns._ID + " <= ? and " + MessageTableColumns.MP_ID + " != ?", whereArgs);
     }
 
-    public static void insertMessage(MPDatabase db, String apiKey, MessageManager.BaseMPMessage message, long mpId) throws JSONException {
+    public static void insertMessage(MPDatabase db, String apiKey, MessageManager.BaseMPMessage message, long mpId, String dataplanId, Integer dataplanVersion) throws JSONException {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MessageTableColumns.API_KEY, apiKey);
         contentValues.put(MessageTableColumns.CREATED_AT, message.getLong(Constants.MessageKey.TIMESTAMP));
         String sessionID = message.getSessionId();
         contentValues.put(MessageTableColumns.SESSION_ID, sessionID);
         contentValues.put(MessageTableColumns.MP_ID, mpId);
+        contentValues.put(MessageTableColumns.DATAPLAN_ID, dataplanId);
+        contentValues.put(MessageTableColumns.DATAPLAN_VERSION, dataplanVersion);
         if (Constants.NO_SESSION_ID.equals(sessionID)) {
             message.remove(Constants.MessageKey.SESSION_ID);
         }
@@ -186,12 +205,16 @@ public class MessageService extends MessageTable {
         private String sessionId;
         private int messageId;
         private String message;
+        private String dataplanId;
+        private Integer dataplanVersion;
 
-        private ReadyMessage(long mpid, String sessionId, int messageId, String message) {
+        private ReadyMessage(long mpid, String sessionId, int messageId, String message, String dataplanId, Integer dataplanVersion) {
             this.mpid = mpid;
             this.sessionId = sessionId;
             this.messageId = messageId;
             this.message = message;
+            this.dataplanId = dataplanId;
+            this.dataplanVersion = dataplanVersion;
         }
 
         public long getMpid() {
@@ -208,6 +231,14 @@ public class MessageService extends MessageTable {
 
         public String getMessage() {
             return message;
+        }
+
+        public String getDataplanId() {
+            return dataplanId;
+        }
+
+        public Integer getDataplanVersion() {
+            return dataplanVersion;
         }
     }
 }

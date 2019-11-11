@@ -1,5 +1,8 @@
 package com.mparticle.internal;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.mparticle.BuildConfig;
 import com.mparticle.MParticle;
 import com.mparticle.consent.ConsentState;
@@ -12,14 +15,19 @@ import org.json.JSONObject;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.mparticle.internal.Constants.MessageKey.DATA_PLAN_CONTEXT;
+import static com.mparticle.internal.Constants.MessageKey.DATA_PLAN_ID;
+import static com.mparticle.internal.Constants.MessageKey.DATA_PLAN_KEY;
+import static com.mparticle.internal.Constants.MessageKey.DATA_PLAN_VERSION;
+
 public class MessageBatch extends JSONObject {
     private long messageLengthBytes;
 
-    private MessageBatch() {
+    protected MessageBatch() {
         super();
     }
 
-    public static MessageBatch create(boolean history, ConfigManager configManager, JSONObject cookies, long mpId) throws JSONException {
+    public static MessageBatch create(boolean history, ConfigManager configManager, JSONObject cookies, BatchId batchId) throws JSONException {
         MessageBatch uploadMessage = new MessageBatch();
         if (BuildConfig.MP_DEBUG) {
             uploadMessage.put(Constants.MessageKey.ECHO, true);
@@ -31,12 +39,12 @@ public class MessageBatch extends JSONObject {
         uploadMessage.put(Constants.MessageKey.OPT_OUT_HEADER, configManager.getOptedOut());
         uploadMessage.put(Constants.MessageKey.CONFIG_UPLOAD_INTERVAL, configManager.getUploadInterval()/1000);
         uploadMessage.put(Constants.MessageKey.CONFIG_SESSION_TIMEOUT, configManager.getSessionTimeout()/1000);
-        uploadMessage.put(Constants.MessageKey.MPID, String.valueOf(mpId));
+        uploadMessage.put(Constants.MessageKey.MPID, String.valueOf(batchId.getMpid()));
         uploadMessage.put(Constants.MessageKey.SANDBOX, configManager.getEnvironment().equals(MParticle.Environment.Development));
         uploadMessage.put(Constants.MessageKey.DEVICE_APPLICATION_STAMP, configManager.getDeviceApplicationStamp());
 
         if (history) {
-            String deletedAttr = configManager.getUserStorage(mpId).getDeletedUserAttributes();
+            String deletedAttr = configManager.getUserStorage(batchId.getMpid()).getDeletedUserAttributes();
             if (deletedAttr != null) {
                 uploadMessage.put(Constants.MessageKey.DELETED_USER_ATTRIBUTES, new JSONArray(deletedAttr));
                 configManager.getUserStorage().deleteDeletedUserAttributes();
@@ -46,7 +54,8 @@ public class MessageBatch extends JSONObject {
         uploadMessage.put(Constants.MessageKey.COOKIES, cookies);
         uploadMessage.put(Constants.MessageKey.PROVIDER_PERSISTENCE, configManager.getProviderPersistence());
         uploadMessage.put(Constants.MessageKey.INTEGRATION_ATTRIBUTES, configManager.getIntegrationAttributes());
-        uploadMessage.addConsentState(configManager.getConsentState(mpId));
+        uploadMessage.addConsentState(configManager.getConsentState(batchId.getMpid()));
+        uploadMessage.addDataplanContext(batchId.getDataplanId(), batchId.getDataplanVersion());
         return uploadMessage;
     }
 
@@ -84,6 +93,18 @@ public class MessageBatch extends JSONObject {
 
 
             } catch (JSONException ignored) { }
+        }
+    }
+
+    public void addDataplanContext(String dataplanId, Integer dataplanVersion) throws JSONException {
+        if (dataplanId != null) {
+            JSONObject dataplan = new JSONObject();
+            dataplan.put(DATA_PLAN_ID, dataplanId);
+            if (dataplanVersion != null) {
+                dataplan.put(DATA_PLAN_VERSION, dataplanVersion);
+            }
+
+            put(DATA_PLAN_CONTEXT, new JSONObject().put(DATA_PLAN_KEY, dataplan));
         }
     }
 

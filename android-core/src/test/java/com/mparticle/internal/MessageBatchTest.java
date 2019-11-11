@@ -25,7 +25,8 @@ public class MessageBatchTest {
         MParticle.setInstance(mockMp);
         ConfigManager manager = new ConfigManager(new MockContext(), MParticle.Environment.Production, "some api key", "some api secret");
         boolean sessionHistory = true;
-        MessageBatch batch = MessageBatch.create( sessionHistory, manager,new JSONObject(), manager.getMpid());
+        BatchId batchId = new BatchId(manager.getMpid(), null, null, null);
+        MessageBatch batch = MessageBatch.create( sessionHistory, manager,new JSONObject(), batchId);
         assertNotNull(batch.getString("dt"));
         assertNotNull(batch.getString("id"));
         assertNotNull(batch.getDouble("ct"));
@@ -38,7 +39,7 @@ public class MessageBatchTest {
             assertNotNull(batch.getJSONObject("cms"));
         }
         sessionHistory = false;
-        batch = MessageBatch.create( sessionHistory, manager,new JSONObject(), manager.getMpid());
+        batch = MessageBatch.create( sessionHistory, manager,new JSONObject(), batchId);
         assertNotNull(batch.getString("dt"));
         assertNotNull(batch.getString("id"));
         assertNotNull(batch.getDouble("ct"));
@@ -51,7 +52,7 @@ public class MessageBatchTest {
             assertNotNull(batch.getJSONObject("cms"));
         }
 
-        batch = MessageBatch.create( sessionHistory, manager,new JSONObject(), manager.getMpid());
+        batch = MessageBatch.create( sessionHistory, manager,new JSONObject(), batchId);
         assertFalse(batch.has("pb"));
     }
 
@@ -64,7 +65,8 @@ public class MessageBatchTest {
         MParticle.setInstance(mockMp);
         ConfigManager manager = new ConfigManager(new MockContext(), MParticle.Environment.Production, "some api key", "some api secret");
         boolean sessionHistory = true;
-        MessageBatch batch = MessageBatch.create( sessionHistory, manager,new JSONObject(), manager.getMpid());
+        BatchId batchId = new BatchId(manager.getMpid(), null, null, null);
+        MessageBatch batch = MessageBatch.create( sessionHistory, manager,new JSONObject(), batchId);
         batch.addConsentState(null);
         batch.addConsentState(ConsentState.builder().build());
         JSONObject consent = batch.optJSONObject("con");

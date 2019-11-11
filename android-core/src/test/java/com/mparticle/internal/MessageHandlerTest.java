@@ -39,7 +39,7 @@ public class MessageHandlerTest {
         mMessageManager = Mockito.mock(MessageManager.class);
         Mockito.when(mMessageManager.getApiKey()).thenReturn("apiKey");
         mParticleDatabaseManager = Mockito.mock(MParticleDBManager.class);
-        handler = new MessageHandler(mMessageManager, new MockContext(), mParticleDatabaseManager) {
+        handler = new MessageHandler(mMessageManager, new MockContext(), mParticleDatabaseManager, "dataplan1", 1) {
             @Override
             boolean databaseAvailable() {
                 return true;

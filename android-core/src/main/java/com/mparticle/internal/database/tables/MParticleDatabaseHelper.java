@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Message;
 
 import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
@@ -18,7 +19,7 @@ import java.util.Iterator;
 
 public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
     private final Context mContext;
-    public static final int DB_VERSION = 8;
+    public static final int DB_VERSION = 9;
     public static final String DB_NAME = "mparticle.db";
 
     public MParticleDatabaseHelper(Context context) {
@@ -57,6 +58,9 @@ public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
         if (oldVersion < 8) {
             removeGcmTable(db);
         }
+        if (oldVersion < 9) {
+            upgradeMessageTable(db);
+        }
     }
 
     private void upgradeSessionTable(SQLiteDatabase db) {
@@ -66,6 +70,11 @@ public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
 
     private void upgradeReportingTable(SQLiteDatabase db) {
         db.execSQL(ReportingTable.REPORTING_ADD_SESSION_ID_COLUMN);
+    }
+
+    private void upgradeMessageTable(SQLiteDatabase db) {
+        db.execSQL(MessageTable.ADD_DATAPLAN_ID_COLUMN);
+        db.execSQL(MessageTable.ADD_DATAPLAN_VERSION_COLUMN);
     }
 
     private void upgradeMpId(SQLiteDatabase db) {

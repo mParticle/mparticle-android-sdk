@@ -138,6 +138,10 @@ public class MPUtility {
         return Boolean.valueOf(TimeZone.getDefault().inDaylightTime(new Date()));
     }
 
+    public static boolean isEqual(Object field, Object field1) {
+        return field == field1 || (field != null && field.equals(field1));
+    }
+
     public static class AndroidAdIdInfo {
         public final String id;
         public final boolean isLimitAdTrackingEnabled;

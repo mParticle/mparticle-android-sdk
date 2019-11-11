@@ -16,12 +16,14 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.Process;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.telephony.TelephonyManager;
 
 import com.mparticle.InstallReferrerHelper;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
+import com.mparticle.MParticleOptions;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.commerce.Cart;
 import com.mparticle.commerce.CommerceEvent;
@@ -54,6 +56,10 @@ import java.util.UUID;
 import static com.mparticle.internal.Constants.MessageKey.ALIAS_REQUEST_TYPE;
 import static com.mparticle.internal.Constants.MessageKey.API_KEY;
 import static com.mparticle.internal.Constants.MessageKey.DATA;
+import static com.mparticle.internal.Constants.MessageKey.DATA_PLAN_CONTEXT;
+import static com.mparticle.internal.Constants.MessageKey.DATA_PLAN_ID;
+import static com.mparticle.internal.Constants.MessageKey.DATA_PLAN_KEY;
+import static com.mparticle.internal.Constants.MessageKey.DATA_PLAN_VERSION;
 import static com.mparticle.internal.Constants.MessageKey.DEVICE_APPLICATION_STAMP_ALIAS;
 import static com.mparticle.internal.Constants.MessageKey.END_TIME;
 import static com.mparticle.internal.Constants.MessageKey.ENVIRONMENT_ALIAS;
@@ -161,18 +167,18 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         mInstallType = installType;
     }
 
-    public MessageManager(Context appContext, ConfigManager configManager, MParticle.InstallType installType, AppStateManager appStateManager, boolean devicePerformanceMetricsDisabled, MParticleDBManager dbManager) {
+    public MessageManager(ConfigManager configManager, AppStateManager appStateManager, boolean devicePerformanceMetricsDisabled, MParticleDBManager dbManager, MParticleOptions options) {
         this.devicePerformanceMetricsDisabled = devicePerformanceMetricsDisabled;
         mDeviceAttributes = new DeviceAttributes();
-        sContext = appContext.getApplicationContext();
+        sContext = options.getContext().getApplicationContext();
         mConfigManager = configManager;
         mAppStateManager = appStateManager;
         mAppStateManager.setMessageManager(this);
         mMParticleDBManager = dbManager;
-        mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), this, appContext, dbManager);
-        mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager, appStateManager, this, dbManager);
-        sPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-        mInstallType = installType;
+        mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), this, options.getContext(), dbManager, options.getDataplanId(), options.getDataplanVersion());
+        mUploadHandler = new UploadHandler(options.getContext(), sUploadHandlerThread.getLooper(), configManager, appStateManager, this, dbManager);
+        sPreferences = options.getContext().getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+        mInstallType = options.getInstallType();
     }
 
     private static TelephonyManager getTelephonyManager() {
@@ -1051,16 +1057,6 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             mMessageHandler.sendMessage(mUploadHandler.obtainMessage(MessageHandler.STORE_ALIAS_MESSAGE, aliasMessage));
         } catch (JSONException e) {
             Logger.warning("Failed to create mParticle opt out message");
-        }
-    }
-
-    public class InfluenceOpenMessage {
-        public final long mTimeStamp;
-        public final long mTimeout;
-
-        public InfluenceOpenMessage(long timestamp, long influenceOpenTimeoutMillis) {
-            mTimeStamp = timestamp;
-            mTimeout = influenceOpenTimeoutMillis;
         }
     }
 

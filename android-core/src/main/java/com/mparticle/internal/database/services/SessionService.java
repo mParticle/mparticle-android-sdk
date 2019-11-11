@@ -3,7 +3,7 @@ package com.mparticle.internal.database.services;
 import android.content.ContentValues;
 import android.database.Cursor;
 
-import com.mparticle.MParticle;
+import com.mparticle.internal.BatchId;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.MessageBatch;
@@ -108,22 +108,23 @@ public class SessionService extends SessionTable {
         db.insert(TABLE_NAME, null, contentValues);
     }
 
-    public static List<JSONObject> processSessions(MPDatabase database, HashMap<String, Map<Long, MessageBatch>> uploadMessagesBySession) {
+    public static List<JSONObject> processSessions(MPDatabase database, HashMap<BatchId, MessageBatch> uploadMessagesByBatchId) {
         Cursor sessionCursor = null;
         List<JSONObject> deviceInfos = new ArrayList<JSONObject>();
+        Map<String, List<MessageBatch>> batchesBySessionId = flattenBySessionId(uploadMessagesByBatchId);
         try {
             sessionCursor = SessionService.getSessions(database);
             while (sessionCursor.moveToNext()) {
                 String sessionId = sessionCursor.getString(sessionCursor.getColumnIndex(SessionTableColumns.SESSION_ID));
-                Map<Long, MessageBatch> batchMap = uploadMessagesBySession.get(sessionId);
-                if (batchMap != null) {
+                List<MessageBatch> batchList = batchesBySessionId.get(sessionId);
+                if (batchList != null) {
                     try {
                         String appInfo = sessionCursor.getString(sessionCursor.getColumnIndex(APP_INFO));
                         JSONObject appInfoJson = new JSONObject(appInfo);
                         String deviceInfo = sessionCursor.getString(sessionCursor.getColumnIndex(SessionTableColumns.DEVICE_INFO));
                         JSONObject deviceInfoJson = new JSONObject(deviceInfo);
                         deviceInfos.add(deviceInfoJson);
-                        for (MessageBatch batch: batchMap.values()) {
+                        for (MessageBatch batch: batchList) {
                             batch.setAppInfo(appInfoJson);
                             batch.setDeviceInfo(deviceInfoJson);
                         }
@@ -147,5 +148,19 @@ public class SessionService extends SessionTable {
                 contentValues.put(APP_INFO, appInfo.toString());
                 String[] whereArgs = {sessionId};
                 db.update(TABLE_NAME, contentValues, SessionTableColumns.SESSION_ID + "=?", whereArgs);
+    }
+
+    static Map<String, List<MessageBatch>> flattenBySessionId(Map<BatchId, MessageBatch> uploadMessagesByBatchId) {
+        Map<String, List<MessageBatch>> uploadMessagesBySessionId = new HashMap<String, List<MessageBatch>>();
+        for (Map.Entry<BatchId, MessageBatch> batchEntry: uploadMessagesByBatchId.entrySet()) {
+            String sessionId = batchEntry.getKey().getSessionId();
+            List<MessageBatch> messageBatches = uploadMessagesBySessionId.get(sessionId);
+            if (messageBatches == null) {
+                messageBatches = new ArrayList<MessageBatch>();
+                uploadMessagesBySessionId.put(sessionId, messageBatches);
+            }
+            messageBatches.add(batchEntry.getValue());
+        }
+        return uploadMessagesBySessionId;
     }
 }

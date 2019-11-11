@@ -42,21 +42,27 @@ import java.util.UUID;
     public static final int STORE_ALIAS_MESSAGE = 15;
 
     private final MessageManagerCallbacks mMessageManagerCallbacks;
+    String mDataplanId;
+    Integer mDataplanVersion;
 
     /**
      * for unit testing only
      */
-    MessageHandler(MessageManagerCallbacks messageManager, Context context, MParticleDBManager dbManager) {
+    MessageHandler(MessageManagerCallbacks messageManager, Context context, MParticleDBManager dbManager, String dataplanId, Integer dataplanVersion) {
         mMessageManagerCallbacks = messageManager;
         mContext = context;
         mMParticleDBManager = dbManager;
+        mDataplanId = dataplanId;
+        mDataplanVersion = dataplanVersion;
     }
 
-    public MessageHandler(Looper looper, MessageManagerCallbacks messageManager, Context context, MParticleDBManager dbManager) {
+    public MessageHandler(Looper looper, MessageManagerCallbacks messageManager, Context context, MParticleDBManager dbManager, String dataplanId, Integer dataplanVersion) {
         super(looper);
         mMessageManagerCallbacks = messageManager;
         mContext = context;
         mMParticleDBManager = dbManager;
+        mDataplanId = dataplanId;
+        mDataplanVersion = dataplanVersion;
     }
 
     boolean databaseAvailable() {
@@ -96,7 +102,7 @@ import java.util.UUID;
                         mMParticleDBManager.appendBreadcrumbs(message);
                     }
                     try {
-                        mMParticleDBManager.insertMessage(mMessageManagerCallbacks.getApiKey(), message);
+                        mMParticleDBManager.insertMessage(mMessageManagerCallbacks.getApiKey(), message, mDataplanId, mDataplanVersion);
                     } catch (MParticleApiClientImpl.MPNoConfigException e) {
                         Logger.error("Unable to process uploads, API key and/or API Secret are missing.");
                         return;
@@ -145,7 +151,7 @@ import java.util.UUID;
                    if (endMessage != null) {
                        try {
                            Logger.verbose("Creating session end message for session ID: " + sessionId);
-                           mMParticleDBManager.insertMessage(mMessageManagerCallbacks.getApiKey(), endMessage);
+                           mMParticleDBManager.insertMessage(mMessageManagerCallbacks.getApiKey(), endMessage, mDataplanId, mDataplanVersion);
                            mMParticleDBManager.updateSessionStatus(sessionId, SessionTable.SessionStatus.CLOSED);
                        } catch (MParticleApiClientImpl.MPNoConfigException e) {
                            Logger.error("Unable to process uploads, API key and/or API Secret are missing.");
