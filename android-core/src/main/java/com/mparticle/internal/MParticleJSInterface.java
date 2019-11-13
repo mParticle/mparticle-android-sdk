@@ -463,27 +463,6 @@ public class MParticleJSInterface {
         return jsonArray.toString();
     }
 
-    protected static Map<String, String> convertToMap(JSONObject attributes) {
-        if (null != attributes) {
-            Iterator keys = attributes.keys();
-
-            Map<String, String> parsedAttributes = new HashMap<String, String>();
-
-            while (keys.hasNext()) {
-                String key = (String) keys.next();
-                try {
-                    parsedAttributes.put(key, attributes.getString(key));
-                } catch (JSONException e) {
-                    Logger.warning("Could not parse event attribute value.");
-                }
-            }
-
-            return parsedAttributes;
-        }
-
-        return null;
-    }
-
     private EventType convertEventType(int eventType) {
         switch (eventType) {
             case 1:
@@ -575,7 +554,7 @@ public class MParticleJSInterface {
         if (builder == null) {
             return null;
         }
-        Map<String, String> customAttributes = getCustomAttributes(jsonObject);
+        Map<String, String> customAttributes = convertToMap(jsonObject.optJSONObject(JS_KEY_EVENT_ATTRIBUTES));
         if (customAttributes != null) {
             builder.customAttributes(customAttributes);
         }
@@ -677,7 +656,7 @@ public class MParticleJSInterface {
             }
             builder.brand(jsonObject.optString(BRAND, null));
             builder.variant(jsonObject.optString(VARIANT, null));
-            Map<String, String> customAttributes = getCustomAttributes(jsonObject);
+            Map<String, String> customAttributes = convertToMap(jsonObject.optJSONObject(ATTRIBUTES));
             if (customAttributes != null) {
                 builder.customAttributes(customAttributes);
             }
@@ -688,20 +667,24 @@ public class MParticleJSInterface {
         }
     }
 
-    private Map<String, String> getCustomAttributes(JSONObject jsonObject) {
-        JSONObject attributesJson = jsonObject.optJSONObject(ATTRIBUTES);
-        if (attributesJson != null) {
-            if (attributesJson.length() > 0) {
-                Map<String, String> customAttributes = new HashMap<String, String>();
-                Iterator<String> keys = attributesJson.keys();
+    protected static Map<String, String> convertToMap(JSONObject attributes) {
+        if (null != attributes) {
+            Iterator keys = attributes.keys();
 
-                while (keys.hasNext()) {
-                    String key = keys.next();
-                    customAttributes.put(key, attributesJson.optString(key));
+            Map<String, String> parsedAttributes = new HashMap<String, String>();
+
+            while (keys.hasNext()) {
+                String key = (String) keys.next();
+                try {
+                    parsedAttributes.put(key, attributes.getString(key));
+                } catch (JSONException e) {
+                    Logger.warning("Could not parse attribute value.");
                 }
-                return customAttributes;
             }
+
+            return parsedAttributes;
         }
+
         return null;
     }
 

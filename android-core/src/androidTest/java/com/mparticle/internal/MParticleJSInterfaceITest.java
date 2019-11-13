@@ -15,8 +15,12 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.WebViewActivity;
+import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.commerce.Product;
+import com.mparticle.commerce.TransactionAttributes;
 import com.mparticle.identity.AccessUtils;
 import com.mparticle.test.R;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
@@ -335,6 +339,61 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
         latch.await();
         assertTrue(called.value);
     }
+
+    @Test
+    public void testLogCommerceEvent() throws Exception {
+        final JSONObject customAttributes = MPUtility.mapToJson( mRandomUtils.getRandomAttributes(10));
+
+        String testJavascript = String.format("// 1. Create the product\n" +
+                "var product = mParticle.eCommerce.createProduct(\n" +
+                "    'Double Room - Econ Rate', //\n" +
+                "    'econ-1', \n" +
+                "    100.00, \n" +
+                "    4\n" +
+                ");\n" +
+                "\n" +
+                "// 2. Summarize the transaction\n" +
+                "var transactionAttributes = {\n" +
+                "    Id: 'foo-transaction-id',\n" +
+                "    Revenue: 430.00,\n" +
+                "    Tax: 30\n" +
+                "};\n" +
+                "\n" +
+                "// 3. Log the purchase event\n" +
+                "mParticle.eCommerce.logPurchase(transactionAttributes, product, true, %s);", customAttributes.toString(4));
+
+        final MutableBoolean called = new MutableBoolean(false);
+        final CountDownLatch latch = new MPLatch(1);
+        runJavascriptTest(testJavascript, new MParticleJSInterface() {
+            @Override
+            @JavascriptInterface
+            public void logEvent(String json) {
+                super.logEvent(json);
+                try {
+                    CommerceEvent commerceEvent = toCommerceEvent(new JSONObject(json));
+                    assertEquals(1, commerceEvent.getProducts().size());
+                    assertEquals(Product.PURCHASE, commerceEvent.getProductAction());
+                    Product product = commerceEvent.getProducts().get(0);
+                    assertEquals("Double Room - Econ Rate", product.getName());
+                    assertEquals("econ-1", product.getSku());
+                    assertEquals(100.0, product.getUnitPrice(), .1);
+                    assertEquals(4.0, product.getQuantity(), .1);
+                    TransactionAttributes transactionAttributes = commerceEvent.getTransactionAttributes();
+                    assertEquals("foo-transaction-id", transactionAttributes.getId());
+                    assertEquals(430.0, transactionAttributes.getRevenue(), .1);
+                    assertEquals(30.0, transactionAttributes.getTax(), .1);
+                    assertJsonEqual(customAttributes, MPUtility.mapToJson(commerceEvent.getCustomAttributes()));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                called.value = true;
+                latch.countDown();
+            }
+        });
+        latch.await();
+        assertTrue(called.value);
+    }
+
 
     @Test
     public void testLogout() throws Exception {
