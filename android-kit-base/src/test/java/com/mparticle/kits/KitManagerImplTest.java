@@ -1,7 +1,10 @@
 package com.mparticle.kits;
 
 import com.mparticle.BaseEvent;
+import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
+import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.commerce.Product;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.consent.GDPRConsent;
 import com.mparticle.identity.IdentityApi;
@@ -12,6 +15,7 @@ import com.mparticle.mock.MockKitManagerImpl;
 import com.mparticle.mock.MockMParticle;
 import com.mparticle.internal.BackgroundTaskHandler;
 import com.mparticle.mock.MockKitConfiguration;
+import com.mparticle.testutils.TestingUtils;
 
 import junit.framework.Assert;
 
@@ -344,5 +348,68 @@ public class KitManagerImplTest {
         manager.setUserAttributeList("test key", attributeList, 1);
         Mockito.verify(((KitIntegration.AttributeListener)integration), Mockito.times(1)).setUserAttributeList("test key", attributeList);
         Mockito.verify(((KitIntegration.AttributeListener)integration2), Mockito.times(1)).setUserAttribute("test key", "1,2,3");
+    }
+
+    @Test
+    public void testLogEventCalledOne() throws JSONException {
+        KitManagerEventCounter manager = new KitManagerEventCounter();
+
+        KitIntegration integration = Mockito.mock(
+                KitIntegration.class,
+                Mockito.withSettings().extraInterfaces(KitIntegration.AttributeListener.class)
+        );
+        KitIntegration integration2 = Mockito.mock(
+                KitIntegration.class,
+                Mockito.withSettings().extraInterfaces(KitIntegration.AttributeListener.class)
+        );
+        Mockito.when(((KitIntegration.AttributeListener)integration).supportsAttributeLists()).thenReturn(true);
+        Mockito.when(((KitIntegration.AttributeListener)integration2).supportsAttributeLists()).thenReturn(false);
+        Mockito.when(integration.getConfiguration()).thenReturn(MockKitConfiguration.createKitConfiguration());
+        Mockito.when(integration2.getConfiguration()).thenReturn(MockKitConfiguration.createKitConfiguration());
+        ((KitManagerImpl)manager).providers.put(5, integration);
+        ((KitManagerImpl)manager).providers.put(6, integration2);
+
+        MPEvent mpEvent = new TestingUtils().getRandomMPEventSimple();
+        manager.logEvent(mpEvent);
+        assertEquals(1, manager.logBaseEventCalled);
+        assertEquals(1, manager.logMPEventCalled);
+        assertEquals(0, manager.logCommerceEventCalled);
+
+        manager.logBaseEventCalled = 0;
+        manager.logMPEventCalled = 0;
+
+
+        CommerceEvent commerceEvent = new CommerceEvent.Builder(Product.CHECKOUT, new Product.Builder("name", "sku", 100).build())
+                .build();
+
+        manager.logEvent(commerceEvent);
+        assertEquals(1, manager.logBaseEventCalled);
+        assertEquals(0, manager.logMPEventCalled);
+        assertEquals(1, manager.logCommerceEventCalled);
+
+    }
+
+    class KitManagerEventCounter extends MockKitManagerImpl {
+            int logBaseEventCalled = 0;
+            int logCommerceEventCalled = 0;
+            int logMPEventCalled = 0;
+            
+            @Override
+            public void logEvent(BaseEvent event) {
+            super.logEvent(event);
+            logBaseEventCalled++;
+        }
+
+            @Override
+            protected void logMPEvent(MPEvent event) {
+            super.logMPEvent(event);
+            logMPEventCalled++;
+        }
+
+            @Override
+            protected void logCommerceEvent(CommerceEvent event) {
+            super.logCommerceEvent(event);
+            logCommerceEventCalled++;
+        }
     }
 }

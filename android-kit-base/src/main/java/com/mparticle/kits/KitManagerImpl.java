@@ -373,19 +373,18 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     public void logEvent(BaseEvent event) {
         for (KitIntegration provider: providers.values()) {
             try {
-                List<ReportingMessage> messages = provider.logEvent(event);
+                List<ReportingMessage> messages = provider.logBaseEvent(event);
                 mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), !MPUtility.isEmpty(messages), event);
                 mReportingManager.logAll(messages);
             } catch (Exception e) {
                 Logger.warning("Failed to call logMPEvent for kit: " + provider.getName() + ": " + e.getMessage());
                 mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), false, event, e);
             }
-            if (event instanceof MPEvent) {
-                logMPEvent((MPEvent) event);
-            }
-            if (event instanceof CommerceEvent) {
-                logCommerceEvent((CommerceEvent) event);
-            }
+        }
+        if (event instanceof MPEvent) {
+            logMPEvent((MPEvent) event);
+        } else if (event instanceof CommerceEvent) {
+            logCommerceEvent((CommerceEvent) event);
         }
     }
 

@@ -255,7 +255,12 @@ public abstract class KitIntegration {
     }
 
     @Nullable
-    public List<ReportingMessage> logEvent(@NonNull BaseEvent baseEvent) {
+    public List<ReportingMessage> logBaseEvent(@NonNull BaseEvent baseEvent) {
+        return Collections.emptyList();
+    }
+
+    @Nullable
+    public List<ReportingMessage> logEvent(@NonNull MPEvent baseEvent) {
         return Collections.emptyList();
     }
 
