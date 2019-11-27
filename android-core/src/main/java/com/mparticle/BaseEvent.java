@@ -5,6 +5,8 @@ import android.support.annotation.Nullable;
 
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
+import com.mparticle.internal.MessageManager;
+import com.mparticle.internal.messages.BaseMPMessageBuilder;
 
 import org.json.JSONArray;
 
@@ -12,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 public class BaseEvent {
-
     private MessageType mType;
     private Map<String, List<String>> mCustomFlags;
     private Map<String, String> mCustomAttributes;
@@ -20,6 +21,7 @@ public class BaseEvent {
     protected BaseEvent(MessageType type) {
         mType = type;
     }
+
 
     @NonNull
     public MessageType getType() {
@@ -67,6 +69,10 @@ public class BaseEvent {
             customAttributes.remove(null);
         }
         this.mCustomAttributes = customAttributes;
+    }
+
+    public BaseMPMessageBuilder getMessage() {
+        return new BaseMPMessageBuilder(getType().getMessageType());
     }
 
     public interface MessageType {

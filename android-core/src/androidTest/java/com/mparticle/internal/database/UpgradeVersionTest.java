@@ -20,6 +20,7 @@ import com.mparticle.internal.database.services.UserAttributesService;
 import com.mparticle.internal.database.tables.BaseTableTest;
 import com.mparticle.internal.database.tables.MParticleDatabaseHelper;
 import com.mparticle.internal.database.tables.UploadTable;
+import com.mparticle.internal.messages.BaseMPMessage;
 import com.mparticle.testutils.MPLatch;
 import com.mparticle.testutils.TestingUtils;
 
@@ -95,7 +96,7 @@ public class UpgradeVersionTest extends BaseTableTest {
         timer.await();
         MPDatabase db = new MPDatabaseImpl(baseDatabase);
 
-        MessageManager.BaseMPMessage message = new MessageManager.BaseMPMessage.Builder("test", new InternalSession(), new Location("New York City"), 1).build();
+        BaseMPMessage message = new BaseMPMessage.Builder("test").build(new InternalSession(), new Location("New York City"), 1);
 
         BreadcrumbService.insertBreadcrumb(db, mContext, message, "key", 1l);
         MessageService.insertMessage(db, "key", message, 1L, "id", 1);

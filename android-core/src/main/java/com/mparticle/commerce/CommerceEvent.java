@@ -8,6 +8,8 @@ import com.mparticle.BaseEvent;
 import com.mparticle.MParticle;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
+import com.mparticle.internal.messages.BaseMPMessageBuilder;
+import com.mparticle.internal.messages.MPCommerceMessage;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -76,16 +78,10 @@ public final class CommerceEvent extends BaseEvent {
             setCustomFlags(builder.mCustomFlags);
         }
 
-        boolean devMode = MParticle.Environment.Development.equals(MParticle.getInstance().getEnvironment());
-
         if (MPUtility.isEmpty(mProductAction)
                 && MPUtility.isEmpty(mPromotionAction)
                 && (mImpressions == null || mImpressions.size() == 0)) {
-            if (devMode) {
-                throw new IllegalStateException("CommerceEvent must be created with either a product action, promotion action, or an impression.");
-            } else {
-                Logger.error("CommerceEvent must be created with either a product action, promotion action, or an impression.");
-            }
+            Logger.error("CommerceEvent must be created with either a product action, promotion action, or an impression.");
         }
 
         if (mProductAction != null) {
@@ -93,19 +89,11 @@ public final class CommerceEvent extends BaseEvent {
                     mProductAction.equalsIgnoreCase(Product.REFUND)) {
                 if (mTransactionAttributes == null || MPUtility.isEmpty(mTransactionAttributes.getId())) {
                     String message = "CommerceEvent with action " + mProductAction + " must include a TransactionAttributes object with a transaction ID.";
-                    if (devMode) {
-                        throw new IllegalStateException(message);
-                    } else {
-                        Logger.error(message);
-                    }
+                    Logger.error(message);
                 }
             }
             if (promotionList != null && promotionList.size() > 0) {
-                if (devMode) {
-                    throw new IllegalStateException("Product CommerceEvent should not contain Promotions.");
-                } else {
-                    Logger.error("Product CommerceEvent should not contain Promotions.");
-                }
+                Logger.error("Product CommerceEvent should not contain Promotions.");
             }
             if (!mProductAction.equals(Product.ADD_TO_CART)
                     && !mProductAction.equals(Product.ADD_TO_WISHLIST)
@@ -121,11 +109,7 @@ public final class CommerceEvent extends BaseEvent {
             }
         } else if (mPromotionAction != null ) {
             if (productList != null && productList.size() > 0) {
-                if (devMode) {
-                    throw new IllegalStateException("Promotion CommerceEvent should not contain Products.");
-                }else {
-                    Logger.error("Promotion CommerceEvent should not contain Products.");
-                }
+                Logger.error("Promotion CommerceEvent should not contain Products.");
             }
             if (!mPromotionAction.equals(Promotion.VIEW)
                     && !mPromotionAction.equals(Promotion.CLICK)) {
@@ -133,18 +117,10 @@ public final class CommerceEvent extends BaseEvent {
             }
         } else {
             if (productList != null && productList.size() > 0) {
-                if (devMode) {
-                    throw new IllegalStateException("Impression CommerceEvent should not contain Products.");
-                }else {
-                    Logger.error("Impression CommerceEvent should not contain Products.");
-                }
+                Logger.error("Impression CommerceEvent should not contain Products.");
             }
             if (promotionList != null && promotionList.size() > 0) {
-                if (devMode) {
-                    throw new IllegalStateException("Impression CommerceEvent should not contain Promotions.");
-                } else {
-                    Logger.error("Impression CommerceEvent should not contain Promotions.");
-                }
+                Logger.error("Impression CommerceEvent should not contain Promotions.");
             }
         }
 
@@ -462,6 +438,12 @@ public final class CommerceEvent extends BaseEvent {
     @Nullable
     public String getEventName() {
         return mEventName;
+    }
+
+    @Override
+    public BaseMPMessageBuilder getMessage() {
+        return new MPCommerceMessage.Builder(this)
+                .flags(getCustomFlags());
     }
 
     /**

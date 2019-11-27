@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import com.mparticle.MParticle;
 import com.mparticle.MockMParticle;
 import com.mparticle.identity.IdentityApi;
+import com.mparticle.internal.messages.BaseMPMessage;
 import com.mparticle.testutils.AndroidUtils;
 
 import org.json.JSONArray;
@@ -294,9 +295,9 @@ public class ConfigManagerTest {
 
     @Test
     public void testShouldTrigger() throws Exception {
-        MessageManager.BaseMPMessage message = new MessageManager.BaseMPMessage.Builder(Constants.MessageType.COMMERCE_EVENT, new InternalSession(), null, 1).build();
+        BaseMPMessage message = new BaseMPMessage.Builder(Constants.MessageType.COMMERCE_EVENT).build(new InternalSession(), null, 1);
         assertTrue(manager.shouldTrigger(message));
-        message = new MessageManager.BaseMPMessage.Builder(Constants.MessageType.PUSH_RECEIVED, new InternalSession(), null, 1).build();
+        message = new BaseMPMessage.Builder(Constants.MessageType.PUSH_RECEIVED).build(new InternalSession(), null, 1);
         assertTrue(manager.shouldTrigger(message));
     }
 

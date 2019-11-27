@@ -6,6 +6,8 @@ import com.mparticle.MockMParticle;
 import com.mparticle.commerce.Cart;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Product;
+import com.mparticle.internal.messages.BaseMPMessage;
+import com.mparticle.internal.messages.MPCommerceMessage;
 
 import org.junit.Test;
 
@@ -22,12 +24,12 @@ public class BaseMPMessageTest {
     public void testEventLength() throws Exception {
         MPEvent event = new MPEvent.Builder("test name", MParticle.EventType.Navigation).build();
         InternalSession session = new InternalSession();
-        MessageManager.BaseMPMessage message = new MessageManager.BaseMPMessage.Builder(Constants.MessageType.EVENT, session, null, 1)
+        BaseMPMessage message = new BaseMPMessage.Builder(Constants.MessageType.EVENT)
                 .name(event.getEventName())
                 .timestamp(1235)
                 .length(event.getLength())
                 .attributes(MPUtility.enforceAttributeConstraints(event.getCustomAttributes()))
-                .build();
+                .build(session, null, 1);
 
         assertNull(message.opt("el"));
         assertNull(message.getAttributes());
@@ -35,22 +37,22 @@ public class BaseMPMessageTest {
         Map<String, String> info = new HashMap<String, String>(1);
         info.put("EventLength", "321");
         MPEvent event2 = new MPEvent.Builder("test name", MParticle.EventType.Navigation).duration(123).customAttributes(info).build();
-        MessageManager.BaseMPMessage message2 = new MessageManager.BaseMPMessage.Builder(Constants.MessageType.EVENT, session, null, 1)
+        BaseMPMessage message2 = new BaseMPMessage.Builder(Constants.MessageType.EVENT)
                 .name(event2.getEventName())
                 .timestamp(1235)
                 .length(event2.getLength())
                 .attributes(MPUtility.enforceAttributeConstraints(event2.getCustomAttributes()))
-                .build();
+                .build(session, null, 1);
 
         assertEquals(message2.getAttributes().getString("EventLength"), "321");
 
         MPEvent event3 = new MPEvent.Builder("test name", MParticle.EventType.Navigation).duration(123).build();
-        MessageManager.BaseMPMessage message3 = new MessageManager.BaseMPMessage.Builder(Constants.MessageType.EVENT, session, null, 1)
+        BaseMPMessage message3 = new BaseMPMessage.Builder(Constants.MessageType.EVENT)
                 .name(event3.getEventName())
                 .timestamp(1235)
                 .length(event3.getLength())
                 .attributes(MPUtility.enforceAttributeConstraints(event.getCustomAttributes()))
-                .build();
+                .build(session, null, 1);
 
         assertEquals(message3.getAttributes().getString("EventLength"), "123");
 
@@ -61,9 +63,9 @@ public class BaseMPMessageTest {
         MParticle.setInstance(new MockMParticle());
         CommerceEvent event = new CommerceEvent.Builder(Product.ADD_TO_CART, new Product.Builder("foo", "bar", 10).build()).build();
         Cart cart = null;
-        MessageManager.BaseMPMessage message = new MessageManager.MPCommerceMessage.Builder(event, new InternalSession(), null, 0, cart)
-                .timestamp(12345)
-                .build();
+        MPCommerceMessage.Builder builder = (MPCommerceMessage.Builder) new MPCommerceMessage.Builder(event)
+                .timestamp(12345);
+        BaseMPMessage message = builder.build(new InternalSession(), null, 0, cart);
         assertNotNull(message);
     }
 }

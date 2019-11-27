@@ -7,6 +7,7 @@ import android.support.test.InstrumentationRegistry;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.InternalSession;
+import com.mparticle.internal.messages.BaseMPMessage;
 
 import org.json.JSONException;
 import org.junit.Before;
@@ -20,13 +21,13 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
 public class BreadcrumbServiceTest extends BaseMPServiceTest {
-    private static MessageManager.BaseMPMessage message;
+    private static BaseMPMessage message;
     private static int breadCrumbLimit;
     private static Context context;
 
     @Before
     public void before() throws Exception {
-        message = new MessageManager.BaseMPMessage.Builder("test", new InternalSession(), new Location("New York City"), 1).build();
+        message = new BaseMPMessage.Builder("test").build(new InternalSession(), new Location("New York City"), 1);
         context = InstrumentationRegistry.getContext();
         breadCrumbLimit = ConfigManager.getBreadcrumbLimit(context);
     }

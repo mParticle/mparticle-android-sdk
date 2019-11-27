@@ -12,6 +12,7 @@ import com.mparticle.ExceptionHandler;
 import com.mparticle.MParticle;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApi;
+import com.mparticle.internal.messages.BaseMPMessage;
 import com.mparticle.networking.NetworkOptions;
 import com.mparticle.networking.NetworkOptionsManager;
 
@@ -710,7 +711,7 @@ public class ConfigManager {
         return mTriggerMessageHashes;
     }
 
-    public boolean shouldTrigger(MessageManager.BaseMPMessage message) {
+    public boolean shouldTrigger(BaseMPMessage message) {
         JSONArray messageMatches = getTriggerMessageMatches();
         JSONArray triggerHashes = getTriggerMessageHashes();
 

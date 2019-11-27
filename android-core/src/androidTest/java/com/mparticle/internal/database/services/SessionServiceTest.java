@@ -7,6 +7,7 @@ import com.mparticle.internal.BatchId;
 import com.mparticle.internal.MessageBatch;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.database.tables.SessionTable;
+import com.mparticle.internal.messages.BaseMPMessage;
 
 import junit.framework.Assert;
 
@@ -29,7 +30,7 @@ public class SessionServiceTest extends BaseMPServiceTest {
         JSONObject fooObject = new JSONObject();
         String sessionId = UUID.randomUUID().toString();
         fooObject.put("foo", "bar");
-        MessageManager.BaseMPMessage mpMessage = getMpMessage(sessionId);
+        BaseMPMessage mpMessage = getMpMessage(sessionId);
         SessionService.insertSession(database, mpMessage, "foo-app-key", fooObject.toString(), fooObject.toString(), 1);
         fooObject = new JSONObject();
         String randomId = UUID.randomUUID().toString();

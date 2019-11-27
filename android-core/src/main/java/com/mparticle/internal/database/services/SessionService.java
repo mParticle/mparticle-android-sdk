@@ -9,6 +9,7 @@ import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.MessageBatch;
 import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.tables.SessionTable;
+import com.mparticle.internal.messages.BaseMPMessage;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -95,7 +96,7 @@ public class SessionService extends SessionTable {
         }
     }
 
-    public static void insertSession(MPDatabase db, MessageManager.BaseMPMessage message, String apiKey, String appInfo, String deviceInfo, long mpId) throws JSONException {
+    public static void insertSession(MPDatabase db, BaseMPMessage message, String apiKey, String appInfo, String deviceInfo, long mpId) throws JSONException {
         ContentValues contentValues = new ContentValues();
         contentValues.put(SessionTableColumns.MP_ID, mpId);
         contentValues.put(SessionTableColumns.API_KEY, apiKey);

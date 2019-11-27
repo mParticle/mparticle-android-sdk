@@ -10,6 +10,7 @@ import com.mparticle.identity.AliasRequest;
 import com.mparticle.identity.AliasResponse;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.listeners.InternalListenerManager;
+import com.mparticle.internal.messages.MPAliasMessage;
 import com.mparticle.segmentation.SegmentListener;
 
 import org.json.JSONException;
@@ -278,7 +279,7 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
             Logger.warning("Alias Request will be retried");
         }
         try {
-            MessageManager.MPAliasMessage mpAliasMessage = new MessageManager.MPAliasMessage(aliasRequestMessage);
+            MPAliasMessage mpAliasMessage = new MPAliasMessage(aliasRequestMessage);
             AliasRequest aliasRequest = mpAliasMessage.getAliasRequest();
             String requestId = mpAliasMessage.getRequestId();
             AliasResponse aliasResponse = new AliasResponse(response, aliasRequest, requestId, !shouldDelete);

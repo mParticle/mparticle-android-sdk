@@ -5,6 +5,7 @@ import android.location.Location;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.InternalSession;
 import com.mparticle.internal.MessageManager;
+import com.mparticle.internal.messages.BaseMPMessage;
 
 import org.json.JSONException;
 import org.junit.Before;
@@ -83,10 +84,10 @@ public class MessageServiceTest extends BaseMPServiceTest {
     public void testSessionHistoryAccuracy() throws Exception {
         String currentSession = UUID.randomUUID().toString();
         String previousSession = UUID.randomUUID().toString();
-        MessageManager.BaseMPMessage testMessage;
+        BaseMPMessage testMessage;
         Long[] mpids = new Long[]{mpid1, mpid2, mpid3};
         Long testMpid;
-        Map<String, MessageManager.BaseMPMessage> testMessages = new HashMap<String, MessageManager.BaseMPMessage>();
+        Map<String, BaseMPMessage> testMessages = new HashMap<String, BaseMPMessage>();
         for (int i = 0; i < 100; i++) {
             testMpid = mpids[mRandomUtils.randomInt(0, 3)];
             testMessage = getMpMessage(currentSession, testMpid);
@@ -97,7 +98,7 @@ public class MessageServiceTest extends BaseMPServiceTest {
         List<MessageService.ReadyMessage> readyMessages = MessageService.getSessionHistory(database, previousSession, false, Constants.TEMPORARY_MPID);
         assertEquals(readyMessages.size(), testMessages.size());
         for (MessageService.ReadyMessage readyMessage: readyMessages) {
-            MessageManager.BaseMPMessage message = testMessages.get(readyMessage.getMessage());
+            BaseMPMessage message = testMessages.get(readyMessage.getMessage());
             assertNotNull(message);
             assertEquals(readyMessage.getMpid(), message.getMpId());
             assertEquals(readyMessage.getMessage(), message.toString());
@@ -171,7 +172,7 @@ public class MessageServiceTest extends BaseMPServiceTest {
         for (int i = 0; i < Constants.LIMIT_MAX_MESSAGE_SIZE; i++) {
             builder.append("ab");
         }
-        MessageManager.BaseMPMessage message = new MessageManager.BaseMPMessage.Builder(builder.toString(), new InternalSession(), new Location("New York City"), 1).build();
+        BaseMPMessage message = new BaseMPMessage.Builder(builder.toString()).build(new InternalSession(), new Location("New York City"), 1);
         MessageService.insertMessage(database, "apiKey", message, 1, "b", 2);
 
         assertEquals(MessageService.getMessagesForUpload(database).size(), 10);

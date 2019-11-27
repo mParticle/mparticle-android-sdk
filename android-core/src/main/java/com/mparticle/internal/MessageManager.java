@@ -16,7 +16,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.Process;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.telephony.TelephonyManager;
 
@@ -27,15 +26,15 @@ import com.mparticle.MParticleOptions;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.commerce.Cart;
 import com.mparticle.commerce.CommerceEvent;
-import com.mparticle.commerce.Impression;
-import com.mparticle.commerce.Product;
-import com.mparticle.commerce.Promotion;
-import com.mparticle.commerce.TransactionAttributes;
 import com.mparticle.identity.AliasRequest;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
 import com.mparticle.internal.database.services.MParticleDBManager;
+import com.mparticle.internal.messages.BaseMPMessage;
+import com.mparticle.internal.messages.BaseMPMessageBuilder;
+import com.mparticle.internal.messages.MPAliasMessage;
+import com.mparticle.internal.messages.MPCommerceMessage;
 import com.mparticle.messaging.ProviderCloudMessage;
 
 import org.json.JSONArray;
@@ -56,18 +55,14 @@ import java.util.UUID;
 import static com.mparticle.internal.Constants.MessageKey.ALIAS_REQUEST_TYPE;
 import static com.mparticle.internal.Constants.MessageKey.API_KEY;
 import static com.mparticle.internal.Constants.MessageKey.DATA;
-import static com.mparticle.internal.Constants.MessageKey.DATA_PLAN_CONTEXT;
-import static com.mparticle.internal.Constants.MessageKey.DATA_PLAN_ID;
-import static com.mparticle.internal.Constants.MessageKey.DATA_PLAN_KEY;
-import static com.mparticle.internal.Constants.MessageKey.DATA_PLAN_VERSION;
+import static com.mparticle.internal.Constants.MessageKey.DESTINATION_MPID;
 import static com.mparticle.internal.Constants.MessageKey.DEVICE_APPLICATION_STAMP_ALIAS;
 import static com.mparticle.internal.Constants.MessageKey.END_TIME;
 import static com.mparticle.internal.Constants.MessageKey.ENVIRONMENT_ALIAS;
-import static com.mparticle.internal.Constants.MessageKey.SOURCE_MPID;
 import static com.mparticle.internal.Constants.MessageKey.REQUEST_ID;
 import static com.mparticle.internal.Constants.MessageKey.REQUEST_TYPE;
+import static com.mparticle.internal.Constants.MessageKey.SOURCE_MPID;
 import static com.mparticle.internal.Constants.MessageKey.START_TIME;
-import static com.mparticle.internal.Constants.MessageKey.DESTINATION_MPID;
 
 /**
  * This class is primarily responsible for generating BaseMPMessage objects, and then adding them to a
@@ -248,17 +243,17 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     }
 
     public BaseMPMessage createFirstRunMessage() throws JSONException {
-        return new BaseMPMessage.Builder(MessageType.FIRST_RUN, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+        return new BaseMPMessage.Builder(MessageType.FIRST_RUN)
                 .timestamp(mAppStateManager.getSession().mSessionStartTime)
                 .dataConnection(sActiveNetworkName)
-                .build();
+                .build(mAppStateManager.getSession(), mLocation, mConfigManager.getMpid());
     }
 
     public BaseMPMessage startSession(InternalSession session) {
         try {
-            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.SESSION_START, session, mLocation, mConfigManager.getMpid())
+            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.SESSION_START)
                     .timestamp(mAppStateManager.getSession().mSessionStartTime)
-                    .build();
+                    .build(session, mLocation, mConfigManager.getMpid());
 
             SharedPreferences.Editor editor = sPreferences.edit();
             long timeInFg = mConfigManager.getUserStorage().getPreviousSessionForegound();
@@ -337,17 +332,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         if (event != null) {
             try {
 
-                BaseMPMessage message = new MPEventMessage.Builder(MessageType.EVENT, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
-                        .name(event.getEventName())
-                        .timestamp(mAppStateManager.getSession().mLastEventTime)
-                        .length(event.getLength())
-                        .flags(event.getCustomFlags())
-                        .attributes(MPUtility.enforceAttributeConstraints(event.getCustomAttributes()))
-                        .build();
-                message.put(MessageKey.EVENT_TYPE, event.getEventType());
-                message.put(MessageKey.EVENT_START_TIME, message.getTimestamp());
-
-
+                BaseMPMessage message = event.getMessage()
+                        .build(mAppStateManager.getSession(), mLocation, mConfigManager.getMpid());
+                message.put(Constants.MessageKey.EVENT_START_TIME, mAppStateManager.getSession().mLastEventTime);
                 if (currentActivity != null) {
                     message.put(MessageKey.CURRENT_ACTIVITY, currentActivity);
                 }
@@ -373,10 +360,16 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 if (user != null) {
                     cart = user.getCart();
                 }
-                BaseMPMessage message = new MPCommerceMessage.Builder(event, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid(), cart)
-                        .timestamp(mAppStateManager.getSession().mLastEventTime)
-                        .flags(event.getCustomFlags())
-                        .build();
+                BaseMPMessageBuilder builder = event.getMessage();
+                BaseMPMessage message;
+                if (builder instanceof MPCommerceMessage.Builder) {
+                    message = ((MPCommerceMessage.Builder)builder)
+                            .build(mAppStateManager.getSession(), mLocation, mConfigManager.getMpid(), cart);
+                } else {
+                    message = builder
+                            .build(mAppStateManager.getSession(), mLocation, mConfigManager.getMpid());
+                }
+
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
                 return message;
             } catch (JSONException e) {
@@ -389,12 +382,12 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     public BaseMPMessage logScreen(MPEvent event, boolean started) {
         if (event != null && event.getEventName() != null) {
             try {
-                BaseMPMessage message = new BaseMPMessage.Builder(MessageType.SCREEN_VIEW, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+                BaseMPMessage message = new BaseMPMessage.Builder(MessageType.SCREEN_VIEW)
                         .timestamp(mAppStateManager.getSession().mLastEventTime)
                         .name(event.getEventName())
                         .flags(event.getCustomFlags())
                         .attributes(MPUtility.enforceAttributeConstraints(event.getCustomAttributes()))
-                        .build();
+                        .build(mAppStateManager.getSession(), mLocation, mConfigManager.getMpid());
 
                 message.put(MessageKey.EVENT_START_TIME, mAppStateManager.getSession().mLastEventTime);
                 message.put(MessageKey.EVENT_DURATION, 0);
@@ -411,9 +404,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     public BaseMPMessage logBreadcrumb(String breadcrumb) {
         if (breadcrumb != null) {
             try {
-                BaseMPMessage message = new BaseMPMessage.Builder(MessageType.BREADCRUMB, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+                BaseMPMessage message = new BaseMPMessage.Builder(MessageType.BREADCRUMB)
                         .timestamp(mAppStateManager.getSession().mLastEventTime)
-                        .build();
+                        .build(mAppStateManager.getSession(), mLocation, mConfigManager.getMpid());
 
                 message.put(MessageKey.EVENT_START_TIME, mAppStateManager.getSession().mLastEventTime);
                 message.put(MessageKey.BREADCRUMB_SESSION_COUNTER, mConfigManager.getUserStorage().getCurrentSessionCounter());
@@ -431,9 +424,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public BaseMPMessage optOut(long time, boolean optOutStatus) {
         try {
-            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.OPT_OUT, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.OPT_OUT)
                     .timestamp(time)
-                    .build();
+                    .build(mAppStateManager.getSession(), mLocation, mConfigManager.getMpid());
             message.put(MessageKey.OPT_OUT_STATUS, optOutStatus);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
             return message;
@@ -449,10 +442,10 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public BaseMPMessage logErrorEvent(String errorMessage, Throwable t, JSONObject attributes, boolean caught) {
         try {
-            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.ERROR, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.ERROR)
                     .timestamp(mAppStateManager.getSession().mLastEventTime)
                     .attributes(attributes)
-                    .build();
+                    .build(mAppStateManager.getSession(), mLocation, mConfigManager.getMpid());
             if (t != null) {
                 message.put(MessageKey.ERROR_MESSAGE, t.getMessage());
                 message.put(MessageKey.ERROR_SEVERITY, caught ? "error" : "fatal");
@@ -478,9 +471,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     public BaseMPMessage logNetworkPerformanceEvent(long time, String method, String url, long length, long bytesSent, long bytesReceived, String requestString) {
         if (!MPUtility.isEmpty(url) && !MPUtility.isEmpty(method)) {
             try {
-                BaseMPMessage message = new BaseMPMessage.Builder(MessageType.NETWORK_PERFORMNACE, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+                BaseMPMessage message = new BaseMPMessage.Builder(MessageType.NETWORK_PERFORMNACE)
                         .timestamp(time)
-                        .build();
+                        .build(mAppStateManager.getSession(), mLocation, mConfigManager.getMpid());
                 message.put(MessageKey.NPE_METHOD, method);
                 message.put(MessageKey.NPE_URL, url);
                 message.put(MessageKey.NPE_LENGTH, length);
@@ -503,9 +496,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         if (!MPUtility.isEmpty(token)) {
             try {
                 mConfigManager.setPushInstanceId(token);
-                BaseMPMessage message = new BaseMPMessage.Builder(MessageType.PUSH_REGISTRATION, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+                BaseMPMessage message = new BaseMPMessage.Builder(MessageType.PUSH_REGISTRATION)
                         .timestamp(System.currentTimeMillis())
-                        .build();
+                        .build(mAppStateManager.getSession(), mLocation, mConfigManager.getMpid());
                 message.put(MessageKey.PUSH_TOKEN, token);
                 message.put(MessageKey.PUSH_TOKEN_TYPE, "google");
                 message.put(MessageKey.PUSH_REGISTER_FLAG, registeringFlag);
@@ -565,9 +558,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                                             String launchUri, String launchExtras, String launchSourcePackage, long previousForegroundTime, long suspendedTime, int interruptions) {
         if (!MPUtility.isEmpty(stateTransInit)) {
             try {
-                BaseMPMessage message = new BaseMPMessage.Builder(MessageType.APP_STATE_TRANSITION, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+                BaseMPMessage message = new BaseMPMessage.Builder(MessageType.APP_STATE_TRANSITION)
                         .timestamp(System.currentTimeMillis())
-                        .build();
+                        .build(mAppStateManager.getSession(), mLocation, mConfigManager.getMpid());
 
                 message.put(MessageKey.STATE_TRANSITION_TYPE, stateTransInit);
                 if (currentActivity != null) {
@@ -642,10 +635,10 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public void logNotification(ProviderCloudMessage cloudMessage, String appState) {
         try{
-            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.PUSH_RECEIVED, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.PUSH_RECEIVED)
                     .timestamp(System.currentTimeMillis())
                     .name("gcm")
-                    .build();
+                    .build(mAppStateManager.getSession(), mLocation, mConfigManager.getMpid());
 
             message.put(MessageKey.PAYLOAD, cloudMessage.getRedactedJsonPayload().toString());
             message.put(MessageKey.PUSH_TYPE, Constants.Push.MESSAGE_TYPE_RECEIVED);
@@ -665,10 +658,10 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     @Override
     public void logNotification(int contentId, String payload, String appState, int newBehavior) {
         try{
-            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.PUSH_RECEIVED, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.PUSH_RECEIVED)
                     .timestamp(System.currentTimeMillis())
                     .name("gcm")
-                    .build();
+                    .build(mAppStateManager.getSession(), mLocation, mConfigManager.getMpid());
 
             message.put(MessageKey.PAYLOAD, payload);
             message.put(MessageKey.PUSH_BEHAVIOR, newBehavior);
@@ -691,9 +684,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     public void logProfileAction(String action) {
         try {
 
-            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.PROFILE, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.PROFILE)
                     .timestamp(System.currentTimeMillis())
-                    .build();
+                    .build(mAppStateManager.getSession(), mLocation, mConfigManager.getMpid());
 
             message.put(Constants.ProfileActions.KEY, action);
 
@@ -705,9 +698,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public BaseMPMessage logUserIdentityChangeMessage(JSONObject newIdentity, JSONObject oldIdentity, JSONArray userIdentities, long mpId) {
         try {
-            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.USER_IDENTITY_CHANGE, mAppStateManager.getSession(), mLocation, mpId)
+            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.USER_IDENTITY_CHANGE)
                     .timestamp(System.currentTimeMillis())
-                    .build();
+                    .build(mAppStateManager.getSession(), mLocation, mpId);
             if (newIdentity != null) {
                 message.put(MessageKey.NEW_USER_IDENTITY, newIdentity);
             } else {
@@ -736,9 +729,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public BaseMPMessage logUserAttributeChangeMessage(String userAttributeKey, Object newValue, Object oldValue, boolean deleted, boolean isNewAttribute, long time, long mpId) {
         try {
-            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.USER_ATTRIBUTE_CHANGE, mAppStateManager.getSession(), mLocation, mpId)
+            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.USER_ATTRIBUTE_CHANGE)
                     .timestamp(time)
-                    .build();
+                    .build(mAppStateManager.getSession(), mLocation, mpId);
             message.put(MessageKey.NAME, userAttributeKey);
 
             if (newValue == null || deleted) {
@@ -1071,401 +1064,5 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     boolean hasDelayedStartOccurred() {
         return delayedStartOccurred;
-    }
-
-    public static class MPAliasMessage extends JSONObject {
-
-        public MPAliasMessage(String jsonString) throws JSONException {
-            super(jsonString);
-        }
-
-        protected MPAliasMessage(AliasRequest request, String deviceApplicationStamp, String apiKey) throws JSONException {
-            String environment = getStringValue(ConfigManager.getEnvironment());
-            String requestId = UUID.randomUUID().toString();
-
-            JSONObject dataJson = new JSONObject()
-                    .put(SOURCE_MPID, request.getSourceMpid())
-                    .put(DESTINATION_MPID, request.getDestinationMpid())
-                    .put(DEVICE_APPLICATION_STAMP_ALIAS, deviceApplicationStamp);
-
-            if (request.getStartTime() != 0) {
-                dataJson.put(START_TIME, request.getStartTime());
-            }
-            if (request.getEndTime() != 0) {
-                dataJson.put(END_TIME, request.getEndTime());
-            }
-
-            put(DATA, dataJson);
-            put(REQUEST_TYPE, ALIAS_REQUEST_TYPE);
-            put(REQUEST_ID, requestId);
-            put(ENVIRONMENT_ALIAS, environment);
-            put(API_KEY, apiKey);
-        }
-
-        public AliasRequest getAliasRequest() throws JSONException {
-            JSONObject data = getJSONObject(DATA);
-            return AliasRequest.builder()
-                    .destinationMpid(data.getLong(DESTINATION_MPID))
-                    .sourceMpid(data.getLong(SOURCE_MPID))
-                    .endTime(data.optLong(END_TIME, 0))
-                    .startTime(data.optLong(START_TIME, 0))
-                    .build();
-        }
-
-        public String getRequestId() throws JSONException {
-            return getString(REQUEST_ID);
-        }
-
-
-        protected String getStringValue(MParticle.Environment environment) {
-            switch (environment) {
-                case Development:
-                    return "development";
-                case Production:
-                    return "production";
-                default:
-                    return "";
-            }
-        }
-    }
-
-    public static class BaseMPMessage extends JSONObject{
-        private long mpId;
-
-        protected BaseMPMessage(){}
-
-        protected BaseMPMessage(BaseMPMessageBuilder builder) throws JSONException{
-            mpId = builder.mpid;
-            put(MessageKey.TYPE, builder.mMessageType);
-            put(MessageKey.TIMESTAMP, builder.mTimestamp);
-            if (MessageType.SESSION_START.equals(builder.mMessageType)) {
-                put(MessageKey.ID, builder.mSession.mSessionID);
-            } else {
-                put(MessageKey.SESSION_ID, builder.mSession.mSessionID);
-
-                if (builder.mSession.mSessionStartTime > 0) {
-                    put(MessageKey.SESSION_START_TIMESTAMP, builder.mSession.mSessionStartTime);
-                }
-            }
-
-            if (builder.mName != null) {
-                put(MessageKey.NAME, builder.mName);
-            }
-
-            if (builder.mCustomFlags != null) {
-                JSONObject flagsObject = new JSONObject();
-                for (Map.Entry<String, List<String>> entry : builder.mCustomFlags.entrySet()) {
-                    List<String> values = entry.getValue();
-                    JSONArray valueArray = new JSONArray(values);
-                    flagsObject.put(entry.getKey(), valueArray);
-                }
-                put(MessageKey.EVENT_FLAGS, flagsObject);
-            }
-
-            if (builder.mLength != null){
-                put(MessageKey.EVENT_DURATION, builder.mLength);
-                if (builder.mAttributes == null){
-                    builder.mAttributes = new JSONObject();
-                }
-                if (!builder.mAttributes.has("EventLength")) {
-                    //can't be longer than max int milliseconds
-                    builder.mAttributes.put("EventLength", Integer.toString(builder.mLength.intValue()));
-                }
-            }
-
-            if (builder.mAttributes != null) {
-                put(MessageKey.ATTRIBUTES, builder.mAttributes);
-            }
-
-            if (builder.mDataConnection != null) {
-                put(MessageKey.STATE_INFO_DATA_CONNECTION, builder.mDataConnection);
-            }
-
-            if (!(MessageType.ERROR.equals(builder.mMessageType) &&
-                    !(MessageType.OPT_OUT.equals(builder.mMessageType)))) {
-                if (builder.mLocation != null) {
-                    JSONObject locJSON = new JSONObject();
-                    locJSON.put(MessageKey.LATITUDE, builder.mLocation .getLatitude());
-                    locJSON.put(MessageKey.LONGITUDE, builder.mLocation .getLongitude());
-                    locJSON.put(MessageKey.ACCURACY, builder.mLocation .getAccuracy());
-                    put(MessageKey.LOCATION, locJSON);
-                }
-            }
-        }
-
-        public JSONObject getAttributes(){
-            return optJSONObject(MessageKey.ATTRIBUTES);
-        }
-
-        public long getTimestamp(){
-            try {
-                return getLong(MessageKey.TIMESTAMP);
-            }catch (JSONException jse){
-
-            }
-            return 0;
-        }
-
-        public String getSessionId() {
-            if (MessageType.SESSION_START.equals(getMessageType())) {
-                return optString(MessageKey.ID, Constants.NO_SESSION_ID);
-            } else {
-                return optString(MessageKey.SESSION_ID, Constants.NO_SESSION_ID);
-            }
-        }
-
-        public String getMessageType() {
-            return optString(MessageKey.TYPE);
-        }
-
-        public int getTypeNameHash() {
-            return MPUtility.mpHash(getMessageType() + getName());
-        }
-
-        public String getName() {
-            return optString(MessageKey.NAME);
-        }
-
-        public long getMpId() {
-            return mpId;
-        }
-
-        public static class Builder extends BaseMPMessageBuilder {
-
-            public Builder(String messageType, InternalSession session, @Nullable Location location, long mpId) {
-                super(messageType, session, location, mpId);
-            }
-        }
-    }
-
-    public static class BaseMPMessageBuilder {
-        final String mMessageType;
-        final InternalSession mSession;
-        long mTimestamp;
-        String mName;
-        JSONObject mAttributes;
-        Location mLocation;
-        String mDataConnection;
-        Double mLength = null;
-        Map<String, List<String>> mCustomFlags;
-        long mpid;
-
-        protected BaseMPMessageBuilder(String messageType, InternalSession session, @Nullable Location location, long mpId) {
-            mMessageType = messageType;
-            mSession = new InternalSession(session);
-            mLocation = location;
-            mpid = mpId;
-        }
-
-        public BaseMPMessageBuilder timestamp(long timestamp) {
-            mTimestamp = timestamp;
-            return this;
-        }
-
-        public BaseMPMessageBuilder name(String name) {
-            mName = name;
-            return this;
-        }
-
-        public BaseMPMessageBuilder attributes(JSONObject attributes) {
-            mAttributes = attributes;
-            return this;
-        }
-
-        public BaseMPMessage build() throws JSONException {
-            return new BaseMPMessage(this);
-        }
-
-        public BaseMPMessageBuilder dataConnection(String dataConnection) {
-            mDataConnection = dataConnection;
-            return this;
-        }
-
-        public BaseMPMessageBuilder length(Double length) {
-            mLength = length;
-            return this;
-        }
-
-        public BaseMPMessageBuilder flags(Map<String, List<String>> customFlags) {
-            mCustomFlags = customFlags;
-            return this;
-        }
-    }
-
-    public static class MPCommerceMessage extends BaseMPMessage {
-
-        protected MPCommerceMessage(Builder builder) throws JSONException {
-            super(builder);
-            addCommerceEventInfo(this, builder.commerceEvent, builder.cart);
-        }
-
-        private static void addCommerceEventInfo(BaseMPMessage message, CommerceEvent event, @Nullable Cart cart) {
-            try {
-
-                if (event.getScreen() != null) {
-                    message.put(Constants.Commerce.SCREEN_NAME, event.getScreen());
-                }
-                if (event.getNonInteraction() != null) {
-                    message.put(Constants.Commerce.NON_INTERACTION, event.getNonInteraction().booleanValue());
-                }
-                if (event.getCurrency() != null) {
-                    message.put(Constants.Commerce.CURRENCY, event.getCurrency());
-                }
-                if (event.getCustomAttributes() != null) {
-                    message.put(Constants.Commerce.ATTRIBUTES, MPUtility.mapToJson(event.getCustomAttributes()));
-                }
-                if (event.getProductAction() != null) {
-                    JSONObject productAction = new JSONObject();
-                    message.put(Constants.Commerce.PRODUCT_ACTION_OBJECT, productAction);
-                    productAction.put(Constants.Commerce.PRODUCT_ACTION, event.getProductAction());
-                    if (event.getCheckoutStep() != null) {
-                        productAction.put(Constants.Commerce.CHECKOUT_STEP, event.getCheckoutStep());
-                    }
-                    if (event.getCheckoutOptions() != null) {
-                        productAction.put(Constants.Commerce.CHECKOUT_OPTIONS, event.getCheckoutOptions());
-                    }
-                    if (event.getProductListName() != null) {
-                        productAction.put(Constants.Commerce.PRODUCT_LIST_NAME, event.getProductListName());
-                    }
-                    if (event.getProductListSource() != null) {
-                        productAction.put(Constants.Commerce.PRODUCT_LIST_SOURCE, event.getProductListSource());
-                    }
-                    if (event.getTransactionAttributes() != null) {
-                        TransactionAttributes transactionAttributes = event.getTransactionAttributes();
-                        if (transactionAttributes.getId() != null) {
-                            productAction.put(Constants.Commerce.TRANSACTION_ID, transactionAttributes.getId());
-                        }
-                        if (transactionAttributes.getAffiliation() != null) {
-                            productAction.put(Constants.Commerce.TRANSACTION_AFFILIATION, transactionAttributes.getAffiliation());
-                        }
-                        if (transactionAttributes.getRevenue() != null) {
-                            productAction.put(Constants.Commerce.TRANSACTION_REVENUE, transactionAttributes.getRevenue());
-                        }
-                        if (transactionAttributes.getTax() != null) {
-                            productAction.put(Constants.Commerce.TRANSACTION_TAX, transactionAttributes.getTax());
-                        }
-                        if (transactionAttributes.getShipping() != null) {
-                            productAction.put(Constants.Commerce.TRANSACTION_SHIPPING, transactionAttributes.getShipping());
-                        }
-                        if (transactionAttributes.getCouponCode() != null) {
-                            productAction.put(Constants.Commerce.TRANSACTION_COUPON_CODE, transactionAttributes.getCouponCode());
-                        }
-                    }
-                    if (event.getProducts() != null && event.getProducts().size() > 0) {
-                        JSONArray products = new JSONArray();
-                        for (int i = 0; i < event.getProducts().size(); i++) {
-                            products.put(new JSONObject(event.getProducts().get(i).toString()));
-                        }
-                        productAction.put(Constants.Commerce.PRODUCT_LIST, products);
-                    }
-                    if (event.getProductAction().equals(Product.PURCHASE)) {
-                        if (cart != null) {
-                            cart.clear();
-                        }
-
-                    }
-                    if (cart != null) {
-                        JSONObject cartJsonObject = new JSONObject(cart.toString());
-                        if (cartJsonObject.length() > 0) {
-                            message.put("sc", cartJsonObject);
-                        }
-                    }
-                }
-                if (event.getPromotionAction() != null) {
-                    JSONObject promotionAction = new JSONObject();
-                    message.put(Constants.Commerce.PROMOTION_ACTION_OBJECT, promotionAction);
-                    promotionAction.put(Constants.Commerce.PROMOTION_ACTION, event.getPromotionAction());
-                    if (event.getPromotions() != null && event.getPromotions().size() > 0) {
-                        JSONArray promotions = new JSONArray();
-                        for (int i = 0; i < event.getPromotions().size(); i++) {
-                            promotions.put(getPromotionJson(event.getPromotions().get(i)));
-                        }
-                        promotionAction.put(Constants.Commerce.PROMOTION_LIST, promotions);
-                    }
-                }
-                if (event.getImpressions() != null && event.getImpressions().size() > 0) {
-                    JSONArray impressions = new JSONArray();
-                    for (Impression impression : event.getImpressions()) {
-                        JSONObject impressionJson = new JSONObject();
-                        if (impression.getListName() != null) {
-                            impressionJson.put(Constants.Commerce.IMPRESSION_LOCATION, impression.getListName());
-                        }
-                        if (impression.getProducts() != null && impression.getProducts().size() > 0) {
-                            JSONArray productsJson = new JSONArray();
-                            impressionJson.put(Constants.Commerce.IMPRESSION_PRODUCT_LIST, productsJson);
-                            for (Product product : impression.getProducts()) {
-                                productsJson.put(new JSONObject(product.toString()));
-                            }
-                        }
-                        if (impressionJson.length() > 0) {
-                            impressions.put(impressionJson);
-                        }
-                    }
-                    if (impressions.length() > 0) {
-                        message.put(Constants.Commerce.IMPRESSION_OBJECT, impressions);
-                    }
-                }
-
-
-            } catch (Exception jse) {
-
-            }
-        }
-
-        private static JSONObject getPromotionJson(Promotion promotion) {
-            JSONObject json = new JSONObject();
-            try {
-                if (!MPUtility.isEmpty(promotion.getId())) {
-                    json.put("id", promotion.getId());
-                }
-                if (!MPUtility.isEmpty(promotion.getName())) {
-                    json.put("nm", promotion.getName());
-                }
-                if (!MPUtility.isEmpty(promotion.getCreative())) {
-                    json.put("cr", promotion.getCreative());
-                }
-                if (!MPUtility.isEmpty(promotion.getPosition())) {
-                    json.put("ps", promotion.getPosition());
-                }
-            } catch (JSONException jse) {
-
-            }
-            return json;
-        }
-
-        public static class Builder extends BaseMPMessageBuilder {
-            private CommerceEvent commerceEvent;
-            private Cart cart;
-
-            public Builder(CommerceEvent commerceEvent, InternalSession session, Location location, long mpId, Cart cart) {
-                super(MessageType.COMMERCE_EVENT, session, location, mpId);
-                this.commerceEvent = commerceEvent;
-                this.cart = cart;
-            }
-
-            @Override
-            public BaseMPMessage build() throws JSONException {
-                return new MPCommerceMessage(this);
-            }
-        }
-    }
-
-    public static class MPEventMessage extends BaseMPMessage {
-
-        protected MPEventMessage(Builder builder) throws JSONException {
-            super(builder);
-        }
-
-        public static class Builder extends BaseMPMessageBuilder {
-
-            public Builder(String messageType, InternalSession session, Location location, long mpId) {
-                super(messageType, session, location, mpId);
-            }
-
-            @Override
-            public BaseMPMessage build() throws JSONException {
-                return new MPEventMessage(this);
-            }
-        }
     }
 }

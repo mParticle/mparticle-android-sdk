@@ -8,6 +8,8 @@ import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.listeners.InternalListenerManager;
+import com.mparticle.internal.messages.BaseMPMessageBuilder;
+import com.mparticle.internal.messages.MPEventMessage;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -225,10 +227,20 @@ public class MPEvent extends BaseEvent {
         return entering;
     }
 
+    @NonNull
+    public BaseMPMessageBuilder getMessage() {
+        return new MPEventMessage.Builder(Constants.MessageType.EVENT)
+                .customEventType(getEventType())
+                .name(getEventName())
+                .length(getLength())
+                .flags(getCustomFlags())
+                .attributes(MPUtility.enforceAttributeConstraints(getCustomAttributes()));
+    }
+
     /**
      * Class used to build an {@link com.mparticle.MPEvent} object.
      *
-     * @see com.mparticle.MParticle#logEvent(MPEvent)
+     * @see com.mparticle.MParticle#logEvent(BaseEvent)
      */
     public static class Builder {
         private boolean screenEvent;

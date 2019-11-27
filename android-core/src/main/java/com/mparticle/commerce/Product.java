@@ -104,24 +104,14 @@ public final class Product {
         mCustomAttributes = builder.mCustomAttributes;
         updateTimeAdded();
 
-        boolean devMode = MParticle.Environment.Development.equals(MParticle.getInstance().getEnvironment());
-
         if (MPUtility.isEmpty(mName)) {
             String message = "Product name is required.";
-            if (devMode) {
-                throw new IllegalArgumentException(message);
-            } else {
-                mName = "Unknown";
-                Logger.error(message);
-            }
+            mName = "Unknown";
+            Logger.error(message);
         } else if (MPUtility.isEmpty(mSku)) {
             String message = "Product SKU is required.";
-            if (devMode) {
-                throw new IllegalArgumentException(message);
-            } else {
-                mSku = "Unknown";
-                Logger.error(message);
-            }
+            mSku = "Unknown";
+            Logger.error(message);
         }
     }
 

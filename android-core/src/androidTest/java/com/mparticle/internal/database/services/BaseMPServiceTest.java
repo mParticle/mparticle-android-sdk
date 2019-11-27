@@ -9,6 +9,7 @@ import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.database.BaseDatabase;
 import com.mparticle.internal.database.MPDatabaseImpl;
 import com.mparticle.internal.database.tables.MParticleDatabaseHelper;
+import com.mparticle.internal.messages.BaseMPMessage;
 import com.mparticle.testutils.BaseCleanInstallEachTest;
 
 import org.json.JSONException;
@@ -25,17 +26,17 @@ abstract public class BaseMPServiceTest extends BaseCleanInstallEachTest {
         database = new MPDatabaseImpl(openHelper.getWritableDatabase());
     }
 
-    MessageManager.BaseMPMessage getMpMessage() throws JSONException {
+    BaseMPMessage getMpMessage() throws JSONException {
         return getMpMessage(UUID.randomUUID().toString());
     }
 
-    MessageManager.BaseMPMessage getMpMessage(String sessionId) throws JSONException {
+    BaseMPMessage getMpMessage(String sessionId) throws JSONException {
         return getMpMessage(sessionId, mRandomUtils.randomLong(Long.MIN_VALUE, Long.MAX_VALUE));
     }
 
-    MessageManager.BaseMPMessage getMpMessage(String sessionId, long mpid) throws JSONException {
+    BaseMPMessage getMpMessage(String sessionId, long mpid) throws JSONException {
         InternalSession session = new InternalSession();
         session.mSessionID = sessionId;
-        return new MessageManager.BaseMPMessage.Builder(mRandomUtils.getAlphaNumericString(mRandomUtils.randomInt(20, 48)), session, new Location(mRandomUtils.getAlphaNumericString(mRandomUtils.randomInt(1, 55))), mpid).build();
+        return new BaseMPMessage.Builder(mRandomUtils.getAlphaNumericString(mRandomUtils.randomInt(20, 48))).build(session, new Location(mRandomUtils.getAlphaNumericString(mRandomUtils.randomInt(1, 55))), mpid);
     }
 }

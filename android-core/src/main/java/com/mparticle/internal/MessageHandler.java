@@ -9,6 +9,8 @@ import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.database.tables.SessionTable;
+import com.mparticle.internal.messages.BaseMPMessage;
+import com.mparticle.internal.messages.MPAliasMessage;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -87,7 +89,7 @@ import java.util.UUID;
         switch (msg.what) {
             case STORE_MESSAGE:
                 try {
-                    MessageManager.BaseMPMessage message = (MessageManager.BaseMPMessage) msg.obj;
+                    BaseMPMessage message = (BaseMPMessage) msg.obj;
                     message.put(MessageKey.STATE_INFO_KEY, MessageManager.getStateInfo());
                     String messageType = message.getString(MessageKey.TYPE);
                     // Handle the special case of session-start by creating the
@@ -141,7 +143,7 @@ import java.util.UUID;
             case CREATE_SESSION_END_MESSAGE:
                 try {
                     Map.Entry<String, Set<Long>> entry = (Map.Entry<String, Set<Long>>) msg.obj;
-                    MessageManager.BaseMPMessage endMessage = null;
+                    BaseMPMessage endMessage = null;
                     String sessionId = entry.getKey();
                    try {
                        endMessage = mMParticleDBManager.getSessionForSessionEndMessage(sessionId, ((MessageManager)mMessageManagerCallbacks).getLocation(), entry.getValue());
@@ -189,7 +191,7 @@ import java.util.UUID;
                 break;
             case STORE_BREADCRUMB:
                 try {
-                    MessageManager.BaseMPMessage message = (MessageManager.BaseMPMessage) msg.obj;
+                    BaseMPMessage message = (BaseMPMessage) msg.obj;
                     message.put(Constants.MessageKey.ID, UUID.randomUUID().toString());
                     try {
                         mMParticleDBManager.insertBreadcrumb(message, mMessageManagerCallbacks.getApiKey());
@@ -235,7 +237,7 @@ import java.util.UUID;
                 break;
             case STORE_ALIAS_MESSAGE:
                 try {
-                    MessageManager.MPAliasMessage aliasMessage = (MessageManager.MPAliasMessage) msg.obj;
+                    MPAliasMessage aliasMessage = (MPAliasMessage) msg.obj;
                     mMParticleDBManager.insertAliasRequest(mMessageManagerCallbacks.getApiKey(), aliasMessage);
                     if (MParticle.getInstance() != null) {
                         MParticle.getInstance().upload();
@@ -291,7 +293,7 @@ import java.util.UUID;
         }
     }
 
-    private void dbInsertSession(MessageManager.BaseMPMessage message) throws JSONException {
+    private void dbInsertSession(BaseMPMessage message) throws JSONException {
         try {
             DeviceAttributes deviceAttributes =  mMessageManagerCallbacks.getDeviceAttributes();
             mMParticleDBManager.insertSession(message, mMessageManagerCallbacks.getApiKey(), deviceAttributes.getAppInfo(mContext), deviceAttributes.getDeviceInfo(mContext));

@@ -14,6 +14,7 @@ import com.mparticle.SdkListener;
 import com.mparticle.identity.AliasRequest;
 import com.mparticle.identity.AliasResponse;
 import com.mparticle.internal.database.services.MParticleDBManager;
+import com.mparticle.internal.messages.MPAliasMessage;
 import com.mparticle.mock.MockContext;
 import com.mparticle.testutils.AndroidUtils;
 import com.mparticle.testutils.RandomUtils;
@@ -245,7 +246,7 @@ public class UploadHandlerTest {
         assertNull(deleteId.value);
 
         AliasRequest aliasRequest = TestingUtils.getInstance().getRandomAliasRequest();
-        JSONObject request = new MessageManager.MPAliasMessage(aliasRequest, "das","apiKey");
+        JSONObject request = new MPAliasMessage(aliasRequest, "das","apiKey");
         uploadHandler.uploadAliasRequest(1, request.toString());
 
         assertNull(deleteId.value);
@@ -283,7 +284,7 @@ public class UploadHandlerTest {
 
         AliasRequest aliasRequest = TestingUtils.getInstance().getRandomAliasRequest();
 
-        uploadHandler.uploadAliasRequest(1, new MessageManager.MPAliasMessage(aliasRequest, "das", "apiKey").toString());
+        uploadHandler.uploadAliasRequest(1, new MPAliasMessage(aliasRequest, "das", "apiKey").toString());
 
         assertNotNull(deletedUpload.value);
     }
@@ -311,7 +312,7 @@ public class UploadHandlerTest {
         assertNull(capturedResponse.value);
 
         AliasRequest aliasRequest = TestingUtils.getInstance().getRandomAliasRequest();
-        MessageManager.MPAliasMessage aliasRequestMessage = new MessageManager.MPAliasMessage(aliasRequest, "das", "apiKey");
+        MPAliasMessage aliasRequestMessage = new MPAliasMessage(aliasRequest, "das", "apiKey");
         handler.uploadAliasRequest(1, aliasRequestMessage.toString());
 
         assertTrue(capturedResponse.value.isSuccessful());
@@ -329,7 +330,7 @@ public class UploadHandlerTest {
         assertNull(capturedResponse.value);
 
         aliasRequest = TestingUtils.getInstance().getRandomAliasRequest();
-        aliasRequestMessage = new MessageManager.MPAliasMessage(aliasRequest, "das", "apiKey");
+        aliasRequestMessage = new MPAliasMessage(aliasRequest, "das", "apiKey");
         handler.uploadAliasRequest(2, aliasRequestMessage.toString());
 
         assertFalse(capturedResponse.value.isSuccessful());
@@ -347,7 +348,7 @@ public class UploadHandlerTest {
         assertNull(capturedResponse.value);
 
         aliasRequest = TestingUtils.getInstance().getRandomAliasRequest();
-        aliasRequestMessage = new MessageManager.MPAliasMessage(aliasRequest, "das", "apiKey");
+        aliasRequestMessage = new MPAliasMessage(aliasRequest, "das", "apiKey");
         handler.uploadAliasRequest(3, aliasRequestMessage.toString());
 
         assertFalse(capturedResponse.value.isSuccessful());

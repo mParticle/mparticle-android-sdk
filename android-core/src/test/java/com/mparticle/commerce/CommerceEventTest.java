@@ -1,7 +1,9 @@
 package com.mparticle.commerce;
 
 import com.mparticle.MParticle;
+import com.mparticle.internal.Logger;
 import com.mparticle.mock.utils.RandomUtils;
+import com.mparticle.testutils.AndroidUtils;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -14,9 +16,7 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 
-/**
- * Created by sdozor on 7/31/15.
- */
+
 public class CommerceEventTest {
 
     @BeforeClass
@@ -38,21 +38,23 @@ public class CommerceEventTest {
         Product product2 = new Product.Builder("name 2", "sku 2", 0).build();
         CommerceEvent event = new CommerceEvent.Builder(Product.ADD_TO_CART, product).addProduct(product2).build();
         assertEquals("name 2", event.getProducts().get(1).getName());
-        IllegalStateException stateException = null;
-        try {
-            event = new CommerceEvent.Builder(Promotion.VIEW, new Promotion().setId("whatever")).addProduct(product2).build();
-        }catch (IllegalStateException ise) {
-            stateException = ise;
 
-        }
-        assertNotNull("Should have thrown IllegalStateException", stateException);
-        stateException = null;
-        try {
-            event = new CommerceEvent.Builder(new Impression("name", product)).addProduct(product2).build();
-        }catch (IllegalStateException ise) {
-            stateException = ise;
-        }
-        assertNotNull("Should have thrown IllegalStateException", stateException);
+        final AndroidUtils.Mutable<String> errorMessage = new AndroidUtils.Mutable<String>(null);
+        Logger.setLogHandler(new Logger.DefaultLogHandler() {
+            @Override
+            public void log(MParticle.LogLevel priority, Throwable error, String messages) {
+                if (priority == MParticle.LogLevel.ERROR) {
+                    errorMessage.value = messages;
+                }
+            }
+        });
+        new CommerceEvent.Builder(Promotion.VIEW, new Promotion().setId("whatever")).addProduct(product2).build();
+        assertNotNull("Should have logged Error", errorMessage.value);
+        errorMessage.value = null;
+
+        new CommerceEvent.Builder(new Impression("name", product)).addProduct(product2).build();
+        assertNotNull("Should have loggedError", errorMessage.value);
+        errorMessage.value = null;
     }
 
     @Test
@@ -60,13 +62,18 @@ public class CommerceEventTest {
         Product product = new Product.Builder("name", "sku", 0).build();
         CommerceEvent event = new CommerceEvent.Builder(Product.ADD_TO_CART, product).transactionAttributes(new TransactionAttributes().setId("the id")).build();
         assertEquals("the id", event.getTransactionAttributes().getId());
-        IllegalStateException stateException = null;
-        try {
-            event = new CommerceEvent.Builder(Product.PURCHASE, product).build();
-        }catch (IllegalStateException ise) {
-            stateException = ise;
-        }
-        assertNotNull("Should have thrown IllegalStateException", stateException);
+
+        final AndroidUtils.Mutable<String> errorMessage = new AndroidUtils.Mutable<String>(null);
+        Logger.setLogHandler(new Logger.DefaultLogHandler() {
+            @Override
+            public void log(MParticle.LogLevel priority, Throwable error, String messages) {
+                if (priority == MParticle.LogLevel.ERROR) {
+                    errorMessage.value = messages;
+                }
+            }
+        });
+        new CommerceEvent.Builder(Product.PURCHASE, product).build();
+        assertNotNull("Should have logged Error", errorMessage.value);
 
     }
 
@@ -100,13 +107,19 @@ public class CommerceEventTest {
         Product product = new Product.Builder("name", "sku", 0).build();
         CommerceEvent event = new CommerceEvent.Builder("promo", new Promotion().setId("promo id")).nonInteraction(true).build();
         assertEquals("promo id", event.getPromotions().get(0).getId());
-        IllegalStateException stateException = null;
-        try {
-            event = new CommerceEvent.Builder(Product.ADD_TO_CART, product).nonInteraction(true).addPromotion(new Promotion().setId("promo id")).build();
-        }catch (IllegalStateException ise) {
-            stateException = ise;
-        }
-        assertNotNull("Should have thrown IllegalStateException", stateException);
+
+        final AndroidUtils.Mutable<String> errorMessage = new AndroidUtils.Mutable<String>(null);
+        Logger.setLogHandler(new Logger.DefaultLogHandler() {
+            @Override
+            public void log(MParticle.LogLevel priority, Throwable error, String messages) {
+                if (priority == MParticle.LogLevel.ERROR) {
+                    errorMessage.value = messages;
+                }
+            }
+        });
+
+        new CommerceEvent.Builder(Product.ADD_TO_CART, product).nonInteraction(true).addPromotion(new Promotion().setId("promo id")).build();
+        assertNotNull("Should have logged Error", errorMessage.value);
     }
 
     @Test

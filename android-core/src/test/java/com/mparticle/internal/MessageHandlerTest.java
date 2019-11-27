@@ -7,6 +7,7 @@ import com.mparticle.MockMParticle;
 import com.mparticle.identity.AliasRequest;
 import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.services.MParticleDBManager;
+import com.mparticle.internal.messages.MPAliasMessage;
 import com.mparticle.mock.MockContext;
 import com.mparticle.testutils.AndroidUtils;
 import com.mparticle.testutils.TestingUtils;
@@ -70,7 +71,7 @@ public class MessageHandlerTest {
         assertNull(insertedAliasRequest.value);
 
         AliasRequest aliasRequest = TestingUtils.getInstance().getRandomAliasRequest();
-        MessageManager.MPAliasMessage aliasMessage = new MessageManager.MPAliasMessage(aliasRequest, "das","apiKey");;
+        MPAliasMessage aliasMessage = new MPAliasMessage(aliasRequest, "das","apiKey");;
 
         Message mockMessage = Mockito.mock(Message.class);
         mockMessage.what = MessageHandler.STORE_ALIAS_MESSAGE;

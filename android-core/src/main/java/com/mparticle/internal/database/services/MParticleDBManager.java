@@ -25,6 +25,7 @@ import com.mparticle.internal.MessageManagerCallbacks;
 import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.MPDatabaseImpl;
 import com.mparticle.internal.listeners.InternalListenerManager;
+import com.mparticle.internal.messages.BaseMPMessage;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -83,11 +84,11 @@ public class MParticleDBManager {
      */
 
 
-    public void insertBreadcrumb(MessageManager.BaseMPMessage message, String apiKey) throws JSONException {
+    public void insertBreadcrumb(BaseMPMessage message, String apiKey) throws JSONException {
         BreadcrumbService.insertBreadcrumb(getDatabase(), mContext, message, apiKey, message.getMpId());
     }
 
-    public void appendBreadcrumbs(MessageManager.BaseMPMessage message) throws JSONException {
+    public void appendBreadcrumbs(BaseMPMessage message) throws JSONException {
         JSONArray breadcrumbs = BreadcrumbService.getBreadcrumbs(getDatabase(), mContext, message.getMpId());
         if (!MPUtility.isEmpty(breadcrumbs)) {
             message.put(Constants.MessageType.BREADCRUMB, breadcrumbs);
@@ -106,7 +107,7 @@ public class MParticleDBManager {
         MessageService.cleanupMessages(getDatabase());
     }
 
-    public void insertMessage(String apiKey, MessageManager.BaseMPMessage message, String dataplanId, Integer dataplanVersion) throws JSONException {
+    public void insertMessage(String apiKey, BaseMPMessage message, String dataplanId, Integer dataplanVersion) throws JSONException {
         MessageService.insertMessage(getDatabase(), apiKey, message, message.getMpId(), dataplanId, dataplanVersion);
         if (sMessageListener != null) {
             sMessageListener.onMessageStored(message);
@@ -124,7 +125,7 @@ public class MParticleDBManager {
     }
 
     public interface MessageListener {
-        void onMessageStored(MessageManager.BaseMPMessage message);
+        void onMessageStored(BaseMPMessage message);
     }
 
     /**
@@ -373,11 +374,11 @@ public class MParticleDBManager {
         SessionService.updateSessionStatus(getDatabase(), sessionId, status);
     }
 
-    public MessageManager.BaseMPMessage getSessionForSessionEndMessage(String sessionId, Location location, Set<Long> mpIds) throws JSONException {
+    public BaseMPMessage getSessionForSessionEndMessage(String sessionId, Location location, Set<Long> mpIds) throws JSONException {
         Cursor selectCursor = null;
         try {
             selectCursor = SessionService.getSessionForSessionEndMessage(getDatabase(), sessionId);
-            MessageManager.BaseMPMessage endMessage = null;
+            BaseMPMessage endMessage = null;
             if (selectCursor.moveToFirst()) {
                 long start = selectCursor.getLong(0);
                 long end = selectCursor.getLong(1);
@@ -402,7 +403,7 @@ public class MParticleDBManager {
         }
     }
 
-    MessageManager.BaseMPMessage createMessageSessionEnd(String sessionId, long start, long end, long foregroundLength, JSONObject sessionAttributes, Location location, Set<Long> mpIds) throws JSONException{
+    BaseMPMessage createMessageSessionEnd(String sessionId, long start, long end, long foregroundLength, JSONObject sessionAttributes, Location location, Set<Long> mpIds) throws JSONException{
         int eventCounter = mPreferences.getInt(Constants.PrefKeys.EVENT_COUNTER, 0);
         resetEventCounter();
         InternalSession session = new InternalSession();
@@ -417,10 +418,10 @@ public class MParticleDBManager {
                 storageMpid = mpid;
             }
         }
-        MessageManager.BaseMPMessage message = new MessageManager.BaseMPMessage.Builder(Constants.MessageType.SESSION_END, session, location, storageMpid)
+        BaseMPMessage message = new BaseMPMessage.Builder(Constants.MessageType.SESSION_END)
                 .timestamp(end)
                 .attributes(sessionAttributes)
-                .build();
+                .build(session, location, storageMpid);
         message.put(Constants.MessageKey.EVENT_COUNTER, eventCounter);
         message.put(Constants.MessageKey.SESSION_LENGTH, foregroundLength);
         message.put(Constants.MessageKey.SESSION_LENGTH_TOTAL, (end - start));
@@ -439,7 +440,7 @@ public class MParticleDBManager {
     }
 
 
-    public void insertSession(MessageManager.BaseMPMessage message, String apiKey, JSONObject appInfo, JSONObject deviceInfo) throws JSONException {
+    public void insertSession(BaseMPMessage message, String apiKey, JSONObject appInfo, JSONObject deviceInfo) throws JSONException {
         String appInfoString = appInfo.toString();
         String deviceInfoString = deviceInfo.toString();
         SessionService.insertSession(getDatabase(), message, apiKey, appInfoString, deviceInfoString, message.getMpId());

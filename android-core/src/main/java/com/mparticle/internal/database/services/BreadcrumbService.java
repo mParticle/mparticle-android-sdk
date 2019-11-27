@@ -10,6 +10,7 @@ import com.mparticle.internal.Logger;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.tables.BreadcrumbTable;
+import com.mparticle.internal.messages.BaseMPMessage;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,7 +20,7 @@ public class BreadcrumbService extends BreadcrumbTable {
 
     private static final String[] idColumns = {"_id"};
 
-    public static int insertBreadcrumb(MPDatabase db, Context context, MessageManager.BaseMPMessage message, String apiKey, Long mpid) throws JSONException {
+    public static int insertBreadcrumb(MPDatabase db, Context context, BaseMPMessage message, String apiKey, Long mpid) throws JSONException {
         if (message == null) {
             return -1;
         }

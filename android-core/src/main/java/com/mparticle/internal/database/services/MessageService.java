@@ -12,6 +12,7 @@ import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.tables.MessageTable;
 import com.mparticle.internal.listeners.InternalListenerManager;
+import com.mparticle.internal.messages.BaseMPMessage;
 
 import org.json.JSONException;
 
@@ -171,7 +172,7 @@ public class MessageService extends MessageTable {
         return database.delete(MessageTableColumns.TABLE_NAME, MessageTableColumns._ID + " <= ? and " + MessageTableColumns.MP_ID + " != ?", whereArgs);
     }
 
-    public static void insertMessage(MPDatabase db, String apiKey, MessageManager.BaseMPMessage message, long mpId, String dataplanId, Integer dataplanVersion) throws JSONException {
+    public static void insertMessage(MPDatabase db, String apiKey, BaseMPMessage message, long mpId, String dataplanId, Integer dataplanVersion) throws JSONException {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MessageTableColumns.API_KEY, apiKey);
         contentValues.put(MessageTableColumns.CREATED_AT, message.getLong(Constants.MessageKey.TIMESTAMP));
