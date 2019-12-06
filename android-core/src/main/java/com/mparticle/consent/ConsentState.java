@@ -22,13 +22,17 @@ import java.util.Map;
 public final class ConsentState {
 
     private final static String SERIALIZED_GDPR_KEY = "GDPR";
+    private final static String SERIALIZED_CCPA_KEY = "CCPA";
+
     private Map<String, GDPRConsent> gdprConsentState = null;
+    private CCPAConsent ccpaConsentState;
 
     private ConsentState() {
     }
 
     private ConsentState(Builder builder) {
         gdprConsentState = builder.gdprConsentState;
+        ccpaConsentState = builder.ccpaConsent;
     }
 
     @NonNull
@@ -73,6 +77,11 @@ public final class ConsentState {
         return Collections.unmodifiableMap(gdprConsentState);
     }
 
+    @Nullable
+    public CCPAConsent getCCPAConsentState() {
+        return ccpaConsentState;
+    }
+
     @Override
     @NonNull
     public String toString() {
@@ -83,6 +92,9 @@ public final class ConsentState {
             for (Map.Entry<String, GDPRConsent> entry : gdprConsentState.entrySet()) {
                 gdprConsentStateJsonObject.put(entry.getKey(), entry.getValue().toString());
             }
+            if (ccpaConsentState != null) {
+                consentJsonObject.put(SERIALIZED_CCPA_KEY, ccpaConsentState.toString());
+            }
         } catch (JSONException ignored) {
 
         }
@@ -92,6 +104,7 @@ public final class ConsentState {
     public static class Builder {
 
         private Map<String, GDPRConsent> gdprConsentState = new HashMap<String, GDPRConsent>();
+        private CCPAConsent ccpaConsent = null;
 
         public Builder() {
 
@@ -99,6 +112,7 @@ public final class ConsentState {
 
         private Builder(ConsentState consentState) {
             setGDPRConsentState(consentState.getGDPRConsentState());
+            setCCPAConsent(consentState.getCCPAConsentState());
         }
 
         private Builder(String serializedConsent) {
@@ -113,6 +127,10 @@ public final class ConsentState {
                         String key = it.next();
                         this.addGDPRConsentState(key, GDPRConsent.withGDPRConsent(gdprConsentState.getString(key)).build());
                     }
+                }
+                if (jsonConsent.has(SERIALIZED_CCPA_KEY)) {
+                    String ccpaConsentString = jsonConsent.getString(SERIALIZED_CCPA_KEY);
+                    setCCPAConsent(CCPAConsent.withCCPAConsent(ccpaConsentString).build());
                 }
             } catch (JSONException ignored) {
 
@@ -180,6 +198,18 @@ public final class ConsentState {
                 return this;
             }
             gdprConsentState.remove(normalizedPurpose);
+            return this;
+        }
+
+        @NonNull
+        public Builder setCCPAConsent(@NonNull CCPAConsent ccpaConsent) {
+            this.ccpaConsent = ccpaConsent;
+            return this;
+        }
+
+        @NonNull
+        public Builder removeCCPAConsent() {
+            ccpaConsent = null;
             return this;
         }
 

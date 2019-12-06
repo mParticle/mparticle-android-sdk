@@ -2,10 +2,10 @@ package com.mparticle.internal;
 
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceApi;
+import com.mparticle.consent.CCPAConsent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.consent.GDPRConsent;
 import com.mparticle.mock.MockContext;
-import com.mparticle.mock.MockSharedPreferences;
 
 import org.json.JSONObject;
 import org.junit.Test;
@@ -79,18 +79,35 @@ public class MessageBatchTest {
                                 .hardwareId("foo hardware id")
                                 .document("foo document")
                                 .build())
+                        .setCCPAConsent(CCPAConsent.builder(true)
+                                .timestamp(20L)
+                                .location("bar location")
+                                .hardwareId("bar hardware id")
+                                .document("bar document")
+                                .build())
                         .build()
         );
-        consent = batch.optJSONObject(Constants.MessageKey.CONSENT_STATE);
+        JSONObject consentJSON = batch.optJSONObject(Constants.MessageKey.CONSENT_STATE);
         assertNotNull(consent);
-        consent = consent.optJSONObject(Constants.MessageKey.CONSENT_STATE_GDPR);
+        consent = consentJSON.optJSONObject(Constants.MessageKey.CONSENT_STATE_GDPR);
         assertNotNull(consent);
         consent = consent.getJSONObject("foo purpose");
         assertNotNull(consent);
-        assertEquals(true, consent.getBoolean(Constants.MessageKey.CONSENT_STATE_GDPR_CONSENTED));
-        assertEquals((long)10, consent.getLong(Constants.MessageKey.CONSENT_STATE_GDPR_TIMESTAMP));
-        assertEquals("foo location", consent.getString(Constants.MessageKey.CONSENT_STATE_GDPR_LOCATION));
-        assertEquals("foo hardware id", consent.getString(Constants.MessageKey.CONSENT_STATE_GDPR_HARDWARE_ID));
-        assertEquals("foo document", consent.getString(Constants.MessageKey.CONSENT_STATE_GDPR_DOCUMENT));
+        assertEquals(true, consent.getBoolean(Constants.MessageKey.CONSENT_STATE_CONSENTED));
+        assertEquals((long)10, consent.getLong(Constants.MessageKey.CONSENT_STATE_TIMESTAMP));
+        assertEquals("foo location", consent.getString(Constants.MessageKey.CONSENT_STATE_LOCATION));
+        assertEquals("foo hardware id", consent.getString(Constants.MessageKey.CONSENT_STATE_HARDWARE_ID));
+        assertEquals("foo document", consent.getString(Constants.MessageKey.CONSENT_STATE_DOCUMENT));
+
+        consent = consentJSON.optJSONObject(Constants.MessageKey.CONSENT_STATE_CCPA);
+        assertNotNull(consent);
+        consent = consent.getJSONObject(Constants.MessageKey.CCPA_CONSENT_KEY);
+        assertNotNull(consent);
+
+        assertEquals(true, consent.getBoolean(Constants.MessageKey.CONSENT_STATE_CONSENTED));
+        assertEquals((long)20, consent.getLong(Constants.MessageKey.CONSENT_STATE_TIMESTAMP));
+        assertEquals("bar location", consent.getString(Constants.MessageKey.CONSENT_STATE_LOCATION));
+        assertEquals("bar hardware id", consent.getString(Constants.MessageKey.CONSENT_STATE_HARDWARE_ID));
+        assertEquals("bar document", consent.getString(Constants.MessageKey.CONSENT_STATE_DOCUMENT));
     }
 }

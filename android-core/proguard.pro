@@ -115,6 +115,8 @@
 -keep class com.mparticle.consent.ConsentState$Builder { *; }
 -keep class com.mparticle.consent.GDPRConsent { *; }
 -keep class com.mparticle.consent.GDPRConsent$Builder { *; }
+-keep class com.mparticle.consent.CCPAConsent { *; }
+-keep class com.mparticle.consent.CCPAConsent$Builder {*;}
 
 
 -keep class com.mparticle.internal.KitManager { *; }

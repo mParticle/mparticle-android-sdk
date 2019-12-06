@@ -359,11 +359,13 @@ public class Constants {
         //consent state
         String CONSENT_STATE = "con";
         String CONSENT_STATE_GDPR = "gdpr";
-        String CONSENT_STATE_GDPR_DOCUMENT = "d";
-        String CONSENT_STATE_GDPR_CONSENTED = "c";
-        String CONSENT_STATE_GDPR_TIMESTAMP = "ts";
-        String CONSENT_STATE_GDPR_LOCATION = "l";
-        String CONSENT_STATE_GDPR_HARDWARE_ID = "h";
+        String CONSENT_STATE_CCPA = "ccpa";
+        String CONSENT_STATE_DOCUMENT = "d";
+        String CONSENT_STATE_CONSENTED = "c";
+        String CONSENT_STATE_TIMESTAMP = "ts";
+        String CONSENT_STATE_LOCATION = "l";
+        String CONSENT_STATE_HARDWARE_ID = "h";
+        String CCPA_CONSENT_KEY = "data_sale_opt_out";
 
         //alias request
         String SOURCE_MPID = "source_mpid";

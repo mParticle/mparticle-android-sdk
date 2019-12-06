@@ -9,9 +9,11 @@ import com.mparticle.commerce.Impression;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.Promotion;
 import com.mparticle.commerce.TransactionAttributes;
+import com.mparticle.consent.CCPAConsent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.consent.GDPRConsent;
 import com.mparticle.identity.MParticleUser;
+import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.kits.mappings.CustomMapping;
@@ -288,8 +290,7 @@ public class KitConfiguration {
     public boolean isConsentStateFilterMatch(ConsentState consentState) {
         if (mConsentForwardingRules.size() == 0
                 || consentState == null
-                || consentState.getGDPRConsentState() == null
-                || consentState.getGDPRConsentState().size() == 0) {
+                || (consentState.getGDPRConsentState().size() == 0 && consentState.getCCPAConsentState() == null)) {
             return false;
         }
         Map<String, GDPRConsent> gdprConsentState = consentState.getGDPRConsentState();
@@ -300,6 +301,14 @@ public class KitConfiguration {
                 return true;
             }
         }
+        CCPAConsent ccpaConsent = consentState.getCCPAConsentState();
+        if (ccpaConsent != null) {
+            int consentPurposeHash = KitUtils.hashForFiltering("2" + Constants.MessageKey.CCPA_CONSENT_KEY);
+            Boolean consented = mConsentForwardingRules.get(consentPurposeHash);
+            if (consented != null && consented == ccpaConsent.isConsented()) {
+                return true;
+            }
+         }
         return false;
     }
 

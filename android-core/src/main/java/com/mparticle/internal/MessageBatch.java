@@ -1,10 +1,9 @@
 package com.mparticle.internal;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import com.mparticle.BuildConfig;
 import com.mparticle.MParticle;
+import com.mparticle.consent.CCPAConsent;
+import com.mparticle.consent.ConsentInstance;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.consent.GDPRConsent;
 
@@ -12,6 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -65,30 +65,23 @@ public class MessageBatch extends JSONObject {
                 JSONObject state = new JSONObject();
                 this.put(Constants.MessageKey.CONSENT_STATE, state);
 
+
                 Map<String, GDPRConsent> gdprState = consentState.getGDPRConsentState();
                 if (gdprState != null) {
                     JSONObject gdpr = new JSONObject();
                     state.put(Constants.MessageKey.CONSENT_STATE_GDPR, gdpr);
                     for (Map.Entry<String, GDPRConsent> entry : gdprState.entrySet()) {
-                        GDPRConsent consent = entry.getValue();
+                        ConsentInstance consent = entry.getValue();
                         if (consent != null) {
-                            JSONObject gdprConsent = new JSONObject();
-                            gdpr.put(entry.getKey(), gdprConsent);
-                            gdprConsent.put(Constants.MessageKey.CONSENT_STATE_GDPR_CONSENTED, entry.getValue().isConsented());
-                            if (entry.getValue().getDocument() != null) {
-                                gdprConsent.put(Constants.MessageKey.CONSENT_STATE_GDPR_DOCUMENT, entry.getValue().getDocument());
-                            }
-                            if (entry.getValue().getTimestamp() != null) {
-                                gdprConsent.put(Constants.MessageKey.CONSENT_STATE_GDPR_TIMESTAMP, entry.getValue().getTimestamp());
-                            }
-                            if (entry.getValue().getLocation() != null) {
-                                gdprConsent.put(Constants.MessageKey.CONSENT_STATE_GDPR_LOCATION, entry.getValue().getLocation());
-                            }
-                            if (entry.getValue().getHardwareId() != null) {
-                                gdprConsent.put(Constants.MessageKey.CONSENT_STATE_GDPR_HARDWARE_ID, entry.getValue().getHardwareId());
-                            }
+                            addConsentStateJSON(gdpr, entry.getKey(), entry.getValue());
                         }
                     }
+                }
+                CCPAConsent ccpaConsent = consentState.getCCPAConsentState();
+                if (ccpaConsent != null) {
+                    JSONObject ccpa = new JSONObject();
+                    state.put(Constants.MessageKey.CONSENT_STATE_CCPA, ccpa);
+                    addConsentStateJSON(ccpa, Constants.MessageKey.CCPA_CONSENT_KEY, ccpaConsent);
                 }
 
 
@@ -208,5 +201,21 @@ public class MessageBatch extends JSONObject {
 
     public void incrementMessageLengthBytes(long bytes) {
         messageLengthBytes = messageLengthBytes + bytes;
+    }
+
+    private void addConsentStateJSON(JSONObject parentJSON, String key, ConsentInstance consentInstance) throws JSONException {
+        JSONObject consentInstanceJSON = new JSONObject();
+        parentJSON.put(key, consentInstanceJSON);
+        consentInstanceJSON.put(Constants.MessageKey.CONSENT_STATE_CONSENTED, consentInstance.isConsented());
+        if (consentInstance.getDocument() != null) {
+            consentInstanceJSON.put(Constants.MessageKey.CONSENT_STATE_DOCUMENT, consentInstance.getDocument());
+        }
+        consentInstanceJSON.put(Constants.MessageKey.CONSENT_STATE_TIMESTAMP, consentInstance.getTimestamp());
+        if (consentInstance.getLocation() != null) {
+            consentInstanceJSON.put(Constants.MessageKey.CONSENT_STATE_LOCATION, consentInstance.getLocation());
+        }
+        if (consentInstance.getHardwareId() != null) {
+            consentInstanceJSON.put(Constants.MessageKey.CONSENT_STATE_HARDWARE_ID, consentInstance.getHardwareId());
+        }
     }
 }

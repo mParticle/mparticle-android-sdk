@@ -9,13 +9,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Record of consent under the GDPR.
+ * Record of consent under the CCPA.
  */
-public final class GDPRConsent extends ConsentInstance {
+public class CCPAConsent extends ConsentInstance {
 
-    private GDPRConsent() {}
+    private CCPAConsent() { }
 
-    private GDPRConsent(GDPRConsent.Builder builder) {
+    private CCPAConsent(Builder builder) {
         if (builder.mTimestamp == null) {
             mTimestamp = System.currentTimeMillis();
         } else {
@@ -28,17 +28,17 @@ public final class GDPRConsent extends ConsentInstance {
     }
 
     @NonNull
-    public static GDPRConsent.Builder builder(boolean consented) {
-        return new GDPRConsent.Builder(consented);
+    public static Builder builder(boolean consented) {
+        return new Builder(consented);
     }
 
     @NonNull
-    public static GDPRConsent.Builder withGDPRConsent(@NonNull GDPRConsent gdprConsent) {
-        return new GDPRConsent.Builder(gdprConsent);
+    public static Builder withCCPAConsent(@NonNull CCPAConsent ccpaConsent) {
+        return new Builder(ccpaConsent);
     }
 
-    static GDPRConsent.Builder withGDPRConsent(String gdprConsent) {
-        return GDPRConsent.Builder.withString(gdprConsent);
+    static Builder withCCPAConsent(String ccpaConsent) {
+        return Builder.withString(ccpaConsent);
     }
 
     public static class Builder {
@@ -49,32 +49,32 @@ public final class GDPRConsent extends ConsentInstance {
         private String mLocation = null;
         private String mHardwareId = null;
 
-        private Builder(GDPRConsent gdprConsent) {
-            this.consented(gdprConsent.isConsented())
-                    .document(gdprConsent.getDocument())
-                    .timestamp(gdprConsent.getTimestamp())
-                    .location(gdprConsent.getLocation())
-                    .hardwareId(gdprConsent.getHardwareId());
+        private Builder(CCPAConsent ccpaConsent) {
+            this.consented(ccpaConsent.isConsented())
+                    .document(ccpaConsent.getDocument())
+                    .timestamp(ccpaConsent.getTimestamp())
+                    .location(ccpaConsent.getLocation())
+                    .hardwareId(ccpaConsent.getHardwareId());
         }
 
         private Builder(boolean consented) {
             this.consented(consented);
         }
 
-        private static GDPRConsent.Builder withString(String serializedGDPRConsent) {
-            GDPRConsent.Builder builder = GDPRConsent.builder(false);
-            if (MPUtility.isEmpty(serializedGDPRConsent)) {
+        private static Builder withString(String serializedCCPAConsent) {
+            Builder builder = CCPAConsent.builder(false);
+            if (MPUtility.isEmpty(serializedCCPAConsent)) {
                 return builder;
             }
             try {
-                JSONObject gdprConsentJsonObject = new JSONObject(serializedGDPRConsent);
-                builder.consented(gdprConsentJsonObject.optBoolean(SERIALIZED_KEY_CONSENTED));
-                if (gdprConsentJsonObject.has(SERIALIZED_KEY_TIMESTAMP)) {
-                    builder.timestamp(gdprConsentJsonObject.optLong(SERIALIZED_KEY_TIMESTAMP));
+                JSONObject ccpaConsentJsonObject = new JSONObject(serializedCCPAConsent);
+                builder.consented(ccpaConsentJsonObject.optBoolean(SERIALIZED_KEY_CONSENTED));
+                if (ccpaConsentJsonObject.has(SERIALIZED_KEY_TIMESTAMP)) {
+                    builder.timestamp(ccpaConsentJsonObject.optLong(SERIALIZED_KEY_TIMESTAMP));
                 }
-                builder.document(gdprConsentJsonObject.optString(SERIALIZED_KEY_DOCUMENT, null));
-                builder.location(gdprConsentJsonObject.optString(SERIALIZED_KEY_LOCATION, null));
-                builder.hardwareId(gdprConsentJsonObject.optString(SERIALIZED_KEY_HARDWARE_ID, null));
+                builder.document(ccpaConsentJsonObject.optString(SERIALIZED_KEY_DOCUMENT, null));
+                builder.location(ccpaConsentJsonObject.optString(SERIALIZED_KEY_LOCATION, null));
+                builder.hardwareId(ccpaConsentJsonObject.optString(SERIALIZED_KEY_HARDWARE_ID, null));
             } catch (JSONException ignored) {
 
             }
@@ -113,8 +113,8 @@ public final class GDPRConsent extends ConsentInstance {
         }
 
         @NonNull
-        public GDPRConsent build() {
-            return new GDPRConsent(this);
+        public CCPAConsent build() {
+            return new CCPAConsent(this);
         }
 
         @Override

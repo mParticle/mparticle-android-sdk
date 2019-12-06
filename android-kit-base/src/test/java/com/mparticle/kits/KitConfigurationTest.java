@@ -6,9 +6,11 @@ import com.mparticle.commerce.Impression;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.Promotion;
 import com.mparticle.commerce.TransactionAttributes;
+import com.mparticle.consent.CCPAConsent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.consent.GDPRConsent;
 import com.mparticle.identity.MParticleUser;
+import com.mparticle.internal.Constants;
 import com.mparticle.mock.MockKitConfiguration;
 
 import org.json.JSONArray;
@@ -390,6 +392,26 @@ public class KitConfigurationTest {
                                 .addGDPRConsentState(
                                         "foo purpose 3",
                                         GDPRConsent.builder(false).build())
+                                .setCCPAConsent(
+                                        CCPAConsent.builder(false).build())
+                                .build()
+                )
+        );
+
+        assertTrue(
+                configuration.isConsentStateFilterMatch(
+                        ConsentState.builder()
+                                .addGDPRConsentState(
+                                        "foo purpose 1",
+                                        GDPRConsent.builder(false).build())
+                                .addGDPRConsentState(
+                                        "foo purpose 2",
+                                        GDPRConsent.builder(false).build())
+                                .addGDPRConsentState(
+                                        "foo purpose 3",
+                                        GDPRConsent.builder(false).build())
+                                .setCCPAConsent(
+                                        CCPAConsent.builder(true).build())
                                 .build()
                 )
         );
@@ -448,6 +470,65 @@ public class KitConfigurationTest {
                                 .addGDPRConsentState(
                                         "foo purpose",
                                         GDPRConsent.builder(false).build())
+                                .build()
+                )
+        );
+    }
+
+
+    @Test
+    public void testCCPAConsentStateShouldFilterFromForwardingRules() throws Exception {
+        JSONObject jsonConfiguration = new JSONObject("{\"id\":56}");
+        JSONObject consentForwardingRule = new JSONObject();
+        jsonConfiguration.put("crvf", consentForwardingRule);
+        consentForwardingRule.put("i", false);
+        JSONArray ruleArray = new JSONArray();
+        consentForwardingRule.put("v", ruleArray);
+        JSONObject rule1 = new JSONObject();
+        ruleArray.put(rule1);
+        rule1.put("h", KitUtils.hashForFiltering("2" + Constants.MessageKey.CCPA_CONSENT_KEY));
+        rule1.put("c", false);
+        KitConfiguration configuration = MockKitConfiguration.createKitConfiguration(jsonConfiguration);
+
+        assertTrue(
+                configuration.isConsentStateFilterMatch(
+                        ConsentState.builder()
+                                .setCCPAConsent(
+                                        CCPAConsent.builder(false)
+                                                .build())
+                                .build()
+                )
+        );
+
+        assertFalse(
+                configuration.isConsentStateFilterMatch(
+                        ConsentState.builder()
+                                .setCCPAConsent(
+                                        CCPAConsent.builder(true)
+                                                .build())
+                                .build()
+                )
+        );
+
+        ruleArray.getJSONObject(0).put("c", true);
+        configuration.parseConfiguration(jsonConfiguration);
+
+        assertTrue(
+                configuration.isConsentStateFilterMatch(
+                        ConsentState.builder()
+                                .setCCPAConsent(
+                                        CCPAConsent.builder(true)
+                                                .build())
+                                .build()
+                )
+        );
+
+        assertFalse(
+                configuration.isConsentStateFilterMatch(
+                        ConsentState.builder()
+                                .setCCPAConsent(
+                                        CCPAConsent.builder(false)
+                                                .build())
                                 .build()
                 )
         );

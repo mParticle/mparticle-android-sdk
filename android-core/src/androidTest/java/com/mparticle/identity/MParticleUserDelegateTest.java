@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
+import com.mparticle.consent.CCPAConsent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.consent.GDPRConsent;
 import com.mparticle.internal.AccessUtils;
@@ -129,13 +130,17 @@ public class MParticleUserDelegateTest extends BaseCleanStartedEachTest {
         mUserDelegate.setConsentState(builder.build(), mpid);
         builder.addGDPRConsentState("foo2", GDPRConsent.builder(true).build());
         mUserDelegate.setConsentState(builder.build(), mpid2);
+        builder.setCCPAConsent(CCPAConsent.builder(false).build());
+        mUserDelegate.setConsentState(builder.build(), mpid2);
 
         assertEquals(1, mUserDelegate.getConsentState(mpid).getGDPRConsentState().size());
         assertTrue(mUserDelegate.getConsentState(mpid).getGDPRConsentState().containsKey("foo"));
+        assertNull(mUserDelegate.getConsentState(mpid).getCCPAConsentState());
 
         assertEquals(2, mUserDelegate.getConsentState(mpid2).getGDPRConsentState().size());
         assertTrue(mUserDelegate.getConsentState(mpid2).getGDPRConsentState().containsKey("foo"));
         assertTrue(mUserDelegate.getConsentState(mpid2).getGDPRConsentState().containsKey("foo2"));
+        assertNotNull(mUserDelegate.getConsentState(mpid2).getCCPAConsentState());
     }
 
     @Test
@@ -148,12 +153,15 @@ public class MParticleUserDelegateTest extends BaseCleanStartedEachTest {
 
         ConsentState.Builder builder = ConsentState.builder();
         builder.addGDPRConsentState("foo", GDPRConsent.builder(true).build());
+        builder.setCCPAConsent(CCPAConsent.builder(true).build());
         mUserDelegate.setConsentState(builder.build(), mpid);
 
         assertEquals(1, mUserDelegate.getConsentState(mpid).getGDPRConsentState().size());
+        assertNotNull(mUserDelegate.getConsentState(mpid).getCCPAConsentState());
         assertTrue(mUserDelegate.getConsentState(mpid).getGDPRConsentState().containsKey("foo"));
         mUserDelegate.setConsentState(null, mpid);
         assertEquals(0, mUserDelegate.getConsentState(mpid).getGDPRConsentState().size());
+        assertNull(mUserDelegate.getConsentState(mpid).getCCPAConsentState());
     }
 
     @Test
