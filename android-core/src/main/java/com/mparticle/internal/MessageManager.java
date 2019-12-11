@@ -821,8 +821,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
                     @Override
                     public void onFailed() {
-                        //do nothing, it very may well be the case that the InstallReferrer API
-                        //is not available, and the user will have to rely upon the ReferrerReceiver
+                        //do nothing, it very may well be the case that the InstallReferrer API is not available
                     }
                 });
             }

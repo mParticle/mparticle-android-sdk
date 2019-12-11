@@ -105,7 +105,6 @@
 -keep class com.mparticle.AttributionListener { *; }
 -keep class com.mparticle.AttributionResult { *; }
 -keep class com.mparticle.MParticleTask { *; }
--keep class com.mparticle.ReferrerReceiver { *; }
 -keep class com.mparticle.kits.ForeseeKit { *; }
 -keep class com.mparticle.UserAttributeListener { *; }
 -keep class com.mparticle.BaseEvent { *; }
@@ -125,7 +124,6 @@
 -keep class com.mparticle.internal.JsonReportingMessage { *; }
 -keep class com.mparticle.internal.MPUtility { *; }
 -keep class com.mparticle.internal.MPUtility$* { *; }
--keep class com.mparticle.ReferrerReceiver { *; }
 -keep class com.mparticle.UserAttributeListener { *; }
 -keep class com.mparticle.internal.PushRegistrationHelper { *; }
 -keep class com.mparticle.internal.PushRegistrationHelper$PushRegistration { *; }

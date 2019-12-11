@@ -94,9 +94,9 @@ mParticle supports several marketing automation and push messaging integrations.
 
 In order for attribution, deep linking, and many other integrations to work properly, the mParticle SDK collects the Google Play Install referrer string, which tracks the original link that brought the user to Google Play.
 
-There are two different ways to collect this value - you only need to implement one.
+Since google has deprecated the "INSTALL_REFERRER" broadcast intent, you will need to add a the Play Install Referrer Library
 
-### 1. Play Install Referrer Library
+### Play Install Referrer Library
 
 Google now supports a [library that surface the referrer string](https://developer.android.com/google/play/installreferrer/library.html):
 
@@ -106,38 +106,6 @@ Simply add this dependency to your app and the mParticle SDK will detect it:
 implementation 'com.android.installreferrer:installreferrer:1.0'
 ```
 
-### 2. Broadcast Receivers
-
-Alternatively, you can add the mParticle `ReferrerReceiver` to your manifest file within the `<application>` tag. The mParticle SDK
-will collect any campaign referral information and automatically forward it to kits (such as AppsFlyer, Kochava, and Adjust) and server-side integrations.
-
-#### Single Receiver
-
-If you have no other `BroadcastReceiver` that listens for the `INSTALL_REFERRER` intent, you can just add the mParticle receiver:
-
-```xml
-<receiver android:name="com.mparticle.ReferrerReceiver" android:exported="true">
-    <intent-filter>
-        <action android:name="com.android.vending.INSTALL_REFERRER"/>
-    </intent-filter>
-</receiver>
-```
-
-#### Multiple Receivers
-
-Google Play will only deliver the `INSTALL_REFERRER` Intent to a single `BroadcastReceiver` - you **cannot** have multiple in your manifest. If you already have your own receiver, or otherwise have multiple receivers that require
-referral data, you must expose your own `BroadcastReceiver` in your manifest and then forward the received Intent to mParticle:
-
-```java
-public class ExampleReceiver extends BroadcastReceiver {
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        //process the Intent/send to other receivers as desired, and
-        //send the Context and Intent into mParticle's BroadcastReceiver
-        new com.mparticle.ReferrerReceiver().onReceive(context, intent);
-    }
-}
-```
 
 ## Initialize the SDK
 

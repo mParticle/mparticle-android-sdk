@@ -8,6 +8,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.mparticle.AttributionError;
 import com.mparticle.AttributionListener;
@@ -15,7 +17,6 @@ import com.mparticle.AttributionResult;
 import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
-import com.mparticle.ReferrerReceiver;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
@@ -251,7 +252,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             syncUserIdentities((KitIntegration.AttributeListener) activeKit, activeKit.getConfiguration());
         }
 
-        Intent mockInstallReferrer = ReferrerReceiver.getMockInstallReferrerIntent(MParticle.getInstance().getInstallReferrer());
+        Intent mockInstallReferrer = getMockInstallReferrerIntent(MParticle.getInstance().getInstallReferrer());
         if (mockInstallReferrer != null) {
             activeKit.setInstallReferrer(mockInstallReferrer);
         }
@@ -1097,7 +1098,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
     @Override
     public void installReferrerUpdated() {
-        Intent mockIntent = ReferrerReceiver.getMockInstallReferrerIntent(MParticle.getInstance().getInstallReferrer());
+        Intent mockIntent = getMockInstallReferrerIntent(MParticle.getInstance().getInstallReferrer());
         for (KitIntegration provider : providers.values()) {
             try {
                 if (!provider.isDisabled()) {
@@ -1233,5 +1234,16 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
     public String getPushInstanceId() {
         return mCoreCallbacks.getPushInstanceId();
+    }
+
+    @Nullable
+    private static Intent getMockInstallReferrerIntent(@NonNull String referrer) {
+        if (!MPUtility.isEmpty(referrer)) {
+            Intent fakeReferralIntent = new Intent("com.android.vending.INSTALL_REFERRER");
+            fakeReferralIntent.putExtra(com.mparticle.internal.Constants.REFERRER, referrer);
+            return fakeReferralIntent;
+        } else {
+            return null;
+        }
     }
 }

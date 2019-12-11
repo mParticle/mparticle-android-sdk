@@ -124,24 +124,6 @@ public class MParticleTest extends BaseCleanStartedEachTest {
 
         Arrays.fill(called, false);
 
-        //Test when it is received via the ReferrerReceiver Receiver.
-        installReferrer = mRandomUtils.getAlphaNumericString(10);
-        ReferrerReceiver.setInstallReferrer(mContext, ReferrerReceiver.getMockInstallReferrerIntent(installReferrer));
-
-        assertTrue(called[0]);
-        assertTrue(called[1]);
-
-        Arrays.fill(called, false);
-
-        //Test when it is received through the MPReceiver Receiver.
-        installReferrer = mRandomUtils.getAlphaNumericString(10);
-        new MPReceiver().onReceive(mContext, ReferrerReceiver.getMockInstallReferrerIntent(installReferrer));
-
-        assertTrue(called[1]);
-        assertTrue(called[0]);
-
-        Arrays.fill(called, false);
-
         //Just a sanity check, if Context is null, it should not set mark the InstallReferrer as updated.
         installReferrer = mRandomUtils.getAlphaNumericString(10);
         InstallReferrerHelper.setInstallReferrer(null, installReferrer);
