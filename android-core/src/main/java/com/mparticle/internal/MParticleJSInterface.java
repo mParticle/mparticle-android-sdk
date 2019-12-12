@@ -463,8 +463,10 @@ public class MParticleJSInterface {
         return jsonArray.toString();
     }
 
-    private EventType convertEventType(int eventType) {
+    EventType convertEventType(int eventType) {
         switch (eventType) {
+            case 0:
+                return EventType.Unknown;
             case 1:
                 return EventType.Navigation;
             case 2:
@@ -479,7 +481,7 @@ public class MParticleJSInterface {
                 return EventType.UserPreference;
             case 7:
                 return EventType.Social;
-            case 8:
+            case 9:
                 return EventType.Media;
             default:
                 return EventType.Other;

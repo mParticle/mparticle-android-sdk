@@ -334,6 +334,13 @@ public class MParticleJSInterfaceTest extends MParticleJSInterface {
         request.getUserIdentities().toString();
     }
 
+    @Test
+    public void testEventTypeParsing() {
+        for (int i = 0; i < MParticle.EventType.values().length; i++) {
+            assertEquals(i + "", MParticle.EventType.values()[i], jsInterfaceInstance.convertEventType(i));
+        }
+    }
+
     public boolean isEqual(Product product1, Product product2) {
         try {
             JSONObject object1 = new JSONObject(product1.toString());
