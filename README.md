@@ -103,7 +103,7 @@ Google now supports a [library that surface the referrer string](https://develop
 Simply add this dependency to your app and the mParticle SDK will detect it:
 
 ```groovy
-implementation 'com.android.installreferrer:installreferrer:1.0'
+implementation 'com.android.installreferrer:installreferrer:1+'
 ```
 
 

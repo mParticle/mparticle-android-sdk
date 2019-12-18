@@ -1,21 +1,41 @@
 apply plugin: 'java'
+apply plugin: 'kotlin'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.50'
+    }
+}
+
 
 repositories {
     jcenter()
+    google()
     maven {
         url  "http://dl.bintray.com/android/android-tools"
+    }
+    maven {
+        url "https://mvnrepository.com/artifact/com.android.tools.lint/lint-tests"
     }
 }
 
 dependencies {
-    compile 'com.android.tools.lint:lint-api:25.3.0'
-    compile 'com.android.tools.lint:lint-checks:25.3.0'
-    compile 'org.codehaus.groovy:groovy-all:2.1.2'
-    testCompile 'junit:junit:4.11'
-    testCompile 'com.android.tools.lint:lint:25.3.0'
-    testCompile 'com.android.tools.lint:lint-tests:25.3.0'
-    testCompile 'com.android.tools:testutils:25.3.0'
-    testCompile 'org.easytesting:fest-assert-core:2.0M10'
+    compileOnly 'com.android.tools.lint:lint-api:26.5.3'
+    compileOnly 'com.android.tools.lint:lint-checks:26.5.3'
+    compileOnly 'org.codehaus.groovy:groovy-all:2.4.15'
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'com.android.tools.lint:lint:26.5.3'
+    testImplementation 'com.android.tools.lint:lint-tests:26.5.3'
+    testImplementation 'com.android.tools:testutils:26.5.3'
+    testImplementation 'org.easytesting:fest-assert-core:2.0M10'
 
 }
 
@@ -23,7 +43,8 @@ jar {
     archiveName 'lint.jar'
     manifest {
         attributes 'Manifest-Version': 1.0
-        attributes 'Lint-Registry': 'com.mparticle.lints.MyIssueRegistry'
+        attributes 'Lint-Registry-v2': 'com.mparticle.lints.MParticleIssueRegistry'
+        attributes 'Lint-Registry': 'com.mparticle.lints.MParticleIssueRegistry'
     }
 }
 

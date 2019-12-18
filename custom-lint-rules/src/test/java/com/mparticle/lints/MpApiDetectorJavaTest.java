@@ -3,7 +3,7 @@ package com.mparticle.lints;
 import com.android.tools.lint.checks.infrastructure.LintDetectorTest;
 import com.android.tools.lint.detector.api.Detector;
 import com.android.tools.lint.detector.api.Issue;
-import com.mparticle.lints.detectors.MpApiDetector;
+import com.mparticle.lints.detectors.MpApiDetectorKt;
 
 import org.intellij.lang.annotations.Language;
 import org.junit.Test;
@@ -13,17 +13,22 @@ import java.util.List;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
-public class MpApiDetectorTest extends LintDetectorTest {
+public class MpApiDetectorJavaTest extends LintDetectorTest {
     private static final String NO_WARNINGS = "No warnings.";
 
     @Override
     protected Detector getDetector() {
-        return new MpApiDetector();
+        return new MpApiDetectorKt();
     }
 
     @Override
     protected List<Issue> getIssues() {
-        return Collections.singletonList(MpApiDetector.ISSUE);
+        return Collections.singletonList(MpApiDetectorKt.Companion.getISSUE());
+    }
+
+    @Override
+    protected boolean allowMissingSdk() {
+        return true;
     }
 
     @Test
@@ -102,10 +107,10 @@ public class MpApiDetectorTest extends LintDetectorTest {
 
     /**
      * We want to make sure that we are have a limit on how deep down the AST we will look for the start
-     * call, otherwise, we might have cases where this method could cause a hang if the AST has backlinks.
+     * call, otherwise, we might have cases where this method could cause a hang if the AST has backlinks
      *
      * currently, this test that we will not try to go beyond 4 levels of nested calls. This test has
-     * MParticle.start() in the 5th level, and should fail, as "Not Found".
+     * MParticle.start() in the 5th level, and should fail, as "Not Found"
      * @throws Exception
      */
     @Test
@@ -143,9 +148,58 @@ public class MpApiDetectorTest extends LintDetectorTest {
                         "    public void anotherMethod() {}\n" +
                         "}";
         assertThat(lintProject(java(source), mParticleStub, mApplicationStub))
-                .contains(MpApiDetector.MESSAGE_START_CALLED_IN_WRONG_PLACE)
-                .contains(MpApiDetector.MESSAGE_NO_START_CALL_IN_ON_CREATE)
+                .contains(MpApiDetectorKt.Companion.getMESSAGE_START_CALLED_IN_WRONG_PLACE())
+                .contains(MpApiDetectorKt.Companion.getMESSAGE_NO_START_CALL_IN_ON_CREATE())
                 .contains(Constants.getErrorWarningMessageString(0,2));
+    }
+
+    @Test
+    public void testStartCalledProperyNestedInSeperateClass() throws Exception {
+        @Language("JAVA") String source =
+                "package com.mparticle.lints;\n" +
+                        "import android.util.Log;\n" +
+                        "import com.mparticle.MParticle;\n" +
+                        "import android.app.Application;\n" +
+                        "import com.mparticle.lints.Initializer;\n" +
+                        "public class HasProperCall extends Application {\n" +
+                        "    Initializer initializer = new Initializer();\n" +
+                        "    public void onCreate() {\n" +
+                        "       super.onCreate();\n" +
+                        "       initializer.init();\n" +
+                        "       int a = random(4);\n" +
+                        "    }\n" +
+                        "    public int random(int number) {\n" +
+                        "       return 5 + number;\n" +
+                        "    }\n" +
+                        "    public void anotherMethod() {}\n" +
+                        "}";
+        assertEquals(NO_WARNINGS, lintProject(java(source), mInitializerClass, mParticleStub, mApplicationStub));
+    }
+
+
+
+    @Test
+    public void testStartCalledProperyNestedInSeperateSubClass() throws Exception {
+        @Language("JAVA") String source =
+                "package com.mparticle.lints;\n" +
+                        "import android.util.Log;\n" +
+                        "import com.mparticle.MParticle;\n" +
+                        "import android.app.Application;\n" +
+                        "import com.mparticle.lints.Initializer;\n" +
+                        "import com.mparticle.lints.InitializerChild;\n" +
+                        "public class HasProperCall extends Application {\n" +
+                        "    InitializerChild initializer = new InitializerChild();\n" +
+                        "    public void onCreate() {\n" +
+                        "       super.onCreate();\n" +
+                        "       initializer.init();\n" +
+                        "       int a = random(4);\n" +
+                        "    }\n" +
+                        "    public int random(int number) {\n" +
+                        "       return 5 + number;\n" +
+                        "    }\n" +
+                        "    public void anotherMethod() {}\n" +
+                        "}";
+        assertEquals(NO_WARNINGS, lintProject(java(source), mInitializerClass, mInitializerSubClass, mParticleStub, mApplicationStub));
     }
 
     @Test
@@ -172,7 +226,7 @@ public class MpApiDetectorTest extends LintDetectorTest {
                         "    }\n" +
                         "}";
         assertThat(lintProject(java(source), mParticleStub, mApplicationStub))
-                .contains(MpApiDetector.MESSAGE_START_CALLED_IN_WRONG_PLACE)
+                .contains(MpApiDetectorKt.Companion.getMESSAGE_START_CALLED_IN_WRONG_PLACE())
                 .contains(Constants.getErrorWarningMessageString(0,1));
     }
 
@@ -186,7 +240,7 @@ public class MpApiDetectorTest extends LintDetectorTest {
                         "public class HasProperCall extends Application {\n" +
                         "}";
         assertThat(lintProject(java(source), mParticleStub, mApplicationStub))
-                .contains(MpApiDetector.MESSAGE_NO_START_CALL_AT_ALL)
+                .contains(MpApiDetectorKt.Companion.getMESSAGE_NO_START_CALL_AT_ALL())
                 .contains(Constants.getErrorWarningMessageString(0,1));
     }
 
@@ -207,7 +261,7 @@ public class MpApiDetectorTest extends LintDetectorTest {
                         "   }\n" +
                         "}";
         assertThat(lintProject(java(source), mParticleStub, mApplicationStub))
-                .contains(MpApiDetector.MESSAGE_MULTIPLE_START_CALLS)
+                .contains(MpApiDetectorKt.Companion.getMESSAGE_MULTIPLE_START_CALLS())
                 .contains(Constants.getErrorWarningMessageString(0,1));
     }
 
@@ -216,7 +270,7 @@ public class MpApiDetectorTest extends LintDetectorTest {
      * This test guarantees that we are searching for start() calls in the correct order within onCreate(),
      * which should the order in which they will be executed. To attain this we need to keep a DFS.
      * This does not account for multiple children of android.app.Application and chained constructors.
-     * In that case, order cannot be guaranteed.
+     * In that case, order cannot be guaranteed
      * @throws Exception
      */
     @Test
@@ -252,7 +306,7 @@ public class MpApiDetectorTest extends LintDetectorTest {
                         "    public void anotherMethod() {}\n" +
                         "}";
         assertThat(lintProject(java(source), mParticleStub, mApplicationStub))
-                .contains(MpApiDetector.MESSAGE_MULTIPLE_START_CALLS)
+                .contains(MpApiDetectorKt.Companion.getMESSAGE_MULTIPLE_START_CALLS())
                 .contains("HasProperCall.java:10")
                 .contains(Constants.getErrorWarningMessageString(0,1));
     }
@@ -283,7 +337,7 @@ public class MpApiDetectorTest extends LintDetectorTest {
                         "   }\n" +
                         "}";
         assertThat(lintProject(java(source), java(source2), mParticleStub, mApplicationStub))
-                .contains(MpApiDetector.MESSAGE_START_CALLED_IN_WRONG_PLACE)
+                .contains(MpApiDetectorKt.Companion.getMESSAGE_START_CALLED_IN_WRONG_PLACE())
                 .contains(Constants.getErrorWarningMessageString(0,2));
     }
 
@@ -298,8 +352,8 @@ public class MpApiDetectorTest extends LintDetectorTest {
                         "   }\n" +
                         "}";
         assertThat(lintProject(java(source), mParticleStub, mApplicationStub))
-                .contains(MpApiDetector.MESSAGE_START_CALLED_IN_WRONG_PLACE)
-                .contains(MpApiDetector.MESSAGE_NO_START_CALL_AT_ALL)
+                .contains(MpApiDetectorKt.Companion.getMESSAGE_START_CALLED_IN_WRONG_PLACE())
+                .contains(MpApiDetectorKt.Companion.getMESSAGE_NO_START_CALL_AT_ALL())
                 .contains(Constants.getErrorWarningMessageString(0,2));
     }
 
@@ -317,8 +371,8 @@ public class MpApiDetectorTest extends LintDetectorTest {
                         "   }\n" +
                         "}";
         assertThat(lintProject(java(source), mParticleStub, mApplicationStub))
-                .contains(MpApiDetector.MESSAGE_START_CALLED_IN_WRONG_PLACE)
-                .contains(MpApiDetector.MESSAGE_NO_START_CALL_AT_ALL)
+                .contains(MpApiDetectorKt.Companion.getMESSAGE_START_CALLED_IN_WRONG_PLACE())
+                .contains(MpApiDetectorKt.Companion.getMESSAGE_NO_START_CALL_AT_ALL())
                 .contains(Constants.getErrorWarningMessageString(0,2));
     }
 
@@ -343,6 +397,7 @@ public class MpApiDetectorTest extends LintDetectorTest {
             "       MParticle.start();\n" +
             "   }\n" +
             "}");
+
 
     private TestFile mInitializerSubClass = java("" +
             "package com.mparticle.lints;\n" +

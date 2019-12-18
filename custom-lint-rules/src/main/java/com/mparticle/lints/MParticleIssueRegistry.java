@@ -19,8 +19,8 @@ package com.mparticle.lints;
 import com.android.tools.lint.client.api.IssueRegistry;
 import com.android.tools.lint.detector.api.Issue;
 import com.mparticle.lints.detectors.GradleBuildDetector;
-import com.mparticle.lints.detectors.InstallReferrerDetector;
-import com.mparticle.lints.detectors.MpApiDetector;
+import com.mparticle.lints.detectors.MpApiDetectorKt;
+import com.mparticle.lints.detectors.ReferrerReceiverDetector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,13 +29,13 @@ import java.util.List;
  * The list of issues that will be checked when running <code>lint</code>.
  */
 @SuppressWarnings("unused")
-public class MyIssueRegistry extends IssueRegistry {
+public class MParticleIssueRegistry extends IssueRegistry {
     @Override
     public List<Issue> getIssues() {
         return new ArrayList<Issue>() {{
             add(GradleBuildDetector.ISSUE);
-            add(InstallReferrerDetector.ISSUE);
-            add(MpApiDetector.ISSUE);
+            add(MpApiDetectorKt.getISSUE());
+            add(ReferrerReceiverDetector.ISSUE);
         }};
     }
 }

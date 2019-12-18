@@ -115,6 +115,8 @@ dependencies {
     compileOnly 'com.android.installreferrer:installreferrer:[1.0, )'
     compileOnly 'com.google.android.instantapps:instantapps:[1.0, )'
 
+    lintChecks project(':custom-lint-rules')
+
     //the junit tests seem to explicitly need this dependency while
     //working in Android studio, but from the command line it's not necessary
     testImplementation project(':android-core')

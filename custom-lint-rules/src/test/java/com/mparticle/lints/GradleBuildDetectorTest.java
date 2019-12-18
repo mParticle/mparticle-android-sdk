@@ -23,9 +23,14 @@ public class GradleBuildDetectorTest extends LintDetectorTest {
         return Collections.singletonList(GradleBuildDetector.ISSUE);
     }
 
+    @Override
+    protected boolean allowMissingSdk() {
+        return true;
+    }
+
     // This one inherently can't happen, since the lint.jar file is in the mParticle dependency, but
     // we should test it anyway, in case there might be a weird case where the lint.jar get's cached,
-    // and we should make sure we aren't breaking any project's lints.
+    // and we should make sure we aren't breaking any project's lints
     @Test
     public void testNoDependency() throws Exception {
         String source =
@@ -181,8 +186,8 @@ public class GradleBuildDetectorTest extends LintDetectorTest {
                         "dependencies {\n" +
                         "    compile 'com.android.support:appcompat-v7:25.1.1'\n" +
                         "    compile 'com.android.support:design:25.1.1'\n" +
-                        "    compile 'com.mparticle:android-core:5+'\n" +
-                        "    compile 'com.mparticle:android-branch-kit:5+'\n}";
+                        "    implementation 'com.mparticle:android-core:5+'\n" +
+                        "    api 'com.mparticle:android-branch-kit:5+'\n}";
         assertThat(lintProject(gradle(source)))
                 .isEqualTo(Constants.NO_WARNINGS);
     }
@@ -216,7 +221,7 @@ public class GradleBuildDetectorTest extends LintDetectorTest {
                 "    compile 'com.android.support:appcompat-v7:25.1.1'\n" +
                 "    compile 'com.android.support:design:25.1.1'\n" +
                 "    compile 'com.mparticle:android-core:5.0'\n" +
-                "    compile 'com.mparticle:android-branch-kit:4.10.+'\n}";
+                "    implementation 'com.mparticle:android-branch-kit:4.10.+'\n}";
         assertThat(lintProject(gradle(source)))
                 .contains(GradleBuildDetector.MESSAGE_INCONSISTENCY_IN_VERSIONS_DETECTED)
                 .contains(Constants.getErrorWarningMessageString(1,0));
@@ -250,7 +255,7 @@ public class GradleBuildDetectorTest extends LintDetectorTest {
                         "    compile 'com.android.support:appcompat-v7:25.1.1'\n" +
                         "    compile 'com.android.support:design:25.1.1'\n" +
                         "    compile 'com.mparticle:android-core:5.0'\n" +
-                        "    compile 'com.mparticle:android-android-adjust-kit:5+'\n}";
+                        "    compile 'com.mparticle:android-adjust-kit:5+'\n}";
         assertThat(lintProject(gradle(source)))
                 .contains(GradleBuildDetector.MESSAGE_INCONSISTENCY_IN_VERSIONS_DETECTED)
                 .contains(GradleBuildDetector.MESSAGE_DONT_MIX_PLUSES)
