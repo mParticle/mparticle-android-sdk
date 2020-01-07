@@ -2,6 +2,7 @@ package com.mparticle.identity;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.WorkerThread;
 
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
@@ -37,6 +38,7 @@ public interface MParticleUser {
      * @return the User's attributes
      */
     @NonNull
+    @WorkerThread
     Map<String, Object> getUserAttributes();
 
     /**
