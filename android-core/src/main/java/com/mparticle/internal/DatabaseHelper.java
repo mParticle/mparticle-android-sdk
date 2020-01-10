@@ -33,5 +33,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        sqLiteOpenHelperWrapper.onDowngrade(db, oldVersion, newVersion);
     }
 }

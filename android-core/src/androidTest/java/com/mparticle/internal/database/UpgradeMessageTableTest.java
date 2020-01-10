@@ -41,6 +41,11 @@ public class UpgradeMessageTableTest extends BaseTableTest {
             public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
                 helper.onUpgrade(database, oldVersion, newVersion);
             }
+
+            @Override
+            public void onDowngrade(SQLiteDatabase database, int oldVersion, int newVersion) {
+                helper.onDowngrade(database, oldVersion, newVersion);
+            }
         }, 9);
         deleteTestingDatabase();
 

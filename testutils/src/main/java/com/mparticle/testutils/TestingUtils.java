@@ -1,17 +1,25 @@
 package com.mparticle.testutils;
 
+import android.content.Context;
+import android.database.Cursor;
+
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.identity.AliasRequest;
+import com.mparticle.internal.JsonReportingMessage;
 import com.mparticle.internal.Logger;
+import com.mparticle.internal.database.MPDatabase;
+import com.mparticle.internal.database.services.MParticleDBManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -130,6 +138,50 @@ public class TestingUtils {
                 .sourceMpid(startTime)
                 .endTime(endTime)
                 .build();
+    }
+
+    public JsonReportingMessage getRandomReportingMessage(final String sessionId) {
+        final Random ran = new Random();
+        return new JsonReportingMessage() {
+            int randomNumber;
+
+            @Override
+            public void setDevMode(boolean development) {
+                //do nothing
+            }
+
+            @Override
+            public long getTimestamp() {
+                return System.currentTimeMillis() - 100;
+            }
+
+            @Override
+            public int getModuleId() {
+                return 1;//MParticle.ServiceProviders.APPBOY;
+            }
+
+            @Override
+            public JSONObject toJson() {
+                JSONObject jsonObject = new JSONObject();
+                try {
+                    jsonObject.put("fieldOne", "a value");
+                    jsonObject.put("fieldTwo", "another value");
+                    jsonObject.put("a random Number", randomNumber == -1 ? randomNumber = ran.nextInt() : randomNumber);
+                } catch (JSONException ignore) {
+                }
+                return jsonObject;
+            }
+
+            @Override
+            public String getSessionId() {
+                return sessionId;
+            }
+
+            @Override
+            public void setSessionId(String sessionId) {
+
+            }
+        };
     }
 
     public static void assertJsonEqual(JSONObject object1, JSONObject object2) {

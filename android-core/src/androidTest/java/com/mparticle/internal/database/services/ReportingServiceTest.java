@@ -3,6 +3,7 @@ package com.mparticle.internal.database.services;
 
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.JsonReportingMessage;
+import com.mparticle.testutils.TestingUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,12 +13,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
 public class ReportingServiceTest extends BaseMPServiceTest {
-
 
     @Test
     public void testInsertReportingMessage() throws JSONException {
@@ -133,52 +134,9 @@ public class ReportingServiceTest extends BaseMPServiceTest {
      private List<JsonReportingMessage> getNReportingMessages(int n, String sessionId) {
          List<JsonReportingMessage> reportingMessages = new ArrayList<JsonReportingMessage>();
          for (int i = 0; i < n; i++) {
-             reportingMessages.add(getRandomReportingMessage(sessionId != null ? sessionId : String.valueOf(ran.nextInt())));
+             reportingMessages.add(TestingUtils.getInstance().getRandomReportingMessage(sessionId != null ? sessionId : String.valueOf(ran.nextInt())));
          }
          return reportingMessages;
-     }
-
-     private JsonReportingMessage getRandomReportingMessage(final String sessionId) {
-         return new JsonReportingMessage() {
-             int randomNumber;
-
-             @Override
-             public void setDevMode(boolean development) {
-                 //do nothing
-             }
-
-             @Override
-             public long getTimestamp() {
-                 return System.currentTimeMillis() - 100;
-             }
-
-             @Override
-             public int getModuleId() {
-                 return 1;//MParticle.ServiceProviders.APPBOY;
-             }
-
-             @Override
-             public JSONObject toJson() {
-                 JSONObject jsonObject = new JSONObject();
-                 try {
-                     jsonObject.put("fieldOne", "a value");
-                     jsonObject.put("fieldTwo", "another value");
-                     jsonObject.put("a random Number", randomNumber == -1 ? randomNumber = ran.nextInt() : randomNumber);
-                 }
-                 catch (JSONException ignore) {}
-                 return jsonObject;
-             }
-
-             @Override
-             public String getSessionId() {
-                 return sessionId;
-             }
-
-             @Override
-             public void setSessionId(String sessionId) {
-
-             }
-         };
      }
 
      private boolean equals(JsonReportingMessage jsonReportingMessage, ReportingService.ReportingMessage reportingMessage) {

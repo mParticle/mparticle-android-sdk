@@ -19,6 +19,11 @@ public class UploadTableTest extends BaseTableTest{
             public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
                 //do nothing
             }
+
+            @Override
+            public void onDowngrade(SQLiteDatabase database, int oldVersion, int newVersion) {
+
+            }
         });
     }
 }

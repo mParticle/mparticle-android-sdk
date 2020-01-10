@@ -9,6 +9,7 @@ import android.os.Message;
 import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
+import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.database.services.SQLiteOpenHelperWrapper;
 
@@ -44,23 +45,38 @@ public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
         db.execSQL(BreadcrumbTable.CREATE_BREADCRUMBS_DDL);
         db.execSQL(ReportingTable.CREATE_REPORTING_DDL);
         db.execSQL(UserAttributesTable.CREATE_USER_ATTRIBUTES_DDL);
-        if (oldVersion < 5) {
-            upgradeUserAttributes(db);
+        try {
+            if (oldVersion < 5) {
+                upgradeUserAttributes(db);
+            }
+            if (oldVersion < 6) {
+                upgradeSessionTable(db);
+                upgradeReportingTable(db);
+            }
+            if (oldVersion < 7) {
+                upgradeMpId(db);
+                ConfigManager.setNeedsToMigrate(mContext, true);
+            }
+            if (oldVersion < 8) {
+                removeGcmTable(db);
+            }
+            if (oldVersion < 9) {
+                upgradeMessageTable(db);
+            }
+        } catch (Exception e) {
+            Logger.warning("Exception while upgrading SQLite Database:\n" + e.getMessage() + "\nThis may have been caused by the database having been already upgraded");
         }
-        if (oldVersion < 6) {
-            upgradeSessionTable(db);
-            upgradeReportingTable(db);
-        }
-        if (oldVersion < 7 ) {
-            upgradeMpId(db);
-            ConfigManager.setNeedsToMigrate(mContext, true);
-        }
-        if (oldVersion < 8) {
-            removeGcmTable(db);
-        }
-        if (oldVersion < 9) {
-            upgradeMessageTable(db);
-        }
+    }
+
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS " + SessionTable.SessionTableColumns.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + MessageTable.MessageTableColumns.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + UploadTable.UploadTableColumns.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + BreadcrumbTable.BreadcrumbTableColumns.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + ReportingTable.ReportingTableColumns.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + UserAttributesTable.UserAttributesTableColumns.TABLE_NAME);
+        onCreate(db);
     }
 
     private void upgradeSessionTable(SQLiteDatabase db) {

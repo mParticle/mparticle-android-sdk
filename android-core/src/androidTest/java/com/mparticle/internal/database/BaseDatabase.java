@@ -39,6 +39,7 @@ public class BaseDatabase extends SQLiteOpenHelper {
 
     @Override
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        
+        helper.onDowngrade(db, oldVersion, newVersion);
+        timer.countDown();
     }
 }

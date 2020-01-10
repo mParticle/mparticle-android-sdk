@@ -37,7 +37,9 @@ import org.junit.Test;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -358,7 +360,8 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         for (int i = 0; i < 10; i++) {
             MParticle.getInstance().Internal().getConfigManager().setMpid(ran.nextLong(), ran.nextBoolean());
         }
-        assertTrue(getData(new MParticleDBManager(mContext).getDatabase().query("messages", null, null, null, null, null, null)).length() > 0);
+        JSONObject databaseJson = getDatabaseContents(Collections.singletonList("messages"));
+        assertTrue(databaseJson.getJSONArray("messages").length() > 0);
         assertEquals(6, getAllTables().size());
         assertTrue(10 < MParticle.getInstance().Internal().getConfigManager().getMpids().size());
 
@@ -392,11 +395,11 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         }
         assertEquals(0, mContext.databaseList().length);
         try {
-            for (String tableName: getAllTables()) {
-                JSONArray data = getData(new MParticleDBManager(mContext).getDatabase().query(tableName, null, null, null, null, null, null));
-                if (data.length() > 0) {
-                    assertEquals(0, data.length());
-                }
+            JSONObject databaseJson = getDatabaseContents();
+            Iterator<String> keys = databaseJson.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                assertEquals(key, 0, databaseJson.getJSONArray(key).length());
             }
         } catch (JSONException e) {
             fail(e.getMessage());
@@ -411,58 +414,4 @@ public class MParticleTest extends BaseCleanStartedEachTest {
             return "error printing SharedPrefs :/";
         }
     }
-
-    private List<String> getAllTables() throws JSONException {
-        MPDatabase database = new MParticleDBManager(mContext).getDatabase();
-        Cursor cursor = database.query("sqlite_master", null, "type = ?", new String[]{"table"}, null, null, null);
-        cursor.moveToFirst();
-        List<String> tableNames = new ArrayList<String>();
-        try {
-            while (!cursor.isAfterLast()) {
-                String tableName = cursor.getString(cursor.getColumnIndex("name"));
-                if (!"android_metadata".equals(tableName) && !"sqlite_sequence".equals(tableName)) {
-                    tableNames.add(cursor.getString(cursor.getColumnIndex("name")));
-                }
-                cursor.moveToNext();
-            }
-        }
-        finally {
-            if (cursor != null && !cursor.isClosed()) {
-                cursor.close();
-            }
-        }
-        return tableNames;
-    }
-
-    private JSONArray getData(Cursor cursor) throws JSONException {
-        cursor.moveToFirst();
-        JSONArray jsonArray = new JSONArray();
-        try {
-            while (!cursor.isAfterLast()) {
-                JSONObject jsonObject = new JSONObject();
-                for (int i = 0; i < cursor.getColumnCount(); i++) {
-                    String columnName = cursor.getColumnName(i);
-                    switch (cursor.getType(i)) {
-                        case Cursor.FIELD_TYPE_FLOAT:
-                            jsonObject.put(columnName, cursor.getFloat(i));
-                            break;
-                        case Cursor.FIELD_TYPE_INTEGER:
-                            jsonObject.put(columnName, cursor.getInt(i));
-                            break;
-                        case Cursor.FIELD_TYPE_STRING:
-                            jsonObject.put(columnName, cursor.getString(i));
-                    }
-                }
-                jsonArray.put(jsonObject);
-                cursor.moveToNext();
-            }
-        }
-        finally {
-            if (cursor != null && !cursor.isClosed()) {
-                cursor.close();
-            }
-        }
-        return jsonArray;
-    }
-
 }

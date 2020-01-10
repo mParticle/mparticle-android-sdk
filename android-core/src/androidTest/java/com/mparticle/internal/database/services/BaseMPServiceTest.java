@@ -1,6 +1,5 @@
 package com.mparticle.internal.database.services;
 
-import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.location.Location;
 import android.support.test.InstrumentationRegistry;

@@ -30,6 +30,11 @@ public class BreadcrumbTableTest extends BaseTableTest{
             public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
 
             }
+
+            @Override
+            public void onDowngrade(SQLiteDatabase database, int oldVersion, int newVersion) {
+
+            }
         });
     }
 
@@ -44,6 +49,11 @@ public class BreadcrumbTableTest extends BaseTableTest{
             @Override
             public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
                 database.execSQL(BreadcrumbTable.getAddMpIdColumnString("1"));
+            }
+
+            @Override
+            public void onDowngrade(SQLiteDatabase database, int oldVersion, int newVersion) {
+
             }
         });
     }
