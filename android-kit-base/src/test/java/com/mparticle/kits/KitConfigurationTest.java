@@ -14,6 +14,7 @@ import com.mparticle.internal.Constants;
 import com.mparticle.mock.MockKitConfiguration;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -556,5 +557,49 @@ public class KitConfigurationTest {
         kitConfiguration.mExcludeAnonymousUsers = true;
 
         assertFalse(kitConfiguration.shouldExcludeUser(mockUser));
-        }
+    }
+
+
+    /**
+     * This tests parsing of the attributeAddToUser ("eea"), attributeRemoveFromUser("ear") and attributeSingleItemUser("eas")
+     */
+    @Test
+    public void testAttributeToUser() throws JSONException {
+        JSONObject kitConfig = new JSONObject()
+                .put("id", 10)
+                .put("hs", new JSONObject()
+                        .put("eaa", new JSONObject()
+                                .put("-1107245616", "add-item"))
+                        .put("ear", new JSONObject()
+                                .put("238178128", "remove-item"))
+                        .put("eas", new JSONObject()
+                                .put("1784066270", "single-item"))
+                );
+
+        KitConfiguration kitConfiguration = MockKitConfiguration.createKitConfiguration(kitConfig);
+
+        Map<Integer, String> addMap = kitConfiguration.getEventAttributesAddToUser();
+        assertEquals(1, addMap.size());
+        assertTrue(addMap.containsKey(-1107245616));
+        assertEquals("add-item", addMap.get(-1107245616));
+
+        Map<Integer, String> removeMap = kitConfiguration.getEventAttributesRemoveFromUser();
+        assertEquals(1, removeMap.size());
+        assertTrue(removeMap.containsKey(238178128));
+        assertEquals("remove-item", removeMap.get(238178128));
+
+        Map<Integer, String> singleMap = kitConfiguration.getEventAttributesSingleItemUser();
+        assertEquals(1, singleMap.size());
+        assertTrue(singleMap.containsKey(1784066270));
+        assertEquals("single-item", singleMap.get(1784066270));
+
+        kitConfig = new JSONObject()
+                .put("id", 10)
+                .put("hs", new JSONObject());
+        kitConfiguration = MockKitConfiguration.createKitConfiguration(kitConfig);
+
+        assertEquals(0, kitConfiguration.getEventAttributesAddToUser().size());
+        assertEquals(0, kitConfiguration.getEventAttributesRemoveFromUser().size());
+        assertEquals(0, kitConfiguration.getEventAttributesSingleItemUser().size());
+    }
 }

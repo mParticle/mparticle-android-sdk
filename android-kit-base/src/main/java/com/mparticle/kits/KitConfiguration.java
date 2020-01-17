@@ -47,6 +47,9 @@ public class KitConfiguration {
     private final static String KEY_SCREEN_ATTRIBUTES_FILTER = "svea";
     private final static String KEY_USER_IDENTITY_FILTER = "uid";
     private final static String KEY_USER_ATTRIBUTE_FILTER = "ua";
+    private final static String KEY_EVENT_ATTRIBUTE_ADD_USER = "eaa";
+    private final static String KEY_EVENT_ATTRIBUTE_REMOVE_USER = "ear";
+    private final static String KEY_EVENT_ATTRIBUTE_SINGLE_ITEM_USER = "eas";
     private final static String KEY_BRACKETING_LOW = "lo";
     private final static String KEY_BRACKETING_HIGH = "hi";
     private final static String KEY_COMMERCE_ATTRIBUTE_FILTER = "cea";
@@ -77,6 +80,9 @@ public class KitConfiguration {
     protected SparseBooleanArray mUserAttributeFilters = new SparseBooleanArray(0);
     protected SparseBooleanArray mCommerceAttributeFilters = new SparseBooleanArray(0);
     protected SparseBooleanArray mCommerceEntityFilters = new SparseBooleanArray(0);
+    protected Map<Integer, String> mAttributeAddToUser = new HashMap<Integer, String>();
+    protected Map<Integer, String> mAttributeRemoveFromUser = new HashMap<Integer, String>();
+    protected Map<Integer, String> mAttributeSingleItemUser = new HashMap<Integer, String>();
     private Map<Integer, SparseBooleanArray> mCommerceEntityAttributeFilters = new HashMap<Integer, SparseBooleanArray>(0);
     protected Map<Integer, Boolean> mConsentForwardingRules = new HashMap<Integer, Boolean>();
     private int lowBracket = 0;
@@ -196,6 +202,21 @@ public class KitConfiguration {
                 }
             } else {
                 mCommerceEntityAttributeFilters.clear();
+            }
+            if (filterJson.has(KEY_EVENT_ATTRIBUTE_ADD_USER)) {
+                mAttributeAddToUser = convertToSparseMap(filterJson.getJSONObject(KEY_EVENT_ATTRIBUTE_ADD_USER));
+            } else {
+                mAttributeAddToUser.clear();
+            }
+            if (filterJson.has(KEY_EVENT_ATTRIBUTE_REMOVE_USER)) {
+                mAttributeRemoveFromUser = convertToSparseMap(filterJson.getJSONObject(KEY_EVENT_ATTRIBUTE_REMOVE_USER));
+            } else {
+                mAttributeRemoveFromUser.clear();
+            }
+            if (filterJson.has(KEY_EVENT_ATTRIBUTE_SINGLE_ITEM_USER)) {
+                mAttributeSingleItemUser = convertToSparseMap(filterJson.getJSONObject(KEY_EVENT_ATTRIBUTE_SINGLE_ITEM_USER));
+            } else {
+                mAttributeSingleItemUser.clear();
             }
         }
 
@@ -574,6 +595,19 @@ public class KitConfiguration {
         return map;
     }
 
+    protected Map<Integer, String> convertToSparseMap(JSONObject json) {
+        Map<Integer, String> map = new HashMap<Integer, String>();
+        for (Iterator<String> iterator = json.keys(); iterator.hasNext(); ) {
+            try {
+                String key = iterator.next();
+                map.put(Integer.parseInt(key), json.getString(key));
+            } catch (JSONException jse) {
+                Logger.error("Issue while parsing kit configuration: " + jse.getMessage());
+            }
+        }
+        return map;
+    }
+
     public final List<CustomMapping> getCustomMappingList() {
         return customMappingList;
     }
@@ -631,6 +665,18 @@ public class KitConfiguration {
 
     public Map<Integer, SparseBooleanArray> getCommerceEntityAttributeFilters() {
         return mCommerceEntityAttributeFilters;
+    }
+
+    public Map<Integer, String> getEventAttributesAddToUser() {
+        return mAttributeAddToUser;
+    }
+
+    public Map<Integer, String> getEventAttributesRemoveFromUser() {
+        return mAttributeRemoveFromUser;
+    }
+
+    public Map<Integer, String> getEventAttributesSingleItemUser() {
+        return mAttributeSingleItemUser;
     }
 
     public boolean isAttributeValueFilteringActive() {
