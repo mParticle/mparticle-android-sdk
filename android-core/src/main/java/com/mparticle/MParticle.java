@@ -1558,6 +1558,7 @@ public class MParticle {
         int ONETRUST = 134;
         int GOOGLE_ANALYTICS_FIREBASE = 136;
         int PILGRIM = 211;
+        int SWRVE = 1145;
         @NonNull String BROADCAST_ACTIVE = "MPARTICLE_SERVICE_PROVIDER_ACTIVE_";
         @NonNull String BROADCAST_DISABLED = "MPARTICLE_SERVICE_PROVIDER_DISABLED_";
     }
