@@ -101,35 +101,40 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
             url = domainMapping.getUrl();
         }
         Uri uri;
+        String subdirectory;
         switch (endpoint) {
             case CONFIG:
+                subdirectory = domainMapping.isOverridesSubdirectory() ? "" : SERVICE_VERSION_4 + "/";
                 uri = new Uri.Builder()
                         .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
-                        .path(SERVICE_VERSION_4 + "/" + mApiKey + "/config")
+                        .path(subdirectory + mApiKey + "/config")
                         .appendQueryParameter("av", MPUtility.getAppVersionName(mContext))
                         .appendQueryParameter("sv", Constants.MPARTICLE_VERSION)
                         .build();
                 return MPUrl.getUrl(uri.toString());
             case EVENTS:
+                subdirectory = domainMapping.isOverridesSubdirectory() ? "" : SERVICE_VERSION_2 + "/";
                 uri = new Uri.Builder()
                         .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
-                        .path(SERVICE_VERSION_2 + "/" + mApiKey + "/events")
+                        .path(subdirectory + mApiKey + "/events")
                         .build();
                 return MPUrl.getUrl(uri.toString());
             case ALIAS:
+                subdirectory = domainMapping.isOverridesSubdirectory() ? "" : SERVICE_VERSION_1 + "/identity/";
                 uri = new Uri.Builder()
                         .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
-                        .path(SERVICE_VERSION_1 + "/identity/" + mApiKey + "/alias")
+                        .path(subdirectory + mApiKey + "/alias")
                         .build();
                 return MPUrl.getUrl(uri.toString());
             case IDENTITY:
+                subdirectory = domainMapping.isOverridesSubdirectory() ? "" : SERVICE_VERSION_1 + "/";
                 uri = new Uri.Builder()
                         .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
-                        .path(identityPath)
+                        .path(subdirectory + identityPath)
                         .build();
                 return MPUrl.getUrl(uri.toString());
             case AUDIENCE:

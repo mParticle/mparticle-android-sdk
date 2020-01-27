@@ -3,6 +3,7 @@ package com.mparticle.networking;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.mparticle.BaseEvent;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint;
+import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.ALIAS;
 import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.CONFIG;
 import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.EVENTS;
 import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.IDENTITY;
@@ -77,6 +79,11 @@ public class NetworkOptions {
         return domainMappings.get(IDENTITY);
     }
 
+    @Nullable
+    public DomainMapping getAliasDomain() {
+        return domainMappings.get(ALIAS);
+    }
+
     @NonNull
     public List<DomainMapping> getDomainMappings() {
         return new ArrayList<DomainMapping>(domainMappings.values());
@@ -87,9 +94,6 @@ public class NetworkOptions {
     }
 
     DomainMapping getDomain(Endpoint endpoint) {
-        if (endpoint == Endpoint.ALIAS) {
-            endpoint = Endpoint.EVENTS;
-        }
         return domainMappings.get(endpoint);
     }
 
@@ -134,6 +138,9 @@ public class NetworkOptions {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+            }
+            if (domain.getType() == EVENTS && !domain.isEventsOnly() && !domainMappings.containsKey(ALIAS)) {
+                domainMappings.put(ALIAS, domain);
             }
             domainMappings.put(domain.getType(), domain);
             return this;

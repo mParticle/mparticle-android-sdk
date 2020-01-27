@@ -31,10 +31,10 @@ import java.util.UUID;
     private Context mContext;
     private ConfigManager mConfigManager;
 
-    static final String LOGIN_PATH = "/login";
-    static final String LOGOUT_PATH = "/logout";
-    static final String IDENTIFY_PATH = "/identify";
-    static final String MODIFY_PATH = "/modify";
+    static final String LOGIN_PATH = "login";
+    static final String LOGOUT_PATH = "logout";
+    static final String IDENTIFY_PATH = "identify";
+    static final String MODIFY_PATH = "modify";
 
     static final String PLATFORM = "platform";
     static final String SDK_VENDOR = "sdk_vendor";
@@ -297,14 +297,7 @@ import java.util.UUID;
     }
 
     MPUrl getUrl(String endpoint) throws MalformedURLException {
-
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(SERVICE_VERSION_1);
-        if (endpoint.indexOf("/") != 0) {
-            stringBuilder.append("/");
-        }
-        stringBuilder.append(endpoint);
-        return getUrl(Endpoint.IDENTITY, stringBuilder.toString());
+        return getUrl(Endpoint.IDENTITY, endpoint);
     }
 
     private String getApiKey() {
