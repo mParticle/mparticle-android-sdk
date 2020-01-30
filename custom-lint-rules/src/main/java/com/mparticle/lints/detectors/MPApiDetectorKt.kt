@@ -151,6 +151,9 @@ class MpApiDetectorKt : Detector(), Detector.UastScanner {
                         (declaration as? UVariable)?.
                                 apply {
                                     //we dont want to investigate these right now, because their initializer won't be invoked unless it is called
+                                    if (text.isEmpty()) {
+                                        return@apply
+                                    }
                                     with(" ${text.substring(0, text.indexOf(name ?: ""))} ") {
                                         if (this.contains(" fun ")) {
                                             return@apply
