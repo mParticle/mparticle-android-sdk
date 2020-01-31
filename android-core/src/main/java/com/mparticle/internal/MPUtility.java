@@ -19,6 +19,7 @@ import android.os.Environment;
 import android.os.StatFs;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
+import android.support.annotation.WorkerThread;
 import android.view.Display;
 import android.view.WindowManager;
 
@@ -115,6 +116,7 @@ public class MPUtility {
         return collection == null || collection.size() == 0;
     }
 
+    @WorkerThread
     @TargetApi(Build.VERSION_CODES.ECLAIR)
     public static AdIdInfo getAdIdInfo(Context context) {
         String packageName = context.getPackageName();

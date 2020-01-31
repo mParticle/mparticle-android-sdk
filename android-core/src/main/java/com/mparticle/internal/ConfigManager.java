@@ -1012,7 +1012,7 @@ public class ConfigManager {
         sPreferences.edit().putString(Constants.PrefKeys.IDENTITY_API_CONTEXT, context).apply();
     }
 
-    public String getPreviousGoogleAdId() {
+    public String getPreviousAdId() {
         MPUtility.AdIdInfo adInfo = MPUtility.getAdIdInfo(mContext);
         String currentAdId = null;
         if (adInfo != null) {
@@ -1021,7 +1021,7 @@ public class ConfigManager {
         return sPreferences.getString(Constants.PrefKeys.PREVIOUS_ANDROID_ID, currentAdId);
     }
 
-    public void setPreviousGoogleAdId() {
+    public void setPreviousAdId() {
         MPUtility.AdIdInfo adInfo = MPUtility.getAdIdInfo(mContext);
         String currentAdId = null;
         if (adInfo != null) {

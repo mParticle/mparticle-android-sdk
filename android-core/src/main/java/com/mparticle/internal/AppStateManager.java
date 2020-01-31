@@ -171,7 +171,7 @@ public class  AppStateManager {
                 initialize(mCurrentActivityName, previousSessionUri, previousSessionParameters, previousSessionPackage);
             } else if (isBackgrounded() && mLastStoppedTime.get() > 0) {
                 isBackToForeground = true;
-                checkGoogleAdIdChanged();
+                mMessageManager.postToMessageThread(new CheckAdIdRunnable());
                 logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE,
                         mCurrentActivityName,
                         mLastStoppedTime.get() - mLastForegroundTime,
@@ -218,7 +218,7 @@ public class  AppStateManager {
                         if (isBackgrounded()) {
                             checkSessionTimeout();
                             logBackgrounded();
-                            mConfigManager.setPreviousGoogleAdId();
+                            mConfigManager.setPreviousAdId();
                         }
                     }catch (Exception e){
                         e.printStackTrace();
@@ -417,21 +417,25 @@ public class  AppStateManager {
         return mCurrentActivityReference;
     }
 
-    private void checkGoogleAdIdChanged() {
-        String previousGoogleAdId = mConfigManager.getPreviousGoogleAdId();
-        MPUtility.AdIdInfo adIdInfo =  MPUtility.getAdIdInfo(mContext);
-        String currentGoogleAdId = adIdInfo == null ? null : adIdInfo.id;
-        if (currentGoogleAdId != null && !currentGoogleAdId.equals(previousGoogleAdId)) {
-            MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
-            Builder builder;
-            if (user != null) {
-                builder = new Builder(user);
-            } else {
-                builder = new Builder();
+    class CheckAdIdRunnable implements Runnable {
+
+        @Override
+        public void run() {
+            String previousGoogleAdId = mConfigManager.getPreviousAdId();
+            MPUtility.AdIdInfo adIdInfo =  MPUtility.getAdIdInfo(mContext);
+            String currentGoogleAdId = adIdInfo == null ? null : adIdInfo.id;
+            if (currentGoogleAdId != null && !currentGoogleAdId.equals(previousGoogleAdId)) {
+                MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
+                Builder builder;
+                if (user != null) {
+                    builder = new Builder(user);
+                } else {
+                    builder = new Builder();
+                }
+                MParticle.getInstance().Identity().modify(builder
+                        .googleAdId(currentGoogleAdId, previousGoogleAdId)
+                        .build());
             }
-            MParticle.getInstance().Identity().modify(builder
-                    .googleAdId(currentGoogleAdId, previousGoogleAdId)
-                    .build());
         }
     }
 

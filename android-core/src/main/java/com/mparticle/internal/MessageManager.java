@@ -27,6 +27,7 @@ import com.mparticle.UserAttributeListener;
 import com.mparticle.commerce.Cart;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.identity.AliasRequest;
+import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
@@ -938,6 +939,10 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public JSONArray getUserIdentityJson(long mpId){
         return mConfigManager.getUserIdentityJson(mpId);
+    }
+
+    void postToMessageThread(Runnable runnable) {
+        mMessageHandler.post(runnable);
     }
 
     private MParticleDBManager.UserAttributeResponse getUserAttributes(long mpId) {
