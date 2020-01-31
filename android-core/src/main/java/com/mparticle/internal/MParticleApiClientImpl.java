@@ -159,7 +159,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
                     "URL- " + mConfigUrl.toString());
 
             if (InternalListenerManager.isEnabled()) {
-                InternalListenerManager.getListener().onNetworkRequestStarted(SdkListener.Endpoint.CONFIG, connection.getURL().getFile(), new JSONObject());
+                InternalListenerManager.getListener().onNetworkRequestStarted(SdkListener.Endpoint.CONFIG, connection.getURL().toString(), new JSONObject());
             }
 
             makeUrlRequest(Endpoint.CONFIG, connection, true);
@@ -168,7 +168,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
             int responseCode = connection.getResponseCode();
             try {
                 response = MPUtility.getJsonResponse(connection);
-                InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.CONFIG, connection.getURL().getFile(), response, responseCode);
+                InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.CONFIG, connection.getURL().toString(), response, responseCode);
             }
             catch (Exception ex) {}
             if (responseCode >= 200 && responseCode < 300) {
@@ -261,7 +261,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         logUpload(message);
 
         try {
-            InternalListenerManager.getListener().onNetworkRequestStarted(SdkListener.Endpoint.EVENTS, connection.getURL().getFile(), new JSONObject(message), message);
+            InternalListenerManager.getListener().onNetworkRequestStarted(SdkListener.Endpoint.EVENTS, connection.getURL().toString(), new JSONObject(message), message);
         } catch (Exception e) { }
 
         makeUrlRequest(Endpoint.EVENTS, connection, message, true);
@@ -276,7 +276,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         if (responseCode >= 200 && responseCode < 300) {
             JSONObject response = MPUtility.getJsonResponse(connection);
             if (InternalListenerManager.isEnabled()) {
-                InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.EVENTS, connection.getURL().getFile(), response, responseCode);
+                InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.EVENTS, connection.getURL().toString(), response, responseCode);
             }
 
             Logger.verbose("Upload result response: \n" +
@@ -313,7 +313,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
 
         String url = "";
         try {
-            url = connection.getURL().getFile();
+            url = connection.getURL().toString();
             InternalListenerManager.getListener().onNetworkRequestStarted(SdkListener.Endpoint.EVENTS, url, new JSONObject(message), message);
         } catch (Exception ignore) {}
 
