@@ -56,6 +56,7 @@ public class MParticleApiClientImplTest {
         mockConnection = PowerMockito.mock(MPConnection.class);
         Mockito.when(mockUrl.openConnection()).thenReturn(mockConnection);
         Mockito.when(mockConnection.getURL()).thenReturn(mockUrl);
+        Mockito.when(mockUrl.getDefaultUrl()).thenReturn(mockUrl);
         Mockito.when(mockUrl.getFile()).thenReturn("/config");
         client.setConfigUrl(mockUrl);
     }

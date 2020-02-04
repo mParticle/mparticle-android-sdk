@@ -13,10 +13,12 @@ import javax.net.ssl.SSLSocketFactory;
 
 class MPConnectionImpl implements MPConnection {
     private HttpURLConnection httpURLConnection;
+    private MPUrl url;
     private Integer responseCode = null;
 
-    public MPConnectionImpl(HttpURLConnection mpUrl) {
+    public MPConnectionImpl(HttpURLConnection mpUrl, MPUrl url) {
         this.httpURLConnection = mpUrl;
+        this.url = url;
     }
 
 
@@ -52,7 +54,7 @@ class MPConnectionImpl implements MPConnection {
 
     @Override
     public MPUrl getURL() {
-        return new MPUrlImpl(httpURLConnection.getURL());
+        return url;
     }
 
     @Override

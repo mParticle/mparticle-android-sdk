@@ -18,7 +18,7 @@ class MPUrlImpl extends MPUrl {
 
     @Override
     public MPConnection openConnection() throws IOException {
-        return new MPConnectionImpl((HttpURLConnection)url.openConnection());
+        return new MPConnectionImpl((HttpURLConnection)url.openConnection(), this);
     }
 
     @Override
