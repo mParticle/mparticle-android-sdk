@@ -85,38 +85,7 @@ public class InternalListenerManager implements InternalListener {
 
     @Override
     public void onApiCalled(final Object... objects) {
-        try {
-            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-            int index = -1;
-            for (int i = 0; i < stackTrace.length; i++) {
-                StackTraceElement element = stackTrace[i];
-                if (element.getClassName().equals(getClass().getName())) {
-                    index = i;
-                    break;
-                }
-            }
-            //move to call after the last call in this class;
-            index++;
-            while (stackTrace[index].getClassName().equals(ListenerHook.class.getName())) {
-                index++;
-            }
-            StackTraceElement apiCall = stackTrace[index];
-            StackTraceElement calledFrom = stackTrace[index + 1];
-            final boolean isExternalApiInvocation = isExternalApiInvocation(calledFrom);
-            final String apiName = getApiName(apiCall);
 
-            broadcast(new SdkListenerRunnable() {
-                @Override
-                public void run(SdkListener listener) {
-                    listener.onApiCalled(apiName, Arrays.asList(objects), isExternalApiInvocation);
-                }
-            });
-        } catch (Exception ex) {
-            if (!thrown) {
-                thrown = true;
-                Logger.error("SdkListener failed onApiCalled!\n" + ex.getMessage());
-            }
-        }
     }
 
     @Override

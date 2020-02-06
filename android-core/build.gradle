@@ -4,7 +4,6 @@ ext {
 
 apply plugin: 'com.android.library'
 apply from: '../scripts/maven.gradle'
-apply plugin: 'com.archinamon.aspectj'
 
 def javaVersion = JavaVersion.VERSION_1_6
 
@@ -157,11 +156,4 @@ project.afterEvaluate {
 
 boolean useOrchestrator() {
     return project.hasProperty('orchestrator') ? project.property('orchestrator') : false
-}
-
-aspectj {
-    breakOnError true
-    compileTests false
-    buildTimeLog false
-    java javaVersion
 }
