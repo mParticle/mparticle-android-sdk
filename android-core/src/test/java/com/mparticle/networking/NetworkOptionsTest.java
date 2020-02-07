@@ -37,7 +37,6 @@ public class NetworkOptionsTest {
         String optionsString = options.toString();
         NetworkOptions optionsDeserialized = NetworkOptions.withNetworkOptions(optionsString);
         assertTrue(equals(options, optionsDeserialized));
-
     }
 
     public static boolean equals(NetworkOptions networkOptions1, NetworkOptions networkOptions2) {

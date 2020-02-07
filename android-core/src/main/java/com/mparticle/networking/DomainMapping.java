@@ -275,10 +275,10 @@ public class DomainMapping {
         }
 
         @NonNull
-        public Builder addCertificate(@NonNull String alias, @NonNull String pin) {
-            Certificate certificate = Certificate.with(alias, pin);
-            if (certificate != null) {
-                certificates.add(certificate);
+        public Builder addCertificate(@NonNull String alias, @NonNull String certificate) {
+            Certificate certificateInstance = Certificate.with(alias, certificate);
+            if (certificateInstance != null) {
+                certificates.add(certificateInstance);
             }
             return this;
         }
@@ -306,14 +306,19 @@ public class DomainMapping {
         }
 
         @NonNull
-        public Builder addCertificate(@NonNull String alias, @NonNull String pin, @Nullable Integer position) {
-            addCertificate(Certificate.with(alias, pin), position);
+        public Builder addCertificate(@NonNull String alias, @NonNull String certificate, @Nullable Integer position) {
+            addCertificate(Certificate.with(alias, certificate), position);
             return this;
         }
 
         @NonNull
         public Builder setCertificates(@Nullable List<Certificate> certificates) {
-            this.certificates = certificates;
+            this.certificates = new ArrayList<Certificate>();
+            for (Certificate certificate: certificates) {
+                if (certificate != null) {
+                    addCertificate(certificate);
+                }
+            }
             return this;
         }
 
