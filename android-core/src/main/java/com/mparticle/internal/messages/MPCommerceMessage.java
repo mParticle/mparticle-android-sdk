@@ -21,11 +21,10 @@ public class MPCommerceMessage extends BaseMPMessage {
 
     protected MPCommerceMessage(Builder builder, InternalSession session, @Nullable Location location, long mpId, Cart cart) throws JSONException {
         super(builder, session, location, mpId);
-        if (builder.getProductAction().equals(Product.PURCHASE)) {
+        if (Product.PURCHASE.equals(builder.getProductAction())) {
             if (cart != null) {
                 cart.clear();
             }
-
         }
         if (cart != null) {
             JSONObject cartJsonObject = new JSONObject(cart.toString());
@@ -47,6 +46,7 @@ public class MPCommerceMessage extends BaseMPMessage {
             return super.timestamp(timestamp);
         }
 
+        @Nullable
         public String getProductAction() {
             JSONObject productActionObj = optJSONObject(Constants.Commerce.PRODUCT_ACTION_OBJECT);
             if (productActionObj != null) {
