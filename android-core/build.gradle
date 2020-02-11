@@ -4,6 +4,7 @@ ext {
 
 apply plugin: 'com.android.library'
 apply from: '../scripts/maven.gradle'
+apply plugin: 'kotlin-android'
 
 def javaVersion = JavaVersion.VERSION_1_6
 
@@ -90,6 +91,10 @@ android {
         enable 'UnknownNullness'
         lintConfig file('lint.xml')
     }
+    sourceSets {
+        test.java.srcDirs += 'src/test/kotlin'
+        androidTest.java.srcDirs += 'src/androidTest/kotlin'
+    }
 }
 
 
@@ -124,11 +129,15 @@ dependencies {
     testImplementation 'org.powermock:powermock-core:2.0.2'
     testImplementation 'com.android.support:support-v4:27.1.1'
     testImplementation project(':testutils')
+    testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 
     androidTestImplementation project(':testutils')
     if (useOrchestrator()) {
         androidTestUtil 'com.android.support.test:orchestrator:1.0.2'
     }
+    androidTestImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    androidTestImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 }
 
 configurations {
@@ -158,6 +167,12 @@ afterEvaluate {
         if (theBuildType.name != 'lintBuild') {
             //build the Linting jar at closest time to when gradle naturally does it when using lintChecks
             tasks.getByName("bundle${theBuildType.name.capitalize()}Aar").dependsOn copyLintJar
+        }
+        android.sourceSets.all { sourceSet ->
+            println(sourceSet.name)
+            if (!sourceSet.name.startsWith("test") && !sourceSet.name.startsWith("androidTest")) {
+                sourceSet.kotlin.setSrcDirs([])
+            }
         }
     }
 }
