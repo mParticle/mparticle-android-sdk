@@ -1,5 +1,7 @@
 package com.mparticle.kits;
 
+import android.support.annotation.NonNull;
+
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
@@ -56,9 +58,10 @@ public final class CommerceEventUtils {
             for (int i = 0; i < products.size(); i++) {
                 MPEvent.Builder itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.Transaction);
                 Map<String, String> attributes = new HashMap<String, String>();
-                extractProductFields(products.get(i), attributes);
-                extractProductAttributes(products.get(i), attributes);
-                extractTransactionId(event, attributes);
+                OnAttributeExtracted attributeExtracted = new StringAttributeExtractor(attributes);
+                extractProductFields(products.get(i), attributeExtracted);
+                extractProductAttributes(products.get(i), attributeExtracted);
+                extractTransactionId(event, attributeExtracted);
                 events.add(itemEvent.customAttributes(attributes).build());
             }
         }
@@ -66,68 +69,81 @@ public final class CommerceEventUtils {
     }
 
     public static void extractProductFields(Product product, Map<String, String> attributes) {
+        extractProductFields(product, new StringAttributeExtractor(attributes));
+    }
+
+    public static void extractProductFields(Product product, OnAttributeExtracted onAttributeExtracted) {
         if (product != null) {
             if (!MPUtility.isEmpty(product.getCouponCode())) {
-                attributes.put(Constants.ATT_PRODUCT_COUPON_CODE, product.getCouponCode());
+                onAttributeExtracted.onAttributeExtracted(Constants.ATT_PRODUCT_COUPON_CODE, product.getCouponCode());
+
             }
             if (!MPUtility.isEmpty(product.getBrand())) {
-                attributes.put(Constants.ATT_PRODUCT_BRAND, product.getBrand());
+                onAttributeExtracted.onAttributeExtracted(Constants.ATT_PRODUCT_BRAND, product.getBrand());
             }
             if (!MPUtility.isEmpty(product.getCategory())) {
-                attributes.put(Constants.ATT_PRODUCT_CATEGORY, product.getCategory());
+                onAttributeExtracted.onAttributeExtracted(Constants.ATT_PRODUCT_CATEGORY, product.getCategory());
             }
             if (!MPUtility.isEmpty(product.getName())) {
-                attributes.put(Constants.ATT_PRODUCT_NAME, product.getName());
+                onAttributeExtracted.onAttributeExtracted(Constants.ATT_PRODUCT_NAME, product.getName());
             }
             if (!MPUtility.isEmpty(product.getSku())) {
-                attributes.put(Constants.ATT_PRODUCT_ID, product.getSku());
+                onAttributeExtracted.onAttributeExtracted(Constants.ATT_PRODUCT_ID, product.getSku());
             }
             if (!MPUtility.isEmpty(product.getVariant())) {
-                attributes.put(Constants.ATT_PRODUCT_VARIANT, product.getVariant());
+                onAttributeExtracted.onAttributeExtracted(Constants.ATT_PRODUCT_VARIANT, product.getVariant());
             }
             if (product.getPosition() != null) {
-                attributes.put(Constants.ATT_PRODUCT_POSITION, Integer.toString(product.getPosition()));
+                onAttributeExtracted.onAttributeExtracted(Constants.ATT_PRODUCT_POSITION, product.getPosition());
             }
-            attributes.put(Constants.ATT_PRODUCT_PRICE, Double.toString(product.getUnitPrice()));
-            attributes.put(Constants.ATT_PRODUCT_QUANTITY, Double.toString(product.getQuantity()));
-            attributes.put(Constants.ATT_PRODUCT_TOTAL_AMOUNT, Double.toString(product.getTotalAmount()));
+            onAttributeExtracted.onAttributeExtracted(Constants.ATT_PRODUCT_PRICE, product.getUnitPrice());
+            onAttributeExtracted.onAttributeExtracted(Constants.ATT_PRODUCT_QUANTITY, product.getQuantity());
+            onAttributeExtracted.onAttributeExtracted(Constants.ATT_PRODUCT_TOTAL_AMOUNT, product.getTotalAmount());
         }
     }
 
     public static void extractProductAttributes(Product product, Map<String, String> attributes) {
+        extractProductAttributes(product, new StringAttributeExtractor(attributes));
+    }
+
+    public static void extractProductAttributes(Product product, OnAttributeExtracted onAttributeExtracted) {
         if (product != null) {
             if (product.getCustomAttributes() != null) {
-                attributes.putAll(product.getCustomAttributes());
+                onAttributeExtracted.onAttributeExtracted(product.getCustomAttributes());
             }
         }
     }
 
-    private static void extractTransactionId(CommerceEvent event, Map<String, String> attributes) {
+    private static void extractTransactionId(CommerceEvent event, OnAttributeExtracted onAttributeExtracted) {
         if (event != null && event.getTransactionAttributes() != null && !MPUtility.isEmpty(event.getTransactionAttributes().getId())) {
-            attributes.put(Constants.ATT_TRANSACTION_ID, event.getTransactionAttributes().getId());
+            onAttributeExtracted.onAttributeExtracted(Constants.ATT_TRANSACTION_ID, event.getTransactionAttributes().getId());
         }
     }
 
     public static void extractActionAttributes(CommerceEvent event, Map<String, String> attributes) {
-        extractTransactionAttributes(event, attributes);
-        extractTransactionId(event, attributes);
+        extractActionAttributes(event, new StringAttributeExtractor(attributes));
+    }
+
+    public static void extractActionAttributes(CommerceEvent event, OnAttributeExtracted onAttributeExtracted) {
+        extractTransactionAttributes(event, onAttributeExtracted);
+        extractTransactionId(event, onAttributeExtracted);
         String currency = event.getCurrency();
         if (MPUtility.isEmpty(currency)) {
             currency = Constants.DEFAULT_CURRENCY_CODE;
         }
-        attributes.put(Constants.ATT_ACTION_CURRENCY_CODE, currency);
+        onAttributeExtracted.onAttributeExtracted(Constants.ATT_ACTION_CURRENCY_CODE, currency);
         String checkoutOptions = event.getCheckoutOptions();
         if (!MPUtility.isEmpty(checkoutOptions)) {
-            attributes.put(Constants.ATT_ACTION_CHECKOUT_OPTIONS, checkoutOptions);
+            onAttributeExtracted.onAttributeExtracted(Constants.ATT_ACTION_CHECKOUT_OPTIONS, checkoutOptions);
         }
         if (event.getCheckoutStep() != null) {
-            attributes.put(Constants.ATT_ACTION_CHECKOUT_STEP, Integer.toString(event.getCheckoutStep()));
+            onAttributeExtracted.onAttributeExtracted(Constants.ATT_ACTION_CHECKOUT_STEP, event.getCheckoutStep());
         }
         if (!MPUtility.isEmpty(event.getProductListSource())) {
-            attributes.put(Constants.ATT_ACTION_PRODUCT_LIST_SOURCE, event.getProductListSource());
+            onAttributeExtracted.onAttributeExtracted(Constants.ATT_ACTION_PRODUCT_LIST_SOURCE, event.getProductListSource());
         }
         if (!MPUtility.isEmpty(event.getProductListName())) {
-            attributes.put(Constants.ATT_ACTION_PRODUCT_ACTION_LIST, event.getProductListName());
+            onAttributeExtracted.onAttributeExtracted(Constants.ATT_ACTION_PRODUCT_ACTION_LIST, event.getProductListName());
         }
     }
 
@@ -135,25 +151,28 @@ public final class CommerceEventUtils {
         if (event == null || event.getTransactionAttributes() == null) {
             return attributes;
         }
+        extractTransactionAttributes(event, new StringAttributeExtractor(attributes));
+        return attributes;
+    }
+
+    public static void extractTransactionAttributes(CommerceEvent event, OnAttributeExtracted onAttributeExtracted) {
         TransactionAttributes transactionAttributes = event.getTransactionAttributes();
-        extractTransactionId(event, attributes);
+        extractTransactionId(event, onAttributeExtracted);
         if (!MPUtility.isEmpty(transactionAttributes.getAffiliation())) {
-            attributes.put(Constants.ATT_AFFILIATION, transactionAttributes.getAffiliation());
+            onAttributeExtracted.onAttributeExtracted(Constants.ATT_AFFILIATION, transactionAttributes.getAffiliation());
         }
         if (!MPUtility.isEmpty(transactionAttributes.getCouponCode())) {
-            attributes.put(Constants.ATT_TRANSACTION_COUPON_CODE, transactionAttributes.getCouponCode());
+            onAttributeExtracted.onAttributeExtracted(Constants.ATT_TRANSACTION_COUPON_CODE, transactionAttributes.getCouponCode());
         }
         if (transactionAttributes.getRevenue() != null) {
-            attributes.put(Constants.ATT_TOTAL, Double.toString(transactionAttributes.getRevenue()));
+            onAttributeExtracted.onAttributeExtracted(Constants.ATT_TOTAL, transactionAttributes.getRevenue());
         }
         if (transactionAttributes.getShipping() != null) {
-            attributes.put(Constants.ATT_SHIPPING, Double.toString(transactionAttributes.getShipping()));
+            onAttributeExtracted.onAttributeExtracted(Constants.ATT_SHIPPING, transactionAttributes.getShipping());
         }
         if (transactionAttributes.getTax() != null) {
-            attributes.put(Constants.ATT_TAX, Double.toString(transactionAttributes.getTax()));
+            onAttributeExtracted.onAttributeExtracted(Constants.ATT_TAX, transactionAttributes.getTax());
         }
-
-        return attributes;
     }
 
     public static List<MPEvent> expandPromotionAction(CommerceEvent event) {
@@ -178,18 +197,22 @@ public final class CommerceEventUtils {
     }
 
     public static void extractPromotionAttributes(Promotion promotion, Map<String, String> attributes) {
+        extractPromotionAttributes(promotion, new StringAttributeExtractor(attributes));
+    }
+
+    public static void extractPromotionAttributes(Promotion promotion, OnAttributeExtracted onAttributeExtracted) {
         if (promotion != null) {
             if (!MPUtility.isEmpty(promotion.getId())) {
-                attributes.put(Constants.ATT_PROMOTION_ID, promotion.getId());
+                onAttributeExtracted.onAttributeExtracted(Constants.ATT_PROMOTION_ID, promotion.getId());
             }
             if (!MPUtility.isEmpty(promotion.getPosition())) {
-                attributes.put(Constants.ATT_PROMOTION_POSITION, promotion.getPosition());
+                onAttributeExtracted.onAttributeExtracted(Constants.ATT_PROMOTION_POSITION, promotion.getPosition());
             }
             if (!MPUtility.isEmpty(promotion.getName())) {
-                attributes.put(Constants.ATT_PROMOTION_NAME, promotion.getName());
+                onAttributeExtracted.onAttributeExtracted(Constants.ATT_PROMOTION_NAME, promotion.getName());
             }
             if (!MPUtility.isEmpty(promotion.getCreative())) {
-                attributes.put(Constants.ATT_PROMOTION_CREATIVE, promotion.getCreative());
+                onAttributeExtracted.onAttributeExtracted(Constants.ATT_PROMOTION_CREATIVE, promotion.getCreative());
             }
         }
     }
@@ -362,5 +385,40 @@ public final class CommerceEventUtils {
         String EVENT_TYPE_STRING_IMPRESSION = "ProductImpression";
         String EVENT_TYPE_STRING_UNKNOWN = "Unknown";
 
+    }
+
+    private static class StringAttributeExtractor implements OnAttributeExtracted {
+        Map<String, String> attributes;
+
+        StringAttributeExtractor(@NonNull Map<String, String> attributes) {
+            this.attributes = attributes;
+        }
+
+        @Override
+        public void onAttributeExtracted(String key, String value) {
+            attributes.put(key, value);
+        }
+
+        @Override
+        public void onAttributeExtracted(String key, double value) {
+            attributes.put(key, Double.toString(value));
+        }
+
+        @Override
+        public void onAttributeExtracted(String key, int value) {
+            attributes.put(key, Integer.toString(value));
+        }
+
+        @Override
+        public void onAttributeExtracted(Map<String, String> customAttributes) {
+            attributes.putAll(customAttributes);
+        }
+    }
+
+    public interface OnAttributeExtracted {
+        void onAttributeExtracted(String key, String value);
+        void onAttributeExtracted(String key, double value);
+        void onAttributeExtracted(String key, int value);
+        void onAttributeExtracted(Map<String, String> attributes);
     }
 }
