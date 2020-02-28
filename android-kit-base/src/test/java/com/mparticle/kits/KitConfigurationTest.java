@@ -393,7 +393,7 @@ public class KitConfigurationTest {
                                 .addGDPRConsentState(
                                         "foo purpose 3",
                                         GDPRConsent.builder(false).build())
-                                .setCCPAConsent(
+                                .setCCPAConsentState(
                                         CCPAConsent.builder(false).build())
                                 .build()
                 )
@@ -411,7 +411,7 @@ public class KitConfigurationTest {
                                 .addGDPRConsentState(
                                         "foo purpose 3",
                                         GDPRConsent.builder(false).build())
-                                .setCCPAConsent(
+                                .setCCPAConsentState(
                                         CCPAConsent.builder(true).build())
                                 .build()
                 )
@@ -494,7 +494,7 @@ public class KitConfigurationTest {
         assertTrue(
                 configuration.isConsentStateFilterMatch(
                         ConsentState.builder()
-                                .setCCPAConsent(
+                                .setCCPAConsentState(
                                         CCPAConsent.builder(false)
                                                 .build())
                                 .build()
@@ -504,7 +504,7 @@ public class KitConfigurationTest {
         assertFalse(
                 configuration.isConsentStateFilterMatch(
                         ConsentState.builder()
-                                .setCCPAConsent(
+                                .setCCPAConsentState(
                                         CCPAConsent.builder(true)
                                                 .build())
                                 .build()
@@ -517,7 +517,7 @@ public class KitConfigurationTest {
         assertTrue(
                 configuration.isConsentStateFilterMatch(
                         ConsentState.builder()
-                                .setCCPAConsent(
+                                .setCCPAConsentState(
                                         CCPAConsent.builder(true)
                                                 .build())
                                 .build()
@@ -527,7 +527,7 @@ public class KitConfigurationTest {
         assertFalse(
                 configuration.isConsentStateFilterMatch(
                         ConsentState.builder()
-                                .setCCPAConsent(
+                                .setCCPAConsentState(
                                         CCPAConsent.builder(false)
                                                 .build())
                                 .build()

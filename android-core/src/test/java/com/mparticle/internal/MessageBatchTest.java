@@ -79,7 +79,7 @@ public class MessageBatchTest {
                                 .hardwareId("foo hardware id")
                                 .document("foo document")
                                 .build())
-                        .setCCPAConsent(CCPAConsent.builder(true)
+                        .setCCPAConsentState(CCPAConsent.builder(true)
                                 .timestamp(20L)
                                 .location("bar location")
                                 .hardwareId("bar hardware id")

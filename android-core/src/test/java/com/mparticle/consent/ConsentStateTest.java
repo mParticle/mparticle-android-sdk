@@ -16,10 +16,10 @@ public class ConsentStateTest {
         assertEquals(0, state.build().getGDPRConsentState().size());
         state.addGDPRConsentState("foo-purpose-1", GDPRConsent.builder(false).build());
         state.addGDPRConsentState("foo-purpose-2", GDPRConsent.builder(false).build());
-        state.setCCPAConsent(CCPAConsent.builder(false).build());
+        state.setCCPAConsentState(CCPAConsent.builder(false).build());
         assertEquals(2, state.build().getGDPRConsentState().size());
         state.setGDPRConsentState(null);
-        state.removeCCPAConsent();
+        state.removeCCPAConsentState();
         assertEquals(0, state.build().getGDPRConsentState().size());
         assertNull(state.build().getCCPAConsentState());
     }
@@ -48,7 +48,7 @@ public class ConsentStateTest {
     public void addCCPAConsentState() {
         ConsentState.Builder state = ConsentState.builder();
         assertEquals(0, state.build().getGDPRConsentState().size());
-        state.setCCPAConsent(CCPAConsent.builder(true).build());
+        state.setCCPAConsentState(CCPAConsent.builder(true).build());
         assertNotNull(state.build().getCCPAConsentState());
     }
 
@@ -56,8 +56,8 @@ public class ConsentStateTest {
     public void addCCPAConsentStateMultiple() {
         ConsentState.Builder state = ConsentState.builder();
         assertEquals(0, state.build().getGDPRConsentState().size());
-        state.setCCPAConsent(CCPAConsent.builder(true).build());
-        state.setCCPAConsent(CCPAConsent.builder(false).build());
+        state.setCCPAConsentState(CCPAConsent.builder(true).build());
+        state.setCCPAConsentState(CCPAConsent.builder(false).build());
         assertNotNull(state.build().getCCPAConsentState());
         assertFalse(state.build().getCCPAConsentState().isConsented());
     }
@@ -66,9 +66,9 @@ public class ConsentStateTest {
     public void removeCCPAConsentState() {
         ConsentState.Builder state = ConsentState.builder();
         assertEquals(0, state.build().getGDPRConsentState().size());
-        state.setCCPAConsent(CCPAConsent.builder(true).build());
+        state.setCCPAConsentState(CCPAConsent.builder(true).build());
         assertNotNull(state.build().getCCPAConsentState());
-        state.removeCCPAConsent();
+        state.removeCCPAConsentState();
         assertNull(state.build().getCCPAConsentState());
     }
 
@@ -85,7 +85,7 @@ public class ConsentStateTest {
         ConsentState.Builder state = ConsentState.withConsentState(ConsentState.builder()
                 .addGDPRConsentState("foo-purpose-1", GDPRConsent.builder(false).build())
                 .addGDPRConsentState("foo-purpose-2", GDPRConsent.builder(true).build())
-                .setCCPAConsent(CCPAConsent.builder(false).build())
+                .setCCPAConsentState(CCPAConsent.builder(false).build())
                 .build()
                 .toString()
         );
@@ -102,7 +102,7 @@ public class ConsentStateTest {
         ConsentState.Builder state = ConsentState.withConsentState(ConsentState.builder()
                 .addGDPRConsentState("foo-purpose-1", GDPRConsent.builder(false).build())
                 .addGDPRConsentState("foo-purpose-2", GDPRConsent.builder(true).build())
-                .setCCPAConsent(CCPAConsent.builder(true).build())
+                .setCCPAConsentState(CCPAConsent.builder(true).build())
                 .build()
         );
         assertNotNull(state);
@@ -124,7 +124,7 @@ public class ConsentStateTest {
                         .timestamp(5L)
                         .build()
                 )
-                .setCCPAConsent(CCPAConsent.builder(true)
+                .setCCPAConsentState(CCPAConsent.builder(true)
                         .document("bar document")
                         .hardwareId("bar hardware id")
                         .location("bar location")
@@ -159,7 +159,7 @@ public class ConsentStateTest {
                         .timestamp(5L)
                         .build()
                 )
-                .setCCPAConsent(CCPAConsent.builder(true)
+                .setCCPAConsentState(CCPAConsent.builder(true)
                         .document("bar document")
                         .hardwareId("bar hardware id")
                         .location("bar location")

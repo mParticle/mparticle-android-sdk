@@ -11,12 +11,9 @@ import com.mparticle.consent.CCPAConsent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.consent.GDPRConsent;
 import com.mparticle.internal.AccessUtils;
-import com.mparticle.internal.ConfigManager;
-import com.mparticle.testutils.AndroidUtils;
 import com.mparticle.testutils.AndroidUtils.Mutable;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.testutils.MPLatch;
-import com.mparticle.testutils.TestingUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -130,7 +127,7 @@ public class MParticleUserDelegateTest extends BaseCleanStartedEachTest {
         mUserDelegate.setConsentState(builder.build(), mpid);
         builder.addGDPRConsentState("foo2", GDPRConsent.builder(true).build());
         mUserDelegate.setConsentState(builder.build(), mpid2);
-        builder.setCCPAConsent(CCPAConsent.builder(false).build());
+        builder.setCCPAConsentState(CCPAConsent.builder(false).build());
         mUserDelegate.setConsentState(builder.build(), mpid2);
 
         assertEquals(1, mUserDelegate.getConsentState(mpid).getGDPRConsentState().size());
@@ -153,7 +150,7 @@ public class MParticleUserDelegateTest extends BaseCleanStartedEachTest {
 
         ConsentState.Builder builder = ConsentState.builder();
         builder.addGDPRConsentState("foo", GDPRConsent.builder(true).build());
-        builder.setCCPAConsent(CCPAConsent.builder(true).build());
+        builder.setCCPAConsentState(CCPAConsent.builder(true).build());
         mUserDelegate.setConsentState(builder.build(), mpid);
 
         assertEquals(1, mUserDelegate.getConsentState(mpid).getGDPRConsentState().size());

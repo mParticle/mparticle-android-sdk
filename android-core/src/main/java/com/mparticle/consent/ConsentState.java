@@ -112,7 +112,7 @@ public final class ConsentState {
 
         private Builder(ConsentState consentState) {
             setGDPRConsentState(consentState.getGDPRConsentState());
-            setCCPAConsent(consentState.getCCPAConsentState());
+            setCCPAConsentState(consentState.getCCPAConsentState());
         }
 
         private Builder(String serializedConsent) {
@@ -130,7 +130,7 @@ public final class ConsentState {
                 }
                 if (jsonConsent.has(SERIALIZED_CCPA_KEY)) {
                     String ccpaConsentString = jsonConsent.getString(SERIALIZED_CCPA_KEY);
-                    setCCPAConsent(CCPAConsent.withCCPAConsent(ccpaConsentString).build());
+                    setCCPAConsentState(CCPAConsent.withCCPAConsent(ccpaConsentString).build());
                 }
             } catch (JSONException ignored) {
 
@@ -201,14 +201,26 @@ public final class ConsentState {
             return this;
         }
 
+        @Deprecated
         @NonNull
         public Builder setCCPAConsent(@NonNull CCPAConsent ccpaConsent) {
+            return setCCPAConsentState(ccpaConsent);
+        }
+
+        @NonNull
+        public Builder setCCPAConsentState(@NonNull CCPAConsent ccpaConsent) {
             this.ccpaConsent = ccpaConsent;
             return this;
         }
 
+        @Deprecated
         @NonNull
         public Builder removeCCPAConsent() {
+            return removeCCPAConsentState();
+        }
+
+        @NonNull
+        public Builder removeCCPAConsentState() {
             ccpaConsent = null;
             return this;
         }
