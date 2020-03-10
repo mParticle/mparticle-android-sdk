@@ -10,7 +10,7 @@ import com.mparticle.consent.GDPRConsent;
 import com.mparticle.identity.IdentityApi;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.CoreCallbacks;
-import com.mparticle.mock.MockKit;
+import com.mparticle.internal.KitManager;
 import com.mparticle.mock.MockKitManagerImpl;
 import com.mparticle.mock.MockMParticle;
 import com.mparticle.internal.BackgroundTaskHandler;
@@ -82,7 +82,6 @@ public class KitManagerImplTest {
         manager.configureKits(kitConfiguration);
         Assert.assertEquals(2, manager.providers.size());
         Assert.assertEquals(mockKit, manager.providers.values().iterator().next());
-
     }
 
     @Test
@@ -386,7 +385,39 @@ public class KitManagerImplTest {
         assertEquals(1, manager.logBaseEventCalled);
         assertEquals(0, manager.logMPEventCalled);
         assertEquals(1, manager.logCommerceEventCalled);
+    }
 
+    @Test
+    public void testShouldEnableKitOnOptIn() throws Exception {
+        MParticleUser mockUser = Mockito.mock(MParticleUser.class);
+        ConsentState state = ConsentState.builder().build();
+        Mockito.when(mockUser.getConsentState()).thenReturn(state);
+        Mockito.when(mockIdentity.getCurrentUser()).thenReturn(mockUser);
+        KitManagerImpl manager = new MockKitManagerImpl() {
+            @Override
+            public void updateKits(JSONArray kitConfigs) {
+                configureKits(kitConfigs);
+            }
+        };
+        JSONArray kitConfiguration = new JSONArray();
+        kitConfiguration.put(new JSONObject("{\"id\":1}"));
+        kitConfiguration.put(new JSONObject("{\"id\":2}"));
+
+        Mockito.when(manager.mCoreCallbacks.getLatestKitConfiguration()).thenReturn(kitConfiguration);
+        KitIntegrationFactory factory = Mockito.mock(KitIntegrationFactory.class);
+        manager.setKitFactory(factory);
+        Mockito.when(factory.isSupported(Mockito.anyInt())).thenReturn(true);
+        KitIntegration mockKit  = Mockito.mock(KitIntegration.class);
+        Mockito.when(mockKit.isDisabled()).thenReturn(true);
+        Mockito.when(mockKit.getConfiguration()).thenReturn(Mockito.mock(KitConfiguration.class));
+        Mockito.when(factory.createInstance(Mockito.any(KitManagerImpl.class), Mockito.any(KitConfiguration.class))).thenReturn(mockKit);
+
+        manager.setOptOut(true);
+        manager.configureKits(kitConfiguration);
+        Assert.assertEquals(0, manager.providers.size());
+        Mockito.when(mockKit.isDisabled()).thenReturn(false);
+        manager.setOptOut(false);
+        Assert.assertEquals(2, manager.providers.size());
     }
 
     class KitManagerEventCounter extends MockKitManagerImpl {

@@ -363,6 +363,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 Logger.warning("Failed to call setOptOut for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
+        updateKits(mCoreCallbacks.getLatestKitConfiguration());
     }
 
     @Override
