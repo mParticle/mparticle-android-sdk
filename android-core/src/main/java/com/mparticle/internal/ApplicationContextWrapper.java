@@ -9,6 +9,10 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+
+import androidx.annotation.RequiresApi;
 
 import com.mparticle.MParticle;
 
@@ -101,56 +105,18 @@ public class ApplicationContextWrapper extends Application {
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     @Override
-    public void registerActivityLifecycleCallbacks(ActivityLifecycleCallbacks callback) {
+    public void registerActivityLifecycleCallbacks(final ActivityLifecycleCallbacks callback) {
+        registerActivityLifecycleCallbacks(callback, false);
+    }
+
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    void registerActivityLifecycleCallbacks(final ActivityLifecycleCallbacks callback, boolean unitTesting) {
         mBaseApplication.registerActivityLifecycleCallbacks(callback);
-        if (callback != null && mActivityLifecycleCallbackRecorder != null && mReplay) {
-            WeakReference<Activity> reference = MParticle.getInstance().Internal().getKitManager() == null ? null : MParticle.getInstance().Internal().getKitManager().getCurrentActivity();
-            if (reference != null) {
-                Activity currentActivity = reference.get();
-                if (currentActivity != null) {
-                    LinkedList<LifeCycleEvent> recordedLifecycleList = mActivityLifecycleCallbackRecorder.getRecordedLifecycleListCopy();
-                    while(recordedLifecycleList.size() > 0) {
-                        LifeCycleEvent lifeCycleEvent = recordedLifecycleList.removeFirst();
-                        if (lifeCycleEvent.activityRef != null) {
-                            Activity recordedActivity = lifeCycleEvent.activityRef.get();
-                            if (recordedActivity != null) {
-                                if (recordedActivity == currentActivity) {
-                                    switch (lifeCycleEvent.methodType) {
-                                        case ON_CREATED:
-                                            Logger.debug("Forwarding OnCreate");
-                                            callback.onActivityCreated(recordedActivity, lifeCycleEvent.bundle);
-                                            break;
-                                        case ON_STARTED:
-                                            Logger.debug("Forwarding OnStart");
-                                            callback.onActivityStarted(recordedActivity);
-                                            break;
-                                        case ON_RESUMED:
-                                            Logger.debug("Forwarding OnResume");
-                                            callback.onActivityResumed(recordedActivity);
-                                            break;
-                                        case ON_PAUSED:
-                                            Logger.debug("Forwarding OnPause");
-                                            callback.onActivityPaused(recordedActivity);
-                                            break;
-                                        case ON_SAVE_INSTANCE_STATE:
-                                            Logger.debug("Forwarding OnSaveInstance");
-                                            callback.onActivitySaveInstanceState(recordedActivity, lifeCycleEvent.bundle);
-                                            break;
-                                        case ON_STOPPED:
-                                            Logger.debug("Forwarding OnStop");
-                                            callback.onActivityStopped(recordedActivity);
-                                            break;
-                                        case ON_DESTROYED:
-                                            Logger.debug("Forwarding OnDestroy");
-                                            callback.onActivityDestroyed(recordedActivity);
-                                            break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        ReplayLifecycleCallbacksRunnable runnable = new ReplayLifecycleCallbacksRunnable(callback);
+        if (unitTesting) {
+            runnable.run();
+        } else {
+            new Handler().post(runnable);
         }
     }
 
@@ -302,6 +268,68 @@ public class ApplicationContextWrapper extends Application {
                         l.bundle == bundle;
             }
             return false;
+        }
+    }
+
+    class ReplayLifecycleCallbacksRunnable implements Runnable {
+        ActivityLifecycleCallbacks callback;
+
+        ReplayLifecycleCallbacksRunnable(ActivityLifecycleCallbacks callback) {
+            this.callback = callback;
+        }
+
+        @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+        @Override
+        public void run() {
+            if (callback != null && mActivityLifecycleCallbackRecorder != null && mReplay) {
+                WeakReference<Activity> reference = MParticle.getInstance().Internal().getKitManager() == null ? null : MParticle.getInstance().Internal().getKitManager().getCurrentActivity();
+                if (reference != null) {
+                    Activity currentActivity = reference.get();
+                    if (currentActivity != null) {
+                        LinkedList<LifeCycleEvent> recordedLifecycleList = mActivityLifecycleCallbackRecorder.getRecordedLifecycleListCopy();
+                        while (recordedLifecycleList.size() > 0) {
+                            LifeCycleEvent lifeCycleEvent = recordedLifecycleList.removeFirst();
+                            if (lifeCycleEvent.activityRef != null) {
+                                Activity recordedActivity = lifeCycleEvent.activityRef.get();
+                                if (recordedActivity != null) {
+                                    if (recordedActivity == currentActivity) {
+                                        switch (lifeCycleEvent.methodType) {
+                                            case ON_CREATED:
+                                                Logger.debug("Forwarding OnCreate");
+                                                callback.onActivityCreated(recordedActivity, lifeCycleEvent.bundle);
+                                                break;
+                                            case ON_STARTED:
+                                                Logger.debug("Forwarding OnStart");
+                                                callback.onActivityStarted(recordedActivity);
+                                                break;
+                                            case ON_RESUMED:
+                                                Logger.debug("Forwarding OnResume");
+                                                callback.onActivityResumed(recordedActivity);
+                                                break;
+                                            case ON_PAUSED:
+                                                Logger.debug("Forwarding OnPause");
+                                                callback.onActivityPaused(recordedActivity);
+                                                break;
+                                            case ON_SAVE_INSTANCE_STATE:
+                                                Logger.debug("Forwarding OnSaveInstance");
+                                                callback.onActivitySaveInstanceState(recordedActivity, lifeCycleEvent.bundle);
+                                                break;
+                                            case ON_STOPPED:
+                                                Logger.debug("Forwarding OnStop");
+                                                callback.onActivityStopped(recordedActivity);
+                                                break;
+                                            case ON_DESTROYED:
+                                                Logger.debug("Forwarding OnDestroy");
+                                                callback.onActivityDestroyed(recordedActivity);
+                                                break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

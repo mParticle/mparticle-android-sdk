@@ -32,7 +32,7 @@ import static org.mockito.Mockito.mock;
  *  Test that if you add a bunch on mock activiies that it will play back in the same order.
  *  Test that it won't crash if there aren't anuy activiies added.
  *  Test that it will max out at 10.
- *  Test that it will take wierd, out of order combinations.
+ *  Test that it will take weird, out of order combinations.
  *  Test that it will ONLY replay activies that match current activity.
  *  Test that if you call stopRecordLifecycles, you will not record anymore lifecycles.
  */
@@ -76,7 +76,7 @@ public class ApplicationContextWrapperTest {
         recorder = getMixedActivityCallbacks();
         tester = new ActivityLifecycleCallbackRecordTester();
         applicationContextWrapper.setActivityLifecycleCallbackRecorder(recorder);
-        applicationContextWrapper.registerActivityLifecycleCallbacks(tester);
+        applicationContextWrapper.registerActivityLifecycleCallbacks(tester, true);
         assertListEquals(tester.getRecordedLifecycleList(), getMixedTestListActivity1());
     }
 
@@ -86,7 +86,7 @@ public class ApplicationContextWrapperTest {
         recorder = getMixedActivityCallbacks();
         tester = new ActivityLifecycleCallbackRecordTester();
         applicationContextWrapper.setActivityLifecycleCallbackRecorder(recorder);
-        applicationContextWrapper.registerActivityLifecycleCallbacks(tester);
+        applicationContextWrapper.registerActivityLifecycleCallbacks(tester, true);
         assertListEquals(tester.getRecordedLifecycleList(), getMixedTestListActivity2());
     }
 
@@ -96,7 +96,7 @@ public class ApplicationContextWrapperTest {
         recorder = getMixedActivityCallbacks();
         tester = new ActivityLifecycleCallbackRecordTester();
         applicationContextWrapper.setActivityLifecycleCallbackRecorder(recorder);
-        applicationContextWrapper.registerActivityLifecycleCallbacks(tester);
+        applicationContextWrapper.registerActivityLifecycleCallbacks(tester, true);
         assertListEquals(tester.getRecordedLifecycleList(), new LinkedList());
     }
 
@@ -106,7 +106,7 @@ public class ApplicationContextWrapperTest {
         recorder = getEmptyActivityCallbacks();
         tester = new ActivityLifecycleCallbackRecordTester();
         applicationContextWrapper.setActivityLifecycleCallbackRecorder(recorder);
-        applicationContextWrapper.registerActivityLifecycleCallbacks(tester);
+        applicationContextWrapper.registerActivityLifecycleCallbacks(tester, true);
         assertListEquals(tester.getRecordedLifecycleList(), new LinkedList());
     }
 
@@ -117,7 +117,7 @@ public class ApplicationContextWrapperTest {
         tester = new ActivityLifecycleCallbackRecordTester();
         applicationContextWrapper.setReplayActivityLifecycle(false);
         applicationContextWrapper.setActivityLifecycleCallbackRecorder(recorder);
-        applicationContextWrapper.registerActivityLifecycleCallbacks(tester);
+        applicationContextWrapper.registerActivityLifecycleCallbacks(tester, true);
         assertListEquals(tester.getRecordedLifecycleList(), new LinkedList());
         assertTrue(recorder.lifeCycleEvents.size() > 0);
     }
