@@ -4,6 +4,7 @@ import com.android.tools.lint.client.api.UElementHandler
 import com.android.tools.lint.detector.api.*
 import com.intellij.psi.PsiClass
 import com.intellij.psi.util.PsiTreeUtil
+import org.jetbrains.kotlin.utils.addToStdlib.indexOfOrNull
 import org.jetbrains.uast.*
 import java.util.*
 
@@ -146,7 +147,7 @@ class MpApiDetectorKt : Detector(), Detector.UastScanner {
                     element.declarations.forEach { declaration ->
                         //out of all the UDeclarationExpressions, the only ones we want to grab the body from are ones that
                         //we know are going to be executed when the original method is called. A UMethod is also a subclass of a
-                        //UDeclarationExpression, but we don't want to add this, because it's exitence does not mean it is going
+                        //UDeclarationExpression, but we don't want to add this, because it's existence does not mean it is going
                         //to be invoked. For Methods, we will parse them when their MethodCall is found
                         (declaration as? UVariable)?.
                                 apply {
@@ -154,10 +155,9 @@ class MpApiDetectorKt : Detector(), Detector.UastScanner {
                                     if (text.isEmpty()) {
                                         return@apply
                                     }
-                                    with(" ${text.substring(0, text.indexOf(name ?: ""))} ") {
-                                        if (this.contains(" fun ")) {
-                                            return@apply
-                                        }
+                                    val index = text.indexOf(name ?: "")
+                                    if (index > 0 && " ${text.substring(0, index)} ".contains(" fun ")) {
+                                        return@apply
                                     }
                                     uastInitializer?.let {
                                         callExpressions.addAll(findMethodCall(it, depth))
@@ -179,7 +179,11 @@ class MpApiDetectorKt : Detector(), Detector.UastScanner {
             return callExpressions
         }
 
-        return findMethodCall(method.uastBody, depth)
+        try {
+            return findMethodCall(method.uastBody, depth)
+        } catch (e: Exception) {
+            return listOf()
+        }
     }
 
 
