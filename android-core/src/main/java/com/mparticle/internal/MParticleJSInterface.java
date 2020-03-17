@@ -560,7 +560,10 @@ public class MParticleJSInterface {
         if (customAttributes != null) {
             builder.customAttributes(customAttributes);
         }
-        builder.currency(jsonObject.optString(CURRENCY_CODE, null));
+        String currencyCode = jsonObject.optString(CURRENCY_CODE, null);
+        if (currencyCode != null && !"null".equals(currencyCode)) {
+            builder.currency(currencyCode);
+        }
         builder.internalEventName(jsonObject.optString(EVENT_NAME, null));
         return builder.build();
     }

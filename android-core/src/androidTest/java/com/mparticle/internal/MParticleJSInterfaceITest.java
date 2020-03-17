@@ -15,7 +15,6 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.WebViewActivity;
 import com.mparticle.commerce.CommerceEvent;
@@ -23,6 +22,7 @@ import com.mparticle.commerce.Product;
 import com.mparticle.commerce.TransactionAttributes;
 import com.mparticle.identity.AccessUtils;
 import com.mparticle.test.R;
+import com.mparticle.testutils.AndroidUtils;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.testutils.BuildConfig;
 import com.mparticle.testutils.MPLatch;
@@ -52,6 +52,7 @@ import java.util.concurrent.CountDownLatch;
 
 import static com.mparticle.testutils.TestingUtils.assertJsonEqual;
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
 public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
@@ -363,6 +364,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                 "mParticle.eCommerce.logPurchase(transactionAttributes, product, true, %s);", customAttributes.toString(4));
 
         final MutableBoolean called = new MutableBoolean(false);
+        final AndroidUtils.Mutable<Object> error = new AndroidUtils.Mutable<Object>(null);
         final CountDownLatch latch = new MPLatch(1);
         runJavascriptTest(testJavascript, new MParticleJSInterface() {
             @Override
@@ -373,6 +375,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                     CommerceEvent commerceEvent = toCommerceEvent(new JSONObject(json));
                     assertEquals(1, commerceEvent.getProducts().size());
                     assertEquals(Product.PURCHASE, commerceEvent.getProductAction());
+                    assertNull(commerceEvent.getCurrency());
                     Product product = commerceEvent.getProducts().get(0);
                     assertEquals("Double Room - Econ Rate", product.getName());
                     assertEquals("econ-1", product.getSku());
@@ -382,14 +385,20 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                     assertEquals("foo-transaction-id", transactionAttributes.getId());
                     assertEquals(430.0, transactionAttributes.getRevenue(), .1);
                     assertEquals(30.0, transactionAttributes.getTax(), .1);
+                    assertNull(transactionAttributes.getShipping());
+                    assertNull(transactionAttributes.getAffiliation());
+                    assertNull(transactionAttributes.getCouponCode());
                     assertJsonEqual(customAttributes, MPUtility.mapToJson(commerceEvent.getCustomAttributes()));
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                    called.value = true;
+                } catch (Exception e) {
+                    error.value = e;
+                } catch (AssertionError e) {
+                    error.value = e;
                 }
-                called.value = true;
                 latch.countDown();
             }
         });
+        assertNull(error.value);
         latch.await();
         assertTrue(called.value);
     }
