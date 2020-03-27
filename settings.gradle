@@ -2,6 +2,10 @@ include ':android-core',
         ':testutils',
         ':android-kit-base',
         ':kit-plugin',
-        ':custom-lint-rules'
+        ':tooling:custom-lint-rules',
+        ':tooling:android-plugin',
+        ':tooling:common'
+
 
 project(':kit-plugin').name = 'android-kit-plugin'
+project(':tooling:android-plugin').name = 'android-plugin'

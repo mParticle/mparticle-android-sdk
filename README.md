@@ -35,7 +35,7 @@ dependencies {
 
 Kits are deployed as individual artifacts in Maven Central, and each has a dedicated repository if you'd like to view the source code. Review the table below to see if you need to include any kits:
 
-Kit | Maven Artifact 
+Kit | Maven Artifact
 ----|---------
 [Adobe](https://github.com/mparticle-integrations/mparticle-android-integration-adobe)                |  [`android-adobe-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-adobe-kit%22)
 [AdobeMedia](https://github.com/mparticle-integrations/mparticle-android-integration-adobe-media)                |  [`android-adobemedia-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-adobemedia-kit%22)
@@ -73,7 +73,6 @@ Kit | Maven Artifact
 [Urban Airship](https://github.com/mparticle-integrations/mparticle-android-integration-urbanairship)                    |  [`android-urbanairship-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-urbanairship-kit%22)
 [Wootric](https://github.com/mparticle-integrations/mparticle-android-integration-wootric)              |  [`android-wootric-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-wootric-kit%22)
 
-### Optional Dependencies
 
 ##### Google Play Services Ads
 
@@ -140,11 +139,119 @@ public class MyApplication extends Application {
 }
 ```
 
-> **Warning:** It's generally not a good idea to log events in your `Application.onCreate()`. Android may instantiate your `Application` class for a lot of reasons, in the background, while the user isn't even using their device. 
+> **Warning:** It's generally not a good idea to log events in your `Application.onCreate()`. Android may instantiate your `Application` class for a lot of reasons, in the background, while the user isn't even using their device.
 
-#### Proguard
+### Proguard
 
-Proguard is a minification/optimization/obfuscation tool that's extremely useful, and it can also cause some sticky bugs. The mParticle SDK is already minified so there's no need to...double-minify it. If you're using Gradle there's nothing to do - we include a `consumer-proguard` rules file inside our `AAR` which Gradle will automatically include in your build. If you're not using Gradle, please add those same rules manually - [see here for the latest](https://github.com/mParticle/mparticle-android-sdk/blob/master/android-core/consumer-proguard.pro). 
+Proguard is a minification/optimization/obfuscation tool that's extremely useful, and it can also cause some sticky bugs. The mParticle SDK is already minified so there's no need to...double-minify it. If you're using Gradle there's nothing to do - we include a `consumer-proguard` rules file inside our `AAR` which Gradle will automatically include in your build. If you're not using Gradle, please add those same rules manually - [see here for the latest](https://github.com/mParticle/mparticle-android-sdk/blob/master/android-core/consumer-proguard.pro).
+
+### Data Planning (beta)
+
+> **requires `node` and `npm`**
+
+The Android SDK provides the ability to enforce your Data Plan via linting. Currently, this feature is beta-level, but it only runs
+in the build environment, so there is no chance that it affects the runtime behavior of the mParticle SDK.
+
+To enable Data Plan validation via linting, you must first download your Data Plan according to [these steps](insert-url.com)
+
+We recommended you add the Data Plan in your application's root level directory, but it can be located anywhere in your project directory since `dataPlanFile` accepts a relative file path
+
+##### 1) Add the mParticle Gradle Plugin
+
+The next step is to configure the mParticle Gradle Plugin. In your root `build.gradle` use the following code to add the plugin dependency to your buildscript:
+
+```groovy
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        ...
+        classpath 'com.mparticle:android-plugin:5.12.10'
+    }
+}
+```
+
+Next, apply the plugin in your project-level `build.gradle`
+
+```groovy
+apply plugin: 'com.mparticle'
+```
+
+##### 2) Configure the Plugin
+
+Either configure the mParticle Plugin object
+
+```groovy
+mparticle {
+    dataPlanFile './mp-dataplan.json'   //(required)
+
+    resultsFile './mp-dp-results.json'  //(optional)
+    disabled false                      //(optional) defaults to "false"
+    verbose false                       //{optional) defaults to "false"
+}
+```
+*Or*
+
+provide an `mparticle.json` config file in the project-level directory
+
+```json
+{
+    "data-plan-file": "./mp-dataplan.json",    //(required)
+    
+    "results-file": "./mp-dp-results.json",    //(optional)
+    "disabled": "false",                       //(optional) defaults to "false"
+    "verbose": false                           //(optional) defaults to "false"
+}
+```
+
+##### 3) Install the mParticle CLI tool
+
+Install the mParticle CLI. More documentation is available in it's [Github repo](https://git.corp.mparticle.com/mParticle/mparticle-cli)
+
+```bash
+./gradlew mpInstall
+```
+
+##### 4) Viewing results
+
+> Note: Any changes to your dataplan are not applied until the Gradle Project Syncs
+
+Validation Errors surface in multiple locations. 
+
+- Individual Errors in the IDE as linting errors (red squiggly underlines), marking the offending code.
+- Written to your `resultsFile`, if you configured one in the mParticle plugin
+- Within the terminal, run `./gradlew lint`
+
+### Custom Lint Checks
+
+This SDK contains a number of custom link checks. These are designed to make the development process simpler and more integrated.
+
+If at any time, they become too intrusive, they can easily switch off by including the Lint ID in the following block of your `build.gradle`:
+
+```groovy
+android {
+    lintOptions {
+        disable {LINT_ISSUE_ID_1}, {LINT_ISSUE_ID_2}, {LINT_ISSUE_ID_3}...
+    }
+}
+```
+
+##### General
+
+Lint Issue ID | Description
+--------------|-------
+MParticleVersionInconsistency | mParticle dependencies should, but do not have, matching versions
+MParticleInitialization | mParticle.start() is not being called in Application.onCreate(), or may be being called multiple times
+MParticleInstallRefReceiver | ReferrerReceiver is present, but has been removed
+
+##### Data Planning
+
+Lint Issue ID | Description
+--------------|-------
+DataplanViolation | DataPlan violations
+NodeMissing | The required `node` dependency is not present in the $PATH variable
+DataPlanMissing | Unable to fetch you DataPlan, could be a problem with credentials or network connectivity
 
 ## Read More
 

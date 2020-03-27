@@ -1,0 +1,80 @@
+apply plugin: 'java'
+apply plugin: 'kotlin'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'net.sf.proguard:proguard-gradle:6.2.2'
+    }
+}
+
+
+repositories {
+    jcenter()
+    google()
+    maven {
+        url  "http://dl.bintray.com/android/android-tools"
+    }
+    maven {
+        url "https://mvnrepository.com/artifact/com.android.tools.lint/lint-tests"
+    }
+}
+
+configurations {
+    lintBuild
+}
+
+dependencies {
+    lintBuild files(jar)
+    compile files('libs/mparticle-min.jar')
+    compile project(':tooling:common')
+    compileOnly 'com.android.tools.lint:lint-api:26.5.3'
+    compileOnly 'com.android.tools.lint:lint-checks:26.5.3'
+    compileOnly 'org.codehaus.groovy:groovy-all:2.4.15'
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'com.android.tools.lint:lint:26.5.3'
+    testImplementation 'com.android.tools.lint:lint-tests:26.5.3'
+    testImplementation 'com.android.tools:testutils:26.5.3'
+    testImplementation 'org.easytesting:fest-assert-core:2.0M10'
+
+}
+
+jar {
+    archiveName 'lint.jar'
+    manifest {
+        attributes 'Manifest-Version': 1.0
+        attributes 'Lint-Registry-v2': 'com.mparticle.lints.MParticleIssueRegistry'
+        attributes 'Lint-Registry': 'com.mparticle.lints.MParticleIssueRegistry'
+    }
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+task zipSources(type: Jar) {
+    from (fileTree(dir: "$project.rootDir/android-core/build/intermediates/javac/release/compileReleaseJavaWithJavac/classes")) {
+        destinationDir new File("$project.projectDir/libs")
+        archiveName "mparticle.jar"
+    }
+    outputs.upToDateWhen { false }
+}
+
+task proguardCore(type: proguard.gradle.ProGuardTask) {
+    configuration 'mparticle-core-proguard.pro'
+    injars 'libs/mparticle.jar'
+    outjars 'libs/mparticle-min.jar'
+}
+
+afterEvaluate {
+    compileKotlin.dependsOn proguardCore
+    proguardCore.dependsOn zipSources
+    zipSources.dependsOn ':android-core:transformClassesAndResourcesWithProguardForRelease'
+}

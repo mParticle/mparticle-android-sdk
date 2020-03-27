@@ -1,0 +1,54 @@
+apply plugin: 'groovy'
+apply plugin: 'kotlin'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+
+ext {
+    kitDescription = 'mParticle Gradle Plugin for managing Dataplanning functionality'
+}
+
+apply from: '../../scripts/maven.gradle'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly project(':tooling:common')
+    implementation gradleApi()
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation files('libs/java-json.jar')
+    testImplementation 'junit:junit:4.12'
+    testImplementation project(':tooling:common')
+}
+
+jar {
+    from {
+        configurations.compileOnly.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+task pluginJavadocsJar(type: Jar, dependsOn: groovydoc) {
+    classifier = 'javadoc'
+    from groovydoc.destinationDir
+}
+
+task pluginSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allJava
+}
+
+artifacts {
+    archives pluginJavadocsJar
+    archives pluginSourcesJar
+}

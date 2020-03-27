@@ -51,19 +51,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
-
-import static com.mparticle.internal.Constants.MessageKey.ALIAS_REQUEST_TYPE;
-import static com.mparticle.internal.Constants.MessageKey.API_KEY;
-import static com.mparticle.internal.Constants.MessageKey.DATA;
-import static com.mparticle.internal.Constants.MessageKey.DESTINATION_MPID;
-import static com.mparticle.internal.Constants.MessageKey.DEVICE_APPLICATION_STAMP_ALIAS;
-import static com.mparticle.internal.Constants.MessageKey.END_TIME;
-import static com.mparticle.internal.Constants.MessageKey.ENVIRONMENT_ALIAS;
-import static com.mparticle.internal.Constants.MessageKey.REQUEST_ID;
-import static com.mparticle.internal.Constants.MessageKey.REQUEST_TYPE;
-import static com.mparticle.internal.Constants.MessageKey.SOURCE_MPID;
-import static com.mparticle.internal.Constants.MessageKey.START_TIME;
 
 /**
  * This class is primarily responsible for generating BaseMPMessage objects, and then adding them to a

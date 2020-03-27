@@ -114,8 +114,6 @@ dependencies {
     compileOnly 'com.android.installreferrer:installreferrer:[1.0, )'
     compileOnly 'com.google.android.instantapps:instantapps:[1.0, )'
 
-    lintChecks project(':custom-lint-rules')
-
     //the junit tests seem to explicitly need this dependency while
     //working in Android studio, but from the command line it's not necessary
     testImplementation project(':android-core')
@@ -134,24 +132,34 @@ dependencies {
 }
 
 configurations {
-    lintJarImport
+    lintJar
 }
 
-task copyLintJar(type: Copy) {
+dependencies {
+    lintJar project(path: ':tooling:custom-lint-rules', configuration:'lintBuild')
+}
 
-    from(configurations.lintJarImport) {
+//copy the lint.jar file from custom-lint-rules, to where it needs to be for release
+task copyLintJar(type:Copy) {
+    from(configurations.lintJar) {
         rename {
             String fileName ->
                 'lint.jar'
         }
     }
-    into 'build/intermediates/lint/'
+    into 'build/intermediates/lint_jar/global/prepareLintJar'
+    outputs.upToDateWhen { false }
 }
 
 
-project.afterEvaluate {
-    def compileLintTask = project.tasks.find { it.name == 'compileLint' }
-    compileLintTask.dependsOn(copyLintJar)
+//trigger the secondary core build, which will be consumed by the custom-lint module
+afterEvaluate {
+    android.buildTypes.all { theBuildType ->
+        if (theBuildType.name != 'lintBuild') {
+            //build the Linting jar at closest time to when gradle naturally does it when using lintChecks
+            tasks.getByName("bundle${theBuildType.name.capitalize()}Aar").dependsOn copyLintJar
+        }
+    }
 }
 
 boolean useOrchestrator() {

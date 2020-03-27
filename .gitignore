@@ -39,3 +39,5 @@ build
 #test results
 /testResults
 /android-core/src/androidTest/res/raw/mparticle_js_sdk
+/tooling/custom-lint-rules/libs/mparticle-min.jar
+/tooling/custom-lint-rules/libs/mparticle.jar
