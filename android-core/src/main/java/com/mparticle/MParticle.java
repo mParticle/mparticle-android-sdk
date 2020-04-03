@@ -471,11 +471,7 @@ public class MParticle {
             mAppStateManager.ensureActiveSession();
             if (mConfigManager.isEnabled()) {
                 mMessageManager.logScreen(screenEvent, screenEvent.getNavigationDirection());
-
-                if (null == screenEvent.getCustomAttributes()) {
-                    Logger.debug("Logged screen: ", screenEvent.toString());
-                }
-
+                Logger.debug("Logged screen: ", screenEvent.toString());
             }
             if (screenEvent.getNavigationDirection()) {
                 mKitManager.logScreen(screenEvent);
