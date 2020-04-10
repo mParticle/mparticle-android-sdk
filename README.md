@@ -184,22 +184,22 @@ Either configure the mParticle Plugin object
 
 ```groovy
 mparticle {
-    dataPlanFile './mp-dataplan.json'   //(required)
+    dataPlanFile 'mp-dataplan.json'     //(required) accepts filename or path
 
-    resultsFile './mp-dp-results.json'  //(optional)
+    resultsFile 'mp-dp-results.json'    //(optional) accepts filename or path
     disabled false                      //(optional) defaults to "false"
     verbose false                       //{optional) defaults to "false"
 }
 ```
 *Or*
 
-provide an `mparticle.json` config file in the project-level directory
+provide an `mp.config` config file in the project-level directory
 
 ```json
 {
-    "data-plan-file": "./mp-dataplan.json",    //(required)
+    "dataPlanFile": "./mp-dataplan.json",      //(required) accepts filename or path
     
-    "results-file": "./mp-dp-results.json",    //(optional)
+    "resultsFile": "./mp-dp-results.json",     //(optional) accepts filename or path
     "disabled": "false",                       //(optional) defaults to "false"
     "verbose": false                           //(optional) defaults to "false"
 }

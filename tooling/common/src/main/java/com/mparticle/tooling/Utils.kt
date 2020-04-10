@@ -57,6 +57,15 @@ object Utils {
         return null
     }
 
+    fun getConfigFileLastModified(): Long {
+        val file = File(getFileLocation(configFileName))
+        if (file.exists()) {
+            return file.lastModified()
+        } else {
+            return 0;
+        }
+    }
+
     fun setConfigFile(config: Config) {
         File(getFileLocation(configFileName))
                 .writeText(config.toJson().toString())
@@ -90,7 +99,7 @@ object Utils {
                 .writeText(dataplan)
     }
 
-    fun getFileLocation(fileName: String): String? {
+    fun getFileLocation(fileName: String): String {
         val env = System.getenv()
         var tempDirectory = env["TMPDIR"]
         if (tempDirectory?.endsWith("/") == false) {

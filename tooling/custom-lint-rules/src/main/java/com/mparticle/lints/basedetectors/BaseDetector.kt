@@ -7,19 +7,31 @@ import com.mparticle.tooling.Logger
 import com.mparticle.tooling.Utils
 
 open class BaseDetector: Detector() {
-
-    companion object {
-        var config: Config? = null
-        var count = 0
-    }
+    private var _disabled = false
+    protected var disabled
+        get() = config?.disabled == true || _disabled
+        set(value) {
+            _disabled = value
+        }
+    private var configFile: Config? = null
+    private var configLastModified = 0L
+    protected var config: Config?
+        get() {
+            val lastModified = Utils.getConfigFileLastModified()
+            if (configFile == null || lastModified != configLastModified) {
+                configFile = Utils.getConfigFile()
+            }
+            return configFile
+        }
+        set(value) {
+            configFile = value;
+        }
 
     override fun beforeCheckEachProject(context: Context) {
         super.beforeCheckRootProject(context)
-        //there is only 1 config file that exists when running in the linting environment.
-        //By adding this conditional, it lets us set it manually for testing, and not have it overridden by
-        //the file system
-        config = Utils.getConfigFile()
         Logger.verbose = config?.verbose ?: false
-        count++
+        if (config?.disabled == true) {
+            disabled = true
+        }
     }
 }

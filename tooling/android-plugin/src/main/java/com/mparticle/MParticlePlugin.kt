@@ -31,7 +31,7 @@ class MParticlePlugin: Plugin<Project> {
             isInstallTask = any { it == mpInstallTaskName }
             isUninstallTask = any { it == mpUninstallTaskName}
         }
-        
+
         target.afterEvaluate {
             updateConfig(it)
         }
@@ -82,9 +82,10 @@ class MParticlePlugin: Plugin<Project> {
     private fun updateConfig(project: Project) {
         val extension = project.extensions.getByType(MParticleExtension::class.java)
         clearConfig()
-        var config = Config()
+        var config = readConfig(extension)
         updateArtifactPaths(config)
-        readConfig(config, extension)
+        Utils.setConfigFile(config)
+        storeDataPlanInLocalStorage(config)
     }
 
     private fun getDataplanningApp(noConfig: Boolean = false): DataPlanningNodeApp? {
@@ -125,33 +126,49 @@ class MParticlePlugin: Plugin<Project> {
         Utils.setConfigFile(config)
     }
 
-    private fun readConfig(config: Config, extension: MParticleExtension): Config {
-        val staticConfigFile = File("./mparticle.json")
-        if (staticConfigFile.exists()) {
+    private fun readConfig(extension: MParticleExtension): Config {
+        val staticConfigFile = File("./mp.config.json")
+        var config = if (staticConfigFile.exists()) {
             Logger.verbose("Config File found")
             val text = staticConfigFile.readText()
             try {
                 val json = JSONObject(text)
-                config.apply(Config.from(json))
-            } catch (jse: JSONException) {
-                Logger.warning("Error readon mparticle.json: ${jse.message}")
+                Config.from(json)
+            }catch (jse: JSONException) {
+                Logger.warning("Error reading mp.config.json: ${jse.message}")
+                Config()
             }
         } else {
             Logger.verbose("Config File Not Found, using extension values")
+            Config()
         }
 
         extension.apply {
-            config.resultsFile = resultsFile
-            config.verbose = verbose
-            config.debugReportServerMessage =  debugReportServerMessage
-            if (dataPlanFile != null) {
-                if (File(dataPlanFile).exists()) {
-                    Utils.setLocalDataplan(File(dataPlanFile).readText())
-                }
-                config.dataPlanFile = dataPlanFile
+            if (resultsFile != null) {
+                config.resultsFile = resultsFile
+            }
+            if (verbose != null) {
+                config.verbose = verbose
+            }
+            if (debugReportServerMessage != null) {
+                config.debugReportServerMessage = debugReportServerMessage
+            }
+            if (dataPlanVersionFile != null) {
+                config.dataPlanVersionFile = dataPlanVersionFile
+            }
+            if (disabled != null) {
+                config.disabled = disabled
             }
         }
-        Utils.setConfigFile(config)
         return config
+    }
+
+    private fun storeDataPlanInLocalStorage(config: Config) {
+        Utils.removeLocalDataplan()
+        if (config.dataPlanVersionFile != null) {
+            if (File(config.dataPlanVersionFile).exists()) {
+                Utils.setLocalDataplan(File(config.dataPlanVersionFile).readText())
+            }
+        }
     }
 }

@@ -8,9 +8,10 @@ data class Config(
         var dataPlanId: String? = null,
         var workspaceId: String? = null,
         var dataPlanVersion: String? = null,
-        var dataPlanFile: String? = null,
+        var dataPlanVersionFile: String? = null,
         var resultsFile: String? = null,
         var verbose: Boolean? = null,
+        var disabled: Boolean? = null,
         var debugReportServerMessage: Boolean? = null
     ) {
 
@@ -35,20 +36,12 @@ data class Config(
                     config.internalConfig = InternalConfig.fromJson(json.optJSONObject("internal-config"))
                 } else {
                     Config::class.java.declaredMethods
-                            .firstOrNull { it.name.removePrefix("set") == key }
+                            .firstOrNull { it.name.removePrefix("set").toLowerCase() == key?.toString()?.toLowerCase() }
                             ?.let { it.invoke(config, json.opt(key.toString())) }
                 }
             }
             return config
         }
-    }
-
-    fun apply(config: Config) {
-        dataPlanVersion = config.dataPlanVersion
-        resultsFile = config.resultsFile
-        dataPlanFile = config.dataPlanFile
-        verbose = config.verbose
-        debugReportServerMessage = config.debugReportServerMessage
     }
 
     data class InternalConfig(var nodePath: String? = null,

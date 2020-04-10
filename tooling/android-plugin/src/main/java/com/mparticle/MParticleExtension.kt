@@ -1,9 +1,10 @@
 package com.mparticle
 
 open class MParticleExtension {
-    var dataPlanFile: String? = null
+    var dataPlanVersionFile: String? = null
     var resultsFile: String? = null
 
-    var verbose: Boolean? = false
-    var debugReportServerMessage: Boolean? = false
+    var disabled: Boolean? = null
+    var verbose: Boolean? = null
+    var debugReportServerMessage: Boolean? = null
 }

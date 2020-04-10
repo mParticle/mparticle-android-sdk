@@ -26,37 +26,31 @@ abstract class CallScanner: BaseDetector(), Detector.UastScanner {
 
     abstract fun getApplicableClasses(): List<Class<*>>
 
-    open var disabled: Boolean = false
-
     override fun createUastHandler(context: JavaContext): UElementHandler? {
-        if (!disabled) {
-            return object : UElementHandler() {
-                override fun visitCallExpression(node: UCallExpression) {
-                    try {
-                        if (ofInterest(node)) {
-                            var expression = node.resolveChainedCalls(true, RootParent(node))
+        return object : UElementHandler() {
+            override fun visitCallExpression(node: UCallExpression) {
+                try {
+                    if (!disabled && ofInterest(node)) {
+                        var expression = node.resolveChainedCalls(true, RootParent(node))
 
-                            val variable = node.getVariableElement(true, true)
-                            val method = node.getParentOfType<UMethod>(UMethod::class.java)
+                        val variable = node.getVariableElement(true, true)
+                        val method = node.getParentOfType<UMethod>(UMethod::class.java)
 
-                            if (variable != null && method != null) {
-                                VariableCollector(variable, method, expression).getUnresolvedObject(false)
-                            }
-                            if (expression != null) {
-                                node.receiverClassName()?.let { receiverName ->
-                                    onInstanceCollected(context, expression, node)
-                                }
+                        if (variable != null && method != null) {
+                            VariableCollector(variable, method, expression).getUnresolvedObject(false)
+                        }
+                        if (expression != null) {
+                            node.receiverClassName()?.let { receiverName ->
+                                onInstanceCollected(context, expression, node)
                             }
                         }
-                    } catch (e: Exception) {
-                        if (config?.verbose == true) {
-                            e.printStackTrace()
-                        }
+                    }
+                } catch (e: Exception) {
+                    if (config?.verbose == true) {
+                        e.printStackTrace()
                     }
                 }
             }
-        } else {
-            return null
         }
     }
 

@@ -3,7 +3,6 @@ package com.mparticle
 import com.mparticle.tooling.Config
 import groovy.util.GroovyTestCase.assertEquals
 import org.junit.Test
-import java.lang.reflect.Modifier
 import java.util.*
 
 class MParticlePluginTest {
@@ -13,7 +12,7 @@ class MParticlePluginTest {
     fun testConfigSerialization() {
         val config = Config().apply {
             this.clientId = "clientid"
-            this.dataPlanFile = "dataplanfile"
+            this.dataPlanVersionFile = "dataplanfile"
             this.clientSecret = "clientsecret"
             this.dataPlanId = "dataplanid"
             this.dataPlanVersion = "dataplanversion"

@@ -12,7 +12,6 @@ import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UExpression
 import org.json.JSONObject
 import java.io.File
-import com.mparticle.tooling.Utils.executeCLI
 
 
 class DataplanDetector: CallScanner() {
@@ -24,8 +23,8 @@ class DataplanDetector: CallScanner() {
 
         val ISSUE = Issue.create(
                 "DataplanViolation",
-                "field conflicts with dataplan dataplanConstaints",
-                "this field is in violation of constrains defined in your organization or workspace's dataplan",
+                "Field conflicts with data plan's constraints",
+                "This field is in violation of constrains defined in your organization or workspace's data plan",
                 Category.CORRECTNESS,
                 10,
                 Severity.ERROR,
@@ -35,7 +34,7 @@ class DataplanDetector: CallScanner() {
         val NODE_MISSING = Issue.create(
                 "NodeMissing",
                 "Unable to validate Dataplan, Node is not present",
-                "The MParticle Dataplan validation library required the Node cli tools to be installed. to insure you have Node installed, run \"node -v\" from the Command Line and insure your output is not \"command not found\"",
+                "The MParticle Dataplan validation library requirs Node CLI tools to be installed. To insure you have Node installed, run \"node -v\" from the Command Line",
                 Category.USABILITY,
                 4,
                 Severity.INFORMATIONAL,
@@ -44,8 +43,8 @@ class DataplanDetector: CallScanner() {
 
         val NO_DATA_PLAN = Issue.create(
                 "DataPlanMissing",
-                "Unable to fetch Data Plan, please check credentials",
-                "Retreiving the MParticle Data Plan is necessary to evaluate any violations. There may be a problem with your \"accountId\" or \"dataPlanId\" set in your credentials. Please double check the values are present and correct in you \"mparticle\" block in build.gradle or you mparticle-config.json file",
+                "Unable to read Data Plan",
+                "Retrieving the MParticle Data Plan is necessary to evaluate any violations. There may be a problem with locating your \"dataPlanVersionFile\". Please double check the values is correct in your \"mparticle\" block in build.gradle or your mp.config.json file",
                 Category.USABILITY,
                 4,
                 Severity.INFORMATIONAL,
@@ -62,7 +61,6 @@ class DataplanDetector: CallScanner() {
         Logger.setLogHandler(object : Logger.AbstractLogHandler() {
             override fun log(priority: MParticle.LogLevel?, error: Throwable?, messages: String?) {}
         })
-
 
         if (config != null) {
             dataplanningNode = DataPlanningNodeApp(config!!)
@@ -110,11 +108,19 @@ class DataplanDetector: CallScanner() {
 
         val dp = dataplan
         if (dp == null) {
+            val message = "Data Plan missing" +
+                    if (config?.dataPlanVersionFile != null) {
+                        config?.dataPlanVersionFile?.let {
+                            ", $it not found"
+                        }
+                    } else {
+                        ""
+                    }
             context.report(
                     NO_DATA_PLAN,
                     reportingNode,
                     context.getLocation(reportingNode),
-                    "Data Plan missing, ${config!!.dataPlanFile} from ${File(".").path}"
+                    message
             )
         } else if (dataplanningNode?.checkMPInstalled() == false) {
             context.report(
