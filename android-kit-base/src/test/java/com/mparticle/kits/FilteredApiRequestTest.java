@@ -6,9 +6,6 @@ import com.mparticle.identity.IdentityApiRequest;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
@@ -24,10 +21,7 @@ public class FilteredApiRequestTest {
         Mockito.when(mockIntegration.getConfiguration()).thenReturn(mockConfiguration);
         FilteredIdentityApiRequest filteredRequest = new FilteredIdentityApiRequest(request, mockIntegration);
 
-        assertNotNull(request.getOldIdentities());
-        assertEquals(0, request.getOldIdentities().size());
-        assertEquals(0, filteredRequest.newIdentities.size());
-        assertEquals(0, filteredRequest.oldIdentities.size());
+        assertEquals(0, filteredRequest.userIdentities.size());
     }
 
     @Test
@@ -47,8 +41,7 @@ public class FilteredApiRequestTest {
         Mockito.when(mockIntegration.getConfiguration()).thenReturn(mockConfiguration);
         FilteredIdentityApiRequest filteredRequest = new FilteredIdentityApiRequest(request, mockIntegration);
 
-        assertEquals(4, filteredRequest.newIdentities.size());
-        assertEquals(2, filteredRequest.getNewIdentities().size());
-        assertEquals(0, filteredRequest.oldIdentities.size());
+        assertEquals(4, filteredRequest.userIdentities.size());
+        assertEquals(2, filteredRequest.getUserIdentities().size());
     }
 }

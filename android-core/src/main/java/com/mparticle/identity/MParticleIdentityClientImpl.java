@@ -197,22 +197,18 @@ import java.util.UUID;
         }
         JSONObject jsonObject = getBaseJson();
         JSONArray changesJson = new JSONArray();
-        Map<MParticle.IdentityType, String> newIdentities = request.getUserIdentities();
-        Map<MParticle.IdentityType, String> oldIdentities = request.getOldIdentities();
+        Map<MParticle.IdentityType, String> userIdentities = request.getUserIdentities();
+        Map<MParticle.IdentityType, String> previousIdentities = mConfigManager.getUserIdentities(request.mpid);
 
-        if (oldIdentities.size() == 0) {
-            oldIdentities = mConfigManager.getUserIdentities(request.mpid);
-        }
-
-        Set<MParticle.IdentityType> identityTypes = new HashSet<MParticle.IdentityType>(oldIdentities.keySet());
-        identityTypes.addAll(newIdentities.keySet());
+        Set<MParticle.IdentityType> identityTypes = new HashSet<MParticle.IdentityType>(userIdentities.keySet());
+        identityTypes.addAll(userIdentities.keySet());
 
         for (MParticle.IdentityType identityType: identityTypes) {
             String idTypeString = getStringValue(identityType);
             if (!MPUtility.isEmpty(idTypeString)) {
                 JSONObject changeJson = new JSONObject();
-                String newValue = newIdentities.get(identityType);
-                String oldValue = oldIdentities.get(identityType);
+                String newValue = userIdentities.get(identityType);
+                String oldValue = previousIdentities.get(identityType);
                 if (newValue != oldValue && (newValue == null || !newValue.equals(oldValue))) {
                     changeJson.put(NEW_VALUE, newValue == null ? JSONObject.NULL : newValue);
                     changeJson.put(OLD_VALUE, oldValue == null ? JSONObject.NULL : oldValue);

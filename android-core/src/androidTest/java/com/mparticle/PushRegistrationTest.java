@@ -13,8 +13,10 @@ import com.mparticle.testutils.TestingUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
 
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import static org.junit.Assert.assertEquals;
@@ -37,10 +39,10 @@ public class PushRegistrationTest extends BaseCleanStartedEachTest {
         mServer.waitForVerify(new Matcher(mServer.Endpoints().getModifyUrl(mStartingMpid)), new MockServer.RequestReceivedCallback() {
             @Override
             public void onRequestReceived(Request request) {
-                JSONArray identitChanges = request.asIdentityRequest().getBody().identity_changes;
-                assertEquals(1, identitChanges.length());
+                List<JSONObject> identitChanges = request.asIdentityRequest().getBody().identity_changes;
+                assertEquals(1, identitChanges.size());
                 try {
-                    assertEquals(newToken, identitChanges.getJSONObject(0).getString("new_value"));
+                    assertEquals(newToken, identitChanges.get(0).getString("new_value"));
                     latch.countDown();
                 } catch (JSONException e) {
                     new RuntimeException(e);

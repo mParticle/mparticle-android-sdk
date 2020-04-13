@@ -267,7 +267,6 @@ public class IdentityApi {
             task.setFailed(new IdentityHttpResponse(IdentityApi.UNKNOWN_ERROR, message));
             return task;
         }
-        updateRequest.setOldUserIdentities(mConfigManager.getUserIdentities(updateRequest.mpid));
         mBackgroundHandler.post(new Runnable() {
             @Override
             public void run() {

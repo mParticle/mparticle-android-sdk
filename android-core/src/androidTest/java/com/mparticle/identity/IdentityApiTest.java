@@ -16,12 +16,15 @@ import com.mparticle.testutils.AndroidUtils.Mutable;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.testutils.MPLatch;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -455,7 +458,7 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
         mServer.waitForVerify(new Matcher(mServer.Endpoints().getModifyUrl(mStartingMpid)), new MockServer.RequestReceivedCallback() {
             @Override
             public void onRequestReceived(Request request) {
-                assertEquals(1, request.asIdentityRequest().getBody().identity_changes.length());
+                assertEquals(1, request.asIdentityRequest().getBody().identity_changes.size());
                 latch.countDown();
             }
         });
@@ -534,6 +537,134 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
         String newDas = MParticle.getInstance().Identity().getDeviceApplicationStamp();
         assertNotNull(newDas);
         assertNotSame(currentDas, newDas);
+    }
+
+    @Test
+    public void testModifyWhenIdentityAddedConcurrently() throws InterruptedException {
+        final CountDownLatch latch = new MPLatch(1);
+        final MParticleUser currentUser = MParticle.getInstance().Identity().getCurrentUser();
+        final IdentityApi identityApi = MParticle.getInstance().Identity();
+
+        final IdentityApiRequest modifyRequest = IdentityApiRequest.withUser(currentUser)
+                .pushToken("new push", "old_push")
+                .build();
+
+        TaskSuccessListener taskSuccessListener = new TaskSuccessListener() {
+            @Override
+            public void onSuccess(@NonNull IdentityApiResult result) {
+                identityApi.modify(modifyRequest);
+                mServer.waitForVerify(
+                        new Matcher(mServer.Endpoints().getModifyUrl(currentUser.getId())),
+                        new MockServer.RequestReceivedCallback() {
+                            @Override
+                            public void onRequestReceived(Request request) {
+                                List<JSONObject> identityChanges = request.asIdentityRequest().getBody().identity_changes;
+                                assertEquals(1, identityChanges.size());
+                                //make sure the customerId didn't change. it should not be included in the IdentityApiRequest
+                                //since the request was built before customerId was set
+                                assertTrue(!"customerid".equals(identityChanges.get(0).optString("identity_type")));
+                                assertTrue("push_token".equals(identityChanges.get(0).optString("identity_type")));
+                                latch.countDown();
+                            }
+                        }
+                );
+            }
+        };
+
+        IdentityApiRequest loginRequest = IdentityApiRequest.withUser(currentUser)
+                .customerId("my Id")
+                .build();
+        identityApi
+                .login(loginRequest)
+                .addSuccessListener(taskSuccessListener);
+
+        latch.await();
+    }
+
+    @Test
+    public void testModifyWhenIdentityChangesConcurrently() throws InterruptedException {
+        final CountDownLatch latch = new MPLatch(1);
+        final MParticleUser currentUser = MParticle.getInstance().Identity().getCurrentUser();
+        final IdentityApi identityApi = MParticle.getInstance().Identity();
+
+        final IdentityApiRequest modifyRequest = IdentityApiRequest.withUser(currentUser)
+                .customerId("new customer ID")
+                .build();
+
+        TaskSuccessListener taskSuccessListener = new TaskSuccessListener() {
+            @Override
+            public void onSuccess(@NonNull IdentityApiResult result) {
+                identityApi.modify(modifyRequest);
+                mServer.waitForVerify(
+                        new Matcher(mServer.Endpoints().getModifyUrl(currentUser.getId())),
+                        new MockServer.RequestReceivedCallback() {
+                            @Override
+                            public void onRequestReceived(Request request) {
+                                List<JSONObject> identityChanges = request.asIdentityRequest().getBody().identity_changes;
+                                assertEquals(1, identityChanges.size());
+                                //make sure the customerId used the correct "old" value
+                                assertTrue("customerid".equals(identityChanges.get(0).optString("identity_type")));
+                                assertEquals("new customer ID", identityChanges.get(0).optString("new_value"));
+                                assertEquals("old customer ID", identityChanges.get(0).optString("old_value"));
+                                latch.countDown();
+                            }
+                        }
+                );
+            }
+        };
+
+        IdentityApiRequest loginRequest = IdentityApiRequest.withUser(currentUser)
+                .customerId("old customer ID")
+                .build();
+        identityApi
+                .login(loginRequest)
+                .addSuccessListener(taskSuccessListener);
+
+        latch.await();
+    }
+
+    @Test
+    public void testModifyDoesntMissIdentitiesSetNull() throws InterruptedException {
+        AccessUtils.setUserIdentity("customer Id", MParticle.IdentityType.CustomerId, mStartingMpid);
+        AccessUtils.setUserIdentity("facebook Id", MParticle.IdentityType.Facebook, mStartingMpid);
+        AccessUtils.setUserIdentity("other Id", MParticle.IdentityType.Other2, mStartingMpid);
+        final CountDownLatch latch = new MPLatch(1);
+
+        IdentityApiRequest request = IdentityApiRequest.withUser(MParticle.getInstance().Identity().getCurrentUser())
+                .customerId(null)
+                .userIdentity(MParticle.IdentityType.Facebook, null)
+                .userIdentity(MParticle.IdentityType.Other2, null)
+                .build();
+        MParticle.getInstance().Identity().modify(request);
+        mServer.waitForVerify(new Matcher(mServer.Endpoints().getModifyUrl(mStartingMpid)), new MockServer.RequestReceivedCallback() {
+            @Override
+            public void onRequestReceived(Request request) {
+                List<JSONObject> identityChanges = request.asIdentityRequest().getBody().identity_changes;
+                assertEquals(3, identityChanges.size());
+                Collections.sort(identityChanges, new Comparator<JSONObject>() {
+                    @Override
+                    public int compare(JSONObject jsonObject, JSONObject t1) {
+                        return jsonObject.optString("identity_type").compareTo(t1.optString("identity_type"));
+                    }
+                });
+
+                //make sure the existing values were set to null
+                assertTrue("customerid".equals(identityChanges.get(0).optString("identity_type")));
+                assertEquals("customer Id", identityChanges.get(0).optString("old_value"));
+                assertEquals("null", identityChanges.get(0).optString("new_value"));
+
+                assertTrue("facebook".equals(identityChanges.get(1).optString("identity_type")));
+                assertEquals("facebook Id", identityChanges.get(1).optString("old_value"));
+                assertEquals("null", identityChanges.get(1).optString("new_value"));
+
+                assertTrue("other2".equals(identityChanges.get(2).optString("identity_type")));
+                assertEquals("other Id", identityChanges.get(2).optString("old_value"));
+                assertEquals("null", identityChanges.get(2).optString("new_value"));
+                latch.countDown();
+            }
+        });
+
+        latch.await();
     }
 }
 

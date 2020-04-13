@@ -4,6 +4,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class IdentityRequest extends Request {
 
     IdentityRequest(Request request) {
@@ -40,7 +43,7 @@ public class IdentityRequest extends Request {
         public Long requestTimestamp;
         public JSONObject known_identities;
         public Long previousMpid;
-        public JSONArray identity_changes;
+        public List<JSONObject> identity_changes = new ArrayList<>();
 
         public static IdentityRequestBody from(JSONObject jsonObject) {
             try {
@@ -54,7 +57,12 @@ public class IdentityRequest extends Request {
                 identityRequest.requestTimestamp = Long.valueOf(jsonObject.getString("request_timestamp_ms"));
                 identityRequest.requestId = jsonObject.getString("request_id");
                 identityRequest.previousMpid = Long.valueOf(jsonObject.optString("previous_mpid", "0"));
-                identityRequest.identity_changes = jsonObject.optJSONArray("identity_changes");
+                JSONArray jsonArray = jsonObject.optJSONArray("identity_changes");
+                if (jsonArray != null) {
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        identityRequest.identity_changes.add(jsonArray.getJSONObject(i));
+                    }
+                }
                 return identityRequest;
             } catch (JSONException jse) {
                 throw new RuntimeException(jse);

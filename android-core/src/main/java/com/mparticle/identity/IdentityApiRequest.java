@@ -26,7 +26,6 @@ public final class IdentityApiRequest {
     private UserAliasHandler userAliasHandler = null;
     private Map<MParticle.IdentityType, String> userIdentities = new HashMap<MParticle.IdentityType, String>();
     // for /modify requests
-    private Map<MParticle.IdentityType, String> oldUserIdentities = new HashMap<MParticle.IdentityType, String>();
     private Map<String, String> otherOldIdentities = new HashMap<String, String>();
     private Map<String, String> otherNewIdentities = new HashMap<String, String>();
     Long mpid;
@@ -79,11 +78,6 @@ public final class IdentityApiRequest {
     }
 
     @NonNull
-    public Map<MParticle.IdentityType, String> getOldIdentities() {
-        return oldUserIdentities;
-    }
-
-    @NonNull
     protected Map<String, String> getOtherOldIdentities() {
         return otherOldIdentities;
     }
@@ -96,10 +90,6 @@ public final class IdentityApiRequest {
     @Nullable
     public UserAliasHandler getUserAliasHandler() {
         return userAliasHandler;
-    }
-
-    void setOldUserIdentities(Map<MParticle.IdentityType, String> identities) {
-        this.oldUserIdentities = identities;
     }
 
     /**
