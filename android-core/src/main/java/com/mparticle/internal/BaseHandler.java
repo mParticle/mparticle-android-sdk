@@ -48,7 +48,11 @@ public class BaseHandler extends Handler {
                 if (InternalListenerManager.isEnabled()) {
                     InternalListenerManager.getListener().onThreadMessage(getClass().getName(), msg, true);
                 }
-                handleMessageImpl(msg);
+                try {
+                    handleMessageImpl(msg);
+                } catch (OutOfMemoryError error) {
+                    Logger.error("Out of memory");
+                }
             }
         }
         finally {

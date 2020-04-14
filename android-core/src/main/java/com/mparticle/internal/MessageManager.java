@@ -181,30 +181,34 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public static JSONObject getStateInfo() throws JSONException {
         JSONObject infoJson = new JSONObject();
-        if (!devicePerformanceMetricsDisabled) {
-            infoJson.put(MessageKey.STATE_INFO_AVAILABLE_DISK, MPUtility.getAvailableInternalDisk(sContext));
-            infoJson.put(MessageKey.STATE_INFO_AVAILABLE_EXT_DISK, MPUtility.getAvailableExternalDisk(sContext));
-            final Runtime rt = Runtime.getRuntime();
-            infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_USAGE, rt.totalMemory());
-            infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_AVAIL, rt.freeMemory());
-            infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_MAX, rt.maxMemory());
-        }
-        infoJson.put(MessageKey.STATE_INFO_AVAILABLE_MEMORY, MPUtility.getAvailableMemory(sContext));
-        infoJson.put(MessageKey.STATE_INFO_TOTAL_MEMORY, getTotalMemory());
-        infoJson.put(MessageKey.STATE_INFO_BATTERY_LVL, sBatteryLevel);
-        infoJson.put(MessageKey.STATE_INFO_TIME_SINCE_START, MPUtility.millitime() - sStartTime);
+        try {
+            if (!devicePerformanceMetricsDisabled) {
+                infoJson.put(MessageKey.STATE_INFO_AVAILABLE_DISK, MPUtility.getAvailableInternalDisk(sContext));
+                infoJson.put(MessageKey.STATE_INFO_AVAILABLE_EXT_DISK, MPUtility.getAvailableExternalDisk(sContext));
+                final Runtime rt = Runtime.getRuntime();
+                infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_USAGE, rt.totalMemory());
+                infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_AVAIL, rt.freeMemory());
+                infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_MAX, rt.maxMemory());
+            }
+            infoJson.put(MessageKey.STATE_INFO_AVAILABLE_MEMORY, MPUtility.getAvailableMemory(sContext));
+            infoJson.put(MessageKey.STATE_INFO_TOTAL_MEMORY, getTotalMemory());
+            infoJson.put(MessageKey.STATE_INFO_BATTERY_LVL, sBatteryLevel);
+            infoJson.put(MessageKey.STATE_INFO_TIME_SINCE_START, MPUtility.millitime() - sStartTime);
 
-        String gps = MPUtility.getGpsEnabled(sContext);
-        if (gps != null){
-            infoJson.put(MessageKey.STATE_INFO_GPS,Boolean.parseBoolean(gps));
+            String gps = MPUtility.getGpsEnabled(sContext);
+            if (gps != null) {
+                infoJson.put(MessageKey.STATE_INFO_GPS, Boolean.parseBoolean(gps));
+            }
+            infoJson.put(MessageKey.STATE_INFO_DATA_CONNECTION, sActiveNetworkName);
+            int orientation = MPUtility.getOrientation(sContext);
+            infoJson.put(MessageKey.STATE_INFO_ORIENTATION, orientation);
+            infoJson.put(MessageKey.STATE_INFO_BAR_ORIENTATION, orientation);
+            infoJson.put(MessageKey.STATE_INFO_MEMORY_LOW, MPUtility.isSystemMemoryLow(sContext));
+            infoJson.put(MessageKey.STATE_INFO_MEMORY_THRESHOLD, getSystemMemoryThreshold());
+            infoJson.put(MessageKey.STATE_INFO_NETWORK_TYPE, getTelephonyManager().getNetworkType());
+        } catch (OutOfMemoryError error) {
+            Logger.error("Out of memory");
         }
-        infoJson.put(MessageKey.STATE_INFO_DATA_CONNECTION, sActiveNetworkName);
-        int orientation = MPUtility.getOrientation(sContext);
-        infoJson.put(MessageKey.STATE_INFO_ORIENTATION, orientation);
-        infoJson.put(MessageKey.STATE_INFO_BAR_ORIENTATION, orientation);
-        infoJson.put(MessageKey.STATE_INFO_MEMORY_LOW, MPUtility.isSystemMemoryLow(sContext));
-        infoJson.put(MessageKey.STATE_INFO_MEMORY_THRESHOLD, getSystemMemoryThreshold());
-        infoJson.put(MessageKey.STATE_INFO_NETWORK_TYPE, getTelephonyManager().getNetworkType());
         return infoJson;
     }
 
