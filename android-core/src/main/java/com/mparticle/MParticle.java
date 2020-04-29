@@ -110,8 +110,7 @@ public class MParticle {
         configManager.setIdentityConnectionTimeout(options.getConnectionTimeout());
         AppStateManager appStateManager = new AppStateManager(options.getContext());
         appStateManager.setConfigManager(configManager);
-        
-        
+
         mAppContext = options.getContext();
         mConfigManager = configManager;
         mAppStateManager = appStateManager;
@@ -1421,6 +1420,11 @@ public class MParticle {
         LogLevel(int logLevel) {
             this.logLevel = logLevel;
         }
+    }
+
+    public enum OperatingSystem {
+        ANDROID,
+        FIRE_OS
     }
 
     void logUnhandledError(Throwable t) {

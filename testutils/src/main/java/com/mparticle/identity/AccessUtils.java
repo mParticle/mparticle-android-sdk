@@ -60,7 +60,7 @@ public class AccessUtils {
     }
 
     private static MParticleIdentityClientImpl getIdentityClient(Context context, ConfigManager configManager) {
-        return new MParticleIdentityClientImpl(context, configManager);
+        return new MParticleIdentityClientImpl(context, configManager, MParticle.OperatingSystem.FIRE_OS);
     }
 
     public static void setIdentityApiClient(MParticleIdentityClient identityClient) {

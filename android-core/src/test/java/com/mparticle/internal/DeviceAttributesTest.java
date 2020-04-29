@@ -12,6 +12,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import static org.junit.Assert.*;
 
 @RunWith(PowerMockRunner.class)
@@ -22,7 +25,7 @@ public class DeviceAttributesTest {
         MParticle.setInstance(new MockMParticle());
         MockContext context = new MockContext();
         context.getSharedPreferences(null, 0).edit().putString(Constants.PrefKeys.INSTALL_REFERRER, "install referrer").apply();
-        JSONObject appInfo = new DeviceAttributes().getAppInfo(context);
+        JSONObject appInfo = new DeviceAttributes(MParticle.OperatingSystem.ANDROID).getAppInfo(context);
         assertTrue(appInfo.getString("apn").equals("com.mparticle.test"));
         assertTrue(appInfo.getString("abn").equals("42"));
         assertTrue(appInfo.getString("ain").equals("com.mparticle.test.installer"));
@@ -47,10 +50,10 @@ public class DeviceAttributesTest {
         MockSharedPreferences prefs = (MockSharedPreferences) context.getSharedPreferences(null, 0);
         long now = 10012;
         prefs.putLong("mp::ict", now).commit();
-        JSONObject appInfo = new DeviceAttributes().getAppInfo(context);
+        JSONObject appInfo = new DeviceAttributes(MParticle.OperatingSystem.ANDROID).getAppInfo(context);
         assertEquals(now, appInfo.getLong("ict"));
 
-        JSONObject appInfo2 = new DeviceAttributes().getAppInfo(context);
+        JSONObject appInfo2 = new DeviceAttributes(MParticle.OperatingSystem.ANDROID).getAppInfo(context);
         assertEquals(now, appInfo2.getLong("ict"));
     }
 
@@ -62,9 +65,23 @@ public class DeviceAttributesTest {
         JSONObject appInfo = null;
         int launchCount = 20;
         for (int i = 0; i < 20; i++) {
-            appInfo = new DeviceAttributes().getAppInfo(context);
+            appInfo = new DeviceAttributes(MParticle.OperatingSystem.ANDROID).getAppInfo(context);
         }
 
         assertEquals(launchCount, appInfo.getInt("lc"));
+    }
+
+    @Test
+    public void testOperatingSystemToString() {
+        //make sure that all the cases are covered, default is not getting returned
+        //if this test fails, it might be becuase you added a new OperatingSystem enum, but forgot
+        //to update this method
+
+        Set<String> osStringValues = new HashSet<String>();
+        for (MParticle.OperatingSystem operatingSystem: MParticle.OperatingSystem.values()) {
+            String osString = new DeviceAttributes(operatingSystem).getOperatingSystemString();
+            assertFalse(osStringValues.contains(osString));
+            osStringValues.add(osString);
+        }
     }
 }

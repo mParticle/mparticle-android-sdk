@@ -28,8 +28,11 @@ public class DeviceAttributes {
     private JSONObject deviceInfo;
     private JSONObject appInfo;
     private boolean firstCollection = true;
+    private MParticle.OperatingSystem operatingSystem;
 
-    /** package-private **/ DeviceAttributes() {}
+    /** package-private **/ DeviceAttributes(MParticle.OperatingSystem operatingSystem) {
+        this.operatingSystem = operatingSystem;
+    }
 
     public static void setDeviceImei(String deviceImei) {
         DeviceAttributes.deviceImei = deviceImei;
@@ -165,7 +168,7 @@ public class DeviceAttributes {
             attributes.put(MessageKey.PRODUCT, android.os.Build.PRODUCT);
             attributes.put(MessageKey.DEVICE, android.os.Build.DEVICE);
             attributes.put(MessageKey.MANUFACTURER, android.os.Build.MANUFACTURER);
-            attributes.put(MessageKey.PLATFORM, "Android");
+            attributes.put(MessageKey.PLATFORM, getOperatingSystemString());
             attributes.put(MessageKey.OS_VERSION, Build.VERSION.SDK);
             attributes.put(MessageKey.OS_VERSION_INT, Build.VERSION.SDK_INT);
             attributes.put(MessageKey.MODEL, android.os.Build.MODEL);
@@ -303,5 +306,16 @@ public class DeviceAttributes {
             updateInstallReferrer(context, appInfo);
         }
         return appInfo;
+    }
+
+    String getOperatingSystemString() {
+        switch (operatingSystem) {
+            case ANDROID:
+                return Constants.Platform.ANDROID;
+            case FIRE_OS:
+                return Constants.Platform.FIRE_OS;
+            default:
+                return Constants.Platform.ANDROID;
+        }
     }
 }

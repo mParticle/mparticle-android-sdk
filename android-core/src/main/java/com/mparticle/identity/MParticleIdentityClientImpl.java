@@ -60,12 +60,17 @@ import java.util.UUID;
     static final String X_MP_KEY = "x-mp-key";
     static final String X_MP_SIGNATURE = "x-mp-signature";
 
-    private static final String SERVICE_VERSION_1 = "/v1";
+    static final String PLATFORM_ANDROID = "android";
+    static final String PLATFORM_FIRE = "fire";
 
-    public MParticleIdentityClientImpl(Context context, ConfigManager configManager) {
+    private static final String SERVICE_VERSION_1 = "/v1";
+    private MParticle.OperatingSystem mOperatingSystem;
+
+    public MParticleIdentityClientImpl(Context context, ConfigManager configManager, MParticle.OperatingSystem operatingSystem) {
         super(context, configManager);
         this.mContext = context;
         this.mConfigManager = configManager;
+        this.mOperatingSystem = operatingSystem;
     }
 
     public IdentityHttpResponse login(IdentityApiRequest request) throws JSONException, IOException {
@@ -126,7 +131,7 @@ import java.util.UUID;
 
     private JSONObject getBaseJson() throws JSONException {
         JSONObject clientSdkObject = new JSONObject();
-        clientSdkObject.put(PLATFORM, "android");
+        clientSdkObject.put(PLATFORM, getOperatingSystemString());
         clientSdkObject.put(SDK_VENDOR, "mparticle");
         clientSdkObject.put(SDK_VERSION, BuildConfig.VERSION_NAME);
 
@@ -377,6 +382,17 @@ import java.util.UUID;
                 return "production";
             default:
                 return "";
+        }
+    }
+
+    String getOperatingSystemString() {
+        switch (mOperatingSystem) {
+            case ANDROID:
+                return PLATFORM_ANDROID;
+            case FIRE_OS:
+                return PLATFORM_FIRE;
+            default:
+                return PLATFORM_ANDROID;
         }
     }
 }

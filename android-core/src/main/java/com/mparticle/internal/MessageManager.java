@@ -65,6 +65,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     private AppStateManager mAppStateManager;
     private ConfigManager mConfigManager = null;
     private MParticleDBManager mMParticleDBManager;
+    private MParticle.OperatingSystem mOperatingSystem;
 
 
     /**
@@ -132,14 +133,14 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
      */
     public MessageManager() {
         super();
-        mDeviceAttributes = new DeviceAttributes();
+        mDeviceAttributes = new DeviceAttributes(mOperatingSystem);
     }
 
     /**
      * Used solely for unit testing
      */
     public MessageManager(Context appContext, ConfigManager configManager, MParticle.InstallType installType, AppStateManager appStateManager, MParticleDBManager dbManager, MessageHandler messageHandler, UploadHandler uploadHandler) {
-        mDeviceAttributes = new DeviceAttributes();
+        mDeviceAttributes = new DeviceAttributes(mOperatingSystem);
         sContext = appContext.getApplicationContext();
         mConfigManager = configManager;
         mAppStateManager = appStateManager;
@@ -152,7 +153,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public MessageManager(ConfigManager configManager, AppStateManager appStateManager, boolean devicePerformanceMetricsDisabled, MParticleDBManager dbManager, MParticleOptions options) {
         this.devicePerformanceMetricsDisabled = devicePerformanceMetricsDisabled;
-        mDeviceAttributes = new DeviceAttributes();
+        mDeviceAttributes = new DeviceAttributes(mOperatingSystem);
         sContext = options.getContext().getApplicationContext();
         mConfigManager = configManager;
         mAppStateManager = appStateManager;
@@ -162,6 +163,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         mUploadHandler = new UploadHandler(options.getContext(), sUploadHandlerThread.getLooper(), configManager, appStateManager, this, dbManager);
         sPreferences = options.getContext().getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mInstallType = options.getInstallType();
+        mOperatingSystem = options.getOperatingSystem();
     }
 
     private static TelephonyManager getTelephonyManager() {

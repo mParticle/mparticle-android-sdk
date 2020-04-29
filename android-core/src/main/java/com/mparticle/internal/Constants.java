@@ -563,4 +563,9 @@ public class Constants {
         String MESSAGE_TYPE_RECEIVED = "received";
         String MESSAGE_TYPE_ACTION = "action";
     }
+
+    public interface Platform {
+        String ANDROID = "Android";
+        String FIRE_OS = "FireTV";
+    }
 }

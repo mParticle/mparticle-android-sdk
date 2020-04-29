@@ -257,7 +257,7 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
     }
 
     private void setApiClient(final MockIdentityApiClient identityClient) {
-        mApiClient = new MParticleIdentityClientImpl(mContext, mConfigManager) {
+        mApiClient = new MParticleIdentityClientImpl(mContext, mConfigManager, MParticle.OperatingSystem.ANDROID) {
             @Override
             public MPConnection makeUrlRequest(Endpoint endpoint, final MPConnection connection, String payload, boolean identity) throws IOException {
                 try {

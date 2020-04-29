@@ -41,6 +41,7 @@ public class MParticleOptions {
     private NetworkOptions mNetworkOptions;
     private String mDataplanId;
     private Integer mDataplanVersion;
+    private MParticle.OperatingSystem mOperatingSystem = MParticle.OperatingSystem.ANDROID;
 
     private MParticleOptions() {
     }
@@ -104,6 +105,9 @@ public class MParticleOptions {
             this.mIdentityConnectionTimeout = builder.identityConnectionTimeout;
         } else if (builder.identityConnectionTimeout != null) {
             Logger.warning(String.format("Connection Timeout milliseconds must be a positive number, greater than %s second. Defaulting to %s seconds", String.valueOf(ConfigManager.MINIMUM_CONNECTION_TIMEOUT_SECONDS), String.valueOf(ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS)));
+        }
+        if (builder.operatingSystem != null) {
+            this.mOperatingSystem = builder.operatingSystem;
         }
         this.mNetworkOptions = NetworkOptionsManager.validateAndResolve(builder.networkOptions);
         this.mDataplanId = builder.dataplanId;
@@ -254,6 +258,11 @@ public class MParticleOptions {
         return mDataplanVersion;
     }
 
+    @NonNull
+    public MParticle.OperatingSystem getOperatingSystem() {
+        return mOperatingSystem;
+    }
+
     public static class Builder {
         private Context context;
         String apiKey;
@@ -276,6 +285,7 @@ public class MParticleOptions {
         private NetworkOptions networkOptions;
         private String dataplanId;
         private Integer dataplanVersion;
+        private MParticle.OperatingSystem operatingSystem;
 
         private Builder(Context context) {
             this.context = context;
@@ -524,6 +534,17 @@ public class MParticleOptions {
         public Builder dataplan(@Nullable String dataplanId, @Nullable Integer dataplanVersion) {
             this.dataplanId = dataplanId;
             this.dataplanVersion = dataplanVersion;
+            return this;
+        }
+
+        /**
+         * Set the Operating System. Defaults to {@link MParticle.OperatingSystem#ANDROID}
+         * @param operatingSystem
+         * @return
+         */
+        @NonNull
+        public Builder operatingSystem(MParticle.OperatingSystem operatingSystem) {
+            this.operatingSystem = operatingSystem;
             return this;
         }
 

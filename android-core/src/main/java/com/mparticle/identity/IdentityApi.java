@@ -7,6 +7,7 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.mparticle.MParticle;
 import com.mparticle.MParticleTask;
 import com.mparticle.SdkListener;
 import com.mparticle.internal.listeners.ApiClass;
@@ -61,7 +62,7 @@ public class IdentityApi {
         this.mMessageManager = messageManager;
         this.mKitManager = kitManager;
         configManager.addMpIdChangeListener(new IdentityStateListenerManager());
-        setApiClient(new MParticleIdentityClientImpl(context, configManager));
+        setApiClient(new MParticleIdentityClientImpl(context, configManager, MParticle.OperatingSystem.ANDROID));
     }
 
     /**
@@ -399,7 +400,7 @@ public class IdentityApi {
 
     MParticleIdentityClient getApiClient() {
         if (mApiClient == null) {
-            mApiClient = new MParticleIdentityClientImpl(mContext, mConfigManager);
+            mApiClient = new MParticleIdentityClientImpl(mContext, mConfigManager, MParticle.OperatingSystem.FIRE_OS);
         }
         return mApiClient;
     }
