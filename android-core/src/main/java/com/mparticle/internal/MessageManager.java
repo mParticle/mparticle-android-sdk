@@ -153,6 +153,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public MessageManager(ConfigManager configManager, AppStateManager appStateManager, boolean devicePerformanceMetricsDisabled, MParticleDBManager dbManager, MParticleOptions options) {
         this.devicePerformanceMetricsDisabled = devicePerformanceMetricsDisabled;
+        mOperatingSystem = options.getOperatingSystem();
         mDeviceAttributes = new DeviceAttributes(mOperatingSystem);
         sContext = options.getContext().getApplicationContext();
         mConfigManager = configManager;
@@ -163,7 +164,6 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         mUploadHandler = new UploadHandler(options.getContext(), sUploadHandlerThread.getLooper(), configManager, appStateManager, this, dbManager);
         sPreferences = options.getContext().getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mInstallType = options.getInstallType();
-        mOperatingSystem = options.getOperatingSystem();
     }
 
     private static TelephonyManager getTelephonyManager() {

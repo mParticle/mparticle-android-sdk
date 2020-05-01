@@ -22,9 +22,9 @@ public class IdentityRequest extends Request {
     }
 
     public static class ClientSdk {
-        String platform;
-        String sdkVendor;
-        String sdkVersion;
+        public String platform;
+        public String sdkVendor;
+        public String sdkVersion;
 
         static ClientSdk from(JSONObject jsonObject) throws JSONException {
             ClientSdk clientSdk = new ClientSdk();

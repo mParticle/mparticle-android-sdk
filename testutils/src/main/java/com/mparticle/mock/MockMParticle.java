@@ -24,7 +24,7 @@ public class MockMParticle extends MParticle {
         mMessaging = Mockito.mock(MPMessagingAPI.class);
         mMedia = Mockito.mock(MPMediaAPI.class);
         mCommerce = Mockito.mock(CommerceApi.class);
-        mIdentityApi = new IdentityApi(new MockContext(), mAppStateManager, mMessageManager, Internal().getConfigManager(), mKitManager);
+        mIdentityApi = new IdentityApi(new MockContext(), mAppStateManager, mMessageManager, Internal().getConfigManager(), mKitManager, OperatingSystem.ANDROID);
         mPreferences = new MockSharedPreferences();
     }
 

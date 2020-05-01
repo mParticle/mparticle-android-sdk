@@ -235,6 +235,44 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
         assertEquals(0, AccessUtils.getIdentityStateListeners().size());
     }
 
+    @Test
+    public void testOperatingSystemSetProperly() throws InterruptedException {
+        final Mutable<Boolean> called = new Mutable<Boolean>(false);
+        final CountDownLatch latch = new MPLatch(1);
+        mServer.waitForVerify(new Matcher(mServer.Endpoints().getIdentifyUrl()), new MockServer.RequestReceivedCallback() {
+            @Override
+            public void onRequestReceived(Request request) {
+                assertEquals("fire", request.asIdentityRequest().getBody().clientSdk.platform);
+                called.value = true;
+                latch.countDown();
+            }
+        });
+        MParticle.start(MParticleOptions.builder(mContext)
+                .credentials("key", "secret")
+                .operatingSystem(MParticle.OperatingSystem.FIRE_OS)
+                .build());
+        latch.await();
+        assertTrue(called.value);
+
+        MParticle.setInstance(null);
+        called.value = false;
+        final CountDownLatch latch1 = new MPLatch(1);
+        mServer.waitForVerify(new Matcher(mServer.Endpoints().getIdentifyUrl()), new MockServer.RequestReceivedCallback() {
+            @Override
+            public void onRequestReceived(Request request) {
+                assertEquals("fire", request.asIdentityRequest().getBody().clientSdk.platform);
+                called.value = true;
+                latch1.countDown();
+            }
+        });
+        MParticle.start(MParticleOptions.builder(mContext)
+                .credentials("key", "secret")
+                .operatingSystem(MParticle.OperatingSystem.FIRE_OS)
+                .build());
+        latch1.await();
+        assertTrue(called.value);
+    }
+
     /**
      * This builds on the previous test. The common scenario where we send a modify() request
      * when a valid MPID is not present, is when a client sets a pushRegistration in MParticleOptions

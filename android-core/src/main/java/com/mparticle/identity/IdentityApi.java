@@ -54,7 +54,7 @@ public class IdentityApi {
     protected IdentityApi() {}
 
     @SuppressLint("UnknownNullness")
-    public IdentityApi(Context context, AppStateManager appStateManager, MessageManager messageManager, ConfigManager configManager, KitManager kitManager) {
+    public IdentityApi(Context context, AppStateManager appStateManager, MessageManager messageManager, ConfigManager configManager, KitManager kitManager, MParticle.OperatingSystem operatingSystem) {
         this.mContext = context;
         this.mBackgroundHandler = messageManager.mUploadHandler;
         this.mUserDelegate = new MParticleUserDelegate(appStateManager, configManager, messageManager, kitManager);
@@ -62,7 +62,7 @@ public class IdentityApi {
         this.mMessageManager = messageManager;
         this.mKitManager = kitManager;
         configManager.addMpIdChangeListener(new IdentityStateListenerManager());
-        setApiClient(new MParticleIdentityClientImpl(context, configManager, MParticle.OperatingSystem.ANDROID));
+        setApiClient(new MParticleIdentityClientImpl(context, configManager, operatingSystem));
     }
 
     /**

@@ -9,16 +9,23 @@ import android.support.test.rule.GrantPermissionRule;
 import com.mparticle.internal.AccessUtils;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
+import com.mparticle.internal.DeviceAttributes;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
+import com.mparticle.networking.Matcher;
+import com.mparticle.networking.MockServer;
+import com.mparticle.networking.Request;
 import com.mparticle.testutils.AndroidUtils;
+import com.mparticle.testutils.AndroidUtils.Mutable;
 import com.mparticle.testutils.BaseAbstractTest;
+import com.mparticle.testutils.MPLatch;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -316,6 +323,49 @@ public class MParticleOptionsTest extends BaseAbstractTest {
         startMParticle(MParticleOptions.builder(mContext)
                 .attributionListener(null));
         assertNull(MParticle.getInstance().getAttributionListener());
+    }
+
+    @Test
+    public void setOperatingSystemTest() throws InterruptedException {
+        final Mutable<Boolean> called = new Mutable<Boolean>(false);
+        final CountDownLatch latch = new MPLatch(1);
+        startMParticle(MParticleOptions.builder(mContext)
+                .operatingSystem(MParticle.OperatingSystem.FIRE_OS));
+        mServer.waitForVerify(new Matcher(mServer.Endpoints().getEventsUrl()), new MockServer.RequestReceivedCallback() {
+            @Override
+            public void onRequestReceived(Request request) {
+                assertEquals("FireTV", request.getBodyJson().optJSONObject("di").optString("dp"));
+                called.value = true;
+                latch.countDown();
+            }
+        });
+
+        MParticle.getInstance().logEvent(new MPEvent.Builder("event name", MParticle.EventType.Location).build());
+        MParticle.getInstance().upload();
+
+        latch.await();
+        assertTrue(called.value);
+    }
+    @Test
+    public void setOperatingSystemDefault() throws InterruptedException {
+        final Mutable<Boolean> called = new Mutable<Boolean>(false);
+        final CountDownLatch latch1 = new MPLatch(1);
+
+        startMParticle(MParticleOptions.builder(mContext));
+        mServer.waitForVerify(new Matcher(mServer.Endpoints().getEventsUrl()), new MockServer.RequestReceivedCallback() {
+            @Override
+            public void onRequestReceived(Request request) {
+                assertEquals("Android", request.getBodyJson().optJSONObject("di").optString("dp"));
+                called.value = true;
+                latch1.countDown();
+            }
+        });
+
+        MParticle.getInstance().logEvent(new MPEvent.Builder("event name", MParticle.EventType.Location).build());
+        MParticle.getInstance().upload();
+
+        latch1.await();
+        assertTrue(called.value);
     }
 
     @Rule
