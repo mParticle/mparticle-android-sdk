@@ -6,10 +6,8 @@ import android.support.annotation.NonNull;
 
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
-import com.mparticle.commerce.Cart;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.internal.listeners.ApiClass;
-import com.mparticle.internal.listeners.InternalListenerManager;
 import com.mparticle.segmentation.SegmentListener;
 
 import java.util.Map;
@@ -21,12 +19,10 @@ import java.util.Map;
 public class MParticleUserImpl implements MParticleUser {
     private long mMpId;
     MParticleUserDelegate mUserDelegate;
-    Cart cart;
 
     private MParticleUserImpl(Context context, long mpId, MParticleUserDelegate userDelegate) {
         this.mMpId = mpId;
         this.mUserDelegate = userDelegate;
-        this.cart = new Cart(context, mMpId);
     }
 
     //unit testing only
@@ -39,11 +35,6 @@ public class MParticleUserImpl implements MParticleUser {
     @Override
     public long getId() {
         return mMpId;
-    }
-
-    @Override
-    public Cart getCart() {
-        return cart;
     }
 
     @Override

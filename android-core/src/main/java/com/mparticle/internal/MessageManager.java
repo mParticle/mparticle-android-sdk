@@ -24,7 +24,6 @@ import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.UserAttributeListener;
-import com.mparticle.commerce.Cart;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.identity.AliasRequest;
 import com.mparticle.identity.IdentityApiRequest;
@@ -349,21 +348,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     public BaseMPMessage logEvent(CommerceEvent event) {
         if (event != null) {
             try {
-                MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
-                Cart cart = null;
-                if (user != null) {
-                    cart = user.getCart();
-                }
                 BaseMPMessageBuilder builder = event.getMessage();
-                BaseMPMessage message;
-                if (builder instanceof MPCommerceMessage.Builder) {
-                    message = ((MPCommerceMessage.Builder)builder)
-                            .build(mAppStateManager.getSession(), mLocation, mConfigManager.getMpid(), cart);
-                } else {
-                    message = builder
-                            .build(mAppStateManager.getSession(), mLocation, mConfigManager.getMpid());
-                }
-
+                BaseMPMessage message = builder
+                        .build(mAppStateManager.getSession(), mLocation, mConfigManager.getMpid());
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
                 return message;
             } catch (JSONException e) {

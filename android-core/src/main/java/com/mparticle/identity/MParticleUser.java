@@ -6,7 +6,6 @@ import android.support.annotation.WorkerThread;
 
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
-import com.mparticle.commerce.Cart;
 import com.mparticle.consent.ConsentState;
 
 import java.util.Map;
@@ -20,17 +19,6 @@ public interface MParticleUser {
      */
     @NonNull
     long getId();
-
-    /**
-     * query the Cart of the User
-     *
-     * @return the cart
-     *
-     * @see Cart
-     */
-    @Deprecated
-    @NonNull
-    Cart getCart();
 
     /**
      * query the attributes of the User

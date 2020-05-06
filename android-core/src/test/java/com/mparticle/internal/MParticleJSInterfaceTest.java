@@ -2,8 +2,6 @@ package com.mparticle.internal;
 
 
 import com.mparticle.MParticle;
-import com.mparticle.commerce.Cart;
-import com.mparticle.commerce.CommerceApi;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Impression;
 import com.mparticle.commerce.Product;
@@ -14,6 +12,8 @@ import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.utils.RandomUtils;
+import com.mparticle.testutils.AndroidUtils;
+import com.mparticle.testutils.MPLatch;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,6 +24,7 @@ import org.mockito.Mockito;
 
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.CountDownLatch;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -42,7 +43,6 @@ public class MParticleJSInterfaceTest extends MParticleJSInterface {
     private String mPromotion1String = "{\"Id\":\"12345\",\"Creative\":\"my-creative\",\"Name\":\"creative-name\",\"Position\":1}";
 
     private Product mProduct1, mProduct2;
-    private Cart cart;
 
     private MParticleJSInterface jsInterfaceInstance;
 
@@ -62,10 +62,8 @@ public class MParticleJSInterfaceTest extends MParticleJSInterface {
         MParticle mockMp = Mockito.mock(MParticle.class);
         Mockito.when(mockMp.Internal()).thenReturn(Mockito.mock(MParticle.Internal.class));
         Mockito.when(mockMp.Internal().getConfigManager()).thenReturn(new ConfigManager(new MockContext()));
-        cart = new Cart(new MockContext(), 2);
         MParticleUser mockCurrentUser = Mockito.mock(MParticleUser.class);
         IdentityApi mockIdentity = Mockito.mock(IdentityApi.class);
-        Mockito.when(mockCurrentUser.getCart()).thenReturn(cart);
         Mockito.when(mockIdentity.getCurrentUser()).thenReturn(mockCurrentUser);
         Mockito.when(mockMp.Identity()).thenReturn(mockIdentity);
         Mockito.when(mockMp.getEnvironment()).thenReturn(MParticle.Environment.Development);
@@ -73,7 +71,6 @@ public class MParticleJSInterfaceTest extends MParticleJSInterface {
         jsInterfaceInstance = new MParticleJSInterface();
 
         Mockito.when(MParticle.getInstance().getEnvironment()).thenReturn(MParticle.Environment.Development);
-        Mockito.when(MParticle.getInstance().Commerce()).thenReturn(Mockito.mock(CommerceApi.class));
 
         mProduct1 = new Product.Builder("iPhone", "12345", 400)
                 .quantity(1)
@@ -89,44 +86,6 @@ public class MParticleJSInterfaceTest extends MParticleJSInterface {
                 .category("CellPhones")
                 .customAttributes(customAttributes)
                 .build();
-    }
-
-    @Test
-    public void testAddToCart() throws Exception {
-        jsInterfaceInstance.addToCart(mProduct1Json);
-        assertNotNull(cart.getProduct(mProduct1.getName()));
-        assertEquals(cart.getProduct(mProduct1.getName()), mProduct1);
-        jsInterfaceInstance.addToCart(mProduct2Json);
-        assertNotNull(cart.getProduct(mProduct2.getName()));
-        assertNotNull(cart.getProduct(mProduct1.getName()));
-        assertEquals(cart.getProduct(mProduct1.getName()), mProduct1);
-        assertEquals(cart.getProduct(mProduct2.getName()), mProduct2);
-    }
-
-    @Test
-    public void testRemoveFromCart() throws Exception {
-        jsInterfaceInstance.addToCart(mProduct1Json);
-        jsInterfaceInstance.addToCart(mProduct2Json);
-        jsInterfaceInstance.removeFromCart(mProduct3Json);
-        assertNotNull(cart.getProduct(mProduct2.getName()));
-        assertNotNull(cart.getProduct(mProduct1.getName()));
-        jsInterfaceInstance.removeFromCart(mProduct1Json);
-        assertNull(cart.getProduct(mProduct1.getName()));
-        assertNotNull(cart.getProduct(mProduct2.getName()));
-        jsInterfaceInstance.removeFromCart(mProduct2Json);
-        assertNull(cart.getProduct(mProduct2.getName()));
-        assertNull(cart.getProduct(mProduct1.getName()));
-    }
-
-    @Test
-    public void testClearCart() throws Exception {
-        jsInterfaceInstance.addToCart(mProduct1Json);
-        jsInterfaceInstance.addToCart(mProduct2Json);
-        assertNotNull(cart.getProduct(mProduct1.getName()));
-        assertNotNull(cart.getProduct(mProduct2.getName()));
-        jsInterfaceInstance.clearCart();
-        assertNull(cart.getProduct(mProduct1.getName()));
-        assertNull(cart.getProduct(mProduct2.getName()));
     }
 
     @Test

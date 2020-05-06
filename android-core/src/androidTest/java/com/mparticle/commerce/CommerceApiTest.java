@@ -15,15 +15,6 @@ import static junit.framework.TestCase.assertEquals;
 public class CommerceApiTest extends BaseCleanStartedEachTest {
 
 
-    @Test
-    public void testAddToCart() {
-        Product product = new Product.Builder("product1", "1234", 1.0).build();
-        MParticle.getInstance().Identity().getCurrentUser().getCart().add(product);
-        assertEquals(1, MParticle.getInstance().Identity().getCurrentUser().getCart().products().size());
-        MParticle.getInstance().Identity().getCurrentUser().getCart().remove(product);
-        assertEquals(0, MParticle.getInstance().Identity().getCurrentUser().getCart().products().size());
-    }
-
     //just verify that we can log an event and it will get sent to the server. Not testing the event message
     @Test
     public void testCommerceProductEvent() throws InterruptedException {

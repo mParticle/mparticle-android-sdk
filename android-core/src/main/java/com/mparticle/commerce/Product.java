@@ -3,7 +3,6 @@ package com.mparticle.commerce;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.mparticle.MParticle;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 
@@ -19,7 +18,7 @@ import java.util.Map;
  *
  * The Product class is built to be immutable - use the {@link com.mparticle.commerce.Product.Builder} class to create a Product.
  *
- * Product objects are designed to be used with {@link CommerceEvent} and the {@link Cart}.
+ * Product objects are designed to be used with {@link CommerceEvent}.
  *
  */
 public final class Product {
@@ -68,7 +67,6 @@ public final class Product {
      * A simple interface that you can implement in order to customize Product equality comparisons.
      *
      * @see #setEqualityComparator(EqualityComparator)
-     * @see Cart#remove(Product)
      */
     public interface EqualityComparator {
         boolean equals(@Nullable Product product1, @Nullable Product product2);
@@ -520,7 +518,7 @@ public final class Product {
         /**
          * Build the Product object.
          *
-         * @return a Product object to be added to a {@link CommerceEvent} or to the {@link Cart}
+         * @return a Product object to be added to a {@link CommerceEvent}}
          */
         @NonNull
         public Product build() {

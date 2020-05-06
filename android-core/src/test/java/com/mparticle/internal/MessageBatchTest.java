@@ -1,7 +1,6 @@
 package com.mparticle.internal;
 
 import com.mparticle.MParticle;
-import com.mparticle.commerce.CommerceApi;
 import com.mparticle.consent.CCPAConsent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.consent.GDPRConsent;
@@ -20,8 +19,6 @@ public class MessageBatchTest {
     public void testCreate() throws Exception {
         MParticle mockMp = Mockito.mock(MParticle.class);
         Mockito.when(mockMp.getEnvironment()).thenReturn(MParticle.Environment.Development);
-        CommerceApi mockCommerce = Mockito.mock(CommerceApi.class);
-        Mockito.when(mockMp.Commerce()).thenReturn(mockCommerce);
         MParticle.setInstance(mockMp);
         ConfigManager manager = new ConfigManager(new MockContext(), MParticle.Environment.Production, "some api key", "some api secret");
         boolean sessionHistory = true;
@@ -60,8 +57,6 @@ public class MessageBatchTest {
     public void testAddConsentState() throws Exception {
         MParticle mockMp = Mockito.mock(MParticle.class);
         Mockito.when(mockMp.getEnvironment()).thenReturn(MParticle.Environment.Development);
-        CommerceApi mockCommerce = Mockito.mock(CommerceApi.class);
-        Mockito.when(mockMp.Commerce()).thenReturn(mockCommerce);
         MParticle.setInstance(mockMp);
         ConfigManager manager = new ConfigManager(new MockContext(), MParticle.Environment.Production, "some api key", "some api secret");
         boolean sessionHistory = true;

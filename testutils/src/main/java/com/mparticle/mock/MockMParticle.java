@@ -1,7 +1,6 @@
 package com.mparticle.mock;
 
 import com.mparticle.MParticle;
-import com.mparticle.commerce.CommerceApi;
 import com.mparticle.identity.IdentityApi;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
@@ -23,7 +22,6 @@ public class MockMParticle extends MParticle {
         mMessageManager = Mockito.mock(MessageManager.class);
         mMessaging = Mockito.mock(MPMessagingAPI.class);
         mMedia = Mockito.mock(MPMediaAPI.class);
-        mCommerce = Mockito.mock(CommerceApi.class);
         mIdentityApi = new IdentityApi(new MockContext(), mAppStateManager, mMessageManager, Internal().getConfigManager(), mKitManager, OperatingSystem.ANDROID);
         mPreferences = new MockSharedPreferences();
     }

@@ -18,9 +18,6 @@ import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.webkit.WebView;
 
-import com.mparticle.internal.listeners.ApiClass;
-import com.mparticle.commerce.Cart;
-import com.mparticle.commerce.CommerceApi;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Product;
 import com.mparticle.identity.IdentityApi;
@@ -47,6 +44,7 @@ import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.PushRegistrationHelper;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.database.tables.MParticleDatabaseHelper;
+import com.mparticle.internal.listeners.ApiClass;
 import com.mparticle.internal.listeners.InternalListenerManager;
 import com.mparticle.media.MPMediaAPI;
 import com.mparticle.media.MediaCallbacks;
@@ -60,7 +58,6 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -91,7 +88,6 @@ public class MParticle {
     @NonNull protected Context mAppContext;
     @NonNull protected MPMessagingAPI mMessaging;
     @NonNull protected MPMediaAPI mMedia;
-    @NonNull protected CommerceApi mCommerce;
     @NonNull protected MParticleDBManager mDatabaseManager;
     @NonNull protected volatile AttributionListener mAttributionListener;
     @NonNull protected IdentityApi mIdentityApi;
@@ -120,7 +116,6 @@ public class MParticle {
         } else {
             disableUncaughtExceptionLogging();
         }
-        mCommerce = new CommerceApi(options.getContext());
         mMessageManager = new MessageManager(configManager, appStateManager, sDevicePerformanceMetricsDisabled, mDatabaseManager, options);
         mConfigManager.setNetworkOptions(options.getNetworkOptions());
         mPreferences = options.getContext().getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
@@ -382,23 +377,6 @@ public class MParticle {
     private void logCommerceEvent(@NonNull CommerceEvent event) {
         if (mConfigManager.isEnabled() && checkEventLimit()) {
             MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
-            if (user != null) {
-                Cart cart = user.getCart();
-                if (event.getProductAction() != null) {
-                    List<Product> productList = event.getProducts();
-                    if (productList != null) {
-                        if (event.getProductAction().equalsIgnoreCase(Product.ADD_TO_CART)) {
-                            for (Product product : productList) {
-                                cart.add(product, false);
-                            }
-                        } else if (event.getProductAction().equalsIgnoreCase(Product.REMOVE_FROM_CART)) {
-                            for (Product product : productList) {
-                                cart.remove(product, false);
-                            }
-                        }
-                    }
-                }
-            }
             mAppStateManager.ensureActiveSession();
             mMessageManager.logEvent(event);
             Logger.debug("Logged commerce event - \n", event.toString());
@@ -931,20 +909,6 @@ public class MParticle {
             }
         }
         return appState;
-    }
-
-    /**
-     * @deprecated use {@link CommerceEvent} with the proper {@link Product} action with the {@link MParticle#logEvent(BaseEvent)} api instead
-     *
-     * Retrieve an instance of the {@link CommerceApi} helper class, used to access the {@link Cart} and as a helper class to log {@link CommerceEvent} events
-     * with the {@link Product} objects currently in the Cart.
-     *
-     * @return returns a global CommerceApi instance.
-     */
-    @Deprecated
-    @NonNull
-    public CommerceApi Commerce() {
-        return mCommerce;
     }
 
     /**

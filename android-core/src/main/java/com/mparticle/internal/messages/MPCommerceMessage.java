@@ -3,7 +3,6 @@ package com.mparticle.internal.messages;
 import android.location.Location;
 import android.support.annotation.Nullable;
 
-import com.mparticle.commerce.Cart;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Impression;
 import com.mparticle.commerce.Product;
@@ -19,19 +18,8 @@ import org.json.JSONObject;
 
 public class MPCommerceMessage extends BaseMPMessage {
 
-    protected MPCommerceMessage(Builder builder, InternalSession session, @Nullable Location location, long mpId, Cart cart) throws JSONException {
+    protected MPCommerceMessage(Builder builder, InternalSession session, @Nullable Location location, long mpId) throws JSONException {
         super(builder, session, location, mpId);
-        if (Product.PURCHASE.equals(builder.getProductAction())) {
-            if (cart != null) {
-                cart.clear();
-            }
-        }
-        if (cart != null) {
-            JSONObject cartJsonObject = new JSONObject(cart.toString());
-            if (cartJsonObject.length() > 0) {
-                put("sc", cartJsonObject);
-            }
-        }
     }
 
     public static class Builder extends BaseMPMessageBuilder {
@@ -55,8 +43,8 @@ public class MPCommerceMessage extends BaseMPMessage {
             return null;
         }
 
-        public BaseMPMessage build(InternalSession session, @Nullable Location location, long mpId, Cart cart) throws JSONException {
-            return new MPCommerceMessage(this, session, location, mpId, cart);
+        public BaseMPMessage build(InternalSession session, @Nullable Location location, long mpId) throws JSONException {
+            return new MPCommerceMessage(this, session, location, mpId);
         }
 
         private static void addCommerceEventInfo(JSONObject message, CommerceEvent event) {

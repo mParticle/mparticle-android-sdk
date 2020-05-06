@@ -32,7 +32,6 @@ public class UserStorage {
     private static final String COOKIES = "mp::cookies";
     private static final String TOTAL_SINCE_UPGRADE = "mp::launch_since_upgrade";
     private static final String USER_IDENTITIES = "mp::user_ids::";
-    private static final String CART = "mp::cart::";
     private static final String CONSENT_STATE = "mp::consent_state::";
     private static final String KNOWN_USER = "mp::known_user";
     private static final String FIRST_SEEN_TIME = "mp::first_seen";
@@ -83,18 +82,6 @@ public class UserStorage {
         }
         this.messageManagerSharedPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         setDefaultSeenTime();
-    }
-
-    public String getSerializedCart() {
-        return mPreferences.getString(CART, null);
-    }
-
-    public void setSerializedCart(String serializedCart) {
-        mPreferences.edit().putString(CART, serializedCart).apply();
-    }
-
-    private boolean hasCart() {
-        return mPreferences.contains(CART);
     }
 
     long getMpid() {
@@ -431,9 +418,6 @@ public class UserStorage {
         if (userStorage.hasUserIdentities()) {
             setUserIdentities(userStorage.getUserIdentities());
         }
-        if (userStorage.hasCart()) {
-            setSerializedCart(userStorage.getSerializedCart());
-        }
         if (userStorage.hasConsent()) {
             setSerializedConsentState(userStorage.getSerializedConsentState());
         }
@@ -449,7 +433,6 @@ public class UserStorage {
 
     private static class SharedPreferencesMigrator {
         private static final String NEEDS_TO_MIGRATE_TO_MPID_DEPENDENT = "mp::needs_to_migrate_to_mpid_dependent";
-        private final SharedPreferences cartSharedPreferences;
         private SharedPreferences messageManagerSharedPreferences;
         private SharedPreferences configManagerSharedPreferences;
         private String apiKey;
@@ -472,12 +455,9 @@ public class UserStorage {
             String COOKIES = "mp::cookies";
             String TOTAL_SINCE_UPGRADE = "mp::launch_since_upgrade";
             String USER_IDENTITIES = "mp::user_ids::";
-            String CART = "mp::cart";
-            String CART_PREFS_FILE = "mParticlePrefs_cart";
         }
 
         SharedPreferencesMigrator(Context context) {
-            cartSharedPreferences = context.getSharedPreferences(LegacySharedPreferencesKeys.CART_PREFS_FILE, Context.MODE_PRIVATE);
             messageManagerSharedPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
             configManagerSharedPreferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
             this.apiKey = new AppConfig(context, null, configManagerSharedPreferences, null, null).mKey;
@@ -516,11 +496,6 @@ public class UserStorage {
                     userStorage.setTotalRuns(totalRuns);
                 }
 
-                String previousCart = getCart();
-                if (previousCart != null) {
-                    userStorage.setSerializedCart(previousCart);
-                }
-                cartSharedPreferences.edit().clear().apply();
                 //migrate both cookies and device application stamp
                 String cookies = getCookies();
                 String das = null;
@@ -596,10 +571,6 @@ public class UserStorage {
 
         long getPreviousSessionStart() {
             return messageManagerSharedPreferences.getLong(LegacySharedPreferencesKeys.PREVIOUS_SESSION_START, 0);
-        }
-
-        String getCart() {
-            return cartSharedPreferences.getString(LegacySharedPreferencesKeys.CART, null);
         }
 
         String getLtv() {
