@@ -59,6 +59,7 @@ public class KitIntegrationFactory {
         kits.put(MParticle.ServiceProviders.PILGRIM,                    "com.mparticle.kits.PilgrimKit");
         kits.put(MParticle.ServiceProviders.ONETRUST,                   "com.mparticle.kits.OneTrustKit");
         kits.put(MParticle.ServiceProviders.SWRVE,                      "com.mparticle.kits.SwrveKit");
+        kits.put(MParticle.ServiceProviders.BLUESHIFT,                  "com.mparticle.kits.BlueshiftKit");
         return kits;
     }
 
