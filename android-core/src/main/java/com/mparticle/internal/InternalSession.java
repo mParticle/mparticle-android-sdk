@@ -17,7 +17,6 @@ import java.util.concurrent.atomic.AtomicLong;
  * This is the internal classes used to hold session state.
  */
 public class InternalSession {
-    public int mEventCount = 0;
     public String mSessionID = Constants.NO_SESSION_ID;
     public long mSessionStartTime = 0;
     public long mLastEventTime = 0;
@@ -32,7 +31,6 @@ public class InternalSession {
 
     public InternalSession(InternalSession session) {
         super();
-        mEventCount = session.mEventCount;
         mSessionID = session.mSessionID;
         mSessionStartTime = session.mSessionStartTime;
         mLastEventTime = session.mLastEventTime;
@@ -52,21 +50,10 @@ public class InternalSession {
         mLastEventTime = mSessionStartTime = System.currentTimeMillis();
         mSessionID = UUID.randomUUID().toString().toUpperCase(Locale.US);
         mSessionAttributes = new JSONObject();
-        mEventCount = 0;
         mTimeInBackground = 0;
         addMpid(ConfigManager.getMpid(context));
         InternalListenerManager.getListener().onSessionUpdated(this);
         return this;
-    }
-
-    public Boolean checkEventLimit() {
-        if (mEventCount < Constants.EVENT_LIMIT) {
-            mEventCount++;
-            return true;
-        } else {
-            Logger.warning("The event limit has been exceeded for this session.");
-            return false;
-        }
     }
 
     public boolean isTimedOut(int sessionTimeout) {

@@ -358,7 +358,7 @@ public class MParticle {
      * @param event the event object to log
      */
     private void logMPEvent(@NonNull MPEvent event) {
-        if (mConfigManager.isEnabled() && checkEventLimit()) {
+        if (mConfigManager.isEnabled()) {
             mAppStateManager.ensureActiveSession();
             mMessageManager.logEvent(event, mAppStateManager.getCurrentActivityName());
             Logger.debug("Logged event - \n", event.toString());
@@ -375,7 +375,7 @@ public class MParticle {
      * @see CommerceEvent
      */
     private void logCommerceEvent(@NonNull CommerceEvent event) {
-        if (mConfigManager.isEnabled() && checkEventLimit()) {
+        if (mConfigManager.isEnabled()) {
             MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
             mAppStateManager.ensureActiveSession();
             mMessageManager.logEvent(event);
@@ -437,22 +437,20 @@ public class MParticle {
     public void logScreen(@NonNull MPEvent screenEvent) {
         screenEvent.setScreenEvent(true);
         if (MPUtility.isEmpty(screenEvent.getEventName())) {
-            Logger.error( "screenName is required for logScreen.");
+            Logger.error("screenName is required for logScreen.");
             return;
         }
         if (screenEvent.getEventName().length() > Constants.LIMIT_ATTR_KEY) {
-            Logger.error( "The screen name was too long. Discarding event.");
+            Logger.error("The screen name was too long. Discarding event.");
             return;
         }
-        if (checkEventLimit()) {
-            mAppStateManager.ensureActiveSession();
-            if (mConfigManager.isEnabled()) {
-                mMessageManager.logScreen(screenEvent, screenEvent.getNavigationDirection());
-                Logger.debug("Logged screen: ", screenEvent.toString());
-            }
-            if (screenEvent.getNavigationDirection()) {
-                mKitManager.logScreen(screenEvent);
-            }
+        mAppStateManager.ensureActiveSession();
+        if (mConfigManager.isEnabled()) {
+            mMessageManager.logScreen(screenEvent, screenEvent.getNavigationDirection());
+            Logger.debug("Logged screen: ", screenEvent.toString());
+        }
+        if (screenEvent.getNavigationDirection()) {
+            mKitManager.logScreen(screenEvent);
         }
     }
 
@@ -497,17 +495,15 @@ public class MParticle {
     public void logError(@NonNull String message, @Nullable Map<String, String> errorAttributes) {
         if (mConfigManager.isEnabled()) {
             if (MPUtility.isEmpty(message)) {
-                Logger.error( "message is required for logErrorEvent.");
+                Logger.error("message is required for logErrorEvent.");
                 return;
             }
             mAppStateManager.ensureActiveSession();
-            if (checkEventLimit()) {
-                JSONObject eventDataJSON = MPUtility.enforceAttributeConstraints(errorAttributes);
-                mMessageManager.logErrorEvent(message, null, eventDataJSON);
-                Logger.debug("Logged error with message: " + (message == null ? "<none>" : message) +
-                                " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString())
-                );
-            }
+            JSONObject eventDataJSON = MPUtility.enforceAttributeConstraints(errorAttributes);
+            mMessageManager.logErrorEvent(message, null, eventDataJSON);
+            Logger.debug("Logged error with message: " + (message == null ? "<none>" : message) +
+                    " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString())
+            );
             mKitManager.logError(message, errorAttributes);
         }
     }
@@ -515,11 +511,8 @@ public class MParticle {
     public void logNetworkPerformance(@NonNull String url, long startTime, @NonNull String method, long length, long bytesSent, long bytesReceived, @Nullable String requestString, int responseCode) {
         if (mConfigManager.isEnabled()) {
             mAppStateManager.ensureActiveSession();
-            if (checkEventLimit()) {
-                mMessageManager.logNetworkPerformanceEvent(startTime, method, url, length, bytesSent, bytesReceived, requestString);
-            }
+            mMessageManager.logNetworkPerformanceEvent(startTime, method, url, length, bytesSent, bytesReceived, requestString);
             mKitManager.logNetworkPerformance(url, startTime, method, length, bytesSent, bytesReceived, requestString, responseCode);
-
         }
     }
 
@@ -579,15 +572,13 @@ public class MParticle {
     public void logException(@NonNull Exception exception, @Nullable Map<String, String> eventData, @Nullable String message) {
         if (mConfigManager.isEnabled()) {
             mAppStateManager.ensureActiveSession();
-            if (checkEventLimit()) {
-                JSONObject eventDataJSON = MPUtility.enforceAttributeConstraints(eventData);
-                mMessageManager.logErrorEvent(message, exception, eventDataJSON);
-                Logger.debug(
-                        "Logged exception with message: " + (message == null ? "<none>" : message) +
-                                " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString()) +
-                                " with exception: " + (exception == null ? "<none>" : exception.getMessage())
-                );
-            }
+            JSONObject eventDataJSON = MPUtility.enforceAttributeConstraints(eventData);
+            mMessageManager.logErrorEvent(message, exception, eventDataJSON);
+            Logger.debug(
+                    "Logged exception with message: " + (message == null ? "<none>" : message) +
+                            " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString()) +
+                            " with exception: " + (exception == null ? "<none>" : exception.getMessage())
+            );
             mKitManager.logException(exception, eventData, message);
         }
     }
@@ -802,17 +793,6 @@ public class MParticle {
      */
     public void disableUncaughtExceptionLogging() {
         mConfigManager.disableUncaughtExceptionLogging(true);
-    }
-
-    /**
-     * This method checks the event count is below the limit and increments the event count. A
-     * warning is logged if the limit has been reached.
-     *
-     * @return true if event count is below limit
-     */
-    @NonNull
-    private Boolean checkEventLimit() {
-        return mAppStateManager.getSession().checkEventLimit();
     }
 
     /**

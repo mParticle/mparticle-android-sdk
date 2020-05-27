@@ -81,28 +81,4 @@ public class MParticleUserDelegateTest {
         }
     }
 
-    @Test
-    public void setUserAttributeEventCounter() {
-        InternalSession session = new InternalSession();
-
-        AppStateManager appStateManager = Mockito.mock(AppStateManager.class);
-        Mockito.when(appStateManager.getSession()).thenReturn(session);
-
-        ConfigManager configManager = Mockito.mock(ConfigManager.class);
-        MessageManager messageManager = Mockito.mock(MessageManager.class);
-        KitManager kitManager = Mockito.mock(KitManager.class);
-
-        Mockito.when(configManager.isEnabled()).thenReturn(true);
-
-        MParticleUserDelegate delegate = new MParticleUserDelegate(appStateManager, configManager, messageManager, kitManager);
-
-        for (int i = 0; i < 1000; i++) {
-            delegate.setUserAttribute("key", "value", 1L);
-        }
-
-
-
-        assertEquals(0, session.mEventCount);
-    }
-
 }
