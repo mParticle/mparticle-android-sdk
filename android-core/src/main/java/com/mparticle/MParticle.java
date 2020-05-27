@@ -1260,7 +1260,17 @@ public class MParticle {
         FacebookCustomAudienceId(9),
         Other2(10),
         Other3(11),
-        Other4(12);
+        Other4(12),
+        Other5(13),
+        Other6(14),
+        Other7(15),
+        Other8(16),
+        Other9(17),
+        Other10(18),
+        MobileNumber(19),
+        PhoneNumber2(20),
+        PhoneNumber3(21);
+
 
         private final int value;
 
@@ -1295,6 +1305,24 @@ public class MParticle {
                     return Other3;
                 case 12:
                     return Other4;
+                case 13:
+                    return Other5;
+                case 14:
+                    return Other6;
+                case 15:
+                    return Other7;
+                case 16:
+                    return Other8;
+                case 17:
+                    return Other9;
+                case 18:
+                    return Other10;
+                case 19:
+                    return MobileNumber;
+                case 20:
+                    return PhoneNumber2;
+                case 21:
+                    return PhoneNumber3;
                 default:
                     return Other;
             }

@@ -319,6 +319,18 @@ import java.util.UUID;
                 return "other3";
             case Other4:
                 return "other4";
+            case Other5:
+                return "other5";
+            case Other6:
+                return "other6";
+            case Other7:
+                return "other7";
+            case Other8:
+                return "other8";
+            case Other9:
+                return "other9";
+            case Other10:
+                return "other10";
             case CustomerId:
                 return "customerid";
             case Facebook:
@@ -337,41 +349,64 @@ import java.util.UUID;
                 return "email";
             case FacebookCustomAudienceId:
                 return "facebookcustomaudienceid";
+            case MobileNumber:
+                return "mobile_number";
+            case PhoneNumber2:
+                return "phone_number_2";
+            case PhoneNumber3:
+                return "phone_number_3";
             default:
                 return "";
         }
     }
 
     static MParticle.IdentityType getIdentityType(String idTypeString) {
-        if (idTypeString.equals("other")) {
+        if ("other".equals(idTypeString)) {
             return MParticle.IdentityType.Other;
-        } else if (idTypeString.equals("other2")) {
+        } else if ("other2".equals(idTypeString)) {
             return MParticle.IdentityType.Other2;
-        } else if (idTypeString.equals("other3")) {
+        } else if ("other3".equals(idTypeString)) {
             return MParticle.IdentityType.Other3;
-        } else if (idTypeString.equals("other4")) {
+        } else if ("other4".equals(idTypeString)) {
             return MParticle.IdentityType.Other4;
-        } else if (idTypeString.equals("customerid")) {
+        } else if ("other5".equals(idTypeString)) {
+            return MParticle.IdentityType.Other5;
+        } else if ("other6".equals(idTypeString)) {
+            return MParticle.IdentityType.Other6;
+        } else if ("other7".equals(idTypeString)) {
+            return MParticle.IdentityType.Other7;
+        } else if ("other8".equals(idTypeString)) {
+            return MParticle.IdentityType.Other8;
+        } else if ("other9".equals(idTypeString)) {
+            return MParticle.IdentityType.Other9;
+        } else if ("other10".equals(idTypeString)) {
+            return MParticle.IdentityType.Other10;
+        } else if ("customerid".equals(idTypeString)) {
             return MParticle.IdentityType.CustomerId;
-        } else if (idTypeString.equals("facebook")) {
+        } else if ("facebook".equals(idTypeString)) {
             return MParticle.IdentityType.Facebook;
-        } else if (idTypeString.equals("twitter")) {
+        } else if ("twitter".equals(idTypeString)) {
             return MParticle.IdentityType.Twitter;
-        } else if (idTypeString.equals("google")) {
+        } else if ("google".equals(idTypeString)) {
             return MParticle.IdentityType.Google;
-        } else if (idTypeString.equals("microsoft")) {
+        } else if ("microsoft".equals(idTypeString)) {
             return MParticle.IdentityType.Microsoft;
-        } else if (idTypeString.equals("yahoo")) {
+        } else if ("yahoo".equals(idTypeString)) {
             return MParticle.IdentityType.Yahoo;
-        } else if (idTypeString.equals("email")) {
+        } else if ("email".equals(idTypeString)) {
             return MParticle.IdentityType.Email;
-        } else if (idTypeString.equals("facebookcustomaudienceid")) {
+        } else if ("facebookcustomaudienceid".equals(idTypeString)) {
             return MParticle.IdentityType.FacebookCustomAudienceId;
-        } else if (idTypeString.equals("alias")) {
+        } else if ("alias".equals(idTypeString)) {
             return MParticle.IdentityType.Alias;
-        } else {
-            return null;
+        } else if ("mobile_number".equals(idTypeString)) {
+            return MParticle.IdentityType.MobileNumber;
+        } else if ("phone_number_2".equals(idTypeString)) {
+            return MParticle.IdentityType.PhoneNumber2;
+        } else if ("phone_number_3".equals(idTypeString)) {
+            return MParticle.IdentityType.PhoneNumber3;
         }
+        return null;
     }
 
     private String getStringValue(MParticle.Environment environment) {

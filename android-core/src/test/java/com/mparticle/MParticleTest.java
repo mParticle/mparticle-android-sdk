@@ -293,4 +293,11 @@ public class MParticleTest {
 
         Mockito.verify(instance.mKitManager, Mockito.times(0)).logEvent(Mockito.any(BaseEvent.class));
     }
+
+    @Test
+    public void testIdentityTypeParsing() {
+        for(MParticle.IdentityType identityType: MParticle.IdentityType.values()) {
+            assertEquals(identityType, MParticle.IdentityType.parseInt(identityType.getValue()));
+        }
+    }
 }

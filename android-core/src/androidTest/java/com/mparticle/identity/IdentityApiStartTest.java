@@ -1,7 +1,5 @@
 package com.mparticle.identity;
 
-import android.os.Handler;
-
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.internal.ConfigManager;
@@ -180,7 +178,7 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
 
         while (keys.hasNext()) {
             String key = keys.next();
-            assertEquals(copy.get(getIdentityTypeIgnoreCase(key)), knownIdentities.getString(key));
+            assertEquals(copy.get(MParticleIdentityClientImpl.getIdentityType(key)), knownIdentities.getString(key));
         }
     }
 
@@ -291,15 +289,5 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
             ex = e;
         }
         assertNull(ex);
-    }
-
-    private MParticle.IdentityType getIdentityTypeIgnoreCase(String value) {
-        for (MParticle.IdentityType identityType: MParticle.IdentityType.values()) {
-            if (value.toLowerCase().equals(identityType.name().toLowerCase())) {
-                return identityType;
-            }
-        }
-        fail(String.format("Could not find IdentityType equal to \"%s\"", value));
-        return null;
     }
 }
