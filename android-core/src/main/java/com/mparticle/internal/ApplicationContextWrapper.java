@@ -10,9 +10,6 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
-
-import androidx.annotation.RequiresApi;
 
 import com.mparticle.MParticle;
 

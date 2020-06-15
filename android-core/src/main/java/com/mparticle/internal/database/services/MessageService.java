@@ -3,12 +3,8 @@ package com.mparticle.internal.database.services;
 import android.content.ContentValues;
 import android.database.Cursor;
 
-import androidx.annotation.Nullable;
-
-import com.google.android.gms.common.internal.Objects;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
-import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.tables.MessageTable;
 import com.mparticle.internal.listeners.InternalListenerManager;
