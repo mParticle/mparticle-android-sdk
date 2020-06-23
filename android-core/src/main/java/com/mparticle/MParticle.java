@@ -69,6 +69,8 @@ import java.util.Set;
 @ApiClass
 public class MParticle {
 
+    // Add a comment here 
+
     /**
      * Used to delegate messages, events, user actions, etc on to embedded kits.
      */
