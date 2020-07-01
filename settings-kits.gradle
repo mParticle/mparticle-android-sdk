@@ -31,8 +31,7 @@ include (
         ':kits:googleanalyticsfirebase-kit',
         ':kits:pilgrim-kit',
         ':kits:onetrust-kit',
-        ':kits:adobemedia-kit',
-        ':kits:neura-kit'
+        ':kits:adobemedia-kit'
 )
 project(':kits').getChildren().each {
     proj -> proj.name = 'android-' + proj.name
