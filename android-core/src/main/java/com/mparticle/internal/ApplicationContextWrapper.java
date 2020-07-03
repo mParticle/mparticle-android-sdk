@@ -10,6 +10,7 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 
 import com.mparticle.MParticle;
 
@@ -113,6 +114,9 @@ public class ApplicationContextWrapper extends Application {
         if (unitTesting) {
             runnable.run();
         } else {
+            if (Looper.myLooper() == null) {
+                Looper.prepare();
+            }
             new Handler().post(runnable);
         }
     }
