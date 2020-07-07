@@ -391,7 +391,9 @@ public class  AppStateManager {
                 .remove(Constants.PrefKeys.LOCATION_MINTIME)
                 .remove(Constants.PrefKeys.LOCATION_MINDISTANCE)
                 .apply();
-        MParticle.getInstance().disableLocationTracking();
+        if (MParticle.getInstance() != null) {
+            MParticle.getInstance().disableLocationTracking();
+        }
     }
 
     public void startSession() {
