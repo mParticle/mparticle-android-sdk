@@ -537,7 +537,7 @@ public final class CommerceEvent extends BaseEvent {
          * @see Product#PURCHASE
          *
          */
-        public Builder(@NonNull String productAction, Product product) {
+        public Builder(@NonNull @Product.ProductConstant String productAction, Product product) {
             mProductAction = productAction;
             mPromotionAction = null;
             addProduct(product);
@@ -552,7 +552,7 @@ public final class CommerceEvent extends BaseEvent {
          * @see Promotion#CLICK
          * @see Promotion#VIEW
          */
-        public Builder(@NonNull String promotionAction, @NonNull Promotion promotion) {
+        public Builder(@NonNull @Promotion.PromotionConstant String promotionAction, @NonNull Promotion promotion) {
             mProductAction = null;
             mPromotionAction = promotionAction;
             addPromotion(promotion);

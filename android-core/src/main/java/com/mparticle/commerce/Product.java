@@ -2,6 +2,7 @@ package com.mparticle.commerce;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringDef;
 
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
@@ -9,6 +10,8 @@ import com.mparticle.internal.MPUtility;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -22,6 +25,10 @@ import java.util.Map;
  *
  */
 public final class Product {
+
+    @Retention(RetentionPolicy.CLASS)
+    @StringDef({ADD_TO_CART, REMOVE_FROM_CART, ADD_TO_WISHLIST, REMOVE_FROM_WISHLIST, CHECKOUT, CLICK, DETAIL, PURCHASE, REFUND, CHECKOUT_OPTION})
+    @interface ProductConstant{}
 
     @NonNull public static final String ADD_TO_CART = "add_to_cart";
     @NonNull public static final String REMOVE_FROM_CART = "remove_from_cart";
