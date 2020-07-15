@@ -92,27 +92,27 @@ public class LoggerTest {
         }
 
         @Override
-        void verbose(Throwable error, String message) {
+        public void verbose(Throwable error, String message) {
             called[0] = true;
         }
 
         @Override
-        void info(Throwable error, String message) {
+        public void info(Throwable error, String message) {
             called[1] = true;
         }
 
         @Override
-        void debug(Throwable error, String message) {
+        public void debug(Throwable error, String message) {
             called[2] = true;
         }
 
         @Override
-        void warning(Throwable error, String message) {
+        public void warning(Throwable error, String message) {
             called[3] = true;
         }
 
         @Override
-        void error(Throwable error, String message) {
+        public void error(Throwable error, String message) {
             called[4] = true;
         }
     }

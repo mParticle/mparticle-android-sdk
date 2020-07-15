@@ -58,7 +58,7 @@ class DataplanDetector: CallScanner() {
         super.beforeCheckRootProject(context)
 
         //stub logger in MParticle to avoid any dependencies on Android Log when building Events
-        Logger.setLogHandler(object : Logger.AbstractLogHandler() {
+        Logger.setLogHandler(object : Logger.DefaultLogHandler() {
             override fun log(priority: MParticle.LogLevel?, error: Throwable?, messages: String?) {}
         })
 

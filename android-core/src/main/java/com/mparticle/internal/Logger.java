@@ -139,11 +139,11 @@ public class Logger {
             return Log.isLoggable(tag, logLevel);
         }
 
-        abstract void verbose(Throwable error, String message);
-        abstract void info(Throwable error, String message);
-        abstract void debug(Throwable error, String message);
-        abstract void warning(Throwable error, String message);
-        abstract void error(Throwable error, String message);
+        public abstract void verbose(Throwable error, String message);
+        public abstract void info(Throwable error, String message);
+        public abstract void debug(Throwable error, String message);
+        public abstract void warning(Throwable error, String message);
+        public abstract void error(Throwable error, String message);
     }
     
     public static class DefaultLogHandler extends AbstractLogHandler {
