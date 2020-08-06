@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 : ${1?"Version missing - usage: $0 x.y.z"}
 
+git pull origin development
+
 #update build.gradle
 sed -i '.bak' "s/version = '.*-SNAPSHOT/version = '$1-SNAPSHOT/g" build.gradle
 
