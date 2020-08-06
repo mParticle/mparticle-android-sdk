@@ -60,6 +60,10 @@ public class InstallReferrerHelper {
                                             Logger.warning("InstallReferrer Remote Exception, using InstallReferrer from intent.");
                                             callback.onFailed();
                                         }
+                                        catch (Exception e) {
+                                            Logger.warning("InstallReferrer Exception: " + e.getMessage() + ", using InstallReferrer from intent");
+                                            callback.onFailed();
+                                        }
                                         break;
                                     case InstallReferrerClient.InstallReferrerResponse.FEATURE_NOT_SUPPORTED:
                                         Logger.warning("InstallReferrer not supported, using InstallReferrer from intent.");
