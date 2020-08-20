@@ -14,6 +14,8 @@ import com.mparticle.internal.PushRegistrationHelper;
 import com.mparticle.networking.NetworkOptions;
 import com.mparticle.networking.NetworkOptionsManager;
 
+import ly.iterative.itly.android.Itly;
+
 /**
  * class used for passing optional settings to the SDK when it is started.
  */
@@ -42,6 +44,7 @@ public class MParticleOptions {
     private String mDataplanId;
     private Integer mDataplanVersion;
     private MParticle.OperatingSystem mOperatingSystem = MParticle.OperatingSystem.ANDROID;
+    private Itly mItly;
 
     private MParticleOptions() {
     }
@@ -108,6 +111,9 @@ public class MParticleOptions {
         }
         if (builder.operatingSystem != null) {
             this.mOperatingSystem = builder.operatingSystem;
+        }
+        if (builder.itly != null) {
+            this.mItly = builder.itly;
         }
         this.mNetworkOptions = NetworkOptionsManager.validateAndResolve(builder.networkOptions);
         this.mDataplanId = builder.dataplanId;
@@ -263,6 +269,11 @@ public class MParticleOptions {
         return mOperatingSystem;
     }
 
+    @Nullable
+    public Itly getItly() {
+        return mItly;
+    }
+
     public static class Builder {
         private Context context;
         String apiKey;
@@ -286,6 +297,7 @@ public class MParticleOptions {
         private String dataplanId;
         private Integer dataplanVersion;
         private MParticle.OperatingSystem operatingSystem;
+        private Itly itly;
 
         private Builder(Context context) {
             this.context = context;
@@ -545,6 +557,17 @@ public class MParticleOptions {
         @NonNull
         public Builder operatingSystem(MParticle.OperatingSystem operatingSystem) {
             this.operatingSystem = operatingSystem;
+            return this;
+        }
+
+        /**
+         * Set the Itly instance to use for auditing. Defaults to null.
+         * @param itly
+         * @return
+         */
+        @NonNull
+        public Builder itly(Itly itly) {
+            this.itly = itly;
             return this;
         }
 

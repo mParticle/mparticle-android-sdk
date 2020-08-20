@@ -51,6 +51,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import ly.iterative.itly.Event;
+import ly.iterative.itly.android.Itly;
+
 /**
  * This class is primarily responsible for generating BaseMPMessage objects, and then adding them to a
  * queue which is then processed in a background thread for further processing and database storage.
@@ -65,7 +68,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     private ConfigManager mConfigManager = null;
     private MParticleDBManager mMParticleDBManager;
     private MParticle.OperatingSystem mOperatingSystem;
-
+    private Itly mItly;
 
     /**
      * These two threads are used to do the heavy lifting.
@@ -163,6 +166,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         mUploadHandler = new UploadHandler(options.getContext(), sUploadHandlerThread.getLooper(), configManager, appStateManager, this, dbManager);
         sPreferences = options.getContext().getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mInstallType = options.getInstallType();
+        mItly = options.getItly();
     }
 
     private static TelephonyManager getTelephonyManager() {
@@ -323,6 +327,24 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public BaseMPMessage logEvent(MPEvent event, String currentActivity) {
         if (event != null) {
+            if (mItly != null && !event.getCustomAttributes().containsKey("$itly")) {
+                Map<String, Object> mpMetadata = new HashMap<>();
+                mpMetadata.put("eventType", event.getEventType());
+                mpMetadata.put("customFlags", event.getCustomFlags());
+
+                Map<String, Map<String, Object>> metadata = new HashMap<>();
+                metadata.put("mparticle", mpMetadata);
+
+                mItly.track(new Event(
+                    event.getEventName(),
+                    event.getCustomAttributes(),
+                    null,
+                    null,
+                    metadata
+                ));
+                return null;
+            }
+
             try {
 
                 BaseMPMessage message = event.getMessage()

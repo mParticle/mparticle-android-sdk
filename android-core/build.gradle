@@ -6,7 +6,8 @@ apply plugin: 'com.android.library'
 apply from: '../scripts/maven.gradle'
 apply plugin: 'kotlin-android'
 
-def javaVersion = JavaVersion.VERSION_1_6
+//def javaVersion = JavaVersion.VERSION_1_6
+def javaVersion = JavaVersion.VERSION_1_7
 
 android {
     compileSdkVersion 28
@@ -118,6 +119,9 @@ dependencies {
     compileOnly 'com.android.support:support-v4:27.1.1'
     compileOnly 'com.android.installreferrer:installreferrer:[1.0, )'
     compileOnly 'com.google.android.instantapps:instantapps:[1.0, )'
+
+    // Iteratively
+    implementation 'ly.iterative.itly:sdk-android:1.0.1'
 
     //the junit tests seem to explicitly need this dependency while
     //working in Android studio, but from the command line it's not necessary
