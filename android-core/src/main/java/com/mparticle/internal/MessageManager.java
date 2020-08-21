@@ -19,6 +19,7 @@ import android.os.Process;
 import android.support.annotation.Nullable;
 import android.telephony.TelephonyManager;
 
+import com.mparticle.BaseEvent;
 import com.mparticle.InstallReferrerHelper;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
@@ -324,24 +325,30 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         }
     }
 
+    private boolean logEventToItly(String eventName, MParticle.EventType eventType, BaseEvent event) {
+        if (mItly != null && !event.getCustomAttributes().containsKey("$itly")) {
+            Map<String, Object> mpMetadata = new HashMap<>();
+            mpMetadata.put("eventType", eventType);
+            mpMetadata.put("customFlags", event.getCustomFlags());
 
-    public BaseMPMessage logEvent(MPEvent event, String currentActivity) {
-        if (event != null) {
-            if (mItly != null && !event.getCustomAttributes().containsKey("$itly")) {
-                Map<String, Object> mpMetadata = new HashMap<>();
-                mpMetadata.put("eventType", event.getEventType());
-                mpMetadata.put("customFlags", event.getCustomFlags());
+            Map<String, Map<String, Object>> metadata = new HashMap<>();
+            metadata.put("mparticle", mpMetadata);
 
-                Map<String, Map<String, Object>> metadata = new HashMap<>();
-                metadata.put("mparticle", mpMetadata);
-
-                mItly.track(new Event(
-                    event.getEventName(),
+            mItly.track(new Event(
+                    eventName,
                     event.getCustomAttributes(),
                     null,
                     null,
                     metadata
-                ));
+            ));
+            return true;
+        }
+        return false;
+    }
+
+    public BaseMPMessage logEvent(MPEvent event, String currentActivity) {
+        if (event != null) {
+            if (logEventToItly(event.getEventName(), event.getEventType(), event)) {
                 return null;
             }
 
@@ -369,6 +376,10 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public BaseMPMessage logEvent(CommerceEvent event) {
         if (event != null) {
+            if (logEventToItly(event.getEventName(), MParticle.EventType.Other, event)) {
+                return null;
+            }
+
             try {
                 BaseMPMessageBuilder builder = event.getMessage();
                 BaseMPMessage message = builder
