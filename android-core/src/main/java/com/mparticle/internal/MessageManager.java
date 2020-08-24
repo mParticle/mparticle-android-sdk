@@ -61,6 +61,7 @@ import ly.iterative.itly.android.Itly;
  *
  */
 public class MessageManager implements MessageManagerCallbacks, ReportingManager {
+    private static final String ITLY_ATTRIBUTE_KEY = "$itly";
     private static Context sContext = null;
     static SharedPreferences sPreferences = null;
     static volatile boolean devicePerformanceMetricsDisabled;
@@ -325,21 +326,35 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         }
     }
 
+    /**
+     * Logs event via Itly depending on configuration. Returns true if event was logged, false otherwise
+     *
+     * @param eventName
+     * @param eventType
+     * @param event
+     * @return
+     */
     private boolean logEventToItly(String eventName, MParticle.EventType eventType, BaseEvent event) {
-        if (mItly != null && !event.getCustomAttributes().containsKey("$itly")) {
+        // Check for $itly property
+        if (event.getCustomAttributes() != null && event.getCustomAttributes().containsKey(ITLY_ATTRIBUTE_KEY)) {
+            // if $itly is found, remove it and track via standard mParticle logic
+            event.getCustomAttributes().remove(ITLY_ATTRIBUTE_KEY);
+        } else if (mItly != null) {
+            // Construct metadata
             Map<String, Object> mpMetadata = new HashMap<>();
             mpMetadata.put("eventType", eventType);
-            mpMetadata.put("customFlags", event.getCustomFlags());
-
+            if (event.getCustomFlags() != null) {
+                mpMetadata.put("customFlags", event.getCustomFlags());
+            }
             Map<String, Map<String, Object>> metadata = new HashMap<>();
             metadata.put("mparticle", mpMetadata);
 
             mItly.track(new Event(
-                    eventName,
-                    event.getCustomAttributes(),
-                    null,
-                    null,
-                    metadata
+                eventName,
+                event.getCustomAttributes(),
+                null,
+                null,
+                metadata
             ));
             return true;
         }
