@@ -121,7 +121,7 @@ dependencies {
     compileOnly 'com.google.android.instantapps:instantapps:[1.0, )'
 
     // Iteratively
-    implementation 'ly.iterative.itly:sdk-android:1.0.1'
+    implementation 'ly.iterative.itly:sdk-android:1.1.0'
 
     //the junit tests seem to explicitly need this dependency while
     //working in Android studio, but from the command line it's not necessary
