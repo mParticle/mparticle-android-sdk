@@ -1,5 +1,6 @@
 package com.mparticle.internal;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -206,7 +207,11 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             infoJson.put(MessageKey.STATE_INFO_BAR_ORIENTATION, orientation);
             infoJson.put(MessageKey.STATE_INFO_MEMORY_LOW, MPUtility.isSystemMemoryLow(sContext));
             infoJson.put(MessageKey.STATE_INFO_MEMORY_THRESHOLD, getSystemMemoryThreshold());
-            infoJson.put(MessageKey.STATE_INFO_NETWORK_TYPE, getTelephonyManager().getNetworkType());
+            Integer networkType = MPUtility.getNetworkType(sContext, getTelephonyManager());
+            if (networkType != null) {
+                infoJson.put(MessageKey.STATE_INFO_NETWORK_TYPE, networkType);
+            }
+
         } catch (OutOfMemoryError error) {
             Logger.error("Out of memory");
         }

@@ -2,6 +2,8 @@ package com.mparticle.internal;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.telephony.TelephonyManager;
+
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.utils.RandomUtils;
 
@@ -111,6 +113,16 @@ public class MPUtilityTest {
         Mockito.when(context.getApplicationInfo()).thenReturn(applicationInfo);
         MPUtility.isAppDebuggable(context);
         assertEquals(5, applicationInfo.flags);
+    }
+
+    @Test
+    public void testGetNetworkType() throws Exception {
+        Context context = Mockito.mock(Context.class);
+        TelephonyManager telephonyManager = Mockito.mock(TelephonyManager.class);
+        Integer result = MPUtility.getNetworkType(context, telephonyManager);
+        assertEquals(new Integer(0), result);
+        result = MPUtility.getNetworkType(context, null);
+        assertNull(result);
     }
 
     @Test

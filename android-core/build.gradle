@@ -9,8 +9,8 @@ apply plugin: 'kotlin-android'
 def javaVersion = JavaVersion.VERSION_1_6
 
 android {
-    compileSdkVersion 28
-    buildToolsVersion '28.0.3'
+    compileSdkVersion 30
+    buildToolsVersion '30.0.2'
     packagingOptions {
         exclude 'META-INF/LICENSE'
     }
@@ -46,7 +46,7 @@ android {
 
     defaultConfig {
         minSdkVersion 9
-        targetSdkVersion 28
+        targetSdkVersion 30
         versionName project.version.toString().replace('-SNAPSHOT', '')
         versionCode Integer.parseInt(new Date().format('yyyyMMdd'))
 

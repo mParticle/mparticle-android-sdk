@@ -1,6 +1,7 @@
 package com.mparticle.internal;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
@@ -20,6 +21,8 @@ import android.os.StatFs;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
+import android.telecom.TelecomManager;
+import android.telephony.TelephonyManager;
 import android.view.Display;
 import android.view.WindowManager;
 
@@ -212,6 +215,15 @@ public class MPUtility {
                 .checkCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
             final LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
             return Boolean.toString(manager.isProviderEnabled(LocationManager.GPS_PROVIDER));
+        } else {
+            return null;
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    public static Integer getNetworkType(Context context, TelephonyManager telephonyManager) {
+        if (telephonyManager != null && MPUtility.checkPermission(context, Manifest.permission.READ_PHONE_STATE)) {
+            return telephonyManager.getNetworkType();
         } else {
             return null;
         }
@@ -507,6 +519,7 @@ public class MPUtility {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
     }
 
+    @SuppressLint("MissingPermission")
     public static boolean isBluetoothEnabled(Context context) {
         if (checkPermission(context, Manifest.permission.BLUETOOTH)) {
             BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();

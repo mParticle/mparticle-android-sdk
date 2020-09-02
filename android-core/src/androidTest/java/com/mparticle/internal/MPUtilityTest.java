@@ -1,5 +1,8 @@
 package com.mparticle.internal;
 
+import android.content.Context;
+import android.telephony.TelephonyManager;
+
 import com.mparticle.testutils.BaseCleanInstallEachTest;
 
 import org.junit.Test;
@@ -12,6 +15,8 @@ import java.util.TreeMap;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class MPUtilityTest extends BaseCleanInstallEachTest {
 
@@ -39,5 +44,12 @@ public class MPUtilityTest extends BaseCleanInstallEachTest {
 
         map = new LinkedHashMap(map);
         assertFalse(MPUtility.containsNullKey(map));
+    }
+
+    @Test
+    public void testGetInstrumentedNetworkType() throws Exception {
+        TelephonyManager manager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        Integer result = MPUtility.getNetworkType(mContext, manager);
+        assertNull(result);
     }
 }
