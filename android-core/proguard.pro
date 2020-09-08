@@ -92,6 +92,7 @@
 -keep class com.mparticle.MParticle$ServiceProviders { *; }
 -keep class com.mparticle.MParticle$UserAttributes { *; }
 -keep class com.mparticle.MParticle$ResetListener { *; }
+-keep class com.mparticle.MParticle$OperatingSystem { *; }
 
 
 -keep class com.mparticle.Session { *; }
