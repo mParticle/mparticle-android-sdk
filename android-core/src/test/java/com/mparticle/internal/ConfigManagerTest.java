@@ -173,6 +173,14 @@ public class ConfigManagerTest {
     }
 
     @Test
+    public void testUploadIntervalNoOverridenDelayedInit() {
+        manager.setUploadInterval(123);
+        assertEquals(123 * 1000, manager.getUploadInterval());
+        manager.delayedStart();
+        assertEquals(123 * 1000, manager.getUploadInterval());
+    }
+
+    @Test
     public void testGetEnvironment() throws Exception {
         assertEquals(MParticle.Environment.Production, manager.getEnvironment());
     }

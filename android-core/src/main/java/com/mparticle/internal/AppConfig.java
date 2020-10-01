@@ -83,7 +83,7 @@ class AppConfig {
     }
 
     public void delayedInit() {
-        uploadInterval = getInteger(PREFKEY_PROD_UPLOAD_INTERVAL, ConfigManager.DEFAULT_UPLOAD_INTERVAL);
+        uploadInterval = getInteger(PREFKEY_PROD_UPLOAD_INTERVAL, uploadInterval);
         isPushEnabled = getBoolean(PREFKEY_PUSH_ENABLED, DEFAULT_ENABLE_PUSH);
         if (isPushEnabled){
             pushSenderId = getString(PREFKEY_PUSH_SENDER_ID, null);
