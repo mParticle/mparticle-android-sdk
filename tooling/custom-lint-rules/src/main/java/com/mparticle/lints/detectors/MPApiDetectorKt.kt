@@ -29,7 +29,7 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
         private val TARGET_METHOD_QUALIFIED_NAME = "com.mparticle.MParticle.start"
 
         // the deepest level of the AST we want to search to.
-        private val MAX_AST_DEPTH = 4
+        private val MAX_AST_DEPTH = 50
     }
 
     private var properMethodCall: LocationWrapper? = null

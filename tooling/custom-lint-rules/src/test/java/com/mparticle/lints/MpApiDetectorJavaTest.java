@@ -114,7 +114,7 @@ public class MpApiDetectorJavaTest extends LintDetectorTest {
      * @throws Exception
      */
     @Test
-    public void testStartToDeeplyNestedToBeFound() throws Exception {
+    public void testStartDeeplyNested() throws Exception {
         @Language("JAVA") String source =
                 "package com.mparticle.lints;\n" +
                         "import android.util.Log;\n" +
@@ -143,14 +143,11 @@ public class MpApiDetectorJavaTest extends LintDetectorTest {
                         "       MParticle.start();" +
                         "    }\n" +
                         "    public int random(int number) {\n" +
-                        "       return 5 + number;\n" +
+                        "       return 5 + number;" +
                         "    }\n" +
                         "    public void anotherMethod() {}\n" +
                         "}";
-        assertThat(lintProject(java(source), mParticleStub, mApplicationStub))
-                .contains(MpApiDetectorKt.Companion.getMESSAGE_START_CALLED_IN_WRONG_PLACE())
-                .contains(MpApiDetectorKt.Companion.getMESSAGE_NO_START_CALL_IN_ON_CREATE())
-                .contains(Constants.getErrorWarningMessageString(0,2));
+        assertEquals(NO_WARNINGS, lintProject(java(source), mParticleStub, mApplicationStub));
     }
 
     @Test
