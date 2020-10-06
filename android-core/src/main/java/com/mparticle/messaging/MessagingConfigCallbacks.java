@@ -1,6 +1,6 @@
 package com.mparticle.messaging;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 public interface MessagingConfigCallbacks {
     void onInstanceIdRegistered(@Nullable String instanceId);

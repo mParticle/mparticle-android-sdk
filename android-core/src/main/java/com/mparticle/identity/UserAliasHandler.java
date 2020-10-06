@@ -1,6 +1,6 @@
 package com.mparticle.identity;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * to the {@link BaseIdentityTask} that is being returned from this method ){@link BaseIdentityTask#addSuccessListener(TaskSuccessListener)}. Within the

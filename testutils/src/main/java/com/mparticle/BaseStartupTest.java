@@ -1,6 +1,5 @@
 package com.mparticle;
 
-import android.Manifest;
 import android.content.Context;
 import android.os.Environment;
 import android.os.Looper;
@@ -13,7 +12,6 @@ import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
@@ -25,7 +23,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.support.test.InstrumentationRegistry;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import static org.junit.Assert.fail;
 
@@ -51,7 +49,7 @@ public abstract class BaseStartupTest {
 
     @Before
     public void beforeBase() {
-        mContext = InstrumentationRegistry.getContext();
+        mContext = InstrumentationRegistry.getInstrumentation().getContext();
     }
 
     @Test

@@ -1,6 +1,6 @@
 package com.mparticle.identity;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.mparticle.MParticle;
 import com.mparticle.internal.Logger;

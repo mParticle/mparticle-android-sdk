@@ -1,12 +1,11 @@
 package com.mparticle.internal.messages;
 
 import android.location.Location;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.InternalSession;
 import com.mparticle.internal.MPUtility;
-import com.mparticle.internal.MessageManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;

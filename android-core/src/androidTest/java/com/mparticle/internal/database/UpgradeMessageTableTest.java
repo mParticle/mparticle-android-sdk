@@ -2,7 +2,7 @@ package com.mparticle.internal.database;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.provider.BaseColumns;
-import android.support.test.InstrumentationRegistry;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.mparticle.internal.database.services.SQLiteOpenHelperWrapper;
 import com.mparticle.internal.database.tables.BaseTableTest;
@@ -12,7 +12,7 @@ import com.mparticle.internal.database.tables.MessageTable;
 import org.junit.Test;
 
 public class UpgradeMessageTableTest extends BaseTableTest {
-    private MParticleDatabaseHelper helper = new MParticleDatabaseHelper(InstrumentationRegistry.getContext());
+    private MParticleDatabaseHelper helper = new MParticleDatabaseHelper(mContext);
 
     static final String CREATE_MESSAGES_DDL =
             "CREATE TABLE IF NOT EXISTS " + MessageTable.MessageTableColumns.TABLE_NAME + " (" + BaseColumns._ID +

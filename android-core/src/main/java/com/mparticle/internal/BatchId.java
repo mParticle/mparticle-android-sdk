@@ -1,8 +1,7 @@
 package com.mparticle.internal;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
-import com.google.android.gms.common.internal.Objects;
 import com.mparticle.internal.database.services.MessageService;
 
 import java.util.Arrays;

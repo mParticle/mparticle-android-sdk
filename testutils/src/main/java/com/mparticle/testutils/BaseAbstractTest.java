@@ -5,7 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.test.InstrumentationRegistry;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
@@ -56,7 +56,7 @@ public abstract class BaseAbstractTest {
     @Before
     public void beforeImpl() throws Exception {
         Logger.setLogHandler(null);
-        mContext = InstrumentationRegistry.getContext();
+        mContext = InstrumentationRegistry.getInstrumentation().getContext();
         mStartingMpid = new Random().nextLong();
         if (autoStartServer()) {
             mServer = MockServer.getNewInstance(mContext);

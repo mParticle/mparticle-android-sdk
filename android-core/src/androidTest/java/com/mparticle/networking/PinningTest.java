@@ -1,13 +1,11 @@
 package com.mparticle.networking;
 
-import android.support.test.InstrumentationRegistry;
+import androidx.test.platform.app.InstrumentationRegistry;
 import android.util.MutableBoolean;
 
 import com.mparticle.MParticle;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
-import com.mparticle.testutils.RandomUtils;
-import com.mparticle.testutils.TestingUtils;
 
 import org.json.JSONObject;
 import org.junit.Before;
@@ -31,7 +29,7 @@ public class PinningTest extends BaseCleanStartedEachTest {
 
     @BeforeClass
     public static void beforeClass() {
-        MParticle.reset(InstrumentationRegistry.getContext());
+        MParticle.reset(InstrumentationRegistry.getInstrumentation().getContext());
     }
 
     @Before

@@ -2,7 +2,7 @@ package com.mparticle;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import com.mparticle.test.R;
 
 public class WebViewActivity extends Activity {

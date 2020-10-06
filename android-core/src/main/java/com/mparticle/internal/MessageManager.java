@@ -1,6 +1,5 @@
 package com.mparticle.internal;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -17,7 +16,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.Process;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.telephony.TelephonyManager;
 
 import com.mparticle.InstallReferrerHelper;
@@ -27,15 +26,12 @@ import com.mparticle.MParticleOptions;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.identity.AliasRequest;
-import com.mparticle.identity.IdentityApiRequest;
-import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.messages.BaseMPMessage;
 import com.mparticle.internal.messages.BaseMPMessageBuilder;
 import com.mparticle.internal.messages.MPAliasMessage;
-import com.mparticle.internal.messages.MPCommerceMessage;
 import com.mparticle.messaging.ProviderCloudMessage;
 
 import org.json.JSONArray;

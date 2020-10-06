@@ -1,7 +1,7 @@
 package com.mparticle.startup;
 
 import android.Manifest;
-import android.support.test.rule.GrantPermissionRule;
+import androidx.test.rule.GrantPermissionRule;
 
 import com.mparticle.AttributionError;
 import com.mparticle.AttributionListener;

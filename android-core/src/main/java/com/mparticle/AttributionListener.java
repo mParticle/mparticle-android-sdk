@@ -1,6 +1,6 @@
 package com.mparticle;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * Implement this interface and react to deep links.

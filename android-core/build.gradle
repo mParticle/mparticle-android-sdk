@@ -45,7 +45,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 9
+        minSdkVersion 14
         targetSdkVersion 30
         versionName project.version.toString().replace('-SNAPSHOT', '')
         versionCode Integer.parseInt(new Date().format('yyyyMMdd'))
@@ -57,7 +57,7 @@ android {
         buildConfigField 'Boolean', 'MP_DEBUG', 'false'
         buildConfigField 'String', 'SCHEME', '\"https\"'
 
-        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         if (useOrchestrator()) {
             testInstrumentationRunnerArgument 'annotation', 'com.mparticle.OrchestratorOnly'
         } else {
@@ -115,7 +115,7 @@ task coreSdkJavadocs(type: Javadoc) {
 dependencies {
     compileOnly 'com.google.android.gms:play-services-ads:10.2.1'
     compileOnly 'com.google.firebase:firebase-messaging:[9.4.0, )'
-    compileOnly 'com.android.support:support-v4:27.1.1'
+    compileOnly 'androidx.legacy:legacy-support-v4:1.0.0'
     compileOnly 'com.android.installreferrer:installreferrer:[1.0, )'
     compileOnly 'com.google.android.instantapps:instantapps:[1.0, )'
 
@@ -127,7 +127,7 @@ dependencies {
     testImplementation 'org.powermock:powermock-module-junit4:2.0.2'
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.2'
     testImplementation 'org.powermock:powermock-core:2.0.2'
-    testImplementation 'com.android.support:support-v4:27.1.1'
+    testImplementation 'androidx.legacy:legacy-support-v4:1.0.0'
     testImplementation project(':testutils')
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"

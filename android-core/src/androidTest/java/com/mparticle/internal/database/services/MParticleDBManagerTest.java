@@ -2,17 +2,15 @@ package com.mparticle.internal.database.services;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.mparticle.UserAttributeListener;
-import com.mparticle.testutils.AndroidUtils;
 import com.mparticle.testutils.AndroidUtils.Mutable;
 import com.mparticle.testutils.BaseCleanInstallEachTest;
 import com.mparticle.testutils.MPLatch;
 
 import junit.framework.Assert;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;

@@ -3,14 +3,13 @@ package com.mparticle.internal.listeners;
 import android.content.ContentValues;
 import android.content.Context;
 import android.os.Message;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.mparticle.SdkListener;
 import com.mparticle.identity.AliasResponse;
 import com.mparticle.internal.InternalSession;
 import com.mparticle.internal.KitFrameworkWrapper;
-import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 
 import org.json.JSONException;
@@ -19,7 +18,6 @@ import org.json.JSONObject;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 

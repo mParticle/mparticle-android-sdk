@@ -5,13 +5,12 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ResolveInfo;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
-import android.support.annotation.RequiresApi;
-import android.support.v4.content.LocalBroadcastManager;
+import androidx.annotation.RequiresApi;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
@@ -20,8 +19,6 @@ import com.mparticle.internal.KitsLoadedListener;
 import com.mparticle.internal.Logger;
 import com.mparticle.messaging.MPMessagingAPI;
 import com.mparticle.messaging.ProviderCloudMessage;
-
-import java.util.List;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
 

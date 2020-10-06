@@ -10,7 +10,7 @@ android {
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
         if (legacyTest()) {
             testInstrumentationRunnerArgument 'annotation', 'com.mparticle.LegacyOnly'
@@ -37,7 +37,7 @@ android {
         }
     }
     testOptions {
-        execution 'ANDROID_TEST_ORCHESTRATOR'
+        execution 'ANDROIDX_TEST_ORCHESTRATOR'
     }
 }
 
@@ -48,9 +48,9 @@ dependencies {
     compileOnly 'org.mockito:mockito-android:3.0.0'
 
     api 'com.android.installreferrer:installreferrer:1.0'
-    api 'com.android.support:support-annotations:27.1.1'
-    api 'com.android.support.test:runner:1.0.2'
-    api 'com.android.support.test:rules:1.0.2'
+    api 'androidx.annotation:annotation:1.0.0'
+    api 'androidx.test.ext:junit:1.1.1'
+    api 'androidx.test:rules:1.1.1'
     api 'org.apache.httpcomponents:httpclient-android:4.3.5.1'
     api 'org.slf4j:slf4j-api:1.7.25'
 
@@ -62,11 +62,11 @@ dependencies {
         androidTestImplementation project(':android-core')
 
     }
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test:rules:1.0.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test:rules:1.1.1'
     androidTestImplementation 'com.google.firebase:firebase-messaging:20.0.0'
 
-    androidTestUtil 'com.android.support.test:orchestrator:1.0.2'
+    androidTestUtil 'androidx.test:orchestrator:1.1.1'
 }
 
 boolean legacyTest() {

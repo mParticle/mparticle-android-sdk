@@ -1,7 +1,7 @@
 package com.mparticle.internal.database.tables;
 
 import android.database.sqlite.SQLiteDatabase;
-import android.support.test.InstrumentationRegistry;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.mparticle.testutils.BaseCleanInstallEachTest;
 import com.mparticle.internal.database.BaseDatabase;
@@ -23,12 +23,12 @@ public class BaseTableTest extends BaseCleanInstallEachTest {
     }
 
     protected void runTest(SQLiteOpenHelperWrapper helper, int oldVersion) throws InterruptedException {
-        InstrumentationRegistry.getTargetContext().deleteDatabase(DB_NAME);
+        InstrumentationRegistry.getInstrumentation().getTargetContext().deleteDatabase(DB_NAME);
         SQLiteDatabase baseDatabase = new BaseDatabase(helper, DB_NAME, timer, oldVersion).getWritableDatabase();
         timer.await(5, TimeUnit.SECONDS);
         baseDatabase.setVersion(MParticleDatabaseHelper.DB_VERSION);
         timer.await(5, TimeUnit.SECONDS);
-        InstrumentationRegistry.getTargetContext().deleteDatabase(DB_NAME);
+        InstrumentationRegistry.getInstrumentation().getTargetContext().deleteDatabase(DB_NAME);
     }
 
     @Before
@@ -37,6 +37,6 @@ public class BaseTableTest extends BaseCleanInstallEachTest {
     }
 
     protected void deleteTestingDatabase() {
-        InstrumentationRegistry.getTargetContext().deleteDatabase(DB_NAME);
+        InstrumentationRegistry.getInstrumentation().getTargetContext().deleteDatabase(DB_NAME);
     }
 }

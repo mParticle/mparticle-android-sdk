@@ -19,9 +19,9 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
 import android.provider.Settings;
-import android.support.annotation.Nullable;
-import android.support.annotation.WorkerThread;
-import android.telecom.TelecomManager;
+import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
+
 import android.telephony.TelephonyManager;
 import android.view.Display;
 import android.view.WindowManager;

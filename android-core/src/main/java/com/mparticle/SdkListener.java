@@ -1,7 +1,7 @@
 package com.mparticle;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.mparticle.identity.AliasRequest;
 import com.mparticle.identity.AliasResponse;

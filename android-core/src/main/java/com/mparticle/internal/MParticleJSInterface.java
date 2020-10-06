@@ -4,7 +4,7 @@ package com.mparticle.internal;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;

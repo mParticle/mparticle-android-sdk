@@ -5,7 +5,7 @@ import android.app.Application
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Looper
-import android.support.test.InstrumentationRegistry
+import androidx.test.platform.app.InstrumentationRegistry
 import com.mparticle.OrchestratorOnly
 import com.mparticle.testutils.BaseAbstractTest
 import junit.framework.Assert.assertNotNull
@@ -24,7 +24,7 @@ class ApplicationContextWrapperITest {
     @OrchestratorOnly
     @Test
     fun testRegisterListenerBackgroundThread() {
-        val applicationContextWrapper = ApplicationContextWrapper(InstrumentationRegistry.getContext().applicationContext as Application)
+        val applicationContextWrapper = ApplicationContextWrapper(InstrumentationRegistry.getInstrumentation().getContext().applicationContext as Application)
         var exception: Exception? = null
         assertNull(Looper.myLooper())
         try {

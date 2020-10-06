@@ -4,8 +4,8 @@ import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.rule.ActivityTestRule;
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.rule.ActivityTestRule;
 import android.util.MutableBoolean;
 import android.webkit.CookieManager;
 import android.webkit.JavascriptInterface;
@@ -163,7 +163,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
     public static void beforeClass() {
         try {
             if (BuildConfig.JS_TEST_SDK) {
-                InputStream inputStream = InstrumentationRegistry.getContext().getResources().openRawResource(R.raw.mparticle_js_sdk);
+                InputStream inputStream = InstrumentationRegistry.getInstrumentation().getContext().getResources().openRawResource(R.raw.mparticle_js_sdk);
                 //add in all the basic configuration stuff the server would send with a production sdk fetch from the url
                 jsSdk = new StringBuilder()
                         .append("window.mParticle = window.mParticle || {};;\n" +

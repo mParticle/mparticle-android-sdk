@@ -3,8 +3,8 @@ package com.mparticle.identity;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.mparticle.MParticle;
 import com.mparticle.MParticleTask;
@@ -16,7 +16,6 @@ import com.mparticle.testutils.AndroidUtils.Mutable;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.testutils.MPLatch;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;

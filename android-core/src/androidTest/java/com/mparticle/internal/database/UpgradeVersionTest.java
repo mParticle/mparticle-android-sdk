@@ -2,29 +2,22 @@ package com.mparticle.internal.database;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
-import android.support.test.InstrumentationRegistry;
+import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.mparticle.MParticle;
 import com.mparticle.internal.InternalSession;
-import com.mparticle.internal.MessageBatch;
-import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.database.services.BreadcrumbService;
-import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.database.services.MessageService;
 import com.mparticle.internal.database.services.ReportingService;
-import com.mparticle.internal.database.services.ReportingServiceTest;
 import com.mparticle.internal.database.services.SQLiteOpenHelperWrapper;
 import com.mparticle.internal.database.services.SessionService;
 import com.mparticle.internal.database.services.UploadService;
 import com.mparticle.internal.database.services.UserAttributesService;
 import com.mparticle.internal.database.tables.BaseTableTest;
 import com.mparticle.internal.database.tables.MParticleDatabaseHelper;
-import com.mparticle.internal.database.tables.UploadTable;
 import com.mparticle.internal.messages.BaseMPMessage;
 import com.mparticle.testutils.MPLatch;
 import com.mparticle.testutils.TestingUtils;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -35,7 +28,7 @@ import java.util.concurrent.CountDownLatch;
 import static org.junit.Assert.assertEquals;
 
 public class UpgradeVersionTest extends BaseTableTest {
-    private MParticleDatabaseHelper helper = new MParticleDatabaseHelper(InstrumentationRegistry.getContext());
+    private MParticleDatabaseHelper helper = new MParticleDatabaseHelper(mContext);
 
     protected interface FcmMessageTableColumns {
         String CONTENT_ID = "content_id";

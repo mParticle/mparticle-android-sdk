@@ -3,13 +3,12 @@ package com.mparticle.internal.listeners;
 import android.content.ContentValues;
 import android.os.Build;
 import android.os.Message;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import com.mparticle.SdkListener;
 import com.mparticle.identity.AliasResponse;
-import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.InternalSession;
 
 import org.json.JSONObject;

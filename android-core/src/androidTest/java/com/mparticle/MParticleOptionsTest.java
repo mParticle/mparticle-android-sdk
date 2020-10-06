@@ -3,13 +3,12 @@ package com.mparticle;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Looper;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.rule.GrantPermissionRule;
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.rule.GrantPermissionRule;
 
 import com.mparticle.internal.AccessUtils;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
-import com.mparticle.internal.DeviceAttributes;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.networking.Matcher;
@@ -43,7 +42,7 @@ public class MParticleOptionsTest extends BaseAbstractTest {
         if (Looper.myLooper() == null) {
             Looper.prepare();
         }
-        mContext = InstrumentationRegistry.getContext();
+        mContext = InstrumentationRegistry.getInstrumentation().getContext();
         mProductionContext = new AndroidUtils().getProductionContext(mContext);
         MParticle.setInstance(null);
         assertNull(MParticle.getInstance());

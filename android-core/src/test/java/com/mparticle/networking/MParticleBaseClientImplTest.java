@@ -1,7 +1,6 @@
 package com.mparticle.networking;
 
-import android.net.Network;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.mock.MockSharedPreferences;
@@ -11,10 +10,8 @@ import org.mockito.Mockito;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.util.zip.GZIPOutputStream;
 
-import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
 import static junit.framework.Assert.assertFalse;

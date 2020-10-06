@@ -1,24 +1,17 @@
 package com.mparticle.internal.listeners;
 
 import android.content.pm.ApplicationInfo;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import com.mparticle.SdkListener;
-import com.mparticle.identity.AliasResponse;
-import com.mparticle.internal.InternalSession;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.mock.MockContext;
 
-import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

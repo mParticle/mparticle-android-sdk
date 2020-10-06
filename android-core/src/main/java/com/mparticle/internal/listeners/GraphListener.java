@@ -1,10 +1,8 @@
 package com.mparticle.internal.listeners;
 
 import android.os.Message;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
-import com.mparticle.SdkListener;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 interface GraphListener {
     void onCompositeObjects(@Nullable Object child, @Nullable Object parent);

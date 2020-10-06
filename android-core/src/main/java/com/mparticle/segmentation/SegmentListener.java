@@ -1,6 +1,6 @@
 package com.mparticle.segmentation;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 /**
  * Use this callback interface to retrieve the current user's segment membership.

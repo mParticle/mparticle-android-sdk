@@ -1,11 +1,10 @@
 package com.mparticle.internal.database.services;
 
 import android.database.Cursor;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.mparticle.internal.BatchId;
 import com.mparticle.internal.MessageBatch;
-import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.database.tables.SessionTable;
 import com.mparticle.internal.messages.BaseMPMessage;
 

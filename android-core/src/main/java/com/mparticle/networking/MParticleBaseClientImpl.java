@@ -3,12 +3,11 @@ package com.mparticle.networking;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.mparticle.BuildConfig;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
-import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 
 import java.io.IOException;

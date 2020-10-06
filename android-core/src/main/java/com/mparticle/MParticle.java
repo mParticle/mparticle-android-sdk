@@ -12,14 +12,13 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import android.util.Log;
 import android.webkit.WebView;
 
 import com.mparticle.commerce.CommerceEvent;
-import com.mparticle.commerce.Product;
 import com.mparticle.identity.IdentityApi;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.IdentityApiResult;

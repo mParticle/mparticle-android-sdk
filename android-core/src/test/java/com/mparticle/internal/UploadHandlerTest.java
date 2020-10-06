@@ -5,8 +5,7 @@ package com.mparticle.internal;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Message;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
 
 import com.mparticle.MParticle;
 import com.mparticle.MockMParticle;
@@ -32,7 +31,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;

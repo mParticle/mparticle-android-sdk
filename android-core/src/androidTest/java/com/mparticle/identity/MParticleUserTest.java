@@ -1,15 +1,13 @@
 package com.mparticle.identity;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.mparticle.MParticle;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.testutils.MPLatch;
 
 import org.junit.Test;
-
-import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

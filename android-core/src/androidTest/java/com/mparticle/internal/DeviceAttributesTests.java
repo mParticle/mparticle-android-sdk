@@ -1,7 +1,7 @@
 package com.mparticle.internal;
 
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.mparticle.testutils.BaseCleanInstallEachTest;
 import com.mparticle.MParticle;
@@ -17,7 +17,7 @@ public class DeviceAttributesTests extends BaseCleanInstallEachTest {
 
     @Test
     public void testAndroidIDCollection() throws Exception {
-        Context context = InstrumentationRegistry.getContext();
+        Context context = InstrumentationRegistry.getInstrumentation().getContext();
         String androidId = MPUtility.getAndroidID(context);
         JSONObject attributes = new JSONObject();
         DeviceAttributes.addAndroidId(attributes, context);

@@ -2,8 +2,6 @@ package com.mparticle;
 
 import android.Manifest;
 
-import com.mparticle.BaseStartupTest;
-import com.mparticle.MParticle;
 import com.mparticle.internal.Logger;
 
 import org.junit.After;
@@ -12,7 +10,7 @@ import org.junit.Before;
 import org.junit.Rule;
 
 import android.content.Context;
-import android.support.test.rule.GrantPermissionRule;
+import androidx.test.rule.GrantPermissionRule;
 
 
 import java.lang.reflect.Method;

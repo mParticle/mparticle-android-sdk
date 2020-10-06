@@ -1,6 +1,6 @@
 package com.mparticle.kits;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;

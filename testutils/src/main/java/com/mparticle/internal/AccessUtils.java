@@ -2,8 +2,8 @@ package com.mparticle.internal;
 
 import android.content.Context;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.test.InstrumentationRegistry;
+import androidx.annotation.NonNull;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.mparticle.MParticle;
 import com.mparticle.identity.IdentityStateListener;
@@ -45,7 +45,7 @@ public class AccessUtils {
     }
 
     public static void deleteDatabase() {
-        InstrumentationRegistry.getTargetContext().deleteDatabase(MParticleDatabaseHelper.DB_NAME);
+        InstrumentationRegistry.getInstrumentation().getTargetContext().deleteDatabase(MParticleDatabaseHelper.DB_NAME);
     }
 
     public static MessageHandler getMessageHandler() {

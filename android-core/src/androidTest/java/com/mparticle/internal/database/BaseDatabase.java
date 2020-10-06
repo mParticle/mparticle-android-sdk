@@ -2,8 +2,7 @@ package com.mparticle.internal.database;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.support.test.InstrumentationRegistry;
-import android.util.Log;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.mparticle.internal.database.services.SQLiteOpenHelperWrapper;
 
@@ -20,7 +19,7 @@ public class BaseDatabase extends SQLiteOpenHelper {
     }
 
     public BaseDatabase(SQLiteOpenHelperWrapper helper, String databaseName, CountDownLatch timer, int version) {
-        super(InstrumentationRegistry.getContext(), databaseName, null, version);
+        super(InstrumentationRegistry.getInstrumentation().getContext(), databaseName, null, version);
         this.helper = helper;
         this.timer = timer;
     }

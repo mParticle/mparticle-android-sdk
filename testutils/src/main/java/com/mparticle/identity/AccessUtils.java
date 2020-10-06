@@ -1,7 +1,7 @@
 package com.mparticle.identity;
 
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
@@ -46,7 +46,7 @@ public class AccessUtils {
             identityClient = MParticle.getInstance().Identity().getApiClient();
         }
         if (identityClient == null) {
-            Context context = InstrumentationRegistry.getContext();
+            Context context = InstrumentationRegistry.getInstrumentation().getContext();
             ConfigManager configManager = null;
             if (MParticle.getInstance() != null) {
                 MParticle.getInstance().Internal().getConfigManager();
