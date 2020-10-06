@@ -60,7 +60,8 @@ jar {
 }
 
 task zipSources(type: Jar) {
-    from (fileTree(dir: "$project.rootDir/android-core/build/intermediates/javac/release/compileReleaseJavaWithJavac/classes")) {
+    def buildType = rootProject.project('android-core').android.buildTypes[0].name
+    from (fileTree(dir: "$project.rootDir/android-core/build/intermediates/javac/${buildType}/compile${buildType.capitalize()}JavaWithJavac/classes")) {
         destinationDir new File("$project.projectDir/libs")
         archiveName "mparticle.jar"
     }
@@ -76,5 +77,22 @@ task proguardCore(type: proguard.gradle.ProGuardTask) {
 afterEvaluate {
     compileKotlin.dependsOn proguardCore
     proguardCore.dependsOn zipSources
-    zipSources.dependsOn ':android-core:transformClassesAndResourcesWithProguardForRelease'
+    rootProject.project('android-core').android.buildTypes.all {
+        theBuildType ->
+        def buildType = theBuildType.name.capitalize()
+        if (rootProject.project('android-core').tasks.findByName("compile${buildType}JavaWithJavac")) {
+            zipSources.dependsOn ":android-core:compile${buildType}JavaWithJavac"
+        }
+    }
+}
+
+beforeEvaluate {
+    File baseMParticle = file('libs/mparticle.jar')
+    File minifiedMParticle = file('libs/mparticle-min.jar')
+    if (baseMParticle.exists()) {
+        baseMParticle.delete()
+    }
+    if (minifiedMParticle.exists()) {
+        minifiedMParticle.delete()
+    }
 }
