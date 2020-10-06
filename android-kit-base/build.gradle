@@ -6,14 +6,14 @@ apply plugin: 'com.android.library'
 apply from: '../scripts/maven.gradle'
 
 android {
-    compileSdkVersion 28
-    buildToolsVersion '28.0.3'
+    compileSdkVersion 30
+    buildToolsVersion '30.0.2'
 
     testBuildType 'debug'
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 28
+        targetSdkVersion 30
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
@@ -51,14 +51,14 @@ task kitSdkJavadocs(type: Javadoc) {
 dependencies {
     implementation project(':android-core')
 
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13'
     testImplementation  files('libs/java-json.jar')
-    testImplementation 'org.powermock:powermock-module-junit4:2.0.2'
+    testImplementation 'org.powermock:powermock-module-junit4:2.0.7'
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.2'
-    testImplementation 'org.powermock:powermock-core:2.0.2'
+    testImplementation 'org.powermock:powermock-core:2.0.7'
     testImplementation 'androidx.legacy:legacy-support-v4:1.0.0'
     testImplementation project(':testutils')
 
     androidTestImplementation project(':testutils')
-    implementation 'androidx.annotation:annotation:1.0.0'
+    implementation 'androidx.annotation:annotation:1.1.0'
 }

@@ -8,11 +8,11 @@ buildscript {
     repositories {
         mavenCentral()
         jcenter()
-
+        google()
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'net.sf.proguard:proguard-gradle:6.2.2'
+        classpath 'com.guardsquare:proguard-gradle:7.0.0'
     }
 }
 
@@ -59,9 +59,17 @@ jar {
     }
 }
 
+def targetBuildType = "release"
+rootProject.project('android-core').android.buildTypes.all {
+    def theBuildType = it.name
+    if (rootProject.project('android-core').tasks.findByName("compile${theBuildType.capitalize()}JavaWithJavac")) {
+        targetBuildType = theBuildType
+    }
+}
+
 task zipSources(type: Jar) {
-    def buildType = rootProject.project('android-core').android.buildTypes[0].name
-    from (fileTree(dir: "$project.rootDir/android-core/build/intermediates/javac/${buildType}/compile${buildType.capitalize()}JavaWithJavac/classes")) {
+    def fileName = "$project.rootDir/android-core/build/intermediates/javac/${targetBuildType}/classes"
+    from(fileTree(dir: fileName)) {
         destinationDir new File("$project.projectDir/libs")
         archiveName "mparticle.jar"
     }
@@ -75,14 +83,10 @@ task proguardCore(type: proguard.gradle.ProGuardTask) {
 }
 
 afterEvaluate {
-    compileKotlin.dependsOn proguardCore
-    proguardCore.dependsOn zipSources
-    rootProject.project('android-core').android.buildTypes.all {
-        theBuildType ->
-        def buildType = theBuildType.name.capitalize()
-        if (rootProject.project('android-core').tasks.findByName("compile${buildType}JavaWithJavac")) {
-            zipSources.dependsOn ":android-core:compile${buildType}JavaWithJavac"
-        }
+    if (targetBuildType != null) {
+        compileKotlin.dependsOn proguardCore
+        proguardCore.dependsOn zipSources
+        zipSources.dependsOn ":android-core:compile${targetBuildType.capitalize()}JavaWithJavac"
     }
 }
 

@@ -30,7 +30,7 @@ class KitPlugin implements Plugin<Project> {
         androidLib.buildToolsVersion('30.0.2')
         androidLib.defaultConfig.versionCode = Integer.parseInt(new Date().format('yyyyMMdd'))
         androidLib.defaultConfig.minSdkVersion 14
-        androidLib.defaultConfig.targetSdkVersion 28
+        androidLib.defaultConfig.targetSdkVersion 30
         androidLib.buildTypes.release.minifyEnabled false
         androidLib.buildTypes.release.consumerProguardFiles 'consumer-proguard.pro'
 

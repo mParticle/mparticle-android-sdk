@@ -115,21 +115,22 @@ task coreSdkJavadocs(type: Javadoc) {
 dependencies {
     compileOnly 'com.google.android.gms:play-services-ads:[10.2.1, )'
     compileOnly 'com.google.firebase:firebase-messaging:[10.2.1, )'
+
     compileOnly 'com.android.installreferrer:installreferrer:[1.0, )'
     compileOnly 'com.google.android.instantapps:instantapps:[1.0, )'
-    compileOnly 'androidx.annotation:annotation:1.1.0'
-    compileOnly 'androidx.core:core:1.3.2'
+    compileOnly 'androidx.annotation:annotation:[1.0.0,)'
+    compileOnly 'androidx.core:core:[1.3.2, )'
 
-    implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
+    implementation 'androidx.localbroadcastmanager:localbroadcastmanager:[1.0.0, )'
 
     //the junit tests seem to explicitly need this dependency while
     //working in Android studio, but from the command line it's not necessary
     testImplementation project(':android-core')
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13'
     testImplementation files('libs/java-json.jar')
-    testImplementation 'org.powermock:powermock-module-junit4:2.0.2'
+    testImplementation 'org.powermock:powermock-module-junit4:2.0.7'
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.2'
-    testImplementation 'org.powermock:powermock-core:2.0.2'
+    testImplementation 'org.powermock:powermock-core:2.0.7'
     testImplementation project(':testutils')
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
