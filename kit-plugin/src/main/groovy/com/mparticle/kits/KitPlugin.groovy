@@ -26,10 +26,10 @@ class KitPlugin implements Plugin<Project> {
         target.dependencies.add('deployerJars', 'org.kuali.maven.wagons:maven-s3-wagon:1.2.1')
         target.extensions.create("mparticle", MParticlePluginExtension)
         LibraryExtension androidLib = target.android
-        androidLib.compileSdkVersion(28)
-        androidLib.buildToolsVersion('28.0.3')
+        androidLib.compileSdkVersion(30)
+        androidLib.buildToolsVersion('30.0.2')
         androidLib.defaultConfig.versionCode = Integer.parseInt(new Date().format('yyyyMMdd'))
-        androidLib.defaultConfig.minSdkVersion 9
+        androidLib.defaultConfig.minSdkVersion 14
         androidLib.defaultConfig.targetSdkVersion 28
         androidLib.buildTypes.release.minifyEnabled false
         androidLib.buildTypes.release.consumerProguardFiles 'consumer-proguard.pro'
