@@ -1520,7 +1520,6 @@ public class MParticle {
         int SKYHOOK = 121;
         int SINGULAR = 119;
         int ADOBE = 124;
-        int INSTABOT = 123;
         int APPSEE = 126;
         int TAPLYTICS = 129;
         int OPTIMIZELY = 54;
