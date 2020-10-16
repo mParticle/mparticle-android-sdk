@@ -62,7 +62,7 @@ public class BaseEvent {
         return mCustomAttributes;
     }
 
-    protected void setCustomAttributes(@Nullable Map<String, String> customAttributes) {
+    public void setCustomAttributes(@Nullable Map<String, String> customAttributes) {
         if (customAttributes != null && MPUtility.containsNullKey(customAttributes)) {
             Logger.warning(String.format("disregarding \"Event.customFlag\" value of \"%s\". Key was found to be null", customAttributes.get(null)));
             customAttributes.remove(null);

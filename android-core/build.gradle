@@ -96,7 +96,6 @@ android {
         androidTest.java.srcDirs += 'src/androidTest/kotlin'
     }
     dexOptions {
-        incremental true
         javaMaxHeapSize "2048M"
     }
 }

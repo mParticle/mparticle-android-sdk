@@ -178,7 +178,7 @@ public class MPEvent extends BaseEvent {
         return screenEvent;
     }
 
-    MPEvent setScreenEvent(boolean screenEvent) {
+    protected MPEvent setScreenEvent(boolean screenEvent) {
         this.screenEvent = screenEvent;
         setType(screenEvent ? Type.SCREEN_VIEW : Type.EVENT);
         return this;

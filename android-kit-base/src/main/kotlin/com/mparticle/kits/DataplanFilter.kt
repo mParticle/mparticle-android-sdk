@@ -1,16 +1,23 @@
 package com.mparticle.kits;
 
+import com.mparticle.BaseEvent
+import com.mparticle.MPEvent
 import com.mparticle.MParticleOptions;
+import com.mparticle.commerce.CommerceEvent
 import com.mparticle.internal.Logger
 import org.json.JSONArray
 
 import org.json.JSONObject;
 
-internal class DataplanFilter protected constructor(val dataPoints: Map<String, HashSet<String>>,
-                     private val blockEvents: Boolean,
-                     private val blockEventAttributes: Boolean,
-                     private val blockUserAttributes: Boolean,
-                     private val blockUserIdentities: Boolean) {
+internal interface DataplanFilter {
+    fun <T: BaseEvent> transformEventForEvent(event: T): T?
+}
+
+internal class DataplanFilterImpl constructor(val dataPoints: Map<String, HashSet<String>?>,
+                                              private val blockEvents: Boolean,
+                                              private val blockEventAttributes: Boolean,
+                                              private val blockUserAttributes: Boolean,
+                                              private val blockUserIdentities: Boolean): DataplanFilter {
 
     constructor(dataplanOptions: MParticleOptions.DataplanOptions):
             this(extractDataPoints(dataplanOptions.dataplan),
@@ -19,7 +26,55 @@ internal class DataplanFilter protected constructor(val dataPoints: Map<String, 
                     dataplanOptions.isBlockUserAttributes,
                     dataplanOptions.isBlockUserIdentities)
 
-    private companion object{
+    /**
+     * filters out events and their attributes if
+     * 1) they are not defined within the dataplan
+     * 2) the corresponding flag for the filtering area is true
+     *
+     * note: this will NOT return a copy of the event, it will return either the original event filtered or null
+     */
+    override fun <T: BaseEvent> transformEventForEvent(event: T): T? {
+        if (blockEvents || blockEventAttributes) {
+            val name = when {
+                (event is MPEvent) ->
+                    when {
+                        event.isScreenEvent -> DataplanPoint(SCREEN_EVENT_KEY, event.eventName)
+                        else -> DataplanPoint(CUSTOM_EVENT_KEY, event.eventName, event.eventType.ordinal.toString())
+                    }
+                event is CommerceEvent ->
+                    when {
+                        !event.productAction.isNullOrBlank() -> DataplanPoint(PRODUCT_ACTION_KEY, event.productAction)
+                        !event.promotionAction.isNullOrBlank() -> DataplanPoint(PROMOTION_ACTION_KEY, event.promotionAction)
+                        !event.impressions.isNullOrEmpty() -> DataplanPoint(PRODUCT_IMPRESSION_KEY)
+                        else -> null
+                    }
+                else -> null
+            }
+            //shouldn't happen but we have to handle it
+            name ?: return event
+            //if there is no valid datapoint then it is an unplanned event
+            if (blockEvents && !dataPoints.containsKey(name.toString())) {
+                Logger.verbose("Blocking unplanned event: ${name}")
+                return null
+            }
+            val dataPoint = dataPoints[name.toString()]
+            if (blockEventAttributes) {
+                event.customAttributes = event.customAttributes?.filterKeys {
+                    //null dataPoint means there are no constraints for custom attributes
+                    if (dataPoint == null || dataPoint.contains(it)) {
+                        true
+                    } else {
+                        Logger.verbose("Blocking unplanned attribute: $it")
+                        false
+                    }
+                }
+            }
+            return event
+        }
+        return event
+    }
+
+    internal companion object{
         const val SCREEN_EVENT_KEY = "screen_view"
         const val CUSTOM_EVENT_KEY = "custom_event"
         const val PRODUCT_ACTION_KEY = "product_action"
@@ -27,6 +82,10 @@ internal class DataplanFilter protected constructor(val dataPoints: Map<String, 
         const val PRODUCT_IMPRESSION_KEY = "product_impression"
         const val USER_IDENTITIES_KEY = "user_identities"
         const val USER_ATTRIBUTES_KEY = "user_attributes"
+
+
+        @JvmField
+        val EMPTY: DataplanFilter = EmptyDataplanFilter()
 
         /**
          * parse dataplan into memory. data structure consists of a key composed of the
@@ -163,4 +222,8 @@ internal class DataplanFilter protected constructor(val dataPoints: Map<String, 
     internal class DataplanPoint(val type: String, val name: String? = null, val eventType: String? = null) {
         override fun toString() = "$type${if (name != null) ".$name" else ""}${if(eventType != null) ".$eventType" else ""}"
     }
+}
+
+class EmptyDataplanFilter: DataplanFilter {
+    override fun <T : BaseEvent> transformEventForEvent(event: T) = event
 }

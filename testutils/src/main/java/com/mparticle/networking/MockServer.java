@@ -577,6 +577,8 @@ public class MockServer {
 
     public class Endpoints {
 
+        private Endpoints() {}
+
         public MPUrl getIdentifyUrl() {
             return getUrl(IDENTIFY);
         }

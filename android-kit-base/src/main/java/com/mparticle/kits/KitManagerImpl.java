@@ -154,11 +154,16 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     }
 
     @Override
-    public void updateDataplan(MParticleOptions.DataplanOptions dataplanOptions) {
-        try {
-            mDataplanFilter = new DataplanFilter(dataplanOptions);
-        } catch (Exception ex) {
-            Logger.warning(ex, "Failed to parse DataplanOptions, Dataplan filtering for Kits will not be applied");
+    public void updateDataplan(@Nullable MParticleOptions.DataplanOptions dataplanOptions) {
+        if (dataplanOptions != null) {
+            try {
+                mDataplanFilter = new DataplanFilterImpl(dataplanOptions);
+            } catch (Exception ex) {
+                Logger.warning(ex, "Failed to parse DataplanOptions, Dataplan filtering for Kits will not be applied");
+                mDataplanFilter = DataplanFilterImpl.EMPTY;
+            }
+        } else {
+            mDataplanFilter = DataplanFilterImpl.EMPTY;
         }
     }
 
@@ -384,6 +389,12 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
     @Override
     public void logEvent(BaseEvent event) {
+        if (mDataplanFilter != null) {
+            event = mDataplanFilter.transformEventForEvent(event);
+            if (event == null) {
+                return;
+            }
+        }
         for (KitIntegration provider: providers.values()) {
             try {
                 List<ReportingMessage> messages = provider.logBaseEvent(event);

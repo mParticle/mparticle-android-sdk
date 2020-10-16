@@ -33,6 +33,7 @@ class KitPlugin implements Plugin<Project> {
         androidLib.defaultConfig.targetSdkVersion 30
         androidLib.buildTypes.release.minifyEnabled false
         androidLib.buildTypes.release.consumerProguardFiles 'consumer-proguard.pro'
+        androidLib.dexOptions.javaMaxHeapSize '2g'
 
         //formerly in maven.gradle
         target.apply(plugin: 'maven')

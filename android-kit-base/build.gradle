@@ -36,8 +36,12 @@ android {
         }
     }
     dexOptions {
-        incremental true
         javaMaxHeapSize "2048M"
+    }
+    sourceSets {
+        androidTest.java.srcDirs += 'src/androidTest/kotlin'
+        main.java.srcDirs += 'src/main/kotlin'
+        test.java.srcDirs += 'src/test/kotlin'
     }
 }
 

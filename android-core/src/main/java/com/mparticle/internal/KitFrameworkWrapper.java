@@ -7,6 +7,8 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
+
 import com.mparticle.AttributionResult;
 import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
@@ -452,7 +454,7 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     @Override
-    public void updateDataplan(MParticleOptions.DataplanOptions dataplanOptions) {
+    public void updateDataplan(@Nullable MParticleOptions.DataplanOptions dataplanOptions) {
         if (mKitManager != null) {
             mKitManager.updateDataplan(dataplanOptions);
         }

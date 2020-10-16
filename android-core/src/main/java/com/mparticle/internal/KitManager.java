@@ -7,6 +7,8 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+
 import com.mparticle.AttributionResult;
 import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
@@ -75,7 +77,7 @@ public interface KitManager {
 
     void updateKits(JSONArray jsonArray);
 
-    void updateDataplan(MParticleOptions.DataplanOptions dataplanOptions);
+    void updateDataplan(@NonNull MParticleOptions.DataplanOptions dataplanOptions);
 
     String getActiveModuleIds();
 
