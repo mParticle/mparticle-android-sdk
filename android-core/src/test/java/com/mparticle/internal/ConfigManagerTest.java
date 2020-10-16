@@ -40,7 +40,7 @@ public class ConfigManagerTest {
     @Before
     public void setUp() throws Exception {
         context = new com.mparticle.mock.MockContext();
-        manager = new ConfigManager(context, MParticle.Environment.Production, "some api key", "some api secret");
+        manager = new ConfigManager(context, MParticle.Environment.Production, "some api key", "some api secret", null);
         mockMp = new MockMParticle();
         MParticle.setInstance(mockMp);
         manager.updateConfig(new JSONObject(sampleConfig));
@@ -88,7 +88,7 @@ public class ConfigManagerTest {
 
     @Test
     public void testRestrictAAIDBasedOnLAT() throws Exception {
-        ConfigManager testManager = new ConfigManager(context, MParticle.Environment.Production, "some api key", "some api secret");
+        ConfigManager testManager = new ConfigManager(context, MParticle.Environment.Production, "some api key", "some api secret", null);
         assertTrue(testManager.getRestrictAAIDBasedOnLAT());
         JSONObject config = new JSONObject();
         config.put("rdlat", "false");

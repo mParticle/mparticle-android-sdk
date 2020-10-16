@@ -14,6 +14,11 @@ import com.mparticle.internal.PushRegistrationHelper;
 import com.mparticle.networking.NetworkOptions;
 import com.mparticle.networking.NetworkOptionsManager;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Map;
+
 /**
  * class used for passing optional settings to the SDK when it is started.
  */
@@ -42,6 +47,7 @@ public class MParticleOptions {
     private String mDataplanId;
     private Integer mDataplanVersion;
     private MParticle.OperatingSystem mOperatingSystem = MParticle.OperatingSystem.ANDROID;
+    private DataplanOptions mDataplanOptions;
 
     private MParticleOptions() {
     }
@@ -112,6 +118,7 @@ public class MParticleOptions {
         this.mNetworkOptions = NetworkOptionsManager.validateAndResolve(builder.networkOptions);
         this.mDataplanId = builder.dataplanId;
         this.mDataplanVersion = builder.dataplanVersion;
+        this.mDataplanOptions = builder.dataplanOptions;
     }
 
     /**
@@ -263,6 +270,11 @@ public class MParticleOptions {
         return mOperatingSystem;
     }
 
+    @Nullable
+    public DataplanOptions getDataplanOptions() {
+        return mDataplanOptions;
+    }
+
     public static class Builder {
         private Context context;
         String apiKey;
@@ -286,6 +298,7 @@ public class MParticleOptions {
         private String dataplanId;
         private Integer dataplanVersion;
         private MParticle.OperatingSystem operatingSystem;
+        private DataplanOptions dataplanOptions;
 
         private Builder(Context context) {
             this.context = context;
@@ -549,6 +562,19 @@ public class MParticleOptions {
         }
 
         /**
+         * Set the {@link com.mparticle.MParticleOptions.DataplanOptions}. This object is used to
+         * load a dataplan for the purpose of blocking unplanned attributes and/or events from being forwarded to kit integrations.
+         * When set, this will override any block settings that have been configured in the mParticle dashboard.
+         * @param dataplanOptions
+         * @return
+         */
+        @NonNull
+        public Builder dataplanOptions(DataplanOptions dataplanOptions) {
+            this.dataplanOptions = dataplanOptions;
+            return this;
+        }
+
+        /**
          * Builds this Builder into an MParticleOptions object which can be used to start the SDK.
          *
          * @return MParticleOptions instance
@@ -625,6 +651,175 @@ public class MParticleOptions {
             this.provider = provider;
             this.minTime = minTime;
             this.minDistance = minDistance;
+        }
+    }
+
+    public static class DataplanOptions {
+        private JSONObject dataplan;
+        private boolean blockUserAttributes;
+        private boolean blockUserIdentities;
+        private boolean blockEventAttributes;
+        private boolean blockEvents;
+
+        private DataplanOptions(@NonNull Builder builder) {
+            dataplan = builder.dataplanVersion;
+            blockUserAttributes = builder.blockUserAttributes;
+            blockUserIdentities = builder.blockUserIdentities;
+            blockEventAttributes = builder.blockEventAttributes;
+            blockEvents = builder.blockEvents;
+        }
+
+        /**
+         * Query the dataplan version document
+         * @return the dataplan version as a JSONObject
+         */
+        @NonNull
+        public JSONObject getDataplan() {
+            return dataplan;
+        }
+
+        /**
+         * Query whether unplanned user attributes should be blocked
+         * @return boolean where true indicates blocking should occur
+         */
+        public boolean isBlockUserAttributes() {
+            return blockUserAttributes;
+        }
+
+        /**
+         * Query whether unplanned user identities should be blocked
+         * @return boolean where true indicates blocking should occur
+         */
+        public boolean isBlockUserIdentities() {
+            return blockUserIdentities;
+        }
+
+        /**
+         * Query whether unplanned event attributes should be blocked
+         * @return boolean where true indicates blocking should occur
+         */
+        public boolean isBlockEventAttributes() {
+            return blockEventAttributes;
+        }
+
+        /**
+         * Query whether unplanned events should be blocked
+         * @return boolean where true indicates blocking should occur
+         */
+        public boolean isBlockEvents() {
+            return blockEvents;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static class Builder {
+            private JSONObject dataplanVersion;
+            private boolean blockUserAttributes;
+            private boolean blockUserIdentities;
+            private boolean blockEventAttributes;
+            private boolean blockEvents;
+
+            private Builder() {}
+
+            /**
+             * Sets/Gets the Data Plan Version to use when evaluating block and transformation settings
+             * @param dataplanVersion
+             * @return the Builder instance
+             */
+            public Builder dataplanVersion(String dataplanVersion) {
+                try {
+                    this.dataplanVersion = new JSONObject(dataplanVersion);
+                } catch (JSONException e) {
+                    Logger.error("Unable to parse dataplan json. Dataplan will not be applied");
+                }
+                return this;
+            }
+
+            /**
+             * Sets/Gets the Data Plan Version to use when evaluating block and transformation settings
+             * @param dataplanVersion
+             * @return the Builder instance
+             */
+            public Builder dataplanVersion(JSONObject dataplanVersion) {
+                this.dataplanVersion = dataplanVersion;
+                return this;
+            }
+
+            /**
+             * Sets/Gets the Data Plan Version to use when evaluating block and transformation settings
+             * @param dataplanVersion
+             * @return the Builder instance
+             */
+            public Builder dataplanVersion(Map<String, Object> dataplanVersion) {
+                try {
+                    this.dataplanVersion = new JSONObject(dataplanVersion);
+                } catch (Exception e) {
+                    Logger.error("Unable to parse dataplan json. Dataplan will not be applied");
+                }
+                return this;
+            }
+
+            /**
+             * This flag determines if unplanned user attributes should be blocked
+             * @param blockUserAttributes
+             * @return the Builder instance
+             */
+            public Builder blockUserAttributes(boolean blockUserAttributes) {
+                this.blockUserAttributes = blockUserAttributes;
+                return this;
+            }
+
+            /**
+             * This flag determines if unplanned user identities should be blocked
+             * @param blockUserIdentities
+             * @return the Builder instance
+             */
+            public Builder blockUserIdentities(boolean blockUserIdentities) {
+                this.blockUserIdentities = blockUserIdentities;
+                return this;
+            }
+
+            /**
+             * This flag determines if unplanned event attributes should be blocked
+             * @param blockEventAttributes
+             * @return the Builder instance
+             */
+            public Builder blockEventAttributes(boolean blockEventAttributes) {
+                this.blockEventAttributes = blockEventAttributes;
+                return this;
+            }
+
+            /**
+             * This flag determines if unplanned events should be blocked
+             * @param blockEvents
+             * @return the Builder instance
+             */
+            public Builder blockEvents(boolean blockEvents) {
+                this.blockEvents = blockEvents;
+                return this;
+            }
+
+            /**
+             * Transform the Builder instance into an immutable {@link DataplanOptions} instance.
+             * This step will check that a valid dataplan verion has been set and will return null if
+             * it has not
+             * @return the DataplanOptions instance, or null if a valid dataplan version was not present
+             */
+            @Nullable
+            public DataplanOptions build() {
+                if (MPUtility.isEmpty(dataplanVersion)) {
+                    String message = "Configuration issue: dataplan is not required, but it may not be empty. Ignoring Dataplan";
+                    if (MPUtility.isDevEnv()) {
+                        throw new IllegalArgumentException(message);
+                    } else {
+                        Logger.error(message);
+                    }
+                    return null;
+                }
+                return new DataplanOptions(this);
+            }
         }
     }
 }

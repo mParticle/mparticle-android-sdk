@@ -11,6 +11,7 @@ import com.mparticle.AttributionResult;
 import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
+import com.mparticle.MParticleOptions;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
@@ -447,6 +448,13 @@ public class KitFrameworkWrapper implements KitManager {
     public void updateKits(JSONArray kitConfiguration) {
         if (mKitManager != null) {
             mKitManager.updateKits(kitConfiguration);
+        }
+    }
+
+    @Override
+    public void updateDataplan(MParticleOptions.DataplanOptions dataplanOptions) {
+        if (mKitManager != null) {
+            mKitManager.updateDataplan(dataplanOptions);
         }
     }
 

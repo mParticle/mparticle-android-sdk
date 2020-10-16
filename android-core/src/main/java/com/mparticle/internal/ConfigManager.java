@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 
 import com.mparticle.ExceptionHandler;
 import com.mparticle.MParticle;
+import com.mparticle.MParticleOptions;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApi;
 import com.mparticle.internal.messages.BaseMPMessage;
@@ -58,6 +59,7 @@ public class ConfigManager {
     private static final int DEFAULT_MAX_ALIAS_WINDOW_DAYS = 90;
     private Context mContext;
     private static NetworkOptions sNetworkOptions;
+    private MParticleOptions.DataplanOptions mDataplanOptions;
 
     static SharedPreferences sPreferences;
 
@@ -102,15 +104,16 @@ public class ConfigManager {
     }
 
     public ConfigManager(Context context) {
-        this(context, null, null, null);
+        this(context, null, null, null, null);
     }
 
-    public ConfigManager(Context context, MParticle.Environment environment, String apiKey, String apiSecret) {
+    public ConfigManager(Context context, MParticle.Environment environment, String apiKey, String apiSecret, MParticleOptions.DataplanOptions dataplanOptions) {
         mContext = context.getApplicationContext();
         sPreferences = getPreferences(mContext);
         mLocalPrefs = new AppConfig(mContext, environment, sPreferences, apiKey, apiSecret);
         mUserStorage = UserStorage.create(mContext, getMpid());
         restoreOldConfig();
+        this.mDataplanOptions = dataplanOptions;
     }
 
     private void restoreOldConfig() {
@@ -139,6 +142,10 @@ public class ConfigManager {
             }
         }
         return null;
+    }
+
+    public MParticleOptions.DataplanOptions getDataplan() {
+        return mDataplanOptions;
     }
 
     public UserStorage getUserStorage() {

@@ -11,6 +11,7 @@ import com.mparticle.AttributionResult;
 import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
+import com.mparticle.MParticleOptions;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
@@ -152,6 +153,11 @@ public class MockKitManager implements KitManager {
 
     @Override
     public void updateKits(JSONArray jsonArray) {
+
+    }
+
+    @Override
+    public void updateDataplan(MParticleOptions.DataplanOptions dataplanOptions) {
 
     }
 

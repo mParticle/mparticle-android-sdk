@@ -11,6 +11,7 @@ import com.mparticle.AttributionResult;
 import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
+import com.mparticle.MParticleOptions;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
@@ -74,6 +75,8 @@ public interface KitManager {
 
     void updateKits(JSONArray jsonArray);
 
+    void updateDataplan(MParticleOptions.DataplanOptions dataplanOptions);
+
     String getActiveModuleIds();
 
     void onActivityCreated(Activity activity, Bundle savedInstanceState);
@@ -111,5 +114,4 @@ public interface KitManager {
     void onModifyCompleted(MParticleUser user, IdentityApiRequest request);
 
     void reset();
-
 }

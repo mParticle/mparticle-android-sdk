@@ -20,7 +20,7 @@ public class MessageBatchTest {
         MParticle mockMp = Mockito.mock(MParticle.class);
         Mockito.when(mockMp.getEnvironment()).thenReturn(MParticle.Environment.Development);
         MParticle.setInstance(mockMp);
-        ConfigManager manager = new ConfigManager(new MockContext(), MParticle.Environment.Production, "some api key", "some api secret");
+        ConfigManager manager = new ConfigManager(new MockContext(), MParticle.Environment.Production, "some api key", "some api secret", null);
         boolean sessionHistory = true;
         BatchId batchId = new BatchId(manager.getMpid(), null, null, null);
         MessageBatch batch = MessageBatch.create( sessionHistory, manager,new JSONObject(), batchId);
@@ -58,7 +58,7 @@ public class MessageBatchTest {
         MParticle mockMp = Mockito.mock(MParticle.class);
         Mockito.when(mockMp.getEnvironment()).thenReturn(MParticle.Environment.Development);
         MParticle.setInstance(mockMp);
-        ConfigManager manager = new ConfigManager(new MockContext(), MParticle.Environment.Production, "some api key", "some api secret");
+        ConfigManager manager = new ConfigManager(new MockContext(), MParticle.Environment.Production, "some api key", "some api secret", null);
         boolean sessionHistory = true;
         BatchId batchId = new BatchId(manager.getMpid(), null, null, null);
         MessageBatch batch = MessageBatch.create( sessionHistory, manager,new JSONObject(), batchId);
