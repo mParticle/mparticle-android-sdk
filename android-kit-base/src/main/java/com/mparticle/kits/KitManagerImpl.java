@@ -54,6 +54,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     protected final CoreCallbacks mCoreCallbacks;
     private final BackgroundTaskHandler mBackgroundTaskHandler;
     KitIntegrationFactory mKitIntegrationFactory;
+    DataplanFilter mDataplanFilter;
 
     private static final String RESERVED_KEY_LTV = "$Amount";
     private static final String METHOD_NAME = "$MethodName";
@@ -154,7 +155,11 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
     @Override
     public void updateDataplan(MParticleOptions.DataplanOptions dataplanOptions) {
-
+        try {
+            mDataplanFilter = new DataplanFilter(dataplanOptions);
+        } catch (Exception ex) {
+            Logger.warning(ex, "Failed to parse DataplanOptions, Dataplan filtering for Kits will not be applied");
+        }
     }
 
     /**

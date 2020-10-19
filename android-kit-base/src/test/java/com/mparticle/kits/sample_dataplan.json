@@ -1,0 +1,491 @@
+{
+  "version": 1,
+  "data_plan_id": "testcommerce",
+  "version_description": null,
+  "activated_environment": "none",
+  "created_on": "2020-07-15T16:33:10.013",
+  "created_by": "wpassidomo@mparticle.com",
+  "last_modified_on": "2020-10-16T04:52:42.877",
+  "last_modified_by": "wpassidomo@mparticle.com",
+  "version_document": {
+    "data_points": [
+      {
+        "description": "a search event with a basic name",
+        "match": {
+          "type": "custom_event",
+          "criteria": {
+            "event_name": "Search Event",
+            "custom_event_type": "search"
+          }
+        },
+        "validator": {
+          "type": "json_schema",
+          "definition": {
+            "properties": {
+              "data": {
+                "additionalProperties": true,
+                "properties": {
+                  "custom_event_type": {
+                    "description": "",
+                    "type": "string"
+                  },
+                  "event_name": {
+                    "description": "",
+                    "type": "string"
+                  },
+                  "custom_attributes": {
+                    "additionalProperties": true,
+                    "description": "",
+                    "properties": {
+                      "hello": {
+                        "description": "",
+                        "type": "string"
+                      }
+                    },
+                    "required": [],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "custom_event_type",
+                  "event_name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "active_transformation_ids": null
+      },
+      {
+        "description": "no description for this location event",
+        "match": {
+          "type": "custom_event",
+          "criteria": {
+            "event_name": "locationEvent",
+            "custom_event_type": "location"
+          }
+        },
+        "validator": {
+          "type": "json_schema",
+          "definition": {
+            "properties": {
+              "data": {
+                "additionalProperties": true,
+                "properties": {
+                  "custom_event_type": {
+                    "description": "",
+                    "type": "string"
+                  },
+                  "event_name": {
+                    "description": "",
+                    "type": "string"
+                  },
+                  "custom_attributes": {
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "foo": {
+                        "description": "",
+                        "enum": [
+                          "bar",
+                          "barr",
+                          "bar bar"
+                        ],
+                        "type": "string"
+                      },
+                      "foo foo": {
+                        "description": "",
+                        "maximum": 5,
+                        "minimum": 0,
+                        "type": "number"
+                      },
+                      "foo number": {
+                        "description": "",
+                        "enum": [
+                          "10",
+                          "20",
+                          "30"
+                        ],
+                        "type": "number"
+                      }
+                    },
+                    "required": [],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "custom_event_type",
+                  "event_name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "active_transformation_ids": null
+      },
+      {
+        "description": "add to cat",
+        "match": {
+          "type": "product_action",
+          "criteria": {
+            "action": "add_to_cart"
+          }
+        },
+        "validator": {
+          "type": "json_schema",
+          "definition": {
+            "properties": {
+              "data": {
+                "additionalProperties": true,
+                "properties": {
+                  "currency_code": {
+                    "description": "",
+                    "enum": [
+                      "USD",
+                      "CAD",
+                      "AUS"
+                    ],
+                    "type": "string"
+                  },
+                  "custom_attributes": {
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "attributeNumMinMax": {
+                        "description": "",
+                        "maximum": 17,
+                        "minimum": 9,
+                        "type": "number"
+                      },
+                      "attributeEmail": {
+                        "description": "",
+                        "format": "email",
+                        "type": "string"
+                      },
+                      "attributeNumEnum": {
+                        "description": "",
+                        "enum": [
+                          "2",
+                          "7",
+                          "9"
+                        ],
+                        "type": "number"
+                      },
+                      "attributeStringAlpha": {
+                        "description": "",
+                        "pattern": "[AZ]",
+                        "type": "string"
+                      },
+                      "attributeBoolean": {
+                        "description": "",
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [],
+                    "type": "object"
+                  }
+                },
+                "required": [],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "active_transformation_ids": null
+      },
+      {
+        "description": "view.a product",
+        "match": {
+          "type": "promotion_action",
+          "criteria": {
+            "action": "view"
+          }
+        },
+        "validator": {
+          "type": "json_schema",
+          "definition": {
+            "properties": {
+              "data": {
+                "additionalProperties": true,
+                "properties": {
+                  "custom_attributes": {
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "not required": {
+                        "description": "",
+                        "type": "string"
+                      },
+                      "required": {
+                        "description": "",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "required"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "custom_attributes"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "active_transformation_ids": null
+      },
+      {
+        "description": "",
+        "match": {
+          "type": "custom_event",
+          "criteria": {
+            "event_name": "TestEvent",
+            "custom_event_type": "navigation"
+          }
+        },
+        "validator": {
+          "type": "json_schema",
+          "definition": {
+            "properties": {
+              "data": {
+                "additionalProperties": true,
+                "properties": {
+                  "canonical_name": {
+                    "description": "",
+                    "enum": [
+                      "This",
+                      "That"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "active_transformation_ids": null
+      },
+      {
+        "description": "",
+        "match": {
+          "type": "product_impression",
+          "criteria": {}
+        },
+        "validator": {
+          "type": "json_schema",
+          "definition": {
+            "properties": {
+              "data": {
+                "additionalProperties": true,
+                "properties": {
+                  "custom_flags": {
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "NotSoCustomFlag": {
+                        "description": "",
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [],
+                    "type": "object"
+                  },
+                  "custom_attributes": {
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "thing1": {
+                        "description": "",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "thing1"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "custom_attributes"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "active_transformation_ids": null
+      },
+      {
+        "description": "",
+        "match": {
+          "type": "screen_view",
+          "criteria": {
+            "screen_name": "A New ScreenViewEvent"
+          }
+        },
+        "validator": {
+          "type": "json_schema",
+          "definition": {
+            "properties": {
+              "data": {
+                "additionalProperties": false,
+                "properties": {
+                  "activity_type": {
+                    "description": "",
+                    "pattern": "[a-z]",
+                    "type": "string"
+                  }
+                },
+                "required": [],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "active_transformation_ids": null
+      },
+      {
+        "description": "",
+        "match": {
+          "type": "screen_view",
+          "criteria": {
+            "screen_name": "my screeeen"
+          }
+        },
+        "validator": {
+          "type": "json_schema",
+          "definition": {
+            "properties": {
+              "data": {
+                "additionalProperties": true,
+                "properties": {
+                  "custom_attributes": {
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "test2key": {
+                        "description": "",
+                        "type": "string"
+                      },
+                      "test1key": {
+                        "description": "",
+                        "type": "string"
+                      }
+                    },
+                    "required": [],
+                    "type": "object"
+                  }
+                },
+                "required": [],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "active_transformation_ids": null
+      },
+      {
+        "description": "",
+        "match": {
+          "type": "custom_event",
+          "criteria": {
+            "event_name": "something something something",
+            "custom_event_type": "navigation"
+          }
+        },
+        "validator": {
+          "type": "json_schema",
+          "definition": {
+            "properties": {
+              "data": {
+                "additionalProperties": true,
+                "properties": {
+                  "custom_attributes": {
+                    "additionalProperties": true,
+                    "description": "",
+                    "type": "object"
+                  }
+                },
+                "required": [],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "active_transformation_ids": null
+      },
+      {
+        "description": "User Attributes",
+        "match": {
+          "type": "user_attributes",
+          "criteria": {}
+        },
+        "validator": {
+          "type": "json_schema",
+          "definition": {
+            "additionalProperties": false,
+            "properties": {
+              "my attribute": {
+                "description": "",
+                "type": "string"
+              },
+              "my other attribute": {
+                "description": "",
+                "type": "string"
+              },
+              "a third attribute": {
+                "description": "",
+                "type": "string"
+              }
+            },
+            "required": [
+              "my other attribute"
+            ]
+          }
+        },
+        "active_transformation_ids": null
+      },
+      {
+        "description": "User Identities",
+        "match": {
+          "type": "user_identities",
+          "criteria": {}
+        },
+        "validator": {
+          "type": "json_schema",
+          "definition": {
+            "additionalProperties": true,
+            "properties": {
+              "customerid": {
+                "description": "",
+                "type": "string"
+              },
+              "amp_id": {
+                "description": "",
+                "type": "string"
+              },
+              "email": {
+                "description": "",
+                "type": "string"
+              }
+            },
+            "required": [
+              "email"
+            ],
+            "type": "object"
+          }
+        },
+        "active_transformation_ids": null
+      }
+    ],
+    "transformations": null,
+    "active_transformation_ids": null
+  }
+}
