@@ -32,6 +32,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    dexOptions {
+        incremental true
+        javaMaxHeapSize "2048M"
+    }
 }
 
 task kitSdkJavadocs(type: Javadoc) {
