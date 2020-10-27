@@ -136,8 +136,8 @@ public abstract class KitIntegration {
             return new HashMap<String, Object>();
         }
         Map<String, Object> userAttributes = user.getUserAttributes();
-        if (getKitManager() != null) {
-            userAttributes = getKitManager().getDataplanFilter().transformUserAttributes(userAttributes);
+        if (kitManager != null) {
+            userAttributes = kitManager.getDataplanFilter().transformUserAttributes(userAttributes);
         }
         Map<String, Object> attributes = (Map<String, Object>) KitConfiguration.filterAttributes(
                 getConfiguration().getUserAttributeFilters(),

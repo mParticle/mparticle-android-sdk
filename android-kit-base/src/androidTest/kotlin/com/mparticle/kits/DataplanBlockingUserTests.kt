@@ -9,7 +9,7 @@ import com.mparticle.Utils.randomPromotionAction
 import com.mparticle.Utils.randomString
 import com.mparticle.identity.IdentityApiRequest
 import com.mparticle.internal.AccessUtils
-import com.mparticle.kits.DataplanFilterImpl.Companion.getServerName
+import com.mparticle.kits.DataplanFilterImpl.Companion.getEventsApiName
 import com.mparticle.kits.testkits.AttributeListenerTestKit
 import com.mparticle.kits.testkits.IdentityListenerTestKit
 import com.mparticle.kits.testkits.KitIntegrationTestKit
@@ -178,7 +178,7 @@ class DataplanBlockingUserTests: BaseKitManagerStarted() {
         val blockIdentities = randomIdentities().filterKeys { !allowedIdentities.containsKey(it) }
         assertTrue(blockIdentities.size > 0)
 
-        datapoints[DataplanFilterImpl.USER_IDENTITIES_KEY] = allowedIdentities.keys.map { it.getServerName() }.toHashSet()
+        datapoints[DataplanFilterImpl.USER_IDENTITIES_KEY] = allowedIdentities.keys.map { it.getEventsApiName() }.toHashSet()
         mKitManager.setDataplanFilter(DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), Random.nextBoolean(), true))
 
 
@@ -211,7 +211,7 @@ class DataplanBlockingUserTests: BaseKitManagerStarted() {
         val blockedIdentities = randomIdentities().filterKeys { !allowedIdentities.containsKey(it) }
         assertTrue(blockedIdentities.size > 0)
 
-        datapoints[DataplanFilterImpl.USER_IDENTITIES_KEY] = allowedIdentities.keys.map { it.getServerName() }.toHashSet()
+        datapoints[DataplanFilterImpl.USER_IDENTITIES_KEY] = allowedIdentities.keys.map { it.getEventsApiName() }.toHashSet()
         mKitManager.setDataplanFilter(DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), Random.nextBoolean(), true))
 
         mServer.addConditionalLoginResponse(mStartingMpid, Random.Default.nextLong())
@@ -235,13 +235,13 @@ class DataplanBlockingUserTests: BaseKitManagerStarted() {
         assertEquals(allowedIdentities + blockedIdentities, MParticle.getInstance()?.Identity()?.currentUser?.userIdentities)
     }
 
-    internal fun getRandomDataplanEventKey(): DataplanFilterImpl.DataplanPoint {
+    internal fun getRandomDataplanEventKey(): DataplanFilterImpl.DataPoint {
         return when (Random.Default.nextInt(0, 5)) {
-            0 -> DataplanFilterImpl.DataplanPoint(DataplanFilterImpl.CUSTOM_EVENT_KEY, randomString(5), randomEventType().ordinal.toString())
-            1 -> DataplanFilterImpl.DataplanPoint(DataplanFilterImpl.SCREEN_EVENT_KEY, randomString(8))
-            2 -> DataplanFilterImpl.DataplanPoint(DataplanFilterImpl.PRODUCT_ACTION_KEY, randomProductAction())
-            3 -> DataplanFilterImpl.DataplanPoint(DataplanFilterImpl.PROMOTION_ACTION_KEY, randomPromotionAction())
-            4 -> DataplanFilterImpl.DataplanPoint(DataplanFilterImpl.PRODUCT_IMPRESSION_KEY)
+            0 -> DataplanFilterImpl.DataPoint(DataplanFilterImpl.CUSTOM_EVENT_KEY, randomString(5), randomEventType().ordinal.toString())
+            1 -> DataplanFilterImpl.DataPoint(DataplanFilterImpl.SCREEN_EVENT_KEY, randomString(8))
+            2 -> DataplanFilterImpl.DataPoint(DataplanFilterImpl.PRODUCT_ACTION_KEY, randomProductAction())
+            3 -> DataplanFilterImpl.DataPoint(DataplanFilterImpl.PROMOTION_ACTION_KEY, randomPromotionAction())
+            4 -> DataplanFilterImpl.DataPoint(DataplanFilterImpl.PRODUCT_IMPRESSION_KEY)
             else -> throw IllegalArgumentException("messed this implementation up :/")
         }
     }

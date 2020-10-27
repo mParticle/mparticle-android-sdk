@@ -4,6 +4,7 @@ import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.MParticleUser;
+import com.mparticle.internal.KitManager;
 
 import java.util.HashMap;
 import java.util.List;
@@ -47,8 +48,9 @@ public class FilteredMParticleUser implements MParticleUser {
     @Override
     public Map<String, Object> getUserAttributes() {
         Map<String, Object> userAttributes = mpUser.getUserAttributes();
-        if (provider.getKitManager() != null) {
-            userAttributes = provider.getKitManager().getDataplanFilter().transformUserAttributes(userAttributes);
+        KitManagerImpl kitManager = provider.getKitManager();
+        if (kitManager != null) {
+            userAttributes = kitManager.getDataplanFilter().transformUserAttributes(userAttributes);
         }
         return (Map<String, Object>)KitConfiguration.filterAttributes(
                 provider.getConfiguration().getUserAttributeFilters(),
@@ -61,9 +63,10 @@ public class FilteredMParticleUser implements MParticleUser {
         return mpUser.getUserAttributes(new UserAttributeListener() {
             @Override
             public void onUserAttributesReceived(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists, Long mpid) {
-                if (provider.getKitManager() != null) {
-                    userAttributes = provider.getKitManager().getDataplanFilter().transformUserAttributes(userAttributes);
-                    userAttributeLists = provider.getKitManager().getDataplanFilter().transformUserAttributes(userAttributeLists);
+                KitManagerImpl kitManager = provider.getKitManager();
+                if (kitManager != null) {
+                    userAttributes = kitManager.getDataplanFilter().transformUserAttributes(userAttributes);
+                    userAttributeLists = kitManager.getDataplanFilter().transformUserAttributes(userAttributeLists);
                 }
                 listener.onUserAttributesReceived((Map<String, String>)KitConfiguration.filterAttributes(
                         provider.getConfiguration().getUserAttributeFilters(),
@@ -83,8 +86,9 @@ public class FilteredMParticleUser implements MParticleUser {
     @Override
     public Map<MParticle.IdentityType, String> getUserIdentities() {
         Map<MParticle.IdentityType, String> identities = mpUser.getUserIdentities();
-        if (provider.getKitManager() != null) {
-            identities = provider.getKitManager().getDataplanFilter().transformIdentities(identities);
+        KitManagerImpl kitManager = provider.getKitManager();
+        if (kitManager != null) {
+            identities = kitManager.getDataplanFilter().transformIdentities(identities);
         }
         Map<MParticle.IdentityType, String> filteredIdentities = new HashMap<MParticle.IdentityType, String>(identities.size());
         for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()) {

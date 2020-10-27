@@ -12,7 +12,7 @@ public class FilteredIdentityApiRequest {
     
     FilteredIdentityApiRequest(IdentityApiRequest identityApiRequest, KitIntegration provider) {
         if (identityApiRequest != null) {
-            userIdentities = identityApiRequest.getUserIdentities();
+            userIdentities = new HashMap<>(identityApiRequest.getUserIdentities());
             if (provider.getKitManager()!= null) {
                 userIdentities = provider.getKitManager().getDataplanFilter().transformIdentities(userIdentities);
             }

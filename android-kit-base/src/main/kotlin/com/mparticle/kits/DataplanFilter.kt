@@ -2,8 +2,10 @@ package com.mparticle.kits;
 
 import com.mparticle.BaseEvent
 import com.mparticle.MPEvent
+import com.mparticle.MParticle
 import com.mparticle.MParticleOptions;
 import com.mparticle.commerce.CommerceEvent
+import com.mparticle.identity.MParticleIdentityClientImpl
 import com.mparticle.internal.Logger
 import org.json.JSONArray
 
@@ -11,6 +13,10 @@ import org.json.JSONObject;
 
 internal interface DataplanFilter {
     fun <T: BaseEvent> transformEventForEvent(event: T): T?
+    fun transformIdentities(identities: Map<MParticle.IdentityType, String>): Map<MParticle.IdentityType, String>
+    fun <T> transformUserAttributes(attributes: Map<String, T>): Map<String, T>
+    fun isUserAttributeBlocked(key: String?): Boolean
+    fun isUserIdentityBlocked(key: MParticle.IdentityType?): Boolean
 }
 
 internal class DataplanFilterImpl constructor(val dataPoints: Map<String, HashSet<String>?>,
@@ -35,29 +41,29 @@ internal class DataplanFilterImpl constructor(val dataPoints: Map<String, HashSe
      */
     override fun <T: BaseEvent> transformEventForEvent(event: T): T? {
         if (blockEvents || blockEventAttributes) {
-            val name = when {
-                (event is MPEvent) ->
+            val dataPointKey = when {
+                event is MPEvent ->
                     when {
-                        event.isScreenEvent -> DataplanPoint(SCREEN_EVENT_KEY, event.eventName)
-                        else -> DataplanPoint(CUSTOM_EVENT_KEY, event.eventName, event.eventType.ordinal.toString())
+                        event.isScreenEvent -> DataPoint(SCREEN_EVENT_KEY, event.eventName)
+                        else -> DataPoint(CUSTOM_EVENT_KEY, event.eventName, event.eventType.getEventsApiName())
                     }
                 event is CommerceEvent ->
                     when {
-                        !event.productAction.isNullOrBlank() -> DataplanPoint(PRODUCT_ACTION_KEY, event.productAction)
-                        !event.promotionAction.isNullOrBlank() -> DataplanPoint(PROMOTION_ACTION_KEY, event.promotionAction)
-                        !event.impressions.isNullOrEmpty() -> DataplanPoint(PRODUCT_IMPRESSION_KEY)
+                        !event.productAction.isNullOrBlank() -> DataPoint(PRODUCT_ACTION_KEY, event.productAction)
+                        !event.promotionAction.isNullOrBlank() -> DataPoint(PROMOTION_ACTION_KEY, event.promotionAction)
+                        !event.impressions.isNullOrEmpty() -> DataPoint(PRODUCT_IMPRESSION_KEY)
                         else -> null
                     }
                 else -> null
             }
             //shouldn't happen but we have to handle it
-            name ?: return event
+            dataPointKey ?: return event
             //if there is no valid datapoint then it is an unplanned event
-            if (blockEvents && !dataPoints.containsKey(name.toString())) {
-                Logger.verbose("Blocking unplanned event: ${name}")
+            if (blockEvents && !dataPoints.containsKey(dataPointKey.toString())) {
+                Logger.verbose("Blocking unplanned event: ${dataPointKey}")
                 return null
             }
-            val dataPoint = dataPoints[name.toString()]
+            val dataPoint = dataPoints[dataPointKey.toString()]
             if (blockEventAttributes) {
                 event.customAttributes = event.customAttributes?.filterKeys {
                     //null dataPoint means there are no constraints for custom attributes
@@ -68,13 +74,100 @@ internal class DataplanFilterImpl constructor(val dataPoints: Map<String, HashSe
                         false
                     }
                 }
+                if (event is CommerceEvent) {
+                    val productActionDatapoint = dataPoints["$dataPointKey.$PRODUCT_ACTION_KEY"]
+                    event.products?.forEach { product ->
+                        product?.customAttributes?.apply {
+                            val filteredAttributes = filterKeys {
+                                productActionDatapoint?.contains(it) ?: true
+                            }
+                            clear()
+                            putAll(filteredAttributes)
+                        }
+                    }
+                    val productImpressionDatapoint = dataPoints["$dataPointKey.$PRODUCT_IMPRESSION_KEY"]
+                    if (event.impressions?.size ?: 0 > 0) {
+                        event.impressions?.forEach {
+                            it.products.forEach { product ->
+                                product?.customAttributes?.apply {
+                                    val filteredAttributes = filterKeys {
+                                        productImpressionDatapoint?.contains(it) ?: true
+                                    }
+                                    clear()
+                                    putAll(filteredAttributes)
+                                }
+                            }
+                        }
+                    }
+                }
             }
             return event
         }
         return event
     }
+    
+    override fun transformIdentities(identities: Map<MParticle.IdentityType, String>): Map<MParticle.IdentityType, String> {
+        if (blockUserIdentities) {
+            val datapoint = dataPoints[USER_IDENTITIES_KEY]
+            if (datapoint != null) {
+                return identities.filterKeys { identity ->
+                    datapoint.contains(MParticleIdentityClientImpl.getStringValue(identity)).also {
+                        if (!it) {
+                            Logger.verbose("Blocking unplanned UserIdentity: $it")
+                        }
+                    }
+                }
+            }
+        }
+        return identities
+    }
 
-    internal companion object{
+    override fun <T> transformUserAttributes(attributes: Map<String, T>): Map<String, T> {
+        if (blockUserAttributes) {
+            val datapoint = dataPoints[USER_ATTRIBUTES_KEY]
+            if (datapoint != null) {
+                return attributes.filterKeys { attribute ->
+                    datapoint.contains(attribute).also {
+                        if (!it) {
+                            Logger.verbose("Blocking unplanned UserAttribute: $it")
+                        }
+                    }
+                }
+            }
+        }
+        return attributes
+    }
+
+    override fun isUserAttributeBlocked(key: String?): Boolean {
+        if (blockUserAttributes && key != null) {
+            val datapoint = dataPoints[USER_ATTRIBUTES_KEY]
+            if (datapoint != null) {
+                return !datapoint.contains(key).also {
+                    if (!it) {
+                        Logger.verbose("Blocking unplanned UserAttribute: $key")
+                    }
+                }
+            }
+        }
+        return false
+    }
+
+    override fun isUserIdentityBlocked(key: MParticle.IdentityType?): Boolean {
+        if (blockUserIdentities && key != null) {
+            val datapoint = dataPoints[USER_IDENTITIES_KEY]
+            if (datapoint != null) {
+                return !datapoint.contains(MParticleIdentityClientImpl.getStringValue(key)).also {
+                    if (!it) {
+                        Logger.verbose("Blocking unplanned UserIdentity: $key")
+                    }
+                }
+            }
+        }
+        return false
+    }
+
+
+    internal companion object {
         const val SCREEN_EVENT_KEY = "screen_view"
         const val CUSTOM_EVENT_KEY = "custom_event"
         const val PRODUCT_ACTION_KEY = "product_action"
@@ -83,6 +176,10 @@ internal class DataplanFilterImpl constructor(val dataPoints: Map<String, HashSe
         const val USER_IDENTITIES_KEY = "user_identities"
         const val USER_ATTRIBUTES_KEY = "user_attributes"
 
+        const val PRODUCT_ACTION_PRODUCTS = "product_action_product"
+        const val PRODUCT_IMPRESSION_PRODUCTS = "product_impression_product"
+
+        private val emptyJSONObject = JSONObject()
 
         @JvmField
         val EMPTY: DataplanFilter = EmptyDataplanFilter()
@@ -92,45 +189,52 @@ internal class DataplanFilterImpl constructor(val dataPoints: Map<String, HashSe
          * event type concatenated to the event name (if applicable) concatenated to the custom
          * event type (if applicable), with periods, pointing to a set of "legal" attribute keys
          **/
-        fun extractDataPoints(dataplan: JSONObject): Map<String, HashSet<String>> {
-            return dataplan
-                    .tryGetJSONObject("version_document", JSONObject())
-                    .tryGetJSONArray("data_points", JSONArray())
-                    .toList()
-                    .filterIsInstance<JSONObject>()
-                    .associate {
+        fun extractDataPoints(dataplan: JSONObject): Map<String, HashSet<String>?> {
+            val points = mutableMapOf<String, HashSet<String>?>()
+            dataplan
+                    .optJSONObject("version_document")
+                    ?.optJSONArray("data_points")
+                    ?.toList()
+                    ?.filterIsInstance<JSONObject>()
+                    ?.forEach {
                         val match = it.getJSONObject("match")
                         val key = generateDatapointKey(match)
-                        val properties = getAllowedKeys(key?.type, it)
-                        key?.toString() to properties
+                        if (key != null) {
+                            val properties = getAllowedKeys(key, it)
+                            points.put(key.toString(), properties)
+                            val productKeys = key.getProductDataPoints()
+                            productKeys?.forEach { productKey ->
+                                points.put(productKey.toString(), getAllowedKeys(productKey, it))
+                            }
+                        }
                     }
-                    .filterKeys { it != null } as Map<String, HashSet<String>>
+            return points
         }
 
-        fun generateDatapointKey(match: JSONObject): DataplanPoint? {
-            val criteria = match.tryGetJSONObject("criteria")
+        fun generateDatapointKey(match: JSONObject): DataPoint? {
+            val criteria = match.optJSONObject("criteria")
             val matchType = match.optString("type")
             when (matchType) {
                 CUSTOM_EVENT_KEY -> {
                     val eventName = criteria?.optString("event_name")
                     val eventType = criteria?.optString("custom_event_type")
                     if (!eventName.isNullOrBlank() && !eventType.isNullOrBlank()) {
-                        return DataplanPoint(matchType, eventName, eventType)
+                        return DataPoint(matchType, eventName, eventType)
                     }
                 }
                 PRODUCT_ACTION_KEY, PROMOTION_ACTION_KEY -> {
                     val commerceEventType = criteria?.optString("action")
                     if (!commerceEventType.isNullOrBlank()) {
-                        return DataplanPoint(matchType, commerceEventType)
+                        return DataPoint(matchType, commerceEventType)
                     }
                 }
                 PRODUCT_IMPRESSION_KEY, USER_ATTRIBUTES_KEY, USER_IDENTITIES_KEY -> {
-                    return DataplanPoint(matchType)
+                    return DataPoint(matchType)
                 }
                 SCREEN_EVENT_KEY -> {
                     val screenName = criteria?.optString("screen_name")
                     if (!screenName.isNullOrBlank()) {
-                        return DataplanPoint(matchType, screenName)
+                        return DataPoint(matchType, screenName)
                     }
                 }
             }
@@ -138,68 +242,59 @@ internal class DataplanFilterImpl constructor(val dataPoints: Map<String, HashSe
         }
 
         //returns a set of "allowed" keys, or `null` if all keys are allowed
-        private fun getAllowedKeys(type: String?, jsonObject: JSONObject): HashSet<String>? {
+        private fun getAllowedKeys(datapoint: DataPoint, jsonObject: JSONObject): HashSet<String>? {
             val definition = jsonObject.optJSONObject("validator")
                     ?.optJSONObject("definition")
-            when (type) {
-                CUSTOM_EVENT_KEY, SCREEN_EVENT_KEY, PRODUCT_IMPRESSION_KEY, PROMOTION_ACTION_KEY, PRODUCT_ACTION_KEY ->
-                    definition
+            when (datapoint.type) {
+                CUSTOM_EVENT_KEY, SCREEN_EVENT_KEY, PRODUCT_IMPRESSION_KEY, PROMOTION_ACTION_KEY, PRODUCT_ACTION_KEY -> {
+                    val data = definition
                             ?.optJSONObject("properties")
-                            ?.optJSONObject("data")?.let {
-                                val customAttributes = it.optJSONObject("properties")
-                                        ?.optJSONObject("custom_attributes")
-                                if (customAttributes == null) {
-                                    //if there are no custom attributes listed, allow all if additionalProperties are allowed or none if they are not
-                                    return if (it.optBoolean("additionalProperties", true)) null else hashSetOf()
-                                }
-                                //if additional custom attributes are allowed, return allow all, otherwise return list of allowed custom attributes
-                                if (customAttributes.optBoolean("additionalProperties", true)) {
-                                    return null
-                                } else {
-                                    return customAttributes.optJSONObject("properties")?.keys()?.toHashSet()
-                                            ?: hashSetOf()
-                                }
-
-                                //if nothing can be gathered, allow all attributes
-                            } ?: return null
-
-                else -> {
-                    val additionalProperties = definition?.optBoolean("additionalProperties", true)
-                            ?: true
-                    if (additionalProperties) {
-                        return null
+                            ?.optJSONObject("data") ?: return null
+                    if (datapoint.productAttributeType == null) {
+                        data.let {
+                            val customAttributes = it.getConstrainedPropertiesJSONObject("custom_attributes")
+                            if (customAttributes == null) {
+                                return null
+                            } else {
+                                return customAttributes.getConstrainedPropertiesKeySet()
+                            }
+                            //if nothing can be gathered, allow all attributes
+                        }
                     } else {
-                        return definition?.optJSONObject("properties")?.keys()?.toHashSet()
-                                ?: hashSetOf()
+                        data.let {
+                            val products = when (datapoint.productAttributeType) {
+                                PRODUCT_ACTION_PRODUCTS -> {
+                                    val productBlock = it.getConstrainedPropertiesJSONObject("product_action")
+                                            ?.getConstrainedPropertiesJSONObject("products")
+                                    if (productBlock == emptyJSONObject) {
+                                        return hashSetOf()
+                                    }
+                                    productBlock
+                                }
+                                PRODUCT_IMPRESSION_PRODUCTS -> {
+                                    var productBlock = it.getConstrainedPropertiesJSONObject("product_impressions")
+                                    if (productBlock == emptyJSONObject) {
+                                        return hashSetOf()
+                                    }
+                                    productBlock = productBlock?.optJSONObject("items")
+                                            ?.getConstrainedPropertiesJSONObject("products")
+                                    if (productBlock == emptyJSONObject) {
+                                        return hashSetOf()
+                                    }
+                                    productBlock
+                                }
+                                else -> {
+                                    return null
+                                }
+                            }
+                            return products?.optJSONObject("items")
+                                    ?.getConstrainedPropertiesJSONObject("custom_attributes")
+                                    ?.getConstrainedPropertiesKeySet()
+                        }
                     }
                 }
-            }
-        }
-
-        /**
-         * utility extension functions, mostly for parsing JSON
-         */
-
-        fun JSONObject.tryGetJSONObject(name: String, default: JSONObject): JSONObject {
-            return tryGetJSONObject(name) ?: default
-        }
-
-        fun JSONObject.tryGetJSONObject(name: String): JSONObject? {
-            return this.optJSONObject(name).also {
-                if (it == null) {
-                    Logger.warning("Dataplan key \"$name\" is missing")
-                }
-            }
-        }
-
-        fun JSONObject.tryGetJSONArray(name: String, default: JSONArray): JSONArray {
-            return tryGetJSONArray(name) ?: default
-        }
-
-        fun JSONObject.tryGetJSONArray(name: String): JSONArray? {
-            return optJSONArray(name).also {
-                if (it == null) {
-                    Logger.warning("Dataplan key \"$name\" is missing")
+                else -> {
+                    return definition?.getConstrainedPropertiesKeySet()
                 }
             }
         }
@@ -212,6 +307,75 @@ internal class DataplanFilterImpl constructor(val dataPoints: Map<String, HashSe
             return list
         }
 
+        /**
+         *  accepts an object like this:
+         *  "data": {
+         *     "additionalProperties": false
+         *     "properties": {
+         *          constraintField: {
+         *
+         *          }
+         *          "some other field" {
+         *
+         *          }
+         *     }
+         *  }
+         *
+         *  and returns either:
+         *  1) null, if the constraintField is not present but additionalProperties are allowed
+         *  2) empty JSONObject if the constrainField is not present and additionalProperties are **not** allowed
+         *  3) the constarintField JSONObject if the field is present
+         */
+        fun JSONObject.getConstrainedPropertiesJSONObject(constraintField: String): JSONObject? {
+            if (this == emptyJSONObject) {
+                return this
+            }
+            val constraintBlock = optJSONObject("properties")?.optJSONObject(constraintField)
+            if (constraintBlock == null) {
+                if (optBoolean("additionalProperties", true)) {
+                    return null
+                } else {
+                    return emptyJSONObject
+                }
+            } else {
+                return constraintBlock
+            }
+        }
+
+        /**
+         * similar to the above, but instead of returning the JSONObject targeted by `constraintField`,
+         * this will return the set of keys in the "properties" object
+         */
+        fun JSONObject.getConstrainedPropertiesKeySet(): HashSet<String>? {
+            if (this == emptyJSONObject) {
+                return hashSetOf()
+            }
+            if (optBoolean("additionalProperties", true)) {
+                return null
+            } else {
+                return optJSONObject("properties")?.keys()?.toHashSet() ?: hashSetOf()
+            }
+        }
+
+        fun MParticle.IdentityType.getEventsApiName(): String {
+            return MParticleIdentityClientImpl.getStringValue(this)
+        }
+
+        fun MParticle.EventType.getEventsApiName(): String {
+            return when (this) {
+                MParticle.EventType.Location -> "location"
+                MParticle.EventType.Media -> "media"
+                MParticle.EventType.Navigation -> "navigation"
+                MParticle.EventType.Other -> "other"
+                MParticle.EventType.Search -> "search"
+                MParticle.EventType.Social -> "social"
+                MParticle.EventType.Transaction -> "transaction"
+                MParticle.EventType.UserContent -> "user_content"
+                MParticle.EventType.UserPreference -> "user_preference"
+                else -> "unknown"
+            }
+        }
+
         fun <T> Iterator<T>.toHashSet(): HashSet<T> {
             val set = HashSet<T>()
             this.forEach { set.add(it) }
@@ -219,11 +383,29 @@ internal class DataplanFilterImpl constructor(val dataPoints: Map<String, HashSe
         }
     }
 
-    internal class DataplanPoint(val type: String, val name: String? = null, val eventType: String? = null) {
-        override fun toString() = "$type${if (name != null) ".$name" else ""}${if(eventType != null) ".$eventType" else ""}"
-    }
-}
+    class DataPoint(val type: String, val name: String? = null, val eventType: String? = null) {
+        constructor(datapoint: DataPoint): this(datapoint.type, datapoint.name, datapoint.eventType)
 
-class EmptyDataplanFilter: DataplanFilter {
-    override fun <T : BaseEvent> transformEventForEvent(event: T) = event
+        var productAttributeType: String? = null
+            private set
+
+        fun getProductDataPoints() =
+                when (type) {
+                    PRODUCT_ACTION_KEY, PRODUCT_IMPRESSION_KEY -> listOf(
+                            DataPoint(this).apply { productAttributeType = PRODUCT_ACTION_PRODUCTS },
+                            DataPoint(this).apply { productAttributeType = PRODUCT_IMPRESSION_PRODUCTS }
+                    )
+                    else -> null
+                }
+
+        override fun toString() = "$type${if (name != null) ".$name" else ""}${if (eventType != null) ".$eventType" else ""}${productAttributeType?.let { ".$it" } ?: ""}"
+    }
+        
+    class EmptyDataplanFilter: DataplanFilter {
+        override fun <T: BaseEvent> transformEventForEvent(event: T) = event
+        override fun transformIdentities(identities: Map<MParticle.IdentityType, String>) = identities
+        override fun <T> transformUserAttributes(attributes: Map<String, T>) = attributes
+        override fun isUserAttributeBlocked(key: String?) = false
+        override fun isUserIdentityBlocked(key: MParticle.IdentityType?) = false
+    }
 }

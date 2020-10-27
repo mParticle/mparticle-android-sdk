@@ -9,12 +9,15 @@ import com.mparticle.commerce.Impression
 import com.mparticle.commerce.Product
 import com.mparticle.commerce.Promotion
 import com.mparticle.kits.DataplanFilterImpl.Companion.CUSTOM_EVENT_KEY
+import com.mparticle.kits.DataplanFilterImpl.Companion.PRODUCT_ACTION_PRODUCTS
+import com.mparticle.kits.DataplanFilterImpl.Companion.PRODUCT_IMPRESSION_PRODUCTS
 import com.mparticle.kits.DataplanFilterImpl.Companion.PRODUCT_ACTION_KEY
 import com.mparticle.kits.DataplanFilterImpl.Companion.PRODUCT_IMPRESSION_KEY
 import com.mparticle.kits.DataplanFilterImpl.Companion.PROMOTION_ACTION_KEY
 import com.mparticle.kits.DataplanFilterImpl.Companion.SCREEN_EVENT_KEY
 import com.mparticle.kits.DataplanFilterImpl.Companion.USER_ATTRIBUTES_KEY
 import com.mparticle.kits.DataplanFilterImpl.Companion.USER_IDENTITIES_KEY
+import com.mparticle.kits.DataplanFilterImpl.Companion.getEventsApiName
 import junit.framework.Assert.*
 import org.json.JSONObject
 import org.junit.Before
@@ -35,37 +38,129 @@ class DataplanFilterImplTest {
                 .dataplanVersion(dataplan)
                 .build()
         val dataplanFilter = DataplanFilterImpl(dataplanOptions!!)
-        assertEquals(11, dataplanFilter.dataPoints.size)
+        assertEquals(15, dataplanFilter.dataPoints.size)
         dataplanFilter.apply {
-            dataPoints["$CUSTOM_EVENT_KEY.Search Event.search"].also {
+            dataPoints.getValue("$CUSTOM_EVENT_KEY.Search Event.search").also {
                 assertEquals(it, null)
             }
-            dataPoints["$CUSTOM_EVENT_KEY.locationEvent.location"].also {
+            dataPoints.getValue("$CUSTOM_EVENT_KEY.locationEvent.location").also {
                 assertEquals(it, hashSetOf("foo number", "foo", "foo foo"))
             }
-            dataPoints["$PRODUCT_ACTION_KEY.add_to_cart"].also {
+            dataPoints.getValue("$PRODUCT_ACTION_KEY.add_to_cart").also {
                 assertEquals(it, hashSetOf("attributeNumEnum", "attributeEmail", "attributeStringAlpha", "attributeBoolean", "attributeNumMinMax"))
             }
-            dataPoints["$PROMOTION_ACTION_KEY.view"].also {
-                assertEquals(it, hashSetOf("not required", "required"))
-            }
-            dataPoints["$CUSTOM_EVENT_KEY.TestEvent.navigation"].also {
+            dataPoints.getValue("$PRODUCT_ACTION_KEY.add_to_cart.$PRODUCT_IMPRESSION_PRODUCTS").also {
                 assertNull(it)
             }
-            dataPoints[PRODUCT_IMPRESSION_KEY].also {
-                assertEquals(it, hashSetOf("thing1"))
+            dataPoints.getValue("$PRODUCT_ACTION_KEY.add_to_cart.$PRODUCT_ACTION_PRODUCTS").also {
+                assertNull(it)
             }
-            dataPoints["$SCREEN_EVENT_KEY.A New ScreenViewEvent"].also {
+            dataPoints.getValue("$PROMOTION_ACTION_KEY.view").also {
+                assertEquals(it, hashSetOf("not required", "required"))
+            }
+            dataPoints.getValue("$CUSTOM_EVENT_KEY.TestEvent.navigation").also {
+                assertEquals(it, null)
+            }
+            dataPoints.getValue("$SCREEN_EVENT_KEY.A New ScreenViewEvent").also {
                 assertEquals(it, hashSetOf<String>())
             }
-            dataPoints[USER_ATTRIBUTES_KEY].also {
+            dataPoints.getValue(USER_ATTRIBUTES_KEY).also {
                 assertEquals(it, hashSetOf("a third attribute", "my attribute", "my other attribute"))
             }
-            dataPoints[USER_IDENTITIES_KEY].also {
+            dataPoints.getValue(USER_IDENTITIES_KEY).also {
+                assertNull(it)
+            }
+            dataPoints.getValue("$PRODUCT_IMPRESSION_KEY").also {
+                assertEquals(hashSetOf("com_attribute_1", "com_attribute_2"), it)
+            }
+            dataPoints.getValue("$PRODUCT_IMPRESSION_KEY.$PRODUCT_IMPRESSION_PRODUCTS").also {
+                assertEquals(hashSetOf("impr_prod_attribute1", "impr_prod_attribute2"), it)
+            }
+            dataPoints.getValue("$PRODUCT_IMPRESSION_KEY.$PRODUCT_ACTION_PRODUCTS").also {
                 assertNull(it)
             }
         }
 
+    }
+
+    @Test
+    fun testParseDataplan2() {
+        val dataplan = File("src/test/java/com/mparticle/kits/sample_dataplan2.json")
+                .readText()
+                .toJSON()
+        val dataplanOptions = MParticleOptions.DataplanOptions.builder()
+                .dataplanVersion(dataplan)
+                .build()
+        val dataplanFilter = DataplanFilterImpl(dataplanOptions!!)
+        assertEquals(20, dataplanFilter.dataPoints.size)
+        dataplanFilter.apply {
+            dataPoints.getValue("$CUSTOM_EVENT_KEY.Search Event.search").also {
+                assertNull(it)
+            }
+            dataPoints.getValue("$CUSTOM_EVENT_KEY.locationEvent.location").also {
+                assertEquals(hashSetOf("foo", "foo foo", "foo number"), it)
+            }
+            dataPoints.getValue("$PRODUCT_ACTION_KEY.add_to_cart").also {
+                assertEquals(
+                        hashSetOf(
+                                "attributeNumMinMax",
+                                "attributeEmail",
+                                "attributeNumEnum",
+                                "attributeStringAlpha",
+                                "attributeBoolean"
+                        ), it
+                )
+            }
+            dataPoints.getValue("$PRODUCT_ACTION_KEY.add_to_cart.$PRODUCT_ACTION_PRODUCTS").also {
+                assertNull(it)
+            }
+            dataPoints.getValue("$PRODUCT_ACTION_KEY.add_to_cart.$PRODUCT_IMPRESSION_PRODUCTS").also {
+                assertNull(it)
+            }
+            dataPoints.getValue("$PROMOTION_ACTION_KEY.view").also {
+                assertEquals(hashSetOf("not required", "required"), it)
+            }
+            dataPoints.getValue("$CUSTOM_EVENT_KEY.TestEvent.navigation").also {
+                assertNull(it)
+            }
+            dataPoints.getValue("$SCREEN_EVENT_KEY.A New ScreenViewEvent").also {
+                assertNull(it)
+            }
+            dataPoints.getValue("$SCREEN_EVENT_KEY.my screeeen").also {
+                assertEquals(hashSetOf("test1key", "test2key"), it)
+            }
+            dataPoints.getValue("$CUSTOM_EVENT_KEY.something something something.navigation").also {
+                assertNull(it)
+            }
+            dataPoints.getValue("$USER_ATTRIBUTES_KEY").also {
+                assertEquals(hashSetOf("my attribute", "my other attribute", "a third attribute"), it)
+            }
+            dataPoints.getValue("$USER_IDENTITIES_KEY").also { assertNull(it) }
+            dataPoints.getValue("$CUSTOM_EVENT_KEY.SocialEvent.social").also {
+                assertEquals(hashSetOf<String>(), it)
+            }
+            dataPoints.getValue("$PRODUCT_ACTION_KEY.purchase").also {
+                assertEquals(hashSetOf("eventAttribute1", "eventAttribute2"), it)
+            }
+            dataPoints.getValue("$PRODUCT_ACTION_KEY.purchase.$PRODUCT_ACTION_PRODUCTS").also {
+                assertEquals(hashSetOf("plannedAttr1", "plannedAttr2"), it)
+            }
+            dataPoints.getValue("$PRODUCT_ACTION_KEY.purchase.$PRODUCT_IMPRESSION_PRODUCTS").also {
+                assertNull(it)
+            }
+            dataPoints.getValue("$PROMOTION_ACTION_KEY.click").also {
+                assertEquals(hashSetOf("eventAttribute1", "eventAttribute2"), it)
+            }
+            dataPoints.getValue("$PRODUCT_IMPRESSION_KEY").also {
+                assertEquals(hashSetOf("thing1"), it)
+            }
+            dataPoints.getValue("$PRODUCT_IMPRESSION_KEY.$PRODUCT_ACTION_PRODUCTS").also {
+                assertNull(it)
+            }
+            dataPoints.getValue("$PRODUCT_IMPRESSION_KEY.$PRODUCT_IMPRESSION_PRODUCTS").also {
+                assertNull(it)
+            }
+        }
     }
 
     @Before
@@ -200,7 +295,7 @@ class DataplanFilterImplTest {
 
     fun getRandomEvent(datapoint: DataplanPoint): BaseEvent {
         return when (datapoint.type) {
-            CUSTOM_EVENT_KEY -> MPEvent.Builder(datapoint.name!!, MParticle.EventType.values().first { it.ordinal == datapoint.eventType?.toInt() }).build()
+            CUSTOM_EVENT_KEY -> MPEvent.Builder(datapoint.name!!, MParticle.EventType.values().first { it.getEventsApiName() == datapoint.eventType }).build()
             SCREEN_EVENT_KEY -> ScreenEventBuilder(datapoint.name!!).build().also { assertTrue(it.isScreenEvent) }
             PRODUCT_ACTION_KEY -> CommerceEvent.Builder(datapoint.name!!, Product.Builder("a", "b", 1.0).build()).build()
             PROMOTION_ACTION_KEY -> CommerceEvent.Builder(datapoint.name!!, Promotion()).build()
@@ -212,7 +307,7 @@ class DataplanFilterImplTest {
 
     fun getRandomDataplanEventKey(): DataplanPoint {
         return when (Random.Default.nextInt(0, 5)) {
-            0 -> DataplanPoint(CUSTOM_EVENT_KEY, randomString(5), randomEventType().ordinal.toString())
+            0 -> DataplanPoint(CUSTOM_EVENT_KEY, randomString(5), randomEventType().getEventsApiName())
             1 -> DataplanPoint(SCREEN_EVENT_KEY,randomString(8))
             2 -> DataplanPoint(PRODUCT_ACTION_KEY, randomProductAction())
             3 -> DataplanPoint(PROMOTION_ACTION_KEY, randomPromotionAction())

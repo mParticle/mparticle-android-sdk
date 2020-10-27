@@ -275,56 +275,6 @@
       {
         "description": "",
         "match": {
-          "type": "product_impression",
-          "criteria": {}
-        },
-        "validator": {
-          "type": "json_schema",
-          "definition": {
-            "properties": {
-              "data": {
-                "additionalProperties": true,
-                "properties": {
-                  "custom_flags": {
-                    "additionalProperties": false,
-                    "description": "",
-                    "properties": {
-                      "NotSoCustomFlag": {
-                        "description": "",
-                        "type": "boolean"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  "custom_attributes": {
-                    "additionalProperties": false,
-                    "description": "",
-                    "properties": {
-                      "thing1": {
-                        "description": "",
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "thing1"
-                    ],
-                    "type": "object"
-                  }
-                },
-                "required": [
-                  "custom_attributes"
-                ],
-                "type": "object"
-              }
-            }
-          }
-        },
-        "active_transformation_ids": null
-      },
-      {
-        "description": "",
-        "match": {
           "type": "screen_view",
           "criteria": {
             "screen_name": "A New ScreenViewEvent"
@@ -483,6 +433,59 @@
           }
         },
         "active_transformation_ids": null
+      },
+      {
+        "description": "",
+        "match": {
+          "type": "product_impression"
+        },
+        "validator": {
+          "definition": {
+            "properties": {
+              "data": {
+                "additionalProperties": true,
+                "properties": {
+                  "custom_attributes": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "com_attribute_2": {
+                        "type": "string"
+                      },
+                      "com_attribute_1": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "product_impressions": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "products": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "custom_attributes": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "impr_prod_attribute2": {
+                                    "type": "string"
+                                  },
+                                  "impr_prod_attribute1": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     ],
     "transformations": null,
