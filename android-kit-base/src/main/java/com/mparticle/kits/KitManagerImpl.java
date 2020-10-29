@@ -54,7 +54,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     protected final CoreCallbacks mCoreCallbacks;
     private final BackgroundTaskHandler mBackgroundTaskHandler;
     KitIntegrationFactory mKitIntegrationFactory;
-    DataplanFilter mDataplanFilter;
+    private DataplanFilter mDataplanFilter = DataplanFilterImpl.EMPTY;
 
     private static final String RESERVED_KEY_LTV = "$Amount";
     private static final String METHOD_NAME = "$MethodName";
@@ -357,6 +357,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
     @Override
     public Uri getSurveyUrl(int serviceId, Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists) {
+        userAttributes = mDataplanFilter.transformUserAttributes(userAttributes);
+        userAttributeLists = mDataplanFilter.transformUserAttributes(userAttributeLists);
         KitIntegration provider = providers.get(serviceId);
         if (provider != null) {
             return provider.getSurveyUrl((Map<String, String>) provider.getConfiguration().filterAttributes(provider.getConfiguration().getUserAttributeFilters(), userAttributes),
@@ -549,6 +551,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     //================================================================================
     @Override
     public void onUserAttributesReceived(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists, Long mpid) {
+        userAttributes = mDataplanFilter.transformUserAttributes(userAttributes);
+        userAttributeLists = mDataplanFilter.transformUserAttributes(userAttributeLists);
         for (KitIntegration provider : providers.values()) {
             try {
                 if ((provider instanceof KitIntegration.AttributeListener || provider instanceof KitIntegration.UserAttributeListener)
@@ -602,6 +606,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
     @Override
     public void setUserAttribute(String attributeKey, String attributeValue, long mpid) {
+        if (mDataplanFilter.isUserAttributeBlocked(attributeKey)) {
+            return;
+        }
         for (KitIntegration provider : providers.values()) {
             try {
                 setUserAttribute(provider, attributeKey, attributeValue, mpid);
@@ -613,6 +620,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
     @Override
     public void setUserAttributeList(String attributeKey, List<String> valuesList, long mpid) {
+        if (mDataplanFilter.isUserAttributeBlocked(attributeKey)) {
+            return;
+        }
         for (KitIntegration provider : providers.values()) {
             try {
                 setUserAttribute(provider, attributeKey, valuesList, mpid);
@@ -659,6 +669,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
     @Override
     public void removeUserAttribute(String key, long mpid) {
+        if (mDataplanFilter.isUserAttributeBlocked(key)) {
+            return;
+        }
         for (KitIntegration provider : providers.values()) {
             try {
                 if ((provider instanceof KitIntegration.AttributeListener || provider instanceof KitIntegration.UserAttributeListener)
@@ -679,6 +692,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
     @Override
     public void incrementUserAttribute(String key, int incrementedBy, String newValue, long mpid) {
+        if (mDataplanFilter.isUserAttributeBlocked(key)) {
+            return;
+        }
         for (KitIntegration provider : providers.values()) {
             try {
                 if (!provider.isDisabled() && KitConfiguration.shouldForwardAttribute(provider.getConfiguration().getUserAttributeFilters(), key))
@@ -696,6 +712,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
     @Override
     public void setUserTag(String tag, long mpid) {
+        if (mDataplanFilter.isUserAttributeBlocked(tag)) {
+            return;
+        }
         for (KitIntegration provider : providers.values()) {
             try {
                 if (provider instanceof KitIntegration.UserAttributeListener && !provider.isDisabled()
@@ -710,6 +729,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
     @Override
     public void setUserIdentity(String id, MParticle.IdentityType identityType) {
+        if (mDataplanFilter.isUserIdentityBlocked(identityType)) {
+            return;
+        }
         for (KitIntegration provider : providers.values()) {
             try {
                 if (provider instanceof KitIntegration.AttributeListener && !provider.isDisabled() && provider.getConfiguration().shouldSetIdentity(identityType)) {
@@ -723,6 +745,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
     @Override
     public void removeUserIdentity(MParticle.IdentityType identityType) {
+        if (mDataplanFilter.isUserIdentityBlocked(identityType)) {
+            return;
+        }
         for (KitIntegration provider : providers.values()) {
             try {
                 if (provider instanceof KitIntegration.AttributeListener && !provider.isDisabled()) {
@@ -1269,4 +1294,24 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             return null;
         }
     }
+
+    @NonNull
+    DataplanFilter getDataplanFilter() {
+        if (mDataplanFilter == null) {
+            Logger.warning("DataplanFilter could not be found");
+            return DataplanFilterImpl.EMPTY;
+        } else {
+            return mDataplanFilter;
+        }
+    }
+
+    void setDataplanFilter(@Nullable DataplanFilter dataplanFilter) {
+        if (dataplanFilter != null) {
+            mDataplanFilter = dataplanFilter;
+        } else {
+            mDataplanFilter = DataplanFilterImpl.EMPTY;
+        }
+    }
+
+
 }

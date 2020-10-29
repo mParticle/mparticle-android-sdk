@@ -46,9 +46,13 @@ public class FilteredMParticleUser implements MParticleUser {
      */
     @Override
     public Map<String, Object> getUserAttributes() {
+        Map<String, Object> userAttributes = mpUser.getUserAttributes();
+        if (provider.getKitManager() != null) {
+            userAttributes = provider.getKitManager().getDataplanFilter().transformUserAttributes(userAttributes);
+        }
         return (Map<String, Object>)KitConfiguration.filterAttributes(
                 provider.getConfiguration().getUserAttributeFilters(),
-                mpUser.getUserAttributes()
+                userAttributes
         );
     }
 
@@ -57,6 +61,10 @@ public class FilteredMParticleUser implements MParticleUser {
         return mpUser.getUserAttributes(new UserAttributeListener() {
             @Override
             public void onUserAttributesReceived(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists, Long mpid) {
+                if (provider.getKitManager() != null) {
+                    userAttributes = provider.getKitManager().getDataplanFilter().transformUserAttributes(userAttributes);
+                    userAttributeLists = provider.getKitManager().getDataplanFilter().transformUserAttributes(userAttributeLists);
+                }
                 listener.onUserAttributesReceived((Map<String, String>)KitConfiguration.filterAttributes(
                         provider.getConfiguration().getUserAttributeFilters(),
                         userAttributes),
@@ -75,6 +83,9 @@ public class FilteredMParticleUser implements MParticleUser {
     @Override
     public Map<MParticle.IdentityType, String> getUserIdentities() {
         Map<MParticle.IdentityType, String> identities = mpUser.getUserIdentities();
+        if (provider.getKitManager() != null) {
+            identities = provider.getKitManager().getDataplanFilter().transformIdentities(identities);
+        }
         Map<MParticle.IdentityType, String> filteredIdentities = new HashMap<MParticle.IdentityType, String>(identities.size());
         for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()) {
             if (provider.getConfiguration().shouldSetIdentity(entry.getKey())) {

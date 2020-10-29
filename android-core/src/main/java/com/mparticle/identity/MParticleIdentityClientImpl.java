@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-/** package-private **/ class MParticleIdentityClientImpl extends MParticleBaseClientImpl implements MParticleIdentityClient {
+public class MParticleIdentityClientImpl extends MParticleBaseClientImpl implements MParticleIdentityClient {
     private Context mContext;
     private ConfigManager mConfigManager;
 
@@ -309,7 +309,7 @@ import java.util.UUID;
         return mConfigManager.getApiSecret();
     }
 
-    static String getStringValue(MParticle.IdentityType identityType) {
+    public static String getStringValue(MParticle.IdentityType identityType) {
         switch (identityType) {
             case Other:
                 return "other";
