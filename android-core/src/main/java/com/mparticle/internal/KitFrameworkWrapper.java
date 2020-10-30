@@ -70,6 +70,7 @@ public class KitFrameworkWrapper implements KitManager {
                     Logger.debug("Restoring previous Kit configuration.");
                     updateKits(configuration);
                 }
+                updateDataplan(mCoreCallbacks.getDataplanOptions());
             } catch (Exception e) {
                 Logger.debug("No Kit Framework detected.");
                 disableQueuing();
@@ -647,6 +648,11 @@ public class KitFrameworkWrapper implements KitManager {
         @Override
         public JSONArray getLatestKitConfiguration() {
             return mConfigManager.getLatestKitConfiguration();
+        }
+
+        @Override
+        public MParticleOptions.DataplanOptions getDataplanOptions() {
+            return mConfigManager.getDataplanOptions();
         }
 
         @Override

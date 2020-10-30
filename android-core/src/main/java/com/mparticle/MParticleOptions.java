@@ -710,6 +710,23 @@ public class MParticleOptions {
             return blockEvents;
         }
 
+        @Override
+        public String toString() {
+            String dataplanString = null;
+            try {
+                dataplanString = dataplan.toString(4);
+            } catch (JSONException e) {
+                dataplanString = "Unable to print Dataplan";
+            }
+            return "DataplanOptions {" +
+                    "\n\tblockUserAttributes=" + blockUserAttributes +
+                    ", \n\tblockUserIdentities=" + blockUserIdentities +
+                    ", \n\tblockEventAttributes=" + blockEventAttributes +
+                    ", \n\tblockEvents=" + blockEvents +
+                    ",\n\tdataplan=" + dataplanString +
+                    "\n}";
+        }
+
         public static Builder builder() {
             return new Builder();
         }

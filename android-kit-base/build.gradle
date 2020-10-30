@@ -25,8 +25,6 @@ android {
 
         debug {
             minifyEnabled false
-            //multidex is required for instrumented test builds
-            multiDexEnabled true
             buildConfigField 'Boolean', 'MP_DEBUG', 'true'
         }
 
@@ -36,7 +34,7 @@ android {
         }
     }
     dexOptions {
-        javaMaxHeapSize "2048M"
+        javaMaxHeapSize "2g"
     }
     sourceSets {
         androidTest.java.srcDirs += 'src/androidTest/kotlin'

@@ -99,7 +99,7 @@ public class MParticle {
     protected MParticle() { }
     
     private MParticle(MParticleOptions options) {
-        ConfigManager configManager = new ConfigManager(options.getContext(), options.getEnvironment(), options.getApiKey(), options.getApiSecret(), options.getDataplanOptions());
+        ConfigManager configManager = new ConfigManager(options.getContext(), options.getEnvironment(), options.getApiKey(), options.getApiSecret(), options.getDataplanOptions(), options.getDataplanId(), options.getDataplanVersion());
         configManager.setUploadInterval(options.getUploadInterval());
         configManager.setSessionTimeout(options.getSessionTimeout());
         configManager.setIdentityConnectionTimeout(options.getConnectionTimeout());

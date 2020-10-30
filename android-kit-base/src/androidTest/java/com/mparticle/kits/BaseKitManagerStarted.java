@@ -180,6 +180,11 @@ public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
         }
 
         @Override
+        public MParticleOptions.DataplanOptions getDataplanOptions() {
+            return configManager.getDataplanOptions();
+        }
+
+        @Override
         public boolean isPushEnabled() {
             return configManager.isPushEnabled();
         }

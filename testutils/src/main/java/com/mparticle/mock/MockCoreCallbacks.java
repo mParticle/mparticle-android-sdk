@@ -3,6 +3,7 @@ package com.mparticle.mock;
 import android.app.Activity;
 import android.net.Uri;
 
+import com.mparticle.MParticleOptions;
 import com.mparticle.internal.CoreCallbacks;
 
 import org.json.JSONArray;
@@ -44,6 +45,11 @@ public class MockCoreCallbacks implements CoreCallbacks {
 
     @Override
     public JSONArray getLatestKitConfiguration() {
+        return null;
+    }
+
+    @Override
+    public MParticleOptions.DataplanOptions getDataplanOptions() {
         return null;
     }
 

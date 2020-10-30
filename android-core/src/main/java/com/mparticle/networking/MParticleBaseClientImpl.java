@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import com.mparticle.BuildConfig;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
+import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 
 import java.io.IOException;
@@ -114,13 +115,24 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
         switch (endpoint) {
             case CONFIG:
                 subdirectory = overridesSubdirectory ? "" : SERVICE_VERSION_4 + "/";
-                uri = new Uri.Builder()
+                Uri.Builder builder = new Uri.Builder()
                         .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
                         .path(subdirectory + mApiKey + "/config")
                         .appendQueryParameter("av", MPUtility.getAppVersionName(mContext))
-                        .appendQueryParameter("sv", Constants.MPARTICLE_VERSION)
-                        .build();
+                        .appendQueryParameter("sv", Constants.MPARTICLE_VERSION);
+                if (mConfigManager.getDataplanId() != null) {
+                    builder.appendQueryParameter("plan_id", mConfigManager.getDataplanId());
+                    Integer dataplanVersion = mConfigManager.getDataplanVersion();
+                    if (dataplanVersion != null) {
+                        if (dataplanVersion > 0 && dataplanVersion < 1001) {
+                            builder.appendQueryParameter("plan_version", mConfigManager.getDataplanVersion().toString());
+                        } else {
+                            Logger.warning("Dataplan version of " + dataplanVersion + " is out of range and will not be used to fetch remote dataplan. Version must be between 1 and 1000.");
+                        }
+                    }
+                }
+                uri = builder.build();
                 return MPUrl.getUrl(uri.toString(), defaultUrl);
             case EVENTS:
                 subdirectory = overridesSubdirectory ? "" : SERVICE_VERSION_2 + "/";

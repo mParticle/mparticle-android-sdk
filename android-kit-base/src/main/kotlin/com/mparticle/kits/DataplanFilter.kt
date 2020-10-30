@@ -12,9 +12,9 @@ import org.json.JSONArray
 import org.json.JSONObject;
 
 internal interface DataplanFilter {
-    fun <T: BaseEvent> transformEventForEvent(event: T): T?
-    fun transformIdentities(identities: Map<MParticle.IdentityType, String>): Map<MParticle.IdentityType, String>
-    fun <T> transformUserAttributes(attributes: Map<String, T>): Map<String, T>
+    fun <T: BaseEvent> transformEventForEvent(event: T?): T?
+    fun transformIdentities(identities: Map<MParticle.IdentityType, String?>?): Map<MParticle.IdentityType, String?>?
+    fun <T> transformUserAttributes(attributes: Map<String, T>?): Map<String, T>?
     fun isUserAttributeBlocked(key: String?): Boolean
     fun isUserIdentityBlocked(key: MParticle.IdentityType?): Boolean
 }
@@ -32,6 +32,22 @@ internal class DataplanFilterImpl constructor(val dataPoints: Map<String, HashSe
                     dataplanOptions.isBlockUserAttributes,
                     dataplanOptions.isBlockUserIdentities)
 
+    init {
+        Logger.debug(
+                """
+                Data Plan parsed for Kit Filtering: 
+                blockEvents=$blockEvents
+                blockEventAttributes=$blockEventAttributes
+                blockUserAttributes=$blockUserAttributes
+                blockUserIdentities=$blockUserIdentities
+                ${
+                dataPoints.entries.joinToString("\n") { (key, value) ->
+                    "$key\n\t${value?.joinToString("\n\t") { it }}"
+                }
+                }
+        """)
+    }
+
     /**
      * filters out events and their attributes if
      * 1) they are not defined within the dataplan
@@ -39,7 +55,10 @@ internal class DataplanFilterImpl constructor(val dataPoints: Map<String, HashSe
      *
      * note: this will NOT return a copy of the event, it will return either the original event filtered or null
      */
-    override fun <T: BaseEvent> transformEventForEvent(event: T): T? {
+    override fun <T: BaseEvent> transformEventForEvent(event: T?): T? {
+        if (event == null) {
+            return null
+        }
         if (blockEvents || blockEventAttributes) {
             val dataPointKey = when {
                 event is MPEvent ->
@@ -60,7 +79,7 @@ internal class DataplanFilterImpl constructor(val dataPoints: Map<String, HashSe
             dataPointKey ?: return event
             //if there is no valid datapoint then it is an unplanned event
             if (blockEvents && !dataPoints.containsKey(dataPointKey.toString())) {
-                Logger.verbose("Blocking unplanned event: ${dataPointKey}")
+                Logger.verbose("Blocking unplanned event: $dataPointKey")
                 return null
             }
             val dataPoint = dataPoints[dataPointKey.toString()]
@@ -75,7 +94,7 @@ internal class DataplanFilterImpl constructor(val dataPoints: Map<String, HashSe
                     }
                 }
                 if (event is CommerceEvent) {
-                    val productActionDatapoint = dataPoints["$dataPointKey.$PRODUCT_ACTION_KEY"]
+                    val productActionDatapoint = dataPoints["$dataPointKey.$PRODUCT_ACTION_PRODUCTS"]
                     event.products?.forEach { product ->
                         product?.customAttributes?.apply {
                             val filteredAttributes = filterKeys {
@@ -85,7 +104,7 @@ internal class DataplanFilterImpl constructor(val dataPoints: Map<String, HashSe
                             putAll(filteredAttributes)
                         }
                     }
-                    val productImpressionDatapoint = dataPoints["$dataPointKey.$PRODUCT_IMPRESSION_KEY"]
+                    val productImpressionDatapoint = dataPoints["$dataPointKey.$PRODUCT_IMPRESSION_PRODUCTS"]
                     if (event.impressions?.size ?: 0 > 0) {
                         event.impressions?.forEach {
                             it.products.forEach { product ->
@@ -106,7 +125,10 @@ internal class DataplanFilterImpl constructor(val dataPoints: Map<String, HashSe
         return event
     }
     
-    override fun transformIdentities(identities: Map<MParticle.IdentityType, String>): Map<MParticle.IdentityType, String> {
+    override fun transformIdentities(identities: Map<MParticle.IdentityType, String?>?): Map<MParticle.IdentityType, String?>? {
+        if (identities == null) {
+            return null
+        }
         if (blockUserIdentities) {
             val datapoint = dataPoints[USER_IDENTITIES_KEY]
             if (datapoint != null) {
@@ -122,7 +144,10 @@ internal class DataplanFilterImpl constructor(val dataPoints: Map<String, HashSe
         return identities
     }
 
-    override fun <T> transformUserAttributes(attributes: Map<String, T>): Map<String, T> {
+    override fun <T> transformUserAttributes(attributes: Map<String, T>?): Map<String, T>? {
+        if (attributes == null) {
+            return null
+        }
         if (blockUserAttributes) {
             val datapoint = dataPoints[USER_ATTRIBUTES_KEY]
             if (datapoint != null) {
@@ -223,7 +248,10 @@ internal class DataplanFilterImpl constructor(val dataPoints: Map<String, HashSe
                     }
                 }
                 PRODUCT_ACTION_KEY, PROMOTION_ACTION_KEY -> {
-                    val commerceEventType = criteria?.optString("action")
+                    var commerceEventType = criteria?.optString("action")
+                    if (commerceEventType == "remove_from_wish_list") {
+                        commerceEventType = "remove_from_wishlist"
+                    }
                     if (!commerceEventType.isNullOrBlank()) {
                         return DataPoint(matchType, commerceEventType)
                     }
@@ -402,9 +430,9 @@ internal class DataplanFilterImpl constructor(val dataPoints: Map<String, HashSe
     }
         
     class EmptyDataplanFilter: DataplanFilter {
-        override fun <T: BaseEvent> transformEventForEvent(event: T) = event
-        override fun transformIdentities(identities: Map<MParticle.IdentityType, String>) = identities
-        override fun <T> transformUserAttributes(attributes: Map<String, T>) = attributes
+        override fun <T: BaseEvent> transformEventForEvent(event: T?) = event
+        override fun transformIdentities(identities: Map<MParticle.IdentityType, String?>?) = identities
+        override fun <T> transformUserAttributes(attributes: Map<String, T>?) = attributes
         override fun isUserAttributeBlocked(key: String?) = false
         override fun isUserIdentityBlocked(key: MParticle.IdentityType?) = false
     }

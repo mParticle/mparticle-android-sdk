@@ -33,7 +33,7 @@ object Utils {
 
     fun randomIdentities(): MutableMap<MParticle.IdentityType, String> {
         val identities = MParticle.IdentityType.values()
-        return (0..Random.Default.nextInt(0, 5)).map {
+        return (0..Random.Default.nextInt(3, 8)).map {
             identities[Random.Default.nextInt(0, identities.size - 1)] to randomString(8)
         }.toMap().toMutableMap()
     }

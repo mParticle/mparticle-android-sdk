@@ -176,7 +176,6 @@ class DataplanBlockingUserTests: BaseKitManagerStarted() {
         val datapoints = getRandomDataplanPoints()
         val allowedIdentities = randomIdentities()
         val blockIdentities = randomIdentities().filterKeys { !allowedIdentities.containsKey(it) }
-        assertTrue(blockIdentities.size > 0)
 
         datapoints[DataplanFilterImpl.USER_IDENTITIES_KEY] = allowedIdentities.keys.map { it.getEventsApiName() }.toHashSet()
         mKitManager.setDataplanFilter(DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), Random.nextBoolean(), true))

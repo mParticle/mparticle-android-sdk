@@ -157,6 +157,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     public void updateDataplan(@Nullable MParticleOptions.DataplanOptions dataplanOptions) {
         if (dataplanOptions != null) {
             try {
+                Logger.info("Updating Data Plan");
+                Logger.debug(dataplanOptions.toString());
                 mDataplanFilter = new DataplanFilterImpl(dataplanOptions);
             } catch (Exception ex) {
                 Logger.warning(ex, "Failed to parse DataplanOptions, Dataplan filtering for Kits will not be applied");
@@ -164,6 +166,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             }
         } else {
             mDataplanFilter = DataplanFilterImpl.EMPTY;
+            Logger.info("Clearing Data Plan");
         }
     }
 
@@ -903,6 +906,12 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
     @Override
     public void logScreen(MPEvent screenEvent) {
+        if (mDataplanFilter != null) {
+            screenEvent = mDataplanFilter.transformEventForEvent(screenEvent);
+            if (screenEvent == null) {
+                return;
+            }
+        }
         for (KitIntegration provider : providers.values()) {
             try {
                 if (provider instanceof KitIntegration.EventListener && !provider.isDisabled() && provider.getConfiguration().shouldLogScreen(screenEvent.getEventName())) {

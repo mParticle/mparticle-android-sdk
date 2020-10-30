@@ -3,6 +3,8 @@ package com.mparticle.internal;
 import android.app.Activity;
 import android.net.Uri;
 
+import com.mparticle.MParticleOptions;
+
 import org.json.JSONArray;
 
 import java.lang.ref.WeakReference;
@@ -16,6 +18,7 @@ public interface CoreCallbacks {
     Map<String, String> getIntegrationAttributes(int kitId);
     WeakReference<Activity> getCurrentActivity();
     JSONArray getLatestKitConfiguration();
+    MParticleOptions.DataplanOptions getDataplanOptions();
     boolean isPushEnabled();
     String getPushSenderId();
     String getPushInstanceId();

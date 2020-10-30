@@ -54,11 +54,21 @@ public class ConfigManager {
     public static final String WORKSPACE_TOKEN = "wst";
     static final String ALIAS_MAX_WINDOW = "alias_max_window";
     static final String KEY_RAMP = "rp";
+    static final String DATAPLAN_KEY = "dpr";
+    static final String DATAPLAN_OBJ = "dtpn";
+    static final String DATAPLAN_BLOCKING = "blok";
+    static final String DATAPLAN_VERSION = "vers";
+    static final String DATAPLAN_BLOCK_EVENTS = "ev";
+    static final String DATAPLAN_BLOCK_EVENT_ATTRIBUTES = "ea";
+    static final String DATAPLAN_BLOCK_USER_ATTRIBUTES = "ua";
+    static final String DATAPLAN_BLOCK_USER_IDENTITIES = "id";
+
 
     private static final int DEVMODE_UPLOAD_INTERVAL_MILLISECONDS = 10 * 1000;
     private static final int DEFAULT_MAX_ALIAS_WINDOW_DAYS = 90;
     private Context mContext;
     private static NetworkOptions sNetworkOptions;
+    private boolean mIgnoreDataplanOptionsFromConfig = false;
     private MParticleOptions.DataplanOptions mDataplanOptions;
 
     static SharedPreferences sPreferences;
@@ -82,6 +92,8 @@ public class ConfigManager {
     private ExceptionHandler mExHandler;
     private boolean mIncludeSessionHistory = false;
     private JSONObject mCurrentCookies;
+    private String mDataplanId;
+    private Integer mDataplanVersion;
     public static final int DEFAULT_CONNECTION_TIMEOUT_SECONDS = 30;
     public static final int MINIMUM_CONNECTION_TIMEOUT_SECONDS = 1;
     public static final int DEFAULT_SESSION_TIMEOUT_SECONDS = 60;
@@ -104,16 +116,20 @@ public class ConfigManager {
     }
 
     public ConfigManager(Context context) {
-        this(context, null, null, null, null);
+        this(context, null, null, null, null, null, null);
     }
 
-    public ConfigManager(Context context, MParticle.Environment environment, String apiKey, String apiSecret, MParticleOptions.DataplanOptions dataplanOptions) {
+    public ConfigManager(Context context, MParticle.Environment environment, String apiKey, String apiSecret, MParticleOptions.DataplanOptions dataplanOptions, String dataplanId, Integer dataplanVersion) {
         mContext = context.getApplicationContext();
         sPreferences = getPreferences(mContext);
         mLocalPrefs = new AppConfig(mContext, environment, sPreferences, apiKey, apiSecret);
         mUserStorage = UserStorage.create(mContext, getMpid());
-        restoreOldConfig();
+        //if we are initialized with a DataplanOptions instance, then we will ignore values from remote config
+        mIgnoreDataplanOptionsFromConfig = dataplanOptions != null;
         this.mDataplanOptions = dataplanOptions;
+        mDataplanVersion = dataplanVersion;
+        mDataplanId = dataplanId;
+        restoreOldConfig();
     }
 
     private void restoreOldConfig() {
@@ -144,7 +160,7 @@ public class ConfigManager {
         return null;
     }
 
-    public MParticleOptions.DataplanOptions getDataplan() {
+    public MParticleOptions.DataplanOptions getDataplanOptions() {
         return mDataplanOptions;
     }
 
@@ -268,6 +284,10 @@ public class ConfigManager {
             editor.putInt(ALIAS_MAX_WINDOW, responseJSON.getInt(ALIAS_MAX_WINDOW));
         } else {
             editor.remove(ALIAS_MAX_WINDOW);
+        }
+        if (!mIgnoreDataplanOptionsFromConfig) {
+            mDataplanOptions = parseDataplanOptions(responseJSON);
+            MParticle.getInstance().Internal().getKitManager().updateDataplan(mDataplanOptions);
         }
         editor.apply();
         applyConfig();
@@ -896,6 +916,14 @@ public class ConfigManager {
         getUserStorage(mpId).setUserIdentities(userIdentities.toString());
     }
 
+    public String getDataplanId() {
+        return mDataplanId;
+    }
+
+    public Integer getDataplanVersion() {
+        return mDataplanVersion;
+    }
+
     private static boolean fixUpUserIdentities(JSONArray identities) {
         boolean changeMade = false;
         try {
@@ -1104,6 +1132,30 @@ public class ConfigManager {
      */
     public int getAliasMaxWindow() {
         return sPreferences.getInt(ALIAS_MAX_WINDOW, DEFAULT_MAX_ALIAS_WINDOW_DAYS);
+    }
+
+    @Nullable
+    MParticleOptions.DataplanOptions parseDataplanOptions(JSONObject jsonObject) {
+        if (jsonObject != null) {
+            JSONObject dataplanConfig = jsonObject.optJSONObject(DATAPLAN_KEY);
+            if (dataplanConfig != null) {
+                JSONObject dataplanContanier = dataplanConfig.optJSONObject(DATAPLAN_OBJ);
+                if (dataplanContanier != null) {
+                    JSONObject block = dataplanContanier.optJSONObject(DATAPLAN_BLOCKING);
+                    JSONObject dataplanVersion = dataplanContanier.optJSONObject(DATAPLAN_VERSION);
+                    if (block != null) {
+                        return MParticleOptions.DataplanOptions.builder()
+                                .dataplanVersion(dataplanVersion)
+                                .blockEvents(block.optBoolean(DATAPLAN_BLOCK_EVENTS, false))
+                                .blockEventAttributes(block.optBoolean(DATAPLAN_BLOCK_EVENT_ATTRIBUTES, false))
+                                .blockUserAttributes(block.optBoolean(DATAPLAN_BLOCK_USER_ATTRIBUTES, false))
+                                .blockUserIdentities(block.optBoolean(DATAPLAN_BLOCK_USER_IDENTITIES, false))
+                                .build();
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private int getAppVersion() {
