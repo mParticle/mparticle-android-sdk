@@ -35,18 +35,19 @@ internal class DataplanFilterImpl constructor(val dataPoints: Map<String, HashSe
     init {
         Logger.debug(
                 """
-                Data Plan parsed for Kit Filtering: 
-                blockEvents=$blockEvents
-                blockEventAttributes=$blockEventAttributes
-                blockUserAttributes=$blockUserAttributes
-                blockUserIdentities=$blockUserIdentities
-                ${
-                dataPoints.entries.joinToString("\n") { (key, value) ->
-                    "$key\n\t${value?.joinToString("\n\t") { it }}"
-                }
-                }
+
+Data Plan parsed for Kit Filtering: 
+    blockEvents=$blockEvents
+    blockEventAttributes=$blockEventAttributes
+    blockUserAttributes=$blockUserAttributes
+    blockUserIdentities=$blockUserIdentities
+        ${
+                    dataPoints.entries.joinToString("\n") { (key, value) ->
+                        "$key\n\t${value?.joinToString("\n\t") { it }}"
+                    }
+                    }
         """)
-    }
+        }
 
     /**
      * filters out events and their attributes if
