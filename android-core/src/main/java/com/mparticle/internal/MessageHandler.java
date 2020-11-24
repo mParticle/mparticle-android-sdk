@@ -126,8 +126,10 @@ import java.util.UUID;
                 try {
                     JSONObject sessionAttributes = (JSONObject) msg.obj;
                     String sessionId = sessionAttributes.getString(MessageKey.SESSION_ID);
-                    String attributes = sessionAttributes.getString(MessageKey.ATTRIBUTES);
-                    mMParticleDBManager.updateSessionAttributes(sessionId, attributes);
+                    String attributes = sessionAttributes.optString(MessageKey.ATTRIBUTES);
+                    if (!MPUtility.isEmpty(attributes)) {
+                        mMParticleDBManager.updateSessionAttributes(sessionId, attributes);
+                    }
                 } catch (Exception e) {
                     Logger.error(e, "Error updating session attributes in mParticle DB.");
                 }
