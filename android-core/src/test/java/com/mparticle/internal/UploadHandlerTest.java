@@ -1,10 +1,10 @@
 package com.mparticle.internal;
 
 
-
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Message;
+
 import androidx.annotation.NonNull;
 
 import com.mparticle.MParticle;
@@ -12,6 +12,7 @@ import com.mparticle.MockMParticle;
 import com.mparticle.SdkListener;
 import com.mparticle.identity.AliasRequest;
 import com.mparticle.identity.AliasResponse;
+import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.messages.MPAliasMessage;
 import com.mparticle.mock.MockContext;
@@ -39,6 +40,7 @@ import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(PowerMockRunner.class)
@@ -355,4 +357,107 @@ public class UploadHandlerTest {
         assertEquals(aliasRequest, capturedResponse.value.getRequest());
         assertEquals(aliasRequestMessage.getRequestId(), capturedResponse.value.getRequestId());
     }
+
+    //we are uploading 100 messages at a time. Make sure when we have > 100 messages ready for upload, we perform
+    //multiple uploads until they are done, then go to the next upload loop
+    @Test
+    public void testFullUploadLogic() throws IOException, MParticleApiClientImpl.MPThrottleException, JSONException, MParticleApiClientImpl.MPRampException {
+
+
+        MockMParticleDBManager database = new MockMParticleDBManager();
+        final ConfigManager mockConfigManager = Mockito.mock(ConfigManager.class);
+        Mockito.when(mockConfigManager.getUploadInterval()).thenReturn(100L);
+        final AppStateManager mockAppStateManager = Mockito.mock(AppStateManager.class);
+        InternalSession session = new InternalSession() {
+            @Override
+            public boolean isActive() {
+                return true;
+            }
+        };
+        Mockito.when(mockAppStateManager.getSession()).thenReturn(session);
+
+        MockUploadHandler uploadHandler = new MockUploadHandler(database, mockConfigManager, mockAppStateManager);
+
+        MParticleApiClient mockApiClient = Mockito.mock(MParticleApiClient.class);
+        Mockito.when(mockApiClient.sendMessageBatch(Mockito.any(String.class))).thenReturn(200);
+        uploadHandler.setApiClient(mockApiClient);
+
+
+        //send a regular "upload loop" message
+        Message message = Mockito.mock(Message.class);
+        message.what = UploadHandler.UPLOAD_MESSAGES;
+        message.arg1 = 0;
+        Mockito.when(message.toString()).thenReturn("asdvasd");
+
+        database.hasMessagesTrueCount = 4;
+        uploadHandler.handleMessageImpl(message);
+
+        //make sure `MParticleDatabaseManager#prepareMessageUploads()` was called 4 times (based on database.hasMessagesTrueCount)
+        assertEquals(4, uploadHandler.prepareMessageUploadsCalledCount);
+        //make sure `MParticleDatabaseManager#upload()` was still only called once. This will take care of all the prepared uploads
+        assertEquals(1, uploadHandler.uploadCalledCount);
+
+        //make sure we send the delayed message for the next "upload loop"
+        assertNotSame(message, uploadHandler.message);
+        assertEquals(100, uploadHandler.messageDelay.longValue());
+    }
+
+    class MockMParticleDBManager extends MParticleDBManager {
+        int hasMessagesTrueCount = 0;
+
+        MockMParticleDBManager() {
+            super(new MockContext());
+        }
+
+        @Override
+        public boolean hasMessagesForUpload() {
+            return hasMessagesTrueCount-- > 0;
+        }
+
+        @Override
+        public MPDatabase getDatabase() {
+            return null;
+        }
+    }
+
+    class MockUploadHandler extends UploadHandler {
+        Message message;
+        Long messageDelay;
+        int uploadCalledCount = 0;
+        int prepareMessageUploadsCalledCount = 0;
+
+        MockUploadHandler(MParticleDBManager database, ConfigManager configManager, AppStateManager appStateManager) {
+            super(new MockContext(),
+                    configManager,
+                    appStateManager,
+                    Mockito.mock(MessageManager.class),
+                    database);
+        }
+
+        @Override
+        protected boolean upload(boolean history) {
+            uploadCalledCount++;
+            return false;
+        }
+
+        @Override
+        protected void prepareMessageUploads(boolean history) throws Exception {
+            prepareMessageUploadsCalledCount++;
+        }
+
+        @Override
+        protected void sendEmpty(int what) {
+            message = new Message();
+            message.what = what;
+            messageDelay = null;
+        }
+
+        @Override
+        public void sendEmptyDelayed(int what, long uptimeMillis) {
+            message = new Message();
+            message.what = what;
+            messageDelay = uptimeMillis;
+
+        }
+    };
 }

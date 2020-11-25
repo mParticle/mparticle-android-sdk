@@ -1,11 +1,27 @@
 package com.mparticle.internal;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.mparticle.BuildConfig;
 
 /**
  *
  */
 public class Constants {
+
+    private static int MAX_MESSAGE_PER_BATCH = 100;
+    public static int getMaxMessagePerBatch() {
+        return MAX_MESSAGE_PER_BATCH;
+    }
+
+    @VisibleForTesting
+    public static void setMaxMessagePerBatch(int max) {
+        if (max > 1) {
+            MAX_MESSAGE_PER_BATCH = max;
+        } else {
+            MAX_MESSAGE_PER_BATCH = 100;
+        }
+    }
 
     public final static String LOG_TAG = "mParticle";
 

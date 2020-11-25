@@ -76,6 +76,7 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
      * Only used for unit testing.
      */
     UploadHandler(Context context, ConfigManager configManager, AppStateManager appStateManager, MessageManager messageManager, MParticleDBManager mparticleDBManager) {
+        super();
         mConfigManager = configManager;
         mContext = context;
         mAppStateManager = appStateManager;
@@ -128,19 +129,21 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
                     long uploadInterval = mConfigManager.getUploadInterval();
                     if (isNetworkConnected) {
                         if (uploadInterval > 0 || msg.arg1 == 1) {
-                            prepareMessageUploads(false);
+                            while(mParticleDBManager.hasMessagesForUpload()) {
+                                prepareMessageUploads(false);
+                            }
                             boolean needsHistory = upload(false);
                             if (needsHistory) {
-                                this.sendEmptyMessage(UPLOAD_HISTORY);
+                                this.sendEmpty(UPLOAD_HISTORY);
                             }
                         }
                     }
                     if (mAppStateManager.getSession().isActive() && uploadInterval > 0 && msg.arg1 == 0) {
-                        this.sendEmptyMessageDelayed(UPLOAD_MESSAGES, uploadInterval);
+                        this.sendEmptyDelayed(UPLOAD_MESSAGES, uploadInterval);
                     }
                     break;
                 case UPLOAD_HISTORY:
-                    removeMessages(UPLOAD_HISTORY);
+                    removeMessage(UPLOAD_HISTORY);
                     prepareMessageUploads(true);
                     if (isNetworkConnected) {
                         upload(true);
@@ -165,7 +168,7 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
      * - persist all of the resulting upload batch objects
      * - mark the messages as having been uploaded.
      */
-    private void prepareMessageUploads(boolean history) throws Exception {
+    protected void prepareMessageUploads(boolean history) throws Exception {
         String currentSessionId = mAppStateManager.getSession().mSessionID;
         long remainingHeap = MPUtility.getRemainingHeapInBytes();
         if (remainingHeap < Constants.LIMIT_MAX_UPLOAD_SIZE) {
@@ -193,7 +196,7 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
     /**
      * This method is responsible for looking for batches that are ready to be uploaded, and uploading them.
      */
-    boolean upload(boolean history) {
+    protected boolean upload(boolean history) {
         mParticleDBManager.cleanupUploadMessages();
         boolean processingSessionEnd = false;
         try {
@@ -321,5 +324,16 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
     public void executeNetworkRequest(Runnable runnable) {
         post(runnable);
     }
+
+    //added so unit tests can subclass
+    protected void sendEmpty(int what) {
+        sendEmptyMessage(what);
+    }
+
+    //added so unit tests can subclass
+    protected void sendEmptyDelayed(int what, long delay) {
+        sendEmptyMessageDelayed(what, delay);
+    }
+
 
 }
