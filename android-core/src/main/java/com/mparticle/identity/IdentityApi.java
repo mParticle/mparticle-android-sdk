@@ -40,6 +40,7 @@ public class IdentityApi {
     private Context mContext;
     private BaseHandler mBackgroundHandler;
     private BaseHandler mMainHandler;
+    private MParticle.OperatingSystem mOperatingSystem;
     ConfigManager mConfigManager;
     MessageManager mMessageManager;
     KitManager mKitManager;
@@ -61,6 +62,7 @@ public class IdentityApi {
         this.mConfigManager = configManager;
         this.mMessageManager = messageManager;
         this.mKitManager = kitManager;
+        this.mOperatingSystem = operatingSystem;
         configManager.addMpIdChangeListener(new IdentityStateListenerManager());
         setApiClient(new MParticleIdentityClientImpl(context, configManager, operatingSystem));
     }
@@ -400,7 +402,7 @@ public class IdentityApi {
 
     MParticleIdentityClient getApiClient() {
         if (mApiClient == null) {
-            mApiClient = new MParticleIdentityClientImpl(mContext, mConfigManager, MParticle.OperatingSystem.FIRE_OS);
+            mApiClient = new MParticleIdentityClientImpl(mContext, mConfigManager, mOperatingSystem);
         }
         return mApiClient;
     }

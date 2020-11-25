@@ -67,7 +67,7 @@ public class MessageService extends MessageTable {
                     selectionArgs,
                     null,
                     null,
-                    prepareOrderBy, "100");
+                    prepareOrderBy, String.valueOf(Constants.getMaxMessagePerBatch()));
             int messageIdIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns._ID);
             int messageIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.MESSAGE);
             int sessionIdIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.SESSION_ID);
@@ -105,6 +105,25 @@ public class MessageService extends MessageTable {
                 selectionArgs);
     }
 
+    public static boolean hasMessagesForUpload(MPDatabase database) {
+        Cursor messageIds = null;
+        try {
+            messageIds = database.query(MessageTableColumns.TABLE_NAME,
+                    new String[]{MessageTableColumns._ID},
+                    MessageTableColumns.STATUS + " != ? and " + MessageTableColumns.CREATED_AT + " < " + System.currentTimeMillis() + " and " + MessageTableColumns.MP_ID + " != ?",
+                    new String[]{Integer.toString(Constants.Status.UPLOADED), String.valueOf(Constants.TEMPORARY_MPID)},
+                    null,
+                    null,
+                    prepareOrderBy);
+            return messageIds.getCount() > 0;
+        }
+        finally {
+            if (messageIds != null && !messageIds.isClosed()) {
+                messageIds.close();
+            }
+        }
+    }
+
     /**
      * Will return all Messages for upload, except for those with MP_ID == Constants.TEMPORARY_MPID,
      * useful in non-testing context.
@@ -124,7 +143,7 @@ public class MessageService extends MessageTable {
                     new String[]{Integer.toString(Constants.Status.UPLOADED), String.valueOf(mpid)},
                     null,
                     null,
-                    prepareOrderBy, "100");
+                    prepareOrderBy, String.valueOf(Constants.getMaxMessagePerBatch()));
             int messageIdIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns._ID);
             int messageIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.MESSAGE);
             int sessionIdIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.SESSION_ID);

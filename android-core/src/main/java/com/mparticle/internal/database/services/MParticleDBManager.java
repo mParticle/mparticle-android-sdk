@@ -163,6 +163,11 @@ public class MParticleDBManager {
         }
     }
 
+    public boolean hasMessagesForUpload() {
+        MPDatabase db = getDatabase();
+        return MessageService.hasMessagesForUpload(db);
+    }
+
     public void createMessagesForUploadMessage(ConfigManager configManager, DeviceAttributes deviceAttributes, String currentSessionId, boolean sessionHistoryEnabled) throws JSONException {
        MPDatabase db = getDatabase();
         db.beginTransaction();
