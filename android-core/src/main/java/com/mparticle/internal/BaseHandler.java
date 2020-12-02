@@ -38,6 +38,7 @@ public class BaseHandler extends Handler {
     @Override
     public final void handleMessage(Message msg) {
         if (disabled) {
+            Logger.error("Handler: " + getClass().getName() + " is destroyed! Message: \"" + msg.toString() + "\" will not be processed");
             return;
         }
         handling = true;

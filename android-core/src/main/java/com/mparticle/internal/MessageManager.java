@@ -68,13 +68,11 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
      * These two threads are used to do the heavy lifting.
      * The Message Handler primarly stores messages in the database.
      */
-    private static final HandlerThread sMessageHandlerThread = new HandlerThread("mParticleMessageHandler",
-            Process.THREAD_PRIORITY_BACKGROUND);
+    private static HandlerThread sMessageHandlerThread;
     /**
      * The upload handler thread primarily queries the database for messages to upload, and then handles network communication.
      */
-    private static final HandlerThread sUploadHandlerThread = new HandlerThread("mParticleUploadHandler",
-            Process.THREAD_PRIORITY_BACKGROUND);
+    private static HandlerThread sUploadHandlerThread;
     /**
      * These are the handlers which manage the queues and threads mentioned above.
      */
@@ -86,6 +84,14 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
      * the constructor.
      */
     static {
+        startThreads();
+    }
+
+    private static void startThreads() {
+        sMessageHandlerThread = new HandlerThread("mParticleMessageHandler",
+                Process.THREAD_PRIORITY_BACKGROUND);
+        sUploadHandlerThread = new HandlerThread("mParticleUploadHandler",
+                Process.THREAD_PRIORITY_BACKGROUND);
         sMessageHandlerThread.start();
         sUploadHandlerThread.start();
     }
@@ -1020,13 +1026,22 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         return mMParticleDBManager;
     }
 
-    public void disableHandlers(){
+    public void disable() {
         if (mMessageHandler != null) {
             mMessageHandler.disable(true);
         }
         if (mUploadHandler != null) {
             mUploadHandler.disable(true);
         }
+    }
+    public static void destroy() {
+        if (sMessageHandlerThread != null) {
+            sMessageHandlerThread.quit();
+        }
+        if (sUploadHandlerThread != null) {
+            sUploadHandlerThread.quit();
+        }
+        startThreads();
     }
 
     public void logAliasRequest(final AliasRequest aliasRequest) {

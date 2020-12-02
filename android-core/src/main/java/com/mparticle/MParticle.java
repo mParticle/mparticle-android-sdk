@@ -1096,10 +1096,11 @@ public class MParticle {
                 if (instance.isLocationTrackingEnabled()) {
                     instance.disableLocationTracking();
                 }
-                instance.mMessageManager.disableHandlers();
+                instance.mMessageManager.disable();
                 instance.mIdentityApi.Internal().reset();
                 MParticle.setInstance(null);
             }
+            MessageManager.destroy();
 
             //Delete all SharedPreferences files.
             Set<String> prefFiles = new HashSet<String>();
