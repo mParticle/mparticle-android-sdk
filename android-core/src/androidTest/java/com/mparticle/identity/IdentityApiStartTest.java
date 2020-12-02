@@ -198,8 +198,8 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
         final Long startingMpid = ran.nextLong();
         mServer.setupHappyIdentify(startingMpid, 200);
         final Mutable<Boolean> logPushRegistrationCalled = new Mutable<Boolean>(false);
-        final CountDownLatch latch = new MPLatch(1);
-
+        final CountDownLatch identifyLatch = new MPLatch(1);
+        final CountDownLatch modifyLatch = new MPLatch(1);
 
         MParticle.start(MParticleOptions.builder(mContext).credentials("key", "value").build());
 
@@ -207,10 +207,11 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
             @Override
             public void onUserIdentified(MParticleUser user, MParticleUser previousUser) {
                 assertTrue(logPushRegistrationCalled.value);
-                latch.countDown();
+                identifyLatch.countDown();
                 MParticle.getInstance().Identity().removeIdentityStateListener(this);
             }
         });
+        mServer.waitForVerify(new Matcher(mServer.Endpoints().getModifyUrl(startingMpid)), modifyLatch);
 
         String pushRegistration = null;
         for (int i = 0; i < 5; i++) {
@@ -218,8 +219,9 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
         }
         logPushRegistrationCalled.value = true;
 
-        latch.await();
-        mServer.waitForVerify(new Matcher(mServer.Endpoints().getModifyUrl(startingMpid)));
+        identifyLatch.await();
+        modifyLatch.await();
+
         List<Request> modifyRequests = mServer.Requests().getModify();
         assertEquals(1, modifyRequests.size());
         JSONObject body = modifyRequests.get(0).getBodyJson();

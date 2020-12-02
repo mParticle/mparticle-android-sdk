@@ -118,7 +118,6 @@ class DataplanBlockingUserTests: BaseKitManagerStarted() {
 
         MParticle.getInstance()?.Identity()?.currentUser?.userAttributes = mapOf()
         AccessUtils.awaitMessageHandler()
-        Thread.sleep(1000)
         assertEquals(count, allowedAttributes.size * 4)
 
         kitIntegrationTestKits.forEach {

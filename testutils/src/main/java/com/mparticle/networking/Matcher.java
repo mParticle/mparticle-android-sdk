@@ -32,8 +32,8 @@ public class Matcher {
                 if (!bodyMatch.isMatch(new JSONObject(mockConnection.getBody()))) {
                     return false;
                 }
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
+            } catch (Throwable e) {
+                throw new Error(e);
             }
         }
         return true;

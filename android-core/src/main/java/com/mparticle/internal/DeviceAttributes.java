@@ -273,14 +273,18 @@ public class DeviceAttributes {
         }
 
         try {
-            PushRegistrationHelper.PushRegistration registration = MParticle.getInstance().Internal().getConfigManager().getPushRegistration();
-            if (registration != null && !MPUtility.isEmpty(registration.instanceId)) {
-                deviceInfo.put(Constants.MessageKey.PUSH_TOKEN, registration.instanceId);
-                deviceInfo.put(Constants.MessageKey.PUSH_TOKEN_TYPE, Constants.GOOGLE_GCM);
-            }
+            MParticle mParticle = MParticle.getInstance();
+            if (mParticle != null) {
+                ConfigManager configManager = mParticle.Internal().getConfigManager();
+                PushRegistrationHelper.PushRegistration registration = configManager.getPushRegistration();
+                if (registration != null && !MPUtility.isEmpty(registration.instanceId)) {
+                    deviceInfo.put(Constants.MessageKey.PUSH_TOKEN, registration.instanceId);
+                    deviceInfo.put(Constants.MessageKey.PUSH_TOKEN_TYPE, Constants.GOOGLE_GCM);
+                }
 
-            deviceInfo.put(Constants.MessageKey.PUSH_SOUND_ENABLED, MParticle.getInstance().Internal().getConfigManager().isPushSoundEnabled());
-            deviceInfo.put(Constants.MessageKey.PUSH_VIBRATION_ENABLED, MParticle.getInstance().Internal().getConfigManager().isPushVibrationEnabled());
+                deviceInfo.put(Constants.MessageKey.PUSH_SOUND_ENABLED, configManager.isPushSoundEnabled());
+                deviceInfo.put(Constants.MessageKey.PUSH_VIBRATION_ENABLED, configManager.isPushVibrationEnabled());
+            }
         } catch (JSONException jse) {
             Logger.debug("Failed while building device-customAttributes object: ", jse.toString());
         }

@@ -37,6 +37,7 @@ public class DataplanTest extends BaseCleanInstallEachTest {
                     messageCount.value += getMessageCount(bodyJson);
                     if (messageCount.value == 3) {
                         latch.countDown();
+                        return true;
                     }
                 } catch (JSONException ex) {}
                 return false;
@@ -59,7 +60,7 @@ public class DataplanTest extends BaseCleanInstallEachTest {
 
         final AndroidUtils.Mutable<Integer> messageCount = new AndroidUtils.Mutable<Integer>(0);
         final MPLatch latch = new MPLatch(1);
-        MockServer.getInstance().waitForVerify(new Matcher().bodyMatch(new MockServer.JSONMatch() {
+        MockServer.getInstance().waitForVerify(new Matcher(mServer.Endpoints().getEventsUrl()).bodyMatch(new MockServer.JSONMatch() {
             @Override
             public boolean isMatch(JSONObject bodyJson) {
                 try {
@@ -71,6 +72,7 @@ public class DataplanTest extends BaseCleanInstallEachTest {
                     messageCount.value += getMessageCount(bodyJson);
                     if (messageCount.value == 3) {
                         latch.countDown();
+                        return true;
                     }
                 } catch (JSONException ex) {}
                 return false;
@@ -93,7 +95,7 @@ public class DataplanTest extends BaseCleanInstallEachTest {
 
         final AndroidUtils.Mutable<Integer> messageCount = new AndroidUtils.Mutable<Integer>(0);
         final MPLatch latch = new MPLatch(1);
-        MockServer.getInstance().waitForVerify(new Matcher().bodyMatch(new MockServer.JSONMatch() {
+        MockServer.getInstance().waitForVerify(new Matcher(mServer.Endpoints().getEventsUrl()).bodyMatch(new MockServer.JSONMatch() {
             @Override
             public boolean isMatch(JSONObject bodyJson) {
                 try {
@@ -101,6 +103,7 @@ public class DataplanTest extends BaseCleanInstallEachTest {
                     messageCount.value += getMessageCount(bodyJson);
                     if (messageCount.value == 3) {
                         latch.countDown();
+                        return true;
                     }
                 } catch (JSONException ex) {}
                 return false;
@@ -124,7 +127,7 @@ public class DataplanTest extends BaseCleanInstallEachTest {
 
         final AndroidUtils.Mutable<Integer> messageCount = new AndroidUtils.Mutable<Integer>(0);
         final MPLatch latch = new MPLatch(1);
-        MockServer.getInstance().waitForVerify(new Matcher().bodyMatch(new MockServer.JSONMatch() {
+        MockServer.getInstance().waitForVerify(new Matcher(mServer.Endpoints().getEventsUrl()).bodyMatch(new MockServer.JSONMatch() {
             @Override
             public boolean isMatch(JSONObject bodyJson) {
                 try {
@@ -137,6 +140,7 @@ public class DataplanTest extends BaseCleanInstallEachTest {
                     messageCount.value += getMessageCount(bodyJson);
                     if (messageCount.value == 3) {
                         latch.countDown();
+                        return true;
                     }
                 } catch (Exception ex) {
                     fail(ex.toString());
@@ -163,7 +167,7 @@ public class DataplanTest extends BaseCleanInstallEachTest {
         final AndroidUtils.Mutable<Integer> dataplan1MessageCount = new AndroidUtils.Mutable<Integer>(0);
         final AndroidUtils.Mutable<Integer> dataplan2MessageCount = new AndroidUtils.Mutable<Integer>(0);
         final MPLatch latch = new MPLatch(1);
-        MockServer.getInstance().waitForVerify(new Matcher().bodyMatch(new MockServer.JSONMatch() {
+        MockServer.getInstance().waitForVerify(new Matcher(mServer.Endpoints().getEventsUrl()).bodyMatch(new MockServer.JSONMatch() {
             @Override
             public boolean isMatch(JSONObject bodyJson) {
                 try {

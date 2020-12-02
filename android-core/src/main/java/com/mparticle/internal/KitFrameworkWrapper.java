@@ -23,6 +23,7 @@ import org.json.JSONArray;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -42,7 +43,7 @@ public class KitFrameworkWrapper implements KitManager {
     private Queue eventQueue;
     private Queue<AttributeChange> attributeQueue;
     private volatile boolean registerForPush = false;
-    private static KitsLoadedListener kitsLoadedListener;
+    private static final List<KitsLoadedListener> kitsLoadedListeners = new ArrayList<KitsLoadedListener>();
 
     public KitFrameworkWrapper(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager, BackgroundTaskHandler backgroundTaskHandler) {
         this(context, reportingManager, configManager, appStateManager, backgroundTaskHandler, false);
@@ -98,20 +99,23 @@ public class KitFrameworkWrapper implements KitManager {
         return kitsLoaded;
     }
 
-    public static void setKitsLoadedListener(KitsLoadedListener listener) {
+    public static void addKitsLoadedListener(KitsLoadedListener listener) {
         if (kitsLoaded) {
             listener.onKitsLoaded();
         } else {
-            kitsLoadedListener = listener;
+            kitsLoadedListeners.add(listener);
         }
     }
 
     void setKitsLoaded(boolean kitsLoaded) {
         this.kitsLoaded = kitsLoaded;
-        if (kitsLoadedListener != null) {
-            kitsLoadedListener.onKitsLoaded();
-            kitsLoadedListener = null;
+        List<KitsLoadedListener> kitsLoadedListenersCopy = new ArrayList<KitsLoadedListener>(kitsLoadedListeners);
+        for (KitsLoadedListener kitsLoadedListener: kitsLoadedListenersCopy) {
+            if (kitsLoadedListener != null) {
+                kitsLoadedListener.onKitsLoaded();
+            }
         }
+        kitsLoadedListeners.clear();
     }
 
     synchronized void disableQueuing() {

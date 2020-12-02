@@ -1,5 +1,6 @@
 package com.mparticle;
 
+import android.Manifest;
 import android.content.Context;
 import android.os.Environment;
 import android.os.Looper;
@@ -12,6 +13,7 @@ import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
@@ -24,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.rule.GrantPermissionRule;
 
 import static org.junit.Assert.fail;
 
@@ -32,6 +35,13 @@ import static org.junit.Assert.fail;
 public abstract class BaseStartupTest {
     public static String LEGACY_FILE_NAME = "legacyStartupTimes.txt";
     public static String CURRENT_FILE_NAME = "startupTimes.txt";
+
+    @Rule
+    public GrantPermissionRule readExternaStoragePermissionRule = GrantPermissionRule.grant(Manifest.permission.READ_EXTERNAL_STORAGE);
+
+    @Rule
+    public GrantPermissionRule writeExternaStoragePermissionRule = GrantPermissionRule.grant(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
 
     protected Context mContext;
 

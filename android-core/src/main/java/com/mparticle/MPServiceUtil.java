@@ -160,7 +160,7 @@ public class MPServiceUtil {
                     }
                 }
             };
-            KitFrameworkWrapper.setKitsLoadedListener(kitsLoadedListener);
+            KitFrameworkWrapper.addKitsLoadedListener(kitsLoadedListener);
             MParticle.start(MParticleOptions.builder(mContext).build());
 
         } catch (Exception e) {

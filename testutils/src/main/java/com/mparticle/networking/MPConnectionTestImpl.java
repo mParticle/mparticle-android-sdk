@@ -150,7 +150,7 @@ public class MPConnectionTestImpl implements MPConnection {
 
     public String getBody() {
         if (outputStream == null) {
-            return "";
+            return "{}";
         } else {
             if (getHeaderField("Content-Encoding").equals("gzip")) {
                 try {

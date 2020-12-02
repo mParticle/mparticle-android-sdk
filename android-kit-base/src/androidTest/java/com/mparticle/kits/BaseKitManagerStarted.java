@@ -10,6 +10,8 @@ import com.mparticle.identity.IdentityApiResult;
 import com.mparticle.identity.IdentityHttpResponse;
 import com.mparticle.identity.TaskFailureListener;
 import com.mparticle.identity.TaskSuccessListener;
+import com.mparticle.internal.KitFrameworkWrapper;
+import com.mparticle.internal.KitsLoadedListener;
 import com.mparticle.testutils.BaseCleanInstallEachTest;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
@@ -58,7 +60,7 @@ public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
                     }
                 }))
                 .build());
-        mKitManager = new CustomKitManagerImpl(mContext, com.mparticle.AccessUtils.getMessageManager(), new CoreCallbackImpl(MParticle.getInstance().Internal().getConfigManager(), MParticle.getInstance().Internal().getAppStateManager()), AccessUtils.getUploadHandler());
+        mKitManager = new CustomKitManagerImpl(mContext, com.mparticle.AccessUtils.getMessageManager(), new CoreCallbackImpl(MParticle.getInstance().Internal().getConfigManager(), MParticle.getInstance().Internal().getAppStateManager(), MParticle.getInstance().Internal().getKitManager()), AccessUtils.getUploadHandler());
         mKitManager.setKitFactory(new CustomKitFactory());
         AccessUtils.setKitManager(mKitManager);
         latch.await();
@@ -138,10 +140,12 @@ public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
     class CoreCallbackImpl implements CoreCallbacks {
         ConfigManager configManager;
         AppStateManager appStateManager;
+        KitFrameworkWrapper kitFrameworkWrapper;
 
-        CoreCallbackImpl(ConfigManager configManager, AppStateManager appStateManager) {
+        CoreCallbackImpl(ConfigManager configManager, AppStateManager appStateManager, KitFrameworkWrapper kitFrameworkWrapper) {
             this.configManager = configManager;
             this.appStateManager = appStateManager;
+            this.kitFrameworkWrapper = kitFrameworkWrapper;
         }
 
         @Override
@@ -210,7 +214,7 @@ public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
         }
 
         @Override
-        public void replayAndDisableQueue() { }
+        public void replayAndDisableQueue() { kitFrameworkWrapper.replayAndDisableQueue();}
 
         @Override
         public KitListener getKitListener() {

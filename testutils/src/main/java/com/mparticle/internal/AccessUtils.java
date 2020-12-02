@@ -138,11 +138,11 @@ public class AccessUtils {
         return com.mparticle.AccessUtils.getMessageManager().mUploadHandler.mApiClient;
     }
 
-    public static void setKitManager(final KitManager kitManager) {
+    public static void setKitManager(final KitManager kitManager) throws InterruptedException {
         final KitFrameworkWrapper kitFrameworkWrapper = MParticle.getInstance().Internal().getKitManager();
         kitFrameworkWrapper.loadKitLibrary();
         MParticle.getInstance().Identity().removeIdentityStateListener((IdentityStateListener)kitFrameworkWrapper.mKitManager);
-        final CountDownLatch latch = new MPLatch(1);
+        final CountDownLatch kitManagerLoadedLatch = new MPLatch(1);
         //Need to do this since the KitManager instance in KitFrameworkWrapper is not threadsafe. If
         //it is in mid-loadKitLibrary, then the instance you set could be overwritten.
         getUploadHandler().post(new Runnable() {
@@ -152,20 +152,25 @@ public class AccessUtils {
                     kitFrameworkWrapper.loadKitLibrary();
                 }
                 kitFrameworkWrapper.setKitManager(kitManager);
-                latch.countDown();
+                kitManagerLoadedLatch.countDown();
             }
         });
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        kitManagerLoadedLatch.await();
+        final CountDownLatch kitsLoadedLatch = new MPLatch(1);
+        kitFrameworkWrapper.setKitsLoaded(false);
+        KitFrameworkWrapper.addKitsLoadedListener(new KitsLoadedListener() {
+            @Override
+            public void onKitsLoaded() {
+                kitsLoadedLatch.countDown();
+            }
+        });
         JSONArray configuration = MParticle.getInstance().Internal().getConfigManager().getLatestKitConfiguration();
-        Logger.debug("Kit Framework loaded.");
+        Logger.debug("Kit Framework loaded. IN TEST");
         if (configuration != null) {
-            Logger.debug("Restoring previous Kit configuration.");
+            Logger.debug("Restoring previous Kit configuration IN TEST.");
             kitManager.updateKits(configuration);
         }
+        kitsLoadedLatch.await();
     }
 
     public static void setPushInPushRegistrationHelper(Context context, String instanceId, String senderId) {

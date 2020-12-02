@@ -102,6 +102,11 @@ public class MockServer {
     }
 
     void onRequestMade(MPConnectionTestImpl mockConnection) {
+        try {
+            Thread.sleep(50);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         requests.add(mockConnection);
 
         boolean foundMatch = false;
@@ -499,7 +504,7 @@ public class MockServer {
 
 
     public class ReceivedRequests {
-        List<MPConnectionTestImpl> requests = new ArrayList<>();
+        public List<MPConnectionTestImpl> requests = new ArrayList<>();
 
 
         ReceivedRequests(List<MPConnectionTestImpl> connections) {

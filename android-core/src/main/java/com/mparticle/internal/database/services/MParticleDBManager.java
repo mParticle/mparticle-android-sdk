@@ -65,14 +65,18 @@ public class MParticleDBManager {
 
     public void updateMpId(long oldMpId, long newMpId) {
         MPDatabase db = getDatabase();
-        db.beginTransaction();
-        new BreadcrumbService().updateMpId(db, oldMpId, newMpId);
-        new MessageService().updateMpId(db, oldMpId, newMpId);
-        new ReportingService().updateMpId(db, oldMpId, newMpId);
-        new SessionService().updateMpId(db, oldMpId, newMpId);
-        new UserAttributesService().updateMpId(db, oldMpId, newMpId);
-        db.setTransactionSuccessful();
-        db.endTransaction();
+        try {
+            db.beginTransaction();
+            new BreadcrumbService().updateMpId(db, oldMpId, newMpId);
+            new MessageService().updateMpId(db, oldMpId, newMpId);
+            new ReportingService().updateMpId(db, oldMpId, newMpId);
+            new SessionService().updateMpId(db, oldMpId, newMpId);
+            new UserAttributesService().updateMpId(db, oldMpId, newMpId);
+            db.setTransactionSuccessful();
+        }
+        finally {
+            db.endTransaction();
+        }
     }
 
     /**
@@ -215,10 +219,15 @@ public class MParticleDBManager {
 
     public void deleteMessagesAndSessions(String currentSessionId) {
        MPDatabase db = getDatabase();
-        db.beginTransaction();
-        MessageService.deleteOldMessages(db, currentSessionId);
-        SessionService.deleteSessions(db, currentSessionId);
-        db.endTransaction();
+       try {
+           db.beginTransaction();
+           MessageService.deleteOldMessages(db, currentSessionId);
+           SessionService.deleteSessions(db, currentSessionId);
+           db.setTransactionSuccessful();
+       }
+       finally {
+           db.endTransaction();
+       }
     }
 
     private HashMap<BatchId, MessageBatch> getUploadMessageByBatchIdMap(List<MessageService.ReadyMessage> readyMessages, MPDatabase db, ConfigManager configManager, boolean isHistory) throws JSONException {

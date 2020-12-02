@@ -29,6 +29,7 @@ import java.util.concurrent.CountDownLatch;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
@@ -169,11 +170,12 @@ public final class UploadMessageTest extends BaseCleanStartedEachTest {
         latch.await();
         for (Map.Entry<String, MPEvent> entry : receivedEvents.entrySet()) {
             if (!sentEvents.containsKey(entry.getKey())) {
-                assertTrue(false);
+                assertNull(entry.getValue());
+            } else {
+                assertTrue(sentEvents.containsKey(entry.getKey()));
+                JSONObject jsonObject = sentEvents.get(entry.getKey());
+                assertEventEquals(entry.getValue(), jsonObject);
             }
-            assertTrue(sentEvents.containsKey(entry.getKey()));
-            JSONObject jsonObject = sentEvents.get(entry.getKey());
-            assertEventEquals(entry.getValue(), jsonObject);
         }
     }
 
