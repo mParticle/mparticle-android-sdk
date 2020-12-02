@@ -1,8 +1,5 @@
 package com.mparticle.testutils;
 
-import com.mparticle.MParticle;
-import com.mparticle.networking.MockServer;
-
 import org.junit.Before;
 
 /**
@@ -13,6 +10,6 @@ abstract public class BaseCleanInstallEachTest extends BaseAbstractTest {
 
     @Before
     public void beforeBase() throws Exception {
-        mServer = MockServer.getNewInstance(mContext);
+
     }
 }

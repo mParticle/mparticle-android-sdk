@@ -78,7 +78,7 @@ public class TestingUtils {
 
 
     private MPEvent.Builder getRandomMPEventBuilder() {
-        return new MPEvent.Builder(randomUtils.getAlphaNumericString(randomUtils.randomInt(1,55)), MParticle.EventType.values()[randomUtils.randomInt(0, MParticle.EventType.values().length - 1)]);
+        return new MPEvent.Builder(randomUtils.getAlphaNumericString(randomUtils.randomInt(1,5)), MParticle.EventType.values()[randomUtils.randomInt(0, MParticle.EventType.values().length - 1)]);
     }
 
     public MPEvent getRandomMPEventSimple() {

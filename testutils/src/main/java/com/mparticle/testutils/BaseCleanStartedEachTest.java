@@ -40,9 +40,4 @@ public class BaseCleanStartedEachTest extends BaseAbstractTest {
     protected MParticleOptions.Builder transformMParticleOptions(MParticleOptions.Builder builder) {
         return builder;
     }
-
-    @Override
-    protected boolean autoStartServer() {
-        return false;
-    }
 }

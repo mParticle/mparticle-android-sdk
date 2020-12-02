@@ -105,11 +105,11 @@ public class MockServer {
         try {
             Thread.sleep(50);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            fail(e.getMessage());
+            Thread.currentThread().interrupt();
         }
         requests.add(mockConnection);
 
-        boolean foundMatch = false;
         List<Map.Entry<Matcher, Object>> logicList = new ArrayList<>(serverLogic.entrySet());
         //try to get a match FILO style
         reverseAndUpdateKey(logicList);

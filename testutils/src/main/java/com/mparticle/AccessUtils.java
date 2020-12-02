@@ -1,5 +1,7 @@
 package com.mparticle;
 
+import android.content.Context;
+
 import com.mparticle.identity.BaseIdentityTask;
 import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.internal.KitManager;
@@ -7,6 +9,10 @@ import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MessageManager;
 
 public class AccessUtils {
+
+    public static void reset(Context context, boolean deleteDatabase) {
+        MParticle.reset(context, deleteDatabase);
+    }
 
     public static MessageManager getMessageManager() {
         return MParticle.getInstance().mMessageManager;

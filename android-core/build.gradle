@@ -59,6 +59,7 @@ android {
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         if (useOrchestrator()) {
+            testInstrumentationRunnerArgument 'clearPackageData', 'true'
             testInstrumentationRunnerArgument 'annotation', 'com.mparticle.OrchestratorOnly'
         } else {
             testInstrumentationRunnerArgument 'notAnnotation', 'com.mparticle.OrchestratorOnly'
@@ -137,7 +138,7 @@ dependencies {
 
     androidTestImplementation project(':testutils')
     if (useOrchestrator()) {
-        androidTestUtil 'com.android.support.test:orchestrator:1.0.2'
+        androidTestUtil 'androidx.test:orchestrator:1.3.0'
     }
     androidTestImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
