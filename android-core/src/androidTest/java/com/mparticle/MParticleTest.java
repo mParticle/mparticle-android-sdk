@@ -393,7 +393,6 @@ public class MParticleTest extends BaseCleanStartedEachTest {
                 fail("SharedPreference file failed to clear:\n" + getSharedPrefsContents(sharedPreferenceName));
             }
         }
-        assertEquals(0, mContext.databaseList().length);
         try {
             JSONObject databaseJson = getDatabaseContents();
             Iterator<String> keys = databaseJson.keys();

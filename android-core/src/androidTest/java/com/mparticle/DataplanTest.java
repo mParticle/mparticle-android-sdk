@@ -1,7 +1,6 @@
 package com.mparticle;
 
 import com.mparticle.internal.Constants;
-import com.mparticle.internal.Logger;
 import com.mparticle.networking.Matcher;
 import com.mparticle.networking.MockServer;
 import com.mparticle.testutils.AndroidUtils;
@@ -28,12 +27,6 @@ public class DataplanTest extends BaseCleanInstallEachTest {
         startMParticle(MParticleOptions.builder(mContext)
                 .dataplan(null, null));
 
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().upload();
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().upload();
-
         final AndroidUtils.Mutable<Integer> messageCount = new AndroidUtils.Mutable<Integer>(0);
         final MPLatch latch = new MPLatch(1);
         MockServer.getInstance().waitForVerify(new Matcher().bodyMatch(new MockServer.JSONMatch() {
@@ -50,6 +43,11 @@ public class DataplanTest extends BaseCleanInstallEachTest {
             }
         }), latch);
 
+        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
+        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
+        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
+        MParticle.getInstance().upload();
+
         latch.await();
         assertEquals(3, messageCount.value.intValue());
     }
@@ -58,12 +56,6 @@ public class DataplanTest extends BaseCleanInstallEachTest {
     public void dataplanPartialTest() throws InterruptedException {
         startMParticle(MParticleOptions.builder(mContext)
                 .dataplan("plan1", null));
-
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().upload();
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().upload();
 
         final AndroidUtils.Mutable<Integer> messageCount = new AndroidUtils.Mutable<Integer>(0);
         final MPLatch latch = new MPLatch(1);
@@ -85,6 +77,11 @@ public class DataplanTest extends BaseCleanInstallEachTest {
             }
         }), latch);
 
+        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
+        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
+        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
+        MParticle.getInstance().upload();
+
         latch.await();
         assertEquals(3, messageCount.value.intValue());
     }
@@ -93,12 +90,6 @@ public class DataplanTest extends BaseCleanInstallEachTest {
     public void noDataPlanIdTest() throws InterruptedException {
         startMParticle(MParticleOptions.builder(mContext)
                 .dataplan(null, 1));
-
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().upload();
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().upload();
 
         final AndroidUtils.Mutable<Integer> messageCount = new AndroidUtils.Mutable<Integer>(0);
         final MPLatch latch = new MPLatch(1);
@@ -116,6 +107,12 @@ public class DataplanTest extends BaseCleanInstallEachTest {
             }
         }), latch);
 
+        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
+        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
+        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
+        MParticle.getInstance().upload();
+
+
         latch.await();
         assertEquals(3, messageCount.value.intValue());
     }
@@ -124,12 +121,6 @@ public class DataplanTest extends BaseCleanInstallEachTest {
     public void dataPlanSetTest() throws InterruptedException {
         startMParticle(MParticleOptions.builder(mContext)
                 .dataplan("dataplan1", 1));
-
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().upload();
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().upload();
 
         final AndroidUtils.Mutable<Integer> messageCount = new AndroidUtils.Mutable<Integer>(0);
         final MPLatch latch = new MPLatch(1);
@@ -154,6 +145,11 @@ public class DataplanTest extends BaseCleanInstallEachTest {
             }
         }), latch);
 
+        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
+        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
+        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
+        MParticle.getInstance().upload();
+
         latch.await();
         assertEquals(3, messageCount.value.intValue());
     }
@@ -162,19 +158,6 @@ public class DataplanTest extends BaseCleanInstallEachTest {
     public void dataplanChanged() throws InterruptedException {
         startMParticle(MParticleOptions.builder(mContext)
                 .dataplan("dataplan1", 1));
-
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-
-
-        MParticle.setInstance(null);
-        startMParticle(MParticleOptions.builder(mContext)
-                .dataplan("dataplan1", 2));
-
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().upload();
 
         final AndroidUtils.Mutable<Integer> totalMessageCount = new AndroidUtils.Mutable<Integer>(0);
         final AndroidUtils.Mutable<Integer> dataplan1MessageCount = new AndroidUtils.Mutable<Integer>(0);
@@ -209,6 +192,19 @@ public class DataplanTest extends BaseCleanInstallEachTest {
                 return false;
             }
         }), latch);
+
+        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
+        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
+        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
+
+
+        MParticle.setInstance(null);
+        startMParticle(MParticleOptions.builder(mContext)
+                .dataplan("dataplan1", 2));
+
+        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
+        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
+        MParticle.getInstance().upload();
 
         //not sure why it needs upload() twice, but this cuts the runtime down from 10s to .7s
         MParticle.getInstance().upload();

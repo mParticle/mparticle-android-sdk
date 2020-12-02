@@ -19,12 +19,15 @@ import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.services.MParticleDBManager;
+import com.mparticle.internal.database.services.MessageService;
+import com.mparticle.internal.database.services.SessionService;
 import com.mparticle.networking.MockServer;
 import com.mparticle.testutils.AndroidUtils.Mutable;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
@@ -57,10 +60,19 @@ public abstract class BaseAbstractTest {
     public void beforeImpl() throws Exception {
         Logger.setLogHandler(null);
         mContext = InstrumentationRegistry.getInstrumentation().getContext();
+        MParticle.reset(mContext);
+
         mStartingMpid = new Random().nextLong();
         if (autoStartServer()) {
             mServer = MockServer.getNewInstance(mContext);
         }
+        assertEquals(0, SessionService.getSessions(new MParticleDBManager(mContext).getDatabase()).getCount());
+        assertEquals(0, MessageService.getMessagesForUpload(new MParticleDBManager(mContext).getDatabase()).size());
+    }
+
+    @After
+    public void afterImpl() {
+        MParticle.reset(mContext);
     }
 
     protected void startMParticle() throws InterruptedException {

@@ -6,6 +6,9 @@ import android.os.Looper;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MParticleApiClientImpl;
+import com.mparticle.networking.Matcher;
+import com.mparticle.networking.MockServer;
+import com.mparticle.networking.Request;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.testutils.MPLatch;
 import com.mparticle.testutils.TestingUtils;
@@ -120,56 +123,51 @@ public final class UploadMessageTest extends BaseCleanStartedEachTest {
     @Test
     public void testEventAccuracy() throws Exception {
         final Handler handler = new Handler(Looper.getMainLooper());
-        final Map<String, MPEvent> events = new HashMap<String, MPEvent>();
+        final Map<String, MPEvent> receivedEvents = new HashMap<String, MPEvent>();
         final Map<String, JSONObject> sentEvents = new HashMap<String, JSONObject>();
         final CountDownLatch latch = new MPLatch(1);
-        com.mparticle.internal.AccessUtils.setMParticleApiClient(new com.mparticle.internal.AccessUtils.EmptyMParticleApiClient() {
+        mServer.waitForVerify(new Matcher(mServer.Endpoints().getEventsUrl()), new MockServer.RequestReceivedCallback() {
             @Override
-            public int sendMessageBatch(final String message) throws IOException, MParticleApiClientImpl.MPThrottleException, MParticleApiClientImpl.MPRampException {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            JSONObject jsonObject = new JSONObject(message);
-                            JSONArray jsonArray = jsonObject.optJSONArray(Constants.MessageKey.MESSAGES);
-                            if (!MPUtility.isEmpty(jsonArray)) {
-                                for (int i = 0; i < jsonArray.length(); i++) {
-                                    JSONObject eventObject = jsonArray.getJSONObject(i);
-                                    if (eventObject.getString("dt").equals(Constants.MessageType.EVENT)) {
-                                        String eventName = eventObject.getString("n");
-                                        if (sentEvents.containsKey(eventName)) {
-                                            fail("Duplicate Event");
-                                        } else {
-                                            sentEvents.put(eventName, eventObject);
-                                        }
-                                    }
+            public void onRequestReceived(Request request) {
+                try {
+                    JSONObject jsonObject = request.getBodyJson();
+                    JSONArray jsonArray = jsonObject.optJSONArray(Constants.MessageKey.MESSAGES);
+                    if (!MPUtility.isEmpty(jsonArray)) {
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject eventObject = jsonArray.getJSONObject(i);
+                            if (eventObject.getString("dt").equals(Constants.MessageType.EVENT)) {
+                                String eventName = eventObject.getString("n");
+                                if (sentEvents.containsKey(eventName)) {
+                                    fail("Duplicate Event");
+                                } else {
+                                    sentEvents.put(eventName, eventObject);
                                 }
                             }
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            fail(e.toString());
                         }
-                        latch.countDown();
                     }
-                });
-                return 202;
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    fail(e.toString());
+                }
+                if (sentEvents.size() == receivedEvents.size())
+                latch.countDown();
             }
         });
 
         for (int j = 0; j < 3; j++) {
             MPEvent event = TestingUtils.getInstance().getRandomMPEventRich();
-            if (events.containsKey(event.getEventName())) {
+            if (receivedEvents.containsKey(event.getEventName())) {
                 j--;
             } else {
-                events.put(event.getEventName(), event);
+                receivedEvents.put(event.getEventName(), event);
                 MParticle.getInstance().logEvent(event);
             }
         }
 
         MParticle.getInstance().upload();
         latch.await();
-        for (Map.Entry<String, MPEvent> entry : events.entrySet()) {
+        for (Map.Entry<String, MPEvent> entry : receivedEvents.entrySet()) {
             if (!sentEvents.containsKey(entry.getKey())) {
                 assertTrue(false);
             }

@@ -13,7 +13,6 @@ abstract public class BaseCleanInstallEachTest extends BaseAbstractTest {
 
     @Before
     public void beforeBase() throws Exception {
-        MParticle.reset(mContext);
         mServer = MockServer.getNewInstance(mContext);
     }
 }

@@ -13,6 +13,7 @@ import com.mparticle.testutils.MPLatch;
 import junit.framework.Assert;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +44,7 @@ public final class SessionMessagesTest extends BaseCleanStartedEachTest {
         final CountDownLatch latch = new MPLatch(1);
         AccessUtils.setMParticleApiClient(new AccessUtils.EmptyMParticleApiClient() {
             @Override
-            public int sendMessageBatch(final String message) throws IOException, MParticleApiClientImpl.MPThrottleException, MParticleApiClientImpl.MPRampException {
+            public int sendMessageBatch(final String message) {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
