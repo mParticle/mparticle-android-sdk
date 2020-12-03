@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Message;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
@@ -21,7 +23,15 @@ import java.util.Iterator;
 public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
     private final Context mContext;
     public static final int DB_VERSION = 9;
-    public static final String DB_NAME = "mparticle.db";
+    private static String DB_NAME = "mparticle.db";
+    public static String getDbName() {
+        return DB_NAME;
+    }
+
+    @VisibleForTesting
+    public static void setDbName(String name) {
+        DB_NAME = name;
+    }
 
     public MParticleDatabaseHelper(Context context) {
         this.mContext = context;

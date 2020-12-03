@@ -12,7 +12,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     SQLiteOpenHelperWrapper sqLiteOpenHelperWrapper;
 
     public DatabaseHelper(Context context) {
-        super(context, MParticleDatabaseHelper.DB_NAME, null, MParticleDatabaseHelper.DB_VERSION);
+        super(context, MParticleDatabaseHelper.getDbName(), null, MParticleDatabaseHelper.DB_VERSION);
         mContext = context;
         this.sqLiteOpenHelperWrapper = getSQLiteOpenHelperWrapper();
     }

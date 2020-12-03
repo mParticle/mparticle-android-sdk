@@ -20,12 +20,15 @@ import org.junit.Before;
  */
 public class BaseCleanStartedEachTest extends BaseAbstractTest {
 
+    public void beforeSetup() { }
+
     @Before
     public final void beforeBase() throws InterruptedException {
         if (MParticle.getInstance() != null) {
             MParticle.reset(mContext);
         }
         MParticle.setInstance(null);
+        beforeSetup();
         MParticleOptions.Builder builder = MParticleOptions
                 .builder(mContext)
                 .credentials("key", "value")

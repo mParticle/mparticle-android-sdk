@@ -1128,7 +1128,7 @@ public class MParticle {
                 }
             }
             if (deleteDatabase) {
-                context.deleteDatabase(MParticleDatabaseHelper.DB_NAME);
+                context.deleteDatabase(MParticleDatabaseHelper.getDbName());
             }
         }
     }

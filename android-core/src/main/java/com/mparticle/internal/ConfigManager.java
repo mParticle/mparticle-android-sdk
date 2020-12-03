@@ -49,7 +49,7 @@ public class ConfigManager {
     public static final String VALUE_APP_DEFINED = "appdefined";
     public static final String VALUE_CUE_CATCH = "forcecatch";
     public static final String PREFERENCES_FILE = "mp_preferences";
-    private static final String KEY_INCLUDE_SESSION_HISTORY = "inhd";
+    public static final String KEY_INCLUDE_SESSION_HISTORY = "inhd";
     private static final String KEY_DEVICE_PERFORMANCE_METRICS_DISABLED = "dpmd";
     public static final String WORKSPACE_TOKEN = "wst";
     static final String ALIAS_MAX_WINDOW = "alias_max_window";

@@ -15,6 +15,8 @@ public interface MPDatabase {
                  String[] selectionArgs, String groupBy, String having,
                  String orderBy);
 
+    Cursor rawQuery(String query, String... selectionArgs);
+
     int delete(String table, String whereClause, String[] whereArgs);
 
     void beginTransaction();

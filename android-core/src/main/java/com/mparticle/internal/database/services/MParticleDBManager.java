@@ -7,7 +7,6 @@ import android.location.Location;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.google.android.gms.common.internal.Objects;
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.internal.BatchId;
@@ -300,11 +299,23 @@ public class MParticleDBManager {
                 //if this was to process session history, or
                 //if we're never going to process history AND
                 //this batch contains a previous session, then delete the session.
-                if (!historyMessages && !sessionHistoryEnabled && !sessionId.equals(currentSessionId)) {
-                    SessionService.deleteSessions(db, currentSessionId);
+                if (!historyMessages && !sessionHistoryEnabled) {
+                    cleanSessions(currentSessionId);
                 }
             }
         }
+    }
+
+    /**
+     * remove Session entries that do not have Message entries referencing them, and
+     * are not the current Session
+     * @param currentSessionId
+     */
+    void cleanSessions(String currentSessionId) {
+        MPDatabase database = getDatabase();
+        Set<String> sessionIds = MessageService.getSessionIds(database);
+        sessionIds.add(currentSessionId);
+        SessionService.deleteSessions(database, sessionIds);
     }
 
     /**
