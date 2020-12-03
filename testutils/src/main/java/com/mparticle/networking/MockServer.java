@@ -162,7 +162,12 @@ public class MockServer {
 
     
     public MockServer setUpHappyConfig() {
-        Matcher match = new Matcher(getUrl(CONFIG));
+        Matcher match = new Matcher().urlMatcher(new UrlMatcher() {
+            @Override
+            public boolean isMatch(MPUrl url) {
+                return url.getFile().equals(getUrl(CONFIG).getFile()) || url.getFile().contains("config2.mparticle.com");
+            }
+        });
         match.keepAfterMatch = true;
         Response response = new Response();
         response.responseCode = 200;

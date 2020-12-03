@@ -22,6 +22,7 @@ import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.database.services.MessageService;
 import com.mparticle.internal.database.services.SessionService;
+import com.mparticle.internal.database.tables.MParticleDatabaseHelper;
 import com.mparticle.networking.MockServer;
 import com.mparticle.testutils.AndroidUtils.Mutable;
 
@@ -47,6 +48,7 @@ public abstract class BaseAbstractTest {
     protected Random ran = new Random();
     protected RandomUtils mRandomUtils = new RandomUtils();
     protected static Long mStartingMpid;
+    private static final String defaultDatabaseName = MParticleDatabaseHelper.getDbName();
 
     @Rule
     public CaptureLogcatOnFailingTest captureFailingTestLogcat = new CaptureLogcatOnFailingTest();
@@ -61,6 +63,11 @@ public abstract class BaseAbstractTest {
 
     @Before
     public void beforeImpl() throws Exception {
+        if (useInMemoryDatabase()) {
+            MParticleDatabaseHelper.setDbName(null);
+        } else {
+            MParticleDatabaseHelper.setDbName(defaultDatabaseName);
+        }
         Logger.setLogHandler(null);
         mContext = new TestingContext(InstrumentationRegistry.getInstrumentation().getContext());
         clearStorage();
@@ -68,6 +75,10 @@ public abstract class BaseAbstractTest {
         mStartingMpid = new Random().nextLong();
         mServer = MockServer.getNewInstance(mContext);
         checkStorageCleared(3);
+    }
+
+    protected boolean useInMemoryDatabase() {
+        return false;
     }
 
     protected void startMParticle() throws InterruptedException {

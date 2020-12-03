@@ -33,6 +33,11 @@ public class MPDatabaseImpl implements MPDatabase {
     }
 
     @Override
+    public Cursor rawQuery(String query, String... selectionArgs) {
+        return sqLiteDatabase.rawQuery(query, selectionArgs);
+    }
+
+    @Override
     public Cursor query(String table, String[] columns, String selection,
                  String[] selectionArgs, String groupBy, String having,
                  String orderBy, String limit) {

@@ -2,10 +2,10 @@ package com.mparticle.internal.database.services;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.text.TextUtils;
 
 import com.mparticle.internal.BatchId;
 import com.mparticle.internal.Constants;
-import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.MessageBatch;
 import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.tables.SessionTable;
@@ -18,8 +18,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.mparticle.internal.database.tables.SessionTable.SessionTableColumns.APP_INFO;
+import static com.mparticle.internal.database.tables.SessionTable.SessionTableColumns.SESSION_ID;
 import static com.mparticle.internal.database.tables.SessionTable.SessionTableColumns.TABLE_NAME;
 
 public class SessionService extends SessionTable {
@@ -28,6 +30,21 @@ public class SessionService extends SessionTable {
     public static int deleteSessions(MPDatabase database, String currentSessionId){
         String[] selectionArgs = new String[]{currentSessionId};
         return database.delete(TABLE_NAME, SessionTableColumns.SESSION_ID + "!=? ", selectionArgs);
+    }
+
+    /**
+     * delete Session entries with session_id that are not a part of the Set
+     * @param database
+     * @param exceptSessionIds the session_id value for message that SHOULD NOT be deleted
+     * @return the number of Session entries deleted
+     */
+    public static int deleteSessions(MPDatabase database, Set<String> exceptSessionIds) {
+        List<String> idsWrapped = new ArrayList<String>();
+        for (String id: exceptSessionIds) {
+            idsWrapped.add("'" + id + "'");
+        }
+        String idArgString = TextUtils.join(",", idsWrapped.toArray());
+        return database.delete(TABLE_NAME, SESSION_ID + " NOT IN (" + idArgString + ")", null);
     }
 
     public static Cursor getSessions(MPDatabase db) {

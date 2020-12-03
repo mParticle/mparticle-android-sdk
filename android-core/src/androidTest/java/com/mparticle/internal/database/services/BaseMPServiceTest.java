@@ -21,7 +21,7 @@ abstract public class BaseMPServiceTest extends BaseCleanInstallEachTest {
 
     @Before
     public final void beforeBaseMPService() throws Exception {
-        SQLiteOpenHelper openHelper = new BaseDatabase(new MParticleDatabaseHelper(mContext), MParticleDatabaseHelper.DB_NAME);
+        SQLiteOpenHelper openHelper = new BaseDatabase(new MParticleDatabaseHelper(mContext), MParticleDatabaseHelper.getDbName());
         database = new MPDatabaseImpl(openHelper.getWritableDatabase());
     }
 

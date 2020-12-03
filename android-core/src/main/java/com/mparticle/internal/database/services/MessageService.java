@@ -13,7 +13,9 @@ import com.mparticle.internal.messages.BaseMPMessage;
 import org.json.JSONException;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MessageService extends MessageTable {
 
@@ -30,6 +32,23 @@ public class MessageService extends MessageTable {
     }
 
     public MessageService() {
+    }
+
+    public static Set<String> getSessionIds(MPDatabase database) {
+        Set<String> sessionIds = new HashSet<String>();
+        Cursor cursor = null;
+        try {
+            cursor = database.rawQuery("SELECT DISTINCT " + MessageTableColumns.SESSION_ID + " FROM " + MessageTableColumns.TABLE_NAME);
+            while(cursor.moveToNext()) {
+                sessionIds.add(cursor.getString(0));
+            }
+            return sessionIds;
+        }
+        finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+        }
     }
 
     public static List<ReadyMessage> getSessionHistory(MPDatabase database, String currentSessionId) {
