@@ -14,12 +14,15 @@ import java.util.Locale;
 public class Session {
 
     private final String mUUID;
+    private final Long mSessionStartTime;
 
     private Session() {
         mUUID = null;
+        mSessionStartTime = null;
     }
-    Session(String uuid) {
+    Session(String uuid, Long sessionStartTime) {
         this.mUUID = uuid;
+        this.mSessionStartTime = sessionStartTime;
     }
 
     /**
@@ -34,6 +37,11 @@ public class Session {
         } else {
             return this.mUUID.toUpperCase(Locale.US);
         }
+    }
+
+    @Nullable
+    public Long getSessionStartTime() {
+        return mSessionStartTime;
     }
 
     /**
@@ -63,13 +71,18 @@ public class Session {
             return false;
         }
         String sessionId = getSessionUUID();
-        String comparisonSessionId = ((Session) obj).getSessionUUID();
-        if (sessionId == null && comparisonSessionId == null) {
+        Long sessionStartTime = getSessionStartTime();
+        Session comparisonSession = ((Session)obj);
+        String comparisonSessionId = comparisonSession.getSessionUUID();
+        Long comparisonSessionStartTime = comparisonSession.getSessionStartTime();
+        if (sessionId == comparisonSessionId &&
+                sessionStartTime == comparisonSessionStartTime
+        ) {
             return true;
         }
-        if (sessionId == null || comparisonSessionId == null) {
+        if (sessionId == null || sessionStartTime == null) {
             return false;
         }
-        return sessionId.equals(comparisonSessionId);
+        return sessionId.equals(comparisonSessionId) && sessionStartTime.equals(comparisonSessionStartTime);
     }
 }

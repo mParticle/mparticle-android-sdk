@@ -33,6 +33,6 @@ public class ApiVisibilityTest {
                 publicMethodCount++;
             }
         }
-        assertEquals(3, publicMethodCount);
+        assertEquals(4, publicMethodCount);
     }
 }

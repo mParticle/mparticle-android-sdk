@@ -304,7 +304,7 @@ public class MParticle {
         if (session == null || !session.isActive() || session.isTimedOut(mConfigManager.getSessionTimeout())) {
             return null;
         } else {
-            return new Session(session.mSessionID);
+            return new Session(session.mSessionID, session.mSessionStartTime);
         }
     }
 
