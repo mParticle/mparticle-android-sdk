@@ -44,7 +44,6 @@ dependencies {
     testImplementation 'com.android.tools.lint:lint-tests:26.5.3'
     testImplementation 'com.android.tools:testutils:26.5.3'
     testImplementation 'org.easytesting:fest-assert-core:2.0M10'
-
 }
 
 jar {
@@ -91,6 +90,10 @@ afterEvaluate {
 }
 
 beforeEvaluate {
+    cleanTempLibraries
+}
+
+task cleanTempLibraries {
     File baseMParticle = file('libs/mparticle.jar')
     File minifiedMParticle = file('libs/mparticle-min.jar')
     if (baseMParticle.exists()) {
@@ -100,3 +103,5 @@ beforeEvaluate {
         minifiedMParticle.delete()
     }
 }
+
+project.tasks.findByName("clean").dependsOn cleanTempLibraries
