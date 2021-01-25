@@ -30,14 +30,14 @@ class DataPlanningNodeApp(val config: Config) {
             } else {
                 mutableListOf(mpCommand, "planning:events:validate", "--dataPlan", dataplan, "--translateEvents", "--event", message, "--versionNumber", version)
             }
-            val results = args.toTypedArray().executeCLI(path)
+            val results = args.toTypedArray().executeCLI(path, workingDirectory = config.credentialsFilePath!!)
             val error = DataPlanError.values().firstOrNull { results.contains(it.message) }
             if (error != null) {
-                return NodeAppResult(listOf(ValidationResult(error = error)))
+                return NodeAppResult(listOf(ValidationResult(error = error, arguments = args)))
             }
-            return NodeAppResult(response = ValidationResult.from(results))
-        } catch (ioe: IOException) {
-            return NodeAppResult()
+            return NodeAppResult(response = ValidationResult.from(results, arguments = args))
+        } catch (ioe: Exception) {
+            return NodeAppResult(ValidationResult.from("", listOf("${ioe.message}\n${ioe.stackTrace.joinToString("\n")}")))
         }
     }
 

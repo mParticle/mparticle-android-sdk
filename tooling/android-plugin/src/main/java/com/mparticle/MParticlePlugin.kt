@@ -142,6 +142,15 @@ class MParticlePlugin: Plugin<Project> {
             Logger.verbose("Config File Not Found, using extension values")
             Config()
         }
+        var credentialsFile = File("mp.config.json")
+        if (credentialsFile.exists()) {
+            config.credentialsFilePath = credentialsFile.absolutePath.let {
+                it.substring(0, it.length - "/mp.config.json".length)
+            }
+        } else {
+            Logger.verbose("Credentials File Not Found")
+            Config()
+        }
 
         extension.apply {
             if (resultsFile != null) {

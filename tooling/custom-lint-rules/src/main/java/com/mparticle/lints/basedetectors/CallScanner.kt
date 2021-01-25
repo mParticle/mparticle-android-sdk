@@ -4,12 +4,11 @@ import com.android.tools.lint.client.api.UElementHandler
 import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.JavaContext
 import com.mparticle.lints.VariableCollector
-import com.mparticle.lints.detectors.DataplanDetector
 import com.mparticle.lints.dtos.Expression
 import com.mparticle.lints.dtos.RootParent
-import com.mparticle.lints.resolveChainedCalls
 import com.mparticle.lints.getVariableElement
 import com.mparticle.lints.receiverClassName
+import com.mparticle.lints.resolveChainedCalls
 import org.jetbrains.uast.*
 import org.jetbrains.uast.util.isConstructorCall
 

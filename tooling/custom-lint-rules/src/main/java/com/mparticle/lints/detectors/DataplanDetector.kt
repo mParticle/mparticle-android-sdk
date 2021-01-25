@@ -25,7 +25,7 @@ class DataplanDetector: CallScanner() {
                 "DataplanViolation",
                 "Field conflicts with data plan's constraints",
                 "This field is in violation of constrains defined in your organization or workspace's data plan",
-                Category.CORRECTNESS,
+                Category.create("DataPlanning", 1),
                 10,
                 Severity.ERROR,
                 Implementation(DataplanDetector::class.java, Scope.JAVA_FILE_SCOPE)
@@ -96,16 +96,6 @@ class DataplanDetector: CallScanner() {
             return
         }
 
-        if (config?.debugReportServerMessage == true) {
-            context.report(
-                    ISSUE,
-                    reportingNode,
-                    context.getLocation(reportingNode),
-                    message.toString(4)
-            )
-            return
-        }
-
         val dp = dataplan
         if (dp == null) {
             val message = "Data Plan missing" +
@@ -130,8 +120,18 @@ class DataplanDetector: CallScanner() {
                     "MParticle CLI tools missing, run \"./gradlew mpInstall\""
             )
         } else {
-            var messageString = message.attributesToNumbers().toString()
+            val messageString = message.attributesToNumbers().toString()
             val result: DataPlanningNodeApp.NodeAppResult<List<ValidationResult>>? = dataplanningNode?.validate(dp, messageString, config?.dataPlanVersion)
+            if (config?.debugReportServerMessage === true){
+                val response = result?.response?.getOrNull(0)
+                context.report(
+                        ISSUE,
+                        reportingNode,
+                        context.getLocation(reportingNode),
+                        response.toString()
+                )
+                return
+            }
             if (result?.response?.size ?: 0 > 0) {
                 result?.response?.forEach { validationResult ->
                     validationResult.data?.validationErrors?.forEach { error ->

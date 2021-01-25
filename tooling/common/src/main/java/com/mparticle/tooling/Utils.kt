@@ -16,7 +16,7 @@ object Utils {
     }
 
 
-    fun Array<String>.executeCLI(path: String? = null): String {
+    fun Array<String>.executeCLI(path: String? = null, workingDirectory: String = "."): String {
         Logger.verbose("command line operation: ${joinToString(" ") {
             if (it.contains(" ")) {
                 "\"$it\""
@@ -32,7 +32,9 @@ object Utils {
             val envMap = mapOf("PATH" to path)
             processBuilder.environment().putAll(envMap)
         }
-        val p = processBuilder.command(*this)
+        val p = processBuilder
+                .directory(File(workingDirectory))
+                .command(*this)
                 .start()
         result = BufferedReader(InputStreamReader(p.inputStream)).readText()
         error = BufferedReader(InputStreamReader(p.errorStream)).readText()

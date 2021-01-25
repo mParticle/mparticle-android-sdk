@@ -11,9 +11,8 @@ class MParticlePluginTest {
     @Test
     fun testConfigSerialization() {
         val config = Config().apply {
-            this.clientId = "clientid"
+            this.credentialsFilePath = "credentialsFilePath"
             this.dataPlanVersionFile = "dataplanfile"
-            this.clientSecret = "clientsecret"
             this.dataPlanId = "dataplanid"
             this.dataPlanVersion = "dataplanversion"
             this.debugReportServerMessage = true

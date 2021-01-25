@@ -33,7 +33,7 @@ class ValidationResultDeserializationTest {
         ]
         """.trimIndent()
 
-        val validationResult = ValidationResult.from(JSONArray(serialized))
+        val validationResult = ValidationResult.from(JSONArray(serialized), listOf(""))
         assertEquals(1, validationResult.size)
     }
 }

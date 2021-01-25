@@ -3,8 +3,7 @@ package com.mparticle.tooling
 import org.json.JSONObject
 
 data class Config(
-        var clientId: String? = null,
-        var clientSecret: String? = null,
+        var credentialsFilePath: String? = null,
         var dataPlanId: String? = null,
         var workspaceId: String? = null,
         var dataPlanVersion: String? = null,
@@ -37,7 +36,7 @@ data class Config(
                 } else {
                     Config::class.java.declaredMethods
                             .firstOrNull { it.name.removePrefix("set").toLowerCase() == key?.toString()?.toLowerCase() }
-                            ?.let { it.invoke(config, json.opt(key.toString())) }
+                            ?.invoke(config, json.opt(key.toString()))
                 }
             }
             return config

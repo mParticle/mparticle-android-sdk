@@ -4,30 +4,61 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
-data class ValidationResult(val eventType: String? = null, val data: ValidationResultData? = null, val error: DataPlanError? = null) {
+data class ValidationResult(val eventType: String? = null, val data: ValidationResultData? = null, val error: DataPlanError? = null, val arguments: List<String>) {
     var originalString: String? = null
     companion object {
 
-        fun from(json: String?): List<ValidationResult>? {
+        fun from(json: String?, arguments: List<String>): List<ValidationResult>? {
             return try {
 
                 val jsonArray = JSONObject(json).getJSONArray("results")
-                from(jsonArray)
+                from(jsonArray, arguments)
             } catch (jse: JSONException) {
-                listOf(ValidationResult().apply { originalString = json })
+                listOf(ValidationResult(arguments = arguments).apply { originalString = json })
             }
         }
-        fun from(json: JSONArray): List<ValidationResult>  {
+        fun from(json: JSONArray, arguments: List<String>): List<ValidationResult>  {
             val validationResults = ArrayList<ValidationResult>()
             for(i in 0..json.length() - 1) {
                 val validationResultJson = json.getJSONObject(i)
                 val eventType = validationResultJson.optString("event_type")
                 val data = ValidationResultData.from(validationResultJson.optJSONObject("data"))
                 validationResults.add(
-                        ValidationResult(eventType, data)
+                        ValidationResult(eventType, data, arguments = arguments)
                 )
             }
             return validationResults
+        }
+    }
+
+    override fun toString(): String {
+        try {
+            val jsonResponse = JSONObject()
+                    .put("Error Message", error?.message)
+                    .put("Data", JSONObject()
+                            .put("Match", data?.match)
+                            .put("ValidationErrors", data?.validationErrors?.foldRight(JSONArray()) { item, arr -> arr.put(item) })
+                    )
+                    .put("Event Type", eventType)
+            return """
+        Arguments:
+        ${
+            arguments.indexOfFirst { it.startsWith("--dataPlan") }.let {
+                arguments.toMutableList().apply {
+                    if (it >= 0) {
+                        val dataplan = removeAt(it + 1)
+                        add(it + 1, "${dataplan.substring(0, Math.min(dataplan.length, 20))}...")
+                    }
+                }
+            }.joinToString(" ")
+        }
+        
+        Response:
+        ${jsonResponse.toString(4)}
+
+        """.trimIndent()
+        } catch (e: Exception) {
+            return e.message + e.stackTrace.joinToString(("\n"))
         }
     }
 }
