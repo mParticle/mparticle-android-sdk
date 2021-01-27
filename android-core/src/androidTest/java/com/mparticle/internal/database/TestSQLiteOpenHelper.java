@@ -5,40 +5,44 @@ import android.database.sqlite.SQLiteOpenHelper;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.mparticle.internal.database.services.SQLiteOpenHelperWrapper;
-
 import com.mparticle.testutils.MPLatch;
 
 import java.util.concurrent.CountDownLatch;
 
-public class BaseDatabase extends SQLiteOpenHelper {
+public class TestSQLiteOpenHelper extends SQLiteOpenHelper {
     SQLiteOpenHelperWrapper helper;
-    CountDownLatch timer;
+    public CountDownLatch onCreateLatch;
+    public CountDownLatch onUpgradeLatch;
+    public CountDownLatch onDowngradeLatch;
 
-    public BaseDatabase(SQLiteOpenHelperWrapper helper, String databaseName) {
-        this(helper, databaseName, new MPLatch(1), 1);
+    public TestSQLiteOpenHelper(SQLiteOpenHelperWrapper helper, String databaseName) {
+        this(helper, databaseName, 1);
     }
 
-    public BaseDatabase(SQLiteOpenHelperWrapper helper, String databaseName, CountDownLatch timer, int version) {
+    public TestSQLiteOpenHelper(SQLiteOpenHelperWrapper helper, String databaseName, int version) {
         super(InstrumentationRegistry.getInstrumentation().getContext(), databaseName, null, version);
         this.helper = helper;
-        this.timer = timer;
+        this.onCreateLatch = new MPLatch(1);
+        this.onUpgradeLatch = new MPLatch(1);
+        this.onDowngradeLatch = new MPLatch(1);
+        getWritableDatabase();
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
         helper.onCreate(db);
-        timer.countDown();
+        onCreateLatch.countDown();
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         helper.onUpgrade(db, oldVersion, newVersion);
-        timer.countDown();
+        onUpgradeLatch.countDown();
     }
 
     @Override
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         helper.onDowngrade(db, oldVersion, newVersion);
-        timer.countDown();
+        onDowngradeLatch.countDown();
     }
 }

@@ -8,7 +8,7 @@ import com.mparticle.internal.database.services.SQLiteOpenHelperWrapper;
 import org.junit.Test;
 
 public class BreadcrumbTableTest extends BaseTableTest{
-    private static final String old_CREATE_BREADCRUMBS_DDL =
+    public static final String old_CREATE_BREADCRUMBS_DDL =
             "CREATE TABLE IF NOT EXISTS " + BreadcrumbTable.BreadcrumbTableColumns.TABLE_NAME + " (" + BaseColumns._ID +
                     " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     BreadcrumbTable.BreadcrumbTableColumns.SESSION_ID + " STRING NOT NULL, " +
@@ -37,25 +37,4 @@ public class BreadcrumbTableTest extends BaseTableTest{
             }
         });
     }
-
-    @Test
-    public void addMpIdColumnTest() throws InterruptedException {
-        runTest(new SQLiteOpenHelperWrapper() {
-            @Override
-            public void onCreate(SQLiteDatabase database) {
-                database.execSQL(old_CREATE_BREADCRUMBS_DDL);
-            }
-
-            @Override
-            public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
-                database.execSQL(BreadcrumbTable.getAddMpIdColumnString("1"));
-            }
-
-            @Override
-            public void onDowngrade(SQLiteDatabase database, int oldVersion, int newVersion) {
-
-            }
-        });
-    }
-
 }

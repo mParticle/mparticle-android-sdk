@@ -3,8 +3,8 @@ package com.mparticle.internal.database.tables;
 import android.database.sqlite.SQLiteDatabase;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.mparticle.internal.database.TestSQLiteOpenHelper;
 import com.mparticle.testutils.BaseCleanInstallEachTest;
-import com.mparticle.internal.database.BaseDatabase;
 import com.mparticle.internal.database.services.SQLiteOpenHelperWrapper;
 
 import org.junit.Before;
@@ -16,7 +16,8 @@ import java.util.concurrent.TimeUnit;
 
 public class BaseTableTest extends BaseCleanInstallEachTest {
     public static final String DB_NAME = "test_database";
-    CountDownLatch timer = new MPLatch(1);
+    CountDownLatch onCreateLatch = new MPLatch(1);
+    CountDownLatch onUpgradeLatch = new MPLatch(1);
 
     protected void runTest(SQLiteOpenHelperWrapper helper) throws InterruptedException {
         runTest(helper, 6);
@@ -24,10 +25,14 @@ public class BaseTableTest extends BaseCleanInstallEachTest {
 
     protected void runTest(SQLiteOpenHelperWrapper helper, int oldVersion) throws InterruptedException {
         InstrumentationRegistry.getInstrumentation().getTargetContext().deleteDatabase(DB_NAME);
-        SQLiteDatabase baseDatabase = new BaseDatabase(helper, DB_NAME, timer, oldVersion).getWritableDatabase();
-        timer.await(5, TimeUnit.SECONDS);
-        baseDatabase.setVersion(MParticleDatabaseHelper.DB_VERSION);
-        timer.await(5, TimeUnit.SECONDS);
+        TestSQLiteOpenHelper openHelper = new TestSQLiteOpenHelper(helper, DB_NAME, oldVersion);
+        openHelper.getWritableDatabase();
+        openHelper.onCreateLatch.await();
+        openHelper = new TestSQLiteOpenHelper(helper, DB_NAME, MParticleDatabaseHelper.DB_VERSION);
+        openHelper.getWritableDatabase();
+        if (oldVersion < MParticleDatabaseHelper.DB_VERSION) {
+            openHelper.onUpgradeLatch.await();
+        }
         InstrumentationRegistry.getInstrumentation().getTargetContext().deleteDatabase(DB_NAME);
     }
 

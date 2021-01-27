@@ -3,6 +3,7 @@ package com.mparticle.testutils;
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -19,6 +20,7 @@ import com.mparticle.internal.AccessUtils;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.database.MPDatabase;
+import com.mparticle.internal.database.MPDatabaseImpl;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.database.services.MessageService;
 import com.mparticle.internal.database.services.SessionService;
@@ -159,6 +161,19 @@ public abstract class BaseAbstractTest {
         for (String tableName: tableNames) {
             JSONArray data = getData(database.query(tableName, null, null, null, null, null, null));
             databaseJson.put(tableName, data);
+        }
+        return databaseJson;
+    }
+
+    protected JSONObject getDatabaseSchema(SQLiteDatabase database) throws JSONException {
+        JSONObject databaseJson = new JSONObject();
+        for (String tableName: getAllTables(new MPDatabaseImpl(database))) {
+            Cursor cursor = database.query(tableName, null, null, null, null, null, null);
+            JSONObject columnNames = new JSONObject();
+            for (String columnName: cursor.getColumnNames()) {
+                columnNames.put(columnName, true);
+            }
+            databaseJson.put(tableName, columnNames);
         }
         return databaseJson;
     }

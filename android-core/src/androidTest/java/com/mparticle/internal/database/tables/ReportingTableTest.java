@@ -9,7 +9,7 @@ import org.junit.Test;
 
 public class ReportingTableTest extends BaseTableTest {
 
-    private static final String old_CREATE_REPORTING_DDL =
+    public static final String old_CREATE_REPORTING_DDL =
             "CREATE TABLE IF NOT EXISTS " + ReportingTable.ReportingTableColumns.TABLE_NAME + " (" + BaseColumns._ID +
                     " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     ReportingTable.ReportingTableColumns.MODULE_ID + " INTEGER NOT NULL, " +
@@ -29,26 +29,6 @@ public class ReportingTableTest extends BaseTableTest {
             @Override
             public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
 
-            }
-
-            @Override
-            public void onDowngrade(SQLiteDatabase database, int oldVersion, int newVersion) {
-
-            }
-        });
-    }
-
-    @Test
-    public void addMpIdColumnTest() throws InterruptedException {
-        runTest(new SQLiteOpenHelperWrapper() {
-            @Override
-            public void onCreate(SQLiteDatabase database) {
-                database.execSQL(old_CREATE_REPORTING_DDL);
-            }
-
-            @Override
-            public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
-                database.execSQL(ReportingTable.getAddMpIdColumnString("1"));
             }
 
             @Override

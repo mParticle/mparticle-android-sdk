@@ -2,10 +2,9 @@ package com.mparticle.internal.database.services;
 
 import android.database.sqlite.SQLiteOpenHelper;
 import android.location.Location;
-import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.mparticle.internal.InternalSession;
-import com.mparticle.internal.database.BaseDatabase;
+import com.mparticle.internal.database.TestSQLiteOpenHelper;
 import com.mparticle.internal.database.MPDatabaseImpl;
 import com.mparticle.internal.database.tables.MParticleDatabaseHelper;
 import com.mparticle.internal.messages.BaseMPMessage;
@@ -21,7 +20,7 @@ abstract public class BaseMPServiceTest extends BaseCleanInstallEachTest {
 
     @Before
     public final void beforeBaseMPService() throws Exception {
-        SQLiteOpenHelper openHelper = new BaseDatabase(new MParticleDatabaseHelper(mContext), MParticleDatabaseHelper.getDbName());
+        SQLiteOpenHelper openHelper = new TestSQLiteOpenHelper(new MParticleDatabaseHelper(mContext), MParticleDatabaseHelper.getDbName());
         database = new MPDatabaseImpl(openHelper.getWritableDatabase());
     }
 
