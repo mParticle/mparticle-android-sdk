@@ -28,10 +28,6 @@ public class MessageTable extends MpIdDependentTable {
         String DATAPLAN_ID = "dataplan_id";
     }
 
-    static String getAddMpIdColumnString(String defaultValue) {
-        return MParticleDatabaseHelper.addIntegerColumnString(MessageTable.MessageTableColumns.TABLE_NAME, MessageTable.MessageTableColumns.MP_ID, defaultValue);
-    }
-
     static final String CREATE_MESSAGES_DDL =
             "CREATE TABLE IF NOT EXISTS " + MessageTableColumns.TABLE_NAME + " (" + BaseColumns._ID +
                     " INTEGER PRIMARY KEY AUTOINCREMENT, " +

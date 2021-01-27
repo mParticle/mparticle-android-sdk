@@ -19,10 +19,6 @@ public class BreadcrumbTable extends MpIdDependentTable {
         String MP_ID = MpIdDependentTable.MP_ID;
     }
 
-    static String getAddMpIdColumnString(String defaultValue) {
-        return MParticleDatabaseHelper.addIntegerColumnString(BreadcrumbTableColumns.TABLE_NAME, BreadcrumbTableColumns.MP_ID, defaultValue);
-    }
-
     static final String CREATE_BREADCRUMBS_DDL =
             "CREATE TABLE IF NOT EXISTS " + BreadcrumbTableColumns.TABLE_NAME + " (" + BaseColumns._ID +
                     " INTEGER PRIMARY KEY AUTOINCREMENT, " +

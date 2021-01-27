@@ -27,8 +27,4 @@ public class UserAttributesTable extends MpIdDependentTable {
                     UserAttributesTableColumns.CREATED_AT + " INTEGER NOT NULL, " +
                     UserAttributesTableColumns.MP_ID + " INTEGER" +
                     ");";
-
-    static String getAddMpIdColumnString(String defaultValue) {
-        return MParticleDatabaseHelper.addIntegerColumnString(UserAttributesTableColumns.TABLE_NAME, UserAttributesTableColumns.MP_ID, defaultValue);
-    }
 }

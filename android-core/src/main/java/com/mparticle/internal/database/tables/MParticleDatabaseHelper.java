@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 import android.os.Message;
 
 import androidx.annotation.VisibleForTesting;
@@ -104,12 +105,19 @@ public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
     }
 
     private void upgradeMpId(SQLiteDatabase db) {
-        String currentMpId = String.valueOf(ConfigManager.getMpid(mContext));
-        db.execSQL(ReportingTable.getAddMpIdColumnString(currentMpId));
-        db.execSQL(SessionTable.getAddMpIdColumnString(currentMpId));
-        db.execSQL(UserAttributesTable.getAddMpIdColumnString(currentMpId));
-        db.execSQL(BreadcrumbTable.getAddMpIdColumnString(currentMpId));
-        db.execSQL(MessageTable.getAddMpIdColumnString(currentMpId));
+        final String currentMpId = String.valueOf(ConfigManager.getMpid(mContext));
+        String updateStatement = "ALTER TABLE %s ADD COLUMN %s INTEGER DEFAULT \'%s\'";
+        String[] tableNames = new String[]{
+                ReportingTable.ReportingTableColumns.TABLE_NAME,
+                SessionTable.SessionTableColumns.TABLE_NAME,
+                UserAttributesTable.UserAttributesTableColumns.TABLE_NAME,
+                BreadcrumbTable.BreadcrumbTableColumns.TABLE_NAME,
+                MessageTable.MessageTableColumns.TABLE_NAME
+        };
+        for (String tableName: tableNames) {
+            SQLiteStatement statement = db.compileStatement(String.format(updateStatement, tableName, MpIdDependentTable.MP_ID, currentMpId));
+            statement.execute();
+        }
     }
 
     private void upgradeUserAttributes(SQLiteDatabase db) {
@@ -153,21 +161,4 @@ public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
             e.printStackTrace();
         }
     }
-
-    static String addIntegerColumnString(String tableName, String columnName, String defaultValue) {
-        return addColumnString(tableName, columnName, "INTEGER", defaultValue);
-    }
-
-    static String addColumnString(String tableName, String columnName, String type) {
-        return addColumnString(tableName, columnName, type, null);
-    }
-
-    static String addColumnString(String tableName, String columnName, String type, String defaultValue) {
-        StringBuilder builder = new StringBuilder(String.format("ALTER TABLE %s ADD COLUMN %s %s", tableName, columnName, type));
-        if (!MPUtility.isEmpty(defaultValue)) {
-            builder.append(String.format(" DEFAULT %s", defaultValue));
-        }
-        return builder.toString();
-    }
-
 }

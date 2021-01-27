@@ -31,8 +31,5 @@ public class ReportingTable extends MpIdDependentTable {
     static final String REPORTING_ADD_SESSION_ID_COLUMN = "ALTER TABLE " + ReportingTableColumns.TABLE_NAME +
             " ADD COLUMN " + ReportingTableColumns.SESSION_ID + " STRING";
 
-    static String getAddMpIdColumnString(String defaultValue) {
-        return MParticleDatabaseHelper.addIntegerColumnString(ReportingTableColumns.TABLE_NAME, ReportingTableColumns.MP_ID, defaultValue);
-    }
 
 }

@@ -43,10 +43,6 @@ public class SessionTable extends MpIdDependentTable {
     static final String SESSION_ADD_APP_INFO_COLUMN = "ALTER TABLE " + SessionTableColumns.TABLE_NAME +
             " ADD COLUMN " + SessionTableColumns.APP_INFO + " TEXT";
 
-    static String getAddMpIdColumnString(String defaultValue) {
-        return MParticleDatabaseHelper.addIntegerColumnString(SessionTableColumns.TABLE_NAME, SessionTableColumns.MP_ID, defaultValue);
-    }
-
     static final String CREATE_SESSIONS_DDL =
             "CREATE TABLE IF NOT EXISTS " + SessionTableColumns.TABLE_NAME + " (" + BaseColumns._ID +
                     " INTEGER PRIMARY KEY AUTOINCREMENT, " +
