@@ -264,7 +264,7 @@ public class MockContext extends Context {
 
     @Override
     public int checkSelfPermission(@NonNull String permission) {
-        return 0;
+        return PackageManager.PERMISSION_GRANTED;
     }
 
     @Override
@@ -299,22 +299,22 @@ public class MockContext extends Context {
 
     @Override
     public int checkUriPermission(Uri uri, int pid, int uid, int modeFlags) {
-        return 0;
+        return PackageManager.PERMISSION_GRANTED;
     }
 
     @Override
     public int checkCallingUriPermission(Uri uri, int modeFlags) {
-        return 0;
+        return PackageManager.PERMISSION_GRANTED;
     }
 
     @Override
     public int checkCallingOrSelfUriPermission(Uri uri, int modeFlags) {
-        return 0;
+        return PackageManager.PERMISSION_GRANTED;
     }
 
     @Override
     public int checkUriPermission(@Nullable Uri uri, @Nullable String readPermission, @Nullable String writePermission, int pid, int uid, int modeFlags) {
-        return 0;
+        return PackageManager.PERMISSION_GRANTED;
     }
 
     @Override
@@ -572,12 +572,12 @@ public class MockContext extends Context {
 
     @Override
     public int checkPermission(@NonNull String permission, int pid, int uid) {
-        return 0;
+        return PackageManager.PERMISSION_GRANTED;
     }
 
     @Override
     public int checkCallingPermission(@NonNull String permission) {
-        return 0;
+        return PackageManager.PERMISSION_GRANTED;
     }
 
 
