@@ -11,6 +11,7 @@ class DataplanDetectorTest: LintDetectorTest() {
 
     @Test
     fun testCollection() {
+        val sdkHome = System.getenv("ANDROID_HOME") ?: "${System.getProperty("user.home")}/Library/Android/sdk"
         @Language("KT") val source = """
                 package com.mparticle.lints 
                 import android.app.Application 
@@ -23,13 +24,13 @@ class DataplanDetectorTest: LintDetectorTest() {
                 }
                 """
         lint()
-                .sdkHome(File("${System.getProperty("user.home")}/Library/Android/sdk"))
+                .sdkHome(File(sdkHome))
                 .files(kotlin(source))
                 .run()
     }
 
     override fun requireCompileSdk() = true
-    override fun getDetector() =DataplanDetector()
+    override fun getDetector() = DataplanDetector()
     override fun getIssues() = listOf(DataplanDetector.ISSUE, DataplanDetector.NODE_MISSING, DataplanDetector.NO_DATA_PLAN)
 
 }
