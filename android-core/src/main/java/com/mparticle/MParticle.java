@@ -380,7 +380,6 @@ public class MParticle {
      */
     private void logCommerceEvent(@NonNull CommerceEvent event) {
         if (mConfigManager.isEnabled()) {
-            MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
             mAppStateManager.ensureActiveSession();
             mMessageManager.logEvent(event);
             Logger.debug("Logged commerce event - \n", event.toString());
@@ -886,10 +885,13 @@ public class MParticle {
     static String getAppState() {
         String appState = AppStateManager.APP_STATE_NOTRUNNING;
         if (AppStateManager.mInitialized) {
-            if (MParticle.getInstance().mAppStateManager.isBackgrounded()) {
-                appState = AppStateManager.APP_STATE_BACKGROUND;
-            } else {
-                appState = AppStateManager.APP_STATE_FOREGROUND;
+            MParticle instance = MParticle.getInstance();
+            if (instance != null) {
+                if (instance.mAppStateManager.isBackgrounded()) {
+                    appState = AppStateManager.APP_STATE_BACKGROUND;
+                } else {
+                    appState = AppStateManager.APP_STATE_FOREGROUND;
+                }
             }
         }
         return appState;
@@ -1425,7 +1427,7 @@ public class MParticle {
     }
 
     private void updatePushToken(@Nullable final String newInstanceId, @Nullable final String oldInstanceId) {
-        MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
+        MParticleUser user = Identity().getCurrentUser();
         if (user != null) {
             sendPushTokenModifyRequest(user, newInstanceId, oldInstanceId);
         } else {

@@ -241,8 +241,10 @@ import java.util.UUID;
                 try {
                     MPAliasMessage aliasMessage = (MPAliasMessage) msg.obj;
                     mMParticleDBManager.insertAliasRequest(mMessageManagerCallbacks.getApiKey(), aliasMessage);
-                    if (MParticle.getInstance() != null) {
-                        MParticle.getInstance().upload();
+
+                    MParticle instance = MParticle.getInstance();
+                    if (instance != null) {
+                        instance.upload();
                     }
                 } catch (MParticleApiClientImpl.MPNoConfigException ex) {
                     Logger.error("Unable to Alias Request, API key and or API Secret is missing");
@@ -290,8 +292,9 @@ import java.util.UUID;
         for (MParticleDBManager.AttributionChange attributeChange: attributionChanges) {
             logUserAttributeChanged(attributeChange);
         }
-        if (MParticle.getInstance() != null && MParticle.getInstance().Internal().getKitManager() != null) {
-            MParticle.getInstance().Internal().getKitManager().incrementUserAttribute(key, incrementValue, newValue, mpId);
+        MParticle instance = MParticle.getInstance();
+        if (instance != null && instance.Internal().getKitManager() != null) {
+            instance.Internal().getKitManager().incrementUserAttribute(key, incrementValue, newValue, mpId);
         }
     }
 

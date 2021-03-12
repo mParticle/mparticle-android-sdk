@@ -115,8 +115,10 @@ public class DeviceAttributes {
             } catch (PackageManager.NameNotFoundException e) {
                 // ignore missing data
             }
-
-            attributes.put(MessageKey.ENVIRONMENT, MParticle.getInstance().Internal().getConfigManager().getEnvironment().getValue());
+            MParticle instance = MParticle.getInstance();
+            if (instance != null) {
+                attributes.put(MessageKey.ENVIRONMENT, instance.Internal().getConfigManager().getEnvironment().getValue());
+            }
             attributes.put(MessageKey.INSTALL_REFERRER, preferences.getString(Constants.PrefKeys.INSTALL_REFERRER, null));
 
             boolean install = preferences.getBoolean(PrefKeys.FIRST_RUN_INSTALL, true);
@@ -250,18 +252,23 @@ public class DeviceAttributes {
         if (adIdInfo != null) {
             try {
                 deviceInfo.put(MessageKey.LIMIT_AD_TRACKING, adIdInfo.isLimitAdTrackingEnabled);
-                if (adIdInfo.isLimitAdTrackingEnabled && MParticle.getInstance().Internal().getConfigManager().getRestrictAAIDBasedOnLAT()) {
-                    message = adIdInfo.advertiser.descriptiveName + " Advertising ID available but ad tracking is disabled on this device.";
-                } else {
-                    switch (adIdInfo.advertiser) {
-                        case AMAZON:
-                            deviceInfo.put(MessageKey.AMAZON_ADV_ID, adIdInfo.id);
-                            break;
-                        case GOOGLE:
-                            deviceInfo.put(MessageKey.GOOGLE_ADV_ID, adIdInfo.id);
-                            break;
+                MParticle instance = MParticle.getInstance();
+                //check instance nullability here and decline to act if it is not available. Don't want to have the case where we are overriding isLimiAdTrackingEnabled
+                //just because there was a timing issue with the singleton
+                if (instance !=  null) {
+                    if (adIdInfo.isLimitAdTrackingEnabled && instance.Internal().getConfigManager().getRestrictAAIDBasedOnLAT()) {
+                        message = adIdInfo.advertiser.descriptiveName + " Advertising ID available but ad tracking is disabled on this device.";
+                    } else {
+                        switch (adIdInfo.advertiser) {
+                            case AMAZON:
+                                deviceInfo.put(MessageKey.AMAZON_ADV_ID, adIdInfo.id);
+                                break;
+                            case GOOGLE:
+                                deviceInfo.put(MessageKey.GOOGLE_ADV_ID, adIdInfo.id);
+                                break;
+                        }
+                        message = "Successfully collected " + adIdInfo.advertiser.descriptiveName + " Advertising ID.";
                     }
-                    message = "Successfully collected " + adIdInfo.advertiser.descriptiveName + " Advertising ID.";
                 }
             }catch (JSONException jse) {
                 Logger.debug("Failed while building device-customAttributes object: ", jse.toString());

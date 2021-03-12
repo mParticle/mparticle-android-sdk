@@ -123,7 +123,7 @@ public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
     private void upgradeUserAttributes(SQLiteDatabase db) {
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
 
-        String userAttrs = sharedPreferences.getString(Constants.PrefKeys.DEPRECATED_USER_ATTRS + MParticle.getInstance().Internal().getConfigManager().getApiKey(), null);
+        String userAttrs = sharedPreferences.getString(Constants.PrefKeys.DEPRECATED_USER_ATTRS + ConfigManager.getInstance(mContext).getApiKey(), null);
         try {
             JSONObject userAttributes = new JSONObject(userAttrs);
             Iterator<String> iter = userAttributes.keys();
@@ -149,7 +149,7 @@ public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
 
         } catch (Exception e) {
         } finally {
-            sharedPreferences.edit().remove(Constants.PrefKeys.DEPRECATED_USER_ATTRS + MParticle.getInstance().Internal().getConfigManager().getApiKey()).apply();
+            sharedPreferences.edit().remove(Constants.PrefKeys.DEPRECATED_USER_ATTRS + ConfigManager.getInstance(mContext).getApiKey()).apply();
         }
     }
 

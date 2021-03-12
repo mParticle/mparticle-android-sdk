@@ -8,6 +8,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.mparticle.MPService;
 import com.mparticle.MParticle;
+import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.PushRegistrationHelper;
@@ -57,7 +58,7 @@ public class MPMessagingAPI {
      * @param senderId the SENDER_ID for the application
      */
     public void enablePushNotifications(@NonNull String senderId) {
-        MParticle.getInstance().Internal().getConfigManager().setPushSenderId(senderId);
+        ConfigManager.getInstance(mContext).setPushSenderId(senderId);
         if (!MPUtility.isFirebaseAvailable()) {
             Logger.error("Push is enabled but Firebase Cloud Messaging library not found - you must add com.google.firebase:firebase-messaging:7.5 or later to your application.");
         }else if (!MPUtility.isServiceAvailable(mContext, MPService.class)){
@@ -73,11 +74,11 @@ public class MPMessagingAPI {
      * Unregister the application for FCM notifications.
      */
     public void disablePushNotifications() {
-        MParticle.getInstance().Internal().getConfigManager().clearPushRegistration();
+        ConfigManager.getInstance(mContext).clearPushRegistration();
     }
 
     public void displayPushNotificationByDefault(@Nullable Boolean enabled) {
-        MParticle.getInstance().Internal().getConfigManager().setDisplayPushNotifications(enabled);
+        ConfigManager.getInstance(mContext).setDisplayPushNotifications(enabled);
     }
 
     /**

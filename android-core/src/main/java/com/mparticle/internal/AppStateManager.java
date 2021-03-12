@@ -189,14 +189,17 @@ public class  AppStateManager {
             }
             mCurrentActivityReference = new WeakReference<Activity>(activity);
 
-            if (MParticle.getInstance().isAutoTrackingEnabled()) {
-                MParticle.getInstance().logScreen(mCurrentActivityName);
+            MParticle instance = MParticle.getInstance();
+            if (instance != null) {
+                if (instance.isAutoTrackingEnabled()) {
+                    instance.logScreen(mCurrentActivityName);
+                }
+                if (isBackToForeground) {
+                    instance.Internal().getKitManager().onApplicationForeground();
+                    Logger.debug("App foregrounded.");
+                }
+                instance.Internal().getKitManager().onActivityResumed(activity);
             }
-            if (isBackToForeground) {
-                MParticle.getInstance().Internal().getKitManager().onApplicationForeground();
-                Logger.debug("App foregrounded.");
-            }
-            MParticle.getInstance().Internal().getKitManager().onActivityResumed(activity);
         }catch (Exception e){
                 Logger.verbose("Failed while trying to track activity resume: " + e.getMessage());
         }
@@ -226,14 +229,17 @@ public class  AppStateManager {
                 }
             }, ACTIVITY_DELAY);
 
-            if (MParticle.getInstance().isAutoTrackingEnabled()) {
-                MParticle.getInstance().logScreen(
-                        new MPEvent.Builder(AppStateManager.getActivityName(activity))
-                                .internalNavigationDirection(false)
-                                .build()
-                );
+            MParticle instance = MParticle.getInstance();
+            if (instance != null) {
+                if (instance.isAutoTrackingEnabled()) {
+                    instance.logScreen(
+                            new MPEvent.Builder(AppStateManager.getActivityName(activity))
+                                    .internalNavigationDirection(false)
+                                    .build()
+                    );
+                }
+                instance.Internal().getKitManager().onActivityPaused(activity);
             }
-            MParticle.getInstance().Internal().getKitManager().onActivityPaused(activity);
         }catch (Exception e) {
             Logger.verbose("Failed while trying to track activity pause: " + e.getMessage());
         }
@@ -289,7 +295,10 @@ public class  AppStateManager {
             long minTime = mPreferences.getLong(Constants.PrefKeys.LOCATION_MINTIME, 0);
             long minDistance = mPreferences.getLong(Constants.PrefKeys.LOCATION_MINDISTANCE, 0);
             if (provider != null && minTime > 0 && minDistance > 0){
-                MParticle.getInstance().enableLocationTracking(provider, minTime, minDistance);
+                MParticle instance = MParticle.getInstance();
+                if (instance != null) {
+                    instance.enableLocationTracking(provider, minTime, minDistance);
+                }
             }
         }
     }
@@ -328,29 +337,35 @@ public class  AppStateManager {
     }
 
     public void onActivityCreated(Activity activity, Bundle savedInstanceState){
-        if (MParticle.getInstance() != null) {
-            MParticle.getInstance().Internal().getKitManager().onActivityCreated(activity, savedInstanceState);
+        MParticle instance = MParticle.getInstance();
+        if (instance != null) {
+            instance.Internal().getKitManager().onActivityCreated(activity, savedInstanceState);
         }
     }
 
     public void onActivityStarted(Activity activity){
-        if (MParticle.getInstance() != null) {
-            MParticle.getInstance().Internal().getKitManager().onActivityStarted(activity);
+        MParticle instance = MParticle.getInstance();
+        if (instance != null) {
+            instance.Internal().getKitManager().onActivityStarted(activity);
         }
     }
 
     public void onActivityStopped(Activity activity) {
-        if (MParticle.getInstance() != null) {
-            MParticle.getInstance().Internal().getKitManager().onActivityStopped(activity);
+        MParticle instance = MParticle.getInstance();
+        if (instance != null) {
+            instance.Internal().getKitManager().onActivityStopped(activity);
         }
     }
 
     private void logBackgrounded(){
-        logStateTransition(Constants.StateTransitionType.STATE_TRANS_BG, mCurrentActivityName);
-        MParticle.getInstance().Internal().getKitManager().onApplicationBackground();
-        mCurrentActivityName = null;
-        Logger.debug("App backgrounded.");
-        mInterruptionCount.incrementAndGet();
+        MParticle instance = MParticle.getInstance();
+        if (instance != null) {
+            logStateTransition(Constants.StateTransitionType.STATE_TRANS_BG, mCurrentActivityName);
+            instance.Internal().getKitManager().onApplicationBackground();
+            mCurrentActivityName = null;
+            Logger.debug("App backgrounded.");
+            mInterruptionCount.incrementAndGet();
+        }
     }
 
     @TargetApi(14)
@@ -379,8 +394,9 @@ public class  AppStateManager {
         mMessageManager.endSession(mCurrentSession);
         disableLocationTracking();
         mCurrentSession = new InternalSession();
-        if (MParticle.getInstance() != null) {
-            MParticle.getInstance().Internal().getKitManager().onSessionEnd();
+        MParticle instance = MParticle.getInstance();
+        if (instance != null) {
+            instance.Internal().getKitManager().onSessionEnd();
         }
         InternalListenerManager.getListener().onSessionUpdated(mCurrentSession);
     }
@@ -391,8 +407,9 @@ public class  AppStateManager {
                 .remove(Constants.PrefKeys.LOCATION_MINTIME)
                 .remove(Constants.PrefKeys.LOCATION_MINDISTANCE)
                 .apply();
-        if (MParticle.getInstance() != null) {
-            MParticle.getInstance().disableLocationTracking();
+        MParticle instance = MParticle.getInstance();
+        if (instance != null) {
+            instance.disableLocationTracking();
         }
     }
 
@@ -400,18 +417,23 @@ public class  AppStateManager {
         mCurrentSession = new InternalSession().start(mContext);
         mLastStoppedTime = new AtomicLong(getTime());
         enableLocationTracking();
-        MParticle.getInstance().Internal().getKitManager().onSessionStart();
+        MParticle instance = MParticle.getInstance();
+        if (instance != null) {
+            instance.Internal().getKitManager().onSessionStart();
+        }
     }
 
     public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-        if (MParticle.getInstance() != null) {
-            MParticle.getInstance().Internal().getKitManager().onActivitySaveInstanceState(activity, outState);
+        MParticle instance = MParticle.getInstance();
+        if (instance != null) {
+            instance.Internal().getKitManager().onActivitySaveInstanceState(activity, outState);
         }
     }
 
     public void onActivityDestroyed(Activity activity) {
-        if (MParticle.getInstance() != null) {
-            MParticle.getInstance().Internal().getKitManager().onActivityDestroyed(activity);
+        MParticle instance = MParticle.getInstance();
+        if (instance != null) {
+            instance.Internal().getKitManager().onActivityDestroyed(activity);
         }
     }
 
@@ -427,16 +449,20 @@ public class  AppStateManager {
             MPUtility.AdIdInfo adIdInfo =  MPUtility.getAdIdInfo(mContext);
             String currentGoogleAdId = adIdInfo == null ? null : adIdInfo.id;
             if (currentGoogleAdId != null && !currentGoogleAdId.equals(previousGoogleAdId)) {
-                MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
-                Builder builder;
-                if (user != null) {
-                    builder = new Builder(user);
-                } else {
-                    builder = new Builder();
+                MParticle instance = MParticle.getInstance();
+                if (instance != null) {
+                    MParticleUser user = instance.Identity().getCurrentUser();
+
+                    Builder builder;
+                    if (user != null) {
+                        builder = new Builder(user);
+                    } else {
+                        builder = new Builder();
+                    }
+                    instance.Identity().modify(builder
+                            .googleAdId(currentGoogleAdId, previousGoogleAdId)
+                            .build());
                 }
-                MParticle.getInstance().Identity().modify(builder
-                        .googleAdId(currentGoogleAdId, previousGoogleAdId)
-                        .build());
             }
         }
     }

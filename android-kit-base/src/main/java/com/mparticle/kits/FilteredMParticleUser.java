@@ -27,9 +27,12 @@ public class FilteredMParticleUser implements MParticleUser {
     }
 
     static FilteredMParticleUser getInstance(long mpid, KitIntegration provider) {
-        MParticleUser user = MParticle.getInstance().Identity().getUser(mpid);
-        if (user != null) {
-            return new FilteredMParticleUser(user, provider);
+        MParticle instance = MParticle.getInstance();
+        if (instance != null) {
+            MParticleUser user = instance.Identity().getUser(mpid);
+            if (user != null) {
+                return new FilteredMParticleUser(user, provider);
+            }
         }
         return null;
     }

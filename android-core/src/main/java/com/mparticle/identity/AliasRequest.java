@@ -153,7 +153,10 @@ public class AliasRequest {
             if (implicitStartTime) {
                 int aliasMaxWindow = 90;
                 try {
-                    aliasMaxWindow = MParticle.getInstance().Internal().getConfigManager().getAliasMaxWindow();
+                    MParticle instance = MParticle.getInstance();
+                    if (instance != null) {
+                        aliasMaxWindow = instance.Internal().getConfigManager().getAliasMaxWindow();
+                    }
                 } catch (Exception e) {
                     Logger.error(e.getMessage());
                 }

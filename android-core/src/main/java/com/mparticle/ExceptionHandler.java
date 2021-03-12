@@ -22,7 +22,10 @@ import java.lang.Thread.UncaughtExceptionHandler;
     @Override
     public void uncaughtException(Thread thread, Throwable ex) {
         try {
-            MParticle.getInstance().logUnhandledError(ex);
+            MParticle instance = MParticle.getInstance();
+            if (instance != null) {
+                instance.logUnhandledError(ex);
+            }
         } catch (Exception t) {
             Logger.error(t, "Failed to log error event for uncaught exception.");
             // we tried. don't make things worse.

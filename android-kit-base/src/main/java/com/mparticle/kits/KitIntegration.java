@@ -102,20 +102,22 @@ public abstract class KitIntegration {
 
     @Deprecated
     public final Map<MParticle.IdentityType, String> getUserIdentities() {
-       MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
-       if (user == null) {
-           return new HashMap<MParticle.IdentityType, String>();
-       } else {
-           Map<MParticle.IdentityType, String> identities = user.getUserIdentities();
-           identities = getKitManager().getDataplanFilter().transformIdentities(identities);
-           Map<MParticle.IdentityType, String> filteredIdentities = new HashMap<MParticle.IdentityType, String>(identities.size());
-           for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()) {
-               if (getConfiguration().shouldSetIdentity(entry.getKey())) {
-                   filteredIdentities.put(entry.getKey(), entry.getValue());
-               }
-           }
-           return identities;
-       }
+        MParticle instance = MParticle.getInstance();
+        if (instance != null) {
+            MParticleUser user = instance.Identity().getCurrentUser();
+            if (user != null) {
+                Map<MParticle.IdentityType, String> identities = user.getUserIdentities();
+                identities = getKitManager().getDataplanFilter().transformIdentities(identities);
+                Map<MParticle.IdentityType, String> filteredIdentities = new HashMap<MParticle.IdentityType, String>(identities.size());
+                for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()) {
+                    if (getConfiguration().shouldSetIdentity(entry.getKey())) {
+                        filteredIdentities.put(entry.getKey(), entry.getValue());
+                    }
+                }
+                return identities;
+            }
+        }
+        return new HashMap<MParticle.IdentityType, String>();
     }
 
     /**
@@ -131,38 +133,49 @@ public abstract class KitIntegration {
      */
     @Deprecated
     public final Map<String, Object> getAllUserAttributes() {
-        MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
-        if (user == null) {
-            return new HashMap<String, Object>();
-        }
-        Map<String, Object> userAttributes = user.getUserAttributes();
-        if (kitManager != null) {
-            userAttributes = kitManager.getDataplanFilter().transformUserAttributes(userAttributes);
-        }
-        Map<String, Object> attributes = (Map<String, Object>) KitConfiguration.filterAttributes(
-                getConfiguration().getUserAttributeFilters(),
-                userAttributes
-        );
-        if ((this instanceof AttributeListener) && ((AttributeListener)this).supportsAttributeLists()) {
-            return attributes;
-        }else {
-            for (Map.Entry<String, Object> entry : attributes.entrySet()) {
-                if (entry.getValue() instanceof List) {
-                    attributes.put(entry.getKey(), KitUtils.join((List)entry.getValue()));
+        MParticle instance = MParticle.getInstance();
+        if (instance != null) {
+            MParticleUser user = instance.Identity().getCurrentUser();
+            if (user != null) {
+                Map<String, Object> userAttributes = user.getUserAttributes();
+                if (kitManager != null) {
+                    userAttributes = kitManager.getDataplanFilter().transformUserAttributes(userAttributes);
+                }
+                Map<String, Object> attributes = (Map<String, Object>) KitConfiguration.filterAttributes(
+                        getConfiguration().getUserAttributeFilters(),
+                        userAttributes
+                );
+                if ((this instanceof AttributeListener) && ((AttributeListener) this).supportsAttributeLists()) {
+                    return attributes;
+                } else {
+                    for (Map.Entry<String, Object> entry : attributes.entrySet()) {
+                        if (entry.getValue() instanceof List) {
+                            attributes.put(entry.getKey(), KitUtils.join((List) entry.getValue()));
+                        }
+                    }
+                    return attributes;
                 }
             }
-            return attributes;
         }
+        return new HashMap<String, Object>();
     }
 
     public final MParticleUser getCurrentUser() {
-        MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
-        return FilteredMParticleUser.getInstance(user, this);
+        MParticle instance = MParticle.getInstance();
+        if (instance != null) {
+            MParticleUser user = instance.Identity().getCurrentUser();
+            return FilteredMParticleUser.getInstance(user, this);
+        }
+        return FilteredMParticleUser.getInstance(null, this);
     }
 
     public final MParticleUser getUser(Long mpid) {
-        MParticleUser user = MParticle.getInstance().Identity().getUser(mpid);
-        return FilteredMParticleUser.getInstance(user, this);
+        MParticle instance = MParticle.getInstance();
+        if (instance != null) {
+            MParticleUser user =instance.Identity().getUser(mpid);
+            return FilteredMParticleUser.getInstance(user, this);
+        }
+        return FilteredMParticleUser.getInstance(null, this);
     }
 
     /**

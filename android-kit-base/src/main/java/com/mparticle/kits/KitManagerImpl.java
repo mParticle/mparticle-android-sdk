@@ -77,7 +77,10 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 mCoreCallbacks.getKitListener().kitFound(kitId);
             }
         }
-        MParticle.getInstance().Identity().addIdentityStateListener(this);
+        MParticle instance = MParticle.getInstance();
+        if (instance != null) {
+            instance.Identity().addIdentityStateListener(this);
+        }
     }
 
     /**
@@ -176,7 +179,12 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
      * Note: This method is meant to always be run on the main thread.
      */
     protected void configureKits(JSONArray kitConfigs) {
-        MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
+        MParticle instance = MParticle.getInstance();
+        if (instance == null) {
+            //if MParticle has been dereferenced, abandon ship. This will run again when it is restarted
+            return;
+        }
+        MParticleUser user = instance.Identity().getCurrentUser();
         HashSet<Integer> activeIds = new HashSet<Integer>();
 
         if (kitConfigs != null) {
@@ -271,9 +279,12 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             syncUserIdentities((KitIntegration.AttributeListener) activeKit, activeKit.getConfiguration());
         }
 
-        Intent mockInstallReferrer = getMockInstallReferrerIntent(MParticle.getInstance().getInstallReferrer());
-        if (mockInstallReferrer != null) {
-            activeKit.setInstallReferrer(mockInstallReferrer);
+        MParticle instance = MParticle.getInstance();
+        if (instance != null) {
+            Intent mockInstallReferrer = getMockInstallReferrerIntent(instance.getInstallReferrer());
+            if (mockInstallReferrer != null) {
+                activeKit.setInstallReferrer(mockInstallReferrer);
+            }
         }
 
         if (activeKit instanceof KitIntegration.PushListener) {
@@ -594,13 +605,16 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     }
 
     private void syncUserIdentities(KitIntegration.AttributeListener attributeListener, KitConfiguration configuration) {
-        MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
-        if (user != null) {
-            Map<MParticle.IdentityType, String> identities = user.getUserIdentities();
-            if (identities != null) {
-                for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()) {
-                    if (configuration.shouldSetIdentity(entry.getKey())) {
-                        attributeListener.setUserIdentity(entry.getKey(), entry.getValue());
+        MParticle instance = MParticle.getInstance();
+        if (instance != null) {
+            MParticleUser user = instance.Identity().getCurrentUser();
+            if (user != null) {
+                Map<MParticle.IdentityType, String> identities = user.getUserIdentities();
+                if (identities != null) {
+                    for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()) {
+                        if (configuration.shouldSetIdentity(entry.getKey())) {
+                            attributeListener.setUserIdentity(entry.getKey(), entry.getValue());
+                        }
                     }
                 }
             }
@@ -1137,32 +1151,41 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     @Override
     public void onResult(AttributionResult result) {
         mAttributionResultsMap.put(result.getServiceProviderId(), result);
-        AttributionListener listener = MParticle.getInstance().getAttributionListener();
-        if (listener != null && result != null) {
-            Logger.debug("Attribution result returned: \n" + result.toString());
-            listener.onResult(result);
+        MParticle instance = MParticle.getInstance();
+        if (instance != null) {
+            AttributionListener listener = instance.getAttributionListener();
+            if (listener != null && result != null) {
+                Logger.debug("Attribution result returned: \n" + result.toString());
+                listener.onResult(result);
+            }
         }
     }
 
     @Override
     public void onError(AttributionError error) {
-        AttributionListener listener = MParticle.getInstance().getAttributionListener();
-        if (listener != null && error != null) {
-            Logger.debug("Attribution error returned: \n" + error.toString());
-            listener.onError(error);
+        MParticle instance = MParticle.getInstance();
+        if (instance != null) {
+            AttributionListener listener = instance.getAttributionListener();
+            if (listener != null && error != null) {
+                Logger.debug("Attribution error returned: \n" + error.toString());
+                listener.onError(error);
+            }
         }
     }
 
     @Override
     public void installReferrerUpdated() {
-        Intent mockIntent = getMockInstallReferrerIntent(MParticle.getInstance().getInstallReferrer());
-        for (KitIntegration provider : providers.values()) {
-            try {
-                if (!provider.isDisabled()) {
-                    provider.setInstallReferrer(mockIntent);
+        MParticle instance = MParticle.getInstance();
+        if (instance != null) {
+            Intent mockIntent = getMockInstallReferrerIntent(instance.getInstallReferrer());
+            for (KitIntegration provider : providers.values()) {
+                try {
+                    if (!provider.isDisabled()) {
+                        provider.setInstallReferrer(mockIntent);
+                    }
+                } catch (Exception e) {
+                    Logger.warning("Failed to update Install Referrer for kit: " + provider.getName() + ": " + e.getMessage());
                 }
-            } catch (Exception e) {
-                Logger.warning("Failed to update Install Referrer for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }

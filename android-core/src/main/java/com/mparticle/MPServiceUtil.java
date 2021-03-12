@@ -125,7 +125,10 @@ public class MPServiceUtil {
             }).execute(message);
         }
         String appState = MParticle.getAppState();
-        MParticle.getInstance().logNotification(message, false, appState);
+        MParticle instance = MParticle.getInstance();
+        if (instance != null) {
+            instance.logNotification(message, false, appState);
+        }
     }
 
     private void handleNotificationTap(Intent intent) {
@@ -150,11 +153,14 @@ public class MPServiceUtil {
                 @Override
                 public void onKitsLoaded() {
                     try {
-                        MParticle.getInstance().Internal().getKitManager().loadKitLibrary();
-                        ProviderCloudMessage cloudMessage = ProviderCloudMessage.createMessage(intent, ConfigManager.getPushKeys(mContext));
-                        boolean handled = MParticle.getInstance().Internal().getKitManager().onMessageReceived(mContext.getApplicationContext(), intent);
-                        cloudMessage.setDisplayed(handled);
-                        broadcastNotificationReceived(cloudMessage);
+                        MParticle instance = MParticle.getInstance();
+                        if (instance != null) {
+                            instance.Internal().getKitManager().loadKitLibrary();
+                            ProviderCloudMessage cloudMessage = ProviderCloudMessage.createMessage(intent, ConfigManager.getPushKeys(mContext));
+                            boolean handled = instance.Internal().getKitManager().onMessageReceived(mContext.getApplicationContext(), intent);
+                            cloudMessage.setDisplayed(handled);
+                            broadcastNotificationReceived(cloudMessage);
+                        }
                     } catch (Exception e) {
                         Logger.warning("FCM parsing error: " + e.toString());
                     }

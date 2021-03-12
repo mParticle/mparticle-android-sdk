@@ -118,7 +118,10 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
             mParticleDBManager.getDatabase();
             switch (msg.what) {
                 case UPDATE_CONFIG:
-                    MParticle.getInstance().Internal().getKitManager().loadKitLibrary();
+                    MParticle instance = MParticle.getInstance();
+                    if (instance != null) {
+                        instance.Internal().getKitManager().loadKitLibrary();
+                    }
                     mApiClient.fetchConfig(true);
                     break;
                 case INIT_CONFIG:
@@ -174,7 +177,12 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
         if (remainingHeap < Constants.LIMIT_MAX_UPLOAD_SIZE) {
             throw new Exception("Low remaining heap space, deferring uploads.");
         }
-        final boolean sessionHistoryEnabled = MParticle.getInstance().Internal().getConfigManager().getIncludeSessionHistory();
+        MParticle instance = MParticle.getInstance();
+        //abort if MParticle singleton has been dereferenced, there is no way to evaluate session history
+        if (instance == null) {
+            return;
+        }
+        final boolean sessionHistoryEnabled = instance.Internal().getConfigManager().getIncludeSessionHistory();
         try {
             mParticleDBManager.cleanupMessages();
             if (history && !sessionHistoryEnabled) {
@@ -307,8 +315,9 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
     public void setConnected(boolean connected){
 
         try {
-            if (!isNetworkConnected && connected && mConfigManager.isPushEnabled()) {
-                MParticle.getInstance().Messaging().enablePushNotifications(mConfigManager.getPushSenderId());
+            MParticle instance = MParticle.getInstance();
+            if (instance != null && !isNetworkConnected && connected && mConfigManager.isPushEnabled()) {
+                instance.Messaging().enablePushNotifications(mConfigManager.getPushSenderId());
             }
         }catch (Exception e) {
 
