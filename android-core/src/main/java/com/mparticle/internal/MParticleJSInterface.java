@@ -6,6 +6,7 @@ import android.webkit.WebView;
 
 import androidx.annotation.Nullable;
 
+import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticle.EventType;
@@ -23,6 +24,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -43,6 +45,7 @@ public class MParticleJSInterface {
     protected static final String JS_KEY_EVENT_CATEGORY = "EventCategory";
     protected static final String JS_KEY_EVENT_ATTRIBUTES = "EventAttributes";
     protected static final String JS_KEY_EVENT_DATATYPE = "EventDataType";
+    protected static final String JS_KEY_EVENT_FLAGS = "CustomFlags";
     protected static final String JS_KEY_OPTOUT = "OptOut";
 
     protected static final int JS_MSG_TYPE_SS = 1;
@@ -177,17 +180,25 @@ public class MParticleJSInterface {
             String name = event.getString(JS_KEY_EVENT_NAME);
             EventType eventType = convertEventType(event.getInt(JS_KEY_EVENT_CATEGORY));
             Map<String, String> eventAttributes = convertToMap(event.optJSONObject(JS_KEY_EVENT_ATTRIBUTES));
+            Map<String, List<String>> eventFlags = convertToListMap(event.optJSONObject(JS_KEY_EVENT_FLAGS));
 
             int messageType = event.getInt(JS_KEY_EVENT_DATATYPE);
             switch (messageType){
                 case JS_MSG_TYPE_PE:
-                    MParticle.getInstance().logEvent(new MPEvent.Builder(name,
-                            eventType).customAttributes(
-                            eventAttributes).build());
+                    logEvent(
+                            new MPEvent.Builder(name, eventType)
+                                .customAttributes(eventAttributes)
+                                .customFlags(eventFlags)
+                                .build()
+                    );
                     break;
                 case JS_MSG_TYPE_PV:
-                    MParticle.getInstance().logScreen(name,
-                            eventAttributes);
+                    logScreen(
+                            new MPEvent.Builder(name, eventType)
+                                .customAttributes(eventAttributes)
+                                .customFlags(eventFlags)
+                                .build()
+                    );
                     break;
                 case JS_MSG_TYPE_OO:
                     MParticle.getInstance().setOptOut(event.optBoolean(JS_KEY_OPTOUT));
@@ -201,7 +212,7 @@ public class MParticleJSInterface {
                         Logger.warning("CommerceEvent empty, or unparseable");
                         break;
                     }
-                    MParticle.getInstance().logEvent(commerceEvent);
+                    logEvent(commerceEvent);
                     break;
                 case JS_MSG_TYPE_SE:
                 case JS_MSG_TYPE_SS:
@@ -477,6 +488,16 @@ public class MParticleJSInterface {
         }
     }
 
+    //for testing
+    protected void logEvent(BaseEvent event) {
+        MParticle.getInstance().logEvent(event);
+    }
+
+    //for testing
+    protected void logScreen(MPEvent event) {
+        MParticle.getInstance().logScreen(event);
+    }
+
     protected CommerceEvent toCommerceEvent(JSONObject jsonObject) {
         CommerceEvent.Builder builder = null;
 
@@ -548,6 +569,10 @@ public class MParticleJSInterface {
         Map<String, String> customAttributes = convertToMap(jsonObject.optJSONObject(JS_KEY_EVENT_ATTRIBUTES));
         if (customAttributes != null) {
             builder.customAttributes(customAttributes);
+        }
+        Map<String, List<String>> customFlags = convertToListMap(jsonObject.optJSONObject(JS_KEY_EVENT_FLAGS));
+        if (customFlags != null) {
+            builder.customFlags(customFlags);
         }
         String currencyCode = jsonObject.optString(CURRENCY_CODE, null);
         if (currencyCode != null && !"null".equals(currencyCode)) {
@@ -672,13 +697,44 @@ public class MParticleJSInterface {
                 try {
                     parsedAttributes.put(key, attributes.getString(key));
                 } catch (JSONException e) {
-                    Logger.warning("Could not parse attribute value.");
+                    Logger.warning(e, "Could not parse attribute value.");
                 }
             }
-
             return parsedAttributes;
         }
+        return null;
+    }
 
+    protected static Map<String, List<String>> convertToListMap(JSONObject customFlags) {
+        if (null != customFlags) {
+            Iterator keys = customFlags.keys();
+            Map<String, List<String>> parsedFlags = new HashMap<String, List<String>>();
+            while(keys.hasNext()) {
+                String key = (String)keys.next();
+                try {
+                    JSONArray valueArray = customFlags.optJSONArray(key);
+                    if (valueArray != null) {
+                        List<String> flags = new ArrayList<String>();
+                        for (int i = 0; i < valueArray.length(); i++) {
+                            try {
+                                flags.add(valueArray.getString(i));
+                            }
+                            catch (JSONException jse) {
+                                Logger.warning("Could not parse custom flag array value.");
+                            }
+                        }
+                        parsedFlags.put(key, flags);
+                    } else {
+                        String stringValue = customFlags.getString(key);
+                        parsedFlags.put(key, Collections.singletonList(stringValue));
+                    }
+                }
+                catch (Exception e) {
+                    Logger.warning(e, "Could not parse custom flag value.");
+                }
+            }
+            return parsedFlags;
+        }
         return null;
     }
 

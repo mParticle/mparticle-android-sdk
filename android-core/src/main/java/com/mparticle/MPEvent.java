@@ -352,6 +352,18 @@ public class MPEvent extends BaseEvent {
         }
 
         /**
+         * Bulk add custom flags to this event. This will replace any flags previously set via {@link MPEvent.Builder#addCustomFlag(String, String)}
+         *
+         * @param customFlags (required) a map containing the custom flags for the MPEvent
+         * @return returns this builder for easy method chaining
+         */
+        @NonNull
+        public Builder customFlags(@Nullable Map<String, List<String>> customFlags) {
+            this.customFlags = customFlags;
+            return this;
+        }
+
+        /**
          *
          * The Google Analytics category with which to associate this event.
          *

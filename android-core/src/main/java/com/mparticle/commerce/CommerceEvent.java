@@ -711,6 +711,18 @@ public final class CommerceEvent extends BaseEvent {
         }
 
         /**
+         * Bulk add custom flags to this event. This will replace any flags previously set via {@link CommerceEvent.Builder#addCustomFlag(String, String)}
+         *
+         * @param customFlags (required) a map containing the custom flags for the CommerceEvent
+         * @return returns this builder for easy method chaining
+         */
+        @NonNull
+        public Builder customFlags(@Nullable Map<String, List<String>> customFlags) {
+            this.mCustomFlags = customFlags;
+            return this;
+        }
+
+        /**
          * Add a {@link Promotion} to this CommerceEvent.
          *
          * <i>This should only be called for {@link Promotion}-based CommerceEvents created with <code><a href="CommerceEvent.Builder.html#CommerceEvent.Builder(java.lang.String,%20com.mparticle.commerce.Promotion)">Builder(java.lang.String, com.mparticle.commerce.Promotion)</a></code></i>

@@ -7,14 +7,19 @@ import android.telephony.TelephonyManager;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.utils.RandomUtils;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import static org.junit.Assert.*;
@@ -141,6 +146,32 @@ public class MPUtilityTest {
         }
     }
 
+    @Test
+    public void testMapToJsonLists() throws Exception {
+        assertNull(MPUtility.mapToJson(null));
+        for (int i = 0; i < 10; i++) {
+            Map<String, Object> testMap = new HashMap<String, Object>();
+            JSONObject testJson = new JSONObject();
+            for (int j = 0; j < 10; j++) {
+                List<String> list = new ArrayList<String>();
+                JSONArray jsonArray = new JSONArray();
+                for (int k = 0; k < 3; k++) {
+                    String value = RandomUtils.getInstance().getAlphaNumericString(18);
+                    list.add(value);
+                    jsonArray.put(value);
+                }
+                String key = RandomUtils.getInstance().getAlphaNumericString(10);
+                testMap.put(key, list);
+                testJson.put(key, jsonArray);
+            }
+            testMap.put("foo", null);
+            testJson.put("foo", null);
+            testMap.put("bar", "foobar");
+            testJson.put("bar", "foobar");
+            assertUnorderedJsonEqual(testJson, MPUtility.mapToJson(testMap));
+        }
+    }
+
     private void assertUnorderedJsonEqual(JSONObject object1, JSONObject object2) {
         if (object1 == object2) {
             return;
@@ -155,6 +186,8 @@ public class MPUtilityTest {
                 //Dealing with nested JSONObjects, not going to deal with nested JSONArray's.
                 if (obj1Val instanceof JSONObject && obj2Val instanceof JSONObject) {
                     assertUnorderedJsonEqual((JSONObject)obj1Val, (JSONObject)obj2Val);
+                } else if (obj1Val instanceof JSONArray && obj1Val instanceof JSONArray) {
+                    assertUnorderedJsonEqual((JSONArray)obj1Val, (JSONArray)obj2Val);
                 } else {
                     assertEquals(obj1Val, obj2Val);
                 }
@@ -164,4 +197,38 @@ public class MPUtilityTest {
             }
         }
     }
+
+    private void assertUnorderedJsonEqual(JSONArray object1, JSONArray object2) {
+        if (object1 == object2) {
+            return;
+        }
+        List<Object> list1 = toList(object1);
+        List<Object> list2 = toList(object2);
+        assertEquals(list1.size(), list2.size());
+        Comparator<Object> comparator = new Comparator<Object>() {
+            @Override
+            public int compare(Object o1, Object o2) {
+                return ((Comparable)o1).compareTo(o2);
+            }
+        };
+        Collections.sort(list1, comparator);
+        Collections.sort(list2, comparator);
+
+        for (int i = 0; i < list1.size(); i++) {
+            assertEquals(list1.get(i), list2.get(i));
+        }
+    }
+
+    private List<Object> toList(JSONArray jsonArray) {
+        List<Object> list = new ArrayList<Object>();
+        for (int i = 0; i < jsonArray.length(); i++) {
+            try {
+                list.add(jsonArray.get(i));
+            } catch (JSONException e) {
+                fail(e.getMessage());
+            }
+        }
+        return list;
+    }
+
 }

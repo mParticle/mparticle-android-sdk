@@ -636,14 +636,26 @@ public class MPUtility {
         }
     }
 
-    public static JSONObject mapToJson(Map<String, String> map) {
+    public static JSONObject mapToJson(Map<String, ?> map) {
         if (map == null) {
             return null;
         }
         JSONObject attrs = new JSONObject();
-        for (Map.Entry<String, String> entry : map.entrySet()) {
+        for (Map.Entry<String, ?> entry : map.entrySet()) {
             try {
-                attrs.put(entry.getKey(), entry.getValue());
+                Object value = entry.getValue();
+                String key = entry.getKey();
+                if (value instanceof List) {
+                    JSONArray array = new JSONArray();
+                    for (Object v: (List)value) {
+                        array.put(v);
+                    }
+                    attrs.put(key, array);
+                } else if (value != null) {
+                    attrs.put(key, value.toString());
+                } else {
+                    attrs.put(key, value);
+                }
             }
             catch (JSONException ignore) {
 

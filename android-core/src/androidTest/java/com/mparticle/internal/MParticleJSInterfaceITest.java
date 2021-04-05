@@ -15,6 +15,7 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.mparticle.BaseEvent;
 import com.mparticle.MParticle;
 import com.mparticle.WebViewActivity;
 import com.mparticle.commerce.CommerceEvent;
@@ -44,8 +45,10 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -311,23 +314,47 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
     @Test
     public void testLogEvent() throws Exception {
         final JSONObject customAttributes = MPUtility.mapToJson( mRandomUtils.getRandomAttributes(10));
+        final JSONObject customFlagsJSON = MPUtility.mapToJson(getCustomFlags());
         String testJavascript = String.format("mParticle.logEvent('Play Movie Tapped',\n" +
                 "                         mParticle.EventType.Navigation,\n" +
-                "                         %s\n" +
-                "                         );", customAttributes.toString(4));
+                "                         %s,\n" +
+                "                         %s);", customAttributes.toString(4), customFlagsJSON.toString(4));
         final MutableBoolean called = new MutableBoolean(false);
-        final CountDownLatch latch = new MPLatch(1);
+        final CountDownLatch latch = new MPLatch(2);
         runJavascriptTest(testJavascript, new MParticleJSInterface() {
+
+            @Override
+            protected void logEvent(BaseEvent event) {
+                Map<String, List<String>> customFlags = event.getCustomFlags();
+                assertEquals(3, customFlags.size());
+                assertTrue(customFlags.containsKey("foo"));
+                assertTrue(customFlags.containsKey("bar"));
+                assertTrue(customFlags.containsKey("baz"));
+                List<String> fooFlags = customFlags.get("foo");
+                List<String> barFlags = customFlags.get("bar");
+                List<String> bazFlags = customFlags.get("baz");
+                assertEquals(3, fooFlags.size());
+                assertTrue(fooFlags.contains("50"));
+                assertTrue(fooFlags.contains("true"));
+                assertTrue(fooFlags.contains("-27"));
+                assertEquals(2, barFlags.size());
+                assertEquals(1, bazFlags.size());
+                latch.countDown();
+            }
+
             @Override
             @JavascriptInterface
             public void logEvent(String json) {
                 super.logEvent(json);
                 try {
                     JSONObject jsonObject = new JSONObject(json);
+                    //make sure we are receiving the expected event from JS world
                     if (jsonObject.getInt(JS_KEY_EVENT_DATATYPE) == JS_MSG_TYPE_PE) {
                         assertEquals(jsonObject.getInt(JS_KEY_EVENT_CATEGORY), MParticle.EventType.Navigation.ordinal());
                         JSONObject receivedCustomAttributes = jsonObject.getJSONObject(JS_KEY_EVENT_ATTRIBUTES);
+                        JSONObject receivedCustomFlags = jsonObject.getJSONObject(JS_KEY_EVENT_FLAGS);
                         assertJsonEqual(customAttributes, receivedCustomAttributes);
+                        assertJsonEqual(customFlagsJSON, receivedCustomFlags);
                         called.value = true;
                         latch.countDown();
                     }
@@ -344,7 +371,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
     @Test
     public void testLogCommerceEvent() throws Exception {
         final JSONObject customAttributes = MPUtility.mapToJson( mRandomUtils.getRandomAttributes(10));
-
+        final JSONObject customFlags = MPUtility.mapToJson(getCustomFlags());
         String testJavascript = String.format("// 1. Create the product\n" +
                 "var product = mParticle.eCommerce.createProduct(\n" +
                 "    'Double Room - Econ Rate', //\n" +
@@ -361,12 +388,32 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                 "};\n" +
                 "\n" +
                 "// 3. Log the purchase event\n" +
-                "mParticle.eCommerce.logPurchase(transactionAttributes, product, true, %s);", customAttributes.toString(4));
+                "mParticle.eCommerce.logPurchase(transactionAttributes, product, true, %s, %s);", customAttributes.toString(4), customFlags);
 
         final MutableBoolean called = new MutableBoolean(false);
         final AndroidUtils.Mutable<Object> error = new AndroidUtils.Mutable<Object>(null);
-        final CountDownLatch latch = new MPLatch(1);
+        final CountDownLatch latch = new MPLatch(2);
         runJavascriptTest(testJavascript, new MParticleJSInterface() {
+
+            @Override
+            protected void logEvent(BaseEvent event) {
+                Map<String, List<String>> customFlags = event.getCustomFlags();
+                assertEquals(3, customFlags.size());
+                assertTrue(customFlags.containsKey("foo"));
+                assertTrue(customFlags.containsKey("bar"));
+                assertTrue(customFlags.containsKey("baz"));
+                List<String> fooFlags = customFlags.get("foo");
+                List<String> barFlags = customFlags.get("bar");
+                List<String> bazFlags = customFlags.get("baz");
+                assertEquals(3, fooFlags.size());
+                assertTrue(fooFlags.contains("50"));
+                assertTrue(fooFlags.contains("true"));
+                assertTrue(fooFlags.contains("-27"));
+                assertEquals(2, barFlags.size());
+                assertEquals(1, bazFlags.size());
+                latch.countDown();
+            }
+
             @Override
             @JavascriptInterface
             public void logEvent(String json) {
@@ -617,6 +664,22 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
         }
         return new JSONObject()
                 .put("UserIdentities", userIdentityJson);
+    }
+
+    private Map<String, Object> getCustomFlags() {
+        final HashMap<String, Object> customFlags = new HashMap<String, Object>();
+        List<Object> fooFlags = new ArrayList<Object>();
+        fooFlags.add(50);
+        fooFlags.add(true);
+        fooFlags.add(-27);
+        List<String> barFlags = new ArrayList<String>();
+        barFlags.add("this other");
+        barFlags.add("that other");
+        customFlags.put("foo", fooFlags);
+        customFlags.put("bar", barFlags);
+        customFlags.put("baz", "foobar");
+        customFlags.put("nullval", null);
+        return customFlags;
     }
 
     private static String toString(InputStream inputStream) throws IOException {
