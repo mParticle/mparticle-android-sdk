@@ -33,3 +33,21 @@ jobs:
         run: ./gradlew test
       - name: Android Test Report
         uses: asadmansr/android-test-report-action@v1.2.0
+
+  automerge:
+      name: Rebase dependabot PRs
+      runs-on: [ubuntu-latest]
+      needs: [instrumented-tests, unit-tests]
+      if: contains(github.repository, 'internal') && github.actor == 'dependabot[bot]' && github.event_name == 'pull_request'
+      steps:
+          - name: Rebase Dependabot PR
+            uses: actions/github-script@v3
+            with:
+                github-token: ${{secrets.GITHUB_TOKEN}}
+                script: |
+                    github.pulls.merge({
+                        owner: context.repo.owner,
+                        repo: context.payload.repository.name,
+                        pull_number: context.payload.pull_request.number,
+                        merge_method: 'rebase'
+                    });
