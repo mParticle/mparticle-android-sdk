@@ -11,7 +11,8 @@ import com.mparticle.identity.IdentityHttpResponse;
 import com.mparticle.identity.TaskFailureListener;
 import com.mparticle.identity.TaskSuccessListener;
 import com.mparticle.internal.KitFrameworkWrapper;
-import com.mparticle.internal.KitsLoadedListener;
+import com.mparticle.kits.testkits.BaseTestKit;
+import com.mparticle.kits.testkits.ListenerTestKit;
 import com.mparticle.testutils.BaseCleanInstallEachTest;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
@@ -68,19 +69,19 @@ public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
 
     //Implementing this method will both register your custom kit, and start it via modifying the
     //config response to contains an "eks" message with the kit's ID.
-    protected abstract Map<String, JSONObject> registerCustomKits();
+    protected abstract  Map<Class<? extends BaseTestKit>, JSONObject> registerCustomKits();
 
     protected void setKitStartedListener(KitStartedListener kitStartedListener) {
         mKitManager.kitsStartedListener = kitStartedListener;
     }
 
-    private void setupConfigMessageForKits(Map<String, JSONObject> kitIds) {
+    private void setupConfigMessageForKits(Map<Class<? extends BaseTestKit>, JSONObject> kitIds) {
         JSONArray eks = new JSONArray();
         int i = -1;
         mCustomTestKits = new HashMap<>();
-        for (Map.Entry<String, JSONObject> kitConfig: kitIds.entrySet()) {
+        for (Map.Entry<Class<? extends BaseTestKit>, JSONObject> kitConfig: kitIds.entrySet()) {
             try {
-                mCustomTestKits.put(i, kitConfig.getKey());
+                mCustomTestKits.put(i, kitConfig.getKey().getName());
                 JSONObject configJson = new JSONObject();
                 if (kitConfig.getValue() != null) {
                     configJson = kitConfig.getValue();

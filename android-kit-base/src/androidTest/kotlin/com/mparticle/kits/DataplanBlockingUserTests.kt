@@ -10,10 +10,7 @@ import com.mparticle.Utils.randomString
 import com.mparticle.identity.IdentityApiRequest
 import com.mparticle.internal.AccessUtils
 import com.mparticle.kits.DataplanFilterImpl.Companion.getEventsApiName
-import com.mparticle.kits.testkits.AttributeListenerTestKit
-import com.mparticle.kits.testkits.IdentityListenerTestKit
-import com.mparticle.kits.testkits.KitIntegrationTestKit
-import com.mparticle.kits.testkits.UserAttributeListenerTestKit
+import com.mparticle.kits.testkits.*
 import com.mparticle.testutils.MPLatch
 import junit.framework.Assert.*
 import org.json.JSONObject
@@ -26,13 +23,13 @@ class DataplanBlockingUserTests: BaseKitManagerStarted() {
     lateinit var identityListenerKitKit: IdentityListenerTestKit
     lateinit var userAttributeListenerKitKit: UserAttributeListenerTestKit
 
-    lateinit var kitIntegrationTestKits: List<KitIntegrationTestKit>
+    lateinit var kitIntegrationTestKits: List<ListenerTestKit>
 
-    override fun registerCustomKits(): Map<String, JSONObject> {
+    override fun registerCustomKits(): Map<Class<out BaseTestKit>, JSONObject> {
         return mapOf(
-                AttributeListenerTestKit::class.java.name to JSONObject(),
-                IdentityListenerTestKit::class.java.name to JSONObject(),
-                UserAttributeListenerTestKit::class.java.name to JSONObject(),
+                AttributeListenerTestKit::class.java to JSONObject(),
+                IdentityListenerTestKit::class.java to JSONObject(),
+                UserAttributeListenerTestKit::class.java to JSONObject(),
         )
     }
 

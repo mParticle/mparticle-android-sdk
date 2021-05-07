@@ -5,7 +5,7 @@ import com.mparticle.kits.KitIntegration
 import com.mparticle.kits.ReportingMessage
 import java.math.BigDecimal
 
-class CommerceListenerTestKit: KitIntegrationTestKit(), KitIntegration.CommerceListener {
+class CommerceListenerTestKit: ListenerTestKit(), KitIntegration.CommerceListener {
     var logEvent: ((CommerceEvent?) -> List<ReportingMessage>)? = null
     var logLtvIncrease: ((BigDecimal?, BigDecimal?, String?, Map<String, String>?) -> List<ReportingMessage>)? = null
 

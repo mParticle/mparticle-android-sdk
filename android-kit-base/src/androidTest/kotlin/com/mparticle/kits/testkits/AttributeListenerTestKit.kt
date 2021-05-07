@@ -4,7 +4,7 @@ import com.mparticle.MParticle
 import com.mparticle.kits.KitIntegration
 import com.mparticle.kits.ReportingMessage
 
-open class AttributeListenerTestKit: KitIntegrationTestKit(), KitIntegration.AttributeListener {
+open class AttributeListenerTestKit: ListenerTestKit(), KitIntegration.AttributeListener {
     var setUserAttribute: ((attributeKey: String?, attributeValue: String?) -> Unit)? = null
     var setUserAttributeList: ((attributeKey: String?, attributeValueList: List<String?>?) -> Unit)? = null
     var supportsAttributeLists: (() -> Boolean)? = null

@@ -4,6 +4,8 @@ import android.content.Context;
 
 import com.mparticle.MParticle;
 import com.mparticle.internal.Logger;
+import com.mparticle.kits.testkits.BaseTestKit;
+import com.mparticle.kits.testkits.ListenerTestKit;
 import com.mparticle.testutils.MPLatch;
 
 import org.json.JSONArray;
@@ -24,12 +26,12 @@ import static junit.framework.TestCase.assertTrue;
 public class KnownUserKitsLifecycleTest extends BaseKitManagerStarted {
 
     @Override
-    protected Map<String, JSONObject> registerCustomKits() {
-        Map<String, JSONObject> map = new HashMap<>();
+    protected Map<Class<? extends BaseTestKit>, JSONObject> registerCustomKits() {
+        Map<Class<? extends BaseTestKit>, JSONObject> map = new HashMap<>();
         try {
-            map.put(TestKit1.class.getName(), new JSONObject().put("eau", true));
-            map.put(TestKit2.class.getName(), new JSONObject().put("eau", false));
-            map.put(TestKit3.class.getName(), new JSONObject().put("eau", true));
+            map.put(TestKit1.class, new JSONObject().put("eau", true));
+            map.put(TestKit2.class, new JSONObject().put("eau", false));
+            map.put(TestKit3.class, new JSONObject().put("eau", true));
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -96,7 +98,7 @@ public class KnownUserKitsLifecycleTest extends BaseKitManagerStarted {
 
     public static class TestKit3 extends TestKit { }
 
-    public static class TestKit extends KitIntegration {
+    public static class TestKit extends ListenerTestKit {
         static int i = 0;
 
         @Override

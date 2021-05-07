@@ -4,7 +4,7 @@ import com.mparticle.identity.MParticleUser
 import com.mparticle.kits.FilteredIdentityApiRequest
 import com.mparticle.kits.KitIntegration
 
-open class IdentityListenerTestKit : KitIntegrationTestKit(), KitIntegration.IdentityListener {
+open class IdentityListenerTestKit : ListenerTestKit(), KitIntegration.IdentityListener {
     var onIdentifyCompleted: ((mParticleUser: MParticleUser?, identityApiRequest: FilteredIdentityApiRequest?) -> Unit)? = null
     var onLoginCompleted: ((mParticleUser: MParticleUser?, identityApiRequest: FilteredIdentityApiRequest?) -> Unit)? = null
     var onLogoutCompleted: ((mParticleUser: MParticleUser?, identityApiRequest: FilteredIdentityApiRequest?) -> Unit)? = null

@@ -3,22 +3,18 @@ package com.mparticle.kits
 import android.os.Handler
 import android.os.Looper
 import com.mparticle.MParticle
-import com.mparticle.internal.AccessUtils
 import com.mparticle.internal.ConfigManager
-import com.mparticle.kits.testkits.AttributeListenerTestKit
-import com.mparticle.kits.testkits.IdentityListenerTestKit
-import com.mparticle.kits.testkits.UserAttributeListenerTestKit
+import com.mparticle.kits.testkits.*
 import com.mparticle.testutils.MPLatch
-import junit.framework.Assert.assertFalse
 import org.json.JSONObject
 import org.junit.Test
 
 class KitManagerImplTests: BaseKitManagerStarted() {
-    override fun registerCustomKits(): Map<String, JSONObject> {
+    override fun registerCustomKits(): Map<Class<out BaseTestKit>, JSONObject> {
         return mapOf(
-                AttributeListenerTestKit::class.java.name to JSONObject(),
-                IdentityListenerTestKit::class.java.name to JSONObject(),
-                UserAttributeListenerTestKit::class.java.name to JSONObject(),
+                AttributeListenerTestKit::class.java to JSONObject(),
+                IdentityListenerTestKit::class.java to JSONObject(),
+                UserAttributeListenerTestKit::class.java to JSONObject(),
         )
     }
 
