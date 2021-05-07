@@ -874,6 +874,25 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     }
 
     @Override
+    public void logBatch(String batch) {
+        for (KitIntegration provider: providers.values()) {
+            try {
+                if (provider instanceof KitIntegration.BatchListener) {
+                    JSONObject jsonObject = new JSONObject(batch);
+                    List<ReportingMessage> reportingMessages = ((KitIntegration.BatchListener)provider).logBatch(jsonObject);
+                    getReportingManager().logAll(reportingMessages);
+                }
+            }
+            catch (JSONException jse) {
+                Logger.error(jse, "Failed to call logBatch (unable to deserialize Batch) for kit" + provider.getName() + ": " + jse.getMessage());
+            }
+            catch (Exception e) {
+                Logger.warning("Failed to call logBatch for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    @Override
     public void leaveBreadcrumb(String breadcrumb) {
         for (KitIntegration provider : providers.values()) {
             try {

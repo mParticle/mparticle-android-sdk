@@ -153,7 +153,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         mInstallType = installType;
     }
 
-    public MessageManager(ConfigManager configManager, AppStateManager appStateManager, boolean devicePerformanceMetricsDisabled, MParticleDBManager dbManager, MParticleOptions options) {
+    public MessageManager(ConfigManager configManager, AppStateManager appStateManager, KitFrameworkWrapper kitFrameworkWrapper, boolean devicePerformanceMetricsDisabled, MParticleDBManager dbManager, MParticleOptions options) {
         this.devicePerformanceMetricsDisabled = devicePerformanceMetricsDisabled;
         mOperatingSystem = options.getOperatingSystem();
         mDeviceAttributes = new DeviceAttributes(mOperatingSystem);
@@ -163,7 +163,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         mAppStateManager.setMessageManager(this);
         mMParticleDBManager = dbManager;
         mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), this, options.getContext(), dbManager, options.getDataplanId(), options.getDataplanVersion());
-        mUploadHandler = new UploadHandler(options.getContext(), sUploadHandlerThread.getLooper(), configManager, appStateManager, this, dbManager);
+        mUploadHandler = new UploadHandler(options.getContext(), sUploadHandlerThread.getLooper(), configManager, appStateManager, this, dbManager, kitFrameworkWrapper);
         sPreferences = options.getContext().getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mInstallType = options.getInstallType();
     }

@@ -20,6 +20,7 @@ import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.listeners.InternalListenerManager;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
@@ -300,6 +301,13 @@ public class KitFrameworkWrapper implements KitManager {
     public void logScreen(MPEvent screenEvent) {
         if (!queueEvent(screenEvent) && mKitManager != null) {
             mKitManager.logScreen(screenEvent);
+        }
+    }
+
+    @Override
+    public void logBatch(String jsonObject) {
+        if (mKitManager != null) {
+            mKitManager.logBatch(jsonObject);
         }
     }
 

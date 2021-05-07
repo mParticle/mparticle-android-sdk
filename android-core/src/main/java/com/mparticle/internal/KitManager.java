@@ -19,6 +19,7 @@ import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -32,6 +33,8 @@ public interface KitManager {
     void logEvent(BaseEvent event);
 
     void logScreen(MPEvent screenEvent);
+
+    void logBatch(String jsonObject);
 
     void leaveBreadcrumb(String breadcrumb);
 

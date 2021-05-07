@@ -301,6 +301,15 @@ public class MockServer {
         serverLogic.put(matcher, response);
         return this;
     }
+
+
+    public MockServer setEventsResponseLogic(int responseCode) {
+        Matcher matcher = new Matcher(getUrl(EVENTS));
+        matcher.keepAfterMatch = true;
+        Response response = new Response(responseCode, new JSONObject().toString());
+        serverLogic.put(matcher, response);
+        return this;
+    }
     
     public MockServer addConditionalIdentityResponse(long ifMpid, long thenMpid) {
         return addConditionalIdentityResponse(ifMpid, thenMpid, ran.nextBoolean(), 0);

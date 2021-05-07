@@ -2,8 +2,11 @@ package com.mparticle.internal;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+
+import androidx.annotation.Nullable;
 
 import com.mparticle.MParticle;
 import com.mparticle.identity.AliasRequest;
@@ -14,6 +17,7 @@ import com.mparticle.internal.messages.MPAliasMessage;
 import com.mparticle.segmentation.SegmentListener;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -32,6 +36,7 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
     private final AppStateManager mAppStateManager;
     private final MessageManager mMessageManager;
     private ConfigManager mConfigManager;
+    private KitFrameworkWrapper mKitFrameworkWrapper;
     /**
      * Message used to trigger the primary upload logic - will upload all non-history batches that are ready to go.
      */
@@ -75,7 +80,7 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
      *
      * Only used for unit testing.
      */
-    UploadHandler(Context context, ConfigManager configManager, AppStateManager appStateManager, MessageManager messageManager, MParticleDBManager mparticleDBManager) {
+    UploadHandler(Context context, ConfigManager configManager, AppStateManager appStateManager, MessageManager messageManager, MParticleDBManager mparticleDBManager, @Nullable KitFrameworkWrapper kitFrameworkWrapper) {
         super();
         mConfigManager = configManager;
         mContext = context;
@@ -84,6 +89,7 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
         mParticleDBManager = mparticleDBManager;
         mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mMessageManager = messageManager;
+        mKitFrameworkWrapper = kitFrameworkWrapper;
         try {
             setApiClient(new MParticleApiClientImpl(configManager, mPreferences, context));
         } catch (MalformedURLException e) {
@@ -94,7 +100,7 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
     }
 
 
-    public UploadHandler(Context context, Looper looper, ConfigManager configManager, AppStateManager appStateManager, MessageManager messageManager, MParticleDBManager mparticleDBManager) {
+    public UploadHandler(Context context, Looper looper, ConfigManager configManager, AppStateManager appStateManager, MessageManager messageManager, MParticleDBManager mparticleDBManager, @Nullable KitFrameworkWrapper kitFrameworkWrapper) {
         super(looper);
         mConfigManager = configManager;
         mContext = context;
@@ -103,6 +109,7 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
         mParticleDBManager = mparticleDBManager;
         mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mMessageManager = messageManager;
+        mKitFrameworkWrapper = kitFrameworkWrapper;
         try {
             setApiClient(new MParticleApiClientImpl(configManager, mPreferences, context));
         } catch (MalformedURLException e) {
@@ -262,6 +269,7 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
         }
 
         if (sampling || shouldDelete(responseCode)) {
+            forwardBatchToKits(message);
             mParticleDBManager.deleteUpload(id);
         } else {
             Logger.warning("Upload failed and will be retried.");
@@ -344,5 +352,18 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
         sendEmptyMessageDelayed(what, delay);
     }
 
-
+    protected void forwardBatchToKits(final String message) {
+        //super messy, but we've hit constructor purgatory and can't guarantee mKitFrameworkWrapper isn't null
+        if (mKitFrameworkWrapper == null) {
+            MParticle instance = MParticle.getInstance();
+            if (instance != null) {
+                mKitFrameworkWrapper = instance.Internal().getKitManager();
+            }
+        }
+        if (mKitFrameworkWrapper != null) {
+            mKitFrameworkWrapper.logBatch(message);
+        } else {
+            Logger.warning("Unable to forward batch to Kits, KitManager has been closed");
+        }
+    }
 }

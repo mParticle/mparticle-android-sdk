@@ -17,6 +17,8 @@ import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.MParticleUser;
 
+import org.json.JSONObject;
+
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -595,5 +597,9 @@ public abstract class KitIntegration {
         boolean supportsAttributeLists();
 
         void onConsentStateUpdated(ConsentState oldState, ConsentState newState, FilteredMParticleUser user);
+    }
+
+    public interface BatchListener {
+        List<ReportingMessage> logBatch(JSONObject jsonObject);
     }
 }

@@ -120,7 +120,7 @@ public class MParticle {
         } else {
             disableUncaughtExceptionLogging();
         }
-        mMessageManager = new MessageManager(configManager, appStateManager, sDevicePerformanceMetricsDisabled, mDatabaseManager, options);
+        mMessageManager = new MessageManager(configManager, appStateManager, mKitManager, sDevicePerformanceMetricsDisabled, mDatabaseManager, options);
         mConfigManager.setNetworkOptions(options.getNetworkOptions());
         mPreferences = options.getContext().getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
     }
