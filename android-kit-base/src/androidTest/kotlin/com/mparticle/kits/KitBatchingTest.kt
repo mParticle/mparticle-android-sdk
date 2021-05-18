@@ -2,19 +2,28 @@ package com.mparticle.kits
 
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
+import com.mparticle.MParticleOptions
 import com.mparticle.kits.testkits.BaseTestKit
 import com.mparticle.networking.Matcher
+import com.mparticle.testutils.BaseCleanInstallEachTest
 import com.mparticle.testutils.MPLatch
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import org.json.JSONArray
 import org.json.JSONObject
+import org.junit.Before
 import org.junit.Test
 
-class KitBatchingTest: BaseKitManagerStarted() {
+class KitBatchingTest: BaseCleanInstallEachTest() {
 
-    override fun registerCustomKits(): Map<Class<out BaseTestKit>, JSONObject> {
-        return mapOf(BatchKit::class.java to JSONObject())
+    @Before
+    fun before() {
+        val options = MParticleOptions.builder(mContext)
+                .configuration(
+                        KitOptions()
+                                .addKit(123, BatchKit::class.java)
+                )
+        startMParticle(options)
     }
 
     @Test
@@ -24,14 +33,13 @@ class KitBatchingTest: BaseKitManagerStarted() {
             logEvent(MPEvent.Builder("some other event").build())
             upload()
         }
-        (MParticle.getInstance()?.getKitInstance(-1) as BatchKit).let { batchKit ->
+        (MParticle.getInstance()?.getKitInstance(123) as BatchKit).let { batchKit ->
             batchKit.await();
             assertEquals(1, batchKit.batches.size)
             with(batchKit.batches[0].getJSONArray("msgs").toList<Any>()) {
-                assertEquals(5, size)
+                assertTrue(size >= 4)
                 assertTrue(any { (it as? JSONObject)?.getString("dt") == "fr" })
                 assertTrue(any { (it as? JSONObject)?.getString("dt") == "ss" })
-                assertTrue(any { (it as? JSONObject)?.getString("dt") == "ast" })
                 assertEquals(2, filter { (it as? JSONObject)?.getString("dt") == "e" }.size)
             }
         }
@@ -56,7 +64,7 @@ class KitBatchingTest: BaseKitManagerStarted() {
         mServer.waitForVerify(Matcher(mServer.Endpoints().eventsUrl))
 
 
-        val batchKit = (MParticle.getInstance()?.getKitInstance(-1) as BatchKit)
+        val batchKit = (MParticle.getInstance()?.getKitInstance(123) as BatchKit)
         assertEquals(0, batchKit.batches.size)
 
         //see if it recovers...

@@ -26,8 +26,8 @@ import static junit.framework.TestCase.assertTrue;
 public class KnownUserKitsLifecycleTest extends BaseKitManagerStarted {
 
     @Override
-    protected Map<Class<? extends BaseTestKit>, JSONObject> registerCustomKits() {
-        Map<Class<? extends BaseTestKit>, JSONObject> map = new HashMap<>();
+    protected Map<Class<? extends KitIntegration>, JSONObject> registerCustomKits() {
+        Map<Class<? extends KitIntegration>, JSONObject> map = new HashMap<>();
         try {
             map.put(TestKit1.class, new JSONObject().put("eau", true));
             map.put(TestKit2.class, new JSONObject().put("eau", false));

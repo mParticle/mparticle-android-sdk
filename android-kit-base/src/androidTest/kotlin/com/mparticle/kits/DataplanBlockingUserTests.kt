@@ -25,7 +25,7 @@ class DataplanBlockingUserTests: BaseKitManagerStarted() {
 
     lateinit var kitIntegrationTestKits: List<ListenerTestKit>
 
-    override fun registerCustomKits(): Map<Class<out BaseTestKit>, JSONObject> {
+    override fun registerCustomKits(): Map<Class<out KitIntegration>, JSONObject> {
         return mapOf(
                 AttributeListenerTestKit::class.java to JSONObject(),
                 IdentityListenerTestKit::class.java to JSONObject(),

@@ -11,8 +11,6 @@ import com.mparticle.identity.IdentityHttpResponse;
 import com.mparticle.identity.TaskFailureListener;
 import com.mparticle.identity.TaskSuccessListener;
 import com.mparticle.internal.KitFrameworkWrapper;
-import com.mparticle.kits.testkits.BaseTestKit;
-import com.mparticle.kits.testkits.ListenerTestKit;
 import com.mparticle.testutils.BaseCleanInstallEachTest;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
@@ -24,18 +22,15 @@ import com.mparticle.internal.ReportingManager;
 import com.mparticle.testutils.MPLatch;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 
 import java.lang.ref.WeakReference;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
 public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
-    private static Map<Integer, String> mCustomTestKits;
     protected Long mStartingMpid;
     protected CustomKitManagerImpl mKitManager;
 
@@ -61,7 +56,7 @@ public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
                     }
                 }))
                 .build());
-        mKitManager = new CustomKitManagerImpl(mContext, com.mparticle.AccessUtils.getMessageManager(), new CoreCallbackImpl(MParticle.getInstance().Internal().getConfigManager(), MParticle.getInstance().Internal().getAppStateManager(), MParticle.getInstance().Internal().getKitManager()), AccessUtils.getUploadHandler());
+        mKitManager = new CustomKitManagerImpl(mContext, com.mparticle.AccessUtils.getMessageManager(), new CoreCallbackImpl(MParticle.getInstance().Internal().getConfigManager(), MParticle.getInstance().Internal().getAppStateManager(), MParticle.getInstance().Internal().getKitManager()), AccessUtils.getUploadHandler(), MParticleOptions.builder(mContext).build());
         mKitManager.setKitFactory(new CustomKitFactory());
         AccessUtils.setKitManager(mKitManager);
         latch.await();
@@ -69,36 +64,10 @@ public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
 
     //Implementing this method will both register your custom kit, and start it via modifying the
     //config response to contains an "eks" message with the kit's ID.
-    protected abstract  Map<Class<? extends BaseTestKit>, JSONObject> registerCustomKits();
+    protected abstract  Map<Class<? extends KitIntegration>, JSONObject> registerCustomKits();
 
     protected void setKitStartedListener(KitStartedListener kitStartedListener) {
         mKitManager.kitsStartedListener = kitStartedListener;
-    }
-
-    private void setupConfigMessageForKits(Map<Class<? extends BaseTestKit>, JSONObject> kitIds) {
-        JSONArray eks = new JSONArray();
-        int i = -1;
-        mCustomTestKits = new HashMap<>();
-        for (Map.Entry<Class<? extends BaseTestKit>, JSONObject> kitConfig: kitIds.entrySet()) {
-            try {
-                mCustomTestKits.put(i, kitConfig.getKey().getName());
-                JSONObject configJson = new JSONObject();
-                if (kitConfig.getValue() != null) {
-                    configJson = kitConfig.getValue();
-                }
-                configJson.put("id", i);
-                eks.put(configJson);
-            } catch (JSONException e) {
-                throw new RuntimeException(String.format("Kit class %s unable to be set", kitConfig.getKey()));
-            }
-            i--;
-        }
-        try {
-            JSONObject configObject = new JSONObject().put("eks", eks);
-            mServer.setupConfigResponse(configObject.toString());
-        } catch (JSONException e) {
-            throw new RuntimeException("Error sending custom eks to config.");
-        }
     }
 
     //This is a non-anonymous class only for the purpose of debugging.
@@ -106,8 +75,8 @@ public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
 
         private KitStartedListener kitsStartedListener;
 
-        public CustomKitManagerImpl(Context context, ReportingManager reportingManager, CoreCallbacks coreCallbacks, BackgroundTaskHandler backgroundTaskHandler) {
-            super(context, reportingManager, coreCallbacks, backgroundTaskHandler);
+        public CustomKitManagerImpl(Context context, ReportingManager reportingManager, CoreCallbacks coreCallbacks, BackgroundTaskHandler backgroundTaskHandler, MParticleOptions options) {
+            super(context, reportingManager, coreCallbacks, backgroundTaskHandler, options);
         }
 
         @Override

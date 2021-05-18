@@ -106,11 +106,11 @@
 -keep class com.mparticle.AttributionListener { *; }
 -keep class com.mparticle.AttributionResult { *; }
 -keep class com.mparticle.MParticleTask { *; }
--keep class com.mparticle.kits.ForeseeKit { *; }
 -keep class com.mparticle.UserAttributeListener { *; }
 -keep class com.mparticle.BaseEvent { *; }
 -keep class com.mparticle.BaseEvent$Type { *; }
 -keep class com.mparticle.BaseEvent$MessageType { *; }
+-keep class com.mparticle.Configuration { *; }
 
 -keep class com.mparticle.consent.ConsentState { *; }
 -keep class com.mparticle.consent.ConsentState$Builder { *; }

@@ -20,7 +20,6 @@ import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.listeners.InternalListenerManager;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
@@ -38,6 +37,7 @@ public class KitFrameworkWrapper implements KitManager {
     private final ReportingManager mReportingManager;
     private final BackgroundTaskHandler mBackgroundTaskHandler;
     KitManager mKitManager;
+    private final MParticleOptions mOptions;
     private volatile boolean frameworkLoadAttempted = false;
     private static volatile boolean kitsLoaded = false;
 
@@ -46,11 +46,12 @@ public class KitFrameworkWrapper implements KitManager {
     private volatile boolean registerForPush = false;
     private static final List<KitsLoadedListener> kitsLoadedListeners = new ArrayList<KitsLoadedListener>();
 
-    public KitFrameworkWrapper(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager, BackgroundTaskHandler backgroundTaskHandler) {
-        this(context, reportingManager, configManager, appStateManager, backgroundTaskHandler, false);
+    public KitFrameworkWrapper(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager, BackgroundTaskHandler backgroundTaskHandler, MParticleOptions options) {
+        this(context, reportingManager, configManager, appStateManager, backgroundTaskHandler, false, options);
     }
 
-    public KitFrameworkWrapper(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager, BackgroundTaskHandler backgroundTaskHandler, boolean testing) {
+    public KitFrameworkWrapper(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager, BackgroundTaskHandler backgroundTaskHandler, boolean testing, MParticleOptions options) {
+        this.mOptions = options;
         this.mContext = testing ? context : new KitContext(context);
         this.mReportingManager = reportingManager;
         this.mCoreCallbacks = new CoreCallbacksImpl(this, configManager, appStateManager);
@@ -64,8 +65,8 @@ public class KitFrameworkWrapper implements KitManager {
             frameworkLoadAttempted = true;
             try {
                 Class clazz = Class.forName("com.mparticle.kits.KitManagerImpl");
-                Constructor<KitFrameworkWrapper> constructor = clazz.getConstructor(Context.class, ReportingManager.class, CoreCallbacks.class, BackgroundTaskHandler.class);
-                mKitManager = constructor.newInstance(mContext, mReportingManager, mCoreCallbacks, mBackgroundTaskHandler);
+                Constructor<KitFrameworkWrapper> constructor = clazz.getConstructor(Context.class, ReportingManager.class, CoreCallbacks.class, BackgroundTaskHandler.class, MParticleOptions.class);
+                mKitManager = constructor.newInstance(mContext, mReportingManager, mCoreCallbacks, mBackgroundTaskHandler, mOptions);
                 JSONArray configuration = mCoreCallbacks.getLatestKitConfiguration();
                 Logger.debug("Kit Framework loaded.");
                 if (configuration != null) {

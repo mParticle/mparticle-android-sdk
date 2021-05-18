@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -33,7 +32,6 @@ import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.PrefKeys;
-import com.mparticle.internal.DatabaseHelper;
 import com.mparticle.internal.DeviceAttributes;
 import com.mparticle.internal.InternalSession;
 import com.mparticle.internal.KitFrameworkWrapper;
@@ -43,7 +41,6 @@ import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MParticleJSInterface;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.PushRegistrationHelper;
-import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.database.tables.MParticleDatabaseHelper;
 import com.mparticle.internal.listeners.ApiClass;
@@ -58,10 +55,8 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -104,7 +99,7 @@ public class MParticle {
     protected MParticle() { }
     
     private MParticle(MParticleOptions options) {
-        ConfigManager configManager = new ConfigManager(options.getContext(), options.getEnvironment(), options.getApiKey(), options.getApiSecret(), options.getDataplanOptions(), options.getDataplanId(), options.getDataplanVersion());
+        ConfigManager configManager = new ConfigManager(options.getContext(), options.getEnvironment(), options.getApiKey(), options.getApiSecret(), options.getDataplanOptions(), options.getDataplanId(), options.getDataplanVersion(), options);
         configManager.setUploadInterval(options.getUploadInterval());
         configManager.setSessionTimeout(options.getSessionTimeout());
         configManager.setIdentityConnectionTimeout(options.getConnectionTimeout());
@@ -158,7 +153,7 @@ public class MParticle {
                     }
 
                     instance = new MParticle(options);
-                    instance.mKitManager = new KitFrameworkWrapper(options.getContext(), instance.mMessageManager, instance.Internal().getConfigManager(), instance.Internal().getAppStateManager(), instance.mMessageManager.getTaskHandler());
+                    instance.mKitManager = new KitFrameworkWrapper(options.getContext(), instance.mMessageManager, instance.Internal().getConfigManager(), instance.Internal().getAppStateManager(), instance.mMessageManager.getTaskHandler(), options);
                     instance.mIdentityApi = new IdentityApi(options.getContext(), instance.mInternal.getAppStateManager(), instance.mMessageManager, instance.mConfigManager, instance.mKitManager, options.getOperatingSystem());
                     instance.mMessageManager.refreshConfiguration();
                     instance.identify(options);

@@ -5,9 +5,11 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.mparticle.Configuration;
 import com.mparticle.ExceptionHandler;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
@@ -100,7 +102,7 @@ public class ConfigManager {
     public static final int DEFAULT_UPLOAD_INTERVAL = 600;
 
     private ConfigManager() {
-
+        super();
     }
 
     public static ConfigManager getInstance(Context context) {
@@ -116,10 +118,10 @@ public class ConfigManager {
     }
 
     public ConfigManager(Context context) {
-        this(context, null, null, null, null, null, null);
+        this(context, null, null, null, null, null, null, null);
     }
 
-    public ConfigManager(Context context, MParticle.Environment environment, String apiKey, String apiSecret, MParticleOptions.DataplanOptions dataplanOptions, String dataplanId, Integer dataplanVersion) {
+    public ConfigManager(Context context, MParticle.Environment environment, String apiKey, String apiSecret, MParticleOptions.DataplanOptions dataplanOptions, String dataplanId, Integer dataplanVersion, MParticleOptions options) {
         mContext = context.getApplicationContext();
         sPreferences = getPreferences(mContext);
         mLocalPrefs = new AppConfig(mContext, environment, sPreferences, apiKey, apiSecret);
@@ -130,6 +132,11 @@ public class ConfigManager {
         mDataplanVersion = dataplanVersion;
         mDataplanId = dataplanId;
         restoreOldConfig();
+        if (options != null) {
+            for (Configuration configuration : options.getConfigurationsForTarget(this.getClass())) {
+                configuration.apply(this);
+            }
+        }
     }
 
     private void restoreOldConfig() {
@@ -216,6 +223,11 @@ public class ConfigManager {
     }
 
     public synchronized void updateConfig(JSONObject responseJSON, boolean newConfig) throws JSONException {
+        MParticle instance = MParticle.getInstance();
+        KitFrameworkWrapper kitManager = null;
+        if (instance != null) {
+            kitManager = instance.Internal().getKitManager();
+        }
         SharedPreferences.Editor editor = sPreferences.edit();
         if (newConfig) {
             saveConfigJson(responseJSON);
@@ -287,12 +299,14 @@ public class ConfigManager {
         }
         if (!mIgnoreDataplanOptionsFromConfig) {
             mDataplanOptions = parseDataplanOptions(responseJSON);
-            MParticle.getInstance().Internal().getKitManager().updateDataplan(mDataplanOptions);
+            if (kitManager != null) {
+                kitManager.updateDataplan(mDataplanOptions);
+            }
         }
         editor.apply();
         applyConfig();
-        if (newConfig) {
-            MParticle.getInstance().Internal().getKitManager().updateKits(responseJSON.optJSONArray(KEY_EMBEDDED_KITS));
+        if (newConfig && kitManager != null) {
+            kitManager.updateKits(responseJSON.optJSONArray(KEY_EMBEDDED_KITS));
         }
     }
 
@@ -370,10 +384,10 @@ public class ConfigManager {
     }
 
     public boolean getLogUnhandledExceptions() {
-        if (mLogUnhandledExceptions.equals(VALUE_APP_DEFINED)) {
+        if (VALUE_APP_DEFINED.equals(mLogUnhandledExceptions)) {
             return mLocalPrefs.reportUncaughtExceptions;
         } else {
-            return mLogUnhandledExceptions.equals(VALUE_CUE_CATCH);
+            return VALUE_CUE_CATCH.equals(mLogUnhandledExceptions);
         }
     }
 

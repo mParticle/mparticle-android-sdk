@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -15,6 +16,7 @@ import com.mparticle.AttributionError;
 import com.mparticle.AttributionListener;
 import com.mparticle.AttributionResult;
 import com.mparticle.BaseEvent;
+import com.mparticle.Configuration;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
@@ -55,6 +57,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     private final BackgroundTaskHandler mBackgroundTaskHandler;
     KitIntegrationFactory mKitIntegrationFactory;
     private DataplanFilter mDataplanFilter = DataplanFilterImpl.EMPTY;
+    private KitOptions mKitOptions;
 
     private static final String RESERVED_KEY_LTV = "$Amount";
     private static final String METHOD_NAME = "$MethodName";
@@ -66,21 +69,24 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     ConcurrentHashMap<Integer, KitIntegration> providers = new ConcurrentHashMap<Integer, KitIntegration>();
     private final Context mContext;
 
-    public KitManagerImpl(Context context, ReportingManager reportingManager, CoreCallbacks coreCallbacks, BackgroundTaskHandler backgroundTaskHandler) {
+    public KitManagerImpl(Context context, ReportingManager reportingManager, CoreCallbacks coreCallbacks, BackgroundTaskHandler backgroundTaskHandler, MParticleOptions options) {
         mContext = context;
         mReportingManager = reportingManager;
         mCoreCallbacks = coreCallbacks;
         mBackgroundTaskHandler = backgroundTaskHandler;
         mKitIntegrationFactory = new KitIntegrationFactory();
-        if (mKitIntegrationFactory.supportedKits != null) {
-            for (Integer kitId : mKitIntegrationFactory.supportedKits.keySet()) {
-                mCoreCallbacks.getKitListener().kitFound(kitId);
-            }
-        }
         MParticle instance = MParticle.getInstance();
         if (instance != null) {
             instance.Identity().addIdentityStateListener(this);
         }
+        for (Configuration configuration: options.getConfigurationsForTarget(this.getClass())) {
+            configuration.apply(this);
+        }
+        initializeKitIntegrationFactory();
+    }
+
+    public void setKitOptions(KitOptions kitOptions) {
+        mKitOptions = kitOptions;
     }
 
     /**
@@ -1364,5 +1370,19 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         }
     }
 
-
+    private void initializeKitIntegrationFactory() {
+        if (mKitIntegrationFactory != null) {
+            if (mKitOptions != null) {
+                for (Map.Entry<Integer, Class<? extends KitIntegration>> kitEntry : mKitOptions.getKits().entrySet()) {
+                    Logger.info("Kit registered: " + kitEntry.getValue().getSimpleName() + "(" + kitEntry.getKey() + ")");
+                    mKitIntegrationFactory.addSupportedKit(kitEntry.getKey(), kitEntry.getValue());
+                }
+            }
+            if (mKitIntegrationFactory.supportedKits != null) {
+                for (Integer kitId : mKitIntegrationFactory.supportedKits.keySet()) {
+                    mCoreCallbacks.getKitListener().kitFound(kitId);
+                }
+            }
+        }
+    }
 }

@@ -1,5 +1,7 @@
 package com.mparticle.kits;
 
+import androidx.annotation.NonNull;
+
 import com.mparticle.MParticle;
 import com.mparticle.internal.Logger;
 
@@ -12,7 +14,7 @@ import java.util.Set;
 
 public class KitIntegrationFactory {
 
-    Map<Integer, Class> supportedKits;
+    final Map<Integer, Class> supportedKits = new HashMap<>();
 
     public KitIntegrationFactory() {
         loadIntegrations();
@@ -72,7 +74,7 @@ public class KitIntegrationFactory {
     }
 
     public KitIntegration createInstance(KitManagerImpl manager, int moduleId) throws JSONException, ClassNotFoundException{
-        if (supportedKits != null) {
+        if (!supportedKits.isEmpty()) {
             try {
                 Constructor<KitIntegration> constructor = supportedKits.get(moduleId).getConstructor();
                 constructor.setAccessible(true);
@@ -90,9 +92,6 @@ public class KitIntegrationFactory {
         for (Map.Entry<Integer, String> entry : knownIntegrations.entrySet()) {
             Class kitClass = loadKit(entry.getValue());
             if (kitClass != null) {
-                if (supportedKits == null) {
-                    supportedKits = new HashMap<Integer, Class>();
-                }
                 supportedKits.put(entry.getKey(), kitClass);
                 Logger.debug(entry.getValue().substring(entry.getValue().lastIndexOf(".") + 1) + " detected.");
             }
@@ -108,20 +107,24 @@ public class KitIntegrationFactory {
         return null;
     }
 
+    public void addSupportedKit(int kitId, Class<? extends KitIntegration> kitIntegration) {
+        Class previousKit = supportedKits.get(kitId);
+        if (previousKit != null) {
+            Logger.warning("Overriding kitId " + kitId + ". KitIntegration: " + kitIntegration.getName() + " will replace existing KitIntegration: " + previousKit.getName());
+        }
+        supportedKits.put(kitId, kitIntegration);
+    }
+
     /**
      * Get the module IDs of the Kits that have been detected.
      *
      * @return
      */
     public Set<Integer> getSupportedKits() {
-        if (supportedKits == null) {
-            return null;
-        }
         return supportedKits.keySet();
     }
 
     public boolean isSupported(int kitModuleId) {
-        return supportedKits != null &&
-                supportedKits.containsKey(kitModuleId);
+        return supportedKits.containsKey(kitModuleId);
     }
 }

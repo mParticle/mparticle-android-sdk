@@ -9,6 +9,7 @@ import android.os.Looper;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.mparticle.Configuration;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.identity.BaseIdentityTask;
@@ -18,6 +19,7 @@ import com.mparticle.identity.TaskFailureListener;
 import com.mparticle.identity.TaskSuccessListener;
 import com.mparticle.internal.AccessUtils;
 import com.mparticle.internal.AppStateManager;
+import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.MPDatabaseImpl;
@@ -25,6 +27,8 @@ import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.database.services.MessageService;
 import com.mparticle.internal.database.services.SessionService;
 import com.mparticle.internal.database.tables.MParticleDatabaseHelper;
+import com.mparticle.kits.KitIntegration;
+import com.mparticle.kits.KitOptions;
 import com.mparticle.networking.MockServer;
 import com.mparticle.testutils.AndroidUtils.Mutable;
 
@@ -36,7 +40,9 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
@@ -51,6 +57,7 @@ public abstract class BaseAbstractTest {
     protected RandomUtils mRandomUtils = new RandomUtils();
     protected static Long mStartingMpid;
     private static final String defaultDatabaseName = MParticleDatabaseHelper.getDbName();
+    protected static Map<Integer, String> mCustomTestKits;
 
     @Rule
     public CaptureLogcatOnFailingTest captureFailingTestLogcat = new CaptureLogcatOnFailingTest();
@@ -87,10 +94,10 @@ public abstract class BaseAbstractTest {
         startMParticle(MParticleOptions.builder(mContext));
     }
 
-    protected void startMParticle(MParticleOptions.Builder options) throws InterruptedException {
+    protected void startMParticle(MParticleOptions.Builder optionsBuilder) throws InterruptedException {
         MParticle.setInstance(null);
         final CountDownLatch latch = new MPLatch(1);
-        BaseIdentityTask identityTask = com.mparticle.AccessUtils.getIdentityTask(options);
+        BaseIdentityTask identityTask = com.mparticle.AccessUtils.getIdentityTask(optionsBuilder);
         final Mutable<Boolean> called = new Mutable<>(false);
         if (identityTask == null) {
             identityTask = new BaseIdentityTask();
@@ -108,8 +115,31 @@ public abstract class BaseAbstractTest {
             }
         });
 
-        options.identifyTask(identityTask);
-        MParticle.start(com.mparticle.AccessUtils.setCredentialsIfEmpty(options).build());
+        optionsBuilder.identifyTask(identityTask);
+        optionsBuilder = com.mparticle.AccessUtils.setCredentialsIfEmpty(optionsBuilder);
+        MParticleOptions options = optionsBuilder.build();
+        KitOptions kitOptions = options.getConfiguration(KitOptions.class);
+        JSONObject config = null;
+        if (kitOptions != null) {
+            Map<Class<? extends KitIntegration>, JSONObject> kitConfigurations = new HashMap();
+            Map<Integer, Class<? extends KitIntegration>> kitIntegrations = kitOptions.getKits();
+            for (Map.Entry<Integer, Class<? extends KitIntegration>> kit: kitIntegrations.entrySet()) {
+                try {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("id", kit.getKey());
+                    kitConfigurations.put(kit.getValue(), jsonObject);
+                }
+                catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+            config = setupConfigMessageForKits(kitConfigurations);
+        }
+        if (config != null) {
+            optionsBuilder.configuration(new ConfigManagerConfiguration(config));
+        }
+        MParticle.start(optionsBuilder.build());
         mServer.setupHappyIdentify(mStartingMpid);
         latch.await();
         assertTrue(called.value);
@@ -234,6 +264,37 @@ public abstract class BaseAbstractTest {
         return jsonArray;
     }
 
+    protected JSONObject setupConfigMessageForKits(Map<Class<? extends KitIntegration>, JSONObject> kitIds) {
+        JSONArray eks = new JSONArray();
+        int i = -1;
+        mCustomTestKits = new HashMap<>();
+        for (Map.Entry<Class<? extends KitIntegration>, JSONObject> kitConfig: kitIds.entrySet()) {
+            try {
+                mCustomTestKits.put(i, kitConfig.getKey().getName());
+                JSONObject configJson;
+                if (kitConfig.getValue() != null) {
+                    configJson = kitConfig.getValue();
+                } else {
+                    configJson = new JSONObject();
+                }
+                if (!configJson.has("id")) {
+                    configJson.put("id", i);
+                }
+                eks.put(configJson);
+            } catch (JSONException e) {
+                throw new RuntimeException(String.format("Kit class %s unable to be set", kitConfig.getKey()));
+            }
+            i--;
+        }
+        try {
+            JSONObject configObject = new JSONObject().put("eks", eks);
+            mServer.setupConfigResponse(configObject.toString());
+            return configObject;
+        } catch (JSONException e) {
+            throw new RuntimeException("Error sending custom eks to config.");
+        }
+    }
+
     private boolean checkStorageCleared(int counter) {
         if (counter <= 0) {
             fail("Database clean failed");
@@ -245,5 +306,28 @@ public abstract class BaseAbstractTest {
             return checkStorageCleared(--counter);
         }
         return true;
+    }
+
+    class ConfigManagerConfiguration implements Configuration<ConfigManager> {
+
+        JSONObject initialConfig;
+
+        ConfigManagerConfiguration(JSONObject initialConfig) {
+            this.initialConfig = initialConfig;
+        }
+
+        @Override
+        public Class<ConfigManager> configures() {
+            return ConfigManager.class;
+        }
+
+        @Override
+        public void apply(ConfigManager configManager) {
+            try {
+                configManager.updateConfig(initialConfig);
+            } catch (JSONException e) {
+                throw new RuntimeException("Unable to set initial configuration: " + initialConfig.toString());
+            }
+        }
     }
 }

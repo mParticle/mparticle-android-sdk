@@ -17,6 +17,10 @@ import com.mparticle.networking.NetworkOptionsManager;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,6 +52,7 @@ public class MParticleOptions {
     private Integer mDataplanVersion;
     private MParticle.OperatingSystem mOperatingSystem = MParticle.OperatingSystem.ANDROID;
     private DataplanOptions mDataplanOptions;
+    private Map<Class, List<Configuration>> mConfigurations = new HashMap();
 
     private MParticleOptions() {
     }
@@ -119,6 +124,7 @@ public class MParticleOptions {
         this.mDataplanId = builder.dataplanId;
         this.mDataplanVersion = builder.dataplanVersion;
         this.mDataplanOptions = builder.dataplanOptions;
+        this.mConfigurations = builder.configurations;
     }
 
     /**
@@ -275,6 +281,34 @@ public class MParticleOptions {
         return mDataplanOptions;
     }
 
+    @NonNull
+    public List<Configuration> getConfigurations() {
+        return new ArrayList(mConfigurations.values());
+    }
+
+    @Nullable
+    public <T extends Configuration> T getConfiguration(Class<T> clazz) {
+        for(List<? extends Configuration> configurations: mConfigurations.values()) {
+            for (Configuration configuration: configurations) {
+                if (configuration.getClass() == clazz) {
+                    return (T)configuration;
+                }
+            }
+        }
+        return null;
+    }
+
+
+    @NonNull
+    public <T> List<Configuration<T>> getConfigurationsForTarget(Class<T> clazz) {
+        List list = mConfigurations.get(clazz);
+        if (list == null) {
+            return new ArrayList<Configuration<T>>();
+        } else {
+            return new ArrayList<Configuration<T>>(list);
+        }
+    }
+
     public static class Builder {
         private Context context;
         String apiKey;
@@ -299,6 +333,7 @@ public class MParticleOptions {
         private Integer dataplanVersion;
         private MParticle.OperatingSystem operatingSystem;
         private DataplanOptions dataplanOptions;
+        private Map<Class, List<Configuration>> configurations = new HashMap();
 
         private Builder(Context context) {
             this.context = context;
@@ -571,6 +606,21 @@ public class MParticleOptions {
         @NonNull
         public Builder dataplanOptions(DataplanOptions dataplanOptions) {
             this.dataplanOptions = dataplanOptions;
+            return this;
+        }
+
+        /**
+         * Register a {@link com.mparticle.Configuration}n. Various implementations of Configuration can modify the behavior of
+         * the SDK at runtime.
+         * @param configuration
+         */
+        public Builder configuration(Configuration configuration) {
+            List<Configuration> configurationList = this.configurations.get(configuration.configures());
+            if (configurationList == null) {
+                configurationList = new ArrayList<Configuration>();
+            }
+            configurationList.add(configuration);
+            this.configurations.put(configuration.configures(), configurationList);
             return this;
         }
 
