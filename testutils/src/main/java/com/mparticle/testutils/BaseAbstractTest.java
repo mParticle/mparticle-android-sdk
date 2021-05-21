@@ -117,28 +117,6 @@ public abstract class BaseAbstractTest {
 
         optionsBuilder.identifyTask(identityTask);
         optionsBuilder = com.mparticle.AccessUtils.setCredentialsIfEmpty(optionsBuilder);
-        MParticleOptions options = optionsBuilder.build();
-        KitOptions kitOptions = options.getConfiguration(KitOptions.class);
-        JSONObject config = null;
-        if (kitOptions != null) {
-            Map<Class<? extends KitIntegration>, JSONObject> kitConfigurations = new HashMap();
-            Map<Integer, Class<? extends KitIntegration>> kitIntegrations = kitOptions.getKits();
-            for (Map.Entry<Integer, Class<? extends KitIntegration>> kit: kitIntegrations.entrySet()) {
-                try {
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("id", kit.getKey());
-                    kitConfigurations.put(kit.getValue(), jsonObject);
-                }
-                catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-            }
-            config = setupConfigMessageForKits(kitConfigurations);
-        }
-        if (config != null) {
-            optionsBuilder.configuration(new ConfigManagerConfiguration(config));
-        }
         MParticle.start(optionsBuilder.build());
         mServer.setupHappyIdentify(mStartingMpid);
         latch.await();
@@ -306,28 +284,5 @@ public abstract class BaseAbstractTest {
             return checkStorageCleared(--counter);
         }
         return true;
-    }
-
-    class ConfigManagerConfiguration implements Configuration<ConfigManager> {
-
-        JSONObject initialConfig;
-
-        ConfigManagerConfiguration(JSONObject initialConfig) {
-            this.initialConfig = initialConfig;
-        }
-
-        @Override
-        public Class<ConfigManager> configures() {
-            return ConfigManager.class;
-        }
-
-        @Override
-        public void apply(ConfigManager configManager) {
-            try {
-                configManager.updateConfig(initialConfig);
-            } catch (JSONException e) {
-                throw new RuntimeException("Unable to set initial configuration: " + initialConfig.toString());
-            }
-        }
     }
 }

@@ -145,7 +145,7 @@ public class KitFrameworkWrapperTest extends BaseCleanStartedEachTest {
     static class StubKitManager extends KitFrameworkWrapper {
 
         public StubKitManager(Context context) {
-            super(context, null, null, null, null, true);
+            super(context, null, null, null, null, true, null);
             setKitManager(null);
         }
 

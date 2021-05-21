@@ -101,7 +101,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
             }
         };
 
-        MParticle.getInstance().mKitManager = new KitFrameworkWrapper(mContext, null,null, null, null, true) {
+        MParticle.getInstance().mKitManager = new KitFrameworkWrapper(mContext, null,null, null, null, true, null) {
             @Override
             public void installReferrerUpdated() {
                 called[1] = true;

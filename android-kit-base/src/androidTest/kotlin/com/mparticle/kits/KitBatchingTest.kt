@@ -1,20 +1,21 @@
 package com.mparticle.kits
 
-import com.mparticle.MPEvent
-import com.mparticle.MParticle
-import com.mparticle.MParticleOptions
+import com.mparticle.*
+import com.mparticle.internal.ConfigManager
 import com.mparticle.kits.testkits.BaseTestKit
 import com.mparticle.networking.Matcher
+import com.mparticle.networking.MockServer
 import com.mparticle.testutils.BaseCleanInstallEachTest
 import com.mparticle.testutils.MPLatch
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import org.json.JSONArray
+import org.json.JSONException
 import org.json.JSONObject
 import org.junit.Before
 import org.junit.Test
 
-class KitBatchingTest: BaseCleanInstallEachTest() {
+class KitBatchingTest: BaseKitOptionsTest() {
 
     @Before
     fun before() {
@@ -23,7 +24,7 @@ class KitBatchingTest: BaseCleanInstallEachTest() {
                         KitOptions()
                                 .addKit(123, BatchKit::class.java)
                 )
-        startMParticle(options)
+        startMParticle(options, mServer)
     }
 
     @Test
@@ -100,7 +101,6 @@ class KitBatchingTest: BaseCleanInstallEachTest() {
             latch.countDown();
             return listOf()
         }
-
     }
 
     fun <T> JSONArray.toList(): List<Any> =  (0..length() -1).map { get(it) }

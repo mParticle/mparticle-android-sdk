@@ -47,6 +47,11 @@ public class MockKitManager implements KitManager {
     }
 
     @Override
+    public void logBatch(String jsonObject) {
+
+    }
+
+    @Override
     public void leaveBreadcrumb(String breadcrumb) {
 
     }

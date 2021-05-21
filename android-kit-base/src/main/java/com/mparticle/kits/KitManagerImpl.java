@@ -79,8 +79,10 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         if (instance != null) {
             instance.Identity().addIdentityStateListener(this);
         }
-        for (Configuration configuration: options.getConfigurationsForTarget(this.getClass())) {
-            configuration.apply(this);
+        if (options != null) {
+            for (Configuration configuration : options.getConfigurationsForTarget(this.getClass())) {
+                configuration.apply(this);
+            }
         }
         initializeKitIntegrationFactory();
     }

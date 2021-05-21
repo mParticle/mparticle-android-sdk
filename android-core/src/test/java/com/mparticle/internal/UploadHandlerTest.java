@@ -53,7 +53,7 @@ public class UploadHandlerTest {
         MParticle.setInstance(new MockMParticle());
         AppStateManager stateManager = Mockito.mock(AppStateManager.class);
         mConfigManager = MParticle.getInstance().Internal().getConfigManager();
-        handler = new UploadHandler(new MockContext(), mConfigManager, stateManager, Mockito.mock(MessageManager.class), Mockito.mock(MParticleDBManager.class));
+        handler = new UploadHandler(new MockContext(), mConfigManager, stateManager, Mockito.mock(MessageManager.class), Mockito.mock(MParticleDBManager.class), Mockito.mock(KitFrameworkWrapper.class));
     }
 
     @Test
@@ -232,7 +232,7 @@ public class UploadHandlerTest {
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
                 Mockito.mock(MessageManager.class),
-                database) {
+                database, Mockito.mock(KitFrameworkWrapper.class)) {
             @Override
             public boolean shouldDelete(int statusCode) {
                 return false;
@@ -268,7 +268,7 @@ public class UploadHandlerTest {
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
                 Mockito.mock(MessageManager.class),
-                database) {
+                database, Mockito.mock(KitFrameworkWrapper.class)) {
             @Override
             public boolean shouldDelete(int statusCode) {
                 return true;
@@ -431,7 +431,8 @@ public class UploadHandlerTest {
                     configManager,
                     appStateManager,
                     Mockito.mock(MessageManager.class),
-                    database);
+                    database,
+                    Mockito.mock(KitFrameworkWrapper.class));
         }
 
         @Override

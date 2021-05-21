@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.MutableBoolean;
 
 import com.mparticle.MParticle;
+import com.mparticle.MParticleOptions;
 import com.mparticle.internal.database.services.AccessUtils;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.messages.BaseMPMessage;
@@ -145,7 +146,8 @@ public class AppStateManagerInstrumentedTest extends BaseCleanStartedEachTest {
                     },
                     MParticle.getInstance().Internal().getConfigManager(),
                     MParticle.getInstance().Internal().getAppStateManager(),
-                    com.mparticle.internal.AccessUtils.getUploadHandler());
+                    com.mparticle.internal.AccessUtils.getUploadHandler(),
+                    MParticleOptions.builder(mContext).credentials("some", "key").build());
             this.latch = latch;
         }
 

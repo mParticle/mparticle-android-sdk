@@ -7,6 +7,7 @@ import android.net.Uri;
 import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
+import com.mparticle.MParticleOptions;
 import com.mparticle.MockMParticle;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.testutils.RandomUtils;
@@ -40,12 +41,15 @@ public class KitFrameworkWrapperTest {
 
     @Test
     public void testLoadKitLibrary() throws Exception {
+        ConfigManager mockConfigManager = Mockito.mock(ConfigManager.class);
+        Mockito.when(mockConfigManager.getLatestKitConfiguration()).thenReturn(new JSONArray());
         KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
                 Mockito.mock(ReportingManager.class),
-                Mockito.mock(ConfigManager.class),
+                mockConfigManager,
                 Mockito.mock(AppStateManager.class),
                 mockBackgroundTaskHandler,
-                true);
+                true,
+                Mockito.mock(MParticleOptions.class));
 
         assertFalse(wrapper.getKitsLoaded());
         assertFalse(wrapper.getFrameworkLoadAttempted());
@@ -64,7 +68,8 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
                 mockBackgroundTaskHandler,
-        true);
+        true,
+                Mockito.mock(MParticleOptions.class));
         assertFalse(wrapper.getKitsLoaded());
         wrapper.setKitsLoaded(false);
         MPEvent event = new MPEvent.Builder("example").build();
@@ -88,7 +93,8 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
                 mockBackgroundTaskHandler,
-                true);
+                true,
+                Mockito.mock(MParticleOptions.class));
         Mockito.when(wrapper.mCoreCallbacks.getPushInstanceId()).thenReturn("instanceId");
         Mockito.when(wrapper.mCoreCallbacks.getPushSenderId()).thenReturn("1234545");
         MParticle.setInstance(new MockMParticle());
@@ -159,7 +165,8 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
                 mockBackgroundTaskHandler,
-                true);
+                true,
+                Mockito.mock(MParticleOptions.class));
         wrapper.setKitsLoaded(false);
         wrapper.replayAndDisableQueue();
         assertTrue(wrapper.getKitsLoaded());
@@ -172,7 +179,8 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
                 mockBackgroundTaskHandler,
-                true);
+                true,
+                Mockito.mock(MParticleOptions.class));
         assertNull(wrapper.getAttributeQueue());
         wrapper.setKitsLoaded(false);
         wrapper.queueAttributeSet("a key", "a value", 1);
@@ -188,7 +196,8 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
                 mockBackgroundTaskHandler,
-                true);
+                true,
+                Mockito.mock(MParticleOptions.class));
         assertNull(wrapper.getAttributeQueue());
         wrapper.setKitsLoaded(false);
         wrapper.queueAttributeTag("a key", 1);
@@ -204,7 +213,8 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
                 mockBackgroundTaskHandler,
-                true);
+                true,
+                Mockito.mock(MParticleOptions.class));
         assertNull(wrapper.getAttributeQueue());
         wrapper.setKitsLoaded(false);
         wrapper.queueAttributeSet("a key", new ArrayList<String>(), 1);
@@ -220,7 +230,8 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
                 mockBackgroundTaskHandler,
-                true);
+                true,
+                Mockito.mock(MParticleOptions.class));
         assertNull(wrapper.getAttributeQueue());
         wrapper.setKitsLoaded(false);
         wrapper.queueAttributeRemove("a key", 1);
@@ -236,7 +247,8 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
                 mockBackgroundTaskHandler,
-                true);
+                true,
+                Mockito.mock(MParticleOptions.class));
         assertNull(wrapper.getAttributeQueue());
         wrapper.setKitsLoaded(false);
         wrapper.queueAttributeIncrement("a key", 3, "3", 1);
@@ -252,7 +264,8 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
                 mockBackgroundTaskHandler,
-                true);
+                true,
+                Mockito.mock(MParticleOptions.class));
         assertNull(wrapper.getEventQueue());
         wrapper.setKitsLoaded(false);
         MPEvent event = Mockito.mock(MPEvent.class);
@@ -272,7 +285,8 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
                 mockBackgroundTaskHandler,
-                true);
+                true,
+                Mockito.mock(MParticleOptions.class));
         assertNull(wrapper.getAttributeQueue());
         wrapper.setKitsLoaded(false);
 
@@ -304,7 +318,8 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
                 mockBackgroundTaskHandler,
-                true);
+                true,
+                Mockito.mock(MParticleOptions.class));
         assertNull(wrapper.getEventQueue());
         wrapper.setKitsLoaded(false);
         MPEvent event = Mockito.mock(MPEvent.class);
@@ -342,7 +357,8 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
                 mockBackgroundTaskHandler,
-                true);
+                true,
+                Mockito.mock(MParticleOptions.class));
         assertNull(wrapper.getEventQueue());
         wrapper.setKitsLoaded(false);
         CommerceEvent event = Mockito.mock(CommerceEvent.class);
@@ -380,7 +396,8 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
                 mockBackgroundTaskHandler,
-                true);
+                true,
+                Mockito.mock(MParticleOptions.class));
         assertNull(wrapper.getEventQueue());
         wrapper.setKitsLoaded(false);
         BaseEvent event = Mockito.mock(BaseEvent.class);
@@ -417,7 +434,8 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
                 mockBackgroundTaskHandler,
-                true);
+                true,
+                Mockito.mock(MParticleOptions.class));
         assertNull(wrapper.getEventQueue());
         wrapper.setKitsLoaded(false);
         MPEvent event = Mockito.mock(MPEvent.class);
@@ -455,7 +473,8 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
                 mockBackgroundTaskHandler,
-                true);
+                true,
+                Mockito.mock(MParticleOptions.class));
         assertFalse(wrapper.isKitActive(0));
 
         KitManager mockKitManager = Mockito.mock(KitManager.class);
@@ -476,7 +495,8 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
                 mockBackgroundTaskHandler,
-                true);
+                true,
+                Mockito.mock(MParticleOptions.class));
         assertNull(wrapper.getSupportedKits());
 
         KitManager mockKitManager = Mockito.mock(KitManager.class);

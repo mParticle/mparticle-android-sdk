@@ -14,7 +14,7 @@ import org.json.JSONObject
 import org.junit.Test
 import java.util.concurrent.CountDownLatch
 
-class KitManagerImplTests: BaseCleanInstallEachTest() {
+class KitManagerImplTests: BaseKitOptionsTest() {
 
     @Test
     fun testKitIntializationViaKitOptions() {
@@ -27,7 +27,7 @@ class KitManagerImplTests: BaseCleanInstallEachTest() {
                             .configuration(it)
                 }
                 .let {
-                    startMParticle(it)
+                    startMParticle(it, mServer)
                 }
         fun getKit(kitId: Int) = MParticle.getInstance()?.getKitInstance(kitId)
 

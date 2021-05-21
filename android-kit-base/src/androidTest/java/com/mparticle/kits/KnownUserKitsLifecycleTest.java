@@ -88,7 +88,7 @@ public class KnownUserKitsLifecycleTest extends BaseKitManagerStarted {
                 }
             }
         });
-        latch.await(1, TimeUnit.SECONDS);
+        latch.await(3, TimeUnit.SECONDS);
         assertEquals(mpid, MParticle.getInstance().Identity().getCurrentUser().getId());
     }
 
