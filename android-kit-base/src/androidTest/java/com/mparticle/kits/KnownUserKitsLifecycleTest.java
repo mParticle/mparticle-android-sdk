@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
@@ -29,9 +30,9 @@ public class KnownUserKitsLifecycleTest extends BaseKitManagerStarted {
     protected Map<Class<? extends KitIntegration>, JSONObject> registerCustomKits() {
         Map<Class<? extends KitIntegration>, JSONObject> map = new HashMap<>();
         try {
-            map.put(TestKit1.class, new JSONObject().put("eau", true));
-            map.put(TestKit2.class, new JSONObject().put("eau", false));
-            map.put(TestKit3.class, new JSONObject().put("eau", true));
+            map.put(TestKit1.class, new JSONObject().put("eau", true).put("id", -1));
+            map.put(TestKit2.class, new JSONObject().put("eau", false).put("id", -2));
+            map.put(TestKit3.class, new JSONObject().put("eau", true).put("id", -3));
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
