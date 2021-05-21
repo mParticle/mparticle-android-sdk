@@ -8,13 +8,13 @@ jobs:
       - name: Checkout Branch
         uses: actions/checkout@v2
       - name: Run Instrumented Tests
-        continue-on-error: true
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 29
           script: ./gradlew :android-core:cAT :android-kit-base:cAT --stacktrace
       - name: Archive Test Results
         uses: actions/upload-artifact@v2
+        if: ${{ always() }}
         with:
           name: test-results
           path: android-core/build/reports/androidTests/connected/**
@@ -29,10 +29,10 @@ jobs:
         with:
           java-version: 1.8
       - name: Run Unit Tests
-        continue-on-error: true
         run: ./gradlew test
       - name: Android Test Report
         uses: asadmansr/android-test-report-action@v1.2.0
+        if: ${{ always() }}
 
   automerge:
       name: Rebase dependabot PRs
