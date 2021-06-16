@@ -1,6 +1,6 @@
 name: Cross Platform Tests
 on:
-  [pull_request, push]
+  pull_request
 jobs:
   run-android-tests:
     timeout-minutes: 30
