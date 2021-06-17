@@ -31,7 +31,6 @@ public class KitIntegrationFactory {
         kits.put(MParticle.ServiceProviders.APPBOY,                     "com.mparticle.kits.AppboyKit");
         kits.put(MParticle.ServiceProviders.BRANCH_METRICS,             "com.mparticle.kits.BranchMetricsKit");
         kits.put(MParticle.ServiceProviders.COMSCORE,                   "com.mparticle.kits.ComscoreKit");
-        kits.put(MParticle.ServiceProviders.KAHUNA,                     "com.mparticle.kits.KahunaKit");
         kits.put(MParticle.ServiceProviders.KOCHAVA,                    "com.mparticle.kits.KochavaKit");
         kits.put(MParticle.ServiceProviders.FORESEE_ID,                 "com.mparticle.kits.ForeseeKit");
         kits.put(MParticle.ServiceProviders.LOCALYTICS,                 "com.mparticle.kits.LocalyticsKit");

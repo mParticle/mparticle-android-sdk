@@ -7,9 +7,6 @@
 [submodule "kits/kochava-kit"]
     path = kits/kochava-kit
     url = git@github.com:mParticle-integrations/mparticle-android-integration-kochava.git
-[submodule "kits/kahuna-kit"]
-    path = kits/kahuna-kit
-    url = git@github.com:mParticle-integrations/mparticle-android-integration-kahuna.git
 [submodule "kits/flurry-kit"]
     path = kits/flurry-kit
     url = git@github.com:mParticle-integrations/mparticle-android-integration-flurry.git

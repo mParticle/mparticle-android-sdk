@@ -1509,7 +1509,6 @@ public class MParticle {
         int TUNE = 32;
         int KOCHAVA = 37;
         int COMSCORE = 39;
-        int KAHUNA = 56;
         int FORESEE_ID = 64;
         int ADJUST = 68;
         int BRANCH_METRICS = 80;
