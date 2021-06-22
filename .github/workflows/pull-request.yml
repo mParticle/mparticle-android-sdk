@@ -1,4 +1,4 @@
-name: Android SDK build and test
+name: Build and Test
 on: [push, pull_request]
 jobs:
   instrumented-tests:
@@ -20,7 +20,7 @@ jobs:
           path: android-core/build/reports/androidTests/connected/**
   unit-tests:
     timeout-minutes: 15
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - name: Checkout Branch
         uses: actions/checkout@v2
@@ -36,7 +36,7 @@ jobs:
 
   automerge:
       name: Rebase dependabot PRs
-      runs-on: [ubuntu-latest]
+      runs-on: ubuntu-18.04
       needs: [instrumented-tests, unit-tests]
       if: contains(github.repository, 'internal') && github.actor == 'dependabot[bot]' && github.event_name == 'pull_request'
       steps:

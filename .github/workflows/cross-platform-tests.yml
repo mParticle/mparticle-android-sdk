@@ -2,7 +2,7 @@ name: Cross Platform Tests
 on:
   pull_request
 jobs:
-  run-android-tests:
+  cross-platform-tests:
     timeout-minutes: 30
     runs-on: macos-11
     steps:

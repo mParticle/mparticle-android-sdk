@@ -29,7 +29,7 @@ if (target_maven_repo in ['sonatype', 'sonatype-snapshot']) {
 
 
 
-uploadArchives{
+uploadArchives {
     repositories {
         mavenDeployer {
             if (target_maven_repo == 'sonatype') {

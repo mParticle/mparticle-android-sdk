@@ -14,11 +14,11 @@ sed -i '.bak' "s/'com.mparticle:android-another-kit:.*'/'com.mparticle:android-a
 #commit the version bump, tag, and push to private and public
 git add build.gradle
 git add README.md
-git commit -m "Update version to $1"
-git tag "v$1"
-git push origin "v$1"
-git remote add public git@github.com:mParticle/mparticle-android-sdk.git
-git push public "v$1"
-git push origin HEAD:development
-git push origin HEAD:master
-git push public HEAD:master
+# git commit -m "Update version to $1"
+# git tag "v$1"
+# git push origin "v$1"
+# git remote add public git@github.com:mParticle/mparticle-android-sdk.git
+# git push public "v$1"
+# git push origin HEAD:development
+# git push origin HEAD:master
+# git push public HEAD:master
