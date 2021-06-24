@@ -4,7 +4,7 @@ on:
 jobs:
   run-android-tests:
     timeout-minutes: 30
-    runs-on: macos-latest
+    runs-on: macos-11
     steps:
       - name: Checkout internal
         uses: actions/checkout@v2
@@ -20,7 +20,7 @@ jobs:
       - name: Set current branch as cross-platform-tests underlying
         run: mv -v android-sdk/* crossplatform-sdk-tests/.sdks/android
       - name: Run Tests
-        uses: reactivecircus/android-emulator-runner@v2
+        uses: reactivecircus/android-emulator-runner@v2.18.0
         with:
           api-level: 29
           working-directory: crossplatform-sdk-tests

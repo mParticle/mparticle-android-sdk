@@ -3,12 +3,12 @@ on: [push, pull_request]
 jobs:
   instrumented-tests:
     timeout-minutes: 30
-    runs-on: macos-latest
+    runs-on: macos-11
     steps:
       - name: Checkout Branch
         uses: actions/checkout@v2
       - name: Run Instrumented Tests
-        uses: reactivecircus/android-emulator-runner@v2
+        uses: reactivecircus/android-emulator-runner@v2.18.0
         with:
           api-level: 29
           script: ./gradlew :android-core:cAT :android-kit-base:cAT --stacktrace
