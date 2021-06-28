@@ -20,7 +20,7 @@ class KitPlugin implements Plugin<Project> {
         target.repositories.add(target.repositories.jcenter())
         target.repositories.add(target.repositories.google())
         target.configurations.create('deployerJars')
-        target.dependencies.add('api', 'com.mparticle:android-kit-base:'+target.version)
+        target.dependencies.add('api', 'com.mparticle:android-kit-base:' + target.version)
         target.dependencies.add('testImplementation', 'junit:junit:4.12')
         target.dependencies.add('testImplementation', 'org.mockito:mockito-core:1.10.19')
         target.dependencies.add('deployerJars', 'org.kuali.maven.wagons:maven-s3-wagon:1.2.1')
@@ -39,17 +39,16 @@ class KitPlugin implements Plugin<Project> {
         target.apply(plugin: 'maven')
         target.apply(plugin: 'signing')
 
-        def keyId = System.getenv('mavenSigningKeyId')
-        def secretRing = System.getenv('mavenSigningKeyRingFile')
-        def password = System.getenv('mavenSigningKeyPassword')
+        def signingKey = System.getenv('mavenSigningKeyId')
+        def signingPassword = System.getenv('mavenSigningKeyPassword')
 
-        if (keyId != null) {
-            target.extensions.add('signing.keyId', keyId)
-            target.extensions.add('signing.secretKeyRingFile', secretRing)
-            target.extensions.add('signing.password', password)
+        if (signingKey != null) {
+            target.extensions.add('signing.keyId', signingKey)
+            target.extensions.add('signing.password', signingPassword)
 
             SigningExtension signing = new SigningExtension(target)
             signing.required = { target.gradle.taskGraph.hasTask("uploadArchives") }
+            signing.useInMemoryPgpKeys(signingKey, signingPassword)
             signing.sign target.configurations.archives
         }
 
@@ -64,14 +63,18 @@ class KitPlugin implements Plugin<Project> {
                 mavenDeployer {
                     if (target_maven_repo == 'sonatype') {
                         beforeDeployment {
-                            MavenDeployment deployment -> target.signing.signPom(deployment)
+                            MavenDeployment deployment ->
+                                target.signing.useInMemoryPgpKeys(signingKey, signingPassword)
+                                target.signing.signPom(deployment)
                         }
                         repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
                             authentication(userName: System.getenv('sonatypeUsername'), password: System.getenv('sonatypePassword'))
                         }
                     } else if (target_maven_repo == 'sonatype-snapshot') {
                         beforeDeployment {
-                            MavenDeployment deployment -> target.signing.signPom(deployment)
+                            MavenDeployment deployment ->
+                                target.signing.useInMemoryPgpKeys(signingKey, signingPassword)
+                                target.signing.signPom(deployment)
                         }
                         repository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
                             authentication(userName: System.getenv('sonatypeUsername'), password: System.getenv('sonatypePassword'))

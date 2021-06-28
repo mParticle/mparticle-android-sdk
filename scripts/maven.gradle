@@ -21,8 +21,11 @@ if (project.hasProperty('target_maven_repo')) {
 
 if (target_maven_repo in ['sonatype', 'sonatype-snapshot']) {
     apply plugin: 'signing'
+    def signingKey = System.getenv("mavenSigningKeyId");
+    def signingPassword = System.getenv("mavenSigningKeyPassword")
     signing {
         required { gradle.taskGraph.hasTask("uploadArchives") }
+        useInMemoryPgpKeys(signingKey, signingPassword)
         sign configurations.archives
     }
 }
