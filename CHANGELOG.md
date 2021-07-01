@@ -1,3 +1,11 @@
+## [5.18.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.18.0...v5.18.1) (2021-07-01)
+
+
+### Bug Fixes
+
+* post new release versions to github ([707c9ec](https://github.com/mParticle/mparticle-android-sdk/commit/707c9ec15f005707d3ecc8a472e090689ec42282))
+* Treat duplicate Push tokens as background tokens if no current Session ([63eb698](https://github.com/mParticle/mparticle-android-sdk/commit/63eb698576a8305f697a851a23b2efafffcb620f))
+
 # [5.18.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.17.2...v5.18.0) (2021-06-30)
 
 
