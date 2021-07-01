@@ -479,13 +479,7 @@ public class ConfigManager {
         int registeredVersion = sPreferences.getInt(Constants.PrefKeys.PROPERTY_APP_VERSION, Integer.MIN_VALUE);
         int currentVersion = getAppVersion();
         int osVersion = sPreferences.getInt(Constants.PrefKeys.PROPERTY_OS_VERSION, Integer.MIN_VALUE);
-        if (registeredVersion != currentVersion || osVersion != Build.VERSION.SDK_INT) {
-            clearPushRegistration();
-            Logger.debug("App or OS version changed, clearing instance ID.");
-            return false;
-        } else {
-            return true;
-        }
+        return registeredVersion == currentVersion && osVersion == Build.VERSION.SDK_INT;
     }
 
     @Nullable

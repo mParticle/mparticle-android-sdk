@@ -2,6 +2,7 @@ package com.mparticle.internal;
 
 import android.content.Context;
 import android.os.Looper;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -43,13 +44,18 @@ public class PushRegistrationHelper {
     static void setPushRegistration(Context context, String instanceId, String senderId) {
         if (!MPUtility.isEmpty(instanceId)) {
             MParticle mParticle = MParticle.getInstance();
-            ConfigManager.getInstance(context).setPushRegistrationFetched();
-            if (mParticle != null) {
-                MParticle.getInstance().logPushRegistration(instanceId, senderId);
-            } else {
-                //If the SDK isn't started, log the push notification in the ConfigManager
-                //so we will know to send a IdentityApi.modify() call when it starts up.
+            ConfigManager configManager = ConfigManager.getInstance(context);
+            configManager.setPushRegistrationFetched();
+            PushRegistration newPushRegistration = new PushRegistration(instanceId, senderId);
+            PushRegistration pushRegistration = configManager.getPushRegistration();
+            //If this new push registration matches the existing persisted value we can will defer logging it until a new Session starts
+
+            if (mParticle == null || (mParticle.getCurrentSession() == null && newPushRegistration.equals(pushRegistration))) {
+                //If the SDK isn't started, OR if a Session hasn't started and this is a duplicate push registration,
+                // log the push notification as a background push in the ConfigManager and we will send a IdentityApi.modify() call when it starts up.
                 ConfigManager.getInstance(context).setPushRegistrationInBackground(new PushRegistration(instanceId, senderId));
+            } else {
+                mParticle.logPushRegistration(instanceId, senderId);
             }
         }
     }
@@ -67,6 +73,19 @@ public class PushRegistrationHelper {
         @NonNull
         public String toString() {
             return "[" + (senderId == null ? "null" : senderId) + ", " + (instanceId == null ? "null" : instanceId) + "]";
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || !(o instanceof PushRegistration)) {
+                return false;
+            }
+            PushRegistration other = (PushRegistration) o;
+            return (senderId == other.senderId || (senderId != null && senderId.equals(other.senderId))) &&
+                    (instanceId == other.instanceId || (instanceId != null && instanceId.equals(other.instanceId)));
         }
     }
 }
