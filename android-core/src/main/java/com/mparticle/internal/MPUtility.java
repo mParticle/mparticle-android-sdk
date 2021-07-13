@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
 import android.provider.Settings;
+
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 
@@ -432,7 +433,7 @@ public class MPUtility {
 
     public static String getRampUdid(Context context) {
         SharedPreferences sharedPrefs = context.getSharedPreferences(
-                    Constants.PREFS_FILE, Context.MODE_PRIVATE);
+                Constants.PREFS_FILE, Context.MODE_PRIVATE);
         String rampUdid = sharedPrefs.getString(Constants.PrefKeys.DEVICE_RAMP_UDID, null);
         if (rampUdid == null) {
             rampUdid = getGeneratedUdid();
@@ -527,9 +528,7 @@ public class MPUtility {
                 try {
                     //noinspection MissingPermission
                     return mBluetoothAdapter.isEnabled();
-                }catch (SecurityException se) {
-
-                }
+                } catch (SecurityException se) { }
             }
         }
         return false;
@@ -547,29 +546,41 @@ public class MPUtility {
         try {
             Class.forName("com.google.android.gms.ads.identifier.AdvertisingIdClient");
             return true;
-        } catch (ClassNotFoundException cnfe) {
-
-        }
+        } catch (ClassNotFoundException ignored) { }
         return false;
     }
 
-    public static boolean isSupportLibAvailable(){
-
+    public static boolean isSupportLibAvailable() {
         try {
             Class.forName("android.support.v4.app.FragmentActivity");
             return true;
-        } catch (Exception cnfe) {
-
-        }
+        } catch (ClassNotFoundException ignored) { }
         return false;
     }
 
-    public static Boolean isFirebaseAvailable() {
+    public static boolean isFirebaseAvailable() {
+        if (isFirebaseAvailablePostV21() || isFirebaseAvailablePreV21()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static Boolean isFirebaseAvailablePostV21() {
+        try {
+            Class.forName("com.google.firebase.messaging.FirebaseMessaging");
+            return true;
+        }
+        catch (ClassNotFoundException ignored) { }
+        return false;
+    }
+
+    public static Boolean isFirebaseAvailablePreV21() {
         try {
             Class.forName("com.google.firebase.iid.FirebaseInstanceId");
             return true;
         }
-        catch (Exception ignore) { }
+        catch (ClassNotFoundException ignored) { }
         return false;
     }
 
@@ -674,7 +685,7 @@ public class MPUtility {
 
     /**
      * This method makes sure the constraints on event attributes are enforced. A JSONObject version
-     * of the attributes is return with data that exceeds the limits removed. 
+     * of the attributes is return with data that exceeds the limits removed.
      * NOTE: Non-string attributes are not converted to strings, currently.
      *
      * @param attributes the user-provided JSONObject

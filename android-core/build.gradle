@@ -34,7 +34,7 @@ android {
         if (properties.stringPropertyNames().contains('mp.configurl')) {
             configurationUrl = properties.getProperty('mp.configurl')
         }
-    } catch (Exception e) {
+    } catch (Exception ignored) {
 
     }
 
@@ -115,7 +115,7 @@ task coreSdkJavadocs(type: Javadoc) {
 }
 
 dependencies {
-    compileOnly 'com.google.firebase:firebase-messaging:[10.2.1, 21.0.0)'
+    compileOnly 'com.google.firebase:firebase-messaging:[10.2.1, )'
 
     compileOnly 'com.android.installreferrer:installreferrer:[1.0, )'
     compileOnly 'com.google.android.instantapps:instantapps:[1.0, )'

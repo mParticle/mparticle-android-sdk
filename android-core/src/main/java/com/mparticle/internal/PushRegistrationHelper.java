@@ -6,7 +6,8 @@ import android.os.Looper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.mparticle.MParticle;
 
 public class PushRegistrationHelper {
@@ -25,8 +26,28 @@ public class PushRegistrationHelper {
                 @Override
                 public void run() {
                     try {
-                        String instanceId = FirebaseInstanceId.getInstance().getToken(senderId, "FCM");
-                        setPushRegistration(context, instanceId, senderId);
+                        if (MPUtility.isFirebaseAvailablePreV21()) {
+                            Class<?> clazz = Class.forName("com.google.firebase.iid.FirebaseInstanceId");
+                            Object instance = clazz.getMethod("getInstance").invoke(null);
+                            String instanceId = (String)clazz.getMethod("getToken", String.class, String.class).invoke(instance, senderId, "FCM");
+                            setPushRegistration(context, instanceId, senderId);
+                        } else if (MPUtility.isFirebaseAvailablePostV21()) {
+                            com.google.firebase.messaging.FirebaseMessaging.getInstance().getToken()
+                            .addOnSuccessListener(new OnSuccessListener<String>() {
+                                @Override
+                                public void onSuccess(String instanceId) {
+                                    setPushRegistration(context, instanceId, senderId);
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Logger.error("Error registering for FCM Instance ID: ", e.getMessage());
+                                }
+                            });
+                        } else {
+                            Logger.error("Error registering FCM Instance ID: no Firebase library");
+                        }
                     } catch (Exception ex) {
                         Logger.error("Error registering for FCM Instance ID: ", ex.getMessage());
                     }
@@ -34,7 +55,7 @@ public class PushRegistrationHelper {
             };
             if (Looper.getMainLooper() == Looper.myLooper()) {
                 new Thread(instanceRunnable).start();
-            }else{
+            } else {
                 instanceRunnable.run();
             }
         }
