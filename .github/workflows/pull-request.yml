@@ -3,15 +3,14 @@ on: [push, pull_request]
 jobs:
   instrumented-tests:
     timeout-minutes: 30
-    runs-on: macos-11
+    runs-on: macos-10.15
     steps:
       - name: Checkout Branch
         uses: actions/checkout@v2
+      - name: Start emulator
+        run: ./scripts/install-start-emulator.sh
       - name: Run Instrumented Tests
-        uses: reactivecircus/android-emulator-runner@v2.18.0
-        with:
-          api-level: 29
-          script: ./gradlew :android-core:cAT :android-kit-base:cAT --stacktrace
+        run: ./gradlew :android-core:cAT :android-kit-base:cAT --stacktrace
       - name: Archive Test Results
         uses: actions/upload-artifact@v2
         if: ${{ always() }}

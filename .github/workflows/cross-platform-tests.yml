@@ -4,30 +4,25 @@ on:
 jobs:
   cross-platform-tests:
     timeout-minutes: 30
-    runs-on: macos-11
+    runs-on: macos-10.15
     steps:
-      - name: Checkout internal
-        uses: actions/checkout@v2
-        with:
-          path: android-sdk
       - name: Checkout cross platform test
         uses: actions/checkout@v2
         with:
-          ref: initial  #remove or change to development/master when initial PR is merged
           token: ${{ secrets.ANDROID_GITHUB_PAT }}  #medium-term solution, this needs to be an MParticle/non-personal PAT
           repository: mParticle/crossplatform-sdk-tests
-          path: crossplatform-sdk-tests
-      - name: Set current branch as cross-platform-tests underlying
-        run: mv -v android-sdk/* crossplatform-sdk-tests/.sdks/android
-      - name: Run Tests
-        uses: reactivecircus/android-emulator-runner@v2.18.0
+      - name: Checkout internal
+        uses: actions/checkout@v2
         with:
-          api-level: 29
-          working-directory: crossplatform-sdk-tests
-          script: ./gradlew runAndroid
+          path: .sdks/android
+
+      - name: Start emulator
+        run: cd .sdks/android; ./scripts/install-start-emulator.sh
+      - name: Run Tests
+        run: ./gradlew runAndroid
       - name: Archive Test Results
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
           name: test-results
-          path: crossplatform-sdk-tests/Tests/build/reports/androidTests/connected/**
+          path: Tests/build/reports/androidTests/connected/**

@@ -42,7 +42,7 @@ jobs:
   instrumented-tests:
     timeout-minutes: 30
     needs: create-release-branch
-    runs-on: macos-11
+    runs-on: macos-10.15
     steps:
       - name: "Checkout Internal Release Branch"
         uses: actions/checkout@v2
@@ -51,11 +51,10 @@ jobs:
           repository: mparticle/mparticle-android-sdk-internal
           token: ${{ secrets.ANDROID_GITHUB_PAT }}
           ref: release/${{ github.run_number }}
+      - name: "Start Emulator"
+        run: ./scripts/install-start-emulator.sh
       - name: "Run Instrumented Tests"
-        uses: reactivecircus/android-emulator-runner@v2.18.0
-        with:
-          api-level: 29
-          script: ./gradlew :android-core:cAT :android-kit-base:cAT --stacktrace
+        run: ./gradlew :android-core:cAT :android-kit-base:cAT --stacktrace
       - name: "Archive Instrumented Test Results"
         uses: actions/upload-artifact@v2
         if: ${{ always() }}
@@ -85,7 +84,7 @@ jobs:
         if: ${{ always() }}
   update-kits:
     needs: [instrumented-tests, unit-tests]
-    runs-on: macos-11
+    runs-on: macos-10.15
     env:
       GIT_AUTHOR_NAME: mparticle-bot
       GIT_AUTHOR_EMAIL: developers@mparticle.com
@@ -113,7 +112,7 @@ jobs:
         run: git push origin release/${{ github.run_number }}
   semantic-release:
     needs: update-kits
-    runs-on: macos-11
+    runs-on: macos-10.15
     env:
       GITHUB_TOKEN: ${{ secrets.ANDROID_GITHUB_PAT }}
       GIT_AUTHOR_NAME: mparticle-bot
