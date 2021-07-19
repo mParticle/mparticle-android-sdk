@@ -1,3 +1,11 @@
+# [5.19.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.18.1...v5.19.0) (2021-07-19)
+
+
+### Features
+
+* add support for firebase messaging v22.0.0 ([0facc42](https://github.com/mParticle/mparticle-android-sdk/commit/0facc42d4adb9ccae254185de3f3056a020a6a75))
+* Update Submodules ([4918847](https://github.com/mParticle/mparticle-android-sdk/commit/491884767f0d23e199c0c8881242d7038cc7c96c))
+
 ## [5.18.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.18.0...v5.18.1) (2021-07-01)
 
 
