@@ -51,7 +51,7 @@ public final class CommerceEventUtils {
                 attributes.putAll(event.getCustomAttributes());
             }
             extractActionAttributes(event, attributes);
-            events.add(plusOne.customAttributes(attributes).build());
+            events.add(plusOne.customAttributes(attributes).shouldUploadEvent(event.isShouldUploadEvent()).build());
         }
         List<Product> products = event.getProducts();
         if (products != null) {
@@ -62,7 +62,7 @@ public final class CommerceEventUtils {
                 extractProductFields(products.get(i), attributeExtracted);
                 extractProductAttributes(products.get(i), attributeExtracted);
                 extractTransactionId(event, attributeExtracted);
-                events.add(itemEvent.customAttributes(attributes).build());
+                events.add(itemEvent.customAttributes(attributes).shouldUploadEvent(event.isShouldUploadEvent()).build());
             }
         }
         return events;
@@ -190,7 +190,7 @@ public final class CommerceEventUtils {
                     attributes.putAll(event.getCustomAttributes());
                 }
                 extractPromotionAttributes(promotions.get(i), attributes);
-                events.add(itemEvent.customAttributes(attributes).build());
+                events.add(itemEvent.customAttributes(attributes).shouldUploadEvent(event.isShouldUploadEvent()).build());
             }
         }
         return events;
@@ -235,7 +235,7 @@ public final class CommerceEventUtils {
                     extractProductAttributes(products.get(i), attributes);
                     extractProductFields(products.get(i), attributes);
                     extractImpressionAttributes(impressions.get(i), attributes);
-                    events.add(itemEvent.customAttributes(attributes).build());
+                    events.add(itemEvent.customAttributes(attributes).shouldUploadEvent(event.isShouldUploadEvent()).build());
                 }
             }
         }

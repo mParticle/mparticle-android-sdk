@@ -16,6 +16,7 @@ public class BaseEvent {
     private MessageType mType;
     private Map<String, List<String>> mCustomFlags;
     private Map<String, String> mCustomAttributes;
+    private boolean mShouldUploadEvent = true;
 
     protected BaseEvent(MessageType type) {
         mType = type;
@@ -29,6 +30,14 @@ public class BaseEvent {
 
     protected void setType(MessageType type) {
         this.mType = type;
+    }
+
+    public boolean isShouldUploadEvent() {
+        return mShouldUploadEvent;
+    }
+
+    protected void setShouldUploadEvent(boolean shouldUploadEvent) {
+        this.mShouldUploadEvent = shouldUploadEvent;
     }
 
     /**

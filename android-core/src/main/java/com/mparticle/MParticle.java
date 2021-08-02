@@ -338,9 +338,9 @@ public class MParticle {
     }
 
     public void logEvent(@NonNull BaseEvent event) {
-        if (event instanceof MPEvent) {
+        if (event instanceof MPEvent && event.isShouldUploadEvent()) {
             logMPEvent((MPEvent)event);
-        } else if (event instanceof CommerceEvent) {
+        } else if (event instanceof CommerceEvent && event.isShouldUploadEvent()) {
             logCommerceEvent((CommerceEvent)event);
         } else {
             if (mConfigManager.isEnabled()) {

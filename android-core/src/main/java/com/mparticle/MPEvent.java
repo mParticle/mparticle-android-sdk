@@ -86,6 +86,9 @@ public class MPEvent extends BaseEvent {
         if (builder.customFlags != null) {
             setCustomFlags(builder.customFlags);
         }
+        if (builder.shouldUploadEvent != null) {
+            setShouldUploadEvent(builder.shouldUploadEvent);
+        }
         screenEvent = builder.screenEvent;
     }
 
@@ -126,6 +129,7 @@ public class MPEvent extends BaseEvent {
         setCustomFlags(mpEvent.getCustomFlags());
         entering = mpEvent.entering;
         screenEvent = mpEvent.screenEvent;
+        setShouldUploadEvent(mpEvent.isShouldUploadEvent());
         InternalListenerManager.getListener().onCompositeObjects(mpEvent, this);
     }
 
@@ -251,6 +255,7 @@ public class MPEvent extends BaseEvent {
         private Double duration = null, startTime = null, endTime = null;
         private Map<String, List<String>> customFlags = null;
         private boolean entering = true;
+        private Boolean shouldUploadEvent;
 
         private Builder(){}
 
@@ -299,6 +304,7 @@ public class MPEvent extends BaseEvent {
             this.customFlags = event.getCustomFlags();
             this.entering = event.entering;
             this.screenEvent = event.screenEvent;
+            this.shouldUploadEvent = event.isShouldUploadEvent();
         }
 
         /**
@@ -452,7 +458,6 @@ public class MPEvent extends BaseEvent {
         }
 
         /**
-         *
          * Manually set the time when this event ended - should be epoch time milliseconds.
          *
          * Note that by using {@link #duration(double)}, this value will be ignored.
@@ -466,7 +471,6 @@ public class MPEvent extends BaseEvent {
         }
 
         /**
-         *
          * Beta API, subject to change. Used internally to signify if a user is entering or exiting a screen.
          *
          *
@@ -480,12 +484,27 @@ public class MPEvent extends BaseEvent {
         }
 
         /**
+         * Manually choose to skip uploading this event to mParticle server and only forward to kits.
+         *
+         * Note that if this method is not called, the default is to upload to mParticle as well as
+         * forward to kits to match the previous behavior.
+         *
+         * @param shouldUploadEvent
+         * @return returns this builder for easy method chaining
+         */
+        @NonNull
+        public Builder shouldUploadEvent(boolean shouldUploadEvent) {
+            this.shouldUploadEvent = shouldUploadEvent;
+            return this;
+        }
+
+        /**
          * Create the MPEvent. In development mode this method will throw an IllegalStateException if this
          * MPEvent is invalid.
          *
          * @return returns the MPEvent object to be logged
          *
-         * @see MParticle#logEvent(MPEvent)
+         * @see MParticle#logEvent(BaseEvent)
          */
         @NonNull
         public MPEvent build(){
@@ -540,6 +559,9 @@ public class MPEvent extends BaseEvent {
                     }
                     builder.customFlags = cFlags;
                 }
+                if (json.has(EVENT_SHOULD_UPLOAD_EVENT)) {
+                    builder.shouldUploadEvent = json.getBoolean(EVENT_SHOULD_UPLOAD_EVENT);
+                }
 
                 return builder;
             }catch (Exception e){
@@ -556,6 +578,7 @@ public class MPEvent extends BaseEvent {
         private final static String EVENT_INFO = "customAttributes";
         private final static String EVENT_START_TIME= "startTime";
         private final static String EVENT_END_TIME= "endTime";
+        private final static String EVENT_SHOULD_UPLOAD_EVENT = "shouldUploadEvent";
 
         /**
          * Use this method to serialize an event builder to persist the object across app sessions. The JSON string
@@ -598,6 +621,9 @@ public class MPEvent extends BaseEvent {
                         flagsObject.put(entry.getKey(), valueArray);
                     }
                     jsonObject.put(EVENT_CUSTOM_FLAGS, flagsObject);
+                }
+                if (shouldUploadEvent != null) {
+                    jsonObject.put(EVENT_SHOULD_UPLOAD_EVENT, shouldUploadEvent);
                 }
                 return jsonObject.toString();
             }catch (JSONException jse){

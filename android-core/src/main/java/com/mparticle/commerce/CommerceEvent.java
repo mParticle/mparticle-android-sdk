@@ -77,6 +77,9 @@ public final class CommerceEvent extends BaseEvent {
         if (builder.mCustomFlags != null) {
             setCustomFlags(builder.mCustomFlags);
         }
+        if (builder.mShouldUploadEvent != null) {
+            setShouldUploadEvent(builder.mShouldUploadEvent);
+        }
 
         if (MPUtility.isEmpty(mProductAction)
                 && MPUtility.isEmpty(mPromotionAction)
@@ -123,7 +126,6 @@ public final class CommerceEvent extends BaseEvent {
                 Logger.error("Impression CommerceEvent should not contain Promotions.");
             }
         }
-
 
         if (mTransactionAttributes == null || mTransactionAttributes.getRevenue() == null) {
             double transactionRevenue = 0;
@@ -513,6 +515,7 @@ public final class CommerceEvent extends BaseEvent {
         private List<Impression> mImpressions;
         private String mEventName;
         private Map<String, List<String>> mCustomFlags = null;
+        private Boolean mShouldUploadEvent = null;
 
         private Builder() {
             mProductAction = mPromotionAction = null;
@@ -609,6 +612,7 @@ public final class CommerceEvent extends BaseEvent {
             }
             mEventName = event.getEventName();
             mCustomFlags = event.getCustomFlags();
+            mShouldUploadEvent = event.isShouldUploadEvent();
         }
 
         /**
@@ -867,6 +871,21 @@ public final class CommerceEvent extends BaseEvent {
         @NonNull
         public Builder internalEventName(@Nullable String eventName) {
             mEventName = eventName;
+            return this;
+        }
+
+        /**
+         * Manually choose to skip uploading this event to mParticle server and only forward to kits.
+         *
+         * Note that if this method is not called, the default is to upload to mParticle as well as
+         * forward to kits to match the previous behavior.
+         *
+         * @param shouldUploadEvent
+         * @return returns this builder for easy method chaining
+         */
+        @NonNull
+        public Builder shouldUploadEvent(boolean shouldUploadEvent) {
+            mShouldUploadEvent = shouldUploadEvent;
             return this;
         }
     }
