@@ -1,3 +1,11 @@
+# [5.21.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.20.0...v5.21.0) (2021-08-05)
+
+
+### Features
+
+* Implement event upload bypass option ([3d8a967](https://github.com/mParticle/mparticle-android-sdk/commit/3d8a9670f4b7f710c2759ab186d2f90abe3990bb))
+* Update Submodules ([e46a282](https://github.com/mParticle/mparticle-android-sdk/commit/e46a282d8b4e9406d9a17a9db77baafa1120bac1))
+
 # [5.20.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.19.0...v5.20.0) (2021-07-22)
 
 
