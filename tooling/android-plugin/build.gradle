@@ -28,7 +28,7 @@ dependencies {
     implementation gradleApi()
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation files('libs/java-json.jar')
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.2'
     testImplementation project(':tooling:common')
 }
 
@@ -39,12 +39,12 @@ jar {
 }
 
 task pluginJavadocsJar(type: Jar, dependsOn: groovydoc) {
-    classifier = 'javadoc'
+    archiveClassifier.set("javadoc")
     from groovydoc.destinationDir
 }
 
 task pluginSourcesJar(type: Jar) {
-    classifier = 'sources'
+    archiveClassifier.set("sources")
     from sourceSets.main.allJava
 }
 

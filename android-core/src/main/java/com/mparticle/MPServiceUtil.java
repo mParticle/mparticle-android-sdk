@@ -26,7 +26,7 @@ public class MPServiceUtil {
     public static final String NOTIFICATION_CHANNEL = "com.mparticle.default";
     public static final String INTERNAL_NOTIFICATION_TAP = "com.mparticle.push.notification_tapped";
     private static PowerManager.WakeLock sWakeLock;
-    private static final String TAG = Constants.LOG_TAG;
+    private static final String TAG = Constants.LOG_TAG + ":wakeLock";
     private static final Object LOCK = MPService.class;
 
     private Context mContext;

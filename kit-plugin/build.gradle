@@ -7,27 +7,27 @@ ext {
 apply from: '../scripts/maven.gradle'
 
 dependencies {
-    compile gradleApi()
-    compile localGroovy()
-    compile 'com.android.tools.build:gradle:4.0.1'
+    implementation gradleApi()
+    implementation localGroovy()
+    implementation 'com.android.tools.build:gradle:4.0.1'
 }
 
 compileGroovy {
-    sourceCompatibility = '1.7'
-    targetCompatibility = '1.7'
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
 }
 
 dependencies {
-    testCompile 'junit:junit:4.13'
+    testImplementation 'junit:junit:4.13.2'
 }
 
 task pluginJavadocsJar(type: Jar, dependsOn: groovydoc) {
-    classifier = 'javadoc'
+    archiveClassifier.set("javadoc")
     from groovydoc.destinationDir
 }
 
 task pluginSourcesJar(type: Jar) {
-    classifier = 'sources'
+    archiveClassifier.set("sources")
     from sourceSets.main.allJava
 }
 

@@ -1,3 +1,5 @@
+import proguard.gradle.ProGuardTask
+
 apply plugin: 'java'
 apply plugin: 'kotlin'
 
@@ -38,8 +40,8 @@ dependencies {
     compile project(':tooling:common')
     compileOnly 'com.android.tools.lint:lint-api:26.5.3'
     compileOnly 'com.android.tools.lint:lint-checks:26.5.3'
-    compileOnly 'org.codehaus.groovy:groovy-all:2.4.15'
-    testImplementation 'junit:junit:4.12'
+    compileOnly 'org.codehaus.groovy:groovy-all:3.0.7'
+    testImplementation 'junit:junit:4.13.2'
     testImplementation 'com.android.tools.lint:lint:26.5.3'
     testImplementation 'com.android.tools.lint:lint-tests:26.5.3'
     testImplementation 'com.android.tools:testutils:26.5.3'
@@ -75,7 +77,7 @@ task zipSources(type: Jar) {
     outputs.upToDateWhen { false }
 }
 
-task proguardCore(type: proguard.gradle.ProGuardTask) {
+task proguardCore(type: ProGuardTask) {
     configuration 'mparticle-core-proguard.pro'
     injars 'libs/mparticle.jar'
     outjars 'libs/mparticle-min.jar'

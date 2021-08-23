@@ -6,17 +6,15 @@ apply plugin: 'com.android.library'
 apply from: '../scripts/maven.gradle'
 apply plugin: 'kotlin-android'
 
-def javaVersion = JavaVersion.VERSION_1_6
-
 android {
     compileSdkVersion 30
-    buildToolsVersion '30.0.2'
+    buildToolsVersion '30.0.3'
     packagingOptions {
         exclude 'META-INF/LICENSE'
     }
     compileOptions {
-        sourceCompatibility javaVersion
-        targetCompatibility javaVersion
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     String url = '\"\"'
@@ -86,7 +84,7 @@ android {
         }
     }
     lintOptions {
-        abortOnError false
+        abortOnError true
         enable 'UnknownNullness'
         lintConfig file('lint.xml')
     }
@@ -115,6 +113,7 @@ task coreSdkJavadocs(type: Javadoc) {
 }
 
 dependencies {
+    //noinspection GradleCompatible
     compileOnly 'com.google.firebase:firebase-messaging:[10.2.1, )'
 
     compileOnly 'com.android.installreferrer:installreferrer:[1.0, )'
@@ -129,7 +128,7 @@ dependencies {
     //the junit tests seem to explicitly need this dependency while
     //working in Android studio, but from the command line it's not necessary
     testImplementation project(':android-core')
-    testImplementation 'junit:junit:4.13'
+    testImplementation 'junit:junit:4.13.2'
     testImplementation files('libs/java-json.jar')
     testImplementation 'org.powermock:powermock-module-junit4:2.0.7'
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.2'
