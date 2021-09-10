@@ -1,6 +1,6 @@
 name: Cross Platform Tests
 on:
-  pull_request
+  pull_request_target
 jobs:
   cross-platform-tests:
     timeout-minutes: 30
