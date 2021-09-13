@@ -27,7 +27,7 @@ class KitPlugin implements Plugin<Project> {
         target.extensions.create("mparticle", MParticlePluginExtension)
         LibraryExtension androidLib = target.android
         androidLib.compileSdkVersion(30)
-        androidLib.buildToolsVersion('30.0.2')
+        androidLib.buildToolsVersion('30.0.3')
         androidLib.defaultConfig.versionCode = Integer.parseInt(new Date().format('yyyyMMdd'))
         androidLib.defaultConfig.minSdkVersion 14
         androidLib.defaultConfig.targetSdkVersion 30
