@@ -8,7 +8,6 @@ import com.mparticle.commerce.CommerceEvent
 import com.mparticle.identity.MParticleIdentityClientImpl
 import com.mparticle.internal.Logger
 import org.json.JSONArray
-import kotlin.collections.forEach as kForEach
 
 import org.json.JSONObject;
 
@@ -97,7 +96,7 @@ Data Plan parsed for Kit Filtering:
                 }
                 if (event is CommerceEvent) {
                     val productActionDatapoint = dataPoints["$dataPointKey.$PRODUCT_ACTION_PRODUCTS"]
-                    event.products?.kForEach { product ->
+                    event.products?.forEach { product ->
                         product?.customAttributes?.apply {
                             val filteredAttributes = filterKeys {
                                 productActionDatapoint?.contains(it) ?: true
@@ -108,8 +107,8 @@ Data Plan parsed for Kit Filtering:
                     }
                     val productImpressionDatapoint = dataPoints["$dataPointKey.$PRODUCT_IMPRESSION_PRODUCTS"]
                     if (event.impressions?.size ?: 0 > 0) {
-                        event.impressions?.kForEach {
-                            it.products.kForEach { product ->
+                        event.impressions?.forEach {
+                            it.products.forEach { product ->
                                 product?.customAttributes?.apply {
                                     val filteredAttributes = filterKeys {
                                         productImpressionDatapoint?.contains(it) ?: true
@@ -223,14 +222,14 @@ Data Plan parsed for Kit Filtering:
                     ?.optJSONArray("data_points")
                     ?.toList()
                     ?.filterIsInstance<JSONObject>()
-                    ?.kForEach {
+                    ?.forEach {
                         val match = it.getJSONObject("match")
                         val key = generateDatapointKey(match)
                         if (key != null) {
                             val properties = getAllowedKeys(key, it)
                             points.put(key.toString(), properties)
                             val productKeys = key.getProductDataPoints()
-                            productKeys?.kForEach { productKey ->
+                            productKeys?.forEach { productKey ->
                                 points.put(productKey.toString(), getAllowedKeys(productKey, it))
                             }
                         }
@@ -408,7 +407,7 @@ Data Plan parsed for Kit Filtering:
 
         fun <T> Iterator<T>.toHashSet(): HashSet<T> {
             val set = HashSet<T>()
-            this.kForEach { set.add(it) }
+            this.forEach { set.add(it) }
             return set
         }
     }
