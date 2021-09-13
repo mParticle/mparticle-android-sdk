@@ -1,3 +1,17 @@
+# [5.25.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.24.0...v5.25.0) (2021-09-13)
+
+
+### Features
+
+* switch crossplatform tests to run on target repo due to token permission scope ([b7e946a](https://github.com/mParticle/mparticle-android-sdk/commit/b7e946a669cdba632b221e29d8cb4b1ca94c9169))
+* turn on lint errors ([9c98535](https://github.com/mParticle/mparticle-android-sdk/commit/9c98535c22492ad637ca25f3bb86d3674085a41f))
+* Update Submodules ([ed75216](https://github.com/mParticle/mparticle-android-sdk/commit/ed75216de72f71eea75ded8186e41abb4ba4d521))
+
+
+### Reverts
+
+* Rollback Kotlin upgrade ([7deee2e](https://github.com/mParticle/mparticle-android-sdk/commit/7deee2eaa36a7cb3899dd17572fb5817037abffc))
+
 # [5.24.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.23.0...v5.24.0) (2021-09-01)
 
 
