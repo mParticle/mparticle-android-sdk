@@ -39,8 +39,8 @@ public class SessionServiceTest extends BaseMPServiceTest {
         try {
             cursor = SessionService.getSessions(database);
             while (cursor.moveToNext()) {
-                String currentSessionId = cursor.getString(cursor.getColumnIndex(SessionTable.SessionTableColumns.SESSION_ID));
-                String appInfo = cursor.getString(cursor.getColumnIndex(SessionTable.SessionTableColumns.APP_INFO));
+                String currentSessionId = cursor.getString(cursor.getColumnIndexOrThrow(SessionTable.SessionTableColumns.SESSION_ID));
+                String appInfo = cursor.getString(cursor.getColumnIndexOrThrow(SessionTable.SessionTableColumns.APP_INFO));
                 if (sessionId.equals(currentSessionId)) {
                     JSONObject appInfoObject = new JSONObject(appInfo);
                     assertEquals(randomId, appInfoObject.getString("foo"));

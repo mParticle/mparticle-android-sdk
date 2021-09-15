@@ -46,7 +46,7 @@ public class MPDatabaseImpl implements MPDatabase {
         }
         Cursor cursor = sqLiteDatabase.query(table, columns, selection, selectionArgs, groupBy, having, orderBy, limit);
         if (InternalListenerManager.isEnabled()) {
-            int columnIndex = cursor.getColumnIndex(BaseColumns._ID);
+            int columnIndex = cursor.getColumnIndexOrThrow(BaseColumns._ID);
             if (columnIndex >= 0 && cursor.getCount() > 0) {
                 cursor.moveToFirst();
                 while (!cursor.isAfterLast()) {
@@ -70,7 +70,7 @@ public class MPDatabaseImpl implements MPDatabase {
         }
         Cursor cursor = sqLiteDatabase.query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
         if (InternalListenerManager.isEnabled()) {
-            int columnIndex = cursor.getColumnIndex(BaseColumns._ID);
+            int columnIndex = cursor.getColumnIndexOrThrow(BaseColumns._ID);
             if (columnIndex >= 0 && cursor.getCount() > 0) {
                 cursor.moveToFirst();
                 while (!cursor.isAfterLast()) {

@@ -133,13 +133,13 @@ public class SessionService extends SessionTable {
         try {
             sessionCursor = SessionService.getSessions(database);
             while (sessionCursor.moveToNext()) {
-                String sessionId = sessionCursor.getString(sessionCursor.getColumnIndex(SessionTableColumns.SESSION_ID));
+                String sessionId = sessionCursor.getString(sessionCursor.getColumnIndexOrThrow(SessionTableColumns.SESSION_ID));
                 List<MessageBatch> batchList = batchesBySessionId.get(sessionId);
                 if (batchList != null) {
                     try {
-                        String appInfo = sessionCursor.getString(sessionCursor.getColumnIndex(APP_INFO));
+                        String appInfo = sessionCursor.getString(sessionCursor.getColumnIndexOrThrow(APP_INFO));
                         JSONObject appInfoJson = new JSONObject(appInfo);
-                        String deviceInfo = sessionCursor.getString(sessionCursor.getColumnIndex(SessionTableColumns.DEVICE_INFO));
+                        String deviceInfo = sessionCursor.getString(sessionCursor.getColumnIndexOrThrow(SessionTableColumns.DEVICE_INFO));
                         JSONObject deviceInfoJson = new JSONObject(deviceInfo);
                         deviceInfos.add(deviceInfoJson);
                         for (MessageBatch batch: batchList) {

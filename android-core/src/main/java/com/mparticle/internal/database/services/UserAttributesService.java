@@ -36,8 +36,8 @@ public class UserAttributesService extends UserAttributesTable {
             String[] args =  {"1", String.valueOf(mpId)};
 
             cursor = db.query(UserAttributesTableColumns.TABLE_NAME, null, UserAttributesTableColumns.IS_LIST + " != ? and " + UserAttributesTableColumns.MP_ID + " = ?", args, null, null, UserAttributesTableColumns.ATTRIBUTE_KEY + ", "+ UserAttributesTableColumns.CREATED_AT +" desc");
-            int keyIndex = cursor.getColumnIndex(UserAttributesTableColumns.ATTRIBUTE_KEY);
-            int valueIndex = cursor.getColumnIndex(UserAttributesTableColumns.ATTRIBUTE_VALUE);
+            int keyIndex = cursor.getColumnIndexOrThrow(UserAttributesTableColumns.ATTRIBUTE_KEY);
+            int valueIndex = cursor.getColumnIndexOrThrow(UserAttributesTableColumns.ATTRIBUTE_VALUE);
             while (cursor.moveToNext()) {
                 attributes.put(cursor.getString(keyIndex), cursor.getString(valueIndex));
             }
@@ -57,8 +57,8 @@ public class UserAttributesService extends UserAttributesTable {
         try {
             String[] args =  {"1", String.valueOf(mpId)};
             cursor = db.query(UserAttributesTableColumns.TABLE_NAME, null, UserAttributesTableColumns.IS_LIST + " = ? and " + UserAttributesTableColumns.MP_ID + " = ?", args, null, null, UserAttributesTableColumns.ATTRIBUTE_KEY + ", "+ UserAttributesTableColumns.CREATED_AT +" desc");
-            int keyIndex = cursor.getColumnIndex(UserAttributesTableColumns.ATTRIBUTE_KEY);
-            int valueIndex = cursor.getColumnIndex(UserAttributesTableColumns.ATTRIBUTE_VALUE);
+            int keyIndex = cursor.getColumnIndexOrThrow(UserAttributesTableColumns.ATTRIBUTE_KEY);
+            int valueIndex = cursor.getColumnIndexOrThrow(UserAttributesTableColumns.ATTRIBUTE_VALUE);
             String previousKey = null;
             List<String> currentList = null;
             while (cursor.moveToNext()) {

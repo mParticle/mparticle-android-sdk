@@ -61,11 +61,11 @@ class SegmentRetriever {
         StringBuilder keys = new StringBuilder("(");
         if (audienceCursor.getCount() > 0){
             while (audienceCursor.moveToNext()){
-                int id = audienceCursor.getInt(audienceCursor.getColumnIndex(SegmentDatabase.SegmentTable.SEGMENT_ID));
+                int id = audienceCursor.getInt(audienceCursor.getColumnIndexOrThrow(SegmentDatabase.SegmentTable.SEGMENT_ID));
 
                 Segment segment = new Segment(id,
-                        audienceCursor.getString(audienceCursor.getColumnIndex(SegmentDatabase.SegmentTable.NAME)),
-                        audienceCursor.getString(audienceCursor.getColumnIndex(SegmentDatabase.SegmentTable.ENDPOINTS)));
+                        audienceCursor.getString(audienceCursor.getColumnIndexOrThrow(SegmentDatabase.SegmentTable.NAME)),
+                        audienceCursor.getString(audienceCursor.getColumnIndexOrThrow(SegmentDatabase.SegmentTable.ENDPOINTS)));
                 audiences.put(id, segment);
                 keys.append(id);
                 keys.append(", ");

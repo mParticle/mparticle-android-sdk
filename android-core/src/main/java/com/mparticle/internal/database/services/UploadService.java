@@ -42,9 +42,9 @@ public class UploadService extends UploadTable {
         try {
             readyUploadsCursor = database.query(UploadTableColumns.TABLE_NAME, new String[]{"_id", UploadTableColumns.MESSAGE, UploadTableColumns.REQUEST_TYPE},
                     null, null, null, null, UploadTableColumns.CREATED_AT);
-            int messageIdIndex = readyUploadsCursor.getColumnIndex(UploadTableColumns._ID);
-            int messageIndex = readyUploadsCursor.getColumnIndex(UploadTableColumns.MESSAGE);
-            int requestTypeIndex = readyUploadsCursor.getColumnIndex(UploadTableColumns.REQUEST_TYPE);
+            int messageIdIndex = readyUploadsCursor.getColumnIndexOrThrow(UploadTableColumns._ID);
+            int messageIndex = readyUploadsCursor.getColumnIndexOrThrow(UploadTableColumns.MESSAGE);
+            int requestTypeIndex = readyUploadsCursor.getColumnIndexOrThrow(UploadTableColumns.REQUEST_TYPE);
             while (readyUploadsCursor.moveToNext()) {
                 MParticleDBManager.ReadyUpload readyUpload = new MParticleDBManager.ReadyUpload(readyUploadsCursor.getInt(messageIdIndex), UploadTable.ALIAS_REQUEST.equals(readyUploadsCursor.getString(requestTypeIndex)), readyUploadsCursor.getString(messageIndex));
                 readyUploads.add(readyUpload);

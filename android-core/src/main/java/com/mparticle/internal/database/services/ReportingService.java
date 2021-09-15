@@ -47,18 +47,18 @@ public class ReportingService extends ReportingTable {
                     null,
                     null,
                     ReportingTableColumns._ID + " asc");
-            int reportingMessageIdIndex = reportingMessageCursor.getColumnIndex(ReportingTableColumns._ID);
+            int reportingMessageIdIndex = reportingMessageCursor.getColumnIndexOrThrow(ReportingTableColumns._ID);
             while (reportingMessageCursor.moveToNext()) {
                 JSONObject msgObject = new JSONObject(
                         reportingMessageCursor.getString(
-                                reportingMessageCursor.getColumnIndex(ReportingTableColumns.MESSAGE)
+                                reportingMessageCursor.getColumnIndexOrThrow(ReportingTableColumns.MESSAGE)
                         )
                 );
                 String sessionId = reportingMessageCursor.getString(
-                        reportingMessageCursor.getColumnIndex(ReportingTableColumns.SESSION_ID)
+                        reportingMessageCursor.getColumnIndexOrThrow(ReportingTableColumns.SESSION_ID)
                 );
                 int reportingMessageId = reportingMessageCursor.getInt(reportingMessageIdIndex);
-                long reportingMessageMpid = reportingMessageCursor.getLong(reportingMessageCursor.getColumnIndex(ReportingTableColumns.MP_ID));
+                long reportingMessageMpid = reportingMessageCursor.getLong(reportingMessageCursor.getColumnIndexOrThrow(ReportingTableColumns.MP_ID));
                 ReportingMessage reportingMessage = new ReportingMessage(msgObject, sessionId, reportingMessageId, reportingMessageMpid);
                 InternalListenerManager.getListener().onCompositeObjects(reportingMessageCursor, reportingMessage);
                 reportingMessages.add(reportingMessage);

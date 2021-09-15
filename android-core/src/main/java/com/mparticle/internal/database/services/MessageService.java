@@ -68,12 +68,12 @@ public class MessageService extends MessageTable {
                     null,
                     null,
                     prepareOrderBy, String.valueOf(Constants.getMaxMessagePerBatch()));
-            int messageIdIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns._ID);
-            int messageIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.MESSAGE);
-            int sessionIdIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.SESSION_ID);
-            int messageMpidIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.MP_ID);
-            int dataplanIdIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.DATAPLAN_ID);
-            int dataplanVersinIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.DATAPLAN_VERSION);
+            int messageIdIndex = readyMessagesCursor.getColumnIndexOrThrow(MessageTableColumns._ID);
+            int messageIndex = readyMessagesCursor.getColumnIndexOrThrow(MessageTableColumns.MESSAGE);
+            int sessionIdIndex = readyMessagesCursor.getColumnIndexOrThrow(MessageTableColumns.SESSION_ID);
+            int messageMpidIndex = readyMessagesCursor.getColumnIndexOrThrow(MessageTableColumns.MP_ID);
+            int dataplanIdIndex = readyMessagesCursor.getColumnIndexOrThrow(MessageTableColumns.DATAPLAN_ID);
+            int dataplanVersinIndex = readyMessagesCursor.getColumnIndexOrThrow(MessageTableColumns.DATAPLAN_VERSION);
             while (readyMessagesCursor.moveToNext()) {
                 String sessionId = readyMessagesCursor.getString(sessionIdIndex);
                 int messageId = readyMessagesCursor.getInt(messageIdIndex);
@@ -144,12 +144,12 @@ public class MessageService extends MessageTable {
                     null,
                     null,
                     prepareOrderBy, String.valueOf(Constants.getMaxMessagePerBatch()));
-            int messageIdIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns._ID);
-            int messageIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.MESSAGE);
-            int sessionIdIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.SESSION_ID);
-            int messageMpidIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.MP_ID);
-            int dataplanIdIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.DATAPLAN_ID);
-            int dataplanVersinIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.DATAPLAN_VERSION);
+            int messageIdIndex = readyMessagesCursor.getColumnIndexOrThrow(MessageTableColumns._ID);
+            int messageIndex = readyMessagesCursor.getColumnIndexOrThrow(MessageTableColumns.MESSAGE);
+            int sessionIdIndex = readyMessagesCursor.getColumnIndexOrThrow(MessageTableColumns.SESSION_ID);
+            int messageMpidIndex = readyMessagesCursor.getColumnIndexOrThrow(MessageTableColumns.MP_ID);
+            int dataplanIdIndex = readyMessagesCursor.getColumnIndexOrThrow(MessageTableColumns.DATAPLAN_ID);
+            int dataplanVersinIndex = readyMessagesCursor.getColumnIndexOrThrow(MessageTableColumns.DATAPLAN_VERSION);
             while (readyMessagesCursor.moveToNext()) {
                 String sessionId = readyMessagesCursor.getString(sessionIdIndex);
                 int messageId = readyMessagesCursor.getInt(messageIdIndex);

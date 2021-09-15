@@ -90,7 +90,7 @@ public class BreadcrumbService extends BreadcrumbTable {
 
             if (breadcrumbCursor.getCount() > 0) {
                 JSONArray breadcrumbs = new JSONArray();
-                int breadcrumbIndex = breadcrumbCursor.getColumnIndex(BreadcrumbTableColumns.MESSAGE);
+                int breadcrumbIndex = breadcrumbCursor.getColumnIndexOrThrow(BreadcrumbTableColumns.MESSAGE);
                 while (breadcrumbCursor.moveToNext()) {
                     JSONObject breadcrumbObject = new JSONObject(breadcrumbCursor.getString(breadcrumbIndex));
                     breadcrumbs.put(breadcrumbObject);

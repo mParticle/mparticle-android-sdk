@@ -34,6 +34,7 @@ class KitPlugin implements Plugin<Project> {
         androidLib.buildTypes.release.minifyEnabled false
         androidLib.buildTypes.release.consumerProguardFiles 'consumer-proguard.pro'
         androidLib.dexOptions.javaMaxHeapSize '2g'
+        androidLib.lintOptions.abortOnError true
 
         //formerly in maven.gradle
         target.apply(plugin: 'maven')

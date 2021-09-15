@@ -2,39 +2,72 @@ name: Build and Test
 on: [push, pull_request]
 jobs:
   instrumented-tests:
+    name: "Instrumented Tests"
     timeout-minutes: 30
     runs-on: macos-10.15
     steps:
-      - name: Checkout Branch
+      - name: "Checkout Branch"
         uses: actions/checkout@v2
-      - name: Start emulator
+      - name: "Start Emulator"
         run: ./scripts/install-start-emulator.sh
-      - name: Run Instrumented Tests
+      - name: "Run Instrumented Tests"
         run: ./gradlew :android-core:cAT :android-kit-base:cAT --stacktrace
-      - name: Archive Test Results
+      - name: "Archive Test Results"
         uses: actions/upload-artifact@v2
         if: ${{ always() }}
         with:
           name: test-results
           path: android-core/build/reports/androidTests/connected/**
   unit-tests:
+    name: "Unit Tests"
     timeout-minutes: 15
     runs-on: ubuntu-18.04
     steps:
-      - name: Checkout Branch
+      - name: "Checkout Branch"
         uses: actions/checkout@v2
-      - name: Install JDK 1.8
+      - name: "Install JDK 1.8"
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
-      - name: Run Unit Tests
+      - name: "Run Unit Tests"
         run: ./gradlew test
-      - name: Android Test Report
+      - name: "Android Test Report"
         uses: asadmansr/android-test-report-action@v1.2.0
         if: ${{ always() }}
-
+  lint-checks:
+    name: "Lint Checks"
+    timeout-minutes: 15
+    runs-on: macos-10.15
+    steps:
+      - name: "Checkout Branch"
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: "Install JDK 11"
+        uses: actions/setup-java@v2
+        with:
+          distribution: "zulu"
+          java-version: "11"
+      - name: "Run Android Core SDK Lint"
+        run: ./gradlew lint
+      - name: "Setup Android Kit Lint"
+        run: ./gradlew uploadArchives
+      - name: "Run Android Kit Lint"
+        run: ./gradlew -c settings-kits.gradle lint
+      - name: "Archive Test Results"
+        uses: actions/upload-artifact@v2
+        if: ${{ always() }}
+        with:
+          name: "core-lint-results"
+          path: ./**/build/reports/**
+      - name: "Archive Test Kit Results"
+        uses: actions/upload-artifact@v2
+        if: ${{ always() }}
+        with:
+          name: "kit-lint-results"
+          path: kits/**/build/reports/**
   automerge:
-      name: Rebase dependabot PRs
+      name: "Rebase dependabot PRs"
       runs-on: ubuntu-18.04
       needs: [instrumented-tests, unit-tests]
       if: contains(github.repository, 'internal') && github.actor == 'dependabot[bot]' && github.event_name == 'pull_request'

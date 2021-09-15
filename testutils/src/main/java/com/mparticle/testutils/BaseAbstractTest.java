@@ -196,9 +196,9 @@ public abstract class BaseAbstractTest {
         List<String> tableNames = new ArrayList<String>();
         try {
             while (!cursor.isAfterLast()) {
-                String tableName = cursor.getString(cursor.getColumnIndex("name"));
+                String tableName = cursor.getString(cursor.getColumnIndexOrThrow("name"));
                 if (!"android_metadata".equals(tableName) && !"sqlite_sequence".equals(tableName)) {
-                    tableNames.add(cursor.getString(cursor.getColumnIndex("name")));
+                    tableNames.add(cursor.getString(cursor.getColumnIndexOrThrow("name")));
                 }
                 cursor.moveToNext();
             }
