@@ -1,3 +1,10 @@
+# [5.26.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.25.0...v5.26.0) (2021-09-17)
+
+
+### Features
+
+* add in lint error check for kits ([81307ae](https://github.com/mParticle/mparticle-android-sdk/commit/81307aea6bd88dcca22a3f74e229da9670147bf9))
+
 # [5.25.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.24.0...v5.25.0) (2021-09-13)
 
 
