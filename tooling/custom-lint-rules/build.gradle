@@ -23,7 +23,7 @@ repositories {
     jcenter()
     google()
     maven {
-        url  "http://dl.bintray.com/android/android-tools"
+        url  "https://dl.bintray.com/android/android-tools"
     }
     maven {
         url "https://mvnrepository.com/artifact/com.android.tools.lint/lint-tests"

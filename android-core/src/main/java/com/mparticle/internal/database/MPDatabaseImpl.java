@@ -24,9 +24,7 @@ public class MPDatabaseImpl implements MPDatabase {
         long row = sqLiteDatabase.insert(table, nullColumnHack, contentValues);
         if (InternalListenerManager.isEnabled()) {
             if (row >= 0) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                    InternalListenerManager.getListener().onEntityStored(row, table, contentValues);
-                }
+                InternalListenerManager.getListener().onEntityStored(row, table, contentValues);
             }
         }
         return row;

@@ -84,9 +84,10 @@ android {
         }
     }
     lintOptions {
-        abortOnError true
         enable 'UnknownNullness'
-        lintConfig file('lint.xml')
+        checkDependencies = true
+        abortOnError true
+        lintConfig file('lint-baseline.xml')
     }
     sourceSets {
         test.java.srcDirs += 'src/test/kotlin'

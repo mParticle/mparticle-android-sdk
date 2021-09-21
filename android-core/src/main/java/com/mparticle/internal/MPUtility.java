@@ -540,9 +540,6 @@ public class MPUtility {
     }
 
     public static boolean isGmsAdIdAvailable() {
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.FROYO) {
-            return false;
-        }
         try {
             Class.forName("com.google.android.gms.ads.identifier.AdvertisingIdClient");
             return true;
@@ -613,10 +610,7 @@ public class MPUtility {
         List resolveInfo =
                 packageManager.queryIntentServices(intent,
                         PackageManager.MATCH_DEFAULT_ONLY);
-        if (resolveInfo.size() > 0) {
-            return true;
-        }
-        return false;
+        return resolveInfo.size() > 0;
     }
 
     public static JSONObject wrapExtras(Bundle extras) {
@@ -627,7 +621,7 @@ public class MPUtility {
                 if ((value = extras.getBundle(key)) != null) {
                     try {
                         parameters.put(key, wrapExtras((Bundle) value));
-                    } catch (JSONException e) {
+                    } catch (JSONException ignored) {
 
                     }
                 } else if ((value = extras.get(key)) != null) {
@@ -635,7 +629,7 @@ public class MPUtility {
                     if ((stringVal.length() < 500)) {
                         try {
                             parameters.put(key, stringVal);
-                        } catch (JSONException e) {
+                        } catch (JSONException ignored) {
 
                         }
                     }

@@ -1153,7 +1153,7 @@ public class MParticle {
                     if (callback != null) {
                         try {
                             callback.onReset();
-                        } catch (Exception e) {
+                        } catch (Exception ignored) {
                         }
                     }
                     handlerThread.quit();
