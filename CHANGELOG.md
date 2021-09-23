@@ -1,3 +1,15 @@
+# [5.27.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.26.0...v5.27.0) (2021-09-23)
+
+
+### Bug Fixes
+
+* bugfix some lint issues ([3177500](https://github.com/mParticle/mparticle-android-sdk/commit/31775003a9f91c6999993d346933bf348c8d02a4))
+
+
+### Features
+
+* Update Submodules ([6b2d6be](https://github.com/mParticle/mparticle-android-sdk/commit/6b2d6bede58a01319ae85e1c18d371f78fd65518))
+
 # [5.26.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.25.0...v5.26.0) (2021-09-17)
 
 
