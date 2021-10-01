@@ -58,8 +58,19 @@ task kitSdkJavadocs(type: Javadoc) {
     getOptions().setNoTimestamp(true)
 }
 
+task generateJavadocsJar(type: Jar, dependsOn: kitSdkJavadocs) {
+    archiveClassifier.set('javadoc')
+    from kitSdkJavadocs.destinationDir
+}
+
+task generateSourcesJar(type: Jar) {
+    archiveClassifier.set('sources')
+    from android.sourceSets.main.java.srcDirs
+}
+
 dependencies {
-    implementation project(':android-core')
+    api project(':android-core')
+    compileOnly 'androidx.annotation:annotation:[1.0.0,)'
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation  files('libs/java-json.jar')
@@ -70,5 +81,4 @@ dependencies {
     testImplementation project(':testutils')
 
     androidTestImplementation project(':testutils')
-    implementation 'androidx.annotation:annotation:1.2.0'
 }

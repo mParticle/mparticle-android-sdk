@@ -163,7 +163,7 @@ The next step is to configure the mParticle Gradle Plugin. In your root `build.g
 ```groovy
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
     }
     dependencies {
         ...

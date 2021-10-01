@@ -19,9 +19,6 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
-repositories {
-    mavenCentral()
-}
 
 dependencies {
     compileOnly project(':tooling:common')
@@ -38,17 +35,12 @@ jar {
     }
 }
 
-task pluginJavadocsJar(type: Jar, dependsOn: groovydoc) {
+task generateJavadocsJar(type: Jar, dependsOn: groovydoc) {
     archiveClassifier.set("javadoc")
     from groovydoc.destinationDir
 }
 
-task pluginSourcesJar(type: Jar) {
+task generateSourcesJar(type: Jar) {
     archiveClassifier.set("sources")
     from sourceSets.main.allJava
-}
-
-artifacts {
-    archives pluginJavadocsJar
-    archives pluginSourcesJar
 }

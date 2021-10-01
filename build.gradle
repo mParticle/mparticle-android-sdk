@@ -2,7 +2,7 @@ buildscript {
     ext.kotlin_version = '1.4.10'
 
     repositories {
-        jcenter()
+        mavenCentral()
         google()
         maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
     }
@@ -34,7 +34,6 @@ allprojects {
     repositories {
         mavenLocal()
         google()
-        jcenter()
+        mavenCentral()
     }
-
 }

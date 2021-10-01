@@ -98,7 +98,6 @@ android {
     }
 }
 
-
 task coreSdkJavadocs(type: Javadoc) {
         source = android.sourceSets.main.java.srcDirs
         source += 'build/generated/source/buildConfig/release/'
@@ -113,10 +112,19 @@ task coreSdkJavadocs(type: Javadoc) {
         getOptions().setNoTimestamp(true)
 }
 
+task generateJavadocsJar(type: Jar, dependsOn: coreSdkJavadocs) {
+    archiveClassifier.set('javadoc')
+    from coreSdkJavadocs.destinationDir
+}
+
+task generateSourcesJar(type: Jar) {
+    archiveClassifier.set('sources')
+    from android.sourceSets.main.java.srcDirs
+}
+
 dependencies {
     //noinspection GradleCompatible
     compileOnly 'com.google.firebase:firebase-messaging:[10.2.1, )'
-
     compileOnly 'com.android.installreferrer:installreferrer:[1.0, )'
     compileOnly 'com.google.android.instantapps:instantapps:[1.0, )'
     compileOnly 'androidx.annotation:annotation:[1.0.0,)'

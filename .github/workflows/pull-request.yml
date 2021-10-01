@@ -51,9 +51,9 @@ jobs:
       - name: "Run Android Core SDK Lint"
         run: ./gradlew lint
       - name: "Setup Android Kit Lint"
-        run: ./gradlew uploadArchives
+        run: ./gradlew publishReleaseLocal
       - name: "Run Android Kit Lint"
-        run: ./gradlew -c settings-kits.gradle lint
+        run: ./gradlew publishReleaseLocal -c settings-kits.gradle lint
       - name: "Archive Test Results"
         uses: actions/upload-artifact@v2
         if: ${{ always() }}

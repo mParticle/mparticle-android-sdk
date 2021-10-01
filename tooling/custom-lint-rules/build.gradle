@@ -9,7 +9,6 @@ targetCompatibility = 1.8
 buildscript {
     repositories {
         mavenCentral()
-        jcenter()
         google()
     }
     dependencies {
@@ -20,7 +19,6 @@ buildscript {
 
 
 repositories {
-    jcenter()
     google()
     maven {
         url  "https://dl.bintray.com/android/android-tools"

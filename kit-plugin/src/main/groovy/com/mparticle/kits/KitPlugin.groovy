@@ -1,10 +1,13 @@
 package com.mparticle.kits
 import com.android.build.gradle.LibraryExtension
+import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.maven.MavenDeployment
-import org.gradle.api.tasks.Upload
+import org.gradle.api.artifacts.dsl.RepositoryHandler
+import org.gradle.api.publish.PublicationContainer
+import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.internal.DefaultPublishingExtension
+import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.plugins.signing.SigningExtension
 
 class KitPlugin implements Plugin<Project> {
@@ -14,20 +17,22 @@ class KitPlugin implements Plugin<Project> {
         target.apply(plugin: 'com.android.library')
         target.group = 'com.mparticle'
         target.buildscript.repositories.add(target.repositories.mavenLocal())
-        target.buildscript.repositories.add(target.repositories.jcenter())
         target.buildscript.repositories.add(target.repositories.google())
+        target.buildscript.repositories.add(target.repositories.mavenCentral())
         target.repositories.add(target.repositories.mavenLocal())
-        target.repositories.add(target.repositories.jcenter())
         target.repositories.add(target.repositories.google())
+        target.repositories.add(target.repositories.mavenCentral())
+        target.repositories.add(target.repositories.jcenter())
         target.configurations.create('deployerJars')
         target.dependencies.add('api', 'com.mparticle:android-kit-base:' + target.version)
-        target.dependencies.add('testImplementation', 'junit:junit:4.12')
+        target.dependencies.add('testImplementation', 'junit:junit:4.13.2')
         target.dependencies.add('testImplementation', 'org.mockito:mockito-core:1.10.19')
-        target.dependencies.add('deployerJars', 'org.kuali.maven.wagons:maven-s3-wagon:1.2.1')
+        target.dependencies.add('testImplementation', 'androidx.annotation:annotation:[1.0.0,)')
+        target.dependencies.add('compileOnly', 'androidx.annotation:annotation:[1.0.0,)')
         target.extensions.create("mparticle", MParticlePluginExtension)
         LibraryExtension androidLib = target.android
         androidLib.compileSdkVersion(30)
-        androidLib.buildToolsVersion('30.0.2')
+        androidLib.buildToolsVersion('30.0.3')
         androidLib.defaultConfig.versionCode = Integer.parseInt(new Date().format('yyyyMMdd'))
         androidLib.defaultConfig.minSdkVersion 14
         androidLib.defaultConfig.targetSdkVersion 30
@@ -37,91 +42,117 @@ class KitPlugin implements Plugin<Project> {
         androidLib.lintOptions.abortOnError true
 
         //formerly in maven.gradle
-        target.apply(plugin: 'maven')
+        target.apply(plugin: 'maven-publish')
         target.apply(plugin: 'signing')
 
-        def signingKey = System.getenv('mavenSigningKeyId')
-        def signingPassword = System.getenv('mavenSigningKeyPassword')
-
-        if (signingKey != null) {
-            target.extensions.add('signing.keyId', signingKey)
-            target.extensions.add('signing.password', signingPassword)
-
-            SigningExtension signing = new SigningExtension(target)
-            signing.required = { target.gradle.taskGraph.hasTask("uploadArchives") }
-            signing.useInMemoryPgpKeys(signingKey, signingPassword)
-            signing.sign target.configurations.archives
-        }
-
-        def target_maven_repo = 'local'
-        if (target.hasProperty('target_maven_repo')) {
-            target_maven_repo = target.property('target_maven_repo')
-        }
-
         target.afterEvaluate {
-            ((Upload) target.uploadArchives).repositories {
+            PublishingExtension publishing = target.extensions.findByName('publishing')
+            publishing.publications.create("release", MavenPublication.class) {
+                groupId = "com.mparticle"
+                artifactId = target.name
+                version = target.version
+                if (target.plugins.findPlugin("com.android.library")) {
+                    from target.components.release
+                } else {
+                    from target.components.java
+                }
 
-                mavenDeployer {
-                    if (target_maven_repo == 'sonatype') {
-                        beforeDeployment {
-                            MavenDeployment deployment ->
-                                target.signing.useInMemoryPgpKeys(signingKey, signingPassword)
-                                target.signing.signPom(deployment)
-                        }
-                        repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
-                            authentication(userName: System.getenv('sonatypeUsername'), password: System.getenv('sonatypePassword'))
-                        }
-                    } else if (target_maven_repo == 'sonatype-snapshot') {
-                        beforeDeployment {
-                            MavenDeployment deployment ->
-                                target.signing.useInMemoryPgpKeys(signingKey, signingPassword)
-                                target.signing.signPom(deployment)
-                        }
-                        repository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
-                            authentication(userName: System.getenv('sonatypeUsername'), password: System.getenv('sonatypePassword'))
-                        }
-                    } else if (target_maven_repo == 's3') {
-                        configuration = target.configurations.deployerJars
-                        repository(url: 's3://maven.mparticle.com')
+                pom {
+                    artifactId = target.name
+                    packaging = 'aar'
+                    name = target.name
+                    if (target.mparticle.kitDescription == null) {
+                        description = target.name + ' for the mParticle SDK'
                     } else {
-                        repository(url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath)
+                        description = target.mparticle.kitDescription
                     }
-
-                    pom.project {
-                        artifactId target.name
-                        packaging 'aar'
-                        name target.name
-                        if (target.mparticle.kitDescription == null) {
-                            description target.name + ' for the mParticle SDK'
-                        } else {
-                            description target.mparticle.kitDescription
+                    url = 'https://github.com/mparticle/mparticle-sdk-android'
+                    licenses {
+                        license {
+                            name = 'The Apache Software License, Version 2.0'
+                            url = 'https://www.apache.org/license/LICENSE-2.0.txt'
                         }
-                        url 'https://github.com/mparticle/mparticle-sdk-android'
-
-                        licenses {
-                            license {
-                                name 'The Apache Software License, Version 2.0'
-                                url 'http://www.apache.org/license/LICENSE-2.0.txt'
-                            }
+                    }
+                    developers {
+                        developer {
+                            id = 'mParticle'
+                            name = 'mParticle Inc.'
+                            email = 'developers@mparticle.com'
                         }
-
-                        scm {
-                            url 'https://github.com/mparticle/mparticle-android-sdk'
-                            connection 'scm:git:https://github.com/mparticle/mparticle-android-sdk'
-                            developerConnection 'scm:git:git@github.com:mparticle/mparticle-android-sdk.git'
-                        }
-
-                        developers {
-                            developer {
-                                id 'mParticle'
-                                name 'mParticle Inc.'
-                                email 'developers@mparticle.com'
-                            }
-                        }
+                    }
+                    scm {
+                        url = 'https://github.com/mparticle/mparticle-android-sdk'
+                        connection = 'scm:git:https://github.com/mparticle/mparticle-android-sdk'
+                        developerConnection = 'scm:git:git@github.com:mparticle/mparticle-android-sdk.git'
                     }
                 }
             }
+            publishing.publications.register("debug", MavenPublication.class) {
+                groupId = "com.mparticle"
+                artifactId = target.name
+                version = target.version
+                if (target.plugins.findPlugin("com.android.library")) {
+                    from target.components.debug
+                } else {
+                    from target.components.java
+                }
+
+                pom {
+                    artifactId = target.name
+                    packaging = 'aar'
+                    name = target.name
+                    if (target.mparticle.kitDescription == null) {
+                        description = target.name + ' for the mParticle SDK'
+                    } else {
+                        description = target.mparticle.kitDescription
+                    }
+                    url = 'https://github.com/mparticle/mparticle-sdk-android'
+                    licenses {
+                        license {
+                            name = 'The Apache Software License, Version 2.0'
+                            url = 'https://www.apache.org/license/LICENSE-2.0.txt'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'mParticle'
+                            name = 'mParticle Inc.'
+                            email = 'developers@mparticle.com'
+                        }
+                    }
+                    scm {
+                        url = 'https://github.com/mparticle/mparticle-android-sdk'
+                        connection = 'scm:git:https://github.com/mparticle/mparticle-android-sdk'
+                        developerConnection = 'scm:git:git@github.com:mparticle/mparticle-android-sdk.git'
+                    }
+                }
+            }
+
+            publishing.repositories.maven {
+                credentials {
+                    username System.getenv('sonatypeUsername') ?: ""
+                    password System.getenv('sonatypePassword') ?: ""
+                }
+                url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+            }
+
+            def signingKey = System.getenv("mavenSigningKeyId")
+            def signingPassword = System.getenv("mavenSigningKeyPassword")
+
+            if (signingKey != null) {
+                target.extensions.add('signing.keyId', signingKey)
+                target.extensions.add('signing.password', signingPassword)
+
+                SigningExtension signing = new SigningExtension(target)
+                signing.required = { target.gradle.taskGraph.hasTask("publishReleasePublicationToMavenRepository") }
+                signing.useInMemoryPgpKeys(signingKey, signingPassword)
+                signing.sign publishing.publications.findByName("release")
+            }
         }
 
+        //Publishing task aliases for simpler local development
+        target.task("publishLocal") { dependsOn "publishDebugPublicationToMavenLocal"}
+        target.task("publishReleaseLocal") { dependsOn "publishReleasePublicationToMavenLocal"}
     }
 }
+

@@ -106,11 +106,11 @@ jobs:
           ref: release/${{ github.run_number }}
           submodules: recursive
       - name: "Build Android Core"
-        run: ./gradlew -Ptarget_maven_repo=test -PisRelease=true cleanBuildCache clean testRelease uploadArchives
+        run: ./gradlew -Ptarget_maven_repo=test -PisRelease=true cleanBuildCache clean testRelease publishReleaseLocal
       - name: "Update Kit references"
         run: git submodule foreach "git fetch; git reset --hard origin/master";
       - name: "Test Kits"
-        run: ./gradlew -Ptarget_maven_repo=test -PisRelease=true cleanBuildCache clean testRelease uploadArchives -c settings-kits.gradle
+        run: ./gradlew -Ptarget_maven_repo=test -PisRelease=true cleanBuildCache clean testRelease publishReleaseLocal -c settings-kits.gradle
       - name: "Commit Kit Updates"
         run: |
           git add .
@@ -197,13 +197,13 @@ jobs:
       - name: "Publish Core, KitManager, KitPlugin"
         if: ${{ github.event.inputs.dryRun == 'false'}}
         run: |
-          ./gradlew -Ptarget_maven_repo=sonatype -PisRelease=true uploadArchives --stacktrace
+          ./gradlew -PisRelease=true publishReleasePublicationToMavenRepository --stacktrace
       - name: "Publish Kits"
         if: ${{ github.event.inputs.dryRun == 'false'}}
         # build kit-plugin locally so kits will compile, then release to sonatype
         run: |
-          ./gradlew -Ptarget_maven_repo=mavenLocal -PisRelease=true uploadArchives;
-          ./gradlew -Ptarget_maven_repo=sonatype -PisRelease=true uploadArchives -c settings-kits.gradle --stacktrace
+          ./gradlew -PisRelease=true publishReleasePublicationToMavenLocal
+          ./gradlew -PisRelease=true publishReleasePublicationToMavenRepository -c settings-kits.gradle --stacktrace
 
   sync-repository:
     name: "Sync Repository"
