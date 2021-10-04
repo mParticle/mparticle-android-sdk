@@ -54,6 +54,7 @@ android {
         buildConfigField 'String', 'MP_CONFIG_URL', configurationUrl
         buildConfigField 'Boolean', 'MP_DEBUG', 'false'
         buildConfigField 'String', 'SCHEME', '\"https\"'
+        buildConfigField 'String', 'VERSION_NAME', '\"' + versionName + '\"'
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         if (useOrchestrator()) {
@@ -92,9 +93,6 @@ android {
     sourceSets {
         test.java.srcDirs += 'src/test/kotlin'
         androidTest.java.srcDirs += 'src/androidTest/kotlin'
-    }
-    dexOptions {
-        javaMaxHeapSize "2g"
     }
 }
 

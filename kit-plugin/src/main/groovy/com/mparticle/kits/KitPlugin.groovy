@@ -1,12 +1,8 @@
 package com.mparticle.kits
 import com.android.build.gradle.LibraryExtension
-import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.artifacts.dsl.RepositoryHandler
-import org.gradle.api.publish.PublicationContainer
 import org.gradle.api.publish.PublishingExtension
-import org.gradle.api.publish.internal.DefaultPublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.plugins.signing.SigningExtension
 
@@ -33,12 +29,13 @@ class KitPlugin implements Plugin<Project> {
         LibraryExtension androidLib = target.android
         androidLib.compileSdkVersion(30)
         androidLib.buildToolsVersion('30.0.3')
-        androidLib.defaultConfig.versionCode = Integer.parseInt(new Date().format('yyyyMMdd'))
+        int dateInt = Integer.parseInt(new Date().format('yyyyMMdd'))
+        androidLib.defaultConfig.versionCode = dateInt
         androidLib.defaultConfig.minSdkVersion 14
         androidLib.defaultConfig.targetSdkVersion 30
+        androidLib.defaultConfig.buildConfigField("String", "VERSION_CODE", '\"' + dateInt + '\"')
         androidLib.buildTypes.release.minifyEnabled false
         androidLib.buildTypes.release.consumerProguardFiles 'consumer-proguard.pro'
-        androidLib.dexOptions.javaMaxHeapSize '2g'
         androidLib.lintOptions.abortOnError true
 
         //formerly in maven.gradle

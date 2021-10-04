@@ -4,23 +4,28 @@ on:
 jobs:
   cross-platform-tests:
     timeout-minutes: 30
-    runs-on: macos-10.15
+    runs-on: macos-11
     steps:
-      - name: Checkout cross platform test
+      - name: "Checkout cross platform test"
         uses: actions/checkout@v2
         with:
           token: ${{ secrets.ANDROID_GITHUB_PAT }}  #medium-term solution, this needs to be an MParticle/non-personal PAT
           repository: mParticle/crossplatform-sdk-tests
-      - name: Checkout internal
+      - name: "Checkout internal"
         uses: actions/checkout@v2
         with:
           path: .sdks/android
-
-      - name: Start emulator
-        run: cd .sdks/android; ./scripts/install-start-emulator.sh
-      - name: Run Tests
-        run: ./gradlew runAndroid
-      - name: Archive Test Results
+      - name: "Install JDK 11"
+        uses: actions/setup-java@v2
+        with:
+          distribution: "zulu"
+          java-version: "11"
+      - name: "Run Crossplatform Tests"
+        uses: reactivecircus/android-emulator-runner@v2.20.0
+        with:
+          api-level: 29
+          script: ./gradlew runAndroid
+      - name: "Archive Test Results"
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:

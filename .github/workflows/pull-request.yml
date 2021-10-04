@@ -4,14 +4,20 @@ jobs:
   instrumented-tests:
     name: "Instrumented Tests"
     timeout-minutes: 30
-    runs-on: macos-10.15
+    runs-on: macos-11
     steps:
       - name: "Checkout Branch"
         uses: actions/checkout@v2
-      - name: "Start Emulator"
-        run: ./scripts/install-start-emulator.sh
+      - name: "Install JDK 11"
+        uses: actions/setup-java@v2
+        with:
+          distribution: "zulu"
+          java-version: "11"
       - name: "Run Instrumented Tests"
-        run: ./gradlew :android-core:cAT :android-kit-base:cAT --stacktrace
+        uses: reactivecircus/android-emulator-runner@v2.20.0
+        with:
+          api-level: 29
+          script: ./gradlew :android-core:cAT :android-kit-base:cAT --stacktrace
       - name: "Archive Test Results"
         uses: actions/upload-artifact@v2
         if: ${{ always() }}
@@ -25,10 +31,11 @@ jobs:
     steps:
       - name: "Checkout Branch"
         uses: actions/checkout@v2
-      - name: "Install JDK 1.8"
-        uses: actions/setup-java@v1
+      - name: "Install JDK 11"
+        uses: actions/setup-java@v2
         with:
-          java-version: 1.8
+          distribution: "zulu"
+          java-version: "11"
       - name: "Run Unit Tests"
         run: ./gradlew test
       - name: "Android Test Report"
@@ -37,7 +44,7 @@ jobs:
   lint-checks:
     name: "Lint Checks"
     timeout-minutes: 15
-    runs-on: macos-10.15
+    runs-on: macos-11
     steps:
       - name: "Checkout Branch"
         uses: actions/checkout@v2

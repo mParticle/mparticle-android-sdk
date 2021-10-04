@@ -47,7 +47,7 @@ jobs:
     name: "Instrumented Tests"
     timeout-minutes: 30
     needs: create-release-branch
-    runs-on: macos-10.15
+    runs-on: macos-11
     steps:
       - name: "Checkout internal release branch"
         uses: actions/checkout@v2
@@ -55,10 +55,16 @@ jobs:
           repository: mparticle/mparticle-android-sdk-internal
           token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
           ref: release/${{ github.run_number }}
-      - name: "Start Emulator"
-        run: ./scripts/install-start-emulator.sh
+      - name: "Install JDK 11"
+        uses: actions/setup-java@v2
+        with:
+          distribution: "zulu"
+          java-version: "11"
       - name: "Run Instrumented Tests"
-        run: ./gradlew :android-core:cAT :android-kit-base:cAT --stacktrace
+        uses: reactivecircus/android-emulator-runner@v2.20.0
+        with:
+          api-level: 29
+          script: ./gradlew :android-core:cAT :android-kit-base:cAT --stacktrace
       - name: "Archive Instrumented Test Results"
         uses: actions/upload-artifact@v2
         if: ${{ always() }}
@@ -78,10 +84,11 @@ jobs:
           repository: mparticle/mparticle-android-sdk-internal
           token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
           ref: release/${{ github.run_number }}
-      - name: "Install JDK 1.8"
-        uses: actions/setup-java@v1
+      - name: "Install JDK 11"
+        uses: actions/setup-java@v2
         with:
-          java-version: 1.8
+          distribution: "zulu"
+          java-version: "11"
       - name: "Run Unit Tests"
         run: ./gradlew test
       - name: "Android Test Report"
@@ -91,7 +98,7 @@ jobs:
   update-kits:
     name: "Update Kits"
     needs: [instrumented-tests, unit-tests]
-    runs-on: macos-10.15
+    runs-on: macos-11
     env:
       GIT_AUTHOR_NAME: mparticle-bot
       GIT_AUTHOR_EMAIL: developers@mparticle.com
@@ -105,12 +112,17 @@ jobs:
           token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
           ref: release/${{ github.run_number }}
           submodules: recursive
+      - name: "Install JDK 11"
+        uses: actions/setup-java@v2
+        with:
+          distribution: "zulu"
+          java-version: "11"
       - name: "Build Android Core"
-        run: ./gradlew -Ptarget_maven_repo=test -PisRelease=true cleanBuildCache clean testRelease publishReleaseLocal
+        run: ./gradlew -PisRelease=true clean publishReleaseLocal
       - name: "Update Kit references"
         run: git submodule foreach "git fetch; git reset --hard origin/master";
       - name: "Test Kits"
-        run: ./gradlew -Ptarget_maven_repo=test -PisRelease=true cleanBuildCache clean testRelease publishReleaseLocal -c settings-kits.gradle
+        run: ./gradlew -PisRelease=true clean testRelease publishReleaseLocal -c settings-kits.gradle
       - name: "Commit Kit Updates"
         run: |
           git add .
@@ -121,7 +133,7 @@ jobs:
   semantic-release:
     name: "Semantic Release"
     needs: update-kits
-    runs-on: macos-10.15
+    runs-on: macos-11
     env:
       GITHUB_TOKEN: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
       GIT_AUTHOR_NAME: mparticle-bot
@@ -194,6 +206,11 @@ jobs:
           token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
           ref: release/${{ github.run_number }}
           submodules: recursive
+      - name: "Install JDK 11"
+        uses: actions/setup-java@v2
+        with:
+          distribution: "zulu"
+          java-version: "11"
       - name: "Publish Core, KitManager, KitPlugin"
         if: ${{ github.event.inputs.dryRun == 'false'}}
         run: |

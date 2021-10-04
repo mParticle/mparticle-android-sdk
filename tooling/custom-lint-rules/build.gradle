@@ -13,7 +13,7 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.guardsquare:proguard-gradle:7.0.0'
+        classpath 'com.guardsquare:proguard-gradle:7.1.0'
     }
 }
 

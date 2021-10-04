@@ -29,9 +29,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    dexOptions {
-        javaMaxHeapSize "2g"
-    }
     sourceSets {
         androidTest.java.srcDirs += 'src/androidTest/kotlin'
         main.java.srcDirs += 'src/main/kotlin'
