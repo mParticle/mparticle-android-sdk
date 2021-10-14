@@ -1,3 +1,11 @@
+# [5.30.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.29.0...v5.30.0) (2021-10-14)
+
+
+### Features
+
+* Update Submodules ([9aa5077](https://github.com/mParticle/mparticle-android-sdk/commit/9aa5077374643eb819cd61575aa429c8de744f21))
+* upgrade to AGP 7.X ([267bf36](https://github.com/mParticle/mparticle-android-sdk/commit/267bf3648eed988c7e171d3dbab2bda46f89b989))
+
 # [5.29.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.28.0...v5.29.0) (2021-10-14)
 
 
