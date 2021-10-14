@@ -358,7 +358,7 @@ public final class Product {
         private String mVariant;
         private Map<String, String> mCustomAttributes = null;
 
-        private Builder() {
+        Builder() {
         }
 
         /**

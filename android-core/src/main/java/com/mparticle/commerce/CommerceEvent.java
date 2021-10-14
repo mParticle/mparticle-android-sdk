@@ -499,8 +499,8 @@ public final class CommerceEvent extends BaseEvent {
      */
     public static class Builder {
 
-        private final String mProductAction;
-        private final String mPromotionAction;
+        String mProductAction;
+        String mPromotionAction;
         private Map<String, String> customAttributes = null;
         private List<Promotion> promotionList = null;
         private List<Product> productList = null;
@@ -517,7 +517,7 @@ public final class CommerceEvent extends BaseEvent {
         private Map<String, List<String>> mCustomFlags = null;
         private Boolean mShouldUploadEvent = null;
 
-        private Builder() {
+        Builder() {
             mProductAction = mPromotionAction = null;
         }
 
