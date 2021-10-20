@@ -423,7 +423,18 @@ public class MParticle {
      * @param eventData  a Map of data attributes to associate with this screen view
      */
     public void logScreen(@NonNull String screenName, @Nullable Map<String, String> eventData) {
-        logScreen(new MPEvent.Builder(screenName).customAttributes(eventData).build().setScreenEvent(true));
+        logScreen(screenName, eventData, true);
+    }
+
+    /**
+     * Logs a screen view event.
+     *
+     * @param screenName the name of the screen to be tracked
+     * @param eventData  a Map of data attributes to associate with this screen view
+     * @param shouldUploadEvent A boolean flag that indicates whether this screen event should be uploaded to mParticle when logged or only passed to kits
+     */
+    public void logScreen(@NonNull String screenName, @Nullable Map<String, String> eventData, @NonNull Boolean shouldUploadEvent) {
+        logScreen(new MPEvent.Builder(screenName).shouldUploadEvent(shouldUploadEvent).customAttributes(eventData).build().setScreenEvent(true));
     }
 
 
@@ -443,7 +454,7 @@ public class MParticle {
             return;
         }
         mAppStateManager.ensureActiveSession();
-        if (mConfigManager.isEnabled()) {
+        if (mConfigManager.isEnabled() && screenEvent.isShouldUploadEvent()) {
             mMessageManager.logScreen(screenEvent, screenEvent.getNavigationDirection());
             Logger.debug("Logged screen: ", screenEvent.toString());
         }
