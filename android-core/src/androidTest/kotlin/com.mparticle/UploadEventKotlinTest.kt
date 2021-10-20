@@ -49,6 +49,39 @@ class UploadEventKotlinTest: BaseCleanStartedEachTest() {
     }
 
     @Test
+    fun testMPScreenEventUploadBypass() {
+        MParticle.getInstance().logScreen("Should Upload 1")
+        MParticle.getInstance().logScreen("Should Upload 2", null)
+        MParticle.getInstance().logScreen("Should Upload 3", null, true)
+        MParticle.getInstance().logScreen("Should Not Upload ", null, false)
+        MParticle.getInstance()?.upload()
+
+        // Wait for an event that matched Matcher"
+        // This matcher contains
+        //     1) a url (mServer.Endpoints().eventsUrl
+        //     2) a "body match" (bodyMatch {} )
+        //
+        // These 3 events are logged within the same upload loop, with the same mpid and sessionid, so they
+        // will be logged in the same upload message. This logic will basically wait until the "Should Upload"
+        // messages are received in an upload message and fail if that, or any previous message, contains the
+        // "Should Not Upload" message
+        var numUploadedEvents = 0
+        mServer.waitForVerify(Matcher(mServer.Endpoints().eventsUrl).bodyMatch {
+            it.optJSONArray("msgs")?.let { messagesArray ->
+                (0 until messagesArray.length())
+                        .any {
+                            val eventMessageName = messagesArray.getJSONObject(it).optString("n")
+                            assertNotEquals("Should Not Upload", eventMessageName)
+                            if (eventMessageName == "Should Upload 1" || eventMessageName == "Should Upload 2" || eventMessageName == "Should Upload 3") {
+                                numUploadedEvents++
+                            }
+                            numUploadedEvents == 3
+                        }
+            } ?: false
+        })
+    }
+
+    @Test
     fun testCommerceEventUploadBypass() {
         val product = Product.Builder("Should Not Upload", "sku1", 100.00)
                 .build()
