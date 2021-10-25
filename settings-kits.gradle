@@ -22,7 +22,6 @@ include (
         ':kits:skyhook-kit',
         ':kits:singular-kit',
         ':kits:adobe-kit',
-        ':kits:appsee-kit',
         ':kits:taplytics-kit',
         ':kits:optimizely-kit',
         ':kits:responsys-kit',

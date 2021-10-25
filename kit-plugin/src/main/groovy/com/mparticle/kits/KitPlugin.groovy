@@ -18,7 +18,6 @@ class KitPlugin implements Plugin<Project> {
         target.repositories.add(target.repositories.mavenLocal())
         target.repositories.add(target.repositories.google())
         target.repositories.add(target.repositories.mavenCentral())
-        target.repositories.add(target.repositories.jcenter())
         target.configurations.create('deployerJars')
         target.dependencies.add('api', 'com.mparticle:android-kit-base:' + target.version)
         target.dependencies.add('testImplementation', 'junit:junit:4.13.2')
