@@ -1,3 +1,16 @@
+# [5.31.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.30.0...v5.31.0) (2021-10-27)
+
+
+### Bug Fixes
+
+* remove Appsee submodule ([8a172b4](https://github.com/mParticle/mparticle-android-sdk/commit/8a172b4a1784260d65149ef5af2bda5dfa2b27cd))
+
+
+### Features
+
+* add upload bypass support to logscreen ([177a5d5](https://github.com/mParticle/mparticle-android-sdk/commit/177a5d5ca0cc2df8482db232c2dee35e3b7dee2d))
+* Update Submodules ([45bfd95](https://github.com/mParticle/mparticle-android-sdk/commit/45bfd954d81762919a581b43f93b5fd1289e78e3))
+
 # [5.30.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.29.0...v5.30.0) (2021-10-14)
 
 
