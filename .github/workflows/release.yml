@@ -4,33 +4,20 @@ on:
   workflow_dispatch:
     inputs:
       dryRun:
-        description: 'Do a dry run to preview instead of a real release [true/false]'
+        description: "Do a dry run to preview instead of a real release [true/false]"
         required: true
-        default: 'true'
+        default: "true"
 
 jobs:
   # SDK release is done from public master branch.
-  confirm-master-branch:
-    name: "Confirm release is run on master branch"
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Git checkout
-        uses: actions/checkout@v2
-      - name: Branch name
-        run: |
-          BRANCHNAME=${GITHUB_REF##*/}
-          echo "confirming branch name, branch name is:"
-          echo $BRANCHNAME
-          if [ $BRANCHNAME != "master" ]
-          then
-            echo "You can only run a release from the master branch, you are trying to run it from ${BRANCHNAME}"
-            exit 1
-          fi
+  confirm-public-repo-master-branch:
+    name: "Confirm release is run from public/master branch"
+    uses: mParticle/mparticle-workflows/.github/workflows/sdk-release-repo-branch-check.yml@stable
 
   create-release-branch:
     name: "Create Release Branch"
     runs-on: ubuntu-18.04
-    needs: confirm-master-branch
+    needs: confirm-public-repo-master-branch
     steps:
       - name: "Checkout internal development branch"
         uses: actions/checkout@v2
