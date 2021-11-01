@@ -9,23 +9,22 @@ on:
         default: "true"
 
 jobs:
-  # SDK release is done from public master branch.
-  confirm-public-repo-master-branch:
-    name: "Confirm release is run from public/master branch"
+  # SDK release is done from public main branch.
+  confirm-public-repo-main-branch:
+    name: "Confirm release is run from public/main branch"
     uses: mParticle/mparticle-workflows/.github/workflows/sdk-release-repo-branch-check.yml@stable
 
   create-release-branch:
     name: "Create Release Branch"
     runs-on: ubuntu-18.04
-    needs: confirm-public-repo-master-branch
+    needs: confirm-public-repo-main-branch
     steps:
-      - name: "Checkout internal development branch"
+      - name: "Checkout development branch"
         uses: actions/checkout@v2
         with:
-          repository: mparticle/mparticle-android-sdk-internal
-          token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
+          repository: mparticle/mparticle-android-sdk
           ref: development
-      - name: "Create and push release branch to internal repository"
+      - name: "Create and push release branch"
         run: |
           git checkout -b release/${{ github.run_number }}
           git push origin release/${{ github.run_number }}
@@ -36,11 +35,10 @@ jobs:
     needs: create-release-branch
     runs-on: macos-11
     steps:
-      - name: "Checkout internal release branch"
+      - name: "Checkout release branch"
         uses: actions/checkout@v2
         with:
-          repository: mparticle/mparticle-android-sdk-internal
-          token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
+          repository: mparticle/mparticle-android-sdk
           ref: release/${{ github.run_number }}
       - name: "Install JDK 11"
         uses: actions/setup-java@v2
@@ -65,11 +63,10 @@ jobs:
     needs: create-release-branch
     runs-on: ubuntu-18.04
     steps:
-      - name: "Checkout internal release branch"
+      - name: "Checkout release branch"
         uses: actions/checkout@v2
         with:
-          repository: mparticle/mparticle-android-sdk-internal
-          token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
+          repository: mparticle/mparticle-android-sdk
           ref: release/${{ github.run_number }}
       - name: "Install JDK 11"
         uses: actions/setup-java@v2
@@ -92,11 +89,10 @@ jobs:
       GIT_COMMITTER_NAME: mparticle-bot
       GIT_COMMITTER_EMAIL: developers@mparticle.com
     steps:
-      - name: "Checkout internal release branch"
+      - name: "Checkout release branch"
         uses: actions/checkout@v2
         with:
-          repository: mparticle/mparticle-android-sdk-internal
-          token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
+          repository: mparticle/mparticle-android-sdk
           ref: release/${{ github.run_number }}
           submodules: recursive
       - name: "Install JDK 11"
@@ -107,14 +103,14 @@ jobs:
       - name: "Build Android Core"
         run: ./gradlew -PisRelease=true clean publishReleaseLocal
       - name: "Update Kit references"
-        run: git submodule foreach "git fetch; git reset --hard origin/master";
+        run: git submodule foreach "git fetch; git reset --hard origin/main";
       - name: "Test Kits"
         run: ./gradlew -PisRelease=true clean testRelease publishReleaseLocal -c settings-kits.gradle
       - name: "Commit Kit Updates"
         run: |
           git add .
           git diff-index --quiet HEAD || git commit -m 'feat: Update Submodules'
-      - name: "Push kit updates to internal release branch"
+      - name: "Push kit updates to release branch"
         run: git push origin release/${{ github.run_number }}
 
   semantic-release:
@@ -128,17 +124,14 @@ jobs:
       GIT_COMMITTER_NAME: mparticle-bot
       GIT_COMMITTER_EMAIL: developers@mparticle.com
     steps:
-      - name: "Checkout public master branch"
+      - name: "Checkout public main branch"
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          repository: ${{ github.repository }}
-          token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
-          ref: master
-      - name: "Merge internal release branch into public master branch"
+          ref: main
+      - name: "Merge release branch into main branch"
         run: |
-          git remote add internal https://${{ secrets.MP_SEMANTIC_RELEASE_BOT }}@github.com/mParticle/mparticle-android-sdk-internal.git
-          git pull internal release/${{ github.run_number }}
+          git pull origin release/${{ github.run_number }}
       - name: "Semantic Release --dry-run"
         if: ${{ github.event.inputs.dryRun == 'true' }}
         env:
@@ -171,10 +164,10 @@ jobs:
           -p @semantic-release/git@9 \
           -p @semantic-release/exec@5 \
           semantic-release
-      - name: "Push automated release commits to internal release branch"
+      - name: "Push automated release commits to release branch"
         if: ${{ github.event.inputs.dryRun == 'false' }}
         run: |
-          git push internal HEAD:release/${{ github.run_number }}
+          git push origin HEAD:release/${{ github.run_number }}
 
   sonatype-release:
     name: "Sonatype Release"
@@ -186,11 +179,10 @@ jobs:
       mavenSigningKeyId: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY }}
       mavenSigningKeyPassword: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_PASSWORD }}
     steps:
-      - name: "Checkout internal release branch"
+      - name: "Checkout release branch"
         uses: actions/checkout@v2
         with:
-          repository: mparticle/mparticle-android-sdk-internal
-          token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
+          repository: mparticle/mparticle-android-sdk
           ref: release/${{ github.run_number }}
           submodules: recursive
       - name: "Install JDK 11"
@@ -214,28 +206,26 @@ jobs:
     needs: sonatype-release
     runs-on: ubuntu-18.04
     steps:
-      - name: "Checkout public master branch"
+      - name: "Checkout main branch"
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          repository: ${{ github.repository }}
-          token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
-          ref: master
-      - name: "Merge internal release branch into public master branch"
+          ref: main
+      - name: "Merge release branch into main branch"
+        if: ${{ github.event.inputs.dryRun == 'false' }}
+        run: |
+          git pull origin release/${{ github.run_number }}
+      - name: "Push release commits to main branch"
+        if: ${{ github.event.inputs.dryRun == 'false'}}
+        run: |
+          git push origin HEAD:main
+          git push origin HEAD:development
+      - name: "Push release commits to internal main"
         if: ${{ github.event.inputs.dryRun == 'false' }}
         run: |
           git remote add internal https://${{ secrets.MP_SEMANTIC_RELEASE_BOT }}@github.com/mParticle/mparticle-android-sdk-internal.git
-          git pull internal release/${{ github.run_number }}
-      - name: "Push release commits to public master branch"
-        if: ${{ github.event.inputs.dryRun == 'false'}}
-        run: |
-          git push origin HEAD:master
-      - name: "Push release commits to internal master and development branches"
+          git push internal HEAD:main
+      - name: "Delete release branch"
         if: ${{ github.event.inputs.dryRun == 'false' }}
         run: |
-          git push internal HEAD:development
-          git push internal HEAD:master
-      - name: "Delete internal release branch"
-        if: ${{ github.event.inputs.dryRun == 'false' }}
-        run: |
-          git push --delete internal release/${{ github.run_number }}
+          git push --delete origin release/${{ github.run_number }}
