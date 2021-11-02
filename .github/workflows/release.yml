@@ -210,6 +210,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          repository: ${{ github.repository }}
+          token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
           ref: main
       - name: "Merge release branch into main branch"
         if: ${{ github.event.inputs.dryRun == 'false' }}
