@@ -1,3 +1,11 @@
+## [5.33.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.33.0...v5.33.1) (2021-11-18)
+
+
+### Bug Fixes
+
+* bad formatting in release.config.js ([#75](https://github.com/mParticle/mparticle-android-sdk/issues/75)) ([253c9a3](https://github.com/mParticle/mparticle-android-sdk/commit/253c9a32aea894bfa1c975c546965a3c75aa900a))
+* typo in release.config.js ([#76](https://github.com/mParticle/mparticle-android-sdk/issues/76)) ([cf30ab8](https://github.com/mParticle/mparticle-android-sdk/commit/cf30ab85326448bb2f4c84b797f3b5a4adae2ed1))
+
 # [5.33.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.32.0...v5.33.0) (2021-11-18)
 
 
