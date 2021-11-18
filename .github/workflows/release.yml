@@ -109,7 +109,7 @@ jobs:
       - name: "Commit Kit Updates"
         run: |
           git add .
-          git diff-index --quiet HEAD || git commit -m 'feat: Update Submodules'
+          git diff-index --quiet HEAD || git commit -m 'ci: Update Submodules'
       - name: "Push kit updates to release branch"
         run: git push origin release/${{ github.run_number }}
 

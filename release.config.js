@@ -7,6 +7,18 @@ module.exports = {
       {
         preset: "angular",
       },
+      "releaseRules": [
+        {type: 'feat', release: 'minor'},
+        {type: 'ci', release: 'patch'},
+        {type: 'fix', scope: 'patch'},
+        {type: 'docs', release: 'patch'},
+        {type: 'test', release: 'patch'},
+        {type: 'refactor', release: 'patch'},
+        {type: 'style', release: 'patch'},
+        {type: 'build', release: 'patch'},
+        {type: 'chore', release: 'patch'},
+        {type: 'revert', release: 'patch'}
+       ]
     ],
     [
       "@semantic-release/release-notes-generator",
