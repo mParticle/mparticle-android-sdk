@@ -9,7 +9,7 @@ module.exports = {
         releaseRules: [
             {type: 'feat', release: 'minor'},
             {type: 'ci', release: 'patch'},
-            {type: 'fix', scope: 'patch'},
+            {type: 'fix', release: 'patch'},
             {type: 'docs', release: 'patch'},
             {type: 'test', release: 'patch'},
             {type: 'refactor', release: 'patch'},
