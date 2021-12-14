@@ -31,7 +31,7 @@ public final class IdentityApiRequest {
     Long mpid;
 
     private IdentityApiRequest(IdentityApiRequest.Builder builder) {
-        if (builder.userIdentities != null){
+        if (builder.userIdentities != null) {
             this.userIdentities = builder.userIdentities;
         }
         if (builder.userAliasHandler != null) {
@@ -205,7 +205,7 @@ public final class IdentityApiRequest {
 
         /**
          * Deprecated. To easily migrate your existing code, add a success listener
-         * to the {@link BaseIdentityTask} that is being returned from this method ){@link BaseIdentityTask#addSuccessListener(TaskSuccessListener)}. Within the
+         * to the {@link BaseIdentityTask} that is being returned from this method ) {@link BaseIdentityTask#addSuccessListener(TaskSuccessListener)}. Within the
          * {@link IdentityApiResult} returned by the success listener, you can run the same code you do
          * in you {@link UserAliasHandler}, using the {@link MParticleUser}s returned by
          * {@link IdentityApiResult#getUser()} and {@link IdentityApiResult#getPreviousUser()} in place

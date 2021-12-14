@@ -10,12 +10,12 @@ import android.os.StatFs;
  */
 @TargetApi(18)
 public class JellybeanHelper {
-    public static long getAvailableMemory(StatFs stat){
+    public static long getAvailableMemory(StatFs stat) {
         try {
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR1) {
                 return stat.getAvailableBlocksLong() * stat.getBlockSizeLong();
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             //For some reason, it appears some devices even in jelly bean don't have this method.
         }
 

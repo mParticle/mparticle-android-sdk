@@ -130,12 +130,12 @@ public class GradleBuildDetector extends BaseDetector implements GradleScanner {
             }
             if (maxLineNumber == null) {
                 maxLineNumber = mpDependency;
-            } else if (maxLineNumber.expression.getLastLineNumber() < mpDependency.expression.getLastLineNumber()){
+            } else if (maxLineNumber.expression.getLastLineNumber() < mpDependency.expression.getLastLineNumber()) {
                 maxLineNumber = mpDependency;
             }
             if (minLineNumber == null) {
                 minLineNumber = mpDependency;
-            } else if (minLineNumber.expression.getLineNumber() > mpDependency.expression.getLineNumber()){
+            } else if (minLineNumber.expression.getLineNumber() > mpDependency.expression.getLineNumber()) {
                 minLineNumber = mpDependency;
             }
 

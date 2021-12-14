@@ -83,7 +83,7 @@ public class UploadHandlerTest {
     @Test
     public void testHandleMessage() throws Exception {
         Message message = Mockito.mock(Message.class);
-        for (int i = 0; i < 30; i++){
+        for (int i = 0; i < 30; i++) {
             message.what = i;
             handler.handleMessage(message);
         }
@@ -91,24 +91,24 @@ public class UploadHandlerTest {
 
     @Test
     public void testShouldDelete() throws Exception {
-        for (int i = 0 ; i < 202; i++){
+        for (int i = 0 ; i < 202; i++) {
             if (i != 200) {
                 assertFalse(handler.shouldDelete(i));
             }
         }
         assertTrue(handler.shouldDelete(200));
         assertTrue(handler.shouldDelete(202));
-        for (int i = 203 ; i < 400; i++){
+        for (int i = 203 ; i < 400; i++) {
             assertFalse(handler.shouldDelete(i));
         }
-        for (int i = 400 ; i < 429; i++){
+        for (int i = 400 ; i < 429; i++) {
             assertTrue(handler.shouldDelete(i));
         }
         assertFalse(handler.shouldDelete(429));
-        for (int i = 430 ; i < 500; i++){
+        for (int i = 430 ; i < 500; i++) {
             assertTrue(handler.shouldDelete(i));
         }
-        for (int i = 500 ; i < 600; i++){
+        for (int i = 500 ; i < 600; i++) {
             assertFalse(handler.shouldDelete(i));
         }
 
@@ -202,7 +202,7 @@ public class UploadHandlerTest {
         handler.handleMessage(null);
         Cursor mockCursor = Mockito.mock(Cursor.class);
         Mockito.when(handler.mParticleDBManager.getReadyUploads())
-                .thenReturn(new ArrayList<MParticleDBManager.ReadyUpload>(){
+                .thenReturn(new ArrayList<MParticleDBManager.ReadyUpload>() {
                     {
                         add(new MParticleDBManager.ReadyUpload(123, false, "a message batch"));
                     }

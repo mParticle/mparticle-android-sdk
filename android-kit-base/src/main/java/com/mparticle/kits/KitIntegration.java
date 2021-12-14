@@ -217,7 +217,7 @@ public abstract class KitIntegration {
             if (allValues != null && allValues.size() > 0) {
                 getKitPreferences().edit().clear().apply();
             }
-        }catch (NullPointerException npe) {
+        } catch (NullPointerException npe) {
 
         }
     }

@@ -41,7 +41,7 @@ public class UserAttributesService extends UserAttributesTable {
             while (cursor.moveToNext()) {
                 attributes.put(cursor.getString(keyIndex), cursor.getString(valueIndex));
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Logger.error(e, "Error while querying user attributes: ", e.toString());
         } finally {
             if (cursor != null && !cursor.isClosed()) {
@@ -63,14 +63,14 @@ public class UserAttributesService extends UserAttributesTable {
             List<String> currentList = null;
             while (cursor.moveToNext()) {
                 String currentKey = cursor.getString(keyIndex);
-                if (!currentKey.equals(previousKey)){
+                if (!currentKey.equals(previousKey)) {
                     previousKey = currentKey;
                     currentList = new ArrayList<String>();
                     attributes.put(currentKey, currentList);
                 }
                 attributes.get(currentKey).add(cursor.getString(valueIndex));
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Logger.error(e, "Error while querying user attribute lists: ", e.toString());
         } finally {
             if (cursor != null && !cursor.isClosed()) {

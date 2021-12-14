@@ -87,7 +87,7 @@ public class LoggerTest {
             return true;
         }
 
-        public LogHandlerTest (boolean[] called){
+        public LogHandlerTest (boolean[] called) {
             this.called = called;
         }
 

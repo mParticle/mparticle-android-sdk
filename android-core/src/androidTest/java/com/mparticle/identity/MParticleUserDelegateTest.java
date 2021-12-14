@@ -92,7 +92,7 @@ public class MParticleUserDelegateTest extends BaseCleanStartedEachTest {
         for (Entry<Long, Map<String, String>> user : attributes.entrySet()) {
             Map<String, Object> storedUserAttributes = mUserDelegate.getUserAttributes(user.getKey());
             for (Entry<String, String> pairs : user.getValue().entrySet()) {
-                if (storedUserAttributes.get(pairs.getKey()) == null){
+                if (storedUserAttributes.get(pairs.getKey()) == null) {
                     assertNull(pairs.getValue());
                 } else {
                     assertEquals(storedUserAttributes.get(pairs.getKey()).toString(), pairs.getValue());

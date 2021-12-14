@@ -98,8 +98,7 @@ public class InstallReferrerHelper {
                 } else {
                     runnable.run();
                 }
-            }
-            catch (Exception ignored) {
+            } catch (Exception ignored) {
                 callback.onFailed();
             }
         } else {

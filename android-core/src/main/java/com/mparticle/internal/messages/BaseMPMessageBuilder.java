@@ -89,7 +89,7 @@ public class BaseMPMessageBuilder extends JSONObject {
 
     public BaseMPMessageBuilder length(Double length) {
         mLength = length;
-        if (length != null){
+        if (length != null) {
             try {
                 put(Constants.MessageKey.EVENT_DURATION, length);
                 addEventLengthAttributes(length);

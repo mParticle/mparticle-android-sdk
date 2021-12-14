@@ -29,7 +29,7 @@ public class MockApplication extends Application {
         return this;
     }
 
-    public void setSharedPreferences(SharedPreferences prefs){
+    public void setSharedPreferences(SharedPreferences prefs) {
         mContext.setSharedPreferences(prefs);
     }
 

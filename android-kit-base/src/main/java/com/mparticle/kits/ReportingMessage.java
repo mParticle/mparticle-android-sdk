@@ -155,9 +155,7 @@ public class ReportingMessage implements JsonReportingMessage {
                     jsonObject.put("et", eventType);
                 }
             }
-        }catch (JSONException jse){
-
-        }
+        } catch (JSONException ignored) { }
         return jsonObject;
     }
 

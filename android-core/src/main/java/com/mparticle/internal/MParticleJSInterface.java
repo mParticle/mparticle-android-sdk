@@ -183,7 +183,7 @@ public class MParticleJSInterface {
             Map<String, List<String>> eventFlags = convertToListMap(event.optJSONObject(JS_KEY_EVENT_FLAGS));
 
             int messageType = event.getInt(JS_KEY_EVENT_DATATYPE);
-            switch (messageType){
+            switch (messageType) {
                 case JS_MSG_TYPE_PE:
                     logEvent(
                             new MPEvent.Builder(name, eventType)
@@ -247,7 +247,7 @@ public class MParticleJSInterface {
     }
 
     @JavascriptInterface
-    public void removeUserTag(String json){
+    public void removeUserTag(String json) {
         try{
             JSONObject attribute = new JSONObject(json);
             final String key = attribute.getString("key");
@@ -261,13 +261,13 @@ public class MParticleJSInterface {
                     }
                 });
             }
-        }catch (JSONException jse){
+        } catch (JSONException jse) {
             Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
     }
 
     @JavascriptInterface
-    public void setUserAttribute(String json){
+    public void setUserAttribute(String json) {
         try {
             JSONObject attribute = new JSONObject(json);
             final String key = attribute.getString("key");
@@ -288,8 +288,8 @@ public class MParticleJSInterface {
     }
 
     @JavascriptInterface
-    public void removeUserAttribute(String json){
-        try{
+    public void removeUserAttribute(String json) {
+        try {
             JSONObject attribute = new JSONObject(json);
             final String key = attribute.getString("key");
             if (MParticle.getInstance().Identity().getCurrentUser() != null) {
@@ -302,13 +302,13 @@ public class MParticleJSInterface {
                     }
                 });
             }
-        }catch (JSONException jse){
+        } catch (JSONException jse) {
             Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
     }
 
     @JavascriptInterface
-    public void setSessionAttribute(String json){
+    public void setSessionAttribute(String json) {
         try {
             JSONObject attribute = new JSONObject(json);
             MParticle.getInstance().setSessionAttribute(attribute.getString("key"), attribute.getString("value"));
@@ -318,12 +318,12 @@ public class MParticleJSInterface {
     }
 
     @JavascriptInterface
-    public void setUserIdentity(String json){
+    public void setUserIdentity(String ignored) {
         //do nothing
     }
 
     @JavascriptInterface
-    public void removeUserIdentity(String json){
+    public void removeUserIdentity(String ignored) {
        // do nothing
     }
 
@@ -782,7 +782,7 @@ public class MParticleJSInterface {
                     JSONObject object = identitiesArray.getJSONObject(i);
                     identities.put(getIdentityType(object), object.getString(IDENTITY));
                 }
-                catch (JSONException jse){
+                catch (JSONException jse) {
                     Logger.warning(String.format(errorMsg, jse.getMessage()));
                 }
             }

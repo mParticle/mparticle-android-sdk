@@ -83,7 +83,7 @@ import java.util.UUID;
                 return;
             }
             mMessageManagerCallbacks.delayedStart();
-        }catch (Exception e) {
+        } catch (Exception e) {
             Logger.verbose(e.toString());
         }
         switch (msg.what) {
@@ -96,11 +96,11 @@ import java.util.UUID;
                     // session record first.
                     if (MessageType.SESSION_START.equals(messageType)) {
                         dbInsertSession(message);
-                    }else{
+                    } else {
                         mMParticleDBManager.updateSessionEndTime(message.getSessionId(), message.getLong(MessageKey.TIMESTAMP), 0);
                         message.put(Constants.MessageKey.ID, UUID.randomUUID().toString());
                     }
-                    if (MessageType.ERROR.equals(messageType)){
+                    if (MessageType.ERROR.equals(messageType)) {
                         mMParticleDBManager.appendBreadcrumbs(message);
                     }
                     try {
@@ -118,7 +118,7 @@ import java.util.UUID;
             case INSTALL_REFERRER_UPDATED:
                 try {
                     mMParticleDBManager.updateSessionInstallReferrer((String) msg.obj, mMessageManagerCallbacks.getDeviceAttributes().getAppInfo(mContext, true));
-                }catch (Exception e) {
+                } catch (Exception e) {
                     Logger.error(e, "Error updating session attributes in mParticle DB.");
                 }
                 break;
@@ -149,7 +149,7 @@ import java.util.UUID;
                     String sessionId = entry.getKey();
                    try {
                        endMessage = mMParticleDBManager.getSessionForSessionEndMessage(sessionId, ((MessageManager)mMessageManagerCallbacks).getLocation(), entry.getValue());
-                   }catch (JSONException jse){
+                   } catch (JSONException jse) {
                        Logger.warning("Failed to create mParticle session end message.");
                    }
                    if (endMessage != null) {
@@ -166,7 +166,7 @@ import java.util.UUID;
                         Logger.error("Error creating session end, no entry for sessionId in mParticle DB.");
                     }
                     //1 means this came from ending the session
-                    if (msg.arg1 == 1){
+                    if (msg.arg1 == 1) {
                         mMessageManagerCallbacks.endUploadLoop();
                     }
                 } catch (Exception e) {
@@ -208,14 +208,14 @@ import java.util.UUID;
                 try{
                     MessageManager.ReportingMpidMessage reportingMessages = (MessageManager.ReportingMpidMessage)msg.obj;
                     mMParticleDBManager.insertReportingMessages((List<JsonReportingMessage>)reportingMessages.reportingMessages, reportingMessages.mpid);
-                }catch (Exception e) {
+                } catch (Exception e) {
                     Logger.verbose(e, "Error while inserting reporting messages: ", e.toString());
                 }
                 break;
             case REMOVE_USER_ATTRIBUTE:
                 try {
                     mMParticleDBManager.removeUserAttribute((MParticleDBManager.UserAttributeRemoval)msg.obj, mMessageManagerCallbacks);
-                }catch (Exception e) {
+                } catch (Exception e) {
                     Logger.error(e, "Error while removing user attribute: ", e.toString());
                 }
                 break;
@@ -279,7 +279,7 @@ import java.util.UUID;
         } else {
             try {
                 newValue = Integer.toString(Integer.parseInt(currentValue) + incrementValue);
-            }catch (NumberFormatException nfe) {
+            } catch (NumberFormatException nfe) {
                 Logger.error("Error while attempting to increment user attribute - existing attribute is not a number.");
                 return;
             }

@@ -35,7 +35,7 @@ public class AppStateManagerTest {
     private MessageManager messageManager;
 
     @Before
-    public void setup(){
+    public void setup() {
         MockContext context = new MockContext();
         mockContext = (MockApplication) context.getApplicationContext();
         manager = new AppStateManager(mockContext, true);

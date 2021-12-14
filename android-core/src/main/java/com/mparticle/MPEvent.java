@@ -42,21 +42,21 @@ public class MPEvent extends BaseEvent {
     private boolean entering = true;
     private boolean screenEvent;
 
-    private MPEvent(){
+    private MPEvent() {
         super(Type.EVENT);
     }
-    private MPEvent(Builder builder){
+    private MPEvent(Builder builder) {
         super(Type.EVENT);
-        if (builder.eventType == null){
+        if (builder.eventType == null) {
             Logger.error("MPEvent created with no event type!");
         } else {
             eventType = builder.eventType;
         }
 
-        if (builder.eventName == null){
+        if (builder.eventName == null) {
             Logger.error("MPEvent created with no event name!");
         } else {
-            if (builder.eventName.length() > Constants.LIMIT_ATTR_KEY){
+            if (builder.eventName.length() > Constants.LIMIT_ATTR_KEY) {
                 Logger.error("MPEvent created with too long of a name and will be truncated, the limit is: " + Constants.LIMIT_ATTR_KEY);
                 eventName = builder.eventName.substring(0, Constants.LIMIT_ATTR_KEY);
             } else {
@@ -67,20 +67,20 @@ public class MPEvent extends BaseEvent {
         entering = builder.entering;
         setCustomAttributes(builder.customAttributes);
 
-        if (builder.category != null){
+        if (builder.category != null) {
             category = builder.category;
-            if (getCustomAttributes() == null){
+            if (getCustomAttributes() == null) {
                 setCustomAttributes(new HashMap<String, String>());
             }
             getCustomAttributes().put(Constants.MessageKey.EVENT_CATEGORY, builder.category);
         }
-        if (builder.duration != null){
+        if (builder.duration != null) {
             duration = builder.duration;
         }
-        if (builder.endTime != null){
+        if (builder.endTime != null) {
             endTime = builder.endTime;
         }
-        if (builder.startTime != null){
+        if (builder.startTime != null) {
             startTime = builder.startTime;
         }
         if (builder.customFlags != null) {
@@ -102,7 +102,7 @@ public class MPEvent extends BaseEvent {
      * @param info
      */
     @Deprecated
-    public void setInfo(@Nullable Map<String, String> info){
+    public void setInfo(@Nullable Map<String, String> info) {
         setCustomAttributes(info);
     }
 
@@ -119,7 +119,7 @@ public class MPEvent extends BaseEvent {
             Map<String, String> shallowCopy = new HashMap<String, String>();
             shallowCopy.putAll(mpEvent.getCustomAttributes());
             setCustomAttributes(shallowCopy);
-        }else {
+        } else {
             setCustomAttributes(null);
         }
         category = mpEvent.category;
@@ -142,18 +142,18 @@ public class MPEvent extends BaseEvent {
             .append(eventName)
             .append("\n");
         }
-        if (eventType != null){
+        if (eventType != null) {
             builder.append("type: ")
             .append(eventType.name())
             .append("\n");
         }
         Double length = getLength();
-        if (length != null && length > 0){
+        if (length != null && length > 0) {
             builder.append("length: ")
                     .append(length).append("ms")
                     .append("\n");
         }
-        if (getCustomAttributes() != null){
+        if (getCustomAttributes() != null) {
             builder.append("customAttributes:\n");
             List<String> sortedKeys = new ArrayList(getCustomAttributes().keySet());
             Collections.sort(sortedKeys);
@@ -189,7 +189,7 @@ public class MPEvent extends BaseEvent {
     }
 
     public int getEventHash() {
-        if (eventHash == 0){
+        if (eventHash == 0) {
             eventHash = MPUtility.mpHash(eventType.ordinal() + eventName);
         }
         return eventHash;
@@ -257,7 +257,7 @@ public class MPEvent extends BaseEvent {
         private boolean entering = true;
         private Boolean shouldUploadEvent;
 
-        private Builder(){}
+        private Builder() {}
 
         /**
          * Starting point of the builder with two required parameters. The rest of the fields
@@ -268,7 +268,7 @@ public class MPEvent extends BaseEvent {
          * @param eventName the name of the event to be tracked (required)
          * @param eventType the type of the event to be tracked (required)
          */
-        public Builder(@NonNull String eventName,@NonNull MParticle.EventType eventType){
+        public Builder(@NonNull String eventName,@NonNull MParticle.EventType eventType) {
             this.eventName = eventName;
             this.eventType = eventType;
         }
@@ -281,7 +281,7 @@ public class MPEvent extends BaseEvent {
          *
          * @param eventName the name of the event to be tracked (required)
          */
-        public Builder(@NonNull String eventName){
+        public Builder(@NonNull String eventName) {
             this.eventName = eventName;
             this.eventType = MParticle.EventType.Other;
         }
@@ -314,7 +314,7 @@ public class MPEvent extends BaseEvent {
          * @return returns this builder for easy method chaining
          */
         @NonNull
-        public Builder eventName(@NonNull String eventName){
+        public Builder eventName(@NonNull String eventName) {
             if (eventName != null) {
                 this.eventName = eventName;
             }
@@ -330,7 +330,7 @@ public class MPEvent extends BaseEvent {
          * @see com.mparticle.MParticle.EventType
          */
         @NonNull
-        public Builder eventType(@NonNull MParticle.EventType eventType){
+        public Builder eventType(@NonNull MParticle.EventType eventType) {
             if (eventType != null) {
                 this.eventType = eventType;
             }
@@ -377,7 +377,7 @@ public class MPEvent extends BaseEvent {
          * @return returns this builder for easy method chaining
          */
         @NonNull
-        public Builder category(@Nullable String category){
+        public Builder category(@Nullable String category) {
             this.category = category;
             return this;
         }
@@ -391,7 +391,7 @@ public class MPEvent extends BaseEvent {
          * @return returns this builder for easy method chaining
          */
         @NonNull
-        public Builder duration(double durationMillis){
+        public Builder duration(double durationMillis) {
             this.duration = durationMillis;
             return this;
         }
@@ -406,7 +406,7 @@ public class MPEvent extends BaseEvent {
          */
         @Deprecated
         @NonNull
-        public Builder info(@Nullable Map<String, String> info){
+        public Builder info(@Nullable Map<String, String> info) {
             this.customAttributes = info;
             return this;
         }
@@ -428,7 +428,7 @@ public class MPEvent extends BaseEvent {
          * @return returns this builder for easy method chaining
          */
         @NonNull
-        private Builder startTime(double startTimeMillis){
+        private Builder startTime(double startTimeMillis) {
             this.startTime = startTimeMillis;
             return this;
         }
@@ -441,7 +441,7 @@ public class MPEvent extends BaseEvent {
          * @return returns this builder for easy method chaining
          */
         @NonNull
-        public Builder startTime(){
+        public Builder startTime() {
             return startTime(System.currentTimeMillis());
         }
 
@@ -453,7 +453,7 @@ public class MPEvent extends BaseEvent {
          * @return returns this builder for easy method chaining
          */
         @NonNull
-        public Builder endTime(){
+        public Builder endTime() {
             return endTime(System.currentTimeMillis());
         }
 
@@ -465,7 +465,7 @@ public class MPEvent extends BaseEvent {
          * @param endTimeMillis
          * @return returns this builder for easy method chaining
          */
-        private Builder endTime(double endTimeMillis){
+        private Builder endTime(double endTimeMillis) {
             this.endTime = endTimeMillis;
             return this;
         }
@@ -478,7 +478,7 @@ public class MPEvent extends BaseEvent {
          * @return returns this builder for easy method chaining
          */
         @NonNull
-        public Builder internalNavigationDirection(boolean entering){
+        public Builder internalNavigationDirection(boolean entering) {
             this.entering = entering;
             return this;
         }
@@ -507,7 +507,7 @@ public class MPEvent extends BaseEvent {
          * @see MParticle#logEvent(BaseEvent)
          */
         @NonNull
-        public MPEvent build(){
+        public MPEvent build() {
             return new MPEvent(this);
         }
 
@@ -518,27 +518,27 @@ public class MPEvent extends BaseEvent {
          * @return returns this builder for easy method chaining
          */
         @Nullable
-        public static Builder parseString(@NonNull String builderString){
+        public static Builder parseString(@NonNull String builderString) {
             Builder builder = null;
             try{
                 JSONObject json = new JSONObject(builderString);
                 builder = new Builder(json.getString(EVENT_NAME), MParticle.EventType.valueOf(json.getString(EVENT_TYPE)));
                 builder.category = json.optString(EVENT_CATEGORY);
-                if (json.has(EVENT_DURATION)){
+                if (json.has(EVENT_DURATION)) {
                     builder.duration = json.getDouble(EVENT_DURATION);
                 }
-                if (json.has(EVENT_START_TIME)){
+                if (json.has(EVENT_START_TIME)) {
                     builder.startTime = json.getDouble(EVENT_START_TIME);
                 }
-                if (json.has(EVENT_END_TIME)){
+                if (json.has(EVENT_END_TIME)) {
                     builder.endTime = json.getDouble(EVENT_END_TIME);
                 }
-                if (json.has(EVENT_INFO)){
+                if (json.has(EVENT_INFO)) {
                     JSONObject infoObject = json.getJSONObject(EVENT_INFO);
                     Map<String, String> info = new HashMap<String, String>();
                     Iterator<?> keys = infoObject.keys();
 
-                    while( keys.hasNext() ){
+                    while( keys.hasNext() ) {
                         String key = (String)keys.next();
                         info.put(key, infoObject.getString(key));
                     }
@@ -549,7 +549,7 @@ public class MPEvent extends BaseEvent {
                     Map<String, List<String>> cFlags = new HashMap<String, List<String>>();
                     Iterator<String> keys = flags.keys();
 
-                    while( keys.hasNext() ){
+                    while( keys.hasNext() ) {
                         String key = keys.next();
                         JSONArray values = flags.getJSONArray(key);
                         cFlags.put(key, new LinkedList<String>());
@@ -564,7 +564,7 @@ public class MPEvent extends BaseEvent {
                 }
 
                 return builder;
-            }catch (Exception e){
+            } catch (Exception e) {
                 Logger.warning("Failed to deserialize MPEvent.Builder: " + e.toString());
                 return builder;
             }
@@ -596,10 +596,10 @@ public class MPEvent extends BaseEvent {
                 if (category != null) {
                     jsonObject.put(EVENT_CATEGORY, category);
                 }
-                if (duration != null){
+                if (duration != null) {
                     jsonObject.put(EVENT_DURATION, duration);
                 }
-                if (customAttributes != null){
+                if (customAttributes != null) {
                     JSONObject jsonInfo = new JSONObject();
                     for (Map.Entry<String, String> entry : customAttributes.entrySet())
                     {
@@ -607,10 +607,10 @@ public class MPEvent extends BaseEvent {
                     }
                     jsonObject.put(EVENT_INFO, jsonInfo);
                 }
-                if (startTime != null){
+                if (startTime != null) {
                     jsonObject.put(EVENT_START_TIME, startTime);
                 }
-                if (endTime != null){
+                if (endTime != null) {
                     jsonObject.put(EVENT_END_TIME, endTime);
                 }
                 if (customFlags != null) {
@@ -626,7 +626,7 @@ public class MPEvent extends BaseEvent {
                     jsonObject.put(EVENT_SHOULD_UPLOAD_EVENT, shouldUploadEvent);
                 }
                 return jsonObject.toString();
-            }catch (JSONException jse){
+            } catch (JSONException jse) {
                 Logger.warning("Failed to serialize MPEvent.Builder: " + jse.toString());
             }
             return super.toString();

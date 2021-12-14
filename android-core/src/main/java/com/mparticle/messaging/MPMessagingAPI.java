@@ -40,7 +40,7 @@ public class MPMessagingAPI {
      */
     @NonNull public static final String BROADCAST_NOTIFICATION_TAPPED = "com.mparticle.push.TAP";
 
-    private MPMessagingAPI(){
+    private MPMessagingAPI() {
         mContext = null;
     }
 
@@ -61,11 +61,11 @@ public class MPMessagingAPI {
         ConfigManager.getInstance(mContext).setPushSenderId(senderId);
         if (!MPUtility.isFirebaseAvailable()) {
             Logger.error("Push is enabled but Firebase Cloud Messaging library not found - you must add com.google.firebase:firebase-messaging:10.2.1 or later to your application.");
-        }else if (!MPUtility.isServiceAvailable(mContext, MPService.class)){
+        } else if (!MPUtility.isServiceAvailable(mContext, MPService.class)) {
             Logger.error("Push is enabled but you have not added <service android:name=\"com.mparticle.MPService\" /> to the <application> section of your AndroidManifest.xml.");
-        }else if (!MPUtility.checkPermission(mContext, "com.google.android.c2dm.permission.RECEIVE")){
+        } else if (!MPUtility.checkPermission(mContext, "com.google.android.c2dm.permission.RECEIVE")) {
             Logger.error("Attempted to enable push notifications without required permission: ", "\"com.google.android.c2dm.permission.RECEIVE\".");
-        }else {
+        } else {
             PushRegistrationHelper.requestInstanceId(mContext, senderId);
         }
     }

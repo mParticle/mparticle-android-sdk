@@ -69,7 +69,7 @@ public class MPApiDetectorKotlinTest extends LintDetectorTest {
                 "package com.mparticle.lints\n" +
                 "   import android.app.Application\n" +
                 "   import com.mparticle.MParticle\n" +
-                "class HasProperCall : Application(){\n" +
+                "class HasProperCall : Application() {\n" +
                 "   override fun onCreate() {\n" +
                 "        super.onCreate()\n" +
                 "        doNothing()\n.also { \n" +
@@ -93,7 +93,7 @@ public class MPApiDetectorKotlinTest extends LintDetectorTest {
                 "package com.mparticle.lints\n" +
                 "   import android.app.Application\n" +
                 "   import com.mparticle.MParticle\n" +
-                "class HasProperCall : Application(){\n" +
+                "class HasProperCall : Application() {\n" +
                 "   override fun onCreate() {\n" +
                 "        super.onCreate()\n" +
                 "        fun inner() {\n"+
@@ -111,7 +111,7 @@ public class MPApiDetectorKotlinTest extends LintDetectorTest {
                 "package com.mparticle.lints\n" +
                 "   import android.app.Application\n" +
                 "   import com.mparticle.MParticle\n" +
-                "class HasProperCall : Application(){\n" +
+                "class HasProperCall : Application() {\n" +
                 "   override fun onCreate() {\n" +
                 "        super.onCreate()\n" +
                 "        fun innerLambda() = MParticle.start()\n" +
@@ -127,7 +127,7 @@ public class MPApiDetectorKotlinTest extends LintDetectorTest {
                 "package com.mparticle.lints\n" +
                 "   import android.app.Application\n" +
                 "   import com.mparticle.MParticle\n" +
-                "class HasProperCall : Application(){\n" +
+                "class HasProperCall : Application() {\n" +
                 "   override fun onCreate() {\n" +
                 "        super.onCreate()\n" +
                 "        var a = onResume()\n" +

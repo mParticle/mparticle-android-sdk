@@ -89,7 +89,7 @@ public class RandomUtils {
     public String getAlphaNumericString(int length) {
         String characters = getAlphNumeric();
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < length; i++){
+        for (int i = 0; i < length; i++) {
             builder.append(characters.charAt(randomInt(0, characters.length() - 1)));
         }
         return builder.toString();

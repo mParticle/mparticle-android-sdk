@@ -161,10 +161,10 @@ public class MessageManagerTest {
     }
 
     @Test
-    public void testIncrementSessionCounter(){
+    public void testIncrementSessionCounter() {
         int count = configManager.getUserStorage().getCurrentSessionCounter(-5);
         assertEquals(-5, count);
-        for (int i = 0; i < 10; i++){
+        for (int i = 0; i < 10; i++) {
             configManager.getUserStorage().incrementSessionCounter();
         }
         count = configManager.getUserStorage().getCurrentSessionCounter(-5);
@@ -215,7 +215,7 @@ public class MessageManagerTest {
         assertEquals(message.get(Constants.MessageKey.EVENT_TYPE), MParticle.EventType.Location);
         assertEquals("test screen name", message.getString(Constants.MessageKey.CURRENT_ACTIVITY));
         assertEquals(1, context.getSharedPreferences("name", 0).getInt(Constants.PrefKeys.EVENT_COUNTER, -1));
-        for (int i = 0; i < 100; i++){
+        for (int i = 0; i < 100; i++) {
             manager.logEvent(event, "test screen name");
         }
         JSONObject flags = message.getJSONObject("flags");

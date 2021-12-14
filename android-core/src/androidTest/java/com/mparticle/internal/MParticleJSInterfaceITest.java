@@ -113,7 +113,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
             "    for (i = hostname.length - 1; i >= 0; i--) {\n" +
             "        testParts = hostname.slice(i).join('.');\n" +
             "        doc.cookie = mpTest + ';domain=.' + testParts + ';';\n" +
-            "        if (doc.cookie.indexOf(mpTest) > -1){\n" +
+            "        if (doc.cookie.indexOf(mpTest) > -1) {\n" +
             "            doc.cookie = mpTest.split('=')[0] + '=;domain=.' + testParts + ';expires=Thu, 01 Jan 1970 00:00:01 GMT;';\n" +
             "            return testParts;\n" +
             "        }\n" +
@@ -220,7 +220,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
         String testJavascript = String.format("mParticle.Identity.getCurrentUser().setUserAttribute(\"%s\", \"%s\");\n", key, value);
         final MutableBoolean called = new MutableBoolean(false);
         final CountDownLatch latch = new MPLatch(1);
-        runJavascriptTest(testJavascript, new MParticleJSInterface(){
+        runJavascriptTest(testJavascript, new MParticleJSInterface() {
             @Override
             @JavascriptInterface
             public void setUserAttribute(String json) {
@@ -248,7 +248,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
         String testJavascript = String.format("mParticle.Identity.getCurrentUser().removeUserAttribute(\"%s\");\n", key);
         final MutableBoolean called = new MutableBoolean(false);
         final CountDownLatch latch = new MPLatch(1);
-        runJavascriptTest(testJavascript, new MParticleJSInterface(){
+        runJavascriptTest(testJavascript, new MParticleJSInterface() {
             @Override
             @JavascriptInterface
             public void removeUserAttribute(String json) {
@@ -275,7 +275,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
         final MutableBoolean called = new MutableBoolean(false);
         final CountDownLatch latch = new MPLatch(1);
         //This is acceptable if the JS SDK calls either setUserTag, or setUserAttribute with a null value
-        runJavascriptTest(testJavascript, new MParticleJSInterface(){
+        runJavascriptTest(testJavascript, new MParticleJSInterface() {
             @Override
             @JavascriptInterface
             public void setUserTag(String json) {

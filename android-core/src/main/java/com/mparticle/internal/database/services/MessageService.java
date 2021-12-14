@@ -55,7 +55,7 @@ public class MessageService extends MessageTable {
         return getSessionHistory(database, currentSessionId, false, Constants.TEMPORARY_MPID);
     }
 
-    static List<ReadyMessage> getSessionHistory(MPDatabase database, String currentSessionId, boolean includes, long mpid){
+    static List<ReadyMessage> getSessionHistory(MPDatabase database, String currentSessionId, boolean includes, long mpid) {
         String[] selectionArgs = new String[]{currentSessionId, String.valueOf(mpid)};
         Cursor readyMessagesCursor = null;
         List<ReadyMessage> readyMessages = new ArrayList<ReadyMessage>();
@@ -97,7 +97,7 @@ public class MessageService extends MessageTable {
         return readyMessages;
     }
 
-    public static int deleteOldMessages(MPDatabase database, String currentSessionId){
+    public static int deleteOldMessages(MPDatabase database, String currentSessionId) {
         String[] selectionArgs = new String[]{currentSessionId, String.valueOf(Constants.TEMPORARY_MPID)};
         return database.delete(
                 MessageTableColumns.TABLE_NAME,
@@ -132,7 +132,7 @@ public class MessageService extends MessageTable {
         return getMessagesForUpload(database, false, Constants.TEMPORARY_MPID);
     }
 
-    static List<ReadyMessage> getMessagesForUpload(MPDatabase database, boolean includes, long mpid){
+    static List<ReadyMessage> getMessagesForUpload(MPDatabase database, boolean includes, long mpid) {
         Cursor readyMessagesCursor = null;
         List<ReadyMessage> readyMessages = new ArrayList<ReadyMessage>();
         try {

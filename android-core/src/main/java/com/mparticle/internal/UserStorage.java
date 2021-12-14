@@ -88,7 +88,7 @@ public class UserStorage {
         return mpId;
     }
 
-    int getCurrentSessionCounter(){
+    int getCurrentSessionCounter() {
         return getCurrentSessionCounter(0);
     }
 
@@ -106,7 +106,7 @@ public class UserStorage {
 
     void incrementSessionCounter() {
         int nextCount = getCurrentSessionCounter() + 1;
-        if (nextCount >= (Integer.MAX_VALUE / 100)){
+        if (nextCount >= (Integer.MAX_VALUE / 100)) {
             nextCount = 0;
         }
         mPreferences.edit().putInt(SESSION_COUNTER, nextCount).apply();
@@ -130,7 +130,7 @@ public class UserStorage {
     }
 
     int getBreadcrumbLimit() {
-        if (mPreferences != null){
+        if (mPreferences != null) {
             return mPreferences.getInt(BREADCRUMB_LIMIT, DEFAULT_BREADCRUMB_LIMIT);
         }
         return DEFAULT_BREADCRUMB_LIMIT;
@@ -348,8 +348,7 @@ public class UserStorage {
         for (int i = 0; i < userConfigs.length(); i++) {
             try {
                 mpIds.add(userConfigs.getLong(i));
-            }
-            catch (JSONException ignore) {}
+            } catch (JSONException ignored) {}
         }
         return mpIds;
     }
@@ -505,7 +504,7 @@ public class UserStorage {
                         String dasParseString = jsonCookies.getJSONObject("uid").getString("c");
                         UrlQuerySanitizer sanitizer = new UrlQuerySanitizer(dasParseString);
                         das = sanitizer.getValue("g");
-                    }catch (Exception e) {
+                    } catch (Exception e) {
 
                     }
                     userStorage.setCookies(cookies);

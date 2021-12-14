@@ -77,15 +77,15 @@ public class MPReceiver extends BroadcastReceiver {
     @Override
     public final void onReceive(@NonNull Context context, @NonNull Intent intent) {
         if (!MPARTICLE_IGNORE.equals(intent.getAction()) && !intent.getBooleanExtra(MPARTICLE_IGNORE, false)) {
-            if (MPMessagingAPI.BROADCAST_NOTIFICATION_TAPPED.equalsIgnoreCase(intent.getAction())){
+            if (MPMessagingAPI.BROADCAST_NOTIFICATION_TAPPED.equalsIgnoreCase(intent.getAction())) {
                 ProviderCloudMessage message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
-                if (!onNotificationTapped(message)){
+                if (!onNotificationTapped(message)) {
                     MPServiceUtil.runIntentInService(context, intent);
                 }
                 return;
-            } else if (MPMessagingAPI.BROADCAST_NOTIFICATION_RECEIVED.equalsIgnoreCase(intent.getAction())){
+            } else if (MPMessagingAPI.BROADCAST_NOTIFICATION_RECEIVED.equalsIgnoreCase(intent.getAction())) {
                 ProviderCloudMessage message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
-                if (!onNotificationReceived(message)){
+                if (!onNotificationReceived(message)) {
                     MPServiceUtil.runIntentInService(context, intent);
                 }
                 return;
@@ -103,7 +103,7 @@ public class MPReceiver extends BroadcastReceiver {
      * @param message The message that was received.
      * @return True if you would like to handle this notification, False if you would like the mParticle to generate and show a {@link android.app.Notification}.
      */
-    protected boolean onNotificationReceived(@NonNull ProviderCloudMessage message){
+    protected boolean onNotificationReceived(@NonNull ProviderCloudMessage message) {
         return false;
     }
 
@@ -113,7 +113,7 @@ public class MPReceiver extends BroadcastReceiver {
      * @param message The message that was tapped.
      * @return True if you would like to consume this tap/action, False if the mParticle SDK should attempt to handle it.
      */
-    protected boolean onNotificationTapped(@NonNull ProviderCloudMessage message){
+    protected boolean onNotificationTapped(@NonNull ProviderCloudMessage message) {
         return false;
     }
 

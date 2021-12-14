@@ -101,7 +101,7 @@ public class DeviceAttributes {
                 int countSinceUpgrade = userStorage.getLaunchesSinceUpgrade();
                 long upgradeDate = preferences.getLong(PrefKeys.UPGRADE_DATE, now);
 
-                if (persistedVersion < 0 || persistedVersion != pInfo.versionCode){
+                if (persistedVersion < 0 || persistedVersion != pInfo.versionCode) {
                     countSinceUpgrade = 0;
                     upgradeDate = now;
                     editor.putInt(PrefKeys.COUNTER_VERSION, pInfo.versionCode);
@@ -270,7 +270,7 @@ public class DeviceAttributes {
                         message = "Successfully collected " + adIdInfo.advertiser.descriptiveName + " Advertising ID.";
                     }
                 }
-            }catch (JSONException jse) {
+            } catch (JSONException jse) {
                 Logger.debug("Failed while building device-customAttributes object: ", jse.toString());
             }
         }
@@ -297,8 +297,8 @@ public class DeviceAttributes {
         }
     }
 
-    public JSONObject getDeviceInfo(Context context){
-        if (deviceInfo == null){
+    public JSONObject getDeviceInfo(Context context) {
+        if (deviceInfo == null) {
             deviceInfo = getStaticDeviceInfo(context);
         }
         updateDeviceInfo(context, deviceInfo);

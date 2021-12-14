@@ -48,7 +48,7 @@ public class MockKitConfiguration extends KitConfiguration {
             try {
                 String key = iterator.next();
                 map.put(Integer.parseInt(key), json.getInt(key) == 1);
-            }catch (JSONException jse){
+            } catch (JSONException jse) {
                 Logger.error("Issue while parsing kit configuration: " + jse.getMessage());
             }
         }
@@ -65,7 +65,7 @@ public class MockKitConfiguration extends KitConfiguration {
             System.out.print("SparseArray getting: " + key);
             if (map.containsKey(key)) {
                 return map.get(key);
-            }else{
+            } else {
                 return valueIfKeyNotFound;
             }
         }

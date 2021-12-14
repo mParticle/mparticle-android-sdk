@@ -75,9 +75,7 @@ public class CCPAConsent extends ConsentInstance {
                 builder.document(ccpaConsentJsonObject.optString(SERIALIZED_KEY_DOCUMENT, null));
                 builder.location(ccpaConsentJsonObject.optString(SERIALIZED_KEY_LOCATION, null));
                 builder.hardwareId(ccpaConsentJsonObject.optString(SERIALIZED_KEY_HARDWARE_ID, null));
-            } catch (JSONException ignored) {
-
-            }
+            } catch (JSONException ignored) { }
 
             return builder;
         }

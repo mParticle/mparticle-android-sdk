@@ -122,7 +122,7 @@ class DataplanDetector: CallScanner() {
         } else {
             val messageString = message.attributesToNumbers().toString()
             val result: DataPlanningNodeApp.NodeAppResult<List<ValidationResult>>? = dataplanningNode?.validate(dp, messageString, config?.dataPlanVersion)
-            if (config?.debugReportServerMessage === true){
+            if (config?.debugReportServerMessage === true) {
                 val response = result?.response?.getOrNull(0)
                 context.report(
                         ISSUE,

@@ -29,7 +29,7 @@ public class SegmentMembership {
      */
     @Override
     @NonNull
-    public String toString(){
+    public String toString() {
         return getCommaSeparatedIds();
     }
 

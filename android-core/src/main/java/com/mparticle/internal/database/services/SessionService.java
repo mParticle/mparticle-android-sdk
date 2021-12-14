@@ -27,7 +27,7 @@ import static com.mparticle.internal.database.tables.SessionTable.SessionTableCo
 public class SessionService extends SessionTable {
     public static String[] readyMessages = new String[]{Integer.toString(Constants.Status.UPLOADED)};
 
-    public static int deleteSessions(MPDatabase database, String currentSessionId){
+    public static int deleteSessions(MPDatabase database, String currentSessionId) {
         String[] selectionArgs = new String[]{currentSessionId};
         return database.delete(TABLE_NAME, SessionTableColumns.SESSION_ID + "!=? ", selectionArgs);
     }
@@ -154,7 +154,7 @@ public class SessionService extends SessionTable {
             }
         }
         finally {
-            if (sessionCursor != null && !sessionCursor.isClosed()){
+            if (sessionCursor != null && !sessionCursor.isClosed()) {
                 sessionCursor.close();
             }
         }

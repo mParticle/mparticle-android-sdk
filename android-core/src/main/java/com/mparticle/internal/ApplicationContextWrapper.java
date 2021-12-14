@@ -42,7 +42,7 @@ public class ApplicationContextWrapper extends Application {
         return mReplay;
     }
 
-    public void setRecordActivityLifecycle(boolean record){
+    public void setRecordActivityLifecycle(boolean record) {
         if (this.mRecord = record) {
             startRecordLifecycles();
         } else {

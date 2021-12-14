@@ -103,9 +103,9 @@ public class CustomMapping {
                     public int compare(AttributeMap lhs, AttributeMap rhs) {
                         if (lhs.mIsRequired == rhs.mIsRequired) {
                             return 0;
-                        }else if (lhs.mIsRequired && !rhs.mIsRequired) {
+                        } else if (lhs.mIsRequired && !rhs.mIsRequired) {
                             return -1;
-                        }else {
+                        } else {
                             return 1;
                         }
                     }
@@ -171,21 +171,21 @@ public class CustomMapping {
         //TODO Impression projections are not supported for now
         if (eventType == CommerceEventUtils.Constants.EVENT_TYPE_IMPRESSION) {
             return null;
-        }else if (eventType == CommerceEventUtils.Constants.EVENT_TYPE_PROMOTION_CLICK || eventType == CommerceEventUtils.Constants.EVENT_TYPE_PROMOTION_VIEW) {
+        } else if (eventType == CommerceEventUtils.Constants.EVENT_TYPE_PROMOTION_CLICK || eventType == CommerceEventUtils.Constants.EVENT_TYPE_PROMOTION_VIEW) {
             List<Promotion> promotions = commerceEvent.getPromotions();
-            if (promotions == null || promotions.size() == 0){
+            if (promotions == null || promotions.size() == 0) {
                 ProjectionResult projectionResult = projectCommerceEvent(commerceEventWrapper, null, null);
                 if (projectionResult != null) {
                     projectionResults.add(projectionResult);
                 }
-            }else{
+            } else {
                 if (isSelectorLast) {
                     Promotion promotion = promotions.get(promotions.size() - 1);
                     ProjectionResult projectionResult = projectCommerceEvent(commerceEventWrapper, null, promotion);
                     if (projectionResult != null) {
                         projectionResults.add(projectionResult);
                     }
-                }else{
+                } else {
                     for (int i = 0; i < promotions.size(); i++) {
                         ProjectionResult projectionResult = projectCommerceEvent(commerceEventWrapper, null, promotions.get(i));
                         if (projectionResult != null) {
@@ -202,18 +202,18 @@ public class CustomMapping {
 
                 }
             }
-        }else {
+        } else {
             List<Product> products = commerceEvent.getProducts();
-            if (isSelectorLast){
+            if (isSelectorLast) {
                 Product product = null;
-                if (products != null && products.size() > 0){
+                if (products != null && products.size() > 0) {
                     product = products.get(products.size() - 1);
                 }
                 ProjectionResult projectionResult = projectCommerceEvent(commerceEventWrapper, product, null);
                 if (projectionResult != null) {
                     projectionResults.add(projectionResult);
                 }
-            }else {
+            } else {
                 if (products != null) {
                     for (int i = 0; i < products.size(); i++) {
                         ProjectionResult projectionResult = projectCommerceEvent(commerceEventWrapper, products.get(i), null);
@@ -236,7 +236,7 @@ public class CustomMapping {
 
         if (projectionResults.size() > 0) {
             return projectionResults;
-        }else{
+        } else {
             return null;
         }
     }
@@ -250,7 +250,7 @@ public class CustomMapping {
 
         if (projectionResults.size() > 0) {
             return projectionResults;
-        }else{
+        } else {
             return null;
         }
     }
@@ -271,7 +271,7 @@ public class CustomMapping {
                 if (entry == null || !attProjection.matchesDataType(entry.getValue())) {
                     if (attProjection.mIsRequired) {
                         return false;
-                    }else {
+                    } else {
                         continue;
                     }
                 }
@@ -317,7 +317,7 @@ public class CustomMapping {
                 }
             }
         }
-        if (mOutboundMessageType == 16){
+        if (mOutboundMessageType == 16) {
             return new ProjectionResult(
                     new CommerceEvent.Builder(eventWrapper.getEvent())
                             .internalEventName(mProjectedEventName)
@@ -325,7 +325,7 @@ public class CustomMapping {
                             .build(),
                     mID
             );
-        }else {
+        } else {
             return new ProjectionResult(
                     new MPEvent.Builder(mProjectedEventName, MParticle.EventType.Transaction)
                             .customAttributes(mappedAttributes)

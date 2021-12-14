@@ -130,7 +130,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
             }
         }
         try {
-            if (mConfigUrl == null){
+            if (mConfigUrl == null) {
                 mConfigUrl = getUrl(Endpoint.CONFIG);
             }
             MPConnection connection = mConfigUrl.openConnection();
@@ -145,11 +145,11 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
 
             connection.setRequestProperty("User-Agent", mUserAgent);
             String etag = mPreferences.getString(Constants.PrefKeys.ETAG, null);
-            if (etag != null){
+            if (etag != null) {
                 connection.setRequestProperty("If-None-Match", etag);
             }
             String modified = mPreferences.getString(Constants.PrefKeys.IF_MODIFIED, null);
-            if (modified != null){
+            if (modified != null) {
                 connection.setRequestProperty("If-Modified-Since", modified);
             }
 
@@ -169,8 +169,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
             try {
                 response = MPUtility.getJsonResponse(connection);
                 InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.CONFIG, connection.getURL().toString(), response, responseCode);
-            }
-            catch (Exception ex) {}
+            } catch (Exception ignored) {}
             if (responseCode >= 200 && responseCode < 300) {
                 parseCookies(response);
 
@@ -190,7 +189,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
                     editor.putString(Constants.PrefKeys.IF_MODIFIED, newModified);
                 }
                 editor.apply();
-            }else if (connection.getResponseCode() == 400) {
+            } else if (connection.getResponseCode() == 400) {
                 throw new MPConfigException();
             } else if (connection.getResponseCode() == 304) {
                 Logger.verbose("Config request deferred, configuration already up-to-date.");
@@ -220,13 +219,13 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
 
             addMessageSignature(connection, null);
             makeUrlRequest(Endpoint.AUDIENCE, connection, true);
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN){
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
                 Logger.error("Segment call forbidden: is Segmentation enabled for your account?");
             }
             response =  MPUtility.getJsonResponse(connection);
             parseCookies(response);
 
-        }catch (Exception e){
+        } catch (Exception e) {
             Logger.error("Segment call failed: " + e.getMessage());
         }
         return response;
@@ -235,7 +234,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
     public int sendMessageBatch(String message) throws IOException, MPThrottleException, MPRampException {
         checkThrottleTime(Endpoint.EVENTS);
         checkRampValue();
-        if (mEventUrl == null){
+        if (mEventUrl == null) {
             mEventUrl = getUrl(Endpoint.EVENTS);
         }
         MPConnection connection = mEventUrl.openConnection();
@@ -262,7 +261,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
 
         try {
             InternalListenerManager.getListener().onNetworkRequestStarted(SdkListener.Endpoint.EVENTS, connection.getURL().toString(), new JSONObject(message), message);
-        } catch (Exception e) { }
+        } catch (Exception ignored) { }
 
         makeUrlRequest(Endpoint.EVENTS, connection, message, true);
 
@@ -288,7 +287,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
             Logger.error("Upload request failed- " + responseCode + ": " + connection.getResponseMessage());
             try {
                 InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.EVENTS, connection.getURL().getFile(), new JSONObject().put(SdkListener.ERROR_MESSAGE, connection.getResponseMessage()), responseCode);
-            } catch (Exception e) { }
+            } catch (Exception ignored) { }
         }
         return connection.getResponseCode();
     }
@@ -315,7 +314,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         try {
             url = connection.getURL().toString();
             InternalListenerManager.getListener().onNetworkRequestStarted(SdkListener.Endpoint.EVENTS, url, new JSONObject(message), message);
-        } catch (Exception ignore) {}
+        } catch (Exception ignored) {}
 
         connection = makeUrlRequest(Endpoint.ALIAS, connection, message, false);
         int responseCode = connection.getResponseCode();
@@ -366,7 +365,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
             Logger.error("Error signing message.");
         } catch (NoSuchAlgorithmException e) {
             Logger.error("Error signing message.");
-        } catch (UnsupportedEncodingException e){
+        } catch (UnsupportedEncodingException e) {
             Logger.error("Error signing message.");
         }
     }
@@ -403,25 +402,25 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
     }
 
     void checkThrottleTime(Endpoint endpoint) throws MPThrottleException {
-        if (System.currentTimeMillis() < getNextRequestTime(endpoint)){
+        if (System.currentTimeMillis() < getNextRequestTime(endpoint)) {
             throw new MPThrottleException();
         }
     }
 
     private void checkRampValue() throws MPRampException {
-        if (mDeviceRampNumber == null){
+        if (mDeviceRampNumber == null) {
             mDeviceRampNumber = MPUtility.hashFnv1A(MPUtility.getRampUdid(mContext).getBytes())
                     .mod(BigInteger.valueOf(100))
                     .intValue();
         }
         int currentRamp = mConfigManager.getCurrentRampValue();
         if (currentRamp > 0 && currentRamp < 100 &&
-                mDeviceRampNumber > mConfigManager.getCurrentRampValue()){
+                mDeviceRampNumber > mConfigManager.getCurrentRampValue()) {
             throw new MPRampException();
         }
     }
 
-    private String getSupportedKitString(){
+    private String getSupportedKitString() {
         if (sSupportedKits == null) {
             MParticle instance = MParticle.getInstance();
             if (instance != null) {
@@ -457,14 +456,14 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
                 }
                 mCurrentCookies = localCookies;
                 mConfigManager.getUserStorage().setCookies(mCurrentCookies.toString());
-            } catch (JSONException jse) {
+            } catch (JSONException ignored) {
 
             }
         }
     }
 
     public JSONObject getCookies()  {
-        if (mCurrentCookies == null){
+        if (mCurrentCookies == null) {
             String currentCookies = mConfigManager.getUserStorage().getCookies();
             if (MPUtility.isEmpty(currentCookies)) {
                 mCurrentCookies = new JSONObject();
@@ -493,22 +492,22 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
                             if (date.before(oldDate)) {
                                 keysToRemove.add(key);
                             }
-                        } catch (ParseException dpe) {
+                        } catch (ParseException ignored) {
 
                         }
                     }
-                }catch (JSONException jse){
+                } catch (JSONException ignored) {
 
                 }
             }
-            for (String key : keysToRemove){
+            for (String key : keysToRemove) {
                 mCurrentCookies.remove(key);
             }
             if (keysToRemove.size() > 0) {
                 mConfigManager.getUserStorage().setCookies(mCurrentCookies.toString());
             }
             return mCurrentCookies;
-        }else{
+        } else {
             return mCurrentCookies;
         }
     }

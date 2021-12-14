@@ -3,7 +3,7 @@ package com.mparticle.identity;
 import androidx.annotation.NonNull;
 
 /**
- * to the {@link BaseIdentityTask} that is being returned from this method ){@link BaseIdentityTask#addSuccessListener(TaskSuccessListener)}. Within the
+ * to the {@link BaseIdentityTask} that is being returned from this method ) {@link BaseIdentityTask#addSuccessListener(TaskSuccessListener)}. Within the
  * {@link IdentityApiResult} returned by the success listener, you can run the same code you do
  * in you {@link UserAliasHandler}, using the {@link MParticleUser}s returned by
  * {@link IdentityApiResult#getUser()} and {@link IdentityApiResult#getPreviousUser()} in place

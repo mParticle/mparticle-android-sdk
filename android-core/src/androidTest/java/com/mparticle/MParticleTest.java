@@ -94,7 +94,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
     @Test
     public void testCalledUpdateInstallReferrer() throws Exception {
         final boolean[] called = new boolean[2];
-        MParticle.getInstance().mMessageManager = new MessageManager(){
+        MParticle.getInstance().mMessageManager = new MessageManager() {
             @Override
             public void installReferrerUpdated() {
                 called[0] = true;

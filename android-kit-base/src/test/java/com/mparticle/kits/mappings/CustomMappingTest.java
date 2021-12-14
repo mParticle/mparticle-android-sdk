@@ -425,7 +425,7 @@ public class CustomMappingTest {
         Product.Builder productBuilder = new Product.Builder("product name 0", "product id 0", 1).category("product category 0").quantity(1);
 
         CommerceEvent.Builder commerceEventBuilder = new CommerceEvent.Builder(Product.DETAIL, productBuilder.build()).currency("dollar bills");
-        for (int i = 1; i < 5; i++){
+        for (int i = 1; i < 5; i++) {
             commerceEventBuilder.addProduct(productBuilder.name("product name " + i).sku("product id " + i).category("product category " + i).quantity(i+1).unitPrice(i+1).build());
         }
         CommerceEvent commerceEvent = commerceEventBuilder.build();

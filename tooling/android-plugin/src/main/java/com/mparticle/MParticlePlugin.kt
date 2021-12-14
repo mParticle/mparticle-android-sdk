@@ -104,7 +104,7 @@ class MParticlePlugin: Plugin<Project> {
         }
     }
 
-    private fun updateArtifactPaths(config: Config){
+    private fun updateArtifactPaths(config: Config) {
         val dataPlanningNodeApp = getDataplanningApp(true)
         if (dataPlanningNodeApp?.checkNodeInstalled() == false) {
             println("MParticle Node not installed. Please install to use Dataplanning features")
@@ -134,7 +134,7 @@ class MParticlePlugin: Plugin<Project> {
             try {
                 val json = JSONObject(text)
                 Config.from(json)
-            }catch (jse: JSONException) {
+            } catch (jse: JSONException) {
                 Logger.warning("Error reading mp.config.json: ${jse.message}")
                 Config()
             }

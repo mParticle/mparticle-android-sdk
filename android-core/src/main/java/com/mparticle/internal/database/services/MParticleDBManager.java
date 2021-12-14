@@ -119,7 +119,7 @@ public class MParticleDBManager {
 
     private static MessageListener sMessageListener;
 
-    static void setMessageListener(MessageListener messageListener){
+    static void setMessageListener(MessageListener messageListener) {
         sMessageListener = messageListener;
     }
 
@@ -335,9 +335,9 @@ public class MParticleDBManager {
                         userAttributes = messages.getJSONObject(i).getJSONObject(Constants.MessageKey.USER_ATTRIBUTES);
                         messages.getJSONObject(i).remove(Constants.MessageKey.USER_ATTRIBUTES);
                     }
-                }catch (JSONException jse) {
+                } catch (JSONException jse) {
 
-                }catch (NullPointerException npe) {
+                } catch (NullPointerException npe) {
 
                 }
             }
@@ -361,9 +361,9 @@ public class MParticleDBManager {
                         identities = messages.getJSONObject(i).getJSONArray(Constants.MessageKey.USER_IDENTITIES);
                         messages.getJSONObject(i).remove(Constants.MessageKey.USER_IDENTITIES);
                     }
-                }catch (JSONException jse) {
+                } catch (JSONException jse) {
 
-                }catch (NullPointerException npe) {
+                } catch (NullPointerException npe) {
 
                 }
             }
@@ -455,7 +455,7 @@ public class MParticleDBManager {
         return message;
     }
 
-    private void resetEventCounter(){
+    private void resetEventCounter() {
         mPreferences.edit().putInt(Constants.PrefKeys.EVENT_COUNTER, 0).apply();
     }
 
@@ -561,7 +561,7 @@ public class MParticleDBManager {
                 } catch (JSONException e) {
 
                 }
-            }else {
+            } else {
                 try {
                     Object entryValue = entry.getValue();
                     if (entryValue == null) {
@@ -595,7 +595,7 @@ public class MParticleDBManager {
                 allUserAttributes.putAll(userAttributeLists);
             }
             return allUserAttributes;
-        }else {
+        } else {
             MParticle instance = MParticle.getInstance();
             if (instance != null) {
                 instance.Internal().getMessageManager().getMessageHandler().post(new Runnable() {
@@ -618,7 +618,7 @@ public class MParticleDBManager {
 
     public List<AttributionChange> setUserAttribute(UserAttributeResponse userAttribute) {
         List<AttributionChange> attributionChanges = new ArrayList<AttributionChange>();
-        if (getDatabase() == null){
+        if (getDatabase() == null) {
             return attributionChanges;
         }
         Map<String, Object> currentValues = getUserAttributes(null, userAttribute.mpId);
@@ -657,7 +657,7 @@ public class MParticleDBManager {
                 }
             }
             db.setTransactionSuccessful();
-        }catch (Exception e){
+        } catch (Exception e) {
             Logger.error(e, "Error while adding user attributes: ", e.toString());
         } finally {
             db.endTransaction();
@@ -677,7 +677,7 @@ public class MParticleDBManager {
                 callbacks.logUserAttributeChangeMessage(container.key, null, currentValues.get(container.key), true, false, container.time, container.mpId);
             }
             db.setTransactionSuccessful();
-        }catch (Exception e) {
+        } catch (Exception e) {
 
         } finally {
             db.endTransaction();

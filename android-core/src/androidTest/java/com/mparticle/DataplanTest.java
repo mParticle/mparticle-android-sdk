@@ -39,7 +39,7 @@ public class DataplanTest extends BaseCleanInstallEachTest {
                         latch.countDown();
                         return true;
                     }
-                } catch (JSONException ex) {}
+                } catch (JSONException ignored) { }
                 return false;
             }
         }), latch);
@@ -74,7 +74,7 @@ public class DataplanTest extends BaseCleanInstallEachTest {
                         latch.countDown();
                         return true;
                     }
-                } catch (JSONException ex) {}
+                } catch (JSONException ignored) { }
                 return false;
             }
         }), latch);
@@ -105,7 +105,7 @@ public class DataplanTest extends BaseCleanInstallEachTest {
                         latch.countDown();
                         return true;
                     }
-                } catch (JSONException ex) {}
+                } catch (JSONException ignored) { }
                 return false;
             }
         }), latch);

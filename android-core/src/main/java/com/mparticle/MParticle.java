@@ -622,7 +622,7 @@ public class MParticle {
                     //noinspection MissingPermission
                     locationManager.requestLocationUpdates(provider, minTime, minDistance, mLocationListener);
                     locationTrackingEnabled = true;
-                }catch (SecurityException se) {
+                } catch (SecurityException se) {
 
                 }
                 SharedPreferences.Editor editor = mPreferences.edit();
@@ -698,7 +698,7 @@ public class MParticle {
             Logger.warning("setSessionAttribute called with null key. Ignoring...");
             return;
         }
-        if (value != null){
+        if (value != null) {
             value = value.toString();
         }
         if (mConfigManager.isEnabled()) {
@@ -882,7 +882,7 @@ public class MParticle {
      */
     @NonNull
     public MPMessagingAPI Messaging() {
-        if (mMessaging == null){
+        if (mMessaging == null) {
             mMessaging = new MPMessagingAPI(mAppContext);
         }
         return mMessaging;
@@ -910,7 +910,7 @@ public class MParticle {
      */
     @NonNull
     public MPMediaAPI Media() {
-        if (mMedia == null){
+        if (mMedia == null) {
             mMedia = new MPMediaAPI(mAppContext, new MediaCallbacks() {
                 @Override
                 public void onAudioPlaying() {
@@ -921,7 +921,7 @@ public class MParticle {
                 public void onAudioStopped() {
                     try {
                         mAppStateManager.getSession().mLastEventTime = System.currentTimeMillis();
-                    }catch (Exception e){
+                    } catch (Exception e) {
 
                     }
                 }
@@ -950,7 +950,7 @@ public class MParticle {
      *
      * @see MParticle.ServiceProviders
      */
-    public boolean isProviderActive(int serviceProviderId){
+    public boolean isProviderActive(int serviceProviderId) {
         return isKitActive(serviceProviderId);
     }
 
@@ -972,7 +972,7 @@ public class MParticle {
      *
      * @see MParticle.ServiceProviders
      */
-    public boolean isKitActive(int serviceProviderId){
+    public boolean isKitActive(int serviceProviderId) {
         return mKitManager.isKitActive(serviceProviderId);
     }
 
@@ -1011,7 +1011,7 @@ public class MParticle {
 
     void logNotification(@NonNull ProviderCloudMessage cloudMessage, boolean startSession, @NonNull String appState, int behavior) {
         if (mConfigManager.isEnabled()) {
-            if (startSession){
+            if (startSession) {
                 mAppStateManager.ensureActiveSession();
             }
             mMessageManager.logNotification(cloudMessage.getId(), cloudMessage.getRedactedJsonPayload().toString(), appState, behavior);
@@ -1020,7 +1020,7 @@ public class MParticle {
 
     void logNotification(@NonNull ProviderCloudMessage cloudMessage, boolean startSession, @NonNull String appState) {
         if (mConfigManager.isEnabled()) {
-            if (startSession){
+            if (startSession) {
                 mAppStateManager.ensureActiveSession();
             }
             mMessageManager.logNotification(cloudMessage, appState);

@@ -46,7 +46,7 @@ import java.util.Map;
         return mMessageManager.getUserAttributes(listener, mpId);
     }
 
-    public Map<MParticle.IdentityType, String> getUserIdentities(long mpId){
+    public Map<MParticle.IdentityType, String> getUserIdentities(long mpId) {
         return mMessageManager.getUserIdentities(mpId);
     }
 
@@ -267,7 +267,7 @@ import java.util.Map;
                         MParticleUserImpl.getInstance(context, previousMpid, this),
                         MParticleUserImpl.getInstance(context, newMpid, this)
                 );
-            }catch (Exception e) {
+            } catch (Exception e) {
                 Logger.error("Error while executing UserAliasHandler: " + e.toString());
             }
         }

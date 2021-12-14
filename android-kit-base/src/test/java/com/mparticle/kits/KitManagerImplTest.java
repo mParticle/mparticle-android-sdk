@@ -36,7 +36,7 @@ import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 
 public class KitManagerImplTest {
-    BackgroundTaskHandler mockBackgroundTaskHandler = new BackgroundTaskHandler(){
+    BackgroundTaskHandler mockBackgroundTaskHandler = new BackgroundTaskHandler() {
 
         @Override
         public void executeNetworkRequest(Runnable runnable) {

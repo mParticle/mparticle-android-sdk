@@ -142,7 +142,7 @@ public class KitManagerTest  {
         String[] ids = activeModuleIds.split(",");
         String[] testIds = {"56", "64", "37", "68"};
         List<String> idList = Arrays.asList(testIds);
-        for (String id : ids){
+        for (String id : ids) {
             assertTrue(activeModuleIds, idList.contains(id.trim()));
         }
     }

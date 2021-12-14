@@ -284,7 +284,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 } catch (JSONException e) {
                     Logger.warning("Failed to create First Run Message.");
                 }
-            }else{
+            } else {
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.END_ORPHAN_SESSIONS, mConfigManager.getMpid()));
             }
 
@@ -638,7 +638,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             message.put(MessageKey.APP_STATE, appState);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
 
-        }catch (JSONException e) {
+        } catch (JSONException e) {
 
         }
     }
@@ -663,7 +663,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             message.put(MessageKey.APP_STATE, appState);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
 
-        }catch (JSONException e) {
+        } catch (JSONException e) {
 
         }
 
@@ -806,7 +806,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                     }
                 });
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             //this can sometimes fail due to wonky-device reasons.
         }
     }
@@ -819,7 +819,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     @Override
     public void checkForTrigger(BaseMPMessage message) {
-        if (mConfigManager.shouldTrigger(message)){
+        if (mConfigManager.shouldTrigger(message)) {
             mUploadHandler.removeMessages(UploadHandler.UPLOAD_TRIGGER_MESSAGES, mConfigManager.getMpid());
             mUploadHandler.sendMessageDelayed(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_TRIGGER_MESSAGES, 1, 0, mConfigManager.getMpid()), Constants.TRIGGER_MESSAGE_DELAY);
         }
@@ -897,7 +897,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         if (value instanceof List) {
             container.attributeLists = new HashMap<String, List<String>>();
             container.attributeLists.put(key, (List<String>) value);
-        }else {
+        } else {
             container.attributeSingles = new HashMap<String, String>();
             container.attributeSingles.put(key, (String) value);
         }
@@ -924,7 +924,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         return mConfigManager.getUserIdentities(mpId);
     }
 
-    public JSONArray getUserIdentityJson(long mpId){
+    public JSONArray getUserIdentityJson(long mpId) {
         return mConfigManager.getUserIdentityJson(mpId);
     }
 
@@ -993,7 +993,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                     int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
                     sBatteryLevel = level / (double) scale;
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 //sometimes we're given a null intent,
                 //or even if we have permissions to ACCESS_NETWORK_STATE, the call may fail.
             }

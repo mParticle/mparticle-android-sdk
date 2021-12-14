@@ -145,7 +145,7 @@ public class ConfigManager {
             try {
                 JSONObject oldConfigJson = new JSONObject(oldConfig);
                 updateConfig(oldConfigJson, false);
-            } catch (Exception jse) {
+            } catch (Exception ignored) {
 
             }
         }
@@ -160,7 +160,7 @@ public class ConfigManager {
             try {
                 JSONObject oldConfigJson = new JSONObject(oldConfig);
                 return oldConfigJson.optJSONArray(KEY_EMBEDDED_KITS);
-            } catch (Exception jse) {
+            } catch (Exception ignored) {
 
             }
         }
@@ -270,10 +270,7 @@ public class ConfigManager {
                 if (items.has(KEY_TRIGGER_ITEM_HASHES)) {
                     mTriggerMessageHashes = items.getJSONArray(KEY_TRIGGER_ITEM_HASHES);
                 }
-            } catch (JSONException jse) {
-
-            }
-
+            } catch (JSONException ignored) { }
         }
 
         if (responseJSON.has(KEY_INFLUENCE_OPEN)) {
@@ -601,7 +598,7 @@ public class ConfigManager {
         return getPreferences(context).getBoolean(Constants.PrefKeys.DISPLAY_PUSH_NOTIFICATIONS, false);
     }
 
-    private static SharedPreferences getPreferences(Context context){
+    private static SharedPreferences getPreferences(Context context) {
         return context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
     }
 
@@ -753,8 +750,7 @@ public class ConfigManager {
         boolean isBackgroundAst = false;
         try {
             isBackgroundAst = (message.getMessageType().equals(Constants.MessageType.APP_STATE_TRANSITION) && message.get(Constants.MessageKey.STATE_TRANSITION_TYPE).equals(Constants.StateTransitionType.STATE_TRANS_BG));
-        }
-        catch (JSONException ex) {}
+        } catch (JSONException ignored) {}
         boolean shouldTrigger = message.getMessageType().equals(Constants.MessageType.PUSH_RECEIVED)
                 || message.getMessageType().equals(Constants.MessageType.COMMERCE_EVENT)
                 || isBackgroundAst;

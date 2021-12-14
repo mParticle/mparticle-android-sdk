@@ -47,13 +47,13 @@ public class MockContext extends Context {
     Resources resources = new MockResources();
     MockApplication application = null;
 
-    public void setSharedPreferences(SharedPreferences prefs){
+    public void setSharedPreferences(SharedPreferences prefs) {
         sharedPreferences = prefs;
     }
 
     @Override
     public Context getApplicationContext() {
-        if (application == null){
+        if (application == null) {
             application = new MockApplication(this);
         }
         return application;
@@ -78,7 +78,7 @@ public class MockContext extends Context {
 
     @Override
     public Object getSystemService(String name) {
-        if (name.equals(Context.TELEPHONY_SERVICE)){
+        if (name.equals(Context.TELEPHONY_SERVICE)) {
             return Mockito.mock(TelephonyManager.class);
         }
         return null;
@@ -98,7 +98,7 @@ public class MockContext extends Context {
 
             Mockito.when(manager.getApplicationInfo(Mockito.anyString(), Mockito.anyInt())).thenReturn(appInfo);
             Mockito.when(manager.getApplicationLabel(appInfo)).thenReturn("test label");
-        }catch (Exception e){
+        } catch (Exception e) {
             fail(e.toString());
         }
         return manager;

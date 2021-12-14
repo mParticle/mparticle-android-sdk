@@ -41,8 +41,7 @@ public class LegacyStartupTest extends BaseStartupTest {
     public void after() {
         try {
             Logger.debug("Startup times = " + readFile());
-        }
-        catch (Exception ex) {}
+        } catch (Exception ignored) { }
     }
 
     @Override

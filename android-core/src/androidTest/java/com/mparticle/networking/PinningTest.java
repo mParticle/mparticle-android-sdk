@@ -128,8 +128,7 @@ public class PinningTest extends BaseCleanStartedEachTest {
         });
         try {
             com.mparticle.internal.AccessUtils.getApiClient().sendMessageBatch(new JSONObject().toString());
-        }
-        catch (Exception e) {}
+        } catch (Exception ignored) { }
         latch.await();
         assertTrue(called.value);
     }

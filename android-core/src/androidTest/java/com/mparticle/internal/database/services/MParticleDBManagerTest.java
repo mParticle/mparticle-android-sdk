@@ -107,7 +107,7 @@ public class MParticleDBManagerTest extends BaseCleanInstallEachTest{
         startMParticle();
 
         final Mutable<Thread> dbAccessThread = new Mutable<Thread>(null);
-        final MParticleDBManager manager = new MParticleDBManager(){
+        final MParticleDBManager manager = new MParticleDBManager() {
             @Override
             public TreeMap<String, String> getUserAttributeSingles(long mpId) {
                 dbAccessThread.value = Thread.currentThread();

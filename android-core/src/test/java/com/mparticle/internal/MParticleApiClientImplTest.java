@@ -193,7 +193,7 @@ public class MParticleApiClientImplTest {
         Mockito.when(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString())).thenReturn("encoded");
         try {
             client.sendMessageBatch("");
-        }catch (Exception e) {
+        } catch (Exception e) {
             if (e instanceof MParticleApiClientImpl.MPThrottleException) {
                 throw e;
             }

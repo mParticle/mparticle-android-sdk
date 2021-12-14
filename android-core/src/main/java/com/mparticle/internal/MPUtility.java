@@ -308,7 +308,7 @@ public class MPUtility {
         return null;
     }
 
-    public static long getDiskSpace(Context context, File path){
+    public static long getDiskSpace(Context context, File path) {
         if (MPUtility.isInstantApp(context)) {
             return 0L;
         }
@@ -317,7 +317,7 @@ public class MPUtility {
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR1) {
             availableSpace = JellybeanHelper.getAvailableMemory(stat);
         }
-        if (availableSpace == 0){
+        if (availableSpace == 0) {
             availableSpace = (long) stat.getAvailableBlocks() * (long) stat.getBlockSize();
         }
         return availableSpace;
@@ -343,7 +343,7 @@ public class MPUtility {
         }
     }
 
-    public static long millitime(){
+    public static long millitime() {
         return TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS);
     }
 
@@ -357,8 +357,8 @@ public class MPUtility {
             //Some Android 8 devices crash here for no clear reason.
             return TimeZone.getDefault().getDisplayName(false, 0);
         }
-        catch (Exception ignored){ }
-        catch (AssertionError e){ }
+        catch (Exception ignored) { }
+        catch (AssertionError e) { }
         return null;
     }
 
@@ -455,7 +455,7 @@ public class MPUtility {
         }
         try {
             return UUID.nameUUIDFromBytes(versionCode.getBytes()).toString();
-        }catch (AssertionError e) {
+        } catch (AssertionError e) {
             //Some devices do not have MD5 and will throw a NoSuchAlgorithmException.
             return DeviceAttributes.UNKNOWN;
         }
@@ -567,8 +567,7 @@ public class MPUtility {
         try {
             Class.forName("com.google.firebase.messaging.FirebaseMessaging");
             return true;
-        }
-        catch (ClassNotFoundException ignored) { }
+        } catch (ClassNotFoundException ignored) { }
         return false;
     }
 
@@ -576,8 +575,7 @@ public class MPUtility {
         try {
             Class.forName("com.google.firebase.iid.FirebaseInstanceId");
             return true;
-        }
-        catch (ClassNotFoundException ignored) { }
+        } catch (ClassNotFoundException ignored) { }
         return false;
     }
 
@@ -636,7 +634,7 @@ public class MPUtility {
                 }
             }
             return parameters;
-        }else{
+        } else {
             return null;
         }
     }
@@ -669,7 +667,7 @@ public class MPUtility {
         return attrs;
     }
 
-    public static boolean isAppDebuggable(Context context){
+    public static boolean isAppDebuggable(Context context) {
         return ( 0 != ( context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE ) );
     }
 
@@ -716,7 +714,7 @@ public class MPUtility {
             }
             if (value != null) {
                 String stringValue = value.toString();
-                if (stringValue.length() > Constants.LIMIT_ATTR_VALUE){
+                if (stringValue.length() > Constants.LIMIT_ATTR_VALUE) {
                     Logger.error( "Attribute value length exceeds limit. Discarding attribute: " + key);
                     return false;
                 }
@@ -728,7 +726,7 @@ public class MPUtility {
             if (value == null) {
                 value = JSONObject.NULL;
             }
-            if (increment){
+            if (increment) {
                 String oldValue = attributes.optString(key, "0");
                 int oldInt = Integer.parseInt(oldValue);
                 value = Integer.toString((Integer)value + oldInt);
@@ -737,10 +735,10 @@ public class MPUtility {
         } catch (JSONException e) {
             Logger.error( "JSON error processing attributes. Discarding attribute: " + key);
             return false;
-        } catch (NumberFormatException nfe){
+        } catch (NumberFormatException nfe) {
             Logger.error( "Attempted to increment a key that could not be parsed as an integer: " + key);
             return false;
-        } catch (Exception e){
+        } catch (Exception e) {
             Logger.error( "Failed to add attribute: " + e.getMessage());
             return false;
         }

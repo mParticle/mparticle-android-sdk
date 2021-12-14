@@ -18,7 +18,7 @@ import static junit.framework.Assert.fail;
 public class MPEventTests  {
 
     @Test
-    public void testBasicBuilder(){
+    public void testBasicBuilder() {
         MPEvent event = new MPEvent.Builder("test name", MParticle.EventType.Navigation).category("test category").duration(1234).build();
         assertTrue(event.getEventName().equals("test name"));
         assertTrue(event.getEventType().equals(MParticle.EventType.Navigation));
@@ -27,7 +27,7 @@ public class MPEventTests  {
     }
 
     @Test
-    public void testScreenBuilder(){
+    public void testScreenBuilder() {
         MPEvent event = new MPEvent.Builder("test name").category("test category").duration(1234).build();
         assertTrue(event.getEventName().equals("test name"));
         assertTrue(event.getEventType().equals(MParticle.EventType.Other));
@@ -36,7 +36,7 @@ public class MPEventTests  {
     }
 
     @Test
-    public void testSerialization(){
+    public void testSerialization() {
         String eventString = new MPEvent.Builder("test name", MParticle.EventType.Navigation).category("test category").duration(1234).toString();
         MPEvent event = MPEvent.Builder.parseString(eventString).build();
         assertTrue(event.getEventName().equals("test name"));
@@ -52,7 +52,7 @@ public class MPEventTests  {
     }
 
     @Test
-    public void testTimer(){
+    public void testTimer() {
         MPEvent.Builder eventBuilder = new MPEvent.Builder("test name", MParticle.EventType.Navigation);
 
         eventBuilder.startTime();
@@ -70,7 +70,7 @@ public class MPEventTests  {
     @Test
     public void testEventNameLength() {
         StringBuilder nameBuilder = new StringBuilder(Constants.LIMIT_ATTR_KEY+10);
-        for (int i = 0; i < Constants.LIMIT_ATTR_KEY+10; i++){
+        for (int i = 0; i < Constants.LIMIT_ATTR_KEY+10; i++) {
             nameBuilder.append("0");
         }
 

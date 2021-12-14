@@ -119,10 +119,10 @@ public class ConfigManagerTest {
             }
         });
         manager.delayedStart();
-        if (manager.isPushEnabled()){
+        if (manager.isPushEnabled()) {
             assertTrue(called[0]);
         }
-        if (manager.isNetworkPerformanceEnabled()){
+        if (manager.isNetworkPerformanceEnabled()) {
             assertTrue(called[1]);
         }*/
     }

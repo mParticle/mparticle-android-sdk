@@ -63,7 +63,7 @@ public class MParticleTest {
         assertTrue(capturedStringList.get(0).equals("203948"));
         assertTrue(longCaptor.getValue() == 1);
         List<String> longStringList = new ArrayList<String>();
-        for (int i = 0; i < Constants.LIMIT_ATTR_VALUE; i++){
+        for (int i = 0; i < Constants.LIMIT_ATTR_VALUE; i++) {
             longStringList.add("a");
         }
         assertTrue(mp.Identity().getCurrentUser().setUserAttribute("test3", longStringList));
@@ -119,7 +119,7 @@ public class MParticleTest {
         assertTrue(capturedStringList.get(0).equals("203948"));
         assertTrue(longCaptor.getValue() == 2);
         List<String> longStringList = new ArrayList<String>();
-        for (int i = 0; i < Constants.LIMIT_ATTR_VALUE; i++){
+        for (int i = 0; i < Constants.LIMIT_ATTR_VALUE; i++) {
             longStringList.add("a");
         }
         assertTrue(mp.Identity().getCurrentUser().setUserAttributeList("test3", longStringList));

@@ -93,7 +93,7 @@ public class NetworkConnection extends BaseNetworkConnection {
      * Custom socket factory used for certificate pinning.
      */
     protected SSLSocketFactory getSocketFactory(MParticleBaseClientImpl.Endpoint endpoint) throws Exception{
-        if (mSocketFactory == null){
+        if (mSocketFactory == null) {
             String keyStoreType = KeyStore.getDefaultType();
             KeyStore keyStore = KeyStore.getInstance(keyStoreType);
             keyStore.load(null, null);

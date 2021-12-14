@@ -162,7 +162,7 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
             }
         } catch (MParticleApiClientImpl.MPConfigException e) {
             Logger.error("Bad API request - is the correct API key and secret configured?");
-        } catch (Exception e){
+        } catch (Exception e) {
             Logger.verbose("UploadHandler Exception while handling message: " + e.toString());
         } catch (VerifyError ve) {
             Logger.verbose("UploadHandler VerifyError while handling message" + ve.toString());
@@ -320,14 +320,14 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
         mApiClient = apiClient;
     }
 
-    public void setConnected(boolean connected){
+    public void setConnected(boolean connected) {
 
         try {
             MParticle instance = MParticle.getInstance();
             if (instance != null && !isNetworkConnected && connected && mConfigManager.isPushEnabled()) {
                 instance.Messaging().enablePushNotifications(mConfigManager.getPushSenderId());
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
 
         }
         isNetworkConnected = connected;

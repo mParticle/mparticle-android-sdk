@@ -44,13 +44,13 @@ class AppConfig {
 
     public AppConfig(Context context, MParticle.Environment environment, SharedPreferences preferences, String apiKey, String apiSecret) {
         mContext = context;
-        if (environment == null || environment == MParticle.Environment.AutoDetect){
-            if (MPUtility.isAppDebuggable(context)){
+        if (environment == null || environment == MParticle.Environment.AutoDetect) {
+            if (MPUtility.isAppDebuggable(context)) {
                sEnvironment = MParticle.Environment.Development;
-            }else{
+            } else {
                sEnvironment = MParticle.Environment.Production;
             }
-        }else{
+        } else {
             sEnvironment = environment;
         }
         if (apiKey == null) {
@@ -85,17 +85,17 @@ class AppConfig {
     public void delayedInit() {
         uploadInterval = getInteger(PREFKEY_PROD_UPLOAD_INTERVAL, uploadInterval);
         isPushEnabled = getBoolean(PREFKEY_PUSH_ENABLED, DEFAULT_ENABLE_PUSH);
-        if (isPushEnabled){
+        if (isPushEnabled) {
             pushSenderId = getString(PREFKEY_PUSH_SENDER_ID, null);
-            if (pushSenderId == null){
+            if (pushSenderId == null) {
                 Logger.error("Configuration issue: Push is enabled but no sender id is specified.");
             }
         }
 
         isLicensingEnabled = getBoolean(PREFKEY_LICENSING_ENABLED, DEFAULT_ENABLE_LICENSING);
-        if (isLicensingEnabled){
+        if (isLicensingEnabled) {
             licenseKey = getString(PREFKEY_APP_LICENSE_KEY, "");
-            if (licenseKey == null){
+            if (licenseKey == null) {
                 Logger.error("Configuration issue: Licensing enabled but no license key specified.");
             }
         }
@@ -115,7 +115,7 @@ class AppConfig {
         }
         try {
             return this.mContext.getResources().getString(id);
-        }catch (android.content.res.Resources.NotFoundException nfe){
+        } catch (android.content.res.Resources.NotFoundException nfe) {
             return defaultString;
         }
     }
@@ -128,7 +128,7 @@ class AppConfig {
         }
         try {
             return this.mContext.getResources().getBoolean(id);
-        }catch (android.content.res.Resources.NotFoundException nfe){
+        } catch (android.content.res.Resources.NotFoundException nfe) {
             return defaultValue;
         }
     }
@@ -141,7 +141,7 @@ class AppConfig {
         }
         try {
             return this.mContext.getResources().getInteger(id);
-        }catch (android.content.res.Resources.NotFoundException nfe){
+        } catch (android.content.res.Resources.NotFoundException nfe) {
             return defaultValue;
         }
     }
@@ -151,7 +151,7 @@ class AppConfig {
     }
 
     public String getPushSenderId() {
-        if (MPUtility.isEmpty(pushSenderId)){
+        if (MPUtility.isEmpty(pushSenderId)) {
             pushSenderId = getString(PREFKEY_PUSH_SENDER_ID, null);
         }
         return pushSenderId;

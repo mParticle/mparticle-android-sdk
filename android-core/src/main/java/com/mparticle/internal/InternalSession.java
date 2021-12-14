@@ -37,7 +37,7 @@ public class InternalSession {
         mTimeInBackground = session.mTimeInBackground;
         try {
             mSessionAttributes = new JSONObject(session.mSessionAttributes.toString());
-        }catch (JSONException jse){
+        } catch (JSONException jse) {
 
         }
     }
@@ -62,7 +62,7 @@ public class InternalSession {
 
     public long getLength() {
         long time = mLastEventTime - mSessionStartTime;
-        if (time >= 0){
+        if (time >= 0) {
             return time;
         }
         return time;

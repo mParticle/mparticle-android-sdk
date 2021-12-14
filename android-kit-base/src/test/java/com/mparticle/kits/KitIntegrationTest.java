@@ -64,7 +64,7 @@ public class KitIntegrationTest {
             System.out.print("SparseArray getting: " + key);
             if (map.containsKey(key)) {
                 return map.get(key);
-            }else{
+            } else {
                 return valueIfKeyNotFound;
             }
         }
