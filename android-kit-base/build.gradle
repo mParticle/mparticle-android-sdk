@@ -8,9 +8,7 @@ apply plugin: 'kotlin-android'
 
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion '30.0.3'
-
+    compileSdk 30
     testBuildType 'debug'
 
     defaultConfig {

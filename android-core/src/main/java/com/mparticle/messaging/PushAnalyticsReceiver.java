@@ -12,7 +12,7 @@ import android.content.Intent;
  * 1. Create your own class which extends this one, for example MyPushReceiver.java
  * 2. Add the following to your <code>AndroidManifest.xml</code>, replacing <code>YOURPACKAGENAME</code> and the name of your <code>BroadcastReceiver</code>:
  * <pre>
- *  {@code <receiver android:name="YOURPACKAGENAME.MyPushReceiver">
+ *  {@code <receiver android:exported="true" android:name="YOURPACKAGENAME.MyPushReceiver">
  *      <intent-filter>
  *          <action android:name="com.mparticle.push.RECEIVE" />
  *          <action android:name="com.mparticle.push.TAP" />
