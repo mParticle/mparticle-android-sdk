@@ -17,7 +17,7 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2.20.0
         with:
           api-level: 29
-          script: ./gradlew :android-core:cAT :android-kit-base:cAT --stacktrace
+          script: ./gradlew :android-core:cAT :android-kit-base:cAT --warning-mode all
       - name: "Archive Test Results"
         uses: actions/upload-artifact@v2
         if: ${{ always() }}

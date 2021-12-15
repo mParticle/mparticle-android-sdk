@@ -19,7 +19,7 @@ import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.AUDIENCE
 import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.CONFIG;
 import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.EVENTS;
 import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.IDENTITY;
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 public class NetworkOptionsTest extends BaseCleanInstallEachTest {
     private MParticleBaseClientImpl mpClient;

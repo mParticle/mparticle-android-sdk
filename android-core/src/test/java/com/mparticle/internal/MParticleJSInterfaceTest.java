@@ -26,11 +26,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 
 public class MParticleJSInterfaceTest extends MParticleJSInterface {
@@ -141,7 +139,7 @@ public class MParticleJSInterfaceTest extends MParticleJSInterface {
 
         assertEquals(commerceEvent.getTransactionAttributes().getShipping(), null);
         assertEquals(commerceEvent.getTransactionAttributes().getTax(), null);
-        assertEquals(commerceEvent.getTransactionAttributes().getRevenue(), 0.0);
+        assertEquals( commerceEvent.getTransactionAttributes().getRevenue().doubleValue(), 0.0,0.0);
         assertEquals(commerceEvent.getProducts().size(), 1);
         Product product2 = commerceEvent.getProducts().get(0);
         assertEquals(product2.getUnitPrice(), 0.0, .001);

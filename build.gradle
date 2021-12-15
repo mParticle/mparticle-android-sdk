@@ -1,26 +1,33 @@
 buildscript {
     ext.kotlin_version = '1.4.10'
+    ext.gradle_version = '7.0.4'
 
     repositories {
         mavenCentral()
         google()
-        maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.2'
+        classpath "com.android.tools.build:gradle:$gradle_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
 plugins {
-    id 'org.sonarqube' version '2.7'
+    id "org.sonarqube" version "3.3"
 }
 
 sonarqube {
     properties {
-        property 'sonar.projectName', 'Android'
-        property 'sonar.projectKey', 'Android'
-        property 'sonar.modules', 'android-core,android-kit-base'
+        property "sonar.projectKey", "mParticle_mparticle-android-sdk"
+        property "sonar.organization", "mparticle"
+        property "sonar.host.url", "https://sonarcloud.io"
+    }
+}
+
+subprojects {
+    apply plugin: 'org.sonarqube'
+    sonarqube {
+        androidVariant "release"
     }
 }
 

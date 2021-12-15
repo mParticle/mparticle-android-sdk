@@ -1,11 +1,10 @@
 package com.mparticle;
 
+import static org.junit.Assert.assertTrue;
+
 import com.mparticle.internal.MPUtility;
 
 import org.junit.Test;
-
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
 
 public class MPUtilityVariantTest {
 

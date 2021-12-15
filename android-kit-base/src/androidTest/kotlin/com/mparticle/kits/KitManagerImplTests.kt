@@ -8,8 +8,8 @@ import com.mparticle.internal.ConfigManager
 import com.mparticle.kits.testkits.*
 import com.mparticle.testutils.BaseCleanInstallEachTest
 import com.mparticle.testutils.MPLatch
-import junit.framework.Assert.assertNotNull
-import junit.framework.Assert.assertTrue
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.json.JSONObject
 import org.junit.Test
 import java.util.concurrent.CountDownLatch

@@ -25,7 +25,7 @@ import com.mparticle.messaging.ProviderCloudMessage;
  *
  * <pre>
  * {@code
- *  <receiver android:name="com.mparticle.MPReceiver"
+ *  <receiver android:exported="true" android:name="com.mparticle.MPReceiver"
  *      android:permission="com.google.android.c2dm.permission.SEND" >
  *      <intent-filter>
  *          <action android:name="com.google.android.c2dm.intent.REGISTRATION" />

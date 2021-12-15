@@ -26,7 +26,7 @@ class ReferrerReceiverTest: LintDetectorTest() {
                 "<manifest package=\"com.mparticle.lints\"\n" +
                 "          xmlns:android=\"http://schemas.android.com/apk/res/android\">\n" +
                 "    <application>\n" +
-                "        <activity android:name=\"com.mparticle.lints" +
+                "        <activity exported=\"true\" android:name=\"com.mparticle.lints" +
                 ".Activity1\">\n" +
                 "            <intent-filter>\n" +
                 "                <action android:name=\"android.intent.action.VIEW\" />\n" +
@@ -39,11 +39,11 @@ class ReferrerReceiverTest: LintDetectorTest() {
                 "            </intent-filter>\n" +
                 "        </activity>\n" +
                 "\n" +
-                "        <activity android:name=\"com.mparticle.lints" +
+                "        <activity exported=\"true\" android:name=\"com.mparticle.lints" +
                 ".Activity2\">\n" +
                 "        </activity>\n" +
                 "\n" +
-                "        <activity android:name=\"com.mparticle.lints" +
+                "        <activity exported=\"true\" android:name=\"com.mparticle.lints" +
                 ".Activity3\">\n" +
                 "            <intent-filter>\n" +
                 "                <action android:name=\"android.intent.action.SEND\"/>\n" +
@@ -71,7 +71,7 @@ class ReferrerReceiverTest: LintDetectorTest() {
                 "<manifest package=\"com.mparticle.lints\"\n" +
                 "          xmlns:android=\"http://schemas.android.com/apk/res/android\">\n" +
                 "    <application>\n" +
-                "        <activity android:name=\"com.mparticle.lints" +
+                "        <activity exported=\"true\" android:name=\"com.mparticle.lints" +
                 ".Activity1\">\n" +
                 "            <intent-filter>\n" +
                 "                <action android:name=\"android.intent.action.VIEW\" />\n" +
@@ -84,11 +84,11 @@ class ReferrerReceiverTest: LintDetectorTest() {
                 "            </intent-filter>\n" +
                 "        </activity>\n" +
                 "\n" +
-                "        <activity android:name=\"com.mparticle.lints" +
+                "        <activity exported=\"true\" android:name=\"com.mparticle.lints" +
                 ".Activity2\">\n" +
                 "        </activity>\n" +
                 "\n" +
-                "        <activity android:name=\"com.mparticle.lints" +
+                "        <activity exported=\"true\" android:name=\"com.mparticle.lints" +
                 ".Activity3\">\n" +
                 "            <intent-filter>\n" +
                 "                <action android:name=\"android.intent.action.SEND\"/>\n" +

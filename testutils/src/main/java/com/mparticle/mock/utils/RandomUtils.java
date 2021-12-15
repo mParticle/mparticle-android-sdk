@@ -12,7 +12,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Utilities for generating tests with Randomness.
