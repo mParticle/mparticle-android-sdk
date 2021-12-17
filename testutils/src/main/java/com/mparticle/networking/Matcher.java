@@ -15,6 +15,7 @@ public class Matcher {
     MockServer.UrlMatcher urlMatcher;
     MockServer.JSONMatch bodyMatch;
     boolean keepAfterMatch;
+    Long timestamp = System.currentTimeMillis();
 
     boolean isMatch(MPConnectionTestImpl mockConnection) {
         if (url != null) {

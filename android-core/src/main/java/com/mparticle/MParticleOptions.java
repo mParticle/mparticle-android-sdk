@@ -41,6 +41,7 @@ public class MParticleOptions {
     private Boolean mAndroidIdDisabled = false;
     private Integer mUploadInterval = ConfigManager.DEFAULT_UPLOAD_INTERVAL;  //seconds
     private Integer mSessionTimeout = ConfigManager.DEFAULT_SESSION_TIMEOUT_SECONDS; //seconds
+    private Long mConfigMaxAge = null;
     private Boolean mUnCaughtExceptionLogging = false;
     private MParticle.LogLevel mLogLevel = MParticle.LogLevel.DEBUG;
     private AttributionListener mAttributionListener;
@@ -95,6 +96,13 @@ public class MParticleOptions {
                 Logger.warning("Session Timeout must be a positive number, disregarding value.");
             } else {
                 this.mSessionTimeout = builder.sessionTimeout;
+            }
+        }
+        if (builder.configMaxAge != null) {
+            if (builder.configMaxAge < 0) {
+                Logger.warning("Config Max Age must be a positive number, disregarding value.");
+            } else {
+                this.mConfigMaxAge = builder.configMaxAge;
             }
         }
         if (builder.unCaughtExceptionLogging != null) {
@@ -219,6 +227,11 @@ public class MParticleOptions {
     }
 
     @NonNull
+    public Long getConfigMaxAge() {
+        return mConfigMaxAge;
+    }
+
+    @NonNull
     public Boolean isUncaughtExceptionLoggingEnabled() {
         return mUnCaughtExceptionLogging;
     }
@@ -320,6 +333,7 @@ public class MParticleOptions {
         private Boolean androidIdDisabled = null;
         private Integer uploadInterval = null;
         private Integer sessionTimeout = null;
+        private Long configMaxAge = null;
         private Boolean unCaughtExceptionLogging = null;
         private MParticle.LogLevel logLevel = null;
         BaseIdentityTask identityTask;
@@ -471,6 +485,28 @@ public class MParticleOptions {
         @NonNull
         public Builder sessionTimeout(int sessionTimeout) {
             this.sessionTimeout = sessionTimeout;
+            return this;
+        }
+
+        /**
+         * Set a maximum threshold for stored configuration age.
+         *
+         * When the SDK starts, before we attempt to fetch a fresh config from the server, we
+         * will load the most recent previous config from disk. when configMaxAge is set, we will
+         * check the timestamp on that config and, if it's age is greater than the threshold, instead
+         * of loading it we will delete it and wait for the fresh config to arrive.
+         *
+         * This field is especially useful if your application often updates the kit/forwarding logic and
+         * has a portion of user's who experience prolonged network interruptions. In these cases, a reasonable
+         * configMaxAge will prevent those users from potentially using very forwarding logic
+         *
+         * @param configMaxAge the upper limit for config age, in seconds
+         *
+         * @return the instance of the builder, for chaining calls
+         */
+        @NonNull
+        public Builder configMaxAgeSeconds(Long configMaxAge) {
+            this.configMaxAge = configMaxAge;
             return this;
         }
 

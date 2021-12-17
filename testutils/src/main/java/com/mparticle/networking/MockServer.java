@@ -14,6 +14,7 @@ import org.json.JSONObject;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -473,7 +474,12 @@ public class MockServer {
     //the server is started before MParticle.start() is called, which means the urls in the "logic"
     //might not contain the same SDK key that was set later in MParticle.start()
     private void reverseAndUpdateKey(List<Map.Entry<Matcher, Object>> logic) {
-        Collections.reverse(logic);
+        Collections.sort(logic, new Comparator<Map.Entry<Matcher, Object>>() {
+            @Override
+            public int compare(Map.Entry<Matcher, Object> o1, Map.Entry<Matcher, Object> o2) {
+                return o1.getKey().timestamp == o2.getKey().timestamp ? 0 : o1.getKey().timestamp < o2.getKey().timestamp ? 1 : -1;
+            }
+        });
         String apiKey = ConfigManager.getInstance(context).getApiKey();
         try {
             for (Map.Entry<Matcher, Object> entry : logic) {
