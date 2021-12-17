@@ -99,7 +99,7 @@ public class ConfigManager {
     private JSONObject mCurrentCookies;
     private String mDataplanId;
     private Integer mDataplanVersion;
-    private Long mMaxConfigAge;
+    private Integer mMaxConfigAge;
     public static final int DEFAULT_CONNECTION_TIMEOUT_SECONDS = 30;
     public static final int MINIMUM_CONNECTION_TIMEOUT_SECONDS = 1;
     public static final int DEFAULT_SESSION_TIMEOUT_SECONDS = 60;
@@ -130,7 +130,7 @@ public class ConfigManager {
         this(options.getContext(), options.getEnvironment(), options.getApiKey(), options.getApiSecret(), options.getDataplanOptions(), options.getDataplanId(), options.getDataplanVersion(), options.getConfigMaxAge(), options.getConfigurationsForTarget(ConfigManager.class));
     }
 
-    public ConfigManager(@NonNull Context context, @Nullable MParticle.Environment environment, @Nullable String apiKey, @Nullable String apiSecret, @Nullable MParticleOptions.DataplanOptions dataplanOptions, @Nullable String dataplanId, @Nullable Integer dataplanVersion, @Nullable Long configMaxAge, @Nullable List<Configuration<ConfigManager>> configurations) {
+    public ConfigManager(@NonNull Context context, @Nullable MParticle.Environment environment, @Nullable String apiKey, @Nullable String apiSecret, @Nullable MParticleOptions.DataplanOptions dataplanOptions, @Nullable String dataplanId, @Nullable Integer dataplanVersion, @Nullable Integer configMaxAge, @Nullable List<Configuration<ConfigManager>> configurations) {
         mContext = context.getApplicationContext();
         sPreferences = getPreferences(mContext);
         mLocalPrefs = new AppConfig(mContext, environment, sPreferences, apiKey, apiSecret);
