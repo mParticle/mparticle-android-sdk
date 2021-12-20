@@ -14,7 +14,7 @@ import androidx.annotation.NonNull;
  * <p></p>
  * <pre>
  * {@code
- * <service android:name="com.mparticle.MPService" />}
+ * <service android:exported="true" android:name="com.mparticle.MPService" />}
  * </pre>
  */
 @SuppressLint("Registered")

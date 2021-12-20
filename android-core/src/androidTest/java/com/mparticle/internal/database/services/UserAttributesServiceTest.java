@@ -2,7 +2,7 @@ package com.mparticle.internal.database.services;
 
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 public class UserAttributesServiceTest extends BaseMPServiceTest {
     @Test

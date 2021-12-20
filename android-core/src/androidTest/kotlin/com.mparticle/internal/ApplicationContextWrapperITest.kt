@@ -8,8 +8,8 @@ import android.os.Looper
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mparticle.OrchestratorOnly
 import com.mparticle.testutils.BaseAbstractTest
-import junit.framework.Assert.assertNotNull
-import junit.framework.Assert.assertNull
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 

@@ -5,8 +5,8 @@ import com.google.firebase.messaging.FirebaseMessagingServiceTestContext
 import com.mparticle.MParticle
 import com.mparticle.messaging.InstanceIdService
 import com.mparticle.testutils.BaseCleanStartedEachTest
-import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertNull
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 import kotlin.test.assertNotNull
 

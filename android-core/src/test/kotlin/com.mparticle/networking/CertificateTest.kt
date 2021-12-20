@@ -1,8 +1,8 @@
 package com.mparticle.networking;
 
 import com.mparticle.testutils.RandomUtils
-import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertNull
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 
