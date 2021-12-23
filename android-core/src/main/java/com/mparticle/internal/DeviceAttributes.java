@@ -144,8 +144,8 @@ public class DeviceAttributes {
     }
 
     public static void addAndroidId(JSONObject attributes, Context context) throws JSONException {
-        if (!MParticle.isAndroidIdDisabled()) {
-            String androidId = MPUtility.getAndroidID(context);
+        String androidId = MPUtility.getAndroidID(context);
+        if (!MPUtility.isEmpty(androidId)) {
             attributes.put(MessageKey.DEVICE_ID, androidId);
             attributes.put(MessageKey.DEVICE_ANID, androidId);
             attributes.put(MessageKey.DEVICE_OPEN_UDID, MPUtility.getOpenUDID(context));

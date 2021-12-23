@@ -27,24 +27,39 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertNull;
 
 public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
 
     @Test
-    public void testInitialIdentitiesPresent() throws Exception {
+    public void testInitialIdentitiesPresentWithAndroidId() throws Exception {
         final Map<MParticle.IdentityType, String> identities = mRandomUtils.getRandomUserIdentities();
 
         IdentityApiRequest request = IdentityApiRequest.withEmptyUser()
                 .userIdentities(identities)
                 .build();
         startMParticle(MParticleOptions.builder(mContext)
+                .androidIdDisabled(false)
                 .identify(request));
 
         assertTrue(mServer.Requests().getIdentify().size() == 1);
-        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), identities);
+        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), identities, false);
+    }
 
-        MParticle.setInstance(null);
+    @Test
+    public void testInitialIdentitiesPresentWithoutAndroidId() throws Exception {
+        final Map<MParticle.IdentityType, String> identities = mRandomUtils.getRandomUserIdentities();
+
+        IdentityApiRequest request = IdentityApiRequest.withEmptyUser()
+                .userIdentities(identities)
+                .build();
+        startMParticle(MParticleOptions.builder(mContext)
+                .androidIdDisabled(true)
+                .identify(request));
+
+        assertTrue(mServer.Requests().getIdentify().size() == 1);
+        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), identities, true);
     }
 
 
@@ -53,7 +68,7 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
         startMParticle();
 
         assertEquals(mServer.Requests().getIdentify().size(), 1);
-        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), new HashMap<MParticle.IdentityType, String>());
+        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), new HashMap<>(), false);
     }
 
     @Test
@@ -75,7 +90,7 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
         startMParticle();
 
         assertEquals(mServer.Requests().getIdentify().size(), 1);
-        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), identities);
+        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), identities, false);
     }
 
     /**
@@ -160,7 +175,7 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
         assertTrue(called.value);
     }
 
-    private void assertIdentitiesMatch(Request request, Map<MParticle.IdentityType, String> identities) throws Exception {
+    private void assertIdentitiesMatch(Request request, Map<MParticle.IdentityType, String> identities, boolean androidIdDisabled) throws Exception {
         assertTrue(request instanceof IdentityRequest);
         IdentityRequest identityRequest = request.asIdentityRequest();
         assertNotNull(identityRequest);
@@ -168,7 +183,11 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
         JSONObject knownIdentities = identityRequest.getBody().known_identities;
         assertNotNull(knownIdentities);
 
-        assertNotNull(knownIdentities.remove("android_uuid"));
+        if (androidIdDisabled) {
+            assertFalse(knownIdentities.has("android_uuid"));
+        } else {
+            assertNotNull(knownIdentities.remove("android_uuid"));
+        }
         assertNotNull(knownIdentities.remove("device_application_stamp"));
 
         assertEquals(knownIdentities.length(), identities.size());
