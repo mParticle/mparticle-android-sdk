@@ -68,7 +68,7 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
         startMParticle();
 
         assertEquals(mServer.Requests().getIdentify().size(), 1);
-        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), new HashMap<>(), false);
+        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), new HashMap<>(), true);
     }
 
     @Test
@@ -90,7 +90,7 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
         startMParticle();
 
         assertEquals(mServer.Requests().getIdentify().size(), 1);
-        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), identities, false);
+        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), identities, true);
     }
 
     /**

@@ -11,6 +11,8 @@ import org.json.JSONObject;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class DeviceAttributesTests extends BaseCleanInstallEachTest {
@@ -18,12 +20,11 @@ public class DeviceAttributesTests extends BaseCleanInstallEachTest {
     @Test
     public void testAndroidIDCollection() throws Exception {
         Context context = InstrumentationRegistry.getInstrumentation().getContext();
-        String androidId = MPUtility.getAndroidID(context);
         JSONObject attributes = new JSONObject();
         DeviceAttributes.addAndroidId(attributes, context);
-        assertEquals(attributes.getString(Constants.MessageKey.DEVICE_ANID),androidId);
-        assertTrue(attributes.getString(Constants.MessageKey.DEVICE_OPEN_UDID).length() > 0);
-        assertEquals(attributes.getString(Constants.MessageKey.DEVICE_ID),androidId);
+        assertFalse(attributes.has(Constants.MessageKey.DEVICE_ANID));
+        assertFalse(attributes.has(Constants.MessageKey.DEVICE_OPEN_UDID));
+        assertFalse(attributes.has(Constants.MessageKey.DEVICE_ID));
 
         MParticleOptions options = MParticleOptions.builder(context)
                 .androidIdDisabled(true)
@@ -31,7 +32,23 @@ public class DeviceAttributesTests extends BaseCleanInstallEachTest {
                 .build();
         MParticle.start(options);
         JSONObject newAttributes = new JSONObject();
-        DeviceAttributes.addAndroidId(attributes, context);
+        DeviceAttributes.addAndroidId(newAttributes, context);
         assertTrue(newAttributes.length() == 0);
+
+        MParticle.setInstance(null);
+
+        options = MParticleOptions.builder(context)
+                .androidIdDisabled(false)
+                .credentials("key", "secret")
+                .build();
+        MParticle.start(options);
+        newAttributes = new JSONObject();
+        String androidId = MPUtility.getAndroidID(context);
+        DeviceAttributes.addAndroidId(newAttributes, context);
+        assertTrue(newAttributes.length() == 3);
+        assertEquals(newAttributes.getString(Constants.MessageKey.DEVICE_ANID),androidId);
+        assertTrue(newAttributes.getString(Constants.MessageKey.DEVICE_OPEN_UDID).length() > 0);
+        assertEquals(newAttributes.getString(Constants.MessageKey.DEVICE_ID),androidId);
+
     }
 }

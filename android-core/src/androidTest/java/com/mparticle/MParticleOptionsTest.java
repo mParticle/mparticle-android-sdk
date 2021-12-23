@@ -23,6 +23,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
@@ -152,13 +154,26 @@ public class MParticleOptionsTest extends BaseAbstractTest {
 
     @Test
     public void testAndroidIdDisabled() throws Exception {
-        MParticle.setInstance(null);
-        startMParticle(MParticleOptions.builder(mContext)
-                .androidIdDisabled(true));
+        //test defaults
         assertTrue(MParticle.isAndroidIdDisabled());
         MParticle.setInstance(null);
-        startMParticle(MParticleOptions.builder(mContext)
-                .androidIdDisabled(false));
+        startMParticle(MParticleOptions.builder(mContext));
+        assertTrue(MParticle.isAndroidIdDisabled());
+
+        //test androidIdDsabled == true
+        MParticle.setInstance(null);
+        startMParticle(
+                MParticleOptions.builder(mContext)
+                        .androidIdDisabled(true)
+        );
+        assertTrue(MParticle.isAndroidIdDisabled());
+        MParticle.setInstance(null);
+
+        //test androidIdDisabled == false
+        startMParticle(
+                MParticleOptions.builder(mContext)
+                        .androidIdDisabled(false)
+        );
         assertFalse(MParticle.isAndroidIdDisabled());
     }
 
@@ -456,4 +471,38 @@ public class MParticleOptionsTest extends BaseAbstractTest {
         assertNull(options.getConfigMaxAge());
     }
 
+    @Test
+    public void  testAndroidIdLogMessage() {
+        List<String> infoLogs = new ArrayList();
+        Logger.setLogHandler(new Logger.DefaultLogHandler() {
+            @Override
+            public void log(MParticle.LogLevel priority, Throwable error, String messages) {
+                super.log(priority, error, messages);
+                if (priority == MParticle.LogLevel.INFO) {
+                    infoLogs.add(messages);
+                }
+            }
+        });
+        MParticleOptions.builder(mContext)
+                .credentials("this", "that")
+                .androidIdDisabled(true)
+                .build();
+        assertTrue(infoLogs.contains("ANDROID_ID will not be collected based on MParticleOptions settings"));
+        infoLogs.clear();
+
+        MParticleOptions.builder(mContext)
+                .credentials("this", "that")
+                .androidIdDisabled(false)
+                .build();
+        assertTrue(infoLogs.contains("ANDROID_ID will be collected based on MParticleOptions settings"));
+        infoLogs.clear();
+
+        //test default
+        MParticleOptions.builder(mContext)
+                .credentials("this", "that")
+                .build();
+
+        assertTrue(infoLogs.contains("ANDROID_ID will not be collected based on default settings"));
+        infoLogs.clear();
+    }
 }

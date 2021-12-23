@@ -90,7 +90,7 @@ public class MParticle {
     @NonNull protected MParticleDBManager mDatabaseManager;
     @NonNull protected volatile AttributionListener mAttributionListener;
     @NonNull protected IdentityApi mIdentityApi;
-    static volatile boolean sAndroidIdDisabled;
+    static volatile boolean sAndroidIdDisabled = true;
     static volatile boolean sDevicePerformanceMetricsDisabled;
     @NonNull protected boolean locationTrackingEnabled = false;
     @NonNull protected Internal mInternal = new Internal();

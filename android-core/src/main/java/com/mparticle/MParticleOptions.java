@@ -38,7 +38,7 @@ public class MParticleOptions {
     private String mApiSecret;
     private IdentityApiRequest mIdentifyRequest;
     private Boolean mDevicePerformanceMetricsDisabled = false;
-    private Boolean mAndroidIdDisabled = false;
+    private Boolean mAndroidIdDisabled = true;
     private Integer mUploadInterval = ConfigManager.DEFAULT_UPLOAD_INTERVAL;  //seconds
     private Integer mSessionTimeout = ConfigManager.DEFAULT_SESSION_TIMEOUT_SECONDS; //seconds
     private Integer mConfigMaxAge = null;
@@ -84,6 +84,8 @@ public class MParticleOptions {
         if (builder.androidIdDisabled != null) {
             this.mAndroidIdDisabled = builder.androidIdDisabled;
         }
+        Logger.info(String.format("ANDROID_ID will%s be collected based on %s settings", mAndroidIdDisabled ? " not" : "", builder.androidIdDisabled != null ? "MParticleOptions" : "default"));
+
         if (builder.uploadInterval != null) {
             if (builder.uploadInterval <= 0) {
                 Logger.warning("Upload Interval must be a positive number, disregarding value.");
