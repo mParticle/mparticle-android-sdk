@@ -1,3 +1,12 @@
+## [5.33.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.33.1...v5.33.2) (2022-01-04)
+
+
+### Bug Fixes
+
+* remove bintray url from kits ([323d57d](https://github.com/mParticle/mparticle-android-sdk/commit/323d57d2d12e65cb539f6a9c90dc8870d56fb7c0))
+* Remove broken Sonatype plugin dependency ([41e86a1](https://github.com/mParticle/mparticle-android-sdk/commit/41e86a1ca36ba0a37740200129672da2ba1e9ed5))
+* Transitive dependency, remove version range for localbroadcastmanager ([5f94984](https://github.com/mParticle/mparticle-android-sdk/commit/5f94984632ce5020916129eb03e1e1c835620081))
+
 ## [5.33.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.33.0...v5.33.1) (2021-11-18)
 
 
