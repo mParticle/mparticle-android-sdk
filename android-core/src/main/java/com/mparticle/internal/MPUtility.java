@@ -348,8 +348,13 @@ public class MPUtility {
     }
 
     @TargetApi(Build.VERSION_CODES.CUPCAKE)
+    @Nullable
     public static String getAndroidID(Context context) {
-        return Settings.Secure.getString(context.getContentResolver(), "android_id");
+        if (!MParticle.isAndroidIdDisabled()) {
+            return Settings.Secure.getString(context.getContentResolver(), "android_id");
+        } else {
+            return null;
+        }
     }
 
     public static String getTimeZone() {
