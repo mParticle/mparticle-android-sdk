@@ -1,4 +1,4 @@
-name: Cross Platform Tests
+name: "Cross Platform Tests"
 on:
   pull_request_target
 jobs:
