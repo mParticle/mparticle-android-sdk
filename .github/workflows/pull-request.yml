@@ -57,22 +57,12 @@ jobs:
           java-version: "11"
       - name: "Run Android Core SDK Lint"
         run: ./gradlew lint
-      - name: "Setup Android Kit Lint"
-        run: ./gradlew publishReleaseLocal
-      - name: "Run Android Kit Lint"
-        run: ./gradlew publishReleaseLocal -c settings-kits.gradle lint
       - name: "Archive Test Results"
         uses: actions/upload-artifact@v2
         if: ${{ always() }}
         with:
           name: "core-lint-results"
           path: ./**/build/reports/**
-      - name: "Archive Test Kit Results"
-        uses: actions/upload-artifact@v2
-        if: ${{ always() }}
-        with:
-          name: "kit-lint-results"
-          path: kits/**/build/reports/**
   automerge:
       name: "Rebase dependabot PRs"
       runs-on: ubuntu-18.04
