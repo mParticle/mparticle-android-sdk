@@ -436,22 +436,22 @@ public class MParticleOptionsTest extends BaseAbstractTest {
         //0 should return 0
         options = MParticleOptions.builder(mContext)
                 .credentials("key", "secret")
-                .configMaxAgeSeconds(0)
+                .configMaxAgeSeconds(0L)
                 .build();
         assertEquals(0, options.getConfigMaxAge().intValue());
 
         //positive number should return positive number
-        int testValue = Math.abs(ran.nextInt());
+        Long testValue = Math.abs(ran.nextLong());
         options = MParticleOptions.builder(mContext)
                 .credentials("key", "secret")
                 .configMaxAgeSeconds(testValue)
                 .build();
-        assertEquals(testValue, options.getConfigMaxAge().intValue());
+        assertEquals(testValue, options.getConfigMaxAge());
 
         //negative number should get thrown out and return null
         options = MParticleOptions.builder(mContext)
                 .credentials("key", "secret")
-                .configMaxAgeSeconds(-5)
+                .configMaxAgeSeconds(-5L)
                 .build();
         assertNull(options.getConfigMaxAge());
     }

@@ -62,7 +62,7 @@ class ConfigStalenessCheckTest: BaseCleanInstallEachTest() {
         var latch = MPLatch(1);
         val options = MParticleOptions.builder(mContext)
             .addCredentials()
-            .configMaxAgeSeconds(1)
+            .configMaxAgeSeconds(1L)
             .build()
 
         mServer.setupConfigResponse(config1.toString())
@@ -103,7 +103,7 @@ class ConfigStalenessCheckTest: BaseCleanInstallEachTest() {
         var latch = MPLatch(1);
         val options = MParticleOptions.builder(mContext)
             .addCredentials()
-            .configMaxAgeSeconds(100)
+            .configMaxAgeSeconds(100L)
             .build()
 
         mServer.setupConfigResponse(config1.toString())
@@ -143,7 +143,7 @@ class ConfigStalenessCheckTest: BaseCleanInstallEachTest() {
         var latch = MPLatch(1);
         val options = MParticleOptions.builder(mContext)
             .addCredentials()
-            .configMaxAgeSeconds(0)
+            .configMaxAgeSeconds(0L)
             .build()
 
         mServer.setupConfigResponse(config1.toString())
