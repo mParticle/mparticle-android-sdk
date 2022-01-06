@@ -41,7 +41,7 @@ public class MParticleOptions {
     private Boolean mAndroidIdDisabled = false;
     private Integer mUploadInterval = ConfigManager.DEFAULT_UPLOAD_INTERVAL;  //seconds
     private Integer mSessionTimeout = ConfigManager.DEFAULT_SESSION_TIMEOUT_SECONDS; //seconds
-    private Long mConfigMaxAge = null;
+    private Integer mConfigMaxAge = null;
     private Boolean mUnCaughtExceptionLogging = false;
     private MParticle.LogLevel mLogLevel = MParticle.LogLevel.DEBUG;
     private AttributionListener mAttributionListener;
@@ -227,7 +227,7 @@ public class MParticleOptions {
     }
 
     @NonNull
-    public Long getConfigMaxAge() {
+    public Integer getConfigMaxAge() {
         return mConfigMaxAge;
     }
 
@@ -333,7 +333,7 @@ public class MParticleOptions {
         private Boolean androidIdDisabled = null;
         private Integer uploadInterval = null;
         private Integer sessionTimeout = null;
-        private Long configMaxAge = null;
+        private Integer configMaxAge = null;
         private Boolean unCaughtExceptionLogging = null;
         private MParticle.LogLevel logLevel = null;
         BaseIdentityTask identityTask;
@@ -505,7 +505,7 @@ public class MParticleOptions {
          * @return the instance of the builder, for chaining calls
          */
         @NonNull
-        public Builder configMaxAgeSeconds(Long configMaxAge) {
+        public Builder configMaxAgeSeconds(int configMaxAge) {
             this.configMaxAge = configMaxAge;
             return this;
         }
