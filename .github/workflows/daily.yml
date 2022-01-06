@@ -9,11 +9,19 @@ on:
   workflow_dispatch:
 
 jobs:
+  confirm-public-repo-development-branch:
+    name: "Confirm android daily cron is run from public origin repo"
+    runs-on: ubuntu-18.04
+    steps:
+      - name: "Cancel workflow"
+        if: ${{ github.repository != 'mParticle/mparticle-android-sdk' }}
+        uses: andymckay/cancel-action@0.2
 
   instrumented-tests:
     name: "Instrumented Tests"
     timeout-minutes: 30
     runs-on: macos-11
+    needs: confirm-public-repo-development-branch
     steps:
       - name: "Checkout development branch"
         uses: actions/checkout@v2
@@ -41,6 +49,7 @@ jobs:
     name: "Unit Tests"
     timeout-minutes: 15
     runs-on: ubuntu-18.04
+    needs: confirm-public-repo-development-branch
     steps:
       - name: "Checkout development branch"
         uses: actions/checkout@v2
@@ -61,6 +70,7 @@ jobs:
     name: "Lint Checks"
     timeout-minutes: 15
     runs-on: macos-11
+    needs: confirm-public-repo-development-branch
     steps:
       - name: "Checkout Branch"
         uses: actions/checkout@v2
@@ -119,7 +129,7 @@ jobs:
 
   semantic-release:
     name: "Test Semantic Release"
-    needs: update-kits
+    needs: [update-kits]
     runs-on: macos-11
     env:
       GITHUB_TOKEN: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
