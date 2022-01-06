@@ -425,4 +425,35 @@ public class MParticleOptionsTest extends BaseAbstractTest {
         assertTrue(com.mparticle.networking.AccessUtils.equals(options.getNetworkOptions(), com.mparticle.networking.AccessUtils.getDefaultNetworkOptions()));
     }
 
+    @Test
+    public void testConfigStaleness() {
+        //nothing set, should return null
+        MParticleOptions options = MParticleOptions.builder(mContext)
+                .credentials("key", "secret")
+                .build();
+        assertNull(options.getConfigMaxAge());
+
+        //0 should return 0
+        options = MParticleOptions.builder(mContext)
+                .credentials("key", "secret")
+                .configMaxAgeSeconds(0L)
+                .build();
+        assertEquals(0, options.getConfigMaxAge().intValue());
+
+        //positive number should return positive number
+        Long testValue = Math.abs(ran.nextLong());
+        options = MParticleOptions.builder(mContext)
+                .credentials("key", "secret")
+                .configMaxAgeSeconds(testValue)
+                .build();
+        assertEquals(testValue, options.getConfigMaxAge());
+
+        //negative number should get thrown out and return null
+        options = MParticleOptions.builder(mContext)
+                .credentials("key", "secret")
+                .configMaxAgeSeconds(-5L)
+                .build();
+        assertNull(options.getConfigMaxAge());
+    }
+
 }

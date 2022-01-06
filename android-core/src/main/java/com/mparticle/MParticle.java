@@ -99,7 +99,7 @@ public class MParticle {
     protected MParticle() { }
     
     private MParticle(MParticleOptions options) {
-        ConfigManager configManager = new ConfigManager(options.getContext(), options.getEnvironment(), options.getApiKey(), options.getApiSecret(), options.getDataplanOptions(), options.getDataplanId(), options.getDataplanVersion(), options);
+        ConfigManager configManager = new ConfigManager(options);
         configManager.setUploadInterval(options.getUploadInterval());
         configManager.setSessionTimeout(options.getSessionTimeout());
         configManager.setIdentityConnectionTimeout(options.getConnectionTimeout());
@@ -362,7 +362,6 @@ public class MParticle {
             mMessageManager.logEvent(event, mAppStateManager.getCurrentActivityName());
             Logger.debug("Logged event - \n", event.toString());
             mKitManager.logEvent(event);
-
         }
     }
 

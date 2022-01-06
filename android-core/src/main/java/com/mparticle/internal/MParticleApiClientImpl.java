@@ -144,11 +144,11 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
             }
 
             connection.setRequestProperty("User-Agent", mUserAgent);
-            String etag = mPreferences.getString(Constants.PrefKeys.ETAG, null);
+            String etag = mConfigManager.getEtag();
             if (etag != null){
                 connection.setRequestProperty("If-None-Match", etag);
             }
-            String modified = mPreferences.getString(Constants.PrefKeys.IF_MODIFIED, null);
+            String modified = mConfigManager.getIfModified();
             if (modified != null){
                 connection.setRequestProperty("If-Modified-Since", modified);
             }
@@ -179,17 +179,10 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
                         connection.getResponseMessage() +"\n" +
                         "response:\n" + response.toString());
 
-                mConfigManager.updateConfig(response);
                 String newEtag = connection.getHeaderField("ETag");
                 String newModified = connection.getHeaderField("Last-Modified");
-                SharedPreferences.Editor editor = mPreferences.edit();
-                if (!MPUtility.isEmpty(newEtag)) {
-                    editor.putString(Constants.PrefKeys.ETAG, newEtag);
-                }
-                if (!MPUtility.isEmpty(newModified)) {
-                    editor.putString(Constants.PrefKeys.IF_MODIFIED, newModified);
-                }
-                editor.apply();
+
+                mConfigManager.updateConfig(response, newEtag, newModified);
             }else if (connection.getResponseCode() == 400) {
                 throw new MPConfigException();
             } else if (connection.getResponseCode() == 304) {

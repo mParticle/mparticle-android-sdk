@@ -117,7 +117,7 @@ public class MParticleApiClientImplTest {
         Mockito.when(MPUtility.getJsonResponse(mockConnection)).thenReturn(response);
         ArgumentCaptor<JSONObject> captor = ArgumentCaptor.forClass(JSONObject.class);
         client.fetchConfig();
-        Mockito.verify(configManager).updateConfig(captor.capture());
+        Mockito.verify(configManager).updateConfig(captor.capture(), Mockito.nullable(String.class), Mockito.nullable(String.class));
         assertEquals(response, captor.getValue());
     }
 
@@ -223,7 +223,7 @@ public class MParticleApiClientImplTest {
         Mockito.when(MPUtility.getJsonResponse(mockConnection)).thenReturn(response);
         ArgumentCaptor<JSONObject> captor = ArgumentCaptor.forClass(JSONObject.class);
         client.fetchConfig();
-        Mockito.verify(configManager).updateConfig(captor.capture());
+        Mockito.verify(configManager).updateConfig(captor.capture(), Mockito.nullable(String.class), Mockito.nullable(String.class));
         assertEquals(response, captor.getValue());
     }
 
