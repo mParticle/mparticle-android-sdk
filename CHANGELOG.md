@@ -1,3 +1,16 @@
+# [5.34.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.33.2...v5.34.0) (2022-01-06)
+
+
+### Bug Fixes
+
+* Add additional checks for AndroidId ([#87](https://github.com/mParticle/mparticle-android-sdk/issues/87)) ([1eceea3](https://github.com/mParticle/mparticle-android-sdk/commit/1eceea3c80d54648916d6d2d1170a7afc97c7c2f))
+* Change configMaxAge type from Long to int ([#91](https://github.com/mParticle/mparticle-android-sdk/issues/91)) ([14ad4b5](https://github.com/mParticle/mparticle-android-sdk/commit/14ad4b5cd93573287866554c2ec3b3df9d33b94a))
+
+
+### Features
+
+* Add configMaxAge to MParticleOptions ([#85](https://github.com/mParticle/mparticle-android-sdk/issues/85)) ([eaadccd](https://github.com/mParticle/mparticle-android-sdk/commit/eaadccd25c9fec33178aa214fbb6525335797def))
+
 ## [5.33.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.33.1...v5.33.2) (2022-01-04)
 
 
