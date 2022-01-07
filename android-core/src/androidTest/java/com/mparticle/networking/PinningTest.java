@@ -16,8 +16,8 @@ import com.mparticle.testutils.MPLatch;
 
 import java.util.concurrent.CountDownLatch;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class PinningTest extends BaseCleanStartedEachTest {
     MutableBoolean called;

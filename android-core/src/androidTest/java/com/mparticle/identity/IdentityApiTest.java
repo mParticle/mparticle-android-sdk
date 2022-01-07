@@ -30,11 +30,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static junit.framework.Assert.assertNotSame;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
 public final class IdentityApiTest extends BaseCleanStartedEachTest {

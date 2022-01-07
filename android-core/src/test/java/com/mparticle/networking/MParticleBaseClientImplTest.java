@@ -14,8 +14,8 @@ import java.util.zip.GZIPOutputStream;
 
 import javax.net.ssl.SSLSocketFactory;
 
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 
 public class MParticleBaseClientImplTest {

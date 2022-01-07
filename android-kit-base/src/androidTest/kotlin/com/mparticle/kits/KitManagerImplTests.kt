@@ -7,7 +7,7 @@ import com.mparticle.MParticleOptions
 import com.mparticle.internal.ConfigManager
 import com.mparticle.kits.testkits.*
 import com.mparticle.testutils.MPLatch
-import junit.framework.Assert.assertTrue
+import org.junit.Assert.assertTrue
 import org.json.JSONObject
 import org.junit.Test
 

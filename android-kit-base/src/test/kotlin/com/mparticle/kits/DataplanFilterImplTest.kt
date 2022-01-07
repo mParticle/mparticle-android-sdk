@@ -18,8 +18,8 @@ import com.mparticle.kits.DataplanFilterImpl.Companion.SCREEN_EVENT_KEY
 import com.mparticle.kits.DataplanFilterImpl.Companion.USER_ATTRIBUTES_KEY
 import com.mparticle.kits.DataplanFilterImpl.Companion.USER_IDENTITIES_KEY
 import com.mparticle.kits.DataplanFilterImpl.Companion.getEventsApiName
-import junit.framework.Assert.*
 import org.json.JSONObject
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import java.io.File
