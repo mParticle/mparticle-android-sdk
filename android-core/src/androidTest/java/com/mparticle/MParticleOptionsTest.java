@@ -155,17 +155,30 @@ public class MParticleOptionsTest extends BaseAbstractTest {
     @Test
     public void testAndroidIdDisabled() throws Exception {
         //test defaults
+        assertFalse(MParticle.isAndroidIdEnabled());
         assertTrue(MParticle.isAndroidIdDisabled());
         MParticle.setInstance(null);
         startMParticle(MParticleOptions.builder(mContext));
+        assertFalse(MParticle.isAndroidIdEnabled());
         assertTrue(MParticle.isAndroidIdDisabled());
 
-        //test androidIdDsabled == true
+        //test androidIdDisabled == true
         MParticle.setInstance(null);
         startMParticle(
                 MParticleOptions.builder(mContext)
                         .androidIdDisabled(true)
         );
+        assertFalse(MParticle.isAndroidIdEnabled());
+        assertTrue(MParticle.isAndroidIdDisabled());
+        MParticle.setInstance(null);
+
+        //test androidIdEnabled == false
+        MParticle.setInstance(null);
+        startMParticle(
+                MParticleOptions.builder(mContext)
+                        .androidIdEnabled(false)
+        );
+        assertFalse(MParticle.isAndroidIdEnabled());
         assertTrue(MParticle.isAndroidIdDisabled());
         MParticle.setInstance(null);
 
@@ -174,6 +187,15 @@ public class MParticleOptionsTest extends BaseAbstractTest {
                 MParticleOptions.builder(mContext)
                         .androidIdDisabled(false)
         );
+        assertTrue(MParticle.isAndroidIdEnabled());
+        assertFalse(MParticle.isAndroidIdDisabled());
+
+        //test androidIdEnabled == true
+        startMParticle(
+                MParticleOptions.builder(mContext)
+                        .androidIdEnabled(true)
+        );
+        assertTrue(MParticle.isAndroidIdEnabled());
         assertFalse(MParticle.isAndroidIdDisabled());
     }
 

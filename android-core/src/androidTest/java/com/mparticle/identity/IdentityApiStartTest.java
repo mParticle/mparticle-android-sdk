@@ -40,11 +40,11 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
                 .userIdentities(identities)
                 .build();
         startMParticle(MParticleOptions.builder(mContext)
-                .androidIdDisabled(false)
+                .androidIdEnabled(true)
                 .identify(request));
 
         assertTrue(mServer.Requests().getIdentify().size() == 1);
-        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), identities, false);
+        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), identities, true);
     }
 
     @Test
@@ -55,11 +55,11 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
                 .userIdentities(identities)
                 .build();
         startMParticle(MParticleOptions.builder(mContext)
-                .androidIdDisabled(true)
+                .androidIdEnabled(false)
                 .identify(request));
 
         assertTrue(mServer.Requests().getIdentify().size() == 1);
-        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), identities, true);
+        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), identities, false);
     }
 
 
@@ -68,7 +68,7 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
         startMParticle();
 
         assertEquals(mServer.Requests().getIdentify().size(), 1);
-        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), new HashMap<>(), true);
+        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), new HashMap<>(), false);
     }
 
     @Test
@@ -90,7 +90,7 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
         startMParticle();
 
         assertEquals(mServer.Requests().getIdentify().size(), 1);
-        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), identities, true);
+        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), identities, false);
     }
 
     /**
@@ -175,7 +175,7 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
         assertTrue(called.value);
     }
 
-    private void assertIdentitiesMatch(Request request, Map<MParticle.IdentityType, String> identities, boolean androidIdDisabled) throws Exception {
+    private void assertIdentitiesMatch(Request request, Map<MParticle.IdentityType, String> identities, boolean androidIdEnabled) throws Exception {
         assertTrue(request instanceof IdentityRequest);
         IdentityRequest identityRequest = request.asIdentityRequest();
         assertNotNull(identityRequest);
@@ -183,10 +183,10 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
         JSONObject knownIdentities = identityRequest.getBody().known_identities;
         assertNotNull(knownIdentities);
 
-        if (androidIdDisabled) {
-            assertFalse(knownIdentities.has("android_uuid"));
-        } else {
+        if (androidIdEnabled) {
             assertNotNull(knownIdentities.remove("android_uuid"));
+        } else {
+            assertFalse(knownIdentities.has("android_uuid"));
         }
         assertNotNull(knownIdentities.remove("device_application_stamp"));
 

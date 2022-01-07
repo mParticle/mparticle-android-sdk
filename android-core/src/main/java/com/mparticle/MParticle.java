@@ -90,7 +90,7 @@ public class MParticle {
     @NonNull protected MParticleDBManager mDatabaseManager;
     @NonNull protected volatile AttributionListener mAttributionListener;
     @NonNull protected IdentityApi mIdentityApi;
-    static volatile boolean sAndroidIdDisabled = true;
+    static volatile boolean sAndroidIdEnabled = false;
     static volatile boolean sDevicePerformanceMetricsDisabled;
     @NonNull protected boolean locationTrackingEnabled = false;
     @NonNull protected Internal mInternal = new Internal();
@@ -143,7 +143,7 @@ public class MParticle {
             synchronized (MParticle.class) {
                 if (instance == null) {
                     sDevicePerformanceMetricsDisabled = options.isDevicePerformanceMetricsDisabled();
-                    sAndroidIdDisabled = options.isAndroidIdDisabled();
+                    sAndroidIdEnabled = options.isAndroidIdEnabled();
                     setLogLevel(options.getLogLevel());
 
                     Context originalContext = context;
@@ -229,19 +229,37 @@ public class MParticle {
     }
 
     /**
+     *  @deprecated
+     *  This method has been replaced as the behavior has been inverted - Android ID collection is now disabled by default.
+     *  <p> Use {@link androidIdEnabled(boolean)} instead.
+     *
+     *
      * Query the status of Android ID collection.
      *
-     * By default, the SDK will collect <a href="http://developer.android.com/reference/android/provider/Settings.Secure.html#ANDROID_ID">Android Id</a> for the purpose
-     * of anonymous analytics. If you're not using an mParticle integration that consumes Android ID, the value will be sent to the mParticle
-     * servers and then immediately discarded. Use this API if you would like to additionally disable it from being collected entirely.
+     * By default, the SDK will NOT collect <a href="http://developer.android.com/reference/android/provider/Settings.Secure.html#ANDROID_ID">Android Id</a> for the purpose
+     * of anonymous analytics. If you're not using an mParticle integration that consumes Android ID and you would like to collect it, use this API to enable collection
      *
-     *
-     * @return true if Android ID collection is disabled. (false by default)
+     * @return false if Android ID collection is enabled. (true by default)
 
-     * @see MParticleOptions.Builder#androidIdDisabled(boolean)
+     * @see MParticleOptions.Builder#androidIdEnabled(boolean)
      */
+    @Deprecated
     public static boolean isAndroidIdDisabled() {
-        return sAndroidIdDisabled;
+        return !sAndroidIdEnabled;
+    }
+
+    /**
+     * Query the status of Android ID collection.
+     *
+     * By default, the SDK will NOT collect <a href="http://developer.android.com/reference/android/provider/Settings.Secure.html#ANDROID_ID">Android Id</a> for the purpose
+     * of anonymous analytics. If you're not using an mParticle integration that consumes Android ID and you would like to collect it, use this API to enable collection.
+     *
+     * @return true if Android ID collection is enabled. (false by default)
+
+     * @see MParticleOptions.Builder#androidIdEnabled(boolean)
+     */
+    public static boolean isAndroidIdEnabled() {
+        return sAndroidIdEnabled;
     }
 
     /**
