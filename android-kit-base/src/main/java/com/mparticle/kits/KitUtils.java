@@ -1,10 +1,16 @@
 package com.mparticle.kits;
 
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
+import android.provider.Settings;
 
+import androidx.annotation.Nullable;
+
+import com.mparticle.MParticle;
 import com.mparticle.internal.MPUtility;
 
 import java.math.BigInteger;
@@ -155,5 +161,15 @@ public final class KitUtils {
      */
     public static boolean parseBooleanSetting(Map<String, String> settings, String key) {
        return parseBooleanSetting(settings, key, false);
+    }
+
+    @TargetApi(Build.VERSION_CODES.CUPCAKE)
+    @Nullable
+    public static String getAndroidID(Context context) {
+        if (!MParticle.isAndroidIdDisabled()) {
+            return Settings.Secure.getString(context.getContentResolver(), "android_id");
+        } else {
+            return null;
+        }
     }
 }
