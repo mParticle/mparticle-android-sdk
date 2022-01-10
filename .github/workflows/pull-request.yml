@@ -8,6 +8,9 @@ jobs:
     steps:
       - name: "Checkout Branch"
         uses: actions/checkout@v2
+        with:
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+          ref: ${{github.head_ref}}
       - name: "Install JDK 11"
         uses: actions/setup-java@v2
         with:
@@ -18,11 +21,11 @@ jobs:
         with:
           api-level: 29
           script: ./gradlew :android-core:cAT :android-kit-base:cAT --stacktrace
-      - name: "Archive Test Results"
+      - name: "Archive Instrumented Tests Results"
         uses: actions/upload-artifact@v2
         if: ${{ always() }}
         with:
-          name: test-results
+          name: "instrumented-tests-results"
           path: android-core/build/reports/androidTests/connected/**
   unit-tests:
     name: "Unit Tests"
@@ -31,6 +34,9 @@ jobs:
     steps:
       - name: "Checkout Branch"
         uses: actions/checkout@v2
+        with:
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+          ref: ${{github.head_ref}}
       - name: "Install JDK 11"
         uses: actions/setup-java@v2
         with:
@@ -38,9 +44,12 @@ jobs:
           java-version: "11"
       - name: "Run Unit Tests"
         run: ./gradlew test
-      - name: "Android Test Report"
+      - name: "Android Unit Tests Report"
         uses: asadmansr/android-test-report-action@v1.2.0
         if: ${{ always() }}
+        with:
+          name: "unit-tests-results"
+          path: ./**/build/reports/**
   lint-checks:
     name: "Lint Checks"
     timeout-minutes: 15
@@ -49,6 +58,8 @@ jobs:
       - name: "Checkout Branch"
         uses: actions/checkout@v2
         with:
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+          ref: ${{github.head_ref}}
           submodules: recursive
       - name: "Install JDK 11"
         uses: actions/setup-java@v2
@@ -57,11 +68,11 @@ jobs:
           java-version: "11"
       - name: "Run Android Core SDK Lint"
         run: ./gradlew lint
-      - name: "Archive Test Results"
+      - name: "Archive Lint Test Results"
         uses: actions/upload-artifact@v2
         if: ${{ always() }}
         with:
-          name: "core-lint-results"
+          name: "lint-results"
           path: ./**/build/reports/**
   automerge:
       name: "Rebase dependabot PRs"
