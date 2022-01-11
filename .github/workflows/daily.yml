@@ -146,7 +146,7 @@ jobs:
       - name: "Merge future release branch into main branch"
         run: |
           git pull origin development
-      - name: "Semantic Release"
+      - name: "Semantic Release Dry Run"
         env:
           GITHUB_TOKEN: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
           GIT_AUTHOR_NAME: mparticle-bot
@@ -160,5 +160,5 @@ jobs:
           -p @semantic-release/changelog@5 \
           -p @semantic-release/git@9 \
           -p @semantic-release/exec@5 \
-          semantic-release
+          semantic-release --dry-run
 
