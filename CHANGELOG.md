@@ -1,3 +1,10 @@
+## [5.34.3](https://github.com/mParticle/mparticle-android-sdk/compare/v5.34.2...v5.34.3) (2022-01-11)
+
+
+### Bug Fixes
+
+* add dry run to fix daily cron health check job ([#95](https://github.com/mParticle/mparticle-android-sdk/issues/95)) ([92c443f](https://github.com/mParticle/mparticle-android-sdk/commit/92c443f0c9913860a25d474dfb57e70c4e549847))
+
 ## [5.34.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.34.1...v5.34.2) (2022-01-07)
 
 ## [5.34.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.34.0...v5.34.1) (2022-01-07)
