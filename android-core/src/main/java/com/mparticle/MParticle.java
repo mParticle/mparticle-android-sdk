@@ -1561,6 +1561,7 @@ public class MParticle {
         int CLEVERTAP = 135;
         int ONETRUST = 134;
         int GOOGLE_ANALYTICS_FIREBASE = 136;
+        int GOOGLE_ANALYTICS_FIREBASE_GA4 = 160;
         int PILGRIM = 211;
         int SWRVE = 1145;
         int BLUESHIFT = 1144;
