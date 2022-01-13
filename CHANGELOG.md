@@ -1,3 +1,15 @@
+# [5.35.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.34.3...v5.35.0) (2022-01-13)
+
+
+### Bug Fixes
+
+* Fix cross platforms for Android forked PRs when checking out code ([#97](https://github.com/mParticle/mparticle-android-sdk/issues/97)) ([90b2760](https://github.com/mParticle/mparticle-android-sdk/commit/90b276009b05575a7b339dbce7631687fa26a0af))
+
+
+### Features
+
+* Android id disabled default true ([#89](https://github.com/mParticle/mparticle-android-sdk/issues/89)) ([7fc0217](https://github.com/mParticle/mparticle-android-sdk/commit/7fc02173f2fe81b55817d1f502e30b1d0c5026f0))
+
 ## [5.34.3](https://github.com/mParticle/mparticle-android-sdk/compare/v5.34.2...v5.34.3) (2022-01-11)
 
 
