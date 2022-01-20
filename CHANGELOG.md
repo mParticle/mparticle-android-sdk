@@ -1,3 +1,10 @@
+## [5.35.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.35.0...v5.35.1) (2022-01-20)
+
+
+### Bug Fixes
+
+* update java docs syntax after gradle upgrade ([#98](https://github.com/mParticle/mparticle-android-sdk/issues/98)) ([9a8e22e](https://github.com/mParticle/mparticle-android-sdk/commit/9a8e22e2f43e801c7f9594122e7996e0b9b81c65))
+
 # [5.35.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.34.3...v5.35.0) (2022-01-13)
 
 
