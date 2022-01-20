@@ -40,16 +40,16 @@ android {
 }
 
 task kitSdkJavadocs(type: Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
-    source += 'build/generated/source/buildConfig/release/'
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    title = 'mParticle Android Kit API Reference'
-    failOnError false
     include {
         String filePath = it.toString()
         filePath.contains('KitIntegration.java') ||
                 filePath.contains('KitUtils')
     }
+    source = android.sourceSets.main.java.srcDirs
+    source += 'build/generated/source/buildConfig/release/'
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    title = 'mParticle Android Kit API Reference'
+    failOnError true
     getOptions().setNoTimestamp(true)
 }
 
@@ -65,7 +65,7 @@ task generateSourcesJar(type: Jar) {
 
 dependencies {
     api project(':android-core')
-    compileOnly 'androidx.annotation:annotation:[1.0.0,)'
+    api 'androidx.annotation:annotation:[1.0.0,)'
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation  files('libs/java-json.jar')
