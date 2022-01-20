@@ -96,17 +96,23 @@ android {
 }
 
 task coreSdkJavadocs(type: Javadoc) {
-        source = android.sourceSets.main.java.srcDirs
-        source += 'build/generated/source/buildConfig/release/'
-        classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    android.libraryVariants.all { variant ->
+        if (variant.name == 'release') {
+            source = android.sourceSets.main.java.srcDirs
+            source += 'build/generated/source/buildConfig/release/'
+            owner.classpath += variant.javaCompileProvider.get().classpath
+            classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+            classpath += project.files('src/main/java')
+        }
         title = 'mParticle Android SDK API Reference'
-        failOnError false
+        failOnError true
+        getOptions().setNoTimestamp(true)
         exclude {
             String filePath = it.toString()
             filePath.contains('/com/mparticle/internal/') ||
                     filePath.contains('/com/mparticle/kits/')
         }
-        getOptions().setNoTimestamp(true)
+    }
 }
 
 task generateJavadocsJar(type: Jar, dependsOn: coreSdkJavadocs) {
@@ -124,7 +130,7 @@ dependencies {
     compileOnly 'com.google.firebase:firebase-messaging:[10.2.1, )'
     compileOnly 'com.android.installreferrer:installreferrer:[1.0, )'
     compileOnly 'com.google.android.instantapps:instantapps:[1.0, )'
-    compileOnly 'androidx.annotation:annotation:[1.0.0,)'
+    api 'androidx.annotation:annotation:[1.0.0,)'
     compileOnly 'androidx.core:core:[1.3.2, )'
 
     api 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'

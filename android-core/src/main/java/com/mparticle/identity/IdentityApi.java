@@ -460,6 +460,9 @@ public class IdentityApi {
         }
     }
 
+    /**
+     * @hidden
+     */
     public class Internal {
         public void reset() {
             IdentityApi.this.reset();
