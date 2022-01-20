@@ -1623,6 +1623,10 @@ public class MParticle {
         void onReset();
     }
 
+
+    /**
+     * @hidden
+     */
     public class Internal {
         protected Internal() { }
 
