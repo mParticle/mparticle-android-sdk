@@ -1,3 +1,5 @@
+## [5.35.3](https://github.com/mParticle/mparticle-android-sdk/compare/v5.35.2...v5.35.3) (2022-02-09)
+
 ## [5.35.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.35.1...v5.35.2) (2022-01-31)
 
 ## [5.35.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.35.0...v5.35.1) (2022-01-20)
