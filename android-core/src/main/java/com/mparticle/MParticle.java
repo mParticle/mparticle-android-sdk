@@ -231,7 +231,7 @@ public class MParticle {
     /**
      *  @deprecated
      *  This method has been replaced as the behavior has been inverted - Android ID collection is now disabled by default.
-     *  <p> Use {@link androidIdEnabled(boolean)} instead.
+     *  <p> Use {@link MParticle#isAndroidIdEnabled()} instead.
      *
      *
      * Query the status of Android ID collection.
@@ -639,7 +639,7 @@ public class MParticle {
                     //noinspection MissingPermission
                     locationManager.requestLocationUpdates(provider, minTime, minDistance, mLocationListener);
                     locationTrackingEnabled = true;
-                }catch (SecurityException se) {
+                } catch (SecurityException se) {
 
                 }
                 SharedPreferences.Editor editor = mPreferences.edit();
@@ -822,13 +822,16 @@ public class MParticle {
     }
 
     /**
+     * @deprecated
+     *
      * Retrieves the current setting of automatic screen tracking.
      *
      * @return The current setting of automatic screen tracking.
      */
     @NonNull
+    @Deprecated
     public Boolean isAutoTrackingEnabled() {
-        return mConfigManager.isAutoTrackingEnabled();
+        return false;
     }
 
     /**
@@ -1653,6 +1656,5 @@ public class MParticle {
         public MessageManager getMessageManager() {
             return mMessageManager;
         }
-
     }
 }

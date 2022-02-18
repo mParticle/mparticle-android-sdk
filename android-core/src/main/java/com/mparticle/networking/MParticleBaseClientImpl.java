@@ -26,7 +26,7 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
     private ConfigManager mConfigManager;
     private BaseNetworkConnection mRequestHandler;
     private SharedPreferences mPreferences;
-    private String mApiKey;
+    String mApiKey;
 
     private static final String SERVICE_VERSION_1 = "/v1";
     private static final String SERVICE_VERSION_2 = "/v2";

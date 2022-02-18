@@ -419,16 +419,16 @@ public class MockServer {
     private MParticleBaseClientImpl getClient() {
         ConfigManager configManager = null;
         if (MParticle.getInstance() != null) {
-            configManager = MParticle.getInstance().Internal().getConfigManager();
+            mConfigManager = MParticle.getInstance().Internal().getConfigManager();
         }
-        if (configManager != null && !configManager.getApiKey().equals(mConfigManager.getApiKey())) {
-            baseClient = null;
-            mConfigManager = configManager;
-        }
-        if (baseClient == null) {
+        if (mConfigManager != null && baseClient != null && mConfigManager.getApiKey() != null && !mConfigManager.getApiKey().equals(baseClient.mApiKey)) {
             baseClient = new MParticleBaseClientImpl(context, mConfigManager);
         }
-        return baseClient;
+        if (baseClient != null) {
+            return baseClient;
+        } else {
+            return new MParticleBaseClientImpl(context, mConfigManager);
+        }
     }
 
     private OnRequestCallback getHappyIdentityRequestCallback() {

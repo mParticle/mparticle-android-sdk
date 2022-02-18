@@ -167,7 +167,7 @@ public class MPServiceUtil {
                 }
             };
             KitFrameworkWrapper.addKitsLoadedListener(kitsLoadedListener);
-            MParticle.start(MParticleOptions.builder(mContext).build());
+            MParticle.start(MParticleOptions.builder(mContext).buildForInternalRestart());
 
         } catch (Exception e) {
             Logger.warning("FCM parsing error: " + e.toString());
@@ -188,7 +188,7 @@ public class MPServiceUtil {
                 (NotificationManager) mContext.getSystemService(NOTIFICATION_SERVICE);
         manager.cancel(message.getId());
 
-        MParticle.start(MParticleOptions.builder(mContext.getApplicationContext()).build());
+        MParticle.start(MParticleOptions.builder(mContext.getApplicationContext()).buildForInternalRestart());
         Intent broadcast = new Intent(MPMessagingAPI.BROADCAST_NOTIFICATION_TAPPED);
         broadcast.putExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA, message);
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(broadcast);

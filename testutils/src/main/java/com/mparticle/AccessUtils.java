@@ -54,4 +54,8 @@ public class AccessUtils {
         }
         return builder;
     }
+
+    public static MParticleOptions emptyMParticleOptions(Context context) {
+        return MParticleOptions.builder(context).buildForInternalRestart();
+    }
 }
