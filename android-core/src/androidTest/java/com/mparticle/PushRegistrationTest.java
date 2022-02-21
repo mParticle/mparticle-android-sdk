@@ -163,9 +163,17 @@ public class PushRegistrationTest extends BaseCleanStartedEachTest {
                     //For enablePushNotifications() to set the push registration, we need to mimic
                     //the Firebase dependency, and clear the push-fetched flags
                     TestingUtils.setFirebasePresent(true, pushRegistration.instanceId);
-                    ConfigManager.getInstance(mContext).clearPushRegistration();
-
                     MParticle.getInstance().Messaging().enablePushNotifications(pushRegistration.senderId);
+                    //this method setting push is async, so wait for confirmation before continuing
+                    ConfigManager configManager = ConfigManager.getInstance(mContext);
+                    while (!configManager.isPushEnabled()) {
+                        try {
+                            Thread.sleep(10);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    TestingUtils.setFirebasePresent(false, null);
                 }
 
                 @Override
@@ -249,7 +257,7 @@ public class PushRegistrationTest extends BaseCleanStartedEachTest {
 
                 @Override
                 public String getName() {
-                    return null;
+                    return "startMParticle(MParticleOptions.builder(mContext).pushRegistration(null, null))";
                 }
             }
     };

@@ -172,7 +172,7 @@ class ConfigStalenessCheckTest: BaseCleanInstallEachTest() {
         latch.await()
 
         //after config has been fetched, we should see config2
-        assertEquals(config2.toString(), MParticle.getInstance()?.Internal()?.configManager?.config)
+        assertEquals(config2.toString(), configManager.config)
     }
 
     private fun randomJson(size: Int) =
@@ -190,8 +190,8 @@ class ConfigStalenessCheckTest: BaseCleanInstallEachTest() {
     fun MParticleOptions.Builder.addCredentials() = this.credentials("apiKey", "apiSecret")
 
     fun ConfigManager.onNewConfig(callback: () -> Unit) {
-        addConfigUpdatedListener { configType, config ->
-            if (configType == ConfigManager.ConfigType.NEW) {
+        addConfigUpdatedListener { configType, isNew ->
+            if (isNew && configType == ConfigManager.ConfigType.CORE) {
                 callback()
             }
         }

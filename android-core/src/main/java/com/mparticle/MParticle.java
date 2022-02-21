@@ -196,6 +196,7 @@ public class MParticle {
                             instance.mConfigManager.clearPushRegistrationBackground();
                         }
                     }
+                    instance.mConfigManager.onMParticleStarted();
                 }
             }
         }
