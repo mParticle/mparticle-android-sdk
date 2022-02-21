@@ -211,7 +211,7 @@ public class MParticle {
     @Nullable
     public static MParticle getInstance() {
         if (instance == null) {
-            Logger.error("Failed to get MParticle instance, getInstance() called prior to start().");
+            Logger.debug("Failed to get MParticle instance, getInstance() called prior to start().");
             return null;
         }
         return getInstance(null, null);
