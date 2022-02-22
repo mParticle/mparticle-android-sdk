@@ -26,8 +26,6 @@ import java.util.Map;
  * class used for passing optional settings to the SDK when it is started.
  */
 public class MParticleOptions {
-    private static final String PREFKEY_API_KEY = "mp_key";
-    private static final String PREFKEY_API_SECRET = "mp_secret";
     private BaseIdentityTask mIdentityTask;
 
     private Context mContext;
@@ -70,6 +68,13 @@ public class MParticleOptions {
         }
         if (builder.environment != null) {
             this.mEnvironment = builder.environment;
+        }
+        if (mEnvironment == null || mEnvironment == MParticle.Environment.AutoDetect) {
+            if (builder.isAppDebuggable) {
+                this.mEnvironment = MParticle.Environment.Development;
+            } else {
+                this.mEnvironment = MParticle.Environment.Production;
+            }
         }
         if (builder.identifyRequest != null) {
             this.mIdentifyRequest = builder.identifyRequest;
@@ -206,7 +211,7 @@ public class MParticleOptions {
     /**
      * @deprecated
      * This method has been replaced as the behavior has been inverted - Android ID collection is now disabled by default.
-     * <p> Use {@link isAndroidIdEnabled(boolean)} instead.
+     * <p> Use {@link MParticle#isAndroidIdEnabled()} instead.
      *
      * Query whether Android Id collection is enabled or disabled.
      * @return true if collection is disabled, false if it is enabled
@@ -363,6 +368,7 @@ public class MParticleOptions {
         private MParticle.OperatingSystem operatingSystem;
         private DataplanOptions dataplanOptions;
         private Map<Class, List<Configuration>> configurations = new HashMap();
+        private boolean isAppDebuggable;
 
         private Builder(Context context) {
             this.context = context;
@@ -701,60 +707,35 @@ public class MParticleOptions {
          */
         @NonNull
         public MParticleOptions build() {
-            boolean devMode = MParticle.Environment.Development.equals(environment) || MPUtility.isAppDebuggable(context);
             String message;
             if (context == null) {
                 throw new IllegalArgumentException("mParticle failed to start: context is required.");
             }
+            isAppDebuggable = MPUtility.isAppDebuggable(context);
+            boolean devMode = MParticle.Environment.Development.equals(environment) || isAppDebuggable;
+
             if (MPUtility.isEmpty(apiKey)) {
-                apiKey = getString(PREFKEY_API_KEY);
-                if (MPUtility.isEmpty(apiKey)) {
-                    apiKey = getConfigManager().getApiKey();
-                    if (MPUtility.isEmpty(apiKey)) {
-                        message = "Configuration issue: No API key passed to start() or configured as mp_key in resources!";
-                        if (devMode) {
-                            throw new IllegalArgumentException(message);
-                        } else {
-                            Logger.error(message);
-                        }
-                    }
+                message = "Configuration issue: No API key passed to start()!";
+                if (devMode) {
+                    throw new IllegalArgumentException(message);
+                } else {
+                    Logger.error(message);
                 }
             }
             if (MPUtility.isEmpty(apiSecret)) {
-                apiSecret = getString(PREFKEY_API_SECRET);
-                if (MPUtility.isEmpty(apiSecret)) {
-                    apiSecret = getConfigManager().getApiSecret();
-                    if (MPUtility.isEmpty(apiSecret)) {
-                        message = "Configuration issue: No API secret passed to start() or configured as mp_secret in resources!";
-                        if (devMode) {
-                            throw new IllegalArgumentException(message);
-                        } else {
-                            Logger.error(message);
-                        }
+                    message = "Configuration issue: No API secret passed to start()!";
+                    if (devMode) {
+                        throw new IllegalArgumentException(message);
+                    } else {
+                        Logger.error(message);
                     }
-                }
             }
-            return new MParticleOptions(this);
-        }
+                return new MParticleOptions(this);
+            }
 
-        private String getString(String key) {
-            int id = this.context.getResources().getIdentifier(key, "string", this.context.getPackageName());
-            if (id == 0) {
-                return null;
+            MParticleOptions buildForInternalRestart() {
+                return new MParticleOptions(this);
             }
-            try {
-                return this.context.getResources().getString(id);
-            } catch (android.content.res.Resources.NotFoundException nfe) {
-                return null;
-            }
-        }
-
-        private ConfigManager getConfigManager() {
-            if (configManager == null) {
-                configManager = new ConfigManager(context);
-            }
-            return configManager;
-        }
     }
 
     static class LocationTracking {

@@ -460,7 +460,7 @@ public class UserStorage {
         SharedPreferencesMigrator(Context context) {
             messageManagerSharedPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
             configManagerSharedPreferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
-            this.apiKey = new AppConfig(context, null, configManagerSharedPreferences, null, null).mKey;
+            this.apiKey = new ConfigManager(context).getApiKey();
         }
 
         void migrate(UserStorage userStorage) {

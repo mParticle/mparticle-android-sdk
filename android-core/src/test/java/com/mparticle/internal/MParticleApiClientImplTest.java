@@ -317,7 +317,7 @@ public class MParticleApiClientImplTest {
 
             assertEquals(0, client.getNextRequestTime(endpoint));
             //need a delta to account for test timing variation
-            double delta = 50;
+            long delta = 50;
             client.getRequestHandler().setNextAllowedRequestTime(null, endpoint);
             assertTrue(client.getNextRequestTime(endpoint) <= client.DEFAULT_THROTTLE_MILLIS + System.currentTimeMillis());
             assertTrue(client.getNextRequestTime(endpoint) > System.currentTimeMillis() + client.DEFAULT_THROTTLE_MILLIS - delta);
