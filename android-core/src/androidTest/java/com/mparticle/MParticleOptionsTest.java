@@ -100,10 +100,10 @@ public class MParticleOptionsTest extends BaseAbstractTest {
 
         setStoredPreference("key", "secret");
         try {
-            MParticleOptions.builder(mContext).build();
+            MParticleOptions.builder(mContext).buildForInternalRestart();
         }
         catch (IllegalArgumentException ex) {
-            fail("MParticleOptions should build without credentials if there are stored credentials");
+            fail("MParticleOptions should build without credentials if the internal build function is used");
         }
 
         try {

@@ -285,4 +285,8 @@ public abstract class BaseAbstractTest {
         }
         return true;
     }
+
+    protected MParticleOptions emptyMParticleOptions(Context context) {
+        return com.mparticle.AccessUtils.emptyMParticleOptions(context);
+    }
 }

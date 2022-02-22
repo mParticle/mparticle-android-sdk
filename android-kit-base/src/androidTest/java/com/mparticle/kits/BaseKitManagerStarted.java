@@ -56,7 +56,7 @@ public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
                     }
                 }))
                 .build());
-        mKitManager = new CustomKitManagerImpl(mContext, com.mparticle.AccessUtils.getMessageManager(), new CoreCallbackImpl(MParticle.getInstance().Internal().getConfigManager(), MParticle.getInstance().Internal().getAppStateManager(), MParticle.getInstance().Internal().getKitManager()), AccessUtils.getUploadHandler(), MParticleOptions.builder(mContext).build());
+        mKitManager = new CustomKitManagerImpl(mContext, com.mparticle.AccessUtils.getMessageManager(), new CoreCallbackImpl(MParticle.getInstance().Internal().getConfigManager(), MParticle.getInstance().Internal().getAppStateManager(), MParticle.getInstance().Internal().getKitManager()), AccessUtils.getUploadHandler(), emptyMParticleOptions(mContext));
         mKitManager.setKitFactory(new CustomKitFactory());
         AccessUtils.setKitManager(mKitManager);
         latch.await();
