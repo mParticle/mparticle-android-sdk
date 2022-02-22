@@ -156,19 +156,21 @@ public class ConfigManagerTest {
 
     @Test
     public void testGetApiKey() throws Exception {
-        assertEquals(manager.mLocalPrefs.mKey, manager.getApiKey());
+        manager.setCredentials("some key", "some key");
+        assertEquals("some key", manager.getApiKey());
     }
 
     @Test
     public void testGetApiSecret() throws Exception {
-        assertEquals(manager.mLocalPrefs.mSecret, manager.getApiSecret());
+        manager.setCredentials("some key", "some secret");
+        assertEquals("some secret", manager.getApiSecret());
     }
 
     @Test
     public void testUploadInterval() throws Exception {
         JSONObject object = new JSONObject(sampleConfig);
-
-        assertEquals((1000 * manager.mLocalPrefs.uploadInterval), manager.getUploadInterval());
+        manager.setUploadInterval(987);
+        assertEquals((1000 * 987), manager.getUploadInterval());
         object.put(ConfigManager.KEY_UPLOAD_INTERVAL, 110);
         manager.updateConfig(object);
         assertEquals(1000 * 110, manager.getUploadInterval());
@@ -190,7 +192,8 @@ public class ConfigManagerTest {
 
     @Test
     public void testSessionTimeout() throws Exception {
-        assertEquals(manager.mLocalPrefs.sessionTimeout * 1000, manager.getSessionTimeout());
+        manager.setSessionTimeout(123);
+        assertEquals(123 * 1000, manager.getSessionTimeout());
         JSONObject object = new JSONObject(sampleConfig);
         object.put(ConfigManager.KEY_SESSION_TIMEOUT, 123);
         manager.updateConfig(object);
@@ -205,24 +208,6 @@ public class ConfigManagerTest {
     }
 
     @Test
-    public void testPushSoundEnabled() throws Exception {
-        assertEquals(AppConfig.DEFAULT_ENABLE_PUSH_SOUND, manager.isPushSoundEnabled());
-        manager.setPushSoundEnabled(true);
-        assertTrue(manager.isPushSoundEnabled());
-        manager.setPushSoundEnabled(false);
-        assertFalse(manager.isPushSoundEnabled());
-    }
-
-    @Test
-    public void testPushVibrationEnabled() throws Exception {
-        assertEquals(AppConfig.DEFAULT_ENABLE_PUSH_VIBRATION, manager.isPushVibrationEnabled());
-        manager.setPushVibrationEnabled(true);
-        assertTrue(manager.isPushVibrationEnabled());
-        manager.setPushVibrationEnabled(false);
-        assertFalse(manager.isPushVibrationEnabled());
-    }
-
-    @Test
     public void testIsEnabled() throws Exception {
         assertTrue(manager.isEnabled());
         manager.setOptOut(true);
@@ -231,11 +216,6 @@ public class ConfigManagerTest {
         object.put(ConfigManager.KEY_OPT_OUT, true);
         manager.updateConfig(object);
         assertTrue(manager.isEnabled());
-    }
-
-    @Test
-    public void testIsAutoTrackingEnabled() throws Exception {
-        assertEquals(manager.mLocalPrefs.autoTrackingEnabled, manager.isAutoTrackingEnabled());
     }
 
     @Test
@@ -278,11 +258,6 @@ public class ConfigManagerTest {
         long mpid = System.currentTimeMillis();
         manager.setMpid(mpid, ran.nextBoolean());
         assertEquals(mpid, manager.getMpid());
-    }
-
-    @Test
-    public void testGetAudienceTimeout() throws Exception {
-        assertEquals(manager.mLocalPrefs.audienceTimeout, manager.getAudienceTimeout());
     }
 
     @Test
@@ -664,7 +639,7 @@ public class ConfigManagerTest {
     @Test
     public void testGetConfig() throws JSONException {
         ConfigManager.clear();
-        
+
         JSONObject newConfigJson = new JSONObject();
         int configSize = Math.abs(ran.nextInt() % 15);
         for (int i = 0; i < configSize; i++) {

@@ -531,6 +531,10 @@ public class Constants {
         String DISPLAY_PUSH_NOTIFICATIONS = "mp::displaypushnotifications";
         String IDENTITY_CONNECTION_TIMEOUT = "mp::connection:timeout:identity";
         String NETWORK_OPTIONS = "mp::network:options";
+        String UPLOAD_INTERVAL = "mp::uploadInterval";
+        String SESSION_TIMEOUT = "mp::sessionTimeout";
+        String REPORT_UNCAUGHT_EXCEPTIONS = "mp::reportUncaughtExceptions";
+        String ENVIRONMENT = "mp::environment";
     }
 
     public interface MiscStorageKeys {

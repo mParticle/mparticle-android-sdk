@@ -78,8 +78,6 @@ public class ConfigManager {
 
     static SharedPreferences sPreferences;
 
-    AppConfig mLocalPrefs;
-
     private static JSONArray sPushKeys;
     private UserStorage mUserStorage;
     private String mLogUnhandledExceptions = VALUE_APP_DEFINED;
@@ -133,7 +131,12 @@ public class ConfigManager {
     public ConfigManager(@NonNull Context context, @Nullable MParticle.Environment environment, @Nullable String apiKey, @Nullable String apiSecret, @Nullable MParticleOptions.DataplanOptions dataplanOptions, @Nullable String dataplanId, @Nullable Integer dataplanVersion, @Nullable Integer configMaxAge, @Nullable List<Configuration<ConfigManager>> configurations) {
         mContext = context.getApplicationContext();
         sPreferences = getPreferences(mContext);
-        mLocalPrefs = new AppConfig(mContext, environment, sPreferences, apiKey, apiSecret);
+        if (apiKey != null || apiSecret != null) {
+            setCredentials(apiKey, apiSecret);
+        }
+        if (environment != null) {
+            setEnvironment(environment);
+        }
         mUserStorage = UserStorage.create(mContext, getMpid());
         //if we are initialized with a DataplanOptions instance, then we will ignore values from remote config
         mIgnoreDataplanOptionsFromConfig = dataplanOptions != null;
@@ -419,9 +422,9 @@ public class ConfigManager {
      * This method will be called from a background thread after startup is already complete.
      */
     public void delayedStart() {
-        mLocalPrefs.delayedInit();
-        if (isPushEnabled() && getPushRegistration() == null) {
-            MParticle.getInstance().Messaging().enablePushNotifications(getPushSenderId());
+        String senderId = getPushSenderId();
+        if (isPushEnabled() && senderId != null) {
+            MParticle.getInstance().Messaging().enablePushNotifications(senderId);
         }
     }
 
@@ -442,49 +445,56 @@ public class ConfigManager {
     }
 
     public void enableUncaughtExceptionLogging(boolean userTriggered) {
+        if (userTriggered) {
+            setLogUnhandledExceptions(true);
+        }
         if (null == mExHandler) {
             Thread.UncaughtExceptionHandler currentUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
             if (!(currentUncaughtExceptionHandler instanceof ExceptionHandler)) {
                 mExHandler = new ExceptionHandler(currentUncaughtExceptionHandler);
                 Thread.setDefaultUncaughtExceptionHandler(mExHandler);
-                if (userTriggered) {
-                    setLogUnhandledExceptions(true);
-                }
             }
         }
     }
 
     public void disableUncaughtExceptionLogging(boolean userTriggered) {
+        if (userTriggered) {
+            setLogUnhandledExceptions(false);
+        }
         if (null != mExHandler) {
             Thread.UncaughtExceptionHandler currentUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
             if (currentUncaughtExceptionHandler instanceof ExceptionHandler) {
                 Thread.setDefaultUncaughtExceptionHandler(mExHandler.getOriginalExceptionHandler());
                 mExHandler = null;
-                if (userTriggered) {
-                    setLogUnhandledExceptions(false);
-                }
             }
         }
     }
 
     public boolean getLogUnhandledExceptions() {
         if (VALUE_APP_DEFINED.equals(mLogUnhandledExceptions)) {
-            return mLocalPrefs.reportUncaughtExceptions;
+            return sPreferences.getBoolean(Constants.PrefKeys.REPORT_UNCAUGHT_EXCEPTIONS, false);
         } else {
             return VALUE_CUE_CATCH.equals(mLogUnhandledExceptions);
         }
     }
 
     public void setLogUnhandledExceptions(boolean log) {
-        mLocalPrefs.reportUncaughtExceptions = log;
+        sPreferences.edit().putBoolean(Constants.PrefKeys.REPORT_UNCAUGHT_EXCEPTIONS, log).apply();
     }
 
     public String getApiKey() {
-        return mLocalPrefs.mKey;
+        return sPreferences.getString(Constants.PrefKeys.API_KEY, null);
     }
 
     public String getApiSecret() {
-        return mLocalPrefs.mSecret;
+        return sPreferences.getString(Constants.PrefKeys.API_SECRET,null);
+    }
+
+    public void setCredentials(String apiKey, String secret) {
+        sPreferences.edit()
+                .putString(Constants.PrefKeys.API_KEY, apiKey)
+                .putString(Constants.PrefKeys.API_SECRET, secret)
+                .apply();
     }
 
     public long getUploadInterval() {
@@ -494,34 +504,49 @@ public class ConfigManager {
             if (mUploadInterval > 0) {
                 return 1000 * mUploadInterval;
             } else {
-                return (1000 * mLocalPrefs.uploadInterval);
+                return (1000 * sPreferences.getInt(Constants.PrefKeys.UPLOAD_INTERVAL, DEFAULT_UPLOAD_INTERVAL));
             }
         }
     }
 
+    public void setEnvironment(MParticle.Environment environment) {
+        if (environment != null) {
+            sPreferences.edit().putInt(Constants.PrefKeys.ENVIRONMENT, environment.getValue()).apply();
+        } else {
+            sPreferences.edit().remove(Constants.PrefKeys.ENVIRONMENT).apply();
+        }
+    }
+
     public static MParticle.Environment getEnvironment() {
-        return AppConfig.getEnvironment();
+        if (sPreferences != null) {
+            int env = sPreferences.getInt(Constants.PrefKeys.ENVIRONMENT, MParticle.Environment.Production.getValue());
+            for(MParticle.Environment environment: MParticle.Environment.values()) {
+                if (environment.getValue() == env) {
+                    return environment;
+                }
+            }
+        }
+        return MParticle.Environment.Production;
     }
 
     public void setUploadInterval(int uploadInterval) {
-        mLocalPrefs.uploadInterval = uploadInterval;
+        sPreferences.edit().putInt(Constants.PrefKeys.UPLOAD_INTERVAL, uploadInterval).apply();
     }
 
     public int getSessionTimeout() {
         if (mSessionTimeoutInterval > 0) {
             return mSessionTimeoutInterval * 1000;
         } else {
-            return mLocalPrefs.sessionTimeout * 1000;
+            return sPreferences.getInt(Constants.PrefKeys.SESSION_TIMEOUT, DEFAULT_SESSION_TIMEOUT_SECONDS) * 1000;
         }
     }
 
     public void setSessionTimeout(int sessionTimeout) {
-        mLocalPrefs.sessionTimeout = sessionTimeout;
+        sPreferences.edit().putInt(Constants.PrefKeys.SESSION_TIMEOUT, sessionTimeout).apply();
     }
 
     public boolean isPushEnabled() {
-        return mLocalPrefs.isPushEnabled ||
-                (sPreferences.getBoolean(Constants.PrefKeys.PUSH_ENABLED, false) && getPushSenderId() != null);
+        return sPreferences.getBoolean(Constants.PrefKeys.PUSH_ENABLED, false) && getPushSenderId() != null;
     }
 
     public String getPushSenderId() {
@@ -617,26 +642,6 @@ public class ConfigManager {
                 .apply();
     }
 
-    public String getLicenseKey() {
-        return mLocalPrefs.licenseKey;
-    }
-
-    public boolean isLicensingEnabled() {
-        return mLocalPrefs.licenseKey != null && mLocalPrefs.isLicensingEnabled;
-    }
-
-    public void setPushSoundEnabled(boolean pushSoundEnabled) {
-        sPreferences.edit()
-                .putBoolean(Constants.PrefKeys.PUSH_ENABLE_SOUND, pushSoundEnabled)
-                .apply();
-    }
-
-    public void setPushVibrationEnabled(boolean pushVibrationEnabled) {
-        sPreferences.edit()
-                .putBoolean(Constants.PrefKeys.PUSH_ENABLE_VIBRATION, pushVibrationEnabled)
-                .apply();
-    }
-
     public boolean isEnabled() {
         boolean optedOut = this.getOptedOut();
         return !optedOut || mSendOoEvents;
@@ -649,18 +654,6 @@ public class ConfigManager {
 
     public boolean getOptedOut() {
         return sPreferences.getBoolean(Constants.PrefKeys.OPTOUT, false);
-    }
-
-    public boolean isAutoTrackingEnabled() {
-        return mLocalPrefs.autoTrackingEnabled;
-    }
-
-    public boolean isPushSoundEnabled() {
-        return sPreferences.getBoolean(Constants.PrefKeys.PUSH_ENABLE_SOUND, AppConfig.DEFAULT_ENABLE_PUSH_SOUND);
-    }
-
-    public boolean isPushVibrationEnabled() {
-        return sPreferences.getBoolean(Constants.PrefKeys.PUSH_ENABLE_VIBRATION, AppConfig.DEFAULT_ENABLE_PUSH_VIBRATION);
     }
 
     public void setPushNotificationIcon(int pushNotificationIcon) {
@@ -820,10 +813,6 @@ public class ConfigManager {
         UserStorage subjectUserStorage = getUserStorage(subjectMpId);
         UserStorage targetUserStorage = getUserStorage(targetMpId);
         targetUserStorage.merge(subjectUserStorage);
-    }
-
-    public int getAudienceTimeout() {
-        return mLocalPrefs.audienceTimeout;
     }
 
     public int getCurrentRampValue() {
