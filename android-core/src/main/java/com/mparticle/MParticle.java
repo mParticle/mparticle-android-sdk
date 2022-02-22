@@ -639,7 +639,7 @@ public class MParticle {
                     //noinspection MissingPermission
                     locationManager.requestLocationUpdates(provider, minTime, minDistance, mLocationListener);
                     locationTrackingEnabled = true;
-                } catch (SecurityException se) {
+                } catch (SecurityException ignored) {
 
                 }
                 SharedPreferences.Editor editor = mPreferences.edit();

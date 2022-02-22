@@ -417,7 +417,6 @@ public class MockServer {
     }
 
     private MParticleBaseClientImpl getClient() {
-        ConfigManager configManager = null;
         if (MParticle.getInstance() != null) {
             mConfigManager = MParticle.getInstance().Internal().getConfigManager();
         }
