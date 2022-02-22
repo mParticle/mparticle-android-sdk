@@ -42,7 +42,7 @@ jobs:
         uses: actions/upload-artifact@v2
         if: ${{ always() }}
         with:
-          name: test-results
+          name: instrumented-test-results
           path: android-core/build/reports/androidTests/connected/**
 
   unit-tests:
@@ -63,9 +63,15 @@ jobs:
           java-version: "11"
       - name: "Run Unit Tests"
         run: ./gradlew test
-      - name: "Android Test Report"
+      - name: "Print Android Unit Tests Report"
         uses: asadmansr/android-test-report-action@v1.2.0
         if: ${{ always() }}
+      - name: "Archive Unit Test Results"
+        uses: actions/upload-artifact@v2
+        if: ${{ always() }}
+        with:
+          name: "unit-tests-results"
+          path: ./**/build/reports/**
   lint-checks:
     name: "Lint Checks"
     timeout-minutes: 15
