@@ -49,11 +49,31 @@ public class ConfigManagerTest {
     }
 
     @Test
+    public void testInitialization() {
+        manager = new ConfigManager(context, MParticle.Environment.Production, "key1", "secret1", null, null, null, null, null);
+        assertEquals("key1", manager.getApiKey());
+        assertEquals("secret1", manager.getApiSecret());
+        assertEquals(MParticle.Environment.Production, ConfigManager.getEnvironment());
+
+        //should persist when we start configmanager without any arguments
+        manager = new ConfigManager(context);
+        assertEquals("key1", manager.getApiKey());
+        assertEquals("secret1", manager.getApiSecret());
+        assertEquals(MParticle.Environment.Production, ConfigManager.getEnvironment());
+
+        //updates key/secret if one is non-null
+        manager = new ConfigManager(context, MParticle.Environment.Development, "key2", null, null, null, null, null, null);
+        assertEquals("key2", manager.getApiKey());
+        assertNull(manager.getApiSecret());
+        assertEquals(MParticle.Environment.Development, ConfigManager.getEnvironment());
+    }
+
+    @Test
     public void testSaveConfigJson() throws Exception {
-        manager.saveConfigJson(null, null, null);
+        manager.saveConfigJson(null);
         JSONObject json = new JSONObject();
         json.put("test", "value");
-        manager.saveConfigJson(json, null, null);
+        manager.saveConfigJson(json);
         JSONObject object = new JSONObject(manager.sPreferences.getString(ConfigManager.CONFIG_JSON, null));
         assertNotNull(object);
     }
@@ -76,7 +96,7 @@ public class ConfigManagerTest {
     @Test
     public void testUpdateConfigWithReload() throws Exception {
         manager.updateConfig(new JSONObject(sampleConfig));
-        manager.reloadConfig(new JSONObject());
+        manager.reloadCoreConfig(new JSONObject());
         JSONObject object = new JSONObject(manager.sPreferences.getString(ConfigManager.CONFIG_JSON, null));
         assertTrue(object.keys().hasNext());
     }
@@ -653,7 +673,7 @@ public class ConfigManagerTest {
         assertNull(manager.getConfigTimestamp());
 
         //test reload() does not set config
-        manager.reloadConfig(newConfigJson);
+        manager.reloadCoreConfig(newConfigJson);
         assertNull(manager.getConfig());
         assertNull(manager.getEtag());
         assertNull(manager.getIfModified());
