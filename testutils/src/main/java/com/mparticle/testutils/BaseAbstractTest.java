@@ -243,6 +243,10 @@ public abstract class BaseAbstractTest {
     }
 
     protected JSONObject setupConfigMessageForKits(Map<Class<? extends KitIntegration>, JSONObject> kitIds) {
+        return setupConfigMessageForKits(kitIds, false);
+    }
+
+    protected JSONObject setupConfigMessageForKits(Map<Class<? extends KitIntegration>, JSONObject> kitIds, Boolean localConfigOnly) {
         JSONArray eks = new JSONArray();
         int i = -1;
         mCustomTestKits = new HashMap<>();
@@ -266,11 +270,36 @@ public abstract class BaseAbstractTest {
         }
         try {
             JSONObject configObject = new JSONObject().put("eks", eks);
-            mServer.setupConfigResponse(configObject.toString());
+            if (localConfigOnly) {
+                 mServer.setupConfigDeferred();
+            } else {
+                mServer.setupConfigResponse(configObject.toString());
+            }
             return configObject;
         } catch (JSONException e) {
             throw new RuntimeException("Error sending custom eks to config.");
         }
+    }
+
+    protected void fetchConfig() {
+        MParticle.getInstance().Internal().getMessageManager().refreshConfiguration();
+    }
+
+    protected void setCachedConfig(JSONObject config) throws JSONException {
+        ConfigManager.getInstance(mContext).saveConfigJson(config, null, null, System.currentTimeMillis());
+    }
+
+    protected JSONObject getSimpleConfigWithKits() throws JSONException {
+        return new JSONObject()
+                .put("id", 12345)
+                .put(
+                        "eks",
+                        new JSONArray()
+                                .put(
+                                        new JSONObject()
+                                                .put("id", 1)
+                                )
+                );
     }
 
     private boolean checkStorageCleared(int counter) {
