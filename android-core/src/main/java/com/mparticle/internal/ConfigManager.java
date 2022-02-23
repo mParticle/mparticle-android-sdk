@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -39,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ConfigManager {
     public static final String CONFIG_JSON = "json";
+    public static final String CONFIG_FILE_NAME = "mparticle_config.json";
     public static final String CONFIG_JSON_TIMESTAMP = "json_timestamp";
     private static final String KEY_TRIGGER_ITEMS = "tri";
     private static final String KEY_MESSAGE_MATCHES = "mm";
@@ -102,7 +104,7 @@ public class ConfigManager {
     public static final int MINIMUM_CONNECTION_TIMEOUT_SECONDS = 1;
     public static final int DEFAULT_SESSION_TIMEOUT_SECONDS = 60;
     public static final int DEFAULT_UPLOAD_INTERVAL = 600;
-    private List<ConfigLoadedListener> configUpdatedListeners = new ArrayList<ConfigLoadedListener>();
+    private List<ConfigLoadedListener> configUpdatedListeners = new ArrayList<>();
 
     private ConfigManager() {
         super();
@@ -121,7 +123,8 @@ public class ConfigManager {
     }
 
     public ConfigManager(Context context) {
-        this(context, null, null, null, null, null, null, null, null);
+        mContext = context;
+        sPreferences = getPreferences(mContext);
     }
 
     public ConfigManager(@NonNull MParticleOptions options) {
@@ -144,22 +147,25 @@ public class ConfigManager {
         mDataplanVersion = dataplanVersion;
         mDataplanId = dataplanId;
         mMaxConfigAge = configMaxAge;
-        checkConfigStaleness();
-        restoreOldConfig();
         if (configurations != null) {
             for (Configuration configuration : configurations) {
                 configuration.apply(this);
             }
-
         }
     }
 
-    private void restoreOldConfig() {
+    public void onMParticleStarted() {
+        checkConfigStaleness();
+        migrateConfigIfNeeded();
+        restoreCoreConfig();
+    }
+
+    private void restoreCoreConfig() {
         String oldConfig = getConfig();
         if (!MPUtility.isEmpty(oldConfig)) {
             try {
                 JSONObject oldConfigJson = new JSONObject(oldConfig);
-                reloadConfig(oldConfigJson);
+                reloadCoreConfig(oldConfigJson);
             } catch (Exception jse) {
 
             }
@@ -169,12 +175,12 @@ public class ConfigManager {
     /**
      * This called on startup. The only thing that's completely necessary is that we fire up kits.
      */
+    @Nullable
     public JSONArray getLatestKitConfiguration() {
-        String oldConfig = sPreferences.getString(CONFIG_JSON, null);
+        String oldConfig = MPUtilityKotlin.readFile(mContext, CONFIG_FILE_NAME);
         if (!MPUtility.isEmpty(oldConfig)) {
             try {
-                JSONObject oldConfigJson = new JSONObject(oldConfig);
-                return oldConfigJson.optJSONArray(KEY_EMBEDDED_KITS);
+                return new JSONArray(oldConfig);
             } catch (Exception jse) {
 
             }
@@ -227,6 +233,20 @@ public class ConfigManager {
         }
     }
 
+    void migrateConfigIfNeeded() {
+        String configString = sPreferences.getString(CONFIG_JSON, null);
+        if (!MPUtility.isEmpty(configString)) {
+            try {
+                //save ourselves some time and only parse the JSONObject if might contain the embedded kits key
+                if (configString.contains("\"" + KEY_EMBEDDED_KITS + "\":")) {
+                    saveConfigJson(new JSONObject(configString), getEtag(), getIfModified(), getConfigTimestamp());
+                }
+            } catch (JSONException jse) {
+
+            }
+        }
+    }
+
     /**
      * detrmine if the stored config age is greater than mMaxConfigAge and clear it from storage if it is
      */
@@ -249,6 +269,7 @@ public class ConfigManager {
         }
     }
 
+    @Nullable
     String getConfig() {
         return sPreferences.getString(CONFIG_JSON, null);
     }
@@ -268,15 +289,35 @@ public class ConfigManager {
         }
     }
 
-    void saveConfigJson(JSONObject json, String etag, String lastModified) throws JSONException {
-        if (json != null) {
-            Logger.debug("Updating config to:\n" + json.toString());
-            sPreferences.edit()
-                    .putLong(CONFIG_JSON_TIMESTAMP, System.currentTimeMillis())
-                    .putString(CONFIG_JSON, json.toString())
-                    .putString(Constants.PrefKeys.ETAG, etag)
-                    .putString(Constants.PrefKeys.IF_MODIFIED, lastModified)
-                    .apply();
+    public void saveConfigJson(JSONObject combinedConfig) throws JSONException {
+        saveConfigJson(combinedConfig, null, null, null);
+    }
+
+    public void saveConfigJson(JSONObject combinedConfig, String etag, String lastModified, Long timestamp) throws JSONException {
+        if (combinedConfig != null) {
+            JSONArray kitConfig = combinedConfig.has(KEY_EMBEDDED_KITS) ? (JSONArray) combinedConfig.remove(KEY_EMBEDDED_KITS) : null;
+            saveConfigJson(combinedConfig, kitConfig, etag, lastModified, timestamp);
+        } else {
+            saveConfigJson(combinedConfig, null, etag, lastModified, timestamp);
+        }
+    }
+
+    void saveConfigJson(JSONObject coreConfig, JSONArray kitConfig, String etag, String lastModified, Long timestamp) throws JSONException {
+        if (coreConfig != null) {
+            String kitConfigString = kitConfig != null ? kitConfig.toString() : null;
+            Logger.debug("Updating core config to:\n" + coreConfig);
+            Logger.debug("Updating kit config to:\n" + kitConfigString);
+            if (MPUtilityKotlin.writeToFile(mContext, CONFIG_FILE_NAME, kitConfigString)) {
+                sPreferences.edit()
+                        .putString(CONFIG_JSON, coreConfig.toString())
+                        .putLong(CONFIG_JSON_TIMESTAMP, timestamp != null ? timestamp : System.currentTimeMillis())
+                        .putString(Constants.PrefKeys.ETAG, etag)
+                        .putString(Constants.PrefKeys.IF_MODIFIED, lastModified)
+                        .apply();
+            } else {
+                Logger.error("Unable to save config. It will be applied, but the next time your application starts, we will need to fetch a new one");
+                clearConfig();
+            }
         } else {
             Logger.debug("clearing current configurations");
             clearConfig();
@@ -284,37 +325,52 @@ public class ConfigManager {
     }
 
     void clearConfig() {
+        MPUtilityKotlin.clearFile(mContext, CONFIG_FILE_NAME);
         sPreferences.edit()
-                .remove(CONFIG_JSON_TIMESTAMP)
                 .remove(CONFIG_JSON)
+                .remove(CONFIG_JSON_TIMESTAMP)
                 .remove(Constants.PrefKeys.ETAG)
                 .remove(Constants.PrefKeys.IF_MODIFIED)
                 .apply();
     }
 
     public synchronized void updateConfig(JSONObject responseJSON) throws JSONException {
-        updateConfig(responseJSON, true, null, null);
+        updateConfig(responseJSON, null, null);
     }
 
     public synchronized void updateConfig(JSONObject responseJSON, String etag, String lastModified) throws JSONException {
-        updateConfig(responseJSON, true, etag, lastModified);
+        if (responseJSON == null) {
+            responseJSON = new JSONObject();
+        }
+        JSONArray kitConfig = responseJSON.has(KEY_EMBEDDED_KITS) ? (JSONArray) responseJSON.remove(KEY_EMBEDDED_KITS) : null;
+        saveConfigJson(responseJSON, kitConfig, etag, lastModified, System.currentTimeMillis());
+        updateCoreConfig(responseJSON, true);
+        updateKitConfig(responseJSON.optJSONArray(KEY_EMBEDDED_KITS));
     }
 
-    public synchronized void reloadConfig(JSONObject responseJSON) throws JSONException  {
-        updateConfig(responseJSON, false, null, null);
+    public synchronized void reloadCoreConfig(JSONObject responseJSON) throws JSONException  {
+        updateCoreConfig(responseJSON, false);
     }
 
-    private synchronized void updateConfig(JSONObject responseJSON, boolean newConfig, String etag, String lastModified) throws JSONException {
+    private synchronized void reloadKitConfig(@Nullable JSONArray kitConfigs) {
+        //only reload if KitManager has not already been loaded (from new config, presumably)
         MParticle instance = MParticle.getInstance();
-        KitFrameworkWrapper kitManager = null;
-        if (instance != null) {
-            kitManager = instance.Internal().getKitManager();
+        if (instance != null ) {
+            instance.Internal().getKitManager().loadKitLibrary();
+            onConfigLoaded(ConfigType.KIT, false);
         }
-        SharedPreferences.Editor editor = sPreferences.edit();
-        if (newConfig) {
-            saveConfigJson(responseJSON, etag, lastModified);
-        }
+    }
 
+    private synchronized void updateKitConfig(@Nullable JSONArray kitConfigs) {
+        MParticle instance = MParticle.getInstance();
+        if (instance != null) {
+            instance.Internal().getKitManager().loadKitLibrary();
+            onConfigLoaded(ConfigType.KIT, true);
+        }
+    }
+
+    private synchronized void updateCoreConfig(JSONObject responseJSON, boolean newConfig) throws JSONException {
+        SharedPreferences.Editor editor = sPreferences.edit();
         if (responseJSON.has(KEY_UNHANDLED_EXCEPTIONS)) {
             mLogUnhandledExceptions = responseJSON.getString(KEY_UNHANDLED_EXCEPTIONS);
         }
@@ -381,20 +437,14 @@ public class ConfigManager {
         }
         if (!mIgnoreDataplanOptionsFromConfig) {
             mDataplanOptions = parseDataplanOptions(responseJSON);
-            if (kitManager != null) {
-                kitManager.updateDataplan(mDataplanOptions);
+            MParticle instance = MParticle.getInstance();
+            if (instance != null) {
+                instance.Internal().getKitManager().updateDataplan(mDataplanOptions);
             }
         }
         editor.apply();
         applyConfig();
-        if (newConfig && kitManager != null) {
-            kitManager.updateKits(responseJSON.optJSONArray(KEY_EMBEDDED_KITS));
-        }
-        for (ConfigLoadedListener listener: new ArrayList<ConfigLoadedListener>(configUpdatedListeners)) {
-            if (listener != null){
-                listener.onConfigUpdated(newConfig ? ConfigType.NEW : ConfigType.RELOADED, responseJSON);
-            }
-        }
+        onConfigLoaded(ConfigType.CORE, newConfig);
     }
 
     public String getActiveModuleIds() {
@@ -422,6 +472,7 @@ public class ConfigManager {
      * This method will be called from a background thread after startup is already complete.
      */
     public void delayedStart() {
+        reloadKitConfig(getLatestKitConfiguration());
         String senderId = getPushSenderId();
         if (isPushEnabled() && senderId != null) {
             MParticle.getInstance().Messaging().enablePushNotifications(senderId);
@@ -678,7 +729,7 @@ public class ConfigManager {
         return getPreferences(context).getBoolean(Constants.PrefKeys.DISPLAY_PUSH_NOTIFICATIONS, false);
     }
 
-    private static SharedPreferences getPreferences(Context context){
+    static SharedPreferences getPreferences(Context context){
         return context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
     }
 
@@ -918,6 +969,7 @@ public class ConfigManager {
         }
     }
 
+    @NonNull
     public Map<String, String> getIntegrationAttributes(int integrationId) {
         Map<String, String> integrationAttributes = new HashMap<String, String>();
         JSONObject jsonAttributes = getIntegrationAttributes();
@@ -1231,6 +1283,15 @@ public class ConfigManager {
         configUpdatedListeners.add(listener);
     }
 
+    private void onConfigLoaded(ConfigType configType, Boolean isNew) {
+        Logger.debug("Loading " + (isNew ? "new ": "cached ") + configType.name().toLowerCase(Locale.ROOT) + " config");
+        for (ConfigLoadedListener listener : new ArrayList<ConfigLoadedListener>(configUpdatedListeners)) {
+            if (listener != null) {
+                listener.onConfigUpdated(configType, isNew);
+            }
+        }
+    }
+
     @Nullable
     MParticleOptions.DataplanOptions parseDataplanOptions(JSONObject jsonObject) {
         if (jsonObject != null) {
@@ -1266,12 +1327,12 @@ public class ConfigManager {
         }
     }
 
-    enum ConfigType {
-        NEW,
-        RELOADED
+    public enum ConfigType {
+        CORE,
+        KIT
     }
 
-    interface ConfigLoadedListener {
-        public void onConfigUpdated(ConfigType configType, JSONObject config);
+    public interface ConfigLoadedListener {
+        public void onConfigUpdated(ConfigType configType, boolean isNew);
     }
 }

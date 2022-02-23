@@ -7,6 +7,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 
+import java.io.File;
+
 /**
  * Created by sdozor on 4/10/15.
  */
@@ -61,5 +63,10 @@ public class MockApplication extends Application {
     @Override
     public Resources getResources() {
         return mContext.getResources();
+    }
+
+    @Override
+    public File getFilesDir() {
+        return mContext.getFilesDir();
     }
 }

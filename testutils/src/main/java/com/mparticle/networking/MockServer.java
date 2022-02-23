@@ -105,10 +105,6 @@ public class MockServer {
     void onRequestMade(MPConnectionTestImpl mockConnection) {
         try {
             Thread.sleep(50);
-        } catch (InterruptedException e) {
-            fail(e.getMessage());
-            Thread.currentThread().interrupt();
-        }
         requests.add(mockConnection);
 
         List<Map.Entry<Matcher, Object>> logicList = new ArrayList<>(serverLogic.entrySet());
@@ -155,6 +151,12 @@ public class MockServer {
                 e.printStackTrace();
             }
         }
+        } catch (InterruptedException e) {
+            fail(e.getMessage());
+            Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
     }
 
     interface OnRequestCallback {
@@ -189,10 +191,20 @@ public class MockServer {
         Response response = new Response();
         response.responseCode = 200;
         response.responseBody = responseString;
+        response.delay = delay;
         serverLogic.put(match, response);
         return this;
     }
 
+    public MockServer setupConfigDeferred() {
+        Matcher match = new Matcher(getUrl(CONFIG));
+        match.keepAfterMatch = true;
+        Response response = new Response();
+        response.responseCode = 304;
+        response.responseBody = "";
+        serverLogic.put(match, response);
+        return this;
+    }
     
     public MockServer setupHappyEvents() {
         Matcher match = new Matcher(getUrl(EVENTS));
@@ -480,6 +492,9 @@ public class MockServer {
             }
         });
         String apiKey = ConfigManager.getInstance(context).getApiKey();
+        if (apiKey == null) {
+            apiKey = "null";
+        }
         try {
             for (Map.Entry<Matcher, Object> entry : logic) {
                 String url = entry.getKey().url;
