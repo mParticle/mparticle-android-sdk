@@ -69,4 +69,9 @@ public class MockApplication extends Application {
     public File getFilesDir() {
         return mContext.getFilesDir();
     }
+
+    @Override
+    public File getCacheDir() {
+        return mContext.getCacheDir();
+    }
 }

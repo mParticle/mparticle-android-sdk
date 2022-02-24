@@ -10,50 +10,56 @@ object MPUtilityKotlin {
 
     @JvmStatic
     fun readFile(context: Context, path: String): String? {
-        return try {
-            getFile(context, path).run {
-                if (exists())  {
-                    readText(Charsets.UTF_8)
-                } else {
-                    null
+        synchronized(path) {
+            return try {
+                getFile(context, path).run {
+                    if (exists()) {
+                        readText(Charsets.UTF_8)
+                    } else {
+                        null
+                    }
                 }
+            } catch (ex: Exception) {
+                Logger.warning("Unable to read file $path")
+                null
             }
-        } catch (ex: Exception) {
-            Logger.warning("Unable to read file $path")
-            null
         }
     }
 
     @JvmStatic
     fun writeToFile(context: Context, path: String, contents: String?): Boolean {
-        return try {
-            getFile(context, path).apply {
-                if (contents.isNullOrEmpty()) {
-                    clearFile(context, path)
-                } else {
-                    if (!exists()) {
-                        parentFile.mkdirs()
-                        createNewFile()
+        synchronized(path) {
+            return try {
+                getFile(context, path).apply {
+                    if (contents.isNullOrEmpty()) {
+                        clearFile(context, path)
+                    } else {
+                        if (!exists()) {
+                            parentFile.mkdirs()
+                            createNewFile()
+                        }
+                        writeText(contents ?: "", Charsets.UTF_8)
                     }
-                    writeText(contents ?: "", Charsets.UTF_8)
                 }
+                true
+            } catch (ex: Exception) {
+                Logger.warning("Unable to write to $path")
+                Logger.debug(ex.stackTraceToString())
+                false
             }
-            true
-        } catch (ex: Exception) {
-            Logger.warning("Unable to write to $path")
-            Logger.debug(ex.stackTraceToString())
-            false
         }
     }
 
     @JvmStatic
     fun clearFile(context: Context, path: String) {
-        getFile(context, path).apply {
-            if (exists()) {
-                delete()
+        synchronized(path) {
+            getFile(context, path).apply {
+                if (exists()) {
+                    delete()
+                }
             }
         }
     }
 
-    private fun getFile(context: Context,  path: String): File = File(context.filesDir.path, path)
+    private fun getFile(context: Context,  path: String): File = File(context.cacheDir.path, path)
 }
