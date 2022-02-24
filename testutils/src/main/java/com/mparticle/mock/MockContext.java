@@ -435,7 +435,7 @@ public class MockContext extends Context {
 
     @Override
     public File getCacheDir() {
-        return null;
+        return new File("test_cache_dir");
     }
 
     @Override
