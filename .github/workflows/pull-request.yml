@@ -77,6 +77,30 @@ jobs:
         with:
           name: "lint-results"
           path: ./**/build/reports/**
+  kotlin-lint-checks:
+    name: "Kotlin Lint Checks"
+    timeout-minutes: 15
+    runs-on: macos-11
+    steps:
+      - name: "Checkout Branch"
+        uses: actions/checkout@v2
+        with:
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+          ref: ${{github.head_ref}}
+          submodules: recursive
+      - name: "Install JDK 11"
+        uses: actions/setup-java@v2
+        with:
+          distribution: "zulu"
+          java-version: "11"
+      - name: "Run Android Core SDK Kotlin Lint"
+        run: ./gradlew ktlintCheck
+      - name: "Archive Kotlin Lint Test Results"
+        uses: actions/upload-artifact@v2
+        if: ${{ always() }}
+        with:
+          name: "kotlin-lint-results"
+          path: ./**/build/reports/**
   automerge:
       name: "Rebase dependabot PRs"
       runs-on: ubuntu-18.04
