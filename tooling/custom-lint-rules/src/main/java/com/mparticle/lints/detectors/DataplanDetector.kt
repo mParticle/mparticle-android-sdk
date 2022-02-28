@@ -1,20 +1,27 @@
 package com.mparticle.lints.detectors
 
-import com.android.tools.lint.detector.api.*
+import com.android.tools.lint.detector.api.Category
+import com.android.tools.lint.detector.api.Context
+import com.android.tools.lint.detector.api.Implementation
+import com.android.tools.lint.detector.api.Issue
+import com.android.tools.lint.detector.api.JavaContext
+import com.android.tools.lint.detector.api.Scope
+import com.android.tools.lint.detector.api.Severity
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.internal.Logger
 import com.mparticle.lints.basedetectors.CallScanner
 import com.mparticle.lints.dtos.Expression
-import com.mparticle.tooling.*
+import com.mparticle.tooling.DataPlanningNodeApp
+import com.mparticle.tooling.Utils
+import com.mparticle.tooling.ValidationResult
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UExpression
 import org.json.JSONObject
 import java.io.File
 
-
-class DataplanDetector: CallScanner() {
+class DataplanDetector : CallScanner() {
 
     private var dataplanningNode: DataPlanningNodeApp? = null
     private var dataplan: String? = null
@@ -22,33 +29,33 @@ class DataplanDetector: CallScanner() {
     companion object {
 
         val ISSUE = Issue.create(
-                "DataplanViolation",
-                "Field conflicts with data plan's constraints",
-                "This field is in violation of constrains defined in your organization or workspace's data plan",
-                Category.create("DataPlanning", 1),
-                10,
-                Severity.ERROR,
-                Implementation(DataplanDetector::class.java, Scope.JAVA_FILE_SCOPE)
+            "DataplanViolation",
+            "Field conflicts with data plan's constraints",
+            "This field is in violation of constrains defined in your organization or workspace's data plan",
+            Category.create("DataPlanning", 1),
+            10,
+            Severity.ERROR,
+            Implementation(DataplanDetector::class.java, Scope.JAVA_FILE_SCOPE)
         )
 
         val NODE_MISSING = Issue.create(
-                "NodeMissing",
-                "Unable to validate Dataplan, Node is not present",
-                "The MParticle Dataplan validation library requirs Node CLI tools to be installed. To insure you have Node installed, run \"node -v\" from the Command Line",
-                Category.USABILITY,
-                4,
-                Severity.INFORMATIONAL,
-                Implementation(DataplanDetector::class.java, Scope.JAVA_FILE_SCOPE)
+            "NodeMissing",
+            "Unable to validate Dataplan, Node is not present",
+            "The MParticle Dataplan validation library requirs Node CLI tools to be installed. To insure you have Node installed, run \"node -v\" from the Command Line",
+            Category.USABILITY,
+            4,
+            Severity.INFORMATIONAL,
+            Implementation(DataplanDetector::class.java, Scope.JAVA_FILE_SCOPE)
         )
 
         val NO_DATA_PLAN = Issue.create(
-                "DataPlanMissing",
-                "Unable to read Data Plan",
-                "Retrieving the MParticle Data Plan is necessary to evaluate any violations. There may be a problem with locating your \"dataPlanVersionFile\". Please double check the values is correct in your \"mparticle\" block in build.gradle or your mp.config.json file",
-                Category.USABILITY,
-                4,
-                Severity.INFORMATIONAL,
-                Implementation(DataplanDetector::class.java, Scope.JAVA_FILE_SCOPE)
+            "DataPlanMissing",
+            "Unable to read Data Plan",
+            "Retrieving the MParticle Data Plan is necessary to evaluate any violations. There may be a problem with locating your \"dataPlanVersionFile\". Please double check the values is correct in your \"mparticle\" block in build.gradle or your mp.config.json file",
+            Category.USABILITY,
+            4,
+            Severity.INFORMATIONAL,
+            Implementation(DataplanDetector::class.java, Scope.JAVA_FILE_SCOPE)
         )
     }
 
@@ -57,7 +64,7 @@ class DataplanDetector: CallScanner() {
     override fun beforeCheckRootProject(context: Context) {
         super.beforeCheckRootProject(context)
 
-        //stub logger in MParticle to avoid any dependencies on Android Log when building Events
+        // stub logger in MParticle to avoid any dependencies on Android Log when building Events
         Logger.setLogHandler(object : Logger.DefaultLogHandler() {
             override fun log(priority: MParticle.LogLevel?, error: Throwable?, messages: String?) {}
         })
@@ -83,7 +90,7 @@ class DataplanDetector: CallScanner() {
 
     override fun onInstanceCollected(context: JavaContext, unresolvedObject: Expression, reportingNode: UExpression) {
         val instance = try { unresolvedObject.resolve() } catch (e: Exception) { }
-        //this will make MParticle not break incase Logger happens to be called
+        // this will make MParticle not break incase Logger happens to be called
         val message = when (instance) {
             is MPEvent.Builder -> instance.build().message
             is CommerceEvent.Builder -> instance.build().message
@@ -99,36 +106,36 @@ class DataplanDetector: CallScanner() {
         val dp = dataplan
         if (dp == null) {
             val message = "Data Plan missing" +
-                    if (config?.dataPlanVersionFile != null) {
-                        config?.dataPlanVersionFile?.let {
-                            ", $it not found"
-                        }
-                    } else {
-                        ""
+                if (config?.dataPlanVersionFile != null) {
+                    config?.dataPlanVersionFile?.let {
+                        ", $it not found"
                     }
+                } else {
+                    ""
+                }
             context.report(
-                    NO_DATA_PLAN,
-                    reportingNode,
-                    context.getLocation(reportingNode),
-                    message
+                NO_DATA_PLAN,
+                reportingNode,
+                context.getLocation(reportingNode),
+                message
             )
         } else if (dataplanningNode?.checkMPInstalled() == false) {
             context.report(
-                    NODE_MISSING,
-                    reportingNode,
-                    context.getLocation(reportingNode),
-                    "MParticle CLI tools missing, run \"./gradlew mpInstall\""
+                NODE_MISSING,
+                reportingNode,
+                context.getLocation(reportingNode),
+                "MParticle CLI tools missing, run \"./gradlew mpInstall\""
             )
         } else {
             val messageString = message.attributesToNumbers().toString()
             val result: DataPlanningNodeApp.NodeAppResult<List<ValidationResult>>? = dataplanningNode?.validate(dp, messageString, config?.dataPlanVersion)
-            if (config?.debugReportServerMessage === true){
+            if (config?.debugReportServerMessage === true) {
                 val response = result?.response?.getOrNull(0)
                 context.report(
-                        ISSUE,
-                        reportingNode,
-                        context.getLocation(reportingNode),
-                        response.toString()
+                    ISSUE,
+                    reportingNode,
+                    context.getLocation(reportingNode),
+                    response.toString()
                 )
                 return
             }
@@ -136,15 +143,15 @@ class DataplanDetector: CallScanner() {
                 result?.response?.forEach { validationResult ->
                     validationResult.data?.validationErrors?.forEach { error ->
                         var errorMessage =
-                                when (error.errorPointer) {
-                                    "#/data/custom_attributes", "#/data/custom_attributes/${error.key}" -> getErrorMessageBySchemaKeyword(ViolationSchemaKeywordType.get(error.schemaKeyworkd), error.expected)
-                                    "#" -> when (validationResult.data?.match?.type) {
-                                        "commerce_event" -> "Unplanned Commerce Event"
-                                        "custom_event" -> "Unplanned Custom Event (MPEvent)"
-                                        else -> null
-                                    }
-                                    else -> "Event does not conform to DataPlan"
+                            when (error.errorPointer) {
+                                "#/data/custom_attributes", "#/data/custom_attributes/${error.key}" -> getErrorMessageBySchemaKeyword(ViolationSchemaKeywordType.get(error.schemaKeyworkd), error.expected)
+                                "#" -> when (validationResult.data?.match?.type) {
+                                    "commerce_event" -> "Unplanned Commerce Event"
+                                    "custom_event" -> "Unplanned Custom Event (MPEvent)"
+                                    else -> null
                                 }
+                                else -> "Event does not conform to DataPlan"
+                            }
                         val matchingValues = ArrayList<UElement>()
                         unresolvedObject.forEachExpression { expression ->
                             val value = expression.resolve()
@@ -156,22 +163,22 @@ class DataplanDetector: CallScanner() {
                         val match = validationResult.data?.match
                         errorMessage = errorMessage ?: validationResult.data?.match?.criteria?.entries?.firstOrNull {
                             it.value == error.key
-                        }?.let {entry ->
-                                "For ${match?.type}, unexpected ${entry.key} value of \"${entry.value}\". exprected ${error.expected}"
+                        }?.let { entry ->
+                            "For ${match?.type}, unexpected ${entry.key} value of \"${entry.value}\". exprected ${error.expected}"
                         }
                         if (matchingValues.size == 1) {
                             context.report(
-                                    ISSUE,
-                                    matchingValues[0],
-                                    context.getLocation(matchingValues[0]),
-                                    errorMessage ?: "Event is not in accordance with Data Plan"
+                                ISSUE,
+                                matchingValues[0],
+                                context.getLocation(matchingValues[0]),
+                                errorMessage ?: "Event is not in accordance with Data Plan"
                             )
                         } else {
                             context.report(
-                                    ISSUE,
-                                    reportingNode,
-                                    context.getLocation(reportingNode),
-                                    errorMessage ?: "Event is not in accordance with Data Plan"
+                                ISSUE,
+                                reportingNode,
+                                context.getLocation(reportingNode),
+                                errorMessage ?: "Event is not in accordance with Data Plan"
                             )
                         }
                     }
@@ -182,40 +189,39 @@ class DataplanDetector: CallScanner() {
                 File(config!!.resultsFile!!).appendText(result?.response?.joinToString { it.toString() } ?: "")
             }
         }
-
     }
 
     fun getErrorMessageBySchemaKeyword(schemaKeyword: ViolationSchemaKeywordType, expectedValue: String? = null): String {
-        val expectedValueMessage = expectedValue?.let { ": ${it}" } ?: ""
+        val expectedValueMessage = expectedValue?.let { ": $it" } ?: ""
         return when (schemaKeyword) {
             ViolationSchemaKeywordType.Const ->
-                "Value did not match the constant specified. Schema keyword const.";
+                "Value did not match the constant specified. Schema keyword const."
             ViolationSchemaKeywordType.Enum ->
-                "Value did not match the set of values specified. Schema keyword enum.";
+                "Value did not match the set of values specified. Schema keyword enum."
             ViolationSchemaKeywordType.ExclusiveMaximum ->
-                "Value was greater than or equal to the maximum specified. Schema keyword exclusiveMaximum.";
+                "Value was greater than or equal to the maximum specified. Schema keyword exclusiveMaximum."
             ViolationSchemaKeywordType.ExclusiveMinimum ->
-                "Value was less than or equal to the minimum specified. Schema keyword exclusiveMinimum";
+                "Value was less than or equal to the minimum specified. Schema keyword exclusiveMinimum"
             ViolationSchemaKeywordType.Maximum ->
-                "Value was greater than the maximum specified. Schema keyword maximum.";
+                "Value was greater than the maximum specified. Schema keyword maximum."
             ViolationSchemaKeywordType.Minimum ->
-                "Value was less than the minimum specified. Schema keyword minimum.";
+                "Value was less than the minimum specified. Schema keyword minimum."
             ViolationSchemaKeywordType.Format ->
-                "Value did not match the format${expectedValueMessage}. Schema keyword format.";
+                "Value did not match the format$expectedValueMessage. Schema keyword format."
             ViolationSchemaKeywordType.MaxLength ->
-                "Value exceeded maximum length specified. Schema keyword maxLength.";
+                "Value exceeded maximum length specified. Schema keyword maxLength."
             ViolationSchemaKeywordType.MinLength ->
-                "Value shorter than the minimum length specified. Schema keyword minLength.";
+                "Value shorter than the minimum length specified. Schema keyword minLength."
             ViolationSchemaKeywordType.Pattern ->
-                "Value did not match the regular expression${expectedValueMessage}. Schema keyword pattern.";
+                "Value did not match the regular expression$expectedValueMessage. Schema keyword pattern."
             ViolationSchemaKeywordType.AdditionalProperties ->
-                "Key was not present in the planned data point";
+                "Key was not present in the planned data point"
             ViolationSchemaKeywordType.Required ->
-                "Required key missing from the data point. Schema keyword required.";
+                "Required key missing from the data point. Schema keyword required."
             ViolationSchemaKeywordType.Type ->
-                "Value did not match the data type${expectedValueMessage}. Schema keyword type.";
+                "Value did not match the data type$expectedValueMessage. Schema keyword type."
             ViolationSchemaKeywordType.Unknown ->
-                "Unknown schema violation. Schema keyword ${schemaKeyword}";
+                "Unknown schema violation. Schema keyword $schemaKeyword"
         }
     }
 
@@ -237,7 +243,7 @@ class DataplanDetector: CallScanner() {
 
         companion object {
             fun get(value: String?): ViolationSchemaKeywordType {
-                return values().firstOrNull { it.toString().toLowerCase() == value?.toLowerCase()} ?: Unknown
+                return values().firstOrNull { it.toString().toLowerCase() == value?.toLowerCase() } ?: Unknown
             }
         }
     }

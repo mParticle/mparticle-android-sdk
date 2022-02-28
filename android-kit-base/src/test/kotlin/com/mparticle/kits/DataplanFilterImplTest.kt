@@ -9,17 +9,19 @@ import com.mparticle.commerce.Impression
 import com.mparticle.commerce.Product
 import com.mparticle.commerce.Promotion
 import com.mparticle.kits.DataplanFilterImpl.Companion.CUSTOM_EVENT_KEY
-import com.mparticle.kits.DataplanFilterImpl.Companion.PRODUCT_ACTION_PRODUCTS
-import com.mparticle.kits.DataplanFilterImpl.Companion.PRODUCT_IMPRESSION_PRODUCTS
 import com.mparticle.kits.DataplanFilterImpl.Companion.PRODUCT_ACTION_KEY
+import com.mparticle.kits.DataplanFilterImpl.Companion.PRODUCT_ACTION_PRODUCTS
 import com.mparticle.kits.DataplanFilterImpl.Companion.PRODUCT_IMPRESSION_KEY
+import com.mparticle.kits.DataplanFilterImpl.Companion.PRODUCT_IMPRESSION_PRODUCTS
 import com.mparticle.kits.DataplanFilterImpl.Companion.PROMOTION_ACTION_KEY
 import com.mparticle.kits.DataplanFilterImpl.Companion.SCREEN_EVENT_KEY
 import com.mparticle.kits.DataplanFilterImpl.Companion.USER_ATTRIBUTES_KEY
 import com.mparticle.kits.DataplanFilterImpl.Companion.USER_IDENTITIES_KEY
 import com.mparticle.kits.DataplanFilterImpl.Companion.getEventsApiName
 import org.json.JSONObject
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.io.File
@@ -32,11 +34,11 @@ class DataplanFilterImplTest {
     @Test
     fun testParseDataplan() {
         val dataplan = File("src/test/java/com/mparticle/kits/sample_dataplan.json")
-                .readText()
-                .toJSON()
+            .readText()
+            .toJSON()
         val dataplanOptions = MParticleOptions.DataplanOptions.builder()
-                .dataplanVersion(dataplan)
-                .build()
+            .dataplanVersion(dataplan)
+            .build()
         val dataplanFilter = DataplanFilterImpl(dataplanOptions!!)
         assertEquals(15, dataplanFilter.dataPoints.size)
         dataplanFilter.apply {
@@ -80,17 +82,16 @@ class DataplanFilterImplTest {
                 assertNull(it)
             }
         }
-
     }
 
     @Test
     fun testParseDataplan2() {
         val dataplan = File("src/test/java/com/mparticle/kits/sample_dataplan2.json")
-                .readText()
-                .toJSON()
+            .readText()
+            .toJSON()
         val dataplanOptions = MParticleOptions.DataplanOptions.builder()
-                .dataplanVersion(dataplan)
-                .build()
+            .dataplanVersion(dataplan)
+            .build()
         val dataplanFilter = DataplanFilterImpl(dataplanOptions!!)
         assertEquals(20, dataplanFilter.dataPoints.size)
         dataplanFilter.apply {
@@ -102,13 +103,14 @@ class DataplanFilterImplTest {
             }
             dataPoints.getValue("$PRODUCT_ACTION_KEY.add_to_cart").also {
                 assertEquals(
-                        hashSetOf(
-                                "attributeNumMinMax",
-                                "attributeEmail",
-                                "attributeNumEnum",
-                                "attributeStringAlpha",
-                                "attributeBoolean"
-                        ), it
+                    hashSetOf(
+                        "attributeNumMinMax",
+                        "attributeEmail",
+                        "attributeNumEnum",
+                        "attributeStringAlpha",
+                        "attributeBoolean"
+                    ),
+                    it
                 )
             }
             dataPoints.getValue("$PRODUCT_ACTION_KEY.add_to_cart.$PRODUCT_ACTION_PRODUCTS").also {
@@ -220,9 +222,8 @@ class DataplanFilterImplTest {
         }
     }
 
-
     @Test
-    fun `test blockEventAttribute is passing properly for planned events` () {
+    fun `test blockEventAttribute is passing properly for planned events`() {
         val diversity = types.toHashSet()
         while (diversity.size != 0) {
             dataplanPoints = getRandomDataplanPoints()
@@ -240,7 +241,7 @@ class DataplanFilterImplTest {
     }
 
     @Test
-    fun `test blockEvent is passing properly for unplanned events but event blocking off` () {
+    fun `test blockEvent is passing properly for unplanned events but event blocking off`() {
         val diversity = types.toHashSet()
         while (diversity.size != 0) {
             dataplanPoints = getRandomDataplanPoints()
@@ -304,11 +305,10 @@ class DataplanFilterImplTest {
         }
     }
 
-
     fun getRandomDataplanEventKey(): DataplanPoint {
         return when (Random.Default.nextInt(0, 5)) {
             0 -> DataplanPoint(CUSTOM_EVENT_KEY, randomString(5), randomEventType().getEventsApiName())
-            1 -> DataplanPoint(SCREEN_EVENT_KEY,randomString(8))
+            1 -> DataplanPoint(SCREEN_EVENT_KEY, randomString(8))
             2 -> DataplanPoint(PRODUCT_ACTION_KEY, randomProductAction())
             3 -> DataplanPoint(PROMOTION_ACTION_KEY, randomPromotionAction())
             4 -> DataplanPoint(PRODUCT_IMPRESSION_KEY)
@@ -318,17 +318,16 @@ class DataplanFilterImplTest {
 
     fun getRandomDataplanPoints(): MutableMap<String, HashSet<String>?> {
         return (0..Random.Default.nextInt(0, 10))
-                .associate {
-                    getRandomDataplanEventKey().toString() to randomAttributes().keys.toHashSet()
-                }
-                .toMutableMap()
+            .associate {
+                getRandomDataplanEventKey().toString() to randomAttributes().keys.toHashSet()
+            }
+            .toMutableMap()
     }
 
     val chars: List<Char> = ('a'..'z') + ('A'..'Z')
 
-
     fun randomAttributes(): Map<String, String> {
-        return (0..Random.Default.nextInt(0,5)).map {
+        return (0..Random.Default.nextInt(0, 5)).map {
             randomString(4) to randomString(8)
         }.toMap()
     }
@@ -353,28 +352,28 @@ class DataplanFilterImplTest {
 
     fun randomConstString(clazz: Class<*>): String {
         return clazz.fields
-                .filter { Modifier.isPublic(it.modifiers) && Modifier.isStatic(it.modifiers) }
-                .filter { it.name.all { it.isUpperCase() } }
-                .filter { it.type == String::class.java }
-                .let {
-                    it[Random.Default.nextInt(0, it.size - 1)].get(null) as String
-                }
+            .filter { Modifier.isPublic(it.modifiers) && Modifier.isStatic(it.modifiers) }
+            .filter { it.name.all { it.isUpperCase() } }
+            .filter { it.type == String::class.java }
+            .let {
+                it[Random.Default.nextInt(0, it.size - 1)].get(null) as String
+            }
     }
 
     private fun String.toJSON() = JSONObject(this)
 
-    class ScreenEvent(event: MPEvent): MPEvent(event) {
+    class ScreenEvent(event: MPEvent) : MPEvent(event) {
         init {
             isScreenEvent = true
         }
     }
-    class ScreenEventBuilder(name: String): MPEvent.Builder(name, MParticle.EventType.Other) {
+    class ScreenEventBuilder(name: String) : MPEvent.Builder(name, MParticle.EventType.Other) {
         override fun build(): MPEvent {
             return ScreenEvent(super.build())
         }
     }
 
     class DataplanPoint(val type: String, val name: String? = null, val eventType: String? = null) {
-        override fun toString() = "$type${if (name != null) ".$name" else ""}${if(eventType != null) ".$eventType" else ""}"
+        override fun toString() = "$type${if (name != null) ".$name" else ""}${if (eventType != null) ".$eventType" else ""}"
     }
 }

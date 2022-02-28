@@ -7,12 +7,11 @@ import com.mparticle.MParticleOptions
 import com.mparticle.networking.Matcher
 import com.mparticle.testutils.BaseCleanStartedEachTest
 import org.json.JSONObject
-import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
-class BatchSessionInfoTest: BaseCleanStartedEachTest() {
+class BatchSessionInfoTest : BaseCleanStartedEachTest() {
 
     override fun useInMemoryDatabase() = true
 
@@ -21,11 +20,13 @@ class BatchSessionInfoTest: BaseCleanStartedEachTest() {
     }
 
     override fun beforeSetup() {
-        //the condition described in the test only happened when `sessionHistory` is false,
-        //so set config to return `sessionHistory` == false
-        mServer.setupConfigResponse(JSONObject()
+        // the condition described in the test only happened when `sessionHistory` is false,
+        // so set config to return `sessionHistory` == false
+        mServer.setupConfigResponse(
+            JSONObject()
                 .put(ConfigManager.KEY_INCLUDE_SESSION_HISTORY, false)
-                .toString())
+                .toString()
+        )
     }
 
     /**
@@ -51,34 +52,35 @@ class BatchSessionInfoTest: BaseCleanStartedEachTest() {
             assertNotEquals(sessionId, appStateManager.session.mSessionID)
         }
 
-
-
-
         var messageCount = 0
         MParticle.getInstance()?.upload()
-        mServer.waitForVerify(Matcher(mServer.Endpoints().getEventsUrl()).bodyMatch {
-            val version = it.getJSONObject("ai").getString(Constants.MessageKey.INSTALL_REFERRER)
-            if (it.has("msgs")) {
-                var messages = it.getJSONArray("msgs")
-                for (i in 0 until messages.length()) {
-                    if (messages.getJSONObject(i).getString("dt") == "e") {
-                        messageCount++
+        mServer.waitForVerify(
+            Matcher(mServer.Endpoints().getEventsUrl()).bodyMatch {
+                val version = it.getJSONObject("ai").getString(Constants.MessageKey.INSTALL_REFERRER)
+                if (it.has("msgs")) {
+                    var messages = it.getJSONArray("msgs")
+                    for (i in 0 until messages.length()) {
+                        if (messages.getJSONObject(i).getString("dt") == "e") {
+                            messageCount++
+                        }
                     }
                 }
+                assertEquals("111", version)
+                MParticle.getInstance()?.upload()
+                messageCount >= 150
             }
-            assertEquals("111", version)
-            MParticle.getInstance()?.upload()
-            messageCount >= 150
-        })
+        )
 
         MParticle.getInstance()?.apply {
             logEvent(MPEvent.Builder("1").build())
             upload()
         }
-        mServer.waitForVerify(Matcher(mServer.Endpoints().getEventsUrl()).bodyMatch {
-            val version = it.getJSONObject("ai").getString(Constants.MessageKey.INSTALL_REFERRER)
-            assertEquals("222", version)
-            true
-        })
+        mServer.waitForVerify(
+            Matcher(mServer.Endpoints().getEventsUrl()).bodyMatch {
+                val version = it.getJSONObject("ai").getString(Constants.MessageKey.INSTALL_REFERRER)
+                assertEquals("222", version)
+                true
+            }
+        )
     }
 }

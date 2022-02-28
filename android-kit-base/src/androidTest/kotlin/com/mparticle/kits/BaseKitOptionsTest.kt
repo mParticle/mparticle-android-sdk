@@ -9,7 +9,7 @@ import com.mparticle.testutils.BaseCleanInstallEachTest
 import org.json.JSONException
 import org.json.JSONObject
 
-open class BaseKitOptionsTest: BaseCleanInstallEachTest() {
+open class BaseKitOptionsTest : BaseCleanInstallEachTest() {
     fun startMParticle(optionsBuilder: MParticleOptions.Builder, server: MockServer) {
         AccessUtils.setCredentialsIfEmpty(optionsBuilder)
         val options: MParticleOptions = optionsBuilder.build()
@@ -35,7 +35,6 @@ open class BaseKitOptionsTest: BaseCleanInstallEachTest() {
         startMParticle(optionsBuilder)
     }
 
-
     internal class ConfigManagerConfiguration(var initialConfig: JSONObject) : Configuration<ConfigManager> {
         override fun configures(): Class<ConfigManager> {
             return ConfigManager::class.java
@@ -48,6 +47,5 @@ open class BaseKitOptionsTest: BaseCleanInstallEachTest() {
                 throw RuntimeException("Unable to set initial configuration: $initialConfig")
             }
         }
-
     }
 }

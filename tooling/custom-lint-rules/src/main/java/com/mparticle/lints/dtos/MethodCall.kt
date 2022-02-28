@@ -2,10 +2,8 @@ package com.mparticle.lints.dtos
 
 import com.mparticle.lints.resolve
 import org.jetbrains.uast.UCallExpression
-import java.lang.reflect.Method
-import java.util.HashSet
 
-data class MethodCall(override val parent: Expression, val methodName: String?, override val node: UCallExpression, var returnValue: Boolean): ParameterizedExpression {
+data class MethodCall(override val parent: Expression, val methodName: String?, override val node: UCallExpression, var returnValue: Boolean) : ParameterizedExpression {
 
     override var arguments: List<Value> = listOf()
 
@@ -18,8 +16,8 @@ data class MethodCall(override val parent: Expression, val methodName: String?, 
             return null
         }
         var matchingMethods = instance::class.java.methods
-                .filter { it.name == methodName }
-                .filter { it.parameterCount == arguments.size }
+            .filter { it.name == methodName }
+            .filter { it.parameterCount == arguments.size }
         if (matchingMethods.size == 1) {
             val method = matchingMethods.first {
                 it.parameterTypes.forEachIndexed { i, type ->

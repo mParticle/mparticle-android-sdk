@@ -3,10 +3,8 @@ package com.mparticle
 import com.mparticle.tooling.Config
 import groovy.util.GroovyTestCase.assertEquals
 import org.junit.Test
-import java.util.*
 
 class MParticlePluginTest {
-    val random = Random()
 
     @Test
     fun testConfigSerialization() {
@@ -20,8 +18,8 @@ class MParticlePluginTest {
             this.verbose = null
             this.workspaceId = "workspaceId"
             this.internalConfig = Config.InternalConfig(
-                    "path/to/node",
-                    "path/to/mp"
+                "path/to/node",
+                "path/to/mp"
             )
         }
         val json = config.toJson()

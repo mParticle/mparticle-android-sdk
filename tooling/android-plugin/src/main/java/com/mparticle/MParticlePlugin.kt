@@ -3,8 +3,8 @@ package com.mparticle
 import com.mparticle.tooling.Config
 import com.mparticle.tooling.DataPlanningNodeApp
 import com.mparticle.tooling.Logger
-import com.mparticle.tooling.Utils.executeCLI
 import com.mparticle.tooling.Utils
+import com.mparticle.tooling.Utils.executeCLI
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -12,7 +12,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.io.File
 
-class MParticlePlugin: Plugin<Project> {
+class MParticlePlugin : Plugin<Project> {
 
     companion object {
         val MParticleCliVersion: String? = null
@@ -21,7 +21,6 @@ class MParticlePlugin: Plugin<Project> {
     var isInstallTask = false
     var isUninstallTask = false
 
-
     override fun apply(target: Project) {
         val mpInstallTaskName = "mpInstall"
         val mpUninstallTaskName = "mpUninstall"
@@ -29,7 +28,7 @@ class MParticlePlugin: Plugin<Project> {
 
         target.gradle.startParameter.taskNames?.apply {
             isInstallTask = any { it == mpInstallTaskName }
-            isUninstallTask = any { it == mpUninstallTaskName}
+            isUninstallTask = any { it == mpUninstallTaskName }
         }
 
         target.afterEvaluate {
@@ -104,7 +103,7 @@ class MParticlePlugin: Plugin<Project> {
         }
     }
 
-    private fun updateArtifactPaths(config: Config){
+    private fun updateArtifactPaths(config: Config) {
         val dataPlanningNodeApp = getDataplanningApp(true)
         if (dataPlanningNodeApp?.checkNodeInstalled() == false) {
             println("MParticle Node not installed. Please install to use Dataplanning features")
@@ -134,7 +133,7 @@ class MParticlePlugin: Plugin<Project> {
             try {
                 val json = JSONObject(text)
                 Config.from(json)
-            }catch (jse: JSONException) {
+            } catch (jse: JSONException) {
                 Logger.warning("Error reading mp.config.json: ${jse.message}")
                 Config()
             }

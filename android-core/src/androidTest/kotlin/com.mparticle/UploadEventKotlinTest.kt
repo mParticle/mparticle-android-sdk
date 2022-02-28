@@ -7,17 +7,17 @@ import com.mparticle.testutils.BaseCleanStartedEachTest
 import org.junit.Test
 import kotlin.test.assertNotEquals
 
-class UploadEventKotlinTest: BaseCleanStartedEachTest() {
+class UploadEventKotlinTest : BaseCleanStartedEachTest() {
     @Test
     fun testMPEventUploadBypass() {
         val event = MPEvent.Builder("Should Not Upload")
-                .shouldUploadEvent(false)
-                .build()
+            .shouldUploadEvent(false)
+            .build()
         val event2 = MPEvent.Builder("Should Upload 1")
-                .shouldUploadEvent(true)
-                .build()
+            .shouldUploadEvent(true)
+            .build()
         val event3 = MPEvent.Builder("Should Upload 2")
-                .build()
+            .build()
         MParticle.getInstance()?.logEvent(event)
         MParticle.getInstance()?.logEvent(event2)
         MParticle.getInstance()?.logEvent(event3)
@@ -33,9 +33,10 @@ class UploadEventKotlinTest: BaseCleanStartedEachTest() {
         // messages are received in an upload message and fail if that, or any previous message, contains the
         // "Should Not Upload" message
         var numUploadedEvents = 0
-        mServer.waitForVerify(Matcher(mServer.Endpoints().eventsUrl).bodyMatch {
-            it.optJSONArray("msgs")?.let { messagesArray ->
-                (0 until messagesArray.length())
+        mServer.waitForVerify(
+            Matcher(mServer.Endpoints().eventsUrl).bodyMatch {
+                it.optJSONArray("msgs")?.let { messagesArray ->
+                    (0 until messagesArray.length())
                         .any {
                             val eventMessageName = messagesArray.getJSONObject(it).optString("n")
                             assertNotEquals("Should Not Upload", eventMessageName)
@@ -44,8 +45,9 @@ class UploadEventKotlinTest: BaseCleanStartedEachTest() {
                             }
                             numUploadedEvents == 2
                         }
-            } ?: false
-        })
+                } ?: false
+            }
+        )
     }
 
     @Test
@@ -66,9 +68,10 @@ class UploadEventKotlinTest: BaseCleanStartedEachTest() {
         // messages are received in an upload message and fail if that, or any previous message, contains the
         // "Should Not Upload" message
         var numUploadedEvents = 0
-        mServer.waitForVerify(Matcher(mServer.Endpoints().eventsUrl).bodyMatch {
-            it.optJSONArray("msgs")?.let { messagesArray ->
-                (0 until messagesArray.length())
+        mServer.waitForVerify(
+            Matcher(mServer.Endpoints().eventsUrl).bodyMatch {
+                it.optJSONArray("msgs")?.let { messagesArray ->
+                    (0 until messagesArray.length())
                         .any {
                             val eventMessageName = messagesArray.getJSONObject(it).optString("n")
                             assertNotEquals("Should Not Upload", eventMessageName)
@@ -77,26 +80,27 @@ class UploadEventKotlinTest: BaseCleanStartedEachTest() {
                             }
                             numUploadedEvents == 3
                         }
-            } ?: false
-        })
+                } ?: false
+            }
+        )
     }
 
     @Test
     fun testCommerceEventUploadBypass() {
         val product = Product.Builder("Should Not Upload", "sku1", 100.00)
-                .build()
+            .build()
         val event = CommerceEvent.Builder(Product.ADD_TO_CART, product)
-                .shouldUploadEvent(false)
-                .build()
+            .shouldUploadEvent(false)
+            .build()
         var product2 = Product.Builder("Should Upload 1", "sku2", 100.00)
-                .build()
+            .build()
         val event2 = CommerceEvent.Builder(Product.ADD_TO_CART, product2)
-                .shouldUploadEvent(true)
-                .build()
+            .shouldUploadEvent(true)
+            .build()
         var product3 = Product.Builder("Should Upload 2", "sku3", 100.00)
-                .build()
+            .build()
         val event3 = CommerceEvent.Builder(Product.ADD_TO_CART, product3)
-                .build()
+            .build()
         MParticle.getInstance()?.logEvent(event)
         MParticle.getInstance()?.logEvent(event2)
         MParticle.getInstance()?.logEvent(event3)
@@ -112,9 +116,10 @@ class UploadEventKotlinTest: BaseCleanStartedEachTest() {
         // messages are received in an upload message and fail if that, or any previous message, contains the
         // "Should Not Upload" message
         var numUploadedEvents = 0
-        mServer.waitForVerify(Matcher(mServer.Endpoints().eventsUrl).bodyMatch {
-            it.optJSONArray("msgs")?.let { messagesArray ->
-                (0 until messagesArray.length())
+        mServer.waitForVerify(
+            Matcher(mServer.Endpoints().eventsUrl).bodyMatch {
+                it.optJSONArray("msgs")?.let { messagesArray ->
+                    (0 until messagesArray.length())
                         .any {
                             val eventProductName = messagesArray.getJSONObject(it).optJSONObject("pd")?.optJSONArray("pl")?.optJSONObject(0)?.optString("nm")
                             assertNotEquals("Should Not Upload", eventProductName)
@@ -123,7 +128,8 @@ class UploadEventKotlinTest: BaseCleanStartedEachTest() {
                             }
                             numUploadedEvents == 2
                         }
-            } ?: false
-        })
+                } ?: false
+            }
+        )
     }
 }

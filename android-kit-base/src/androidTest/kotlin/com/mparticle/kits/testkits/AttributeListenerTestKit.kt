@@ -4,7 +4,7 @@ import com.mparticle.MParticle
 import com.mparticle.kits.KitIntegration
 import com.mparticle.kits.ReportingMessage
 
-open class AttributeListenerTestKit: ListenerTestKit(), KitIntegration.AttributeListener {
+open class AttributeListenerTestKit : ListenerTestKit(), KitIntegration.AttributeListener {
     var setUserAttribute: ((attributeKey: String?, attributeValue: String?) -> Unit)? = null
     var setUserAttributeList: ((attributeKey: String?, attributeValueList: List<String?>?) -> Unit)? = null
     var supportsAttributeLists: (() -> Boolean)? = null
@@ -14,7 +14,7 @@ open class AttributeListenerTestKit: ListenerTestKit(), KitIntegration.Attribute
     var removeUserIdentity: ((identityType: MParticle.IdentityType?) -> Unit)? = null
     var logout: (() -> List<ReportingMessage>)? = null
 
-    override fun supportsAttributeLists() = supportsAttributeLists?.invoke() ?:true
+    override fun supportsAttributeLists() = supportsAttributeLists?.invoke() ?: true
 
     override fun setUserAttributeList(attributeKey: String, attributeValueList: MutableList<String>) {
         setUserAttributeList?.invoke(attributeKey, attributeValueList)
