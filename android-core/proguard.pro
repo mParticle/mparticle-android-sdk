@@ -80,6 +80,7 @@
 -keepparameternames
 -renamesourcefileattribute SourceFile
 -keepattributes Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,*Annotation*,EnclosingMethod
+-repackageclasses com.mparticle
 
 -keep class com.mparticle.MPEvent$* { *; }
 -keep class com.mparticle.MParticle { *; }
