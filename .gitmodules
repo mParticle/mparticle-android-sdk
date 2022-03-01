@@ -97,3 +97,6 @@
 [submodule "kits/example-kit"]
 	path = kits/example-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-example.git
+[submodule "kits/googeleanalyticsfirebasega4-kit"]
+	path = kits/googeleanalyticsfirebasega4-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-google-analytics-firebase-ga4.git
