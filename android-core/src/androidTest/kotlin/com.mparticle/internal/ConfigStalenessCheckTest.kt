@@ -169,7 +169,7 @@ class ConfigStalenessCheckTest : BaseCleanInstallEachTest() {
         configManager.onNewConfig { latch.countDown() }
         latch.await()
 
-        //after config has been fetched, we should see config2
+        // after config has been fetched, we should see config2
         assertEquals(config2.toString(), configManager.config)
     }
 

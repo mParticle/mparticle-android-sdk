@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ConfigManager {
     public static final String CONFIG_JSON = "json";
-    public static final String CONFIG_FILE_NAME = "mparticle_config.json";
+    public static final String KIT_CONFIG_PREFERENCES = "mparticle_config.json";
     public static final String CONFIG_JSON_TIMESTAMP = "json_timestamp";
     private static final String KEY_TRIGGER_ITEMS = "tri";
     private static final String KEY_MESSAGE_MATCHES = "mm";
@@ -69,7 +69,7 @@ public class ConfigManager {
     static final String DATAPLAN_BLOCK_EVENT_ATTRIBUTES = "ea";
     static final String DATAPLAN_BLOCK_USER_ATTRIBUTES = "ua";
     static final String DATAPLAN_BLOCK_USER_IDENTITIES = "id";
-
+    static final String KIT_CONFIG_KEY = "kit_config";
 
     private static final int DEVMODE_UPLOAD_INTERVAL_MILLISECONDS = 10 * 1000;
     private static final int DEFAULT_MAX_ALIAS_WINDOW_DAYS = 90;
@@ -177,7 +177,7 @@ public class ConfigManager {
      */
     @Nullable
     public JSONArray getLatestKitConfiguration() {
-        String oldConfig = MPUtilityKotlin.readFile(mContext, CONFIG_FILE_NAME);
+        String oldConfig = getKitConfigPreferences().getString(KIT_CONFIG_KEY, new JSONArray().toString());
         if (!MPUtility.isEmpty(oldConfig)) {
             try {
                 return new JSONArray(oldConfig);
@@ -307,17 +307,16 @@ public class ConfigManager {
             String kitConfigString = kitConfig != null ? kitConfig.toString() : null;
             Logger.debug("Updating core config to:\n" + coreConfig);
             Logger.debug("Updating kit config to:\n" + kitConfigString);
-            if (MPUtilityKotlin.writeToFile(mContext, CONFIG_FILE_NAME, kitConfigString)) {
-                sPreferences.edit()
-                        .putString(CONFIG_JSON, coreConfig.toString())
-                        .putLong(CONFIG_JSON_TIMESTAMP, timestamp != null ? timestamp : System.currentTimeMillis())
-                        .putString(Constants.PrefKeys.ETAG, etag)
-                        .putString(Constants.PrefKeys.IF_MODIFIED, lastModified)
-                        .apply();
-            } else {
-                Logger.error("Unable to save config. It will be applied, but the next time your application starts, we will need to fetch a new one");
-                clearConfig();
-            }
+            sPreferences.edit()
+                    .putString(CONFIG_JSON, coreConfig.toString())
+                    .putLong(CONFIG_JSON_TIMESTAMP, timestamp != null ? timestamp : System.currentTimeMillis())
+                    .putString(Constants.PrefKeys.ETAG, etag)
+                    .putString(Constants.PrefKeys.IF_MODIFIED, lastModified)
+                    .apply();
+            getKitConfigPreferences()
+                    .edit()
+                    .putString(KIT_CONFIG_KEY, kitConfigString)
+                    .apply();
         } else {
             Logger.debug("clearing current configurations");
             clearConfig();
@@ -325,12 +324,15 @@ public class ConfigManager {
     }
 
     void clearConfig() {
-        MPUtilityKotlin.clearFile(mContext, CONFIG_FILE_NAME);
         sPreferences.edit()
                 .remove(CONFIG_JSON)
                 .remove(CONFIG_JSON_TIMESTAMP)
                 .remove(Constants.PrefKeys.ETAG)
                 .remove(Constants.PrefKeys.IF_MODIFIED)
+                .apply();
+        getKitConfigPreferences()
+                .edit()
+                .remove(KIT_CONFIG_KEY)
                 .apply();
     }
 
@@ -731,6 +733,10 @@ public class ConfigManager {
 
     static SharedPreferences getPreferences(Context context){
         return context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
+    }
+
+    SharedPreferences getKitConfigPreferences(){
+        return mContext.getSharedPreferences(KIT_CONFIG_PREFERENCES, Context.MODE_PRIVATE);
     }
 
     public static JSONArray getPushKeys(Context context) {
