@@ -2,17 +2,29 @@ package com.mparticle.lints
 
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiVariable
-import com.mparticle.lints.dtos.*
-import org.jetbrains.uast.*
+import com.mparticle.lints.dtos.Expression
+import com.mparticle.lints.dtos.MethodCall
+import com.mparticle.lints.dtos.RootParent
+import com.mparticle.lints.dtos.Value
+import org.jetbrains.uast.UArrayAccessExpression
+import org.jetbrains.uast.UCallExpression
+import org.jetbrains.uast.ULocalVariable
+import org.jetbrains.uast.UMethod
+import org.jetbrains.uast.UQualifiedReferenceExpression
+import org.jetbrains.uast.USimpleNameReferenceExpression
+import org.jetbrains.uast.UVariable
+import org.jetbrains.uast.UastCallKind
+import org.jetbrains.uast.getOutermostQualified
+import org.jetbrains.uast.getQualifiedChain
+import org.jetbrains.uast.tryResolve
 import org.jetbrains.uast.visitor.AbstractUastVisitor
 
 /**
  * class that will gather all {@link com.mparticle.ling.dtos.Call}s made to the provided PsiVariable instance.
  * After
  */
-internal class VariableCollector(val variable: PsiVariable, private val method: UMethod, val parent: Expression, val includeInitialization: Boolean = false): AbstractUastVisitor() {
+internal class VariableCollector(val variable: PsiVariable, private val method: UMethod, val parent: Expression, val includeInitialization: Boolean = false) : AbstractUastVisitor() {
     private var expression: Expression? = null
-
 
     fun getUnresolvedObject(returnValue: Boolean? = null): Expression? {
         method.accept(this)
@@ -33,7 +45,7 @@ internal class VariableCollector(val variable: PsiVariable, private val method: 
                 expression = null
                 val uastInitializer = node.uastInitializer
 
-                //check target variable initialization
+                // check target variable initialization
                 if (includeInitialization) {
                     val value = uastInitializer?.evaluate()
                     if (value != null) {
@@ -49,7 +61,7 @@ internal class VariableCollector(val variable: PsiVariable, private val method: 
                         }
 
                         is UQualifiedReferenceExpression -> {
-                            //get the first call in a potential chain of calls
+                            // get the first call in a potential chain of calls
                             val reference = uastInitializer.getOutermostQualified().getQualifiedChain()[0].tryResolve()
                             when (reference) {
                                 // product = productBuilder.build()
@@ -87,7 +99,6 @@ internal class VariableCollector(val variable: PsiVariable, private val method: 
                     }
                 }
                 is UQualifiedReferenceExpression -> {
-
                 }
             }
         }

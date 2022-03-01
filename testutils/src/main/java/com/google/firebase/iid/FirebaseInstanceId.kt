@@ -1,4 +1,4 @@
-package com.google.firebase.iid;
+package com.google.firebase.iid
 
 object FirebaseInstanceIdToken {
     var token: String? = null

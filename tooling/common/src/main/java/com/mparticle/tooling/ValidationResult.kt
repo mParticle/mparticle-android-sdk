@@ -17,14 +17,14 @@ data class ValidationResult(val eventType: String? = null, val data: ValidationR
                 listOf(ValidationResult(arguments = arguments).apply { originalString = json })
             }
         }
-        fun from(json: JSONArray, arguments: List<String>): List<ValidationResult>  {
+        fun from(json: JSONArray, arguments: List<String>): List<ValidationResult> {
             val validationResults = ArrayList<ValidationResult>()
-            for(i in 0..json.length() - 1) {
+            for (i in 0..json.length() - 1) {
                 val validationResultJson = json.getJSONObject(i)
                 val eventType = validationResultJson.optString("event_type")
                 val data = ValidationResultData.from(validationResultJson.optJSONObject("data"))
                 validationResults.add(
-                        ValidationResult(eventType, data, arguments = arguments)
+                    ValidationResult(eventType, data, arguments = arguments)
                 )
             }
             return validationResults
@@ -34,12 +34,14 @@ data class ValidationResult(val eventType: String? = null, val data: ValidationR
     override fun toString(): String {
         try {
             val jsonResponse = JSONObject()
-                    .put("Error Message", error?.message)
-                    .put("Data", JSONObject()
-                            .put("Match", data?.match)
-                            .put("ValidationErrors", data?.validationErrors?.foldRight(JSONArray()) { item, arr -> arr.put(item) })
-                    )
-                    .put("Event Type", eventType)
+                .put("Error Message", error?.message)
+                .put(
+                    "Data",
+                    JSONObject()
+                        .put("Match", data?.match)
+                        .put("ValidationErrors", data?.validationErrors?.foldRight(JSONArray()) { item, arr -> arr.put(item) })
+                )
+                .put("Event Type", eventType)
             return """
         Arguments:
         ${
@@ -51,18 +53,17 @@ data class ValidationResult(val eventType: String? = null, val data: ValidationR
                     }
                 }
             }.joinToString(" ")
-        }
+            }
         
         Response:
         ${jsonResponse.toString(4)}
 
-        """.trimIndent()
+            """.trimIndent()
         } catch (e: Exception) {
             return e.message + e.stackTrace.joinToString(("\n"))
         }
     }
 }
-
 
 data class ValidationResultData(val match: ValidationResultMatch?, val validationErrors: List<ValidationResultErrors>) {
     companion object {
@@ -88,7 +89,7 @@ data class ValidationResultErrors(val validationErrorType: ValidationErrorType, 
     companion object {
         fun from(json: JSONArray): List<ValidationResultErrors> {
             val validationResultErrors = ArrayList<ValidationResultErrors>()
-            for(i in 0..json.length() - 1) {
+            for (i in 0..json.length() - 1) {
                 val jsonObject = json.getJSONObject(i)
                 val validationErrorTypeString = jsonObject.getString("validation_error_type")
                 val validationErrorType = ValidationErrorType.forName(validationErrorTypeString)
@@ -104,7 +105,6 @@ data class ValidationResultErrors(val validationErrorType: ValidationErrorType, 
     }
 }
 
-
 enum class ValidationErrorType(val text: String) {
     Unplanned("unplanned"),
     MissingRequied("missing_required"),
@@ -118,11 +118,10 @@ enum class ValidationErrorType(val text: String) {
     }
 }
 
-
 fun JSONObject.toHashMap(): HashMap<String, String> {
     val keys = keys() as? Iterator<String>
     val map = HashMap<String, String>()
-    while(keys?.hasNext() == true) {
+    while (keys?.hasNext() == true) {
         val key = keys.next()
         map.put(key, getString(key))
     }

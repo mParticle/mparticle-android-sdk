@@ -6,25 +6,25 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
 
-
 object Utils {
     fun getCurrentFileLocation(fileName: String): String {
         return javaClass.getResource(fileName).path.replace(
-                "file:",
-                ""
+            "file:",
+            ""
         ).split("lint.jar")[0]
     }
 
-
     fun Array<String>.executeCLI(path: String? = null, workingDirectory: String = "."): String {
-        Logger.verbose("command line operation: ${joinToString(" ") {
-            if (it.contains(" ")) {
-                "\"$it\""
-            } else {
-                it
+        Logger.verbose(
+            "command line operation: ${joinToString(" ") {
+                if (it.contains(" ")) {
+                    "\"$it\""
+                } else {
+                    it
+                }
             }
-        }
-        }")
+            }"
+        )
         var error = ""
         var result = ""
         val processBuilder = ProcessBuilder()
@@ -33,9 +33,9 @@ object Utils {
             processBuilder.environment().putAll(envMap)
         }
         val p = processBuilder
-                .directory(File(workingDirectory))
-                .command(*this)
-                .start()
+            .directory(File(workingDirectory))
+            .command(*this)
+            .start()
         result = BufferedReader(InputStreamReader(p.inputStream)).readText()
         error = BufferedReader(InputStreamReader(p.errorStream)).readText()
         Logger.verbose("result: $result")
@@ -64,13 +64,13 @@ object Utils {
         if (file.exists()) {
             return file.lastModified()
         } else {
-            return 0;
+            return 0
         }
     }
 
     fun setConfigFile(config: Config) {
         File(getFileLocation(configFileName))
-                .writeText(config.toJson().toString())
+            .writeText(config.toJson().toString())
     }
 
     fun removeConfigFile() {
@@ -98,7 +98,7 @@ object Utils {
 
     fun setLocalDataplan(dataplan: String) {
         File(getFileLocation(dataplanFileName))
-                .writeText(dataplan)
+            .writeText(dataplan)
     }
 
     fun getFileLocation(fileName: String): String {

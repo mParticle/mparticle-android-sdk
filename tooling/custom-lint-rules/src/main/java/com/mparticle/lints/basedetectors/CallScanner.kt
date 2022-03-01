@@ -9,7 +9,11 @@ import com.mparticle.lints.dtos.RootParent
 import com.mparticle.lints.getVariableElement
 import com.mparticle.lints.receiverClassName
 import com.mparticle.lints.resolveChainedCalls
-import org.jetbrains.uast.*
+import org.jetbrains.uast.UCallExpression
+import org.jetbrains.uast.UElement
+import org.jetbrains.uast.UExpression
+import org.jetbrains.uast.UMethod
+import org.jetbrains.uast.getParentOfType
 import org.jetbrains.uast.util.isConstructorCall
 
 /**
@@ -19,7 +23,7 @@ import org.jetbrains.uast.util.isConstructorCall
  *
  * @see com.mparticle.lints.dtos.UnresolvedObject
  */
-abstract class CallScanner: BaseDetector(), Detector.UastScanner {
+abstract class CallScanner : BaseDetector(), Detector.UastScanner {
 
     abstract fun onInstanceCollected(context: JavaContext, unresolvedExpression: Expression, reportingNode: UExpression)
 
@@ -64,5 +68,4 @@ abstract class CallScanner: BaseDetector(), Detector.UastScanner {
             it.canonicalName == receiverClassName
         }
     }
-
 }

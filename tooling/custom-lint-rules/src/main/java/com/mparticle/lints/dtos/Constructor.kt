@@ -4,12 +4,12 @@ import com.mparticle.lints.receiverClassName
 import com.mparticle.lints.resolve
 import org.jetbrains.uast.UCallExpression
 
-data class Constructor(override val parent: Expression, val methodName: String?, override val node: UCallExpression): ParameterizedExpression {
+data class Constructor(override val parent: Expression, val methodName: String?, override val node: UCallExpression) : ParameterizedExpression {
     override var arguments: List<Value> = listOf()
 
     override fun resolve(): Any? {
         val qualifiedClassName =
-                node.receiverClassName()?.replace(".Builder", "\$Builder")
+            node.receiverClassName()?.replace(".Builder", "\$Builder")
         val clazz = Class.forName(qualifiedClassName)
         val params: List<Any?> = arguments.resolve()
         val argumentClasses = params.map {
@@ -20,11 +20,11 @@ data class Constructor(override val parent: Expression, val methodName: String?,
             }
         }
         val constructor =
-                try {
-                    clazz.getConstructor(*argumentClasses.toTypedArray())
-                } catch (ex: Exception) {
-                    clazz.constructors.firstOrNull() { it.parameterTypes.size == argumentClasses.size }
-                }
+            try {
+                clazz.getConstructor(*argumentClasses.toTypedArray())
+            } catch (ex: Exception) {
+                clazz.constructors.firstOrNull() { it.parameterTypes.size == argumentClasses.size }
+            }
         try {
             if (constructor != null) {
                 if (params.size > 0) {
@@ -41,6 +41,6 @@ data class Constructor(override val parent: Expression, val methodName: String?,
 
     override fun forEachExpression(predicate: (Expression) -> Unit) {
         predicate(this)
-        arguments.forEach {it.forEachExpression(predicate)}
+        arguments.forEach { it.forEachExpression(predicate) }
     }
 }

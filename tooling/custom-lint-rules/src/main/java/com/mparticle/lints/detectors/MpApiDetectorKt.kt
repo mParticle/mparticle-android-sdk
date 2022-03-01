@@ -1,12 +1,29 @@
 package com.mparticle.lints.detectors
 
 import com.android.tools.lint.client.api.UElementHandler
-import com.android.tools.lint.detector.api.*
+import com.android.tools.lint.detector.api.Category
+import com.android.tools.lint.detector.api.Context
+import com.android.tools.lint.detector.api.Detector
+import com.android.tools.lint.detector.api.Implementation
+import com.android.tools.lint.detector.api.Issue
+import com.android.tools.lint.detector.api.JavaContext
+import com.android.tools.lint.detector.api.Location
+import com.android.tools.lint.detector.api.Position
+import com.android.tools.lint.detector.api.Scope
+import com.android.tools.lint.detector.api.Severity
 import com.intellij.psi.PsiClass
 import com.intellij.psi.util.PsiTreeUtil
 import com.mparticle.lints.basedetectors.BaseDetector
-import org.jetbrains.uast.*
-import java.util.*
+import org.jetbrains.uast.UBlockExpression
+import org.jetbrains.uast.UCallExpression
+import org.jetbrains.uast.UDeclarationsExpression
+import org.jetbrains.uast.UElement
+import org.jetbrains.uast.UExpression
+import org.jetbrains.uast.ULambdaExpression
+import org.jetbrains.uast.UMethod
+import org.jetbrains.uast.UQualifiedReferenceExpression
+import org.jetbrains.uast.UReturnExpression
+import org.jetbrains.uast.UVariable
 
 class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
 
@@ -18,13 +35,14 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
 
         @JvmStatic
         val ISSUE = Issue.create(
-                "MParticleInitialization",
-                "mParticle is being started improperly",
-                "MParticle.start() is not called in the onCreate method of the Application class",
-                Category.MESSAGES,
-                7,
-                Severity.WARNING,
-                Implementation(MpApiDetectorKt::class.java, Scope.JAVA_FILE_SCOPE))
+            "MParticleInitialization",
+            "mParticle is being started improperly",
+            "MParticle.start() is not called in the onCreate method of the Application class",
+            Category.MESSAGES,
+            7,
+            Severity.WARNING,
+            Implementation(MpApiDetectorKt::class.java, Scope.JAVA_FILE_SCOPE)
+        )
 
         private val TARGET_METHOD_QUALIFIED_NAME = "com.mparticle.MParticle.start"
 
@@ -87,17 +105,17 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
                     this@MpApiDetectorKt.context = context
                     if (isApplicationSubClassOnCreate(context, node)) {
                         findMethodCall(node, TARGET_METHOD_QUALIFIED_NAME, MAX_AST_DEPTH)
-                                .apply {
-                                    forEach { methodCall ->
-                                        if (isTargetMethod(TARGET_METHOD_QUALIFIED_NAME, methodCall)) {
-                                            if (properMethodCall == null) {
-                                                properMethodCall = LocationWrapper(context.getLocation(methodCall))
-                                            } else {
-                                                extraProperMethodCalls.add(LocationWrapper(context.getLocation(methodCall)))
-                                            }
+                            .apply {
+                                forEach { methodCall ->
+                                    if (isTargetMethod(TARGET_METHOD_QUALIFIED_NAME, methodCall)) {
+                                        if (properMethodCall == null) {
+                                            properMethodCall = LocationWrapper(context.getLocation(methodCall))
+                                        } else {
+                                            extraProperMethodCalls.add(LocationWrapper(context.getLocation(methodCall)))
                                         }
                                     }
                                 }
+                            }
                         applicationOnCreateCall = LocationWrapper(context.getLocation(node))
                     } else {
                         findMethodCall(node, TARGET_METHOD_QUALIFIED_NAME, 1).forEach { methodCall ->
@@ -109,7 +127,6 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
-
             }
         }
     }
@@ -128,40 +145,40 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
                         return callExpressions
                     }
                     element.valueArguments
-                            .forEach { a ->
-                                callExpressions.addAll(findMethodCall(a, depth))
-                            }
+                        .forEach { a ->
+                            callExpressions.addAll(findMethodCall(a, depth))
+                        }
                     getMethod(element)?.let {
                         callExpressions.addAll(findMethodCall(it, depth - 1))
                     }
                 }
-            //Test this, but I think this just applies to kotlin extension blocks, like apply, let, also, etc
+                // Test this, but I think this just applies to kotlin extension blocks, like apply, let, also, etc
                 is UBlockExpression -> element.expressions.forEach { e ->
-                    //increment depth here, because we are essentially diving into the expression
+                    // increment depth here, because we are essentially diving into the expression
                     callExpressions.addAll(findMethodCall(e, depth))
                 }
                 is UDeclarationsExpression ->
                     // This covers the case if there is a method being used to initialize a variable..
                     // i.e int a = random();
                     element.declarations.forEach { declaration ->
-                        //out of all the UDeclarationExpressions, the only ones we want to grab the body from are ones that
-                        //we know are going to be executed when the original method is called. A UMethod is also a subclass of a
-                        //UDeclarationExpression, but we don't want to add this, because it's existence does not mean it is going
-                        //to be invoked. For Methods, we will parse them when their MethodCall is found
-                        (declaration as? UVariable)?.
-                                apply {
-                                    //we dont want to investigate these right now, because their initializer won't be invoked unless it is called
-                                    if (text.isEmpty()) {
-                                        return@apply
-                                    }
-                                    val index = text.indexOf(name ?: "")
-                                    if (index > 0 && " ${text.substring(0, index)} ".contains(" fun ")) {
-                                        return@apply
-                                    }
-                                    uastInitializer?.let {
-                                        callExpressions.addAll(findMethodCall(it, depth))
-                                    }
+                        // out of all the UDeclarationExpressions, the only ones we want to grab the body from are ones that
+                        // we know are going to be executed when the original method is called. A UMethod is also a subclass of a
+                        // UDeclarationExpression, but we don't want to add this, because it's existence does not mean it is going
+                        // to be invoked. For Methods, we will parse them when their MethodCall is found
+                        (declaration as? UVariable)
+                            ?.apply {
+                                // we dont want to investigate these right now, because their initializer won't be invoked unless it is called
+                                if (text.isEmpty()) {
+                                    return@apply
                                 }
+                                val index = text.indexOf(name ?: "")
+                                if (index > 0 && " ${text.substring(0, index)} ".contains(" fun ")) {
+                                    return@apply
+                                }
+                                uastInitializer?.let {
+                                    callExpressions.addAll(findMethodCall(it, depth))
+                                }
+                            }
                     }
                 is UQualifiedReferenceExpression -> {
                     // no need to increment depth for either of these calls, we are splitting a declaration apart, not going down a level
@@ -185,7 +202,6 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
         }
     }
 
-
     /**
      * This method takes a method call (UCallExpression) and returns it's method body, so we can
      * drill down into it.
@@ -198,27 +214,27 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
     }
 
     private fun getLocalMethodImplmentation(callExpression: UCallExpression): UExpression? {
-        (callExpression.uastParent as? UBlockExpression)?.
-                apply {
-                    for (expression in expressions) {
-                        if (expression.equals(callExpression)) {
-                            //this means that we were unable to find the local function we were looking for, before reaching back to the original function method call
-                            return null;
-                        }
-                        //find if it matches the name (the variable that is), then look at the UAST initializer, that should be where the method calls are, then add oall the mthod calls to the List to be returneed
-                        (expression as? UDeclarationsExpression)?.
-                                apply {
-                                    for (uDeclaration in declarations) {
-                                        (uDeclaration as? UVariable)?.
-                                                apply {
-                                                    if (callExpression.methodName.equals(name)) {
-                                                        return uastInitializer
-                                                    }
-                                                }
-                                    }
-                                }
+        (callExpression.uastParent as? UBlockExpression)
+            ?.apply {
+                for (expression in expressions) {
+                    if (expression.equals(callExpression)) {
+                        // this means that we were unable to find the local function we were looking for, before reaching back to the original function method call
+                        return null
                     }
+                    // find if it matches the name (the variable that is), then look at the UAST initializer, that should be where the method calls are, then add oall the mthod calls to the List to be returneed
+                    (expression as? UDeclarationsExpression)
+                        ?.apply {
+                            for (uDeclaration in declarations) {
+                                (uDeclaration as? UVariable)
+                                    ?.apply {
+                                        if (callExpression.methodName.equals(name)) {
+                                            return uastInitializer
+                                        }
+                                    }
+                            }
+                        }
                 }
+            }
         return null
     }
 
@@ -226,17 +242,17 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
      *
      */
     private fun getMethodImplementation(callExpression: UCallExpression): UExpression? {
-        return callExpression.resolve()?.
-                let {
-                    context.uastContext.getMethod(it).uastBody
-                }
+        return callExpression.resolve()
+            ?.let {
+                context.uastContext.getMethod(it).uastBody
+            }
     }
 
     private fun isTargetMethod(targetMethodName: String, element: UCallExpression): Boolean {
-        //before we resolve the method, do a quick check to see if the name matches
+        // before we resolve the method, do a quick check to see if the name matches
         if (targetMethodName.endsWith(element.methodName ?: "")) {
-            //if the name matches, do the more expensive operation of resolving the method implementation,
-            //and check the full qualified name
+            // if the name matches, do the more expensive operation of resolving the method implementation,
+            // and check the full qualified name
             element.resolve()?.containingClass?.let {
                 return targetMethodName.equals("${context.uastContext.getClass(it).qualifiedName}.${element.methodName}")
             }
@@ -250,12 +266,12 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
 
     private fun isApplicationSubClass(context: JavaContext, method: UMethod): Boolean {
         val evaluator = context.evaluator
-        return PsiTreeUtil.getParentOfType(method, PsiClass::class.java, true)?.
-                let {
-                    var isApplicationSubclass = evaluator.extendsClass(it, "android.app.Application", false)
-                    var isApplicationClass = method.containingClass?.qualifiedName.equals("android.app.Application")
-                    isApplicationSubclass && !isApplicationClass
-                } ?: false
+        return PsiTreeUtil.getParentOfType(method, PsiClass::class.java, true)
+            ?.let {
+                var isApplicationSubclass = evaluator.extendsClass(it, "android.app.Application", false)
+                var isApplicationClass = method.containingClass?.qualifiedName.equals("android.app.Application")
+                isApplicationSubclass && !isApplicationClass
+            } ?: false
     }
 
     /**
@@ -279,27 +295,26 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
                     return true
                 }
                 return compareTo.file.getAbsolutePath() == location.file.getAbsolutePath() &&
-                        compareLocation(compareTo.start, location.start) &&
-                        compareLocation(compareTo.end, location.end)
+                    compareLocation(compareTo.start, location.start) &&
+                    compareLocation(compareTo.end, location.end)
             }
             return false
         }
 
         fun compareLocation(l1: Position?, l2: Position?): Boolean {
             return l1?.column == l2?.column &&
-                    l1?.line == l2?.line &&
-                    l1?.offset == l2?.offset
+                l1?.line == l2?.line &&
+                l1?.offset == l2?.offset
         }
 
         override fun toString(): String {
             return location.file.getAbsolutePath() + "\n" +
-                    location.start?.offset + " " + location.start?.line + " " + location.start?.column +
-                    location.end?.offset + " " + location.end?.line + " " + location.end?.column
+                location.start?.offset + " " + location.start?.line + " " + location.start?.column +
+                location.end?.offset + " " + location.end?.line + " " + location.end?.column
         }
 
         override fun compareTo(other: LocationWrapper): Int {
             return toString().compareTo(other.toString())
         }
-
     }
 }

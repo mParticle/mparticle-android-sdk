@@ -10,15 +10,15 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
-class ConfigStalenessCheckTest: BaseCleanInstallEachTest() {
+class ConfigStalenessCheckTest : BaseCleanInstallEachTest() {
     val configManager: ConfigManager
         get() = MParticle.getInstance()?.Internal()?.configManager.assertNotNull()
 
     @Test
     fun testNeverStale() {
         val config1 = randomJson(4)
-        val config2 = randomJson(4);
-        var latch = MPLatch(1);
+        val config2 = randomJson(4)
+        var latch = MPLatch(1)
         val options = MParticleOptions.builder(mContext)
             .addCredentials()
             .build()
@@ -41,7 +41,7 @@ class ConfigStalenessCheckTest: BaseCleanInstallEachTest() {
         latch = MPLatch(1)
         configManager.onNewConfig { latch.countDown() }
 
-        //after restart, we should still have config1
+        // after restart, we should still have config1
         assertEquals(config1.toString(), configManager.config)
         assertEquals(etag, configManager.etag)
         assertEquals(lastModified, configManager.ifModified)
@@ -53,13 +53,11 @@ class ConfigStalenessCheckTest: BaseCleanInstallEachTest() {
         assertEquals(config2.toString(), MParticle.getInstance()?.Internal()?.configManager?.config)
     }
 
-
-
     @Test
     fun testExceedStalenessThreshold() {
         val config1 = randomJson(4)
-        val config2 = randomJson(4);
-        var latch = MPLatch(1);
+        val config2 = randomJson(4)
+        var latch = MPLatch(1)
         val options = MParticleOptions.builder(mContext)
             .addCredentials()
             .configMaxAgeSeconds(1)
@@ -76,14 +74,14 @@ class ConfigStalenessCheckTest: BaseCleanInstallEachTest() {
 
         MParticle.setInstance(null)
 
-        Thread.sleep(1010);
+        Thread.sleep(1010)
 
         mServer.setupConfigResponse(config2.toString())
 
         MParticle.start(options)
         latch = MPLatch(1)
 
-        //after configMaxAge time has elapsed, config should be cleared after restart
+        // after configMaxAge time has elapsed, config should be cleared after restart
         assertNull(configManager.config)
         assertNull(configManager.etag)
         assertNull(configManager.ifModified)
@@ -92,15 +90,15 @@ class ConfigStalenessCheckTest: BaseCleanInstallEachTest() {
         configManager.onNewConfig { latch.countDown() }
         latch.await()
 
-        //after config has been fetched, we should see config2
+        // after config has been fetched, we should see config2
         assertEquals(config2.toString(), MParticle.getInstance()?.Internal()?.configManager?.config)
     }
 
     @Test
     fun testDoesntExceedStalenessThreshold() {
         val config1 = randomJson(4)
-        val config2 = randomJson(4);
-        var latch = MPLatch(1);
+        val config2 = randomJson(4)
+        var latch = MPLatch(1)
         val options = MParticleOptions.builder(mContext)
             .addCredentials()
             .configMaxAgeSeconds(100)
@@ -124,7 +122,7 @@ class ConfigStalenessCheckTest: BaseCleanInstallEachTest() {
         latch = MPLatch(1)
         configManager.onNewConfig { latch.countDown() }
 
-        //after restart, we should still have config1
+        // after restart, we should still have config1
         assertEquals(config1.toString(), configManager.config)
         assertEquals(etag, configManager.etag)
         assertEquals(lastModified, configManager.ifModified)
@@ -139,8 +137,8 @@ class ConfigStalenessCheckTest: BaseCleanInstallEachTest() {
     @Test
     fun testAlwaysStale() {
         val config1 = randomJson(4)
-        val config2 = randomJson(4);
-        var latch = MPLatch(1);
+        val config2 = randomJson(4)
+        var latch = MPLatch(1)
         val options = MParticleOptions.builder(mContext)
             .addCredentials()
             .configMaxAgeSeconds(0)
@@ -162,7 +160,7 @@ class ConfigStalenessCheckTest: BaseCleanInstallEachTest() {
         MParticle.start(options)
         latch = MPLatch(1)
 
-        //directly after restart, config should be cleared
+        // directly after restart, config should be cleared
         assertNull(configManager.config)
         assertNull(configManager.etag)
         assertNull(configManager.ifModified)
@@ -171,7 +169,7 @@ class ConfigStalenessCheckTest: BaseCleanInstallEachTest() {
         configManager.onNewConfig { latch.countDown() }
         latch.await()
 
-        //after config has been fetched, we should see config2
+        // after config has been fetched, we should see config2
         assertEquals(config2.toString(), MParticle.getInstance()?.Internal()?.configManager?.config)
     }
 

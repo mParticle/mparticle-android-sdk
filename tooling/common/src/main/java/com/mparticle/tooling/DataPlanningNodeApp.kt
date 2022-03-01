@@ -1,7 +1,7 @@
 package com.mparticle.tooling
 
-import java.io.File
 import com.mparticle.tooling.Utils.executeCLI
+import java.io.File
 import java.io.IOException
 
 enum class DataPlanError(val message: String) {
@@ -58,7 +58,7 @@ class DataPlanningNodeApp(val config: Config) {
         if (checkMPInstalled()) {
             println("MParticle CLI tools already installed")
         }
-        val packageString = "@mparticle/cli" + if (version != null)  "@$version" else ""
+        val packageString = "@mparticle/cli" + if (version != null) "@$version" else ""
         try {
             val result = arrayOf("npm", "install", "-g", packageString).executeCLI(path)
             return NodeAppResult(result)

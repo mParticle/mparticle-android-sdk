@@ -1,13 +1,12 @@
 package com.mparticle.lints
 
 import com.android.tools.lint.checks.infrastructure.LintDetectorTest
-import com.android.tools.lint.checks.infrastructure.TestLintTask
 import com.mparticle.lints.detectors.DataplanDetector
 import org.intellij.lang.annotations.Language
 import org.junit.Test
 import java.io.File
 
-class DataplanDetectorTest: LintDetectorTest() {
+class DataplanDetectorTest : LintDetectorTest() {
 
     @Test
     fun testCollection() {
@@ -24,13 +23,12 @@ class DataplanDetectorTest: LintDetectorTest() {
                 }
                 """
         lint()
-                .sdkHome(File(sdkHome))
-                .files(kotlin(source))
-                .run()
+            .sdkHome(File(sdkHome))
+            .files(kotlin(source))
+            .run()
     }
 
     override fun requireCompileSdk() = true
     override fun getDetector() = DataplanDetector()
     override fun getIssues() = listOf(DataplanDetector.ISSUE, DataplanDetector.NODE_MISSING, DataplanDetector.NO_DATA_PLAN)
-
 }

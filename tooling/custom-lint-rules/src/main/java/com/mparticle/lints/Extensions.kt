@@ -1,16 +1,41 @@
 package com.mparticle.lints
 
 import com.android.tools.lint.detector.api.skipParentheses
-import com.intellij.psi.*
+import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiEnumConstant
+import com.intellij.psi.PsiField
+import com.intellij.psi.PsiType
+import com.intellij.psi.PsiVariable
 import com.intellij.psi.impl.compiled.ClsMethodImpl
 import com.intellij.psi.impl.source.PsiClassReferenceType
 import com.intellij.psi.impl.source.PsiImmediateClassType
-import com.mparticle.lints.dtos.*
+import com.mparticle.lints.dtos.Constructor
+import com.mparticle.lints.dtos.Expression
+import com.mparticle.lints.dtos.MethodCall
+import com.mparticle.lints.dtos.RootParent
+import com.mparticle.lints.dtos.StaticFactory
+import com.mparticle.lints.dtos.Value
 import org.jetbrains.kotlin.load.kotlin.internalName
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.psi.psiUtil.isTopLevelKtOrJavaMember
-import org.jetbrains.uast.*
+import org.jetbrains.uast.UBinaryExpression
+import org.jetbrains.uast.UCallExpression
+import org.jetbrains.uast.UDeclarationsExpression
+import org.jetbrains.uast.UExpression
+import org.jetbrains.uast.UExpressionList
+import org.jetbrains.uast.UField
+import org.jetbrains.uast.UMethod
+import org.jetbrains.uast.UPolyadicExpression
+import org.jetbrains.uast.UQualifiedReferenceExpression
+import org.jetbrains.uast.UReferenceExpression
+import org.jetbrains.uast.UVariable
+import org.jetbrains.uast.getOutermostQualified
+import org.jetbrains.uast.getParentOfType
+import org.jetbrains.uast.getQualifiedChain
+import org.jetbrains.uast.getQualifiedParentOrThis
 import org.jetbrains.uast.kotlin.KotlinUBinaryExpression
+import org.jetbrains.uast.tryResolve
 import org.jetbrains.uast.util.isAssignment
 import org.jetbrains.uast.util.isConstructorCall
 import org.json.JSONArray
@@ -49,7 +74,7 @@ internal fun UExpression.resolveValue(initializer: Expression): Value {
         if (reference is PsiVariable) {
             val method = getParentOfType<UMethod>(UMethod::class.java) ?: null
             if (method != null) {
-                val collectorVisitor = VariableCollector(reference, method, initializer,true)
+                val collectorVisitor = VariableCollector(reference, method, initializer, true)
                 val obj = collectorVisitor.getUnresolvedObject()
                 return Value(initializer, obj, this)
             }
@@ -74,7 +99,6 @@ internal fun PsiVariable.getClassName(): String? {
     }
     return name
 }
-
 
 internal fun UExpression.getUltimateReceiverVariable(): PsiVariable? {
     val receiver = when (this) {
@@ -156,15 +180,15 @@ internal fun UExpression.getVariableElement(
 
 internal fun UCallExpression.receiverClassName(stripGenerics: Boolean = true): String? {
     var className =
-            when {
-                isConstructorCall() -> returnType?.getClassName()
-                receiver == null -> {
-                    (this.resolve() as? ClsMethodImpl)?.run {
-                        stub.parentStub.psi.containingFile.name.split("__")[0]
-                    }
+        when {
+            isConstructorCall() -> returnType?.getClassName()
+            receiver == null -> {
+                (this.resolve() as? ClsMethodImpl)?.run {
+                    stub.parentStub.psi.containingFile.name.split("__")[0]
                 }
-                else -> (receiverType as? PsiClassReferenceType)?.reference?.qualifiedName
             }
+            else -> (receiverType as? PsiClassReferenceType)?.reference?.qualifiedName
+        }
 
     fun stripGenerics() {
         val start = className?.indexOf("<") ?: 0
@@ -207,14 +231,12 @@ internal fun PsiClass.getQualifiedName(reflectable: Boolean): String? {
     return qualifiedName
 }
 
-
-
 internal fun UExpression.resolveChainedCalls(returnValue: Boolean, instance: Expression): Expression {
     var initialInstance = instance
     var calls = (getOutermostQualified() ?: this).getQualifiedChain().toMutableList()
     calls = calls.filter { it is UCallExpression }.toMutableList()
-    //check if first call is a constructor - Product.Builder().brand("") otherwise, the instance
-    //argument should be the object the chain is being called on
+    // check if first call is a constructor - Product.Builder().brand("") otherwise, the instance
+    // argument should be the object the chain is being called on
     if (initialInstance == null) {
         initialInstance = (calls.removeAt(0) as UCallExpression).resolveExpression(instance, true)
     }
@@ -236,7 +258,7 @@ internal fun Pair<*, *>.resolveToEnum(): Enum<*> {
     return className?.let { className ->
         val enumName = second.toString()
         val constructor = Class.forName(className)
-                .methods.first { it.name == "valueOf" }
+            .methods.first { it.name == "valueOf" }
         constructor.invoke(null, enumName)
     } as Enum<*>
 }
@@ -244,7 +266,6 @@ internal fun Pair<*, *>.resolveToEnum(): Enum<*> {
 internal fun List<Value>.resolve(): List<Any?> {
     return map { it.resolve() }
 }
-
 
 internal fun JSONObject.stringify(): JSONObject {
     val newJSONObject = JSONObject()

@@ -4,7 +4,7 @@ import com.mparticle.consent.ConsentState
 import com.mparticle.kits.FilteredMParticleUser
 import com.mparticle.kits.KitIntegration
 
-open class UserAttributeListenerTestKit: ListenerTestKit(), KitIntegration.UserAttributeListener {
+open class UserAttributeListenerTestKit : ListenerTestKit(), KitIntegration.UserAttributeListener {
     var onIncrementUserAttribute: ((key: String?, incrementedBy: Int, value: String?, user: FilteredMParticleUser?) -> Unit)? = null
     var onRemoveUserAttribute: ((key: String?, user: FilteredMParticleUser?) -> Unit)? = null
     var onSetUserAttribute: ((key: String?, value: Any?, user: FilteredMParticleUser?) -> Unit)? = null
