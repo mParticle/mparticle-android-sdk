@@ -1,29 +1,27 @@
 package com.mparticle.kits
 
-import com.mparticle.*
-import com.mparticle.internal.ConfigManager
+import com.mparticle.MPEvent
+import com.mparticle.MParticle
+import com.mparticle.MParticleOptions
 import com.mparticle.kits.testkits.BaseTestKit
 import com.mparticle.networking.Matcher
-import com.mparticle.networking.MockServer
-import com.mparticle.testutils.BaseCleanInstallEachTest
 import com.mparticle.testutils.MPLatch
+import org.json.JSONArray
+import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import org.json.JSONArray
-import org.json.JSONException
-import org.json.JSONObject
 import org.junit.Before
 import org.junit.Test
 
-class KitBatchingTest: BaseKitOptionsTest() {
+class KitBatchingTest : BaseKitOptionsTest() {
 
     @Before
     fun before() {
         val options = MParticleOptions.builder(mContext)
-                .configuration(
-                        KitOptions()
-                                .addKit(123, BatchKit::class.java)
-                )
+            .configuration(
+                KitOptions()
+                    .addKit(123, BatchKit::class.java)
+            )
         startMParticle(options, mServer)
     }
 
@@ -35,7 +33,7 @@ class KitBatchingTest: BaseKitOptionsTest() {
             upload()
         }
         (MParticle.getInstance()?.getKitInstance(123) as BatchKit).let { batchKit ->
-            batchKit.await();
+            batchKit.await()
             assertEquals(1, batchKit.batches.size)
             with(batchKit.batches[0].getJSONArray("msgs").toList<Any>()) {
                 assertTrue(size >= 4)
@@ -55,20 +53,19 @@ class KitBatchingTest: BaseKitOptionsTest() {
             upload()
         }
         mServer.waitForVerify(Matcher(mServer.Endpoints().eventsUrl))
-        //send another event, since batches aren't forwarded to the kits until after the upload,
-        //this is the only way we can gaurantee an batch forwarding *could* have happened. Since it's
-        //not supposed to happen when the upload fails, we can't await() in the kit like the previous test
+        // send another event, since batches aren't forwarded to the kits until after the upload,
+        // this is the only way we can gaurantee an batch forwarding *could* have happened. Since it's
+        // not supposed to happen when the upload fails, we can't await() in the kit like the previous test
         instance.apply {
             logEvent(MPEvent.Builder("some other event").build())
             upload()
         }
         mServer.waitForVerify(Matcher(mServer.Endpoints().eventsUrl))
 
-
         val batchKit = (MParticle.getInstance()?.getKitInstance(123) as BatchKit)
         assertEquals(0, batchKit.batches.size)
 
-        //see if it recovers...
+        // see if it recovers...
         mServer.setupHappyEvents()
         val uploadsCount = getDatabaseContents(listOf("uploads")).getJSONArray("uploads").length()
         instance.upload()
@@ -79,12 +76,10 @@ class KitBatchingTest: BaseKitOptionsTest() {
         assertEquals(2, batchKit.batches.size)
     }
 
-
-
-    class BatchKit: BaseTestKit(), KitIntegration.BatchListener {
+    class BatchKit : BaseTestKit(), KitIntegration.BatchListener {
         var batches = mutableListOf<JSONObject>()
         override fun getName() = "Batch Kit"
-        private var latch = MPLatch(1);
+        private var latch = MPLatch(1)
 
         fun await() {
             latch = MPLatch(1)
@@ -92,16 +87,16 @@ class KitBatchingTest: BaseKitOptionsTest() {
         }
 
         override fun setOptOut(optedOut: Boolean): List<ReportingMessage> {
-            //do nothing
+            // do nothing
             return listOf()
         }
 
         override fun logBatch(jsonObject: JSONObject): List<ReportingMessage> {
             batches.add(jsonObject)
-            latch.countDown();
+            latch.countDown()
             return listOf()
         }
     }
 
-    fun <T> JSONArray.toList(): List<Any> =  (0..length() -1).map { get(it) }
+    fun <T> JSONArray.toList(): List<Any> = (0..length() - 1).map { get(it) }
 }

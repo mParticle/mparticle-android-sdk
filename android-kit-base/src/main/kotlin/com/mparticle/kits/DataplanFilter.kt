@@ -1,40 +1,43 @@
-package com.mparticle.kits;
+package com.mparticle.kits
 
 import com.mparticle.BaseEvent
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
-import com.mparticle.MParticleOptions;
+import com.mparticle.MParticleOptions
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.identity.MParticleIdentityClientImpl
 import com.mparticle.internal.Logger
 import org.json.JSONArray
-
-import org.json.JSONObject;
+import org.json.JSONObject
 
 internal interface DataplanFilter {
-    fun <T: BaseEvent> transformEventForEvent(event: T?): T?
+    fun <T : BaseEvent> transformEventForEvent(event: T?): T?
     fun transformIdentities(identities: Map<MParticle.IdentityType, String?>?): Map<MParticle.IdentityType, String?>?
     fun <T> transformUserAttributes(attributes: Map<String, T>?): Map<String, T>?
     fun isUserAttributeBlocked(key: String?): Boolean
     fun isUserIdentityBlocked(key: MParticle.IdentityType?): Boolean
 }
 
-internal class DataplanFilterImpl constructor(val dataPoints: Map<String, HashSet<String>?>,
-                                              private val blockEvents: Boolean,
-                                              private val blockEventAttributes: Boolean,
-                                              private val blockUserAttributes: Boolean,
-                                              private val blockUserIdentities: Boolean): DataplanFilter {
+internal class DataplanFilterImpl constructor(
+    val dataPoints: Map<String, HashSet<String>?>,
+    private val blockEvents: Boolean,
+    private val blockEventAttributes: Boolean,
+    private val blockUserAttributes: Boolean,
+    private val blockUserIdentities: Boolean
+) : DataplanFilter {
 
-    constructor(dataplanOptions: MParticleOptions.DataplanOptions):
-            this(extractDataPoints(dataplanOptions.dataplan),
-                    dataplanOptions.isBlockEvents,
-                    dataplanOptions.isBlockEventAttributes,
-                    dataplanOptions.isBlockUserAttributes,
-                    dataplanOptions.isBlockUserIdentities)
+    constructor(dataplanOptions: MParticleOptions.DataplanOptions) :
+        this(
+            extractDataPoints(dataplanOptions.dataplan),
+            dataplanOptions.isBlockEvents,
+            dataplanOptions.isBlockEventAttributes,
+            dataplanOptions.isBlockUserAttributes,
+            dataplanOptions.isBlockUserIdentities
+        )
 
     init {
         Logger.debug(
-                """
+            """
 
 Data Plan parsed for Kit Filtering: 
     blockEvents=$blockEvents
@@ -42,12 +45,13 @@ Data Plan parsed for Kit Filtering:
     blockUserAttributes=$blockUserAttributes
     blockUserIdentities=$blockUserIdentities
         ${
-                    dataPoints.entries.joinToString("\n") { (key, value) ->
-                        "$key\n\t${value?.joinToString("\n\t") { it }}"
-                    }
-                    }
-        """)
-        }
+            dataPoints.entries.joinToString("\n") { (key, value) ->
+                "$key\n\t${value?.joinToString("\n\t") { it }}"
+            }
+            }
+        """
+        )
+    }
 
     /**
      * filters out events and their attributes if
@@ -56,7 +60,7 @@ Data Plan parsed for Kit Filtering:
      *
      * note: this will NOT return a copy of the event, it will return either the original event filtered or null
      */
-    override fun <T: BaseEvent> transformEventForEvent(event: T?): T? {
+    override fun <T : BaseEvent> transformEventForEvent(event: T?): T? {
         if (event == null) {
             return null
         }
@@ -76,9 +80,9 @@ Data Plan parsed for Kit Filtering:
                     }
                 else -> null
             }
-            //shouldn't happen but we have to handle it
+            // shouldn't happen but we have to handle it
             dataPointKey ?: return event
-            //if there is no valid datapoint then it is an unplanned event
+            // if there is no valid datapoint then it is an unplanned event
             if (blockEvents && !dataPoints.containsKey(dataPointKey.toString())) {
                 Logger.verbose("Blocking unplanned event: $dataPointKey")
                 return null
@@ -86,7 +90,7 @@ Data Plan parsed for Kit Filtering:
             val dataPoint = dataPoints[dataPointKey.toString()]
             if (blockEventAttributes) {
                 event.customAttributes = event.customAttributes?.filterKeys {
-                    //null dataPoint means there are no constraints for custom attributes
+                    // null dataPoint means there are no constraints for custom attributes
                     if (dataPoint == null || dataPoint.contains(it)) {
                         true
                     } else {
@@ -125,7 +129,7 @@ Data Plan parsed for Kit Filtering:
         }
         return event
     }
-    
+
     override fun transformIdentities(identities: Map<MParticle.IdentityType, String?>?): Map<MParticle.IdentityType, String?>? {
         if (identities == null) {
             return null
@@ -192,7 +196,6 @@ Data Plan parsed for Kit Filtering:
         return false
     }
 
-
     internal companion object {
         const val SCREEN_EVENT_KEY = "screen_view"
         const val CUSTOM_EVENT_KEY = "custom_event"
@@ -218,22 +221,22 @@ Data Plan parsed for Kit Filtering:
         fun extractDataPoints(dataplan: JSONObject): Map<String, HashSet<String>?> {
             val points = mutableMapOf<String, HashSet<String>?>()
             dataplan
-                    .optJSONObject("version_document")
-                    ?.optJSONArray("data_points")
-                    ?.toList()
-                    ?.filterIsInstance<JSONObject>()
-                    ?.forEach {
-                        val match = it.getJSONObject("match")
-                        val key = generateDatapointKey(match)
-                        if (key != null) {
-                            val properties = getAllowedKeys(key, it)
-                            points.put(key.toString(), properties)
-                            val productKeys = key.getProductDataPoints()
-                            productKeys?.forEach { productKey ->
-                                points.put(productKey.toString(), getAllowedKeys(productKey, it))
-                            }
+                .optJSONObject("version_document")
+                ?.optJSONArray("data_points")
+                ?.toList()
+                ?.filterIsInstance<JSONObject>()
+                ?.forEach {
+                    val match = it.getJSONObject("match")
+                    val key = generateDatapointKey(match)
+                    if (key != null) {
+                        val properties = getAllowedKeys(key, it)
+                        points.put(key.toString(), properties)
+                        val productKeys = key.getProductDataPoints()
+                        productKeys?.forEach { productKey ->
+                            points.put(productKey.toString(), getAllowedKeys(productKey, it))
                         }
                     }
+                }
             return points
         }
 
@@ -270,15 +273,15 @@ Data Plan parsed for Kit Filtering:
             return null
         }
 
-        //returns a set of "allowed" keys, or `null` if all keys are allowed
+        // returns a set of "allowed" keys, or `null` if all keys are allowed
         private fun getAllowedKeys(datapoint: DataPoint, jsonObject: JSONObject): HashSet<String>? {
             val definition = jsonObject.optJSONObject("validator")
-                    ?.optJSONObject("definition")
+                ?.optJSONObject("definition")
             when (datapoint.type) {
                 CUSTOM_EVENT_KEY, SCREEN_EVENT_KEY, PRODUCT_IMPRESSION_KEY, PROMOTION_ACTION_KEY, PRODUCT_ACTION_KEY -> {
                     val data = definition
-                            ?.optJSONObject("properties")
-                            ?.optJSONObject("data") ?: return null
+                        ?.optJSONObject("properties")
+                        ?.optJSONObject("data") ?: return null
                     if (datapoint.productAttributeType == null) {
                         data.let {
                             val customAttributes = it.getConstrainedPropertiesJSONObject("custom_attributes")
@@ -287,14 +290,14 @@ Data Plan parsed for Kit Filtering:
                             } else {
                                 return customAttributes.getConstrainedPropertiesKeySet()
                             }
-                            //if nothing can be gathered, allow all attributes
+                            // if nothing can be gathered, allow all attributes
                         }
                     } else {
                         data.let {
                             val products = when (datapoint.productAttributeType) {
                                 PRODUCT_ACTION_PRODUCTS -> {
                                     val productBlock = it.getConstrainedPropertiesJSONObject("product_action")
-                                            ?.getConstrainedPropertiesJSONObject("products")
+                                        ?.getConstrainedPropertiesJSONObject("products")
                                     if (productBlock == emptyJSONObject) {
                                         return hashSetOf()
                                     }
@@ -306,7 +309,7 @@ Data Plan parsed for Kit Filtering:
                                         return hashSetOf()
                                     }
                                     productBlock = productBlock?.optJSONObject("items")
-                                            ?.getConstrainedPropertiesJSONObject("products")
+                                        ?.getConstrainedPropertiesJSONObject("products")
                                     if (productBlock == emptyJSONObject) {
                                         return hashSetOf()
                                     }
@@ -317,8 +320,8 @@ Data Plan parsed for Kit Filtering:
                                 }
                             }
                             return products?.optJSONObject("items")
-                                    ?.getConstrainedPropertiesJSONObject("custom_attributes")
-                                    ?.getConstrainedPropertiesKeySet()
+                                ?.getConstrainedPropertiesJSONObject("custom_attributes")
+                                ?.getConstrainedPropertiesKeySet()
                         }
                     }
                 }
@@ -413,25 +416,25 @@ Data Plan parsed for Kit Filtering:
     }
 
     class DataPoint(val type: String, val name: String? = null, val eventType: String? = null) {
-        constructor(datapoint: DataPoint): this(datapoint.type, datapoint.name, datapoint.eventType)
+        constructor(datapoint: DataPoint) : this(datapoint.type, datapoint.name, datapoint.eventType)
 
         var productAttributeType: String? = null
             private set
 
         fun getProductDataPoints() =
-                when (type) {
-                    PRODUCT_ACTION_KEY, PRODUCT_IMPRESSION_KEY -> listOf(
-                            DataPoint(this).apply { productAttributeType = PRODUCT_ACTION_PRODUCTS },
-                            DataPoint(this).apply { productAttributeType = PRODUCT_IMPRESSION_PRODUCTS }
-                    )
-                    else -> null
-                }
+            when (type) {
+                PRODUCT_ACTION_KEY, PRODUCT_IMPRESSION_KEY -> listOf(
+                    DataPoint(this).apply { productAttributeType = PRODUCT_ACTION_PRODUCTS },
+                    DataPoint(this).apply { productAttributeType = PRODUCT_IMPRESSION_PRODUCTS }
+                )
+                else -> null
+            }
 
         override fun toString() = "$type${if (name != null) ".$name" else ""}${if (eventType != null) ".$eventType" else ""}${productAttributeType?.let { ".$it" } ?: ""}"
     }
-        
-    class EmptyDataplanFilter: DataplanFilter {
-        override fun <T: BaseEvent> transformEventForEvent(event: T?) = event
+
+    class EmptyDataplanFilter : DataplanFilter {
+        override fun <T : BaseEvent> transformEventForEvent(event: T?) = event
         override fun transformIdentities(identities: Map<MParticle.IdentityType, String?>?) = identities
         override fun <T> transformUserAttributes(attributes: Map<String, T>?) = attributes
         override fun isUserAttributeBlocked(key: String?) = false

@@ -9,7 +9,7 @@ interface Expression {
     fun forEachExpression(predicate: (Expression) -> Unit)
 }
 
-interface ParameterizedExpression: Expression {
+interface ParameterizedExpression : Expression {
     var arguments: List<Value>
 }
 

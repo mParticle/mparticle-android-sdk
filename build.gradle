@@ -14,6 +14,7 @@ buildscript {
 
 plugins {
     id "org.sonarqube" version "3.3"
+    id "org.jlleitschuh.gradle.ktlint" version "10.2.1"
 }
 
 sonarqube {
@@ -29,6 +30,7 @@ subprojects {
     sonarqube {
         androidVariant "release"
     }
+    apply plugin: 'org.jlleitschuh.gradle.ktlint'
 }
 
 allprojects {
@@ -47,4 +49,6 @@ allprojects {
     tasks.withType(Javadoc) {
         options.addStringOption('Xdoclint:none', '-quiet')
     }
+
+    apply plugin: 'org.jlleitschuh.gradle.ktlint'
 }

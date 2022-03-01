@@ -10,7 +10,7 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 import kotlin.test.assertNotNull
 
-class PushRegistrationTest: BaseCleanStartedEachTest() {
+class PushRegistrationTest : BaseCleanStartedEachTest() {
 
     @Test
     fun deferDuplicatePushRegistrationFromFirebase() {
@@ -18,29 +18,29 @@ class PushRegistrationTest: BaseCleanStartedEachTest() {
 
         assertNull(MParticle.getInstance()?.currentSession)
 
-        //configure the _next_ token Firebase will return when we fetch it (during test)
+        // configure the _next_ token Firebase will return when we fetch it (during test)
         FirebaseInstanceIdToken.token = "token1"
         FirebaseMessagingServiceTestContext.appContext = mContext.applicationContext
 
-        //set the current sender/instanceId in the SDK
+        // set the current sender/instanceId in the SDK
         configManager?.pushSenderId = "sender1"
         configManager?.pushInstanceId = "token1"
 
-        //kick off a token fetch
+        // kick off a token fetch
         InstanceIdService().onNewToken("")
 
-        //test that 1) the token was fetched and 2) we did not start a session based off of it because it was a duplicate
+        // test that 1) the token was fetched and 2) we did not start a session based off of it because it was a duplicate
         assertNull(MParticle.getInstance()?.currentSession)
         assertEquals("token1", configManager?.pushInstanceIdBackground)
 
-        //set the current senderId and remove the current instanceId in the SDK
+        // set the current senderId and remove the current instanceId in the SDK
         configManager?.clearPushRegistration()
         configManager?.pushSenderId = "sender1"
 
-        //kick off a token fetch
+        // kick off a token fetch
         InstanceIdService().onNewToken("")
 
-        //test that 1) the token was fetched and 2) we DID start a session because it was a new token
+        // test that 1) the token was fetched and 2) we DID start a session because it was a new token
         assertNotNull(MParticle.getInstance()?.currentSession)
         assertEquals("token1", configManager?.pushInstanceId)
     }

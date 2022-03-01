@@ -1,6 +1,5 @@
 package com.mparticle
 
-import com.mparticle.MParticle
 import com.mparticle.commerce.Product
 import com.mparticle.commerce.Promotion
 import java.lang.reflect.Modifier
@@ -14,19 +13,18 @@ object Utils {
 
     fun randomConstString(clazz: Class<*>): String {
         return clazz.fields
-                .filter { Modifier.isPublic(it.modifiers) && Modifier.isStatic(it.modifiers) }
-                .filter { it.name.all { it.isUpperCase() } }
-                .filter { it.type == String::class.java }
-                .let {
-                    it[Random.Default.nextInt(0, it.size - 1)].get(null) as String
-                }
+            .filter { Modifier.isPublic(it.modifiers) && Modifier.isStatic(it.modifiers) }
+            .filter { it.name.all { it.isUpperCase() } }
+            .filter { it.type == String::class.java }
+            .let {
+                it[Random.Default.nextInt(0, it.size - 1)].get(null) as String
+            }
     }
 
     val chars: List<Char> = ('a'..'z') + ('A'..'Z')
 
-
     fun randomAttributes(): MutableMap<String, String> {
-        return (0..Random.Default.nextInt(0,5)).map {
+        return (0..Random.Default.nextInt(0, 5)).map {
             randomString(4) to randomString(8)
         }.toMap().toMutableMap()
     }

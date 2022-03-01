@@ -2,19 +2,14 @@ package com.mparticle.internal
 
 import android.app.Activity
 import android.app.Application
-import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Looper
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mparticle.OrchestratorOnly
-import com.mparticle.testutils.BaseAbstractTest
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
 
-
 class ApplicationContextWrapperITest {
-
 
     /**
      * This test specifically addresses a problem we had where a callback was being registered on a
@@ -29,16 +24,15 @@ class ApplicationContextWrapperITest {
         assertNull(Looper.myLooper())
         try {
             applicationContextWrapper.registerActivityLifecycleCallbacks(MockCallbacks())
-            //call it again to make sure we are not initializing the Looper twice
+            // call it again to make sure we are not initializing the Looper twice
             applicationContextWrapper.registerActivityLifecycleCallbacks(MockCallbacks())
         } catch (e: Exception) {
             exception = e
         }
-        assertNull(exception);
+        assertNull(exception)
     }
 
-
-    class MockCallbacks: Application.ActivityLifecycleCallbacks {
+    class MockCallbacks : Application.ActivityLifecycleCallbacks {
         override fun onActivityPaused(p0: Activity) {}
         override fun onActivityResumed(p0: Activity) {}
         override fun onActivityStarted(p0: Activity) {}

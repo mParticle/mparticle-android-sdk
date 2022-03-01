@@ -6,7 +6,7 @@ import com.mparticle.tooling.Config
 import com.mparticle.tooling.Logger
 import com.mparticle.tooling.Utils
 
-open class BaseDetector: Detector() {
+open class BaseDetector : Detector() {
     protected var disabled: Boolean = false
         get() = config?.disabled == true || field
         set
@@ -21,7 +21,7 @@ open class BaseDetector: Detector() {
             return configFile
         }
         set(value) {
-            configFile = value;
+            configFile = value
         }
 
     override fun beforeCheckEachProject(context: Context) {

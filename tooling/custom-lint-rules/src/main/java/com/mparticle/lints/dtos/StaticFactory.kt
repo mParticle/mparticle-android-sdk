@@ -6,8 +6,7 @@ import org.jetbrains.uast.UCallExpression
 import java.lang.reflect.Method
 import java.util.HashSet
 
-
-class StaticFactory(val methodName: String?, override val node: UCallExpression): ParameterizedExpression {
+class StaticFactory(val methodName: String?, override val node: UCallExpression) : ParameterizedExpression {
     override val parent = RootParent(node)
     override var arguments: List<Value> = listOf()
 
@@ -17,8 +16,8 @@ class StaticFactory(val methodName: String?, override val node: UCallExpression)
         val clazz = Class.forName(qualifiedClassName)
         methods.addAll(clazz.declaredMethods)
         var matchingMethods = methods
-                .filter { it.name == methodName }
-                .filter { it.parameterCount == arguments.size }
+            .filter { it.name == methodName }
+            .filter { it.parameterCount == arguments.size }
         if (matchingMethods.size == 1) {
             val method = matchingMethods.first {
                 it.parameterTypes.forEachIndexed { i, type ->
@@ -38,7 +37,6 @@ class StaticFactory(val methodName: String?, override val node: UCallExpression)
 
     override fun forEachExpression(predicate: (Expression) -> Unit) {
         predicate(this)
-        arguments.forEach{ it.forEachExpression(predicate) }
+        arguments.forEach { it.forEachExpression(predicate) }
     }
-
 }
