@@ -20,7 +20,7 @@ jobs:
   instrumented-tests:
     name: "Instrumented Tests"
     timeout-minutes: 30
-    runs-on: macos-11
+    runs-on: macos-latest
     needs: confirm-public-repo-development-branch
     steps:
       - name: "Checkout development branch"
@@ -75,7 +75,7 @@ jobs:
   lint-checks:
     name: "Lint Checks"
     timeout-minutes: 15
-    runs-on: macos-11
+    runs-on: macos-latest
     needs: confirm-public-repo-development-branch
     steps:
       - name: "Checkout Branch"
@@ -108,7 +108,7 @@ jobs:
   update-kits:
     name: "Update Kits"
     needs: [instrumented-tests, unit-tests]
-    runs-on: macos-11
+    runs-on: macos-latest
     env:
       GIT_AUTHOR_NAME: mparticle-bot
       GIT_AUTHOR_EMAIL: developers@mparticle.com
@@ -136,7 +136,7 @@ jobs:
   semantic-release:
     name: "Test Semantic Release"
     needs: [update-kits]
-    runs-on: macos-11
+    runs-on: macos-latest
     env:
       GITHUB_TOKEN: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
       GIT_AUTHOR_NAME: mparticle-bot

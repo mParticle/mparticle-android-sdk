@@ -4,7 +4,7 @@ jobs:
   instrumented-tests:
     name: "Instrumented Tests"
     timeout-minutes: 30
-    runs-on: macos-11
+    runs-on: macos-latest
     steps:
       - name: "Checkout Branch"
         uses: actions/checkout@v2
@@ -56,7 +56,7 @@ jobs:
   lint-checks:
     name: "Lint Checks"
     timeout-minutes: 15
-    runs-on: macos-11
+    runs-on: macos-latest
     steps:
       - name: "Checkout Branch"
         uses: actions/checkout@v2
@@ -80,7 +80,7 @@ jobs:
   kotlin-lint-checks:
     name: "Kotlin Lint Checks"
     timeout-minutes: 15
-    runs-on: macos-11
+    runs-on: macos-latest
     steps:
       - name: "Checkout Branch"
         uses: actions/checkout@v2
