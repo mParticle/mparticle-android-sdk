@@ -1,3 +1,18 @@
+# [5.36.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.35.4...v5.36.0) (2022-03-03)
+
+
+### Bug Fixes
+
+* downgrade error log to debug ([#102](https://github.com/mParticle/mparticle-android-sdk/issues/102)) ([293ce35](https://github.com/mParticle/mparticle-android-sdk/commit/293ce35f9364dd96e3082934ea48500eb4c70963))
+* keep package names in proguard to prevent collisions ([#109](https://github.com/mParticle/mparticle-android-sdk/issues/109)) ([a8df4fe](https://github.com/mParticle/mparticle-android-sdk/commit/a8df4fe7de883c48312da1a3e09407aaa867a9ae))
+
+
+### Features
+
+* add in ktlintcheck ([#108](https://github.com/mParticle/mparticle-android-sdk/issues/108)) ([f75c5b6](https://github.com/mParticle/mparticle-android-sdk/commit/f75c5b63374e270979a80df0038b2e1977372633))
+* remove deprecated methods, AppConfig ([#100](https://github.com/mParticle/mparticle-android-sdk/issues/100)) ([a5a934a](https://github.com/mParticle/mparticle-android-sdk/commit/a5a934adec9ca931a15e53c54233cfe3b1d52b3f))
+* split configuration into core and kits ([#103](https://github.com/mParticle/mparticle-android-sdk/issues/103)) ([766e0d3](https://github.com/mParticle/mparticle-android-sdk/commit/766e0d3f8743e1077f797b9417181cdf30ac6df7))
+
 ## [5.35.4](https://github.com/mParticle/mparticle-android-sdk/compare/v5.35.3...v5.35.4) (2022-02-18)
 
 ## [5.35.3](https://github.com/mParticle/mparticle-android-sdk/compare/v5.35.2...v5.35.3) (2022-02-09)
