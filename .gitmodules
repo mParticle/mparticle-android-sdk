@@ -1,96 +1,99 @@
-[submodule "kits/wootric-kit"]
-    path = kits/wootric-kit
-    url = git@github.com:mParticle-integrations/mparticle-android-integration-wootric.git
-[submodule "kits/localytics-kit"]
-    path = kits/localytics-kit
-    url = git@github.com:mParticle-integrations/mparticle-android-integration-localytics.git
-[submodule "kits/kochava-kit"]
-    path = kits/kochava-kit
-    url = git@github.com:mParticle-integrations/mparticle-android-integration-kochava.git
-[submodule "kits/flurry-kit"]
-    path = kits/flurry-kit
-    url = git@github.com:mParticle-integrations/mparticle-android-integration-flurry.git
-[submodule "kits/apteligent-kit"]
-    path = kits/apteligent-kit
-    url = git@github.com:mParticle-integrations/mparticle-android-integration-apteligent.git
-[submodule "kits/comscore-kit"]
-    path = kits/comscore-kit
-    url = git@github.com:mParticle-integrations/mparticle-android-integration-comscore.git
-[submodule "kits/branch-kit"]
-    path = kits/branch-kit
-    url = git@github.com:mParticle-integrations/mparticle-android-integration-branch.git
-[submodule "kits/appboy-kit"]
-    path = kits/appboy-kit
-    url = git@github.com:mParticle-integrations/mparticle-android-integration-appboy.git
 [submodule "kits/adjust-kit"]
     path = kits/adjust-kit
     url = git@github.com:mParticle-integrations/mparticle-android-integration-adjust.git
-[submodule "kits/appsflyer-kit"]
-    path = kits/appsflyer-kit
-    url = git@github.com:mParticle-integrations/mparticle-android-integration-appsflyer.git
-[submodule "kits/tune-kit"]
-    path = kits/tune-kit
-    url = git@github.com:mParticle-integrations/mparticle-android-integration-tune.git
-[submodule "kits/apptentive-kit"]
-	path = kits/apptentive-kit
-	url = git@github.com:mparticle-integrations/mparticle-android-integration-apptentive.git
-[submodule "kits/button-kit"]
-	path = kits/button-kit
-	url = git@github.com:mparticle-integrations/mparticle-android-integration-button.git
-[submodule "kits/urbanairship-kit"]
-	path = kits/urbanairship-kit
-	url = git@github.com:mparticle-integrations/mparticle-android-integration-urbanairship.git
-[submodule "kits/leanplum-kit"]
-	path = kits/leanplum-kit
-	url = git@github.com:mparticle-integrations/mparticle-android-integration-leanplum.git
-[submodule "kits/foresee-kit"]
-	path = kits/foresee-kit
-	url = git@github.com:mparticle-integrations/mparticle-android-integration-foresee.git
-[submodule "kits/apptimize-kit"]
-	path = kits/apptimize-kit
-	url = git@github.com:mparticle-integrations/mparticle-android-integration-apptimize.git
-[submodule "kits/revealmobile-kit"]
-	path = kits/revealmobile-kit
-	url = git@github.com:mparticle-integrations/mparticle-android-integration-revealmobile.git
-[submodule "kits/radar-kit"]
-	path = kits/radar-kit
-	url = git@github.com:mparticle-integrations/mparticle-android-integration-radar.git
-[submodule "kits/iterable-kit"]
-	path = kits/iterable-kit
-	url = git@github.com:mparticle-integrations/mparticle-android-integration-iterable.git
-[submodule "kits/skyhook-kit"]
-	path = kits/skyhook-kit
-	url = git@github.com:mparticle-integrations/mparticle-android-integration-skyhook.git
-[submodule "kits/singular-kit"]
-	path = kits/singular-kit
-	url = git@github.com:mparticle-integrations/mparticle-android-integration-singular.git
 [submodule "kits/adobe-kit"]
 	path = kits/adobe-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-adobe.git
-[submodule "kits/taplytics-kit"]
-	path = kits/taplytics-kit
-	url = git@github.com:mparticle-integrations/mparticle-android-integration-taplytics.git
-[submodule "kits/optimizely-kit"]
-    path = kits/optimizely-kit
-    url = git@github.com:mparticle-integrations/mparticle-android-integration-optimizely.git
-[submodule "kits/responsys-kit"]
-	path = kits/responsys-kit
-    url = git@github.com:mparticle-integrations/mparticle-android-integration-responsys.git
-[submodule "kits/clevertap-kit"]
-	path = kits/clevertap-kit
-	url = git@github.com:mparticle-integrations/mparticle-android-integration-clevertap.git
-[submodule "kits/googleanalyticsfirebase-kit"]
-	path = kits/googleanalyticsfirebase-kit
-	url = git@github.com:mparticle-integrations/mparticle-android-integration-google-analytics-firebase.git
-[submodule "kits/pilgrim-kit"]
-	path = kits/pilgrim-kit
-	url = git@github.com:mparticle-integrations/mparticle-android-integration-pilgrim.git
-[submodule "kits/onetrust-kit"]
-	path = kits/onetrust-kit
-	url = git@github.com:mparticle-integrations/mparticle-android-integration-onetrust.git
 [submodule "kits/adobemedia-kit"]
 	path = kits/adobemedia-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-adobe-media.git
+[submodule "kits/appboy-kit"]
+    path = kits/appboy-kit
+    url = git@github.com:mParticle-integrations/mparticle-android-integration-appboy.git
+[submodule "kits/appsflyer-kit"]
+    path = kits/appsflyer-kit
+    url = git@github.com:mParticle-integrations/mparticle-android-integration-appsflyer.git
+[submodule "kits/apptentive-kit"]
+	path = kits/apptentive-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-apptentive.git
+[submodule "kits/apptimize-kit"]
+	path = kits/apptimize-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-apptimize.git
+[submodule "kits/apteligent-kit"]
+    path = kits/apteligent-kit
+    url = git@github.com:mParticle-integrations/mparticle-android-integration-apteligent.git
+[submodule "kits/branch-kit"]
+    path = kits/branch-kit
+    url = git@github.com:mParticle-integrations/mparticle-android-integration-branch.git
+[submodule "kits/button-kit"]
+	path = kits/button-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-button.git
+[submodule "kits/clevertap-kit"]
+	path = kits/clevertap-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-clevertap.git
+[submodule "kits/comscore-kit"]
+    path = kits/comscore-kit
+    url = git@github.com:mParticle-integrations/mparticle-android-integration-comscore.git
 [submodule "kits/example-kit"]
 	path = kits/example-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-example.git
+[submodule "kits/flurry-kit"]
+    path = kits/flurry-kit
+    url = git@github.com:mParticle-integrations/mparticle-android-integration-flurry.git
+[submodule "kits/foresee-kit"]
+	path = kits/foresee-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-foresee.git
+[submodule "kits/googleanalyticsfirebase-kit"]
+	path = kits/googleanalyticsfirebase-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-google-analytics-firebase.git
+[submodule "kits/googleanalyticsfirebasega4-kit"]
+	path = kits/googleanalyticsfirebasega4-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-google-analytics-firebase-ga4.git
+[submodule "kits/iterable-kit"]
+	path = kits/iterable-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-iterable.git
+[submodule "kits/kochava-kit"]
+    path = kits/kochava-kit
+    url = git@github.com:mParticle-integrations/mparticle-android-integration-kochava.git
+[submodule "kits/leanplum-kit"]
+	path = kits/leanplum-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-leanplum.git
+[submodule "kits/localytics-kit"]
+    path = kits/localytics-kit
+    url = git@github.com:mParticle-integrations/mparticle-android-integration-localytics.git
+[submodule "kits/onetrust-kit"]
+	path = kits/onetrust-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-onetrust.git
+[submodule "kits/optimizely-kit"]
+    path = kits/optimizely-kit
+    url = git@github.com:mparticle-integrations/mparticle-android-integration-optimizely.git
+[submodule "kits/pilgrim-kit"]
+	path = kits/pilgrim-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-pilgrim.git
+[submodule "kits/radar-kit"]
+	path = kits/radar-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-radar.git
+[submodule "kits/responsys-kit"]
+	path = kits/responsys-kit
+    url = git@github.com:mparticle-integrations/mparticle-android-integration-responsys.git
+[submodule "kits/revealmobile-kit"]
+	path = kits/revealmobile-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-revealmobile.git
+[submodule "kits/singular-kit"]
+	path = kits/singular-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-singular.git
+[submodule "kits/skyhook-kit"]
+	path = kits/skyhook-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-skyhook.git
+[submodule "kits/taplytics-kit"]
+	path = kits/taplytics-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-taplytics.git
+[submodule "kits/tune-kit"]
+    path = kits/tune-kit
+    url = git@github.com:mParticle-integrations/mparticle-android-integration-tune.git
+[submodule "kits/urbanairship-kit"]
+ 	path = kits/urbanairship-kit
+ 	url = git@github.com:mparticle-integrations/mparticle-android-integration-urbanairship.git
+[submodule "kits/wootric-kit"]
+    path = kits/wootric-kit
+    url = git@github.com:mParticle-integrations/mparticle-android-integration-wootric.git
