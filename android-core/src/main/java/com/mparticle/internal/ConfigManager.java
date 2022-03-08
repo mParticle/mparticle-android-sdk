@@ -347,7 +347,7 @@ public class ConfigManager {
         JSONArray kitConfig = responseJSON.has(KEY_EMBEDDED_KITS) ? (JSONArray) responseJSON.remove(KEY_EMBEDDED_KITS) : null;
         saveConfigJson(responseJSON, kitConfig, etag, lastModified, System.currentTimeMillis());
         updateCoreConfig(responseJSON, true);
-        updateKitConfig(responseJSON.optJSONArray(KEY_EMBEDDED_KITS));
+        updateKitConfig(kitConfig);
     }
 
     public synchronized void reloadCoreConfig(JSONObject responseJSON) throws JSONException  {
@@ -358,7 +358,7 @@ public class ConfigManager {
         //only reload if KitManager has not already been loaded (from new config, presumably)
         MParticle instance = MParticle.getInstance();
         if (instance != null ) {
-            instance.Internal().getKitManager().loadKitLibrary();
+            instance.Internal().getKitManager().updateKits(kitConfigs);
             onConfigLoaded(ConfigType.KIT, false);
         }
     }
