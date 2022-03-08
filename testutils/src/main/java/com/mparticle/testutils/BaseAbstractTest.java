@@ -1,5 +1,8 @@
 package com.mparticle.testutils;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
@@ -9,7 +12,6 @@ import android.os.Looper;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.mparticle.Configuration;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.identity.BaseIdentityTask;
@@ -27,8 +29,6 @@ import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.database.services.MessageService;
 import com.mparticle.internal.database.services.SessionService;
 import com.mparticle.internal.database.tables.MParticleDatabaseHelper;
-import com.mparticle.kits.KitIntegration;
-import com.mparticle.kits.KitOptions;
 import com.mparticle.networking.MockServer;
 import com.mparticle.testutils.AndroidUtils.Mutable;
 
@@ -40,14 +40,9 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public abstract class BaseAbstractTest {
     protected MockServer mServer;

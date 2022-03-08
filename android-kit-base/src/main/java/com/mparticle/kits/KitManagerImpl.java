@@ -29,7 +29,6 @@ import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.BackgroundTaskHandler;
 import com.mparticle.internal.CoreCallbacks;
 import com.mparticle.internal.KitManager;
-import com.mparticle.internal.KitsLoadedListener;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.ReportingManager;
@@ -66,6 +65,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     private static final String LOG_LTV = "LogLTVIncrease";
 
     private Map<Integer, AttributionResult> mAttributionResultsMap = new TreeMap<>();
+    private ArrayList<KitsLoadedListener> kitsLoadedListeners = new ArrayList<>();
 
 
     ConcurrentHashMap<Integer, KitIntegration> providers = new ConcurrentHashMap<Integer, KitIntegration>();
@@ -1391,12 +1391,6 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         }
     }
 
-    private ArrayList<KitsLoadedListener> kitsLoadedListeners = new ArrayList<>();
-
-    public interface KitsLoadedListener {
-        void onKitsLoaded(Map<Integer, KitIntegration> kits, Map<Integer, KitIntegration> previousKits, JSONArray kitConfigs);
-    }
-
     public void addKitsLoadedListener(KitsLoadedListener kitsLoadedListener) {
         kitsLoadedListeners.add(kitsLoadedListener);
     }
@@ -1406,4 +1400,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             listener.onKitsLoaded(kits, previousKits, kitConfigs);
         }
     }
+
+    public interface KitsLoadedListener {
+        void onKitsLoaded(Map<Integer, KitIntegration> kits, Map<Integer, KitIntegration> previousKits, JSONArray kitConfigs);
+    }
+
 }
