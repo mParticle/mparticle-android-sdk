@@ -57,7 +57,6 @@ public abstract class BaseAbstractTest {
     protected RandomUtils mRandomUtils = new RandomUtils();
     protected static Long mStartingMpid;
     private static final String defaultDatabaseName = MParticleDatabaseHelper.getDbName();
-    protected static Map<Integer, String> mCustomTestKits;
 
     @Rule
     public CaptureLogcatOnFailingTest captureFailingTestLogcat = new CaptureLogcatOnFailingTest();
@@ -240,45 +239,6 @@ public abstract class BaseAbstractTest {
             }
         }
         return jsonArray;
-    }
-
-    protected JSONObject setupConfigMessageForKits(Map<Class<? extends KitIntegration>, JSONObject> kitIds) {
-        return setupConfigMessageForKits(kitIds, false);
-    }
-
-    protected JSONObject setupConfigMessageForKits(Map<Class<? extends KitIntegration>, JSONObject> kitIds, Boolean localConfigOnly) {
-        JSONArray eks = new JSONArray();
-        int i = -1;
-        mCustomTestKits = new HashMap<>();
-        for (Map.Entry<Class<? extends KitIntegration>, JSONObject> kitConfig: kitIds.entrySet()) {
-            try {
-                mCustomTestKits.put(i, kitConfig.getKey().getName());
-                JSONObject configJson;
-                if (kitConfig.getValue() != null) {
-                    configJson = kitConfig.getValue();
-                } else {
-                    configJson = new JSONObject();
-                }
-                if (!configJson.has("id")) {
-                    configJson.put("id", i);
-                }
-                eks.put(configJson);
-            } catch (JSONException e) {
-                throw new RuntimeException(String.format("Kit class %s unable to be set", kitConfig.getKey()));
-            }
-            i--;
-        }
-        try {
-            JSONObject configObject = new JSONObject().put("eks", eks);
-            if (localConfigOnly) {
-                 mServer.setupConfigDeferred();
-            } else {
-                mServer.setupConfigResponse(configObject.toString());
-            }
-            return configObject;
-        } catch (JSONException e) {
-            throw new RuntimeException("Error sending custom eks to config.");
-        }
     }
 
     protected void fetchConfig() {

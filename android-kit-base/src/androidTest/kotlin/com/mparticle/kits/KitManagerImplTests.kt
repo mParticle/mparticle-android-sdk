@@ -26,7 +26,7 @@ class KitManagerImplTests : BaseKitOptionsTest() {
                     .configuration(it)
             }
             .let {
-                startMParticle(it, mServer)
+                startMParticle(it)
             }
         fun getKit(kitId: Int) = MParticle.getInstance()?.getKitInstance(kitId)
 

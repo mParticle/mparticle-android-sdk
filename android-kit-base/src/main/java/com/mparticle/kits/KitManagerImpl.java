@@ -29,6 +29,7 @@ import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.BackgroundTaskHandler;
 import com.mparticle.internal.CoreCallbacks;
 import com.mparticle.internal.KitManager;
+import com.mparticle.internal.KitsLoadedListener;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.ReportingManager;
@@ -40,6 +41,7 @@ import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -194,7 +196,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         }
         MParticleUser user = instance.Identity().getCurrentUser();
         HashSet<Integer> activeIds = new HashSet<Integer>();
-
+        HashMap<Integer, KitIntegration> previousKits = new HashMap<>(providers);
         if (kitConfigs != null) {
             for (int i = 0; i < kitConfigs.length(); i++) {
                 try {
@@ -258,6 +260,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 getContext().sendBroadcast(intent);
             }
         }
+        onKitsLoaded(new HashMap<>(providers), previousKits, kitConfigs);
         mCoreCallbacks.replayAndDisableQueue();
     }
 
@@ -1385,6 +1388,22 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     mCoreCallbacks.getKitListener().kitFound(kitId);
                 }
             }
+        }
+    }
+
+    private ArrayList<KitsLoadedListener> kitsLoadedListeners = new ArrayList<>();
+
+    public interface KitsLoadedListener {
+        void onKitsLoaded(Map<Integer, KitIntegration> kits, Map<Integer, KitIntegration> previousKits, JSONArray kitConfigs);
+    }
+
+    public void addKitsLoadedListener(KitsLoadedListener kitsLoadedListener) {
+        kitsLoadedListeners.add(kitsLoadedListener);
+    }
+
+    private void onKitsLoaded(Map<Integer, KitIntegration> kits, Map<Integer, KitIntegration> previousKits, JSONArray kitConfigs) {
+        for(KitsLoadedListener listener: kitsLoadedListeners) {
+            listener.onKitsLoaded(kits, previousKits, kitConfigs);
         }
     }
 }
