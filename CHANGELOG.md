@@ -1,3 +1,11 @@
+## [5.36.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.36.0...v5.36.1) (2022-03-08)
+
+
+### Bug Fixes
+
+* typo in GA4 kit name ([#112](https://github.com/mParticle/mparticle-android-sdk/issues/112)) ([45f9770](https://github.com/mParticle/mparticle-android-sdk/commit/45f97707b3abbf2082354f0fb647de4ff363490d))
+* update with proper kit configuration ([#113](https://github.com/mParticle/mparticle-android-sdk/issues/113)) ([7496077](https://github.com/mParticle/mparticle-android-sdk/commit/7496077b198f26ea0799fcd2a35b230fdab6cdf8))
+
 # [5.36.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.35.4...v5.36.0) (2022-03-03)
 
 
