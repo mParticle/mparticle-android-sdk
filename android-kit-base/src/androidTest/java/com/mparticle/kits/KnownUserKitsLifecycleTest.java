@@ -3,6 +3,8 @@ package com.mparticle.kits;
 import android.content.Context;
 
 import com.mparticle.MParticle;
+import com.mparticle.MParticleOptions;
+import com.mparticle.internal.AccessUtils;
 import com.mparticle.internal.Logger;
 import com.mparticle.kits.testkits.BaseTestKit;
 import com.mparticle.kits.testkits.ListenerTestKit;
@@ -11,6 +13,7 @@ import com.mparticle.testutils.MPLatch;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -24,19 +27,18 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 
-public class KnownUserKitsLifecycleTest extends BaseKitManagerStarted {
+public class KnownUserKitsLifecycleTest extends BaseKitOptionsTest {
 
-    @Override
-    protected Map<Class<? extends KitIntegration>, JSONObject> registerCustomKits() {
-        Map<Class<? extends KitIntegration>, JSONObject> map = new HashMap<>();
-        try {
-            map.put(TestKit1.class, new JSONObject().put("eau", true).put("id", -1));
-            map.put(TestKit2.class, new JSONObject().put("eau", false).put("id", -2));
-            map.put(TestKit3.class, new JSONObject().put("eau", true).put("id", -3));
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-        return map;
+    @Before
+    public void before() throws JSONException {
+        MParticleOptions.Builder builder = MParticleOptions.builder(mContext)
+                .configuration(
+                        new ConfiguredKitOptions()
+                                .addKit(-1, TestKit1.class, new JSONObject().put("eau", true))
+                                .addKit(-2, TestKit2.class, new JSONObject().put("eau", false))
+                                .addKit(-3, TestKit3.class, new JSONObject().put("eau", true))
+                );
+        startMParticle(builder);
     }
 
     @Test
@@ -80,12 +82,12 @@ public class KnownUserKitsLifecycleTest extends BaseKitManagerStarted {
 
     private void waitForNewIdentityKitStart(final long mpid) throws InterruptedException {
         final CountDownLatch latch = new MPLatch(1);
-        setKitStartedListener(new KitStartedListener() {
+        AccessUtils.getKitManager().addKitsLoadedListener(new KitManagerImpl.KitsLoadedListener() {
             @Override
-            public void onKitStarted(JSONArray jsonArray) {
-                if (jsonArray != null && jsonArray.length() == 3) {
+            public void onKitsLoaded(Map<Integer, KitIntegration> kits, Map<Integer, KitIntegration> previousKits, JSONArray kitConfigs) {
+                if (kitConfigs != null && kitConfigs.length() == 3) {
                     latch.countDown();
-                    Logger.error("kits started: " + mKitManager.providers.size());
+                    Logger.error("kits started: " + kits.size());
                 }
             }
         });

@@ -1,5 +1,8 @@
 package com.mparticle.testutils;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
@@ -9,7 +12,6 @@ import android.os.Looper;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.mparticle.Configuration;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.identity.BaseIdentityTask;
@@ -27,8 +29,6 @@ import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.database.services.MessageService;
 import com.mparticle.internal.database.services.SessionService;
 import com.mparticle.internal.database.tables.MParticleDatabaseHelper;
-import com.mparticle.kits.KitIntegration;
-import com.mparticle.kits.KitOptions;
 import com.mparticle.networking.MockServer;
 import com.mparticle.testutils.AndroidUtils.Mutable;
 
@@ -40,14 +40,9 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public abstract class BaseAbstractTest {
     protected MockServer mServer;
@@ -57,7 +52,6 @@ public abstract class BaseAbstractTest {
     protected RandomUtils mRandomUtils = new RandomUtils();
     protected static Long mStartingMpid;
     private static final String defaultDatabaseName = MParticleDatabaseHelper.getDbName();
-    protected static Map<Integer, String> mCustomTestKits;
 
     @Rule
     public CaptureLogcatOnFailingTest captureFailingTestLogcat = new CaptureLogcatOnFailingTest();
@@ -240,45 +234,6 @@ public abstract class BaseAbstractTest {
             }
         }
         return jsonArray;
-    }
-
-    protected JSONObject setupConfigMessageForKits(Map<Class<? extends KitIntegration>, JSONObject> kitIds) {
-        return setupConfigMessageForKits(kitIds, false);
-    }
-
-    protected JSONObject setupConfigMessageForKits(Map<Class<? extends KitIntegration>, JSONObject> kitIds, Boolean localConfigOnly) {
-        JSONArray eks = new JSONArray();
-        int i = -1;
-        mCustomTestKits = new HashMap<>();
-        for (Map.Entry<Class<? extends KitIntegration>, JSONObject> kitConfig: kitIds.entrySet()) {
-            try {
-                mCustomTestKits.put(i, kitConfig.getKey().getName());
-                JSONObject configJson;
-                if (kitConfig.getValue() != null) {
-                    configJson = kitConfig.getValue();
-                } else {
-                    configJson = new JSONObject();
-                }
-                if (!configJson.has("id")) {
-                    configJson.put("id", i);
-                }
-                eks.put(configJson);
-            } catch (JSONException e) {
-                throw new RuntimeException(String.format("Kit class %s unable to be set", kitConfig.getKey()));
-            }
-            i--;
-        }
-        try {
-            JSONObject configObject = new JSONObject().put("eks", eks);
-            if (localConfigOnly) {
-                 mServer.setupConfigDeferred();
-            } else {
-                mServer.setupConfigResponse(configObject.toString());
-            }
-            return configObject;
-        } catch (JSONException e) {
-            throw new RuntimeException("Error sending custom eks to config.");
-        }
     }
 
     protected void fetchConfig() {

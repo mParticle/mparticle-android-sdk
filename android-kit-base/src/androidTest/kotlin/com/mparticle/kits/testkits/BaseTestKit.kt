@@ -4,7 +4,7 @@ import android.content.Context
 import com.mparticle.kits.KitIntegration
 import com.mparticle.kits.ReportingMessage
 
-abstract class BaseTestKit : KitIntegration() {
+open class BaseTestKit : KitIntegration() {
     open override fun onKitCreate(settings: Map<String, String>?, context: Context): List<ReportingMessage> {
         return listOf()
     }

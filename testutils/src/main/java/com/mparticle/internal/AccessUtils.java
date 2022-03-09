@@ -8,6 +8,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.mparticle.MParticle;
 import com.mparticle.identity.IdentityStateListener;
 import com.mparticle.internal.database.tables.MParticleDatabaseHelper;
+import com.mparticle.kits.KitManagerImpl;
 import com.mparticle.networking.BaseNetworkConnection;
 import com.mparticle.testutils.MPLatch;
 
@@ -93,6 +94,10 @@ public class AccessUtils {
         return;
     }
 
+    public static void forceFetchConfig() throws IOException, MParticleApiClientImpl.MPConfigException {
+        getUploadHandler().mApiClient.fetchConfig(true);
+    }
+
     public static class EmptyMParticleApiClient implements MParticleApiClient {
         @Override
         public void fetchConfig() throws IOException, MParticleApiClientImpl.MPConfigException {
@@ -136,6 +141,10 @@ public class AccessUtils {
 
     public static MParticleApiClient getApiClient() {
         return com.mparticle.AccessUtils.getMessageManager().mUploadHandler.mApiClient;
+    }
+
+    public static KitManagerImpl getKitManager() {
+        return (KitManagerImpl) MParticle.getInstance().Internal().getKitManager().mKitManager;
     }
 
     public static void setKitManager(final KitManager kitManager) throws InterruptedException {

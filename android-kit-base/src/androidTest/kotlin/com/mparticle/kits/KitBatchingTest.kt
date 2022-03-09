@@ -22,7 +22,7 @@ class KitBatchingTest : BaseKitOptionsTest() {
                 KitOptions()
                     .addKit(123, BatchKit::class.java)
             )
-        startMParticle(options, mServer)
+        startMParticle(options)
     }
 
     @Test
