@@ -1,3 +1,10 @@
+## [5.36.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.36.1...v5.36.2) (2022-03-09)
+
+
+### Bug Fixes
+
+* add etag to batch upload payload ([#114](https://github.com/mParticle/mparticle-android-sdk/issues/114)) ([6ce43aa](https://github.com/mParticle/mparticle-android-sdk/commit/6ce43aa3a791c246bf9aae2973e6533618f56281))
+
 ## [5.36.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.36.0...v5.36.1) (2022-03-08)
 
 
