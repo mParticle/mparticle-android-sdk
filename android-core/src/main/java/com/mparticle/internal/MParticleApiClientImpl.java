@@ -183,7 +183,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
                 String newModified = connection.getHeaderField("Last-Modified");
 
                 mConfigManager.updateConfig(response, newEtag, newModified);
-            }else if (connection.getResponseCode() == 400) {
+            } else if (connection.getResponseCode() == 400) {
                 throw new MPConfigException();
             } else if (connection.getResponseCode() == 304) {
                 Logger.verbose("Config request deferred, configuration already up-to-date.");

@@ -194,6 +194,7 @@ public class Constants {
         String ACCURACY = "acc";
         // batch details
         String MPARTICLE_VERSION = "sdk";
+        String MPARTICLE_CONFIG_VERSION = "mpcv";
         String APP_INFO = "ai";
         String DEVICE_INFO = "di";
         String USER_ATTRIBUTES = "ua";

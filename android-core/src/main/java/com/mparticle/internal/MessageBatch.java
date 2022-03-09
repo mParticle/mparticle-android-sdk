@@ -1,5 +1,10 @@
 package com.mparticle.internal;
 
+import static com.mparticle.internal.Constants.MessageKey.DATA_PLAN_CONTEXT;
+import static com.mparticle.internal.Constants.MessageKey.DATA_PLAN_ID;
+import static com.mparticle.internal.Constants.MessageKey.DATA_PLAN_KEY;
+import static com.mparticle.internal.Constants.MessageKey.DATA_PLAN_VERSION;
+
 import com.mparticle.BuildConfig;
 import com.mparticle.MParticle;
 import com.mparticle.consent.CCPAConsent;
@@ -11,14 +16,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
-import static com.mparticle.internal.Constants.MessageKey.DATA_PLAN_CONTEXT;
-import static com.mparticle.internal.Constants.MessageKey.DATA_PLAN_ID;
-import static com.mparticle.internal.Constants.MessageKey.DATA_PLAN_KEY;
-import static com.mparticle.internal.Constants.MessageKey.DATA_PLAN_VERSION;
 
 public class MessageBatch extends JSONObject {
     private long messageLengthBytes;
@@ -38,6 +37,7 @@ public class MessageBatch extends JSONObject {
         uploadMessage.put(Constants.MessageKey.MPARTICLE_VERSION, Constants.MPARTICLE_VERSION);
         uploadMessage.put(Constants.MessageKey.OPT_OUT_HEADER, configManager.getOptedOut());
         uploadMessage.put(Constants.MessageKey.CONFIG_UPLOAD_INTERVAL, configManager.getUploadInterval()/1000);
+        uploadMessage.put(Constants.MessageKey.MPARTICLE_CONFIG_VERSION, configManager.getEtag());
         uploadMessage.put(Constants.MessageKey.CONFIG_SESSION_TIMEOUT, configManager.getSessionTimeout()/1000);
         uploadMessage.put(Constants.MessageKey.MPID, String.valueOf(batchId.getMpid()));
         uploadMessage.put(Constants.MessageKey.SANDBOX, configManager.getEnvironment().equals(MParticle.Environment.Development));
@@ -83,8 +83,6 @@ public class MessageBatch extends JSONObject {
                     state.put(Constants.MessageKey.CONSENT_STATE_CCPA, ccpa);
                     addConsentStateJSON(ccpa, Constants.MessageKey.CCPA_CONSENT_KEY, ccpaConsent);
                 }
-
-
             } catch (JSONException ignored) { }
         }
     }
@@ -107,8 +105,7 @@ public class MessageBatch extends JSONObject {
                 put(Constants.MessageKey.HISTORY, new JSONArray());
             }
             getJSONArray(Constants.MessageKey.HISTORY).put(message);
-        } catch (JSONException e) {
-        }
+        } catch (JSONException ignored) { }
     }
 
     public void addMessage(JSONObject message) {
@@ -117,8 +114,7 @@ public class MessageBatch extends JSONObject {
                 put(Constants.MessageKey.MESSAGES, new JSONArray());
             }
             getJSONArray(Constants.MessageKey.MESSAGES).put(message);
-        } catch (JSONException e) {
-        }
+        } catch (JSONException ignored) { }
     }
 
     public void addReportingMessage(JSONObject reportingMessage) {
@@ -127,24 +123,19 @@ public class MessageBatch extends JSONObject {
                 put(Constants.MessageKey.REPORTING, new JSONArray());
             }
             getJSONArray(Constants.MessageKey.REPORTING).put(reportingMessage);
-        } catch (JSONException e) {
-        }
+        } catch (JSONException ignored) { }
     }
 
     public void setAppInfo(JSONObject appInfo) {
         try {
             put(Constants.MessageKey.APP_INFO, appInfo);
-        } catch (JSONException e) {
-
-        }
+        } catch (JSONException ignored) { }
     }
 
     public void setDeviceInfo(JSONObject deviceInfo) {
         try {
             put(Constants.MessageKey.DEVICE_INFO, deviceInfo);
-        } catch (JSONException e) {
-
-        }
+        } catch (JSONException ignored) { }
     }
 
     public JSONObject getAppInfo() {
@@ -182,17 +173,13 @@ public class MessageBatch extends JSONObject {
     public void setIdentities(JSONArray identities) {
         try {
             put(Constants.MessageKey.USER_IDENTITIES, identities);
-        } catch (JSONException e) {
-
-        }
+        } catch (JSONException ignored) { }
     }
 
     public void setUserAttributes(JSONObject userAttributes) {
         try {
             put(Constants.MessageKey.USER_ATTRIBUTES, userAttributes);
-        } catch (JSONException e) {
-
-        }
+        } catch (JSONException ignored) { }
     }
 
     public long getMessageLengthBytes() {
