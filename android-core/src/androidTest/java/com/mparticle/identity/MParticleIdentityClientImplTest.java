@@ -20,6 +20,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
 import static com.mparticle.identity.MParticleIdentityClientImpl.ANDROID_AAID;
@@ -203,13 +204,13 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
 
     @Test
     public void testModifyMessage() throws Exception {
-        mConfigManager.setMpid(ran.nextLong(), ran.nextBoolean());
         int iterations = 5;
-        for (int i = 0; i < iterations; i++) {
+        for (int i = 1; i <= iterations; i++) {
+            mConfigManager.setMpid(i, ran.nextBoolean());
+
             final Map<MParticle.IdentityType, String> oldUserIdentities = mRandomUtils.getRandomUserIdentities();
             final Map<MParticle.IdentityType, String> newUserIdentities = mRandomUtils.getRandomUserIdentities();
 
-            AccessUtils.clearUserIdentities((MParticleUserImpl)MParticle.getInstance().Identity().getCurrentUser());
             ((MParticleUserImpl)MParticle.getInstance().Identity().getCurrentUser()).setUserIdentities(oldUserIdentities);
 
             final CountDownLatch latch = new MPLatch(1);
@@ -241,9 +242,9 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
                                     assertEquals(newValue, newUserIdentities.get(identityType));
                                 }
                             }
+                            setApiClient(null);
                             checked.value = true;
                             latch.countDown();
-                            setApiClient(null);
                         }
                 }
             });
