@@ -78,7 +78,7 @@ public interface KitManager {
 
     Set<Integer> getSupportedKits();
 
-    void updateKits(JSONArray jsonArray);
+    KitsLoadedCallback updateKits(JSONArray jsonArray);
 
     void updateDataplan(@NonNull MParticleOptions.DataplanOptions dataplanOptions);
 

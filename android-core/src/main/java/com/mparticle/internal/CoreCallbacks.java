@@ -3,6 +3,8 @@ package com.mparticle.internal;
 import android.app.Activity;
 import android.net.Uri;
 
+import androidx.annotation.WorkerThread;
+
 import com.mparticle.MParticleOptions;
 
 import org.json.JSONArray;
@@ -17,6 +19,7 @@ public interface CoreCallbacks {
     void setIntegrationAttributes(int kitId, Map<String, String> integrationAttributes);
     Map<String, String> getIntegrationAttributes(int kitId);
     WeakReference<Activity> getCurrentActivity();
+    @WorkerThread
     JSONArray getLatestKitConfiguration();
     MParticleOptions.DataplanOptions getDataplanOptions();
     boolean isPushEnabled();
@@ -24,7 +27,6 @@ public interface CoreCallbacks {
     String getPushInstanceId();
     Uri getLaunchUri();
     String getLaunchAction();
-    void replayAndDisableQueue();
     KitListener getKitListener();
 
     interface KitListener {

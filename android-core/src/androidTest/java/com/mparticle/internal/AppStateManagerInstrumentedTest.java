@@ -146,7 +146,6 @@ public class AppStateManagerInstrumentedTest extends BaseCleanStartedEachTest {
                     },
                     MParticle.getInstance().Internal().getConfigManager(),
                     MParticle.getInstance().Internal().getAppStateManager(),
-                    com.mparticle.internal.AccessUtils.getUploadHandler(),
                     MParticleOptions.builder(mContext).credentials("some", "key").build());
             this.latch = latch;
         }

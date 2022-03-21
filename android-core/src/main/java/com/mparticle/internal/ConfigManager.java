@@ -8,6 +8,7 @@ import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 
 import com.mparticle.Configuration;
 import com.mparticle.ExceptionHandler;
@@ -176,6 +177,7 @@ public class ConfigManager {
      * This called on startup. The only thing that's completely necessary is that we fire up kits.
      */
     @Nullable
+    @WorkerThread
     public JSONArray getLatestKitConfiguration() {
         String oldConfig = getKitConfigPreferences().getString(KIT_CONFIG_KEY, new JSONArray().toString());
         if (!MPUtility.isEmpty(oldConfig)) {
@@ -354,20 +356,12 @@ public class ConfigManager {
         updateCoreConfig(responseJSON, false);
     }
 
-    private synchronized void reloadKitConfig(@Nullable JSONArray kitConfigs) {
-        //only reload if KitManager has not already been loaded (from new config, presumably)
-        MParticle instance = MParticle.getInstance();
-        if (instance != null ) {
-            instance.Internal().getKitManager().updateKits(kitConfigs);
-            onConfigLoaded(ConfigType.KIT, false);
-        }
-    }
-
     private synchronized void updateKitConfig(@Nullable JSONArray kitConfigs) {
         MParticle instance = MParticle.getInstance();
         if (instance != null) {
-            instance.Internal().getKitManager().loadKitLibrary();
-            onConfigLoaded(ConfigType.KIT, true);
+            instance.Internal().getKitManager()
+                    .updateKits(kitConfigs)
+                    .onKitsLoaded(() -> onConfigLoaded(ConfigType.KIT, true));
         }
     }
 
@@ -474,7 +468,6 @@ public class ConfigManager {
      * This method will be called from a background thread after startup is already complete.
      */
     public void delayedStart() {
-        reloadKitConfig(getLatestKitConfiguration());
         String senderId = getPushSenderId();
         if (isPushEnabled() && senderId != null) {
             MParticle.getInstance().Messaging().enablePushNotifications(senderId);

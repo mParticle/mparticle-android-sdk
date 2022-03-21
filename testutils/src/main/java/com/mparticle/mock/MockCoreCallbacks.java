@@ -79,9 +79,6 @@ public class MockCoreCallbacks implements CoreCallbacks {
     }
 
     @Override
-    public void replayAndDisableQueue() { }
-
-    @Override
     public KitListener getKitListener() {
         return KitListener.EMPTY;
     }

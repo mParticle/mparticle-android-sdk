@@ -7,8 +7,10 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 
+import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -26,7 +28,7 @@ import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.IdentityStateListener;
 import com.mparticle.identity.MParticleUser;
-import com.mparticle.internal.BackgroundTaskHandler;
+import com.mparticle.internal.KitsLoadedCallback;
 import com.mparticle.internal.CoreCallbacks;
 import com.mparticle.internal.KitManager;
 import com.mparticle.internal.Logger;
@@ -51,14 +53,21 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-
 public class KitManagerImpl implements KitManager, AttributionListener, UserAttributeListener, IdentityStateListener {
+
+    private static HandlerThread kitHandlerThread;
+    static {
+        kitHandlerThread = new HandlerThread("mParticle_kit_thread");
+        kitHandlerThread.start();
+    }
+
     private final ReportingManager mReportingManager;
     protected final CoreCallbacks mCoreCallbacks;
-    private final BackgroundTaskHandler mBackgroundTaskHandler;
+    private Handler mBackgroundTaskHandler;
     KitIntegrationFactory mKitIntegrationFactory;
     private DataplanFilter mDataplanFilter = DataplanFilterImpl.EMPTY;
     private KitOptions mKitOptions;
+    private volatile List<KitConfiguration> kitConfigurations = new ArrayList<>();
 
     private static final String RESERVED_KEY_LTV = "$Amount";
     private static final String METHOD_NAME = "$MethodName";
@@ -71,11 +80,10 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     ConcurrentHashMap<Integer, KitIntegration> providers = new ConcurrentHashMap<Integer, KitIntegration>();
     private final Context mContext;
 
-    public KitManagerImpl(Context context, ReportingManager reportingManager, CoreCallbacks coreCallbacks, BackgroundTaskHandler backgroundTaskHandler, MParticleOptions options) {
+    public KitManagerImpl(Context context, ReportingManager reportingManager, CoreCallbacks coreCallbacks, MParticleOptions options) {
         mContext = context;
         mReportingManager = reportingManager;
         mCoreCallbacks = coreCallbacks;
-        mBackgroundTaskHandler = backgroundTaskHandler;
         mKitIntegrationFactory = new KitIntegrationFactory();
         MParticle instance = MParticle.getInstance();
         if (instance != null) {
@@ -140,30 +148,23 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         setIntegrationAttributes(kitIntegration, null);
     }
 
-    class UpdateKitRunnable implements Runnable {
-
-        private final JSONArray kitConfigs;
-
-        UpdateKitRunnable(JSONArray kitConfigs) {
-            super();
-            this.kitConfigs = kitConfigs;
-        }
-
-        @Override
-        public void run() {
-            configureKits(kitConfigs);
-        }
-
+    @Override
+    public KitsLoadedCallback updateKits(final JSONArray kitConfigs) {
+        KitsLoadedCallback callback = new KitsLoadedCallback();
+        runOnBackgroundThread(() -> {
+                    kitConfigurations = parseKitConfigurations(kitConfigs);
+                    runOnMainThread(() -> {
+                        configureKits(kitConfigurations);
+                        callback.setKitsLoaded();
+                    });
+                }
+        );
+        return callback;
     }
 
-    @Override
-    public void updateKits(final JSONArray kitConfigs) {
-        if (Looper.getMainLooper() != Looper.myLooper()) {
-            Runnable runnable = new UpdateKitRunnable(kitConfigs);
-            new Handler(Looper.getMainLooper()).post(runnable);
-        } else {
-            configureKits(kitConfigs);
-        }
+    @MainThread
+    public void reloadKits() {
+        configureKits(kitConfigurations);
     }
 
     @Override
@@ -188,7 +189,10 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
      * <p>
      * Note: This method is meant to always be run on the main thread.
      */
-    protected void configureKits(JSONArray kitConfigs) {
+    protected synchronized void configureKits(@NonNull List<KitConfiguration> kitConfigurations) {
+        if (kitConfigurations == null) {
+            kitConfigurations = new ArrayList<>();
+        }
         MParticle instance = MParticle.getInstance();
         if (instance == null) {
             //if MParticle has been dereferenced, abandon ship. This will run again when it is restarted
@@ -197,13 +201,11 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         MParticleUser user = instance.Identity().getCurrentUser();
         HashSet<Integer> activeIds = new HashSet<Integer>();
         HashMap<Integer, KitIntegration> previousKits = new HashMap<>(providers);
-        if (kitConfigs != null) {
-            for (int i = 0; i < kitConfigs.length(); i++) {
+
+        if (kitConfigurations != null) {
+            for (KitConfiguration configuration: kitConfigurations) {
                 try {
-                    JSONObject current = kitConfigs.getJSONObject(i);
-                    KitConfiguration configuration = createKitConfiguration(current);
                     int currentModuleID = configuration.getKitId();
-                    mCoreCallbacks.getKitListener().kitConfigReceived(currentModuleID, configuration.toString());
                     if (configuration.shouldExcludeUser(user)) {
                         mCoreCallbacks.getKitListener().kitExcluded(currentModuleID, "User was required to be known, but was not.");
                         continue;
@@ -234,12 +236,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                         activeKit.onSettingsUpdated(configuration.getSettings());
                     }
                 } catch (Exception e) {
-                    try {
-                        mCoreCallbacks.getKitListener().kitExcluded(kitConfigs.getJSONObject(i).optInt("id", -1), "exception while starting. Exception: " + e.getMessage());
-                    } catch (JSONException e1) {
-                        mCoreCallbacks.getKitListener().kitExcluded(-1, "exception while starting. Exception: " + e.getMessage());
-                    }
-                    Logger.error("Exception while starting kit: " + e.getMessage());
+                    mCoreCallbacks.getKitListener().kitExcluded(configuration.getKitId(), "exception while starting. Exception: " + e.getMessage());
+                    Logger.error("Exception while starting kit " + configuration.getKitId() + ": " + e.getMessage());
                 }
             }
         }
@@ -260,8 +258,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 getContext().sendBroadcast(intent);
             }
         }
-        onKitsLoaded(new HashMap<>(providers), previousKits, kitConfigs);
-        mCoreCallbacks.replayAndDisableQueue();
+        onKitsLoaded(new HashMap<>(providers), previousKits, new ArrayList<>(kitConfigurations));
     }
 
     private void initializeKit(KitIntegration activeKit) {
@@ -406,7 +403,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 Logger.warning("Failed to call setOptOut for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
-        updateKits(mCoreCallbacks.getLatestKitConfiguration());
+        reloadKits();
     }
 
     @Override
@@ -1226,7 +1223,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     @Override
     public void onUserIdentified(MParticleUser mParticleUser, MParticleUser previousUser) {
         //due to consent forwarding rules we need to re-verify kits whenever the user changes
-        updateKits(mCoreCallbacks.getLatestKitConfiguration());
+        reloadKits();
         for (KitIntegration provider : providers.values()) {
             try {
                 if (provider instanceof KitIntegration.IdentityListener && !provider.isDisabled()) {
@@ -1236,6 +1233,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 Logger.warning("Failed to call onUserIdentified for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
+
         mParticleUser.getUserAttributes(this);
     }
 
@@ -1294,29 +1292,16 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     @Override
     public void onConsentStateUpdated(final ConsentState oldState, final ConsentState newState, final long mpid) {
         //Due to consent forwarding rules we need to re-initialize kits whenever the user changes.
-        updateKits(mCoreCallbacks.getLatestKitConfiguration());
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                for (KitIntegration provider : providers.values()) {
-                    if (provider instanceof KitIntegration.UserAttributeListener && !provider.isDisabled()) {
-                        try {
-                            ((KitIntegration.UserAttributeListener) provider).onConsentStateUpdated(oldState, newState, FilteredMParticleUser.getInstance(mpid, provider));
-                        } catch (Exception e) {
-                            Logger.warning("Failed to call onConsentStateUpdated for kit: " + provider.getName() + ": " + e.getMessage());
-                        }
-                    }
+        reloadKits();
+        for (KitIntegration provider : providers.values()) {
+            if (provider instanceof KitIntegration.UserAttributeListener && !provider.isDisabled()) {
+                try {
+                    ((KitIntegration.UserAttributeListener) provider).onConsentStateUpdated(oldState, newState, FilteredMParticleUser.getInstance(mpid, provider));
+                } catch (Exception e) {
+                    Logger.warning("Failed to call onConsentStateUpdated for kit: " + provider.getName() + ": " + e.getMessage());
                 }
             }
-        };
-        //This needs to be run on the main thread, after kit configuration/consent forwarding rules, which also happen on the main thread.
-        if (Looper.getMainLooper() != Looper.myLooper()) {
-            Handler handler = new Handler(getContext().getMainLooper());
-            handler.post(runnable);
-        } else {
-            runnable.run();
         }
-
     }
 
     @Override
@@ -1330,8 +1315,19 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         }
     }
 
-    public void executeNetworkRequest(Runnable runnable) {
-        mBackgroundTaskHandler.executeNetworkRequest(runnable);
+    public void runOnBackgroundThread(Runnable runnable) {
+        if (mBackgroundTaskHandler == null) {
+            mBackgroundTaskHandler = new Handler(kitHandlerThread.getLooper());
+        }
+        mBackgroundTaskHandler.post(runnable);
+    }
+
+    public void runOnMainThread(Runnable runnable) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            runnable.run();
+        } else {
+            new Handler(Looper.getMainLooper()).post(runnable);
+        }
     }
 
     public boolean isPushEnabled() {
@@ -1391,18 +1387,42 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         }
     }
 
-    public void addKitsLoadedListener(KitsLoadedListener kitsLoadedListener) {
-        kitsLoadedListeners.add(kitsLoadedListener);
+    private List<KitConfiguration> parseKitConfigurations(JSONArray kitConfigs) {
+        List<KitConfiguration> configurations = new ArrayList<>();
+        if (kitConfigs == null) {
+            kitConfigs = new JSONArray();
+        }
+        for (int i = 0; i < kitConfigs.length(); i++) {
+            JSONObject kitConfig = null;
+            try {
+                kitConfig = kitConfigs.getJSONObject(i);
+            } catch (JSONException e) {
+                Logger.error(e, "Malformed Kit configuration");
+            }
+            if (kitConfig != null) {
+                try {
+                    configurations.add(createKitConfiguration(kitConfig));
+                } catch (JSONException e) {
+                    int kitId = kitConfig.optInt("id", -1);
+                    mCoreCallbacks.getKitListener().kitExcluded(kitId, "exception while starting. Exception: " + e.getMessage());
+                    Logger.error("Exception while starting kit: " + kitId + ": " + e.getMessage());
+                }
+            }
+        }
+        return configurations;
     }
 
-    private void onKitsLoaded(Map<Integer, KitIntegration> kits, Map<Integer, KitIntegration> previousKits, JSONArray kitConfigs) {
+    public void addKitsLoadedListener(KitsLoadedListener kitsLoadedListener) {
+        kitsLoadedListeners.add((KitsLoadedListener) kitsLoadedListener);
+    }
+
+    private void onKitsLoaded(Map<Integer, KitIntegration> kits, Map<Integer, KitIntegration> previousKits, List<KitConfiguration> kitConfigs) {
         for(KitsLoadedListener listener: kitsLoadedListeners) {
             listener.onKitsLoaded(kits, previousKits, kitConfigs);
         }
     }
 
-    public interface KitsLoadedListener {
-        void onKitsLoaded(Map<Integer, KitIntegration> kits, Map<Integer, KitIntegration> previousKits, JSONArray kitConfigs);
+    interface KitsLoadedListener {
+        void onKitsLoaded(Map<Integer, KitIntegration> kits, Map<Integer, KitIntegration> previousKits, List<KitConfiguration> kitConfigs);
     }
-
 }

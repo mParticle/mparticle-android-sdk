@@ -11,7 +11,7 @@ import static junit.framework.TestCase.fail;
 public class MPLatch extends CountDownLatch {
     int countDowned = 0;
     int count;
-    Handler mHandler = new Handler(Looper.getMainLooper());
+    Handler mHandler;
     AndroidUtils.Mutable<Boolean> timedOut = new AndroidUtils.Mutable<>(false);
     Runnable timeoutRunnable = new Runnable() {
         @Override
@@ -30,27 +30,37 @@ public class MPLatch extends CountDownLatch {
     public MPLatch(int count) {
         super(count);
         this.count = count;
+        mHandler = new Handler(Looper.getMainLooper());
+    }
+
+    public MPLatch() {
+        super(1);
+        mHandler = new Handler();
     }
 
     @Override
     public void countDown() {
-        countDowned++;
-        if (countDowned == count) {
-            mHandler.removeCallbacks(timeoutRunnable);
+        synchronized (this) {
+            countDowned++;
+            if (countDowned == count) {
+                mHandler.removeCallbacks(timeoutRunnable);
+            }
+            super.countDown();
         }
-        super.countDown();
     }
 
     @Override
     public void await() throws InterruptedException {
         int timeoutTimeMs = 5 * 1000;
-        if (count == countDowned) {
-            return;
+        synchronized (this) {
+            if (count == countDowned) {
+                return;
+            }
         }
-        mHandler.postDelayed(timeoutRunnable, timeoutTimeMs - 100L);
-        this.await(timeoutTimeMs, TimeUnit.MILLISECONDS);
-        if (timedOut.value) {
-            fail("timed out");
-        }
+            mHandler.postDelayed(timeoutRunnable, timeoutTimeMs - 100L);
+            this.await(timeoutTimeMs, TimeUnit.MILLISECONDS);
+            if (timedOut.value) {
+                fail("timed out");
+            }
     }
 }

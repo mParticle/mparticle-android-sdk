@@ -830,7 +830,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     }
 
     public void initConfigDelayed() {
-        mUploadHandler.sendEmptyMessageDelayed(UploadHandler.INIT_CONFIG, 1000);
+        mUploadHandler.sendEmptyMessageDelayed(UploadHandler.INIT_CONFIG, 10 * 1000);
     }
 
     @Override

@@ -8,7 +8,9 @@ import com.mparticle.internal.CoreCallbacks;
 import com.mparticle.internal.ReportingManager;
 import com.mparticle.kits.KitConfiguration;
 import com.mparticle.kits.KitManagerImpl;
+import com.mparticle.testutils.MPLatch;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mockito.Mockito;
@@ -21,12 +23,7 @@ public class MockKitManagerImpl extends KitManagerImpl {
     }
 
     public MockKitManagerImpl(Context context, ReportingManager reportingManager, CoreCallbacks coreCallbacks) {
-        super(context, reportingManager, coreCallbacks, new BackgroundTaskHandler() {
-            @Override
-            public void executeNetworkRequest(Runnable runnable) {
-                
-            }
-        }, Mockito.mock(MParticleOptions.class));
+        super(context, reportingManager, coreCallbacks, Mockito.mock(MParticleOptions.class));
     }
 
     @Override
@@ -37,5 +34,15 @@ public class MockKitManagerImpl extends KitManagerImpl {
     @Override
     public int getUserBucket() {
         return 50;
+    }
+
+    @Override
+    public void runOnBackgroundThread(Runnable runnable) {
+        runnable.run();
+    }
+
+    @Override
+    public void runOnMainThread(Runnable runnable) {
+        runnable.run();
     }
 }

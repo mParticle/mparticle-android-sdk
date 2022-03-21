@@ -89,8 +89,6 @@ class UpdateConfigTest : BaseKitOptionsTest() {
                 startMParticle(it)
             }
 
-        waitForKitToStart(1)
-
         mServer.setupConfigResponse(
             JSONObject()
                 .put(
@@ -110,21 +108,6 @@ class UpdateConfigTest : BaseKitOptionsTest() {
             latch.countDown()
         }
         AccessUtils.forceFetchConfig()
-        latch.await()
-    }
-
-    private fun waitForKitToStart(kitId: Int) {
-        val latch = MPLatch(1)
-        // wait for kit to start/reload
-        AccessUtils.getKitManager().addKitsLoadedListener { kits, previousKits, kitConfigs ->
-            if (kits.containsKey(kitId)) {
-                latch.countDown()
-            }
-        }
-        // check if the kit has already been started and short-circut if it has
-        if (MParticle.getInstance()?.isKitActive(kitId) == true) {
-            latch.countDown()
-        }
         latch.await()
     }
 }

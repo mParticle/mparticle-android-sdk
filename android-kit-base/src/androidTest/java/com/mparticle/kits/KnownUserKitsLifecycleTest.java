@@ -82,13 +82,10 @@ public class KnownUserKitsLifecycleTest extends BaseKitOptionsTest {
 
     private void waitForNewIdentityKitStart(final long mpid) throws InterruptedException {
         final CountDownLatch latch = new MPLatch(1);
-        AccessUtils.getKitManager().addKitsLoadedListener(new KitManagerImpl.KitsLoadedListener() {
-            @Override
-            public void onKitsLoaded(Map<Integer, KitIntegration> kits, Map<Integer, KitIntegration> previousKits, JSONArray kitConfigs) {
-                if (kitConfigs != null && kitConfigs.length() == 3) {
-                    latch.countDown();
-                    Logger.error("kits started: " + kits.size());
-                }
+        AccessUtils.getKitManager().addKitsLoadedListener((kits, previousKits, kitConfigs) -> {
+            if (kitConfigs != null && kitConfigs.size() == 3) {
+                latch.countDown();
+                Logger.error("kits started: " + kits.size());
             }
         });
         latch.await(3, TimeUnit.SECONDS);

@@ -14,9 +14,9 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
-import com.mparticle.internal.KitFrameworkWrapper;
-import com.mparticle.internal.KitsLoadedListener;
+import com.mparticle.internal.KitsLoadedListenerConfiguration;
 import com.mparticle.internal.Logger;
+import com.mparticle.internal.KitsLoadedListener;
 import com.mparticle.messaging.MPMessagingAPI;
 import com.mparticle.messaging.ProviderCloudMessage;
 
@@ -149,28 +149,26 @@ public class MPServiceUtil {
     private void generateCloudMessage(final Intent intent) {
         try {
 
-            KitsLoadedListener kitsLoadedListener = new KitsLoadedListener() {
-                @Override
-                public void onKitsLoaded() {
-                    try {
-                        MParticle instance = MParticle.getInstance();
-                        if (instance != null) {
-                            instance.Internal().getKitManager().loadKitLibrary();
-                            ProviderCloudMessage cloudMessage = ProviderCloudMessage.createMessage(intent, ConfigManager.getPushKeys(mContext));
-                            boolean handled = instance.Internal().getKitManager().onMessageReceived(mContext.getApplicationContext(), intent);
-                            cloudMessage.setDisplayed(handled);
-                            broadcastNotificationReceived(cloudMessage);
-                        }
-                    } catch (Exception e) {
-                        Logger.warning("FCM parsing error: " + e.toString());
+            KitsLoadedListener kitsLoadedListener = () -> {
+                try {
+                    MParticle instance = MParticle.getInstance();
+                    if (instance != null) {
+                        ProviderCloudMessage cloudMessage = ProviderCloudMessage.createMessage(intent, ConfigManager.getPushKeys(mContext));
+                        boolean handled = instance.Internal().getKitManager().onMessageReceived(mContext.getApplicationContext(), intent);
+                        cloudMessage.setDisplayed(handled);
+                        broadcastNotificationReceived(cloudMessage);
                     }
+                } catch (Exception e) {
+                    Logger.warning("FCM parsing error: " + e);
                 }
             };
-            KitFrameworkWrapper.addKitsLoadedListener(kitsLoadedListener);
-            MParticle.start(MParticleOptions.builder(mContext).buildForInternalRestart());
+            MParticle.start(MParticleOptions
+                    .builder(mContext)
+                    .configuration(new KitsLoadedListenerConfiguration(kitsLoadedListener))
+                    .buildForInternalRestart());
 
         } catch (Exception e) {
-            Logger.warning("FCM parsing error: " + e.toString());
+            Logger.warning("FCM parsing error: " + e);
         }
     }
 
