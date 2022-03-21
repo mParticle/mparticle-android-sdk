@@ -70,7 +70,7 @@ public class MParticleOptions {
             this.mEnvironment = builder.environment;
         }
         if (mEnvironment == null || mEnvironment == MParticle.Environment.AutoDetect) {
-            if (builder.isAppDebuggable) {
+            if (builder.isDevMode) {
                 this.mEnvironment = MParticle.Environment.Development;
             } else {
                 this.mEnvironment = MParticle.Environment.Production;
@@ -368,7 +368,7 @@ public class MParticleOptions {
         private MParticle.OperatingSystem operatingSystem;
         private DataplanOptions dataplanOptions;
         private Map<Class, List<Configuration>> configurations = new HashMap();
-        private boolean isAppDebuggable;
+        private boolean isDevMode;
 
         private Builder(Context context) {
             this.context = context;
@@ -469,7 +469,7 @@ public class MParticleOptions {
         /**
          * @deprecated
          * This method has been replaced as the behavior has been inverted - Android ID collection is now disabled by default.
-         * <p> Use {@link androidIdEnabled(boolean)} instead.
+         * <p> Use {@link MParticleOptions.Builder#androidIdEnabled(boolean)} instead.
          *
          *
          * By default, the SDK will NOT collect <a href="http://developer.android.com/reference/android/provider/Settings.Secure.html#ANDROID_ID">Android Id</a> for the purpose
@@ -711,12 +711,10 @@ public class MParticleOptions {
             if (context == null) {
                 throw new IllegalArgumentException("mParticle failed to start: context is required.");
             }
-            isAppDebuggable = MPUtility.isAppDebuggable(context);
-            boolean devMode = MParticle.Environment.Development.equals(environment) || isAppDebuggable;
-
+            isDevMode = !MParticle.Environment.Production.equals(environment) && MPUtility.isAppDebuggable(context);
             if (MPUtility.isEmpty(apiKey)) {
                 message = "Configuration issue: No API key passed to start()!";
-                if (devMode) {
+                if (isDevMode) {
                     throw new IllegalArgumentException(message);
                 } else {
                     Logger.error(message);
@@ -724,7 +722,7 @@ public class MParticleOptions {
             }
             if (MPUtility.isEmpty(apiSecret)) {
                     message = "Configuration issue: No API secret passed to start()!";
-                    if (devMode) {
+                    if (isDevMode) {
                         throw new IllegalArgumentException(message);
                     } else {
                         Logger.error(message);
