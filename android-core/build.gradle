@@ -158,7 +158,13 @@ dependencies {
 }
 
 
-//trigger the secondary core build, which will be consumed by the custom-lint module
+configurations {
+    all {
+        exclude module: "httpclient"
+        exclude module: "commons-logging"
+    }
+}
+
 afterEvaluate {
     android.buildTypes.all { theBuildType ->
         android.sourceSets.all { sourceSet ->
