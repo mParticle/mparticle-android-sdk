@@ -167,7 +167,7 @@ public class AccessUtils {
         kitManagerLoadedLatch.await();
         final CountDownLatch kitsLoadedLatch = new MPLatch(1);
         kitFrameworkWrapper.setKitsLoaded(false);
-        KitFrameworkWrapper.addKitsLoadedListener(new KitsLoadedListener() {
+        kitFrameworkWrapper.addKitsLoadedListener(new KitsLoadedListener() {
             @Override
             public void onKitsLoaded() {
                 kitsLoadedLatch.countDown();

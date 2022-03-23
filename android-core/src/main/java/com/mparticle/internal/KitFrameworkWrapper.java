@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 
 import com.mparticle.AttributionResult;
 import com.mparticle.BaseEvent;
@@ -35,7 +36,6 @@ public class KitFrameworkWrapper implements KitManager {
     private final Context mContext;
     final CoreCallbacks mCoreCallbacks;
     private final ReportingManager mReportingManager;
-    private final BackgroundTaskHandler mBackgroundTaskHandler;
     KitManager mKitManager;
     private final MParticleOptions mOptions;
     private volatile boolean frameworkLoadAttempted = false;
@@ -44,39 +44,47 @@ public class KitFrameworkWrapper implements KitManager {
     private Queue eventQueue;
     private Queue<AttributeChange> attributeQueue;
     private volatile boolean registerForPush = false;
-    private static final List<KitsLoadedListener> kitsLoadedListeners = new ArrayList<KitsLoadedListener>();
+    private static final List<KitsLoadedListener> kitsLoadedListeners = new ArrayList<>();
 
-    public KitFrameworkWrapper(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager, BackgroundTaskHandler backgroundTaskHandler, MParticleOptions options) {
-        this(context, reportingManager, configManager, appStateManager, backgroundTaskHandler, false, options);
+    public KitFrameworkWrapper(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager, MParticleOptions options) {
+        this(context, reportingManager, configManager, appStateManager, false, options);
     }
 
-    public KitFrameworkWrapper(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager, BackgroundTaskHandler backgroundTaskHandler, boolean testing, MParticleOptions options) {
+    public KitFrameworkWrapper(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager, boolean testing, MParticleOptions options) {
         this.mOptions = options;
         this.mContext = testing ? context : new KitContext(context);
         this.mReportingManager = reportingManager;
         this.mCoreCallbacks = new CoreCallbacksImpl(this, configManager, appStateManager);
-        this.mBackgroundTaskHandler = backgroundTaskHandler;
         kitsLoaded = false;
     }
 
+    @WorkerThread
     public void loadKitLibrary() {
         if (!frameworkLoadAttempted) {
             Logger.debug("Loading Kit Framework.");
             frameworkLoadAttempted = true;
             try {
                 Class clazz = Class.forName("com.mparticle.kits.KitManagerImpl");
-                Constructor<KitFrameworkWrapper> constructor = clazz.getConstructor(Context.class, ReportingManager.class, CoreCallbacks.class, BackgroundTaskHandler.class, MParticleOptions.class);
-                mKitManager = constructor.newInstance(mContext, mReportingManager, mCoreCallbacks, mBackgroundTaskHandler, mOptions);
+                Constructor<KitFrameworkWrapper> constructor = clazz.getConstructor(Context.class, ReportingManager.class, CoreCallbacks.class, MParticleOptions.class);
+                KitManager kitManager = constructor.newInstance(mContext, mReportingManager, mCoreCallbacks, mOptions);
                 JSONArray configuration = mCoreCallbacks.getLatestKitConfiguration();
                 Logger.debug("Kit Framework loaded.");
-                if (configuration != null) {
+                if (!MPUtility.isEmpty(configuration)) {
                     Logger.debug("Restoring previous Kit configuration.");
-                    updateKits(configuration);
+                    kitManager
+                            .updateKits(configuration)
+                            .onKitsLoaded(() -> {
+                                        mKitManager = kitManager;
+                                        setKitsLoaded(true);
+                                    }
+                            );
+                } else {
+                    mKitManager = kitManager;
                 }
                 updateDataplan(mCoreCallbacks.getDataplanOptions());
             } catch (Exception e) {
                 Logger.debug("No Kit Framework detected.");
-                disableQueuing();
+                setKitsLoaded(true);
             }
         }
     }
@@ -97,21 +105,28 @@ public class KitFrameworkWrapper implements KitManager {
         mKitManager = manager;
     }
 
-    public static boolean getKitsLoaded() {
+    public boolean getKitsLoaded() {
         return kitsLoaded;
     }
 
-    public static void addKitsLoadedListener(KitsLoadedListener listener) {
-        if (kitsLoaded) {
-            listener.onKitsLoaded();
-        } else {
-            kitsLoadedListeners.add(listener);
+    public void addKitsLoadedListener(KitsLoadedListener listener) {
+        if (listener != null) {
+            if (kitsLoaded) {
+                listener.onKitsLoaded();
+            } else {
+                kitsLoadedListeners.add(listener);
+            }
         }
     }
 
     void setKitsLoaded(boolean kitsLoaded) {
         this.kitsLoaded = kitsLoaded;
-        List<KitsLoadedListener> kitsLoadedListenersCopy = new ArrayList<KitsLoadedListener>(kitsLoadedListeners);
+        if (kitsLoaded) {
+            replayAndDisableQueue();
+        } else {
+            disableQueuing();
+        }
+        List<KitsLoadedListener> kitsLoadedListenersCopy = new ArrayList<>(kitsLoadedListeners);
         for (KitsLoadedListener kitsLoadedListener: kitsLoadedListenersCopy) {
             if (kitsLoadedListener != null) {
                 kitsLoadedListener.onKitsLoaded();
@@ -121,7 +136,6 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     synchronized void disableQueuing() {
-        setKitsLoaded(true);
         if (eventQueue != null) {
             eventQueue.clear();
             eventQueue = null;
@@ -195,7 +209,6 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     synchronized public void replayAndDisableQueue() {
-        setKitsLoaded(true);
         replayEvents();
         disableQueuing();
     }
@@ -461,10 +474,24 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     @Override
-    public void updateKits(JSONArray kitConfiguration) {
+    public KitsLoadedCallback updateKits(JSONArray kitConfiguration) {
+        KitsLoadedCallback kitsLoadedCallback = new KitsLoadedCallback();
         if (mKitManager != null) {
-            mKitManager.updateKits(kitConfiguration);
+            // we may have initialized the KitManagerImpl but didn't have a cached config to initialize
+            // any kits with. In this case, we will wait until this next config update to replay + disable queueing
+            if (!kitsLoaded) {
+                mKitManager
+                        .updateKits(kitConfiguration)
+                        .onKitsLoaded(() -> {
+                                    setKitsLoaded(true);
+                                    kitsLoadedCallback.setKitsLoaded();
+                                }
+                        );
+            } else {
+                return mKitManager.updateKits(kitConfiguration);
+            }
         }
+        return kitsLoadedCallback;
     }
 
     @Override
@@ -691,11 +718,6 @@ public class KitFrameworkWrapper implements KitManager {
         @Override
         public String getLaunchAction() {
             return mAppStateManager.getLaunchAction();
-        }
-
-        @Override
-        public void replayAndDisableQueue() {
-            mKitFrameworkWrapper.replayAndDisableQueue();
         }
 
         @Override

@@ -1,14 +1,17 @@
 package com.mparticle.internal;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import android.content.SharedPreferences;
 
-import com.mparticle.identity.AliasRequest;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockSharedPreferences;
 import com.mparticle.networking.MPConnection;
 import com.mparticle.networking.MPUrl;
 import com.mparticle.networking.MParticleBaseClientImpl;
-import com.mparticle.testutils.TestingUtils;
 
 import org.json.JSONObject;
 import org.junit.Test;
@@ -19,17 +22,9 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.io.IOException;
 import java.math.BigInteger;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(PowerMockRunner.class)
 public class MParticleApiClientImplTest {

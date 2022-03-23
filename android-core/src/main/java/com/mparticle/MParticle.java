@@ -153,7 +153,7 @@ public class MParticle {
                     }
 
                     instance = new MParticle(options);
-                    instance.mKitManager = new KitFrameworkWrapper(options.getContext(), instance.mMessageManager, instance.Internal().getConfigManager(), instance.Internal().getAppStateManager(), instance.mMessageManager.getTaskHandler(), options);
+                    instance.mKitManager = new KitFrameworkWrapper(options.getContext(), instance.mMessageManager, instance.Internal().getConfigManager(), instance.Internal().getAppStateManager(), options);
                     instance.mIdentityApi = new IdentityApi(options.getContext(), instance.mInternal.getAppStateManager(), instance.mMessageManager, instance.mConfigManager, instance.mKitManager, options.getOperatingSystem());
                     instance.mMessageManager.refreshConfiguration();
                     instance.identify(options);

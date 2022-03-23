@@ -96,18 +96,12 @@ public abstract class BaseAbstractTest {
         if (identityTask == null) {
             identityTask = new BaseIdentityTask();
         }
-        identityTask.addFailureListener(new TaskFailureListener() {
-            @Override
-            public void onFailure(IdentityHttpResponse result) {
-                fail(result.toString());
-            }
-        }).addSuccessListener(new TaskSuccessListener() {
-            @Override
-            public void onSuccess(IdentityApiResult result) {
-                called.value = true;
-                latch.countDown();
-            }
-        });
+        identityTask
+                .addFailureListener(result -> fail(result.toString()))
+                .addSuccessListener(result -> {
+                    called.value = true;
+                    latch.countDown();
+                });
 
         optionsBuilder.identifyTask(identityTask);
         optionsBuilder = com.mparticle.AccessUtils.setCredentialsIfEmpty(optionsBuilder);
