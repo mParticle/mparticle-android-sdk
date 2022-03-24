@@ -335,7 +335,7 @@ public abstract class KitIntegration {
      * Queues and groups network requests on the MParticle Core network handler
      */
     public void executeNetworkRequest(Runnable runnable) {
-        getKitManager().runOnBackgroundThread(runnable);
+        getKitManager().runOnKitThread(runnable);
     }
 
     /**

@@ -111,7 +111,9 @@ jobs:
       - name: "Update Kit references"
         run: git submodule foreach "git fetch; git reset --hard origin/main";
       - name: "Test Kits"
-        run: ./gradlew -PisRelease=true clean testRelease publishReleaseLocal -c settings-kits.gradle
+        run: |
+          ./gradlew -PisRelease=true clean publishReleaseLocal -c settings-kits.gradle
+          ./gradlew -p kits testRelease
       - name: "Commit Kit Updates"
         run: |
           git add .

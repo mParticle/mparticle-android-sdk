@@ -1014,10 +1014,6 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         }
     }
 
-    public BackgroundTaskHandler getTaskHandler() {
-        return mUploadHandler;
-    }
-
     public Handler getMessageHandler() {
         return mMessageHandler;
     }

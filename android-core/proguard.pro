@@ -134,7 +134,7 @@
 -keep class com.mparticle.internal.MParticleJSInterface { *; }
 -keep class com.mparticle.internal.Logger { *; }
 -keep class com.mparticle.internal.Logger$* { *; }
--keep class com.mparticle.internal.BackgroundTaskHandler { *; }
+-keep class com.mparticle.internal.KitsLoadedCallback { *; }
 
 -keep class com.mparticle.identity.IdentityApi { *; }
 -keep class com.mparticle.identity.IdentityApiRequest { *; }
