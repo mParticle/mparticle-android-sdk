@@ -1,3 +1,15 @@
+# [5.37.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.36.2...v5.37.0) (2022-03-24)
+
+
+### Bug Fixes
+
+* Proguard keeps KitsLoadedCallback ([#119](https://github.com/mParticle/mparticle-android-sdk/issues/119)) ([e8cfd97](https://github.com/mParticle/mparticle-android-sdk/commit/e8cfd973145649cdff617e6d72e94948fd807426))
+
+
+### Features
+
+* improve kit loading performance ([#118](https://github.com/mParticle/mparticle-android-sdk/issues/118)) ([cb9e321](https://github.com/mParticle/mparticle-android-sdk/commit/cb9e32119aff42862caa7419c0ed3e42874c9f37))
+
 ## [5.36.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.36.1...v5.36.2) (2022-03-09)
 
 
