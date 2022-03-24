@@ -3,14 +3,11 @@ package com.mparticle.mock;
 import android.content.Context;
 
 import com.mparticle.MParticleOptions;
-import com.mparticle.internal.BackgroundTaskHandler;
 import com.mparticle.internal.CoreCallbacks;
 import com.mparticle.internal.ReportingManager;
 import com.mparticle.kits.KitConfiguration;
 import com.mparticle.kits.KitManagerImpl;
-import com.mparticle.testutils.MPLatch;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mockito.Mockito;
@@ -37,7 +34,7 @@ public class MockKitManagerImpl extends KitManagerImpl {
     }
 
     @Override
-    public void runOnBackgroundThread(Runnable runnable) {
+    public void runOnKitThread(Runnable runnable) {
         runnable.run();
     }
 

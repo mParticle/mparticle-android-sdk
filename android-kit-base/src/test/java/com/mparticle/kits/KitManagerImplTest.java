@@ -13,7 +13,6 @@ import com.mparticle.consent.ConsentState;
 import com.mparticle.consent.GDPRConsent;
 import com.mparticle.identity.IdentityApi;
 import com.mparticle.identity.MParticleUser;
-import com.mparticle.internal.BackgroundTaskHandler;
 import com.mparticle.internal.CoreCallbacks;
 import com.mparticle.mock.MockKitConfiguration;
 import com.mparticle.mock.MockKitManagerImpl;
@@ -35,13 +34,6 @@ import java.util.List;
 import java.util.Map;
 
 public class KitManagerImplTest {
-    BackgroundTaskHandler mockBackgroundTaskHandler = new BackgroundTaskHandler(){
-
-        @Override
-        public void executeNetworkRequest(Runnable runnable) {
-            //do nothing
-        }
-    };
     MParticle mparticle;
     IdentityApi mockIdentity;
 

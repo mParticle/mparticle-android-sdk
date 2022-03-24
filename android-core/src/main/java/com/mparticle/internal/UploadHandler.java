@@ -30,7 +30,7 @@ import static com.mparticle.networking.NetworkConnection.HTTP_TOO_MANY_REQUESTS;
 /**
  * Primary queue handler which is responsible for querying, packaging, and uploading data.
  */
-public class UploadHandler extends BaseHandler implements BackgroundTaskHandler {
+public class UploadHandler extends BaseHandler {
     private final Context mContext;
     MParticleDBManager mParticleDBManager;
     private final AppStateManager mAppStateManager;
@@ -335,11 +335,6 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
 
     public void fetchSegments(long timeout, String endpointId, SegmentListener listener) {
         new SegmentRetriever(audienceDB, mApiClient).fetchSegments(timeout, endpointId, listener);
-    }
-
-    @Override
-    public void executeNetworkRequest(Runnable runnable) {
-        post(runnable);
     }
 
     //added so unit tests can subclass

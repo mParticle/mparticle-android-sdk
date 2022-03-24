@@ -32,13 +32,6 @@ import static org.junit.Assert.*;
 @RunWith(PowerMockRunner.class)
 public class KitFrameworkWrapperTest {
 
-    private BackgroundTaskHandler mockBackgroundTaskHandler = new BackgroundTaskHandler() {
-        @Override
-        public void executeNetworkRequest(Runnable runnable) {
-
-        }
-    };
-
     @Test
     public void testLoadKitLibrary() throws Exception {
         ConfigManager mockConfigManager = Mockito.mock(ConfigManager.class);

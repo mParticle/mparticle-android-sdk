@@ -63,7 +63,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
     private final ReportingManager mReportingManager;
     protected final CoreCallbacks mCoreCallbacks;
-    private Handler mBackgroundTaskHandler;
+    private Handler mKitHandler;
     KitIntegrationFactory mKitIntegrationFactory;
     private DataplanFilter mDataplanFilter = DataplanFilterImpl.EMPTY;
     private KitOptions mKitOptions;
@@ -151,7 +151,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     @Override
     public KitsLoadedCallback updateKits(final JSONArray kitConfigs) {
         KitsLoadedCallback callback = new KitsLoadedCallback();
-        runOnBackgroundThread(() -> {
+        runOnKitThread(() -> {
                     kitConfigurations = parseKitConfigurations(kitConfigs);
                     runOnMainThread(() -> {
                         configureKits(kitConfigurations);
@@ -1315,11 +1315,11 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         }
     }
 
-    public void runOnBackgroundThread(Runnable runnable) {
-        if (mBackgroundTaskHandler == null) {
-            mBackgroundTaskHandler = new Handler(kitHandlerThread.getLooper());
+    public void runOnKitThread(Runnable runnable) {
+        if (mKitHandler == null) {
+            mKitHandler = new Handler(kitHandlerThread.getLooper());
         }
-        mBackgroundTaskHandler.post(runnable);
+        mKitHandler.post(runnable);
     }
 
     public void runOnMainThread(Runnable runnable) {
