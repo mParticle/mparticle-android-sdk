@@ -26,7 +26,7 @@ configurations {
 
 dependencies {
     fatJar project(':tooling:common')
-    implementation configurations.fatJar
+    compileOnly configurations.fatJar
     implementation gradleApi()
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation files('libs/java-json.jar')

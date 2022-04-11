@@ -16,7 +16,6 @@ import com.mparticle.lints.dtos.MethodCall
 import com.mparticle.lints.dtos.RootParent
 import com.mparticle.lints.dtos.StaticFactory
 import com.mparticle.lints.dtos.Value
-import org.jetbrains.kotlin.load.kotlin.internalName
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.psi.psiUtil.isTopLevelKtOrJavaMember
 import org.jetbrains.uast.UBinaryExpression
@@ -251,7 +250,7 @@ internal fun UExpression.resolveChainedCalls(returnValue: Boolean, instance: Exp
 
 internal fun Pair<*, *>.resolveToEnum(): Enum<*> {
     val className = when (first) {
-        is ClassId -> (first as ClassId).internalName.replace("/", ".")
+        is ClassId -> "${(first as ClassId).packageFqName}.${(first as ClassId).relativeClassName.asString().replace(".", "$")}"
         is String -> first as String
         else -> null
     }
