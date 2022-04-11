@@ -8,12 +8,12 @@ apply plugin: 'kotlin-android'
 
 
 android {
-    compileSdk 30
+    compileSdk 31
     testBuildType 'debug'
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 30
+        targetSdk 31
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
 

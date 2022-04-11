@@ -51,6 +51,10 @@ jar {
         attributes 'Lint-Registry': 'com.mparticle.lints.MParticleIssueRegistry'
     }
     from {
+        println("Configurations")
+        configurations.all {
+            println(it)
+        }
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
