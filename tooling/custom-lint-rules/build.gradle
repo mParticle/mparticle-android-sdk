@@ -27,12 +27,14 @@ repositories {
 
 configurations {
     lintBuild
+    lintJar
 }
 
 dependencies {
     lintBuild files(jar)
-    compile files('libs/mparticle-min.jar')
-    compile project(':tooling:common')
+    lintJar files('libs/mparticle-min.jar')
+    lintJar project(':tooling:common')
+    implementation configurations.lintJar
     compileOnly 'com.android.tools.lint:lint-api:26.5.3'
     compileOnly 'com.android.tools.lint:lint-checks:26.5.3'
     compileOnly 'org.codehaus.groovy:groovy-all:3.0.7'
@@ -51,7 +53,9 @@ jar {
         attributes 'Lint-Registry': 'com.mparticle.lints.MParticleIssueRegistry'
     }
     from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.lintJar.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
     }
 }
 

@@ -20,8 +20,13 @@ buildscript {
     }
 }
 
+configurations {
+    fatJar
+}
+
 dependencies {
-    compileOnly project(':tooling:common')
+    fatJar project(':tooling:common')
+    compileOnly configurations.fatJar
     implementation gradleApi()
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation files('libs/java-json.jar')
@@ -31,7 +36,7 @@ dependencies {
 
 jar {
     from {
-        configurations.compileOnly.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.fatJar.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
 

@@ -26,12 +26,11 @@ class KitPlugin implements Plugin<Project> {
         target.dependencies.add('compileOnly', 'androidx.annotation:annotation:[1.0.0,)')
         target.extensions.create("mparticle", MParticlePluginExtension)
         LibraryExtension androidLib = target.android
-        androidLib.compileSdkVersion(30)
-        androidLib.buildToolsVersion('30.0.3')
+        androidLib.compileSdk 31
         int dateInt = Integer.parseInt(new Date().format('yyyyMMdd'))
         androidLib.defaultConfig.versionCode = dateInt
-        androidLib.defaultConfig.minSdkVersion 14
-        androidLib.defaultConfig.targetSdkVersion 30
+        androidLib.defaultConfig.minSdk 14
+        androidLib.defaultConfig.targetSdk 31
         androidLib.defaultConfig.buildConfigField("String", "VERSION_CODE", '\"' + dateInt + '\"')
         androidLib.buildTypes.release.minifyEnabled false
         androidLib.buildTypes.release.consumerProguardFiles 'consumer-proguard.pro'
