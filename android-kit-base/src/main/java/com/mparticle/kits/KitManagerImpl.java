@@ -866,7 +866,6 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                                     );
                                     masterMessage.addProjectionReport(report);
                                 }
-
                             }
                         }
                         if (forwarded) {
@@ -996,6 +995,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                                             message.getEventName(),
                                             message.getEventTypeString()
                                     );
+                                    masterMessage.setMessageType(ReportingMessage.MessageType.SCREEN_VIEW);
+                                    masterMessage.setScreenName(message.getEventName());
                                     masterMessage.addProjectionReport(projectionReport);
                                 }
                             }
