@@ -121,7 +121,7 @@ jobs:
       - name: "Test Kits"
         run: |
           ./gradlew -PisRelease=true clean publishReleaseLocal -c settings-kits.gradle
-          ./gradlew -p kits testRelease
+          ./gradlew -p kits testRelease -c ../settings-kits.gradle
       - name: "Commit Kit Updates"
         run: |
           git add .
