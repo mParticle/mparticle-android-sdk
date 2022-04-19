@@ -1,3 +1,17 @@
+# [5.38.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.37.0...v5.38.0) (2022-04-19)
+
+
+### Bug Fixes
+
+* add in missing project fields ([#122](https://github.com/mParticle/mparticle-android-sdk/issues/122)) ([db8dd19](https://github.com/mParticle/mparticle-android-sdk/commit/db8dd1913f06d3134f1caf74db509d219ab05f80))
+* update test kit command in release.yml ([#123](https://github.com/mParticle/mparticle-android-sdk/issues/123)) ([e33663e](https://github.com/mParticle/mparticle-android-sdk/commit/e33663e0a3d1bd3682f90a47ec161553c2889351))
+
+
+### Features
+
+* add gpg signing to mparticle-automation commits ([#120](https://github.com/mParticle/mparticle-android-sdk/issues/120)) ([1b146d7](https://github.com/mParticle/mparticle-android-sdk/commit/1b146d7e8e2ecbf59e758dd703cc31d1219ee0e5))
+* update Target SDK, Kotlin version, and AGP ([#121](https://github.com/mParticle/mparticle-android-sdk/issues/121)) ([bc7b377](https://github.com/mParticle/mparticle-android-sdk/commit/bc7b37751cca7bec2346cde806d7f1e45116afae))
+
 # [5.37.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.36.2...v5.37.0) (2022-03-24)
 
 
