@@ -87,7 +87,11 @@ The Google Play Services Ads framework is necessary to collect the Android Adver
 mParticle supports several marketing automation and push messaging integrations. These require that mParticle register for an instance id using the Firebase Cloud Messaging framework:
 
 ```groovy
-    implementation 'com.google.firebase:firebase-messaging:22.0.0'
+    implementation(platform("com.google.firebase:firebase-bom:29.1.0"))
+    implementation("com.google.firebase:firebase-messaging")
+
+    //optional
+    implementation("com.google.firebase:firebase-iid")
 ```
 
 ## Google Play Install Referrer
