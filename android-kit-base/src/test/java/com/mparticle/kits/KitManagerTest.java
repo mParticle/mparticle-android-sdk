@@ -2,6 +2,7 @@ package com.mparticle.kits;
 
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -14,6 +15,7 @@ import android.os.Looper;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
+import com.mparticle.internal.KitManager;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockCoreCallbacks;
 import com.mparticle.mock.MockKitConfiguration;
@@ -138,12 +140,15 @@ public class KitManagerTest  {
         JSONArray array = configJson.optJSONArray(ConfigManager.KEY_EMBEDDED_KITS);
         manager.updateKits(array);
 
-        String activeModuleIds = manager.getActiveModuleIds();
-        String[] ids = activeModuleIds.split(",");
+        Map<Integer, KitManager.KitStatus> kitStatus = manager.getKitStatus();
         String[] testIds = {"56", "64", "37", "68"};
         List<String> idList = Arrays.asList(testIds);
-        for (String id : ids){
-            assertTrue(activeModuleIds, idList.contains(id.trim()));
+        for (Map.Entry<Integer, KitManager.KitStatus> status : kitStatus.entrySet()){
+            if (status.getValue() == KitManager.KitStatus.ACTIVE) {
+                assertTrue(idList.contains(status.getKey().toString()));
+            } else {
+                assertFalse(idList.contains(status.getKey().toString()));
+            }
         }
     }
 
