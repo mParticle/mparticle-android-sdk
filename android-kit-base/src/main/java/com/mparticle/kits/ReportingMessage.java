@@ -21,7 +21,7 @@ public class ReportingMessage implements JsonReportingMessage {
     private final int moduleId;
     private String messageType;
     private final long timestamp;
-    private Map<String, String> attributes;
+    private Map<String, ?> attributes;
     private String eventName = null;
     private String eventType = null;
     private LinkedList<ProjectionReport> projectionReports;
@@ -32,7 +32,7 @@ public class ReportingMessage implements JsonReportingMessage {
     private String mSessionId;
 
 
-    public ReportingMessage(KitIntegration provider, String messageType, long timestamp, Map<String, String> attributes) {
+    public ReportingMessage(KitIntegration provider, String messageType, long timestamp, Map<String, ?> attributes) {
         this.moduleId = provider.getConfiguration().getKitId();
         this.messageType = messageType;
         this.timestamp = timestamp;
@@ -52,7 +52,7 @@ public class ReportingMessage implements JsonReportingMessage {
         return this;
     }
 
-    public ReportingMessage setAttributes(Map<String, String> eventAttributes) {
+    public ReportingMessage setAttributes(Map<String, ?> eventAttributes) {
         attributes = eventAttributes;
         return this;
     }
@@ -127,7 +127,7 @@ public class ReportingMessage implements JsonReportingMessage {
             }
             if (devMode && attributes != null && attributes.size() > 0) {
                 JSONObject attributeJson = new JSONObject();
-                for (Map.Entry<String, String> entry : attributes.entrySet()) {
+                for (Map.Entry<String, ?> entry : attributes.entrySet()) {
                     attributeJson.put(entry.getKey(), entry.getValue());
                 }
                 jsonObject.put("attrs", attributeJson);
