@@ -82,7 +82,8 @@ public interface KitManager {
 
     void updateDataplan(@NonNull MParticleOptions.DataplanOptions dataplanOptions);
 
-    String getActiveModuleIds();
+    @NonNull
+    Map<Integer, KitStatus> getKitStatus();
 
     void onActivityCreated(Activity activity, Bundle savedInstanceState);
 
@@ -119,4 +120,10 @@ public interface KitManager {
     void onModifyCompleted(MParticleUser user, IdentityApiRequest request);
 
     void reset();
+
+    enum KitStatus {
+        NOT_CONFIGURED,
+        STOPPED,
+        ACTIVE
+    }
 }

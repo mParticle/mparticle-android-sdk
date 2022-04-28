@@ -25,6 +25,7 @@ import org.json.JSONArray;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -502,11 +503,12 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     @Override
-    public String getActiveModuleIds() {
+    public Map<Integer, KitStatus> getKitStatus() {
         if (mKitManager != null) {
-            return mKitManager.getActiveModuleIds();
+            return mKitManager.getKitStatus();
+        } else {
+            return new HashMap<>();
         }
-        return null;
     }
 
     @Override

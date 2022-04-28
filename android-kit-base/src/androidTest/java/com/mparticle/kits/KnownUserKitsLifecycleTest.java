@@ -44,52 +44,40 @@ public class KnownUserKitsLifecycleTest extends BaseKitOptionsTest {
     @Test
     public void testExcludeUnknownUsers() throws InterruptedException {
         MParticle.getInstance().Internal().getConfigManager().setMpid(123, true);
-        waitForNewIdentityKitStart(123);
+        waitForKitReload();
 
         assertTrue(MParticle.getInstance().isKitActive(-1));
         assertTrue(MParticle.getInstance().isKitActive(-2));
         assertTrue(MParticle.getInstance().isKitActive(-3));
 
         MParticle.getInstance().Internal().getConfigManager().setMpid(123, false);
-        waitForNewIdentityKitStart(123);
+        waitForKitReload();
 
         assertFalse(MParticle.getInstance().isKitActive(-1));
         assertTrue(MParticle.getInstance().isKitActive(-2));
         assertFalse(MParticle.getInstance().isKitActive(-3));
 
         MParticle.getInstance().Internal().getConfigManager().setMpid(321, false);
-        waitForNewIdentityKitStart(321);
+        waitForKitReload();
 
         assertFalse(MParticle.getInstance().isKitActive(-1));
         assertTrue(MParticle.getInstance().isKitActive(-2));
         assertFalse(MParticle.getInstance().isKitActive(-3));
 
         MParticle.getInstance().Internal().getConfigManager().setMpid(123, true);
-        waitForNewIdentityKitStart(123);
+        waitForKitReload();
 
         assertTrue(MParticle.getInstance().isKitActive(-1));
         assertTrue(MParticle.getInstance().isKitActive(-2));
         assertTrue(MParticle.getInstance().isKitActive(-3));
 
         MParticle.getInstance().Internal().getConfigManager().setMpid(456, true);
-        waitForNewIdentityKitStart(456);
+        waitForKitReload();
 
         assertTrue(MParticle.getInstance().isKitActive(-1));
         assertTrue(MParticle.getInstance().isKitActive(-2));
         assertTrue(MParticle.getInstance().isKitActive(-3));
 
-    }
-
-    private void waitForNewIdentityKitStart(final long mpid) throws InterruptedException {
-        final CountDownLatch latch = new MPLatch(1);
-        AccessUtils.getKitManager().addKitsLoadedListener((kits, previousKits, kitConfigs) -> {
-            if (kitConfigs != null && kitConfigs.size() == 3) {
-                latch.countDown();
-                Logger.error("kits started: " + kits.size());
-            }
-        });
-        latch.await(3, TimeUnit.SECONDS);
-        assertEquals(mpid, MParticle.getInstance().Identity().getCurrentUser().getId());
     }
 
     public static class TestKit1 extends TestKit { }

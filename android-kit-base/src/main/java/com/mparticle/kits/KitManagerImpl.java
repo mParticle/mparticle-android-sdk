@@ -311,25 +311,20 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     }
 
     @Override
-    public String getActiveModuleIds() {
-        if (providers.isEmpty()) {
-            return "";
-        } else {
-            Set keys = providers.keySet();
-            StringBuilder buffer = new StringBuilder(keys.size() * 3);
-
-            Iterator<Integer> it = keys.iterator();
-            while (it.hasNext()) {
-                Integer next = it.next();
-                if (providers.get(next) != null && !providers.get(next).isDisabled()) {
-                    buffer.append(next);
-                    if (it.hasNext()) {
-                        buffer.append(",");
-                    }
-                }
-            }
-            return buffer.toString();
+    public Map<Integer, KitStatus> getKitStatus() {
+        Map<Integer, KitStatus> kitStatusMap = new HashMap<>();
+        for(Integer kitId: mKitIntegrationFactory.getSupportedKits()) {
+            kitStatusMap.put(kitId, KitStatus.NOT_CONFIGURED);
         }
+        for(KitConfiguration kitConfiguration: kitConfigurations) {
+            kitStatusMap.put(kitConfiguration.getKitId(), KitStatus.STOPPED);
+        }
+        for(Map.Entry<Integer, KitIntegration> activeKit: providers.entrySet()) {
+            if (!activeKit.getValue().isDisabled()) {
+                kitStatusMap.put(activeKit.getKey(), KitStatus.ACTIVE);
+            }
+        }
+        return kitStatusMap;
     }
 
     @Override

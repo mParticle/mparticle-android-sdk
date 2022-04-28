@@ -103,9 +103,20 @@ public class ConfigManagerTest {
 
     @Test
     public void testGetActiveModuleIds() throws Exception {
-        Mockito.when(MParticle.getInstance().Internal().getKitManager().getActiveModuleIds())
-                .thenReturn("this is a test");
-        assertEquals("this is a test", manager.getActiveModuleIds());
+        Map<Integer, KitManager.KitStatus> kitStatusMap = new HashMap<>();
+        kitStatusMap.put(1, KitManager.KitStatus.STOPPED);
+        kitStatusMap.put(2, KitManager.KitStatus.ACTIVE);
+        kitStatusMap.put(3, KitManager.KitStatus.NOT_CONFIGURED);
+        kitStatusMap.put(5, KitManager.KitStatus.STOPPED);
+        kitStatusMap.put(4, KitManager.KitStatus.ACTIVE);
+        kitStatusMap.put(6, KitManager.KitStatus.NOT_CONFIGURED);
+        Mockito.when(MParticle.getInstance().Internal().getKitManager().getKitStatus())
+                .thenReturn(kitStatusMap);
+        assertEquals("1,2,4,5", manager.getActiveModuleIds());
+
+        Mockito.when(MParticle.getInstance().Internal().getKitManager().getKitStatus())
+                .thenReturn(new HashMap<>());
+        assertEquals("", manager.getActiveModuleIds());
     }
 
     @Test

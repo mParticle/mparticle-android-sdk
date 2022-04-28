@@ -73,4 +73,16 @@ open class BaseKitOptionsTest : BaseCleanInstallEachTest() {
         }
         latch.await()
     }
+
+    @Throws(InterruptedException::class)
+    @JvmOverloads
+    fun waitForKitReload(after: (() -> Unit)? = null) {
+        val latch = MPLatch(1)
+        com.mparticle.internal.AccessUtils.getKitManager()
+            .addKitsLoadedListener { _: Map<Int?, KitIntegration?>, _: Map<Int?, KitIntegration?>?, _: List<KitConfiguration?>? ->
+                latch.countDown()
+            }
+        after?.invoke()
+        latch.await()
+    }
 }

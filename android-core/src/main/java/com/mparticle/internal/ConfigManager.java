@@ -28,6 +28,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -444,7 +445,28 @@ public class ConfigManager {
     }
 
     public String getActiveModuleIds() {
-        return MParticle.getInstance().Internal().getKitManager().getActiveModuleIds();
+        Map<Integer, KitManager.KitStatus> kitStatusMap = MParticle.getInstance().Internal().getKitManager().getKitStatus();
+        List<Integer> activeKits = new ArrayList<>();
+        for (Map.Entry<Integer, KitManager.KitStatus> kitStatus: kitStatusMap.entrySet()) {
+            KitManager.KitStatus status = kitStatus.getValue();
+            switch (status) {
+                case ACTIVE:
+                case STOPPED:
+                    activeKits.add(kitStatus.getKey());
+            }
+        }
+        Collections.sort(activeKits);
+        if (activeKits.size() == 0) {
+            return "";
+        } else {
+            StringBuilder builder = new StringBuilder(activeKits.size() * 3);
+            for (Integer kitId: activeKits) {
+                builder.append(kitId);
+                builder.append(",");
+            }
+            builder.deleteCharAt(builder.length() - 1);
+            return builder.toString();
+        }
     }
 
     public boolean getIncludeSessionHistory() {
