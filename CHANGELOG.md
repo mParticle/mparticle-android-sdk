@@ -1,3 +1,10 @@
+## [5.38.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.38.0...v5.38.1) (2022-05-02)
+
+
+### Bug Fixes
+
+* include stopped kits in active-kits header ([#126](https://github.com/mParticle/mparticle-android-sdk/issues/126)) ([4aaa619](https://github.com/mParticle/mparticle-android-sdk/commit/4aaa619900dd077a7f5cd1adeb0a1b9e83d060a9))
+
 # [5.38.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.37.0...v5.38.0) (2022-04-19)
 
 
