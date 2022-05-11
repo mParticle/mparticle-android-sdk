@@ -334,7 +334,7 @@ public class KitConfiguration {
     }
 
     protected CommerceEvent filterCommerceEvent(CommerceEvent event) {
-        if (!shouldIncludeFromAttributeValueFiltering(event.getCustomAttributes())) {
+        if (!shouldIncludeFromAttributeValueFiltering(event.getCustomAttributeStrings())) {
             return null;
         }
         if (mTypeFilters != null &&
@@ -431,7 +431,7 @@ public class KitConfiguration {
     }
 
     public final Map<String, String> filterEventAttributes(MPEvent event) {
-        return filterEventAttributes(event.getEventType(), event.getEventName(), mAttributeFilters, event.getCustomAttributes());
+        return filterEventAttributes(event.getEventType(), event.getEventName(), mAttributeFilters, event.getCustomAttributeStrings());
     }
 
     public final Map<String, String> filterScreenAttributes(MParticle.EventType eventType, String eventName, Map<String, String> eventAttributes) {
@@ -510,7 +510,7 @@ public class KitConfiguration {
             return filteredEvent;
         }
         CommerceEvent.Builder builder = new CommerceEvent.Builder(filteredEvent);
-        Map<String, String> customAttributes = filteredEvent.getCustomAttributes();
+        Map<String, String> customAttributes = filteredEvent.getCustomAttributeStrings();
         if (customAttributes != null) {
             Map<String, String> filteredCustomAttributes = new HashMap<String, String>(customAttributes.size());
             for (Map.Entry<String, String> entry : customAttributes.entrySet()) {
@@ -571,7 +571,7 @@ public class KitConfiguration {
 
 
     protected boolean shouldLogEvent(MPEvent event) {
-        if (!shouldIncludeFromAttributeValueFiltering(event.getCustomAttributes())) {
+        if (!shouldIncludeFromAttributeValueFiltering(event.getCustomAttributeStrings())) {
             return false;
         }
         int typeHash = KitUtils.hashForFiltering(event.getEventType().ordinal() + "");

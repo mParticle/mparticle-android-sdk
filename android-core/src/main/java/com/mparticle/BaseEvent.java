@@ -9,13 +9,14 @@ import com.mparticle.internal.messages.BaseMPMessageBuilder;
 
 import org.json.JSONArray;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class BaseEvent {
     private MessageType mType;
     private Map<String, List<String>> mCustomFlags;
-    private Map<String, String> mCustomAttributes;
+    private Map<String, Object> mCustomAttributes;
     private boolean mShouldUploadEvent = true;
 
     protected BaseEvent(MessageType type) {
@@ -67,16 +68,29 @@ public class BaseEvent {
      * @return returns a Map of custom attributes, or null if no custom attributes are set.
      */
     @Nullable
-    public Map<String, String> getCustomAttributes() {
+    public Map<String, Object> getCustomAttributes() {
         return mCustomAttributes;
     }
 
-    public void setCustomAttributes(@Nullable Map<String, String> customAttributes) {
+    @Nullable
+    public Map<String, String> getCustomAttributeStrings() {
+        if (mCustomAttributes == null) {
+            return null;
+        }
+        Map<String, String> attributes = new HashMap<>();
+        for (Map.Entry<String, Object> entry: mCustomAttributes.entrySet()) {
+            Object value = entry.getValue();
+            attributes.put(entry.getKey(), value == null ? null : value.toString());
+        }
+        return attributes;
+    }
+
+    public void setCustomAttributes(@Nullable Map<String, ?> customAttributes) {
         if (customAttributes != null && MPUtility.containsNullKey(customAttributes)) {
             Logger.warning(String.format("disregarding \"Event.customFlag\" value of \"%s\". Key was found to be null", customAttributes.get(null)));
             customAttributes.remove(null);
         }
-        this.mCustomAttributes = customAttributes;
+        this.mCustomAttributes = (Map<String, Object>) customAttributes;
     }
 
     public BaseMPMessageBuilder getMessage() {

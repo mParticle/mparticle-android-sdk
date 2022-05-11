@@ -99,7 +99,7 @@ public class CommerceEventTest {
         Map<String, String> attributes = new HashMap<String, String>();
         attributes.put("cool attribute key", "cool attribute value");
         CommerceEvent event = new CommerceEvent.Builder(Product.ADD_TO_CART, product).customAttributes(attributes).nonInteraction(true).build();
-        assertEquals("cool attribute value", event.getCustomAttributes().get("cool attribute key"));
+        assertEquals("cool attribute value", event.getCustomAttributeStrings().get("cool attribute key"));
     }
 
     @Test
@@ -164,7 +164,7 @@ public class CommerceEventTest {
         CommerceEvent.Builder builder = new CommerceEvent.Builder(Product.CLICK, product);
 
         CommerceEvent event = builder.build();
-        assertEquals(null, event.getCustomFlags());
+        assertNull(event.getCustomFlags());
 
         Map<String, List<String>> attributes = RandomUtils.getInstance().getRandomCustomFlags(RandomUtils.getInstance().randomInt(1, 10));
         for (Map.Entry<String, List<String>> attribute: attributes.entrySet()) {

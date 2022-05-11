@@ -55,7 +55,7 @@ public class BaseMPMessageBuilder extends JSONObject {
     }
 
     public BaseMPMessageBuilder attributes(JSONObject attributes) {
-        if (attributes != null) {
+        if (attributes != null && attributes.length() > 0) {
             try {
                 put(Constants.MessageKey.ATTRIBUTES, attributes);
                 if (mLength != null) {

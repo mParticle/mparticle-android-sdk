@@ -191,7 +191,7 @@ public final class UploadMessageTest extends BaseCleanStartedEachTest {
             assertTrue(mpEvent.getEventType().toString().equals(jsonObject.getString("et")));
         }
 
-        Map<String, String> customAttributesTarget = mpEvent.getCustomAttributes() == null ? new HashMap<String, String>() : mpEvent.getCustomAttributes();
+        Map<String, String> customAttributesTarget = mpEvent.getCustomAttributeStrings() == null ? new HashMap<String, String>() : mpEvent.getCustomAttributeStrings();
         JSONObject customAttributes = jsonObject.optJSONObject("attrs");
         if (customAttributes != null) {
             Iterator<String> keysIterator = customAttributes.keys();

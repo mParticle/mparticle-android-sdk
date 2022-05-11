@@ -59,8 +59,8 @@ public class MPCommerceMessage extends BaseMPMessage {
                 if (event.getCurrency() != null) {
                     message.put(Constants.Commerce.CURRENCY, event.getCurrency());
                 }
-                if (event.getCustomAttributes() != null) {
-                    message.put(Constants.Commerce.ATTRIBUTES, MPUtility.mapToJson(event.getCustomAttributes()));
+                if (event.getCustomAttributeStrings() != null) {
+                    message.put(Constants.Commerce.ATTRIBUTES, MPUtility.mapToJson(event.getCustomAttributeStrings()));
                 }
                 if (event.getProductAction() != null) {
                     JSONObject productAction = new JSONObject();

@@ -580,9 +580,9 @@ public final class CommerceEvent extends BaseEvent {
         public Builder(@NonNull CommerceEvent event) {
             mProductAction = event.getProductAction();
             mPromotionAction = event.getPromotionAction();
-            if (event.getCustomAttributes() != null) {
+            if (event.getCustomAttributeStrings() != null) {
                 Map<String, String> shallowCopy = new HashMap<String, String>();
-                shallowCopy.putAll(event.getCustomAttributes());
+                shallowCopy.putAll(event.getCustomAttributeStrings());
                 customAttributes = shallowCopy;
             }
             if (event.getPromotions() != null) {
