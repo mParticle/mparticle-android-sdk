@@ -27,7 +27,7 @@ public class BaseMPMessageTest {
                 .name(event.getEventName())
                 .timestamp(1235)
                 .length(event.getLength())
-                .attributes(MPUtility.enforceAttributeConstraints(event.getCustomAttributes()))
+                .attributes(MPUtility.enforceAttributeConstraints(event.getCustomAttributeStrings()))
                 .build(session, null, 1);
 
         assertNull(message.opt("el"));
@@ -40,7 +40,7 @@ public class BaseMPMessageTest {
                 .name(event2.getEventName())
                 .timestamp(1235)
                 .length(event2.getLength())
-                .attributes(MPUtility.enforceAttributeConstraints(event2.getCustomAttributes()))
+                .attributes(MPUtility.enforceAttributeConstraints(event2.getCustomAttributeStrings()))
                 .build(session, null, 1);
 
         assertEquals(message2.getAttributes().getString("EventLength"), "321");
@@ -50,7 +50,7 @@ public class BaseMPMessageTest {
                 .name(event3.getEventName())
                 .timestamp(1235)
                 .length(event3.getLength())
-                .attributes(MPUtility.enforceAttributeConstraints(event.getCustomAttributes()))
+                .attributes(MPUtility.enforceAttributeConstraints(event.getCustomAttributeStrings()))
                 .build(session, null, 1);
 
         assertEquals(message3.getAttributes().getString("EventLength"), "123");

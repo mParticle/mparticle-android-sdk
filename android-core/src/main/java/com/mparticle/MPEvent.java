@@ -69,10 +69,10 @@ public class MPEvent extends BaseEvent {
 
         if (builder.category != null){
             category = builder.category;
-            if (getCustomAttributes() == null){
-                setCustomAttributes(new HashMap<String, String>());
+            if (getCustomAttributeStrings() == null){
+                setCustomAttributes(new HashMap<String, Object>());
             }
-            getCustomAttributes().put(Constants.MessageKey.EVENT_CATEGORY, builder.category);
+            getCustomAttributeStrings().put(Constants.MessageKey.EVENT_CATEGORY, builder.category);
         }
         if (builder.duration != null){
             duration = builder.duration;
@@ -97,17 +97,8 @@ public class MPEvent extends BaseEvent {
         return super.equals(o) || (o != null && this.toString().equals(o.toString()));
     }
 
-    /**
-     * @deprecated use {@link MPEvent#setCustomAttributes(Map)} instead
-     * @param info
-     */
-    @Deprecated
-    public void setInfo(@Nullable Map<String, String> info){
-        setCustomAttributes(info);
-    }
-
     @Override
-    public void setCustomAttributes(@Nullable Map<String, String> customAttributes) {
+    public void setCustomAttributes(@NonNull Map<String, ?> customAttributes) {
         super.setCustomAttributes(customAttributes);
     }
 
@@ -115,9 +106,10 @@ public class MPEvent extends BaseEvent {
         super(Type.EVENT);
         eventType = mpEvent.eventType;
         eventName = mpEvent.eventName;
-        if (mpEvent.getCustomAttributes() != null) {
-            Map<String, String> shallowCopy = new HashMap<String, String>();
-            shallowCopy.putAll(mpEvent.getCustomAttributes());
+        if (mpEvent.getCustomAttributeStrings() != null) {
+            Map<String, Object> shallowCopy = new HashMap<>();
+            mpEvent.setCustomAttributes(new HashMap<String, Object>());
+            shallowCopy.putAll(mpEvent.getCustomAttributeStrings());
             setCustomAttributes(shallowCopy);
         }else {
             setCustomAttributes(null);
@@ -153,15 +145,15 @@ public class MPEvent extends BaseEvent {
                     .append(length).append("ms")
                     .append("\n");
         }
-        if (getCustomAttributes() != null){
+        if (getCustomAttributeStrings() != null){
             builder.append("customAttributes:\n");
-            List<String> sortedKeys = new ArrayList(getCustomAttributes().keySet());
+            List<String> sortedKeys = new ArrayList(getCustomAttributeStrings().keySet());
             Collections.sort(sortedKeys);
             for (String key : sortedKeys)
             {
                 builder.append(key)
                 .append(":")
-                .append(getCustomAttributes().get(key))
+                .append(getCustomAttributeStrings().get(key))
                 .append("\n");
             }
         }
@@ -200,16 +192,6 @@ public class MPEvent extends BaseEvent {
         return category;
     }
 
-    /**
-     * @deprecated use {@link MPEvent#getCustomAttributes()} instead
-     * @return
-     */
-    @Deprecated
-    @Nullable
-    public Map<String, String> getInfo() {
-        return getCustomAttributes();
-    }
-
     @NonNull
     public MParticle.EventType getEventType() {
         return eventType;
@@ -238,7 +220,7 @@ public class MPEvent extends BaseEvent {
                 .name(getEventName())
                 .length(getLength())
                 .flags(getCustomFlags())
-                .attributes(MPUtility.enforceAttributeConstraints(getCustomAttributes()));
+                .attributes(MPUtility.enforceAttributeConstraints(getCustomAttributeStrings()));
     }
 
     /**
@@ -251,7 +233,7 @@ public class MPEvent extends BaseEvent {
         private MParticle.EventType eventType;
         private String eventName;
         private String category;
-        private Map<String, String> customAttributes;
+        private Map<String, Object> customAttributes;
         private Double duration = null, startTime = null, endTime = null;
         private Map<String, List<String>> customFlags = null;
         private boolean entering = true;
@@ -396,24 +378,13 @@ public class MPEvent extends BaseEvent {
             return this;
         }
 
-        /**
-         * @deprecated user {@link MPEvent.Builder#customAttributes} instead
-         *
-         * Data attributes to associate with the event.
-         *
-         * @param info
-         * @return returns this builder for easy method chaining
-         */
-        @Deprecated
         @NonNull
-        public Builder info(@Nullable Map<String, String> info){
-            this.customAttributes = info;
-            return this;
-        }
-
-        @NonNull
-        public Builder customAttributes(@Nullable Map<String, String> customAttributes) {
-            this.customAttributes = customAttributes;
+        public Builder customAttributes(@Nullable Map<String, ?> customAttributes) {
+            if (customAttributes == null) {
+                this.customAttributes = new HashMap<>();
+            } else {
+                this.customAttributes = new HashMap<>(customAttributes);
+            }
             return this;
         }
 
@@ -542,7 +513,7 @@ public class MPEvent extends BaseEvent {
                         String key = (String)keys.next();
                         info.put(key, infoObject.getString(key));
                     }
-                    builder.customAttributes = info;
+                    builder.customAttributes = new HashMap<>(info);
                 }
                 if (json.has(EVENT_CUSTOM_FLAGS)) {
                     JSONObject flags = json.getJSONObject(EVENT_CUSTOM_FLAGS);
@@ -601,7 +572,7 @@ public class MPEvent extends BaseEvent {
                 }
                 if (customAttributes != null){
                     JSONObject jsonInfo = new JSONObject();
-                    for (Map.Entry<String, String> entry : customAttributes.entrySet())
+                    for (Map.Entry<String, Object> entry : customAttributes.entrySet())
                     {
                         jsonInfo.put(entry.getKey(), entry.getValue());
                     }

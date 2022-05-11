@@ -103,8 +103,8 @@ public class MPEventTests  {
         assertEquals("another name", copiedEvent.getEventName());
         assertEquals(MParticle.EventType.Social, copiedEvent.getEventType());
         assertEquals("category", copiedEvent.getCategory());
-        assertEquals("value 1", copiedEvent.getCustomAttributes().get("key 1"));
-        assertEquals("value 2", copiedEvent.getCustomAttributes().get("key 2"));
+        assertEquals("value 1", copiedEvent.getCustomAttributeStrings().get("key 1"));
+        assertEquals("value 2", copiedEvent.getCustomAttributeStrings().get("key 2"));
         Map<String, List<String>> flags = copiedEvent.getCustomFlags();
         assertEquals(flags.get("cool flag key").size(), 2);
         assertEquals(flags.get("cool flag key 2").size(), 1);

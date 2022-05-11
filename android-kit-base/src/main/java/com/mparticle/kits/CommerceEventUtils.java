@@ -47,8 +47,8 @@ public final class CommerceEventUtils {
             //Set all product action fields to attributes.
             Map<String, String> attributes = new HashMap<String, String>();
             //Start with the custom attributes then overwrite with action fields.
-            if (event.getCustomAttributes() != null) {
-                attributes.putAll(event.getCustomAttributes());
+            if (event.getCustomAttributeStrings() != null) {
+                attributes.putAll(event.getCustomAttributeStrings());
             }
             extractActionAttributes(event, attributes);
             events.add(plusOne.customAttributes(attributes).shouldUploadEvent(event.isShouldUploadEvent()).build());
@@ -186,8 +186,8 @@ public final class CommerceEventUtils {
             for (int i = 0; i < promotions.size(); i++) {
                 MPEvent.Builder itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.Transaction);
                 Map<String, String> attributes = new HashMap<String, String>();
-                if (event.getCustomAttributes() != null) {
-                    attributes.putAll(event.getCustomAttributes());
+                if (event.getCustomAttributeStrings() != null) {
+                    attributes.putAll(event.getCustomAttributeStrings());
                 }
                 extractPromotionAttributes(promotions.get(i), attributes);
                 events.add(itemEvent.customAttributes(attributes).shouldUploadEvent(event.isShouldUploadEvent()).build());
@@ -229,8 +229,8 @@ public final class CommerceEventUtils {
                 for (int j = 0; j < products.size(); j++) {
                     MPEvent.Builder itemEvent = new MPEvent.Builder(IMPRESSION_NAME, MParticle.EventType.Transaction);
                     Map<String, String> attributes = new HashMap<String, String>();
-                    if (event.getCustomAttributes() != null) {
-                        attributes.putAll(event.getCustomAttributes());
+                    if (event.getCustomAttributeStrings() != null) {
+                        attributes.putAll(event.getCustomAttributeStrings());
                     }
                     extractProductAttributes(products.get(i), attributes);
                     extractProductFields(products.get(i), attributes);
