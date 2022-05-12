@@ -46,7 +46,7 @@ jobs:
   regression-check:
     needs: create-release-branch
     name: "Run regression"
-    uses: mParticle/mparticle-android-sdk/.github/workflows/daily.yml@stable
+    uses: mParticle/mparticle-android-sdk/.github/workflows/daily.yml@development
     with:
       dry_run: ${{ github.event.inputs.dryRun }}
       branch_name: release/${{ github.run_number }}
