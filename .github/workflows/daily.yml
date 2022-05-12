@@ -11,7 +11,7 @@ on:
   # Allow workflow to be called from other files
   workflow_call:
     inputs:
-      dry_run:
+      dryRun:
         description: "Do a dry run to preview instead of a real release [true/false]"
         required: false
         default: "true"
@@ -196,7 +196,7 @@ jobs:
         run: |
           git pull origin regression/${{ github.run_number }}
       - name: "Semantic Release --dry-run"
-        if: ${{ inputs.dryRun == 'true' }}
+        if: ${{ inputs.dryRun }} == 'true'
         run: |
           npx \
           -p lodash \
@@ -217,14 +217,14 @@ jobs:
       GIT_COMMITTER_NAME: mparticle-automation
       GIT_COMMITTER_EMAIL: developers@mparticle.com
     steps:
-      - name: "Checkout main branch"
+      - name: "Checkout repo"
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
           repository: ${{ github.repository }}
-          token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
           ref: ${{ inputs.branch_name }}
       - name: "Delete release branch"
+        if: ${{ always() }}
         run: |
           git fetch origin regression/${{ github.run_number }}
           git push --delete origin regression/${{ github.run_number }}
