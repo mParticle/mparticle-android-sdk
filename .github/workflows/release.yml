@@ -20,9 +20,9 @@ jobs:
     needs: confirm-public-repo-main-branch
     env:
       GITHUB_TOKEN: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
-      GIT_AUTHOR_NAME: mparticle-bot
+      GIT_AUTHOR_NAME: mparticle-automation
       GIT_AUTHOR_EMAIL: developers@mparticle.com
-      GIT_COMMITTER_NAME: mparticle-bot
+      GIT_COMMITTER_NAME: mparticle-automation
       GIT_COMMITTER_EMAIL: developers@mparticle.com
     steps:
       - name: "Checkout development branch"
@@ -57,9 +57,9 @@ jobs:
     runs-on: macos-latest
     env:
       GITHUB_TOKEN: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
-      GIT_AUTHOR_NAME: mparticle-bot
+      GIT_AUTHOR_NAME: mparticle-automation
       GIT_AUTHOR_EMAIL: developers@mparticle.com
-      GIT_COMMITTER_NAME: mparticle-bot
+      GIT_COMMITTER_NAME: mparticle-automation
       GIT_COMMITTER_EMAIL: developers@mparticle.com
     steps:
       - name: "Checkout public main branch"
