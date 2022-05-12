@@ -1,6 +1,7 @@
 package com.mparticle.lints
 
 import com.android.tools.lint.client.api.IssueRegistry
+import com.android.tools.lint.detector.api.CURRENT_API
 import com.mparticle.lints.detectors.DataplanDetector
 import com.mparticle.lints.detectors.GradleBuildDetector
 import com.mparticle.lints.detectors.MpApiDetectorKt
@@ -19,4 +20,7 @@ class MParticleIssueRegistry : IssueRegistry() {
         DataplanDetector.NODE_MISSING,
         DataplanDetector.NO_DATA_PLAN
     )
+
+    override val api: Int
+        get() = CURRENT_API
 }
