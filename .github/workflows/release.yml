@@ -50,6 +50,7 @@ jobs:
     with:
       dry_run: ${{ github.event.inputs.dryRun }}
       branch_name: release/${{ github.run_number }}
+    secrets: inherit
 
   semantic-release:
     name: "Semantic Release"
