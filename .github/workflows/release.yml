@@ -87,6 +87,7 @@ jobs:
           -p @semantic-release/changelog@5 \
           -p @semantic-release/git@9 \
           -p @semantic-release/exec@5 \
+          -p conventional-changelog-conventionalcommits \
           semantic-release --dry-run
       - name: "Semantic Release"
         if: ${{ github.event.inputs.dryRun == 'false' }}
@@ -97,6 +98,7 @@ jobs:
           -p @semantic-release/changelog@5 \
           -p @semantic-release/git@9 \
           -p @semantic-release/exec@5 \
+          -p conventional-changelog-conventionalcommits \
           semantic-release
       - name: "Push automated release commits to release branch"
         if: ${{ github.event.inputs.dryRun == 'false' }}
