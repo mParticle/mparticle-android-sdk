@@ -48,7 +48,7 @@ jobs:
     name: "Run regression"
     uses: mParticle/mparticle-android-sdk/.github/workflows/daily.yml@development
     with:
-      dry_run: ${{ github.event.inputs.dryRun }}
+      dryRun: ${{ github.event.inputs.dryRun }}
       branch_name: release/${{ github.run_number }}
     secrets: inherit
 
