@@ -1,3 +1,14 @@
+## [5.38.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.38.1...v5.38.2) (2022-05-13)
+
+
+### Bug Fixes
+
+* add in environment token in daily job ([#135](https://github.com/mParticle/mparticle-android-sdk/issues/135)) ([8c60184](https://github.com/mParticle/mparticle-android-sdk/commit/8c60184bbd663a30dd28e19fb278eccb85254f93))
+* add value for api in custom lint IssueRegistry ([#129](https://github.com/mParticle/mparticle-android-sdk/issues/129)) ([5b9c520](https://github.com/mParticle/mparticle-android-sdk/commit/5b9c520a43d4aa85675eb8fa1af7032dd05364bf))
+* change dependence from stable tag to branch ([#133](https://github.com/mParticle/mparticle-android-sdk/issues/133)) ([9a99b1d](https://github.com/mParticle/mparticle-android-sdk/commit/9a99b1dde404d0fba1e94ea4ff3d40805dceccfd))
+* dry run param ([#137](https://github.com/mParticle/mparticle-android-sdk/issues/137)) ([e308449](https://github.com/mParticle/mparticle-android-sdk/commit/e308449d0c52fcb06761de143e61dfdc6d46334a))
+* pass in secret to release regression job ([#136](https://github.com/mParticle/mparticle-android-sdk/issues/136)) ([92cccea](https://github.com/mParticle/mparticle-android-sdk/commit/92cccea2b52f244ac11df1d8c689106282140c9f))
+
 ## [5.38.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.38.0...v5.38.1) (2022-05-02)
 
 
