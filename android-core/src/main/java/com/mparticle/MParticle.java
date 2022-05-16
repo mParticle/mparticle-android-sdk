@@ -100,6 +100,7 @@ public class MParticle {
     
     private MParticle(MParticleOptions options) {
         ConfigManager configManager = new ConfigManager(options);
+
         configManager.setUploadInterval(options.getUploadInterval());
         configManager.setSessionTimeout(options.getSessionTimeout());
         configManager.setIdentityConnectionTimeout(options.getConnectionTimeout());
@@ -109,7 +110,7 @@ public class MParticle {
         mAppContext = options.getContext();
         mConfigManager = configManager;
         mAppStateManager = appStateManager;
-        mDatabaseManager = new MParticleDBManager(mAppContext);
+        mDatabaseManager = new MParticleDBManager(mAppContext, options);
         if (options.isUncaughtExceptionLoggingEnabled()) {
             enableUncaughtExceptionLogging();
         } else {
