@@ -7,7 +7,10 @@ import android.location.Location;
 import android.os.Handler;
 import android.os.Looper;
 
+import androidx.annotation.Nullable;
+
 import com.mparticle.MParticle;
+import com.mparticle.MParticleOptions;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.internal.BatchId;
 import com.mparticle.internal.ConfigManager;
@@ -42,15 +45,21 @@ public class MParticleDBManager {
     private SharedPreferences mPreferences;
     private Context mContext;
     private DatabaseHelper mDatabaseHelper;
+    private MParticleOptions options;
 
     MParticleDBManager() {
         //for unit testing
     }
 
-    public MParticleDBManager(Context context) {
+    public MParticleDBManager(Context context, @Nullable MParticleOptions options) {
         this.mContext = context;
+        this.options = options;
         mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mDatabaseHelper = new DatabaseHelper(context);
+    }
+
+    public MParticleDBManager(Context context) {
+        this(context, null);
     }
 
     /**
@@ -300,7 +309,23 @@ public class MParticleDBManager {
                 uploadMessage.setIdentities(identities);
                 JSONObject userAttributes = findUserAttributeState(messages, batchId.getMpid());
                 uploadMessage.setUserAttributes(userAttributes);
-                UploadService.insertUpload(db, uploadMessage, configManager.getApiKey());
+
+                JSONObject batch = uploadMessage;
+                if (options != null && options.getBatchCreationListener() != null) {
+                    try {
+                        batch = options.getBatchCreationListener().onBatchCreated(batch);
+                    } catch (Exception e) {
+                        Logger.error(e, "batch creation listener error, batch will not be uploaded");
+                        return;
+                    }
+                }
+
+                if (batch == null || batch.length() == 0) {
+                    Logger.error("Not uploading batch due to 'onCreateBatch' handler being empty");
+                    return;
+                }
+
+                UploadService.insertUpload(db, batch, configManager.getApiKey());
                 //if this was to process session history, or
                 //if we're never going to process history AND
                 //this batch contains a previous session, then delete the session.
@@ -335,11 +360,8 @@ public class MParticleDBManager {
                         userAttributes = messages.getJSONObject(i).getJSONObject(Constants.MessageKey.USER_ATTRIBUTES);
                         messages.getJSONObject(i).remove(Constants.MessageKey.USER_ATTRIBUTES);
                     }
-                }catch (JSONException jse) {
-
-                }catch (NullPointerException npe) {
-
-                }
+                } catch (JSONException ignored) {
+                } catch (NullPointerException ignored) { }
             }
         }
         if (userAttributes == null) {
@@ -361,11 +383,8 @@ public class MParticleDBManager {
                         identities = messages.getJSONObject(i).getJSONArray(Constants.MessageKey.USER_IDENTITIES);
                         messages.getJSONObject(i).remove(Constants.MessageKey.USER_IDENTITIES);
                     }
-                }catch (JSONException jse) {
-
-                }catch (NullPointerException npe) {
-
-                }
+                } catch (JSONException ignored) {
+                } catch (NullPointerException ignored) { }
             }
         }
         if (identities == null) {
@@ -558,9 +577,7 @@ public class MParticleDBManager {
                 }
                 try {
                     jsonAttributes.put(entry.getKey(), jsonArray);
-                } catch (JSONException e) {
-
-                }
+                } catch (JSONException ignored) { }
             }else {
                 try {
                     Object entryValue = entry.getValue();
@@ -677,8 +694,7 @@ public class MParticleDBManager {
                 callbacks.logUserAttributeChangeMessage(container.key, null, currentValues.get(container.key), true, false, container.time, container.mpId);
             }
             db.setTransactionSuccessful();
-        }catch (Exception e) {
-
+        } catch (Exception e) {
         } finally {
             db.endTransaction();
         }
