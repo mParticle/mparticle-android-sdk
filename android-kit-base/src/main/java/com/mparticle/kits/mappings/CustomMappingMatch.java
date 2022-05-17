@@ -124,9 +124,9 @@ final class CustomMappingMatch {
             return true;
         } else if (mMatchType.startsWith(MATCH_TYPE_STRING) &&
                 event.getEventName().equalsIgnoreCase(mEventName) &&
-                event.getCustomAttributes() != null &&
-                event.getCustomAttributes().containsKey(mAttributeKey) &&
-                getAttributeValues().contains(event.getCustomAttributes().get(mAttributeKey).toLowerCase(Locale.US))) {
+                event.getCustomAttributeStrings() != null &&
+                event.getCustomAttributeStrings().containsKey(mAttributeKey) &&
+                getAttributeValues().contains(event.getCustomAttributeStrings().get(mAttributeKey).toLowerCase(Locale.US))) {
             return true;
         } else {
             return false;
@@ -258,7 +258,7 @@ final class CustomMappingMatch {
     }
 
     private boolean matchCommerceAttributes(CommerceEvent event) {
-        Map<String, String> attributes = event.getCustomAttributes();
+        Map<String, String> attributes = event.getCustomAttributeStrings();
         if (attributes == null || attributes.size() < 1) {
             return false;
         }

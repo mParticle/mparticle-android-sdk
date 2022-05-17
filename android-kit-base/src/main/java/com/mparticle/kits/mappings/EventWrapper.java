@@ -53,8 +53,8 @@ abstract class EventWrapper {
         public Map<Integer, String> getAttributeHashes() {
             if (attributeHashes == null) {
                 attributeHashes = new HashMap<Integer, String>();
-                if (mCommerceEvent.getCustomAttributes() != null) {
-                    for (Map.Entry<String, String> entry : mCommerceEvent.getCustomAttributes().entrySet()) {
+                if (mCommerceEvent.getCustomAttributeStrings() != null) {
+                    for (Map.Entry<String, String> entry : mCommerceEvent.getCustomAttributeStrings().entrySet()) {
                         int hash = KitUtils.hashForFiltering(getEventTypeOrdinal() + entry.getKey());
                         attributeHashes.put(hash, entry.getKey());
                     }
@@ -85,12 +85,12 @@ abstract class EventWrapper {
 
         public Map.Entry<String, String> findAttribute(String propertyType, int hash, Product product, Promotion promotion) {
             if (CustomMapping.PROPERTY_LOCATION_EVENT_ATTRIBUTE.equalsIgnoreCase(propertyType)) {
-                if (getEvent().getCustomAttributes() == null || getEvent().getCustomAttributes().size() == 0) {
+                if (getEvent().getCustomAttributeStrings() == null || getEvent().getCustomAttributeStrings().size() == 0) {
                     return null;
                 }
                 String key = getAttributeHashes().get(hash);
                 if (key != null) {
-                    return new AbstractMap.SimpleEntry<String, String>(key, mCommerceEvent.getCustomAttributes().get(key));
+                    return new AbstractMap.SimpleEntry<String, String>(key, mCommerceEvent.getCustomAttributeStrings().get(key));
                 }
             } else if (CustomMapping.PROPERTY_LOCATION_EVENT_FIELD.equalsIgnoreCase(propertyType)) {
                 if (eventFieldHashes == null) {
@@ -145,11 +145,11 @@ abstract class EventWrapper {
         @Override
         public Map.Entry<String, String> findAttribute(String propertyType, String keyName, Product product, Promotion promotion) {
             if (CustomMapping.PROPERTY_LOCATION_EVENT_ATTRIBUTE.equalsIgnoreCase(propertyType)) {
-                if (getEvent().getCustomAttributes() == null || getEvent().getCustomAttributes().size() == 0) {
+                if (getEvent().getCustomAttributeStrings() == null || getEvent().getCustomAttributeStrings().size() == 0) {
                     return null;
                 }
-                if (getEvent().getCustomAttributes().containsKey(keyName)) {
-                    return new AbstractMap.SimpleEntry<String, String>(keyName, getEvent().getCustomAttributes().get(keyName));
+                if (getEvent().getCustomAttributeStrings().containsKey(keyName)) {
+                    return new AbstractMap.SimpleEntry<String, String>(keyName, getEvent().getCustomAttributeStrings().get(keyName));
                 }
             } else if (CustomMapping.PROPERTY_LOCATION_EVENT_FIELD.equalsIgnoreCase(propertyType)) {
                 if (eventFieldAttributes == null) {
@@ -210,8 +210,8 @@ abstract class EventWrapper {
         public Map<Integer, String> getAttributeHashes() {
             if (attributeHashes == null) {
                 attributeHashes = new HashMap<Integer, String>();
-                if (mEvent.getCustomAttributes() != null) {
-                    for (Map.Entry<String, String> entry : mEvent.getCustomAttributes().entrySet()) {
+                if (mEvent.getCustomAttributeStrings() != null) {
+                    for (Map.Entry<String, String> entry : mEvent.getCustomAttributeStrings().entrySet()) {
                         int hash = KitUtils.hashForFiltering(getEventTypeOrdinal() + mEvent.getEventName() + entry.getKey());
                         attributeHashes.put(hash, entry.getKey());
                     }
@@ -251,10 +251,10 @@ abstract class EventWrapper {
 
         public Map.Entry<String, String> findAttribute(String propertyType, String keyName, Product product, Promotion promotion) {
             if (CustomMapping.PROPERTY_LOCATION_EVENT_ATTRIBUTE.equalsIgnoreCase(propertyType)) {
-                if (getEvent().getCustomAttributes() == null) {
+                if (getEvent().getCustomAttributeStrings() == null) {
                     return null;
                 }
-                String value = getEvent().getCustomAttributes().get(keyName);
+                String value = getEvent().getCustomAttributeStrings().get(keyName);
                 if (value != null) {
                     return new AbstractMap.SimpleEntry<String, String>(keyName, value);
                 }
@@ -266,7 +266,7 @@ abstract class EventWrapper {
             if (CustomMapping.PROPERTY_LOCATION_EVENT_ATTRIBUTE.equalsIgnoreCase(propertyType)) {
                 String key = getAttributeHashes().get(hash);
                 if (key != null) {
-                    return new AbstractMap.SimpleEntry<>(key, mEvent.getCustomAttributes().get(key));
+                    return new AbstractMap.SimpleEntry<>(key, mEvent.getCustomAttributeStrings().get(key));
                 }
             }
             return null;

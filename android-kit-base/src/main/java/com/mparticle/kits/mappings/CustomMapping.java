@@ -147,8 +147,8 @@ public class CustomMapping {
         }
         if (mAppendUnmappedAsIs && mMaxCustomParams > 0 && newAttributes.size() < mMaxCustomParams) {
             Map<String, String> originalAttributes;
-            if (event.getCustomAttributes() != null) {
-                originalAttributes = new HashMap<String, String>(event.getCustomAttributes());
+            if (event.getCustomAttributeStrings() != null) {
+                originalAttributes = new HashMap<String, String>(event.getCustomAttributeStrings());
             } else {
                 originalAttributes = new HashMap<String, String>();
             }
@@ -303,8 +303,8 @@ public class CustomMapping {
         if (mAppendUnmappedAsIs && mMaxCustomParams > 0 && mappedAttributes.size() < mMaxCustomParams) {
             CommerceEvent event = eventWrapper.getEvent();
             Map<String, String> originalAttributes;
-            if (event.getCustomAttributes() != null) {
-                originalAttributes = new HashMap<String, String>(event.getCustomAttributes());
+            if (event.getCustomAttributeStrings() != null) {
+                originalAttributes = new HashMap<String, String>(event.getCustomAttributeStrings());
             } else {
                 originalAttributes = new HashMap<String, String>();
             }

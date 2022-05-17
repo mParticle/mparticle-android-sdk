@@ -112,13 +112,14 @@ jobs:
             repository: ${{github.event.pull_request.head.repo.full_name}}
             ref: ${{github.head_ref}}
             submodules: recursive
+            fetch-depth: 0
         - name: "Install JDK 11"
           uses: actions/setup-java@v2
           with:
             distribution: "zulu"
             java-version: "11"
         - name: "Get Latest Kits"
-          run: git submodule foreach "git checkout main"
+          run: git submodule foreach "git rebase main"
         - name: "Generate Core Release Build"
           run: ./gradlew -PisRelease=true publishLocal
         - name: "Run Kit-Base Release Tests and Build"

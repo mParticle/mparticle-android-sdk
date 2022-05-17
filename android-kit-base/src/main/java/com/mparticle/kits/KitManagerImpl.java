@@ -827,14 +827,14 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     List<ReportingMessage> reportingMessages = new LinkedList<ReportingMessage>();
                     if (projectedEvents == null) {
                         List<ReportingMessage> messages = null;
-                        if (eventCopy.getCustomAttributes() != null
-                                && eventCopy.getCustomAttributes().containsKey(METHOD_NAME)
-                                && eventCopy.getCustomAttributes().get(METHOD_NAME).equals(LOG_LTV)) {
+                        if (eventCopy.getCustomAttributeStrings() != null
+                                && eventCopy.getCustomAttributeStrings().containsKey(METHOD_NAME)
+                                && eventCopy.getCustomAttributeStrings().get(METHOD_NAME).equals(LOG_LTV)) {
                             messages = ((KitIntegration.CommerceListener) provider).logLtvIncrease(
-                                    new BigDecimal(eventCopy.getCustomAttributes().get(RESERVED_KEY_LTV)),
-                                    new BigDecimal(eventCopy.getCustomAttributes().get(RESERVED_KEY_LTV)),
+                                    new BigDecimal(eventCopy.getCustomAttributeStrings().get(RESERVED_KEY_LTV)),
+                                    new BigDecimal(eventCopy.getCustomAttributeStrings().get(RESERVED_KEY_LTV)),
                                     eventCopy.getEventName(),
-                                    eventCopy.getCustomAttributes());
+                                    eventCopy.getCustomAttributeStrings());
                         } else {
                             messages = ((KitIntegration.EventListener) provider).logEvent(eventCopy);
                             mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), !MPUtility.isEmpty(messages), eventCopy);
@@ -951,7 +951,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             try {
                 if (provider instanceof KitIntegration.EventListener && !provider.isDisabled() && provider.getConfiguration().shouldLogScreen(screenEvent.getEventName())) {
                     MPEvent filteredEvent = new MPEvent.Builder(screenEvent)
-                            .customAttributes(provider.getConfiguration().filterScreenAttributes(null, screenEvent.getEventName(), screenEvent.getCustomAttributes()))
+                            .customAttributes(provider.getConfiguration().filterScreenAttributes(null, screenEvent.getEventName(), screenEvent.getCustomAttributeStrings()))
                             .build();
 
                     List<CustomMapping.ProjectionResult> projectedEvents = CustomMapping.projectEvents(
@@ -962,7 +962,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                             provider.getConfiguration().getDefaultScreenCustomMapping());
                     if (projectedEvents == null) {
                         String eventName = filteredEvent.getEventName();
-                        Map<String, String> eventInfo = filteredEvent.getCustomAttributes();
+                        Map<String, String> eventInfo = filteredEvent.getCustomAttributeStrings();
                         List<ReportingMessage> report = ((KitIntegration.EventListener) provider).logScreen(eventName, eventInfo);
                         mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), eventName, eventInfo);
                         if (report != null && report.size() > 0) {
@@ -976,7 +976,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                         ReportingMessage masterMessage = new ReportingMessage(provider,
                                 ReportingMessage.MessageType.SCREEN_VIEW,
                                 System.currentTimeMillis(),
-                                filteredEvent.getCustomAttributes());
+                                filteredEvent.getCustomAttributeStrings());
                         boolean forwarded = false;
                         for (CustomMapping.ProjectionResult projectedEvent: projectedEvents) {
                             List<ReportingMessage> report = ((KitIntegration.EventListener) provider).logEvent(projectedEvent.getMPEvent());

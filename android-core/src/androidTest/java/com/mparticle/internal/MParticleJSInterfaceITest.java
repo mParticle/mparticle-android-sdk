@@ -435,7 +435,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                     assertNull(transactionAttributes.getShipping());
                     assertNull(transactionAttributes.getAffiliation());
                     assertNull(transactionAttributes.getCouponCode());
-                    assertJsonEqual(customAttributes, MPUtility.mapToJson(commerceEvent.getCustomAttributes()));
+                    assertJsonEqual(customAttributes, MPUtility.mapToJson(commerceEvent.getCustomAttributeStrings()));
                     called.value = true;
                 } catch (Exception e) {
                     error.value = e;

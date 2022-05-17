@@ -125,8 +125,8 @@ public class CustomMappingTest {
         assertEquals(event, newEvent);
         info.put("yet another key", "yet another value");
         //sanity check to make sure we're duplicating the map, not passing around a reference
-        assertTrue(event.getCustomAttributes().containsKey("yet another key"));
-        assertFalse(newEvent.getCustomAttributes().containsKey("yet another key"));
+        assertTrue(event.getCustomAttributeStrings().containsKey("yet another key"));
+        assertFalse(newEvent.getCustomAttributeStrings().containsKey("yet another key"));
     }
 
     /**
@@ -175,10 +175,10 @@ public class CustomMappingTest {
         info.put("another key", "another value");
         MPEvent event = new MPEvent.Builder("whatever", MParticle.EventType.Other).customAttributes(info).build();
         CustomMapping.ProjectionResult newEvent = customMapping.project(new EventWrapper.MPEventWrapper(event)).get(0);
-        assertTrue(newEvent.getMPEvent().getCustomAttributes().size() == 0);
+        assertTrue(newEvent.getMPEvent().getCustomAttributeStrings().size() == 0);
         customMapping = new CustomMapping(new JSONObject("{ \"id\":89, \"matches\":[{ \"message_type\":4, \"event_match_type\":\"\", \"event\":\"\" }], \"behavior\":{ \"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{ \"projected_event_name\":\"\", \"attribute_maps\":[ ] } }"));
         newEvent = customMapping.project(new EventWrapper.MPEventWrapper(event)).get(0);
-        assertTrue(newEvent.getMPEvent().getCustomAttributes().size() == 2);
+        assertTrue(newEvent.getMPEvent().getCustomAttributeStrings().size() == 2);
     }
 
     /**
@@ -205,25 +205,25 @@ public class CustomMappingTest {
         MPEvent event = new MPEvent.Builder("whatever", MParticle.EventType.Other).customAttributes(info).build();
         CustomMapping.ProjectionResult result = customMapping.project(new EventWrapper.MPEventWrapper(event)).get(0);
         MPEvent newEvent = result.getMPEvent();
-        assertTrue(newEvent.getCustomAttributes().size() == 5);
+        assertTrue(newEvent.getCustomAttributeStrings().size() == 5);
         //key 5 should be there but key 6 should be kicked out due to alphabetic sorting
-        assertTrue(newEvent.getCustomAttributes().containsKey("key 5"));
-        assertFalse(newEvent.getCustomAttributes().containsKey("key 6"));
+        assertTrue(newEvent.getCustomAttributeStrings().containsKey("key 5"));
+        assertFalse(newEvent.getCustomAttributeStrings().containsKey("key 6"));
         //now create the SAME projection, except specify an optional attribute key 6 - it should boot key 5 from the resulting event
         customMapping = new CustomMapping(new JSONObject("{ \"id\":89, \"matches\":[{ \"message_type\":4, \"event_match_type\":\"\", \"event\":\"\" }], \"behavior\":{ \"append_unmapped_as_is\":true, \"max_custom_params\":5, \"is_default\":true }, \"action\":{ \"projected_event_name\":\"\", \"attribute_maps\":[ { \"projected_attribute_name\":\"\", \"match_type\":\"String\", \"value\":\"key 6\", \"data_type\":\"String\" }] } }"));
         result = customMapping.project(new EventWrapper.MPEventWrapper(event)).get(0);
         newEvent = result.getMPEvent();
-        assertFalse(newEvent.getCustomAttributes().containsKey("key 5"));
-        assertTrue(newEvent.getCustomAttributes().containsKey("key 6")); //note that the json also doesn't specify a key name - so we just use the original
-        assertTrue(newEvent.getCustomAttributes().size() == 5);
+        assertFalse(newEvent.getCustomAttributeStrings().containsKey("key 5"));
+        assertTrue(newEvent.getCustomAttributeStrings().containsKey("key 6")); //note that the json also doesn't specify a key name - so we just use the original
+        assertTrue(newEvent.getCustomAttributeStrings().size() == 5);
 
         //test what happens if max isn't even set (everything should be there)
         customMapping = new CustomMapping(new JSONObject("{ \"id\":89, \"matches\":[{ \"message_type\":4, \"event_match_type\":\"\", \"event\":\"\" }], \"behavior\":{ \"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{ \"projected_event_name\":\"\", \"attribute_maps\":[ { \"projected_attribute_name\":\"\", \"match_type\":\"String\", \"value\":\"key 6\", \"data_type\":\"String\" }] } }"));
         result = customMapping.project(new EventWrapper.MPEventWrapper(event)).get(0);
         newEvent = result.getMPEvent();
-        assertTrue(newEvent.getCustomAttributes().containsKey("key 5"));
-        assertTrue(newEvent.getCustomAttributes().containsKey("key 6")); //note that the json also doesn't specify a key name - so we just use the original
-        assertTrue(newEvent.getCustomAttributes().size() == 6);
+        assertTrue(newEvent.getCustomAttributeStrings().containsKey("key 5"));
+        assertTrue(newEvent.getCustomAttributeStrings().containsKey("key 6")); //note that the json also doesn't specify a key name - so we just use the original
+        assertTrue(newEvent.getCustomAttributeStrings().size() == 6);
     }
 
     /**
@@ -236,7 +236,7 @@ public class CustomMappingTest {
         CustomMapping customMapping = new CustomMapping(new JSONObject("{ \"id\":89, \"matches\":[{ \"message_type\":4, \"event_match_type\":\"\", \"event\":\"\" }], \"behavior\":{ \"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{ \"projected_event_name\":\"\", \"attribute_maps\":[ { \"projected_attribute_name\":\"\", \"match_type\":\"String\", \"value\":\"key 6\", \"data_type\":\"String\" },{ \"projected_attribute_name\": \"screen_name_key\", \"match_type\": \"Field\", \"value\": \"ScreenName\", \"data_type\": 1, \"is_required\": true }] } }"));
         MPEvent event = new MPEvent.Builder("screenname", MParticle.EventType.Other).build();
         CustomMapping.ProjectionResult projectedEvent = customMapping.project(new EventWrapper.MPEventWrapper(event)).get(0);
-        assertEquals("screenname", projectedEvent.getMPEvent().getCustomAttributes().get("screen_name_key"));
+        assertEquals("screenname", projectedEvent.getMPEvent().getCustomAttributeStrings().get("screen_name_key"));
     }
 
     /**
@@ -310,7 +310,7 @@ public class CustomMappingTest {
         assertEquals(1, eventList.size());
         MPEvent projEvent1 = eventList.get(0).getMPEvent();
         assertEquals("account - check order status", projEvent1.getEventName());
-        assertEquals("some value", projEvent1.getCustomAttributes().get("attribute we don't care about"));
+        assertEquals("some value", projEvent1.getCustomAttributeStrings().get("attribute we don't care about"));
 
 
     }
@@ -338,20 +338,20 @@ public class CustomMappingTest {
         MPEvent projEvent1 = eventList.get(0).getMPEvent();
         //same as test 1, but verify for the fun of it.
         assertEquals("account - check order status", projEvent1.getEventName());
-        assertEquals("some value", projEvent1.getCustomAttributes().get("attribute we don't care about"));
+        assertEquals("some value", projEvent1.getCustomAttributeStrings().get("attribute we don't care about"));
 
         //this is the new projection which requires the Value attribute
         projEvent1 = eventList.get(1).getMPEvent();
         assertEquals("pdp - add to tote", projEvent1.getEventName());
         //required attribute
-        assertEquals("product name", projEvent1.getCustomAttributes().get("Last Add to Tote Category")); //the required attribute has been renamed
+        assertEquals("product name", projEvent1.getCustomAttributeStrings().get("Last Add to Tote Category")); //the required attribute has been renamed
         //non-required attributes which define the same hash as the required one.
-        assertEquals("product name", projEvent1.getCustomAttributes().get("Last Add to Tote Total Amount"));
-        assertEquals("product name", projEvent1.getCustomAttributes().get("Last Add to Tote SKU"));
+        assertEquals("product name", projEvent1.getCustomAttributeStrings().get("Last Add to Tote Total Amount"));
+        assertEquals("product name", projEvent1.getCustomAttributeStrings().get("Last Add to Tote SKU"));
 
         //static attributes are in this projection as well.
-        assertEquals("10", projEvent1.getCustomAttributes().get("Last Add to Tote Quantity"));
-        assertEquals("1321", projEvent1.getCustomAttributes().get("Last Add to Tote Unit Price"));
+        assertEquals("10", projEvent1.getCustomAttributeStrings().get("Last Add to Tote Quantity"));
+        assertEquals("1321", projEvent1.getCustomAttributeStrings().get("Last Add to Tote Unit Price"));
 
     }
 
@@ -386,25 +386,25 @@ public class CustomMappingTest {
 
         MPEvent projEvent1 = eventList.get(0).getMPEvent();
         assertEquals("account - check order status", projEvent1.getEventName());
-        assertEquals("some value", projEvent1.getCustomAttributes().get("attribute we don't care about"));
+        assertEquals("some value", projEvent1.getCustomAttributeStrings().get("attribute we don't care about"));
 
         projEvent1 = eventList.get(1).getMPEvent();
         assertEquals("pdp - add to tote", projEvent1.getEventName());
-        assertEquals("product name", projEvent1.getCustomAttributes().get("Last Add to Tote Category"));
-        assertEquals("product name", projEvent1.getCustomAttributes().get("Last Add to Tote Total Amount"));
-        assertEquals("product name", projEvent1.getCustomAttributes().get("Last Add to Tote SKU"));
-        assertEquals("10", projEvent1.getCustomAttributes().get("Last Add to Tote Quantity"));
-        assertEquals("1321", projEvent1.getCustomAttributes().get("Last Add to Tote Unit Price"));
+        assertEquals("product name", projEvent1.getCustomAttributeStrings().get("Last Add to Tote Category"));
+        assertEquals("product name", projEvent1.getCustomAttributeStrings().get("Last Add to Tote Total Amount"));
+        assertEquals("product name", projEvent1.getCustomAttributeStrings().get("Last Add to Tote SKU"));
+        assertEquals("10", projEvent1.getCustomAttributeStrings().get("Last Add to Tote Quantity"));
+        assertEquals("1321", projEvent1.getCustomAttributeStrings().get("Last Add to Tote Unit Price"));
 
         //these are new for the 2nd projection, as they match the Hash for the new  "Label" attribute
-        assertEquals("product label", projEvent1.getCustomAttributes().get("Last Add to Tote Name"));
-        assertEquals("product label", projEvent1.getCustomAttributes().get("Last Add to Tote Print"));
+        assertEquals("product label", projEvent1.getCustomAttributeStrings().get("Last Add to Tote Name"));
+        assertEquals("product label", projEvent1.getCustomAttributeStrings().get("Last Add to Tote Print"));
 
         //and here's our 3rd projection, which defines both the original "Value" attribute hash as well as "Label"
         projEvent1 = eventList.get(2).getMPEvent();
         assertEquals("pdp - complete the look", projEvent1.getEventName());
-        assertEquals("product name", projEvent1.getCustomAttributes().get("Complete the Look Product Name"));
-        assertEquals("product label", projEvent1.getCustomAttributes().get("Complete the Look Product Name 2"));
+        assertEquals("product name", projEvent1.getCustomAttributeStrings().get("Complete the Look Product Name"));
+        assertEquals("product label", projEvent1.getCustomAttributeStrings().get("Complete the Look Product Name 2"));
 
     }
 
@@ -437,7 +437,7 @@ public class CustomMappingTest {
             MPEvent event = result.get(i).getMPEvent();
             assertNotNull(event);
             assertEquals("pdp - product view", event.getEventName());
-            Map<String, String> attributes = event.getCustomAttributes();
+            Map<String, String> attributes = event.getCustomAttributeStrings();
             assertEquals("product category " + i, attributes.get("Last Product View Category"));
             assertEquals("dollar bills", attributes.get("Last Product View Currency"));
             assertEquals("product id " + i, attributes.get("Last Product View SKU"));
@@ -644,9 +644,9 @@ public class CustomMappingTest {
         assertNotNull(event);
         assertEquals("checkout - place order", event.getEventName());
         assertEquals(5, event.getProducts().size());
-        assertEquals("category 4", event.getCustomAttributes().get("Last Place Order Category"));
-        assertEquals("some product list source", event.getCustomAttributes().get("Projected list source"));
-        assertEquals("sample custom event value", event.getCustomAttributes().get("Projected sample event attribute"));
+        assertEquals("category 4", event.getCustomAttributeStrings().get("Last Place Order Category"));
+        assertEquals("some product list source", event.getCustomAttributeStrings().get("Projected list source"));
+        assertEquals("sample custom event value", event.getCustomAttributeStrings().get("Projected sample event attribute"));
 
         config.getJSONObject("behavior").put("selector", "foreach");
         result = new CustomMapping(config).project(new EventWrapper.CommerceEventWrapper(commerceEvent));
@@ -658,13 +658,13 @@ public class CustomMappingTest {
             CommerceEvent event1 = projectionResult1.getCommerceEvent();
             assertEquals("checkout - place order", event1.getEventName());
             assertEquals(1, event1.getProducts().size());
-            assertEquals("some product list source", event1.getCustomAttributes().get("Projected list source"));
-            assertEquals("sample custom event value", event1.getCustomAttributes().get("Projected sample event attribute"));
+            assertEquals("some product list source", event1.getCustomAttributeStrings().get("Projected list source"));
+            assertEquals("sample custom event value", event1.getCustomAttributeStrings().get("Projected sample event attribute"));
             if (i == 1 || i == 2) {
-                assertEquals("sample custom product attribute value", event1.getCustomAttributes().get("Projected sample custom attribute"));
+                assertEquals("sample custom product attribute value", event1.getCustomAttributeStrings().get("Projected sample custom attribute"));
             }
             assertNotNull(event1);
-            assertEquals("category " + i, event1.getCustomAttributes().get("Last Place Order Category"));
+            assertEquals("category " + i, event1.getCustomAttributeStrings().get("Last Place Order Category"));
         }
 
         //make the ProductAttribute mapping required, should limit down the results to 2 products
@@ -708,11 +708,11 @@ public class CustomMappingTest {
         assertEquals(1, results.size());
         MPEvent result = results.get(0).getMPEvent();
         assertEquals(expectedMappedEvent.getEventName(), result.getEventName());
-        assertEquals(expectedMappedEvent.getCustomAttributes().keySet().size(), result.getCustomAttributes().size());
-        for (String key: expectedMappedEvent.getCustomAttributes().keySet()) {
-            String val = result.getCustomAttributes().get(key);
+        assertEquals(expectedMappedEvent.getCustomAttributeStrings().keySet().size(), result.getCustomAttributeStrings().size());
+        for (String key: expectedMappedEvent.getCustomAttributeStrings().keySet()) {
+            String val = result.getCustomAttributeStrings().get(key);
             assertTrue(val != null);
-            assertEquals(expectedMappedEvent.getCustomAttributes().get(key), val);
+            assertEquals(expectedMappedEvent.getCustomAttributeStrings().get(key), val);
         }
     }
 
@@ -728,8 +728,8 @@ public class CustomMappingTest {
         assertTrue(mapping.isMatch(new EventWrapper.MPEventWrapper(event)));
         assertTrue(events.size() == 1);
         assertTrue(events.get(0).getMPEvent().getEventName().equals("new_premium_subscriber"));
-        assertTrue(events.get(0).getMPEvent().getCustomAttributes().get("plan").equals("premium"));
-        assertTrue(events.get(0).getMPEvent().getCustomAttributes().get("plan 2").equals("premium 2"));
+        assertTrue(events.get(0).getMPEvent().getCustomAttributeStrings().get("plan").equals("premium"));
+        assertTrue(events.get(0).getMPEvent().getCustomAttributeStrings().get("plan 2").equals("premium 2"));
         info.put("plan", "notPremium");
         event = new MPEvent.Builder("subscription_success").customAttributes(info).build();
         assertFalse(mapping.isMatch(new EventWrapper.MPEventWrapper(event) ));
@@ -772,8 +772,8 @@ public class CustomMappingTest {
         List<CustomMapping.ProjectionResult> events = mapping.project(new EventWrapper.MPEventWrapper(event));
         assertTrue(events.size() == 1);
         assertTrue(events.get(0).getMPEvent().getEventName().equals("X_NEW_NOAH_SUBSCRIPTION"));
-        assertTrue(events.get(0).getMPEvent().getCustomAttributes().get("plan_id").equals("8"));
-        assertTrue(events.get(0).getMPEvent().getCustomAttributes().get("outcome").equals("new_subscription"));
+        assertTrue(events.get(0).getMPEvent().getCustomAttributeStrings().get("plan_id").equals("8"));
+        assertTrue(events.get(0).getMPEvent().getCustomAttributeStrings().get("outcome").equals("new_subscription"));
         info.remove("outcome");
         event = new MPEvent.Builder("SUBSCRIPTION_END").customAttributes(info).build();
         assertFalse(mapping.isMatch(new EventWrapper.MPEventWrapper(event)));

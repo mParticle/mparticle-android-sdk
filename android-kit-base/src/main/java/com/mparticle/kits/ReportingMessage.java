@@ -89,7 +89,7 @@ public class ReportingMessage implements JsonReportingMessage {
     }
 
     public static ReportingMessage fromEvent(KitIntegration provider, BaseEvent event) {
-        ReportingMessage message = new ReportingMessage(provider, event.getType().getMessageType(), System.currentTimeMillis(), event.getCustomAttributes());
+        ReportingMessage message = new ReportingMessage(provider, event.getType().getMessageType(), System.currentTimeMillis(), event.getCustomAttributeStrings());
         if (event instanceof MPEvent) {
             MPEvent mpEvent = (MPEvent)event;
             message.eventType = mpEvent.getEventType().name();
