@@ -1,3 +1,21 @@
+## [5.39.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.38.2...v5.39.0) (2022-05-17)
+
+
+### Features
+
+* update customAttributes to accept Object/Any ([#134](https://github.com/mParticle/mparticle-android-sdk/issues/134)) ([44e7c4c](https://github.com/mParticle/mparticle-android-sdk/commit/44e7c4c8bcae20062dd6e74368a17a14496bd371))
+
+
+### Bug Fixes
+
+* update semantic release job in daily check ([#139](https://github.com/mParticle/mparticle-android-sdk/issues/139)) ([01921c4](https://github.com/mParticle/mparticle-android-sdk/commit/01921c41d7139ce31816b757a042d50caf4048f3))
+
+
+### Updates & Maintenance
+
+* add in release notes generator updates ([#138](https://github.com/mParticle/mparticle-android-sdk/issues/138)) ([127f0a5](https://github.com/mParticle/mparticle-android-sdk/commit/127f0a53208f89824f48900ea306e29095cae3da))
+* Update Submodules ([1e8c6e3](https://github.com/mParticle/mparticle-android-sdk/commit/1e8c6e3f7e0f077b74270478e226cc68687187a6))
+
 ## [5.38.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.38.1...v5.38.2) (2022-05-13)
 
 
