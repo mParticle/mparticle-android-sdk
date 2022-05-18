@@ -26,7 +26,7 @@ public class UploadService extends UploadTable {
      *
      * @param message
      */
-    public static void insertUpload(MPDatabase database, MessageBatch message, String apiKey) {
+    public static void insertUpload(MPDatabase database, JSONObject message, String apiKey) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(UploadTableColumns.API_KEY, apiKey);
         contentValues.put(UploadTableColumns.CREATED_AT, message.optLong(Constants.MessageKey.TIMESTAMP, System.currentTimeMillis()));
