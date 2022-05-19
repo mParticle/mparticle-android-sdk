@@ -1,3 +1,16 @@
+## [5.40.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.39.0...v5.40.0) (2022-05-19)
+
+
+### Features
+
+* add client side rules ([#141](https://github.com/mParticle/mparticle-android-sdk/issues/141)) ([033ec68](https://github.com/mParticle/mparticle-android-sdk/commit/033ec689ede873f4686af940f7bdd69d58ff3efc))
+
+
+### Updates & Maintenance
+
+* add BatchCreationListener integration tests ([#143](https://github.com/mParticle/mparticle-android-sdk/issues/143)) ([7642acc](https://github.com/mParticle/mparticle-android-sdk/commit/7642accebf3340afffe11edf43736f07a73afd2d))
+* Update Submodules ([94dd501](https://github.com/mParticle/mparticle-android-sdk/commit/94dd5016d4997579d83cca671737bd8a8a7d0ff5))
+
 ## [5.39.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.38.2...v5.39.0) (2022-05-17)
 
 
