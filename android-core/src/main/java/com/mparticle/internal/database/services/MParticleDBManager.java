@@ -314,15 +314,16 @@ public class MParticleDBManager {
                 if (options != null && options.getBatchCreationListener() != null) {
                     try {
                         batch = options.getBatchCreationListener().onBatchCreated(batch);
+                        if (batch == null || batch.length() == 0) {
+                            Logger.error("Not uploading batch due to 'onCreateBatch' handler being empty");
+                            return;
+                        } else {
+                            batch.put(Constants.MessageKey.MODIFIED_BATCH, true);
+                        }
                     } catch (Exception e) {
                         Logger.error(e, "batch creation listener error, batch will not be uploaded");
                         return;
                     }
-                }
-
-                if (batch == null || batch.length() == 0) {
-                    Logger.error("Not uploading batch due to 'onCreateBatch' handler being empty");
-                    return;
                 }
 
                 UploadService.insertUpload(db, batch, configManager.getApiKey());

@@ -188,6 +188,12 @@ public class TestingUtils {
         if (object1 == object2) {
             return;
         }
+        try {
+            object1 = new JSONObject(object1.toString());
+            object2 = new JSONObject(object2.toString());
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
         assertEquals(object1.length(), object2.length());
         Iterator<String> keys = object1.keys();
         while (keys.hasNext()) {
