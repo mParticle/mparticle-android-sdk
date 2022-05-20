@@ -1,3 +1,10 @@
+### [5.40.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.40.0...v5.40.1) (2022-05-20)
+
+
+### Bug Fixes
+
+* rollback removal of MPEvent's info() methods ([#144](https://github.com/mParticle/mparticle-android-sdk/issues/144)) ([854b3a0](https://github.com/mParticle/mparticle-android-sdk/commit/854b3a021142e4bb9a96635ec14928f20f1f5d83))
+
 ## [5.40.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.39.0...v5.40.0) (2022-05-19)
 
 
