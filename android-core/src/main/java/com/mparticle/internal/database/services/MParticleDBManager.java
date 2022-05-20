@@ -321,8 +321,7 @@ public class MParticleDBManager {
                             batch.put(Constants.MessageKey.MODIFIED_BATCH, true);
                         }
                     } catch (Exception e) {
-                        Logger.error(e, "batch creation listener error, batch will not be uploaded");
-                        return;
+                        Logger.error(e, "batch creation listener error, original batch will be uploaded");
                     }
                 }
 
