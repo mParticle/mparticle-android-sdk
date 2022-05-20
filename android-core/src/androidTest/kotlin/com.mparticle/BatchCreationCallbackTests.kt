@@ -113,9 +113,7 @@ class BatchCreationCallbackTests : BaseCleanInstallEachTest() {
 
     @Test
     fun testListenerCrashes() {
-        var newBatch = JSONObject().put("the whole", "batch")
-        val targetEventName = "should not send"
-
+        val targetEventName = "should send"
         val options = MParticleOptions.builder(mContext)
             .batchCreationListener {
                 it.optJSONArray("msgs")
@@ -158,7 +156,7 @@ class BatchCreationCallbackTests : BaseCleanInstallEachTest() {
                 ?.filterIsInstance<JSONObject>()
                 ?.any { it.optString("n") == targetEventName } ?: false
         }.let {
-            assertFalse { it }
+            assertTrue { it }
         }
     }
 
