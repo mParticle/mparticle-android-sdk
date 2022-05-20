@@ -1,3 +1,10 @@
+### [5.40.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.40.1...v5.40.2) (2022-05-20)
+
+
+### Bug Fixes
+
+* change default batch creation error logic ([#145](https://github.com/mParticle/mparticle-android-sdk/issues/145)) ([d0cf645](https://github.com/mParticle/mparticle-android-sdk/commit/d0cf6458fc1b296beb5289f4d3a3c91505f77adc))
+
 ### [5.40.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.40.0...v5.40.1) (2022-05-20)
 
 
