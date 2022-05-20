@@ -97,6 +97,15 @@ public class MPEvent extends BaseEvent {
         return super.equals(o) || (o != null && this.toString().equals(o.toString()));
     }
 
+    /**
+     * @deprecated use {@link MPEvent#setCustomAttributes(Map)} instead
+     * @param info
+     */
+    @Deprecated
+    public void setInfo(@Nullable Map<String, String> info){
+        setCustomAttributes(info);
+    }
+
     @Override
     public void setCustomAttributes(@NonNull Map<String, ?> customAttributes) {
         super.setCustomAttributes(customAttributes);
@@ -187,6 +196,16 @@ public class MPEvent extends BaseEvent {
     @Nullable
     public String getCategory() {
         return category;
+    }
+
+    /**
+     * @deprecated use {@link MPEvent#getCustomAttributes()} instead
+     * @return
+     */
+    @Deprecated
+    @Nullable
+    public Map<String, String> getInfo() {
+        return getCustomAttributeStrings();
     }
 
     @NonNull
@@ -372,6 +391,21 @@ public class MPEvent extends BaseEvent {
         @NonNull
         public Builder duration(double durationMillis){
             this.duration = durationMillis;
+            return this;
+        }
+
+        /**
+         * @deprecated user {@link MPEvent.Builder#customAttributes} instead
+         *
+         * Data attributes to associate with the event.
+         *
+         * @param info
+         * @return returns this builder for easy method chaining
+         */
+        @Deprecated
+        @NonNull
+        public Builder info(@Nullable Map<String, String> info){
+            this.customAttributes = info;
             return this;
         }
 
