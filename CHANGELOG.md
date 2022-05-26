@@ -1,3 +1,11 @@
+### [5.40.3](https://github.com/mParticle/mparticle-android-sdk/compare/v5.40.2...v5.40.3) (2022-05-26)
+
+
+### Updates & Maintenance
+
+* update lint dependencies, add version field ([#146](https://github.com/mParticle/mparticle-android-sdk/issues/146)) ([f5009b0](https://github.com/mParticle/mparticle-android-sdk/commit/f5009b03c4b94c21bc1a5525cd6ec5095657f324))
+* Update Submodules ([f334a97](https://github.com/mParticle/mparticle-android-sdk/commit/f334a97b468fe75ba68b49a8295066c2d1dcba5c))
+
 ### [5.40.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.40.1...v5.40.2) (2022-05-20)
 
 
