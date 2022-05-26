@@ -130,7 +130,7 @@ jobs:
       name: "Rebase dependabot PRs"
       runs-on: ubuntu-18.04
       needs: [instrumented-tests, unit-tests, kit-compatibility-test]
-      if: contains(github.repository, 'internal') && github.actor == 'dependabot[bot]' && github.event_name == 'pull_request'
+      if: github.actor == 'dependabot[bot]' && github.event_name == 'pull_request'
       steps:
           - name: Rebase Dependabot PR
             uses: actions/github-script@v3

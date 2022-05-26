@@ -3,7 +3,7 @@ package com.mparticle.lints
 import com.android.SdkConstants.FN_ANDROID_MANIFEST_XML
 import com.android.tools.lint.checks.infrastructure.LintDetectorTest
 import com.mparticle.lints.detectors.ReferrerReceiverDetector
-import org.fest.assertions.api.Assertions.assertThat
+import org.intellij.lang.annotations.Language
 import org.junit.Test
 
 class ReferrerReceiverTest : LintDetectorTest() {
@@ -20,48 +20,40 @@ class ReferrerReceiverTest : LintDetectorTest() {
     @Throws(Exception::class)
     @Test
     fun testHasReferrerReceiver() {
-        val result = lintProject(
-            xml(
-                FN_ANDROID_MANIFEST_XML,
-                "" +
-                    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
-                    "<manifest package=\"com.mparticle.lints\"\n" +
-                    "          xmlns:android=\"http://schemas.android.com/apk/res/android\">\n" +
-                    "    <application>\n" +
-                    "        <activity exported=\"true\" android:name=\"com.mparticle.lints" +
-                    ".Activity1\">\n" +
-                    "            <intent-filter>\n" +
-                    "                <action android:name=\"android.intent.action.VIEW\" />\n" +
-                    "\n" +
-                    "                <category android:name=\"android.intent.category.HOME\" />\n" +
-                    "                <category android:name=\"android.intent.category.LAUNCHER\" />\n" +
-                    "                <category android:name=\"android.intent.category.DEFAULT\" />\n" +
-                    "                <category android:name=\"android.intent.category.BROWSABLE\" " +
-                    "/>\n" +
-                    "            </intent-filter>\n" +
-                    "        </activity>\n" +
-                    "\n" +
-                    "        <activity exported=\"true\" android:name=\"com.mparticle.lints" +
-                    ".Activity2\">\n" +
-                    "        </activity>\n" +
-                    "\n" +
-                    "        <activity exported=\"true\" android:name=\"com.mparticle.lints" +
-                    ".Activity3\">\n" +
-                    "            <intent-filter>\n" +
-                    "                <action android:name=\"android.intent.action.SEND\"/>\n" +
-                    "                <category android:name=\"android.intent.category.DEFAULT\"/>\n" +
-                    "                <data android:mimeType=\"text/plain\"/>\n" +
-                    "            </intent-filter>\n" +
-                    "        </activity>\n" +
-                    "\n" +
-                    "        <receiver android:name=\"com.mparticle.ReferrerReceiver\" android:exported=\"true\">\n" +
-                    "         </receiver>\n" +
-                    "    </application>\n" +
-                    "</manifest>"
-            )
-        )
-        assertThat(result)
-            .contains("ReferrerReceiver should be removed [" + ReferrerReceiverDetector.ISSUE.id + "]")
+        @Language("XML")
+        val source = """<?xml version="1.0" encoding="utf-8"?>
+                   <manifest package="com.mparticle.lints"
+                             xmlns:android="http://schemas.android.com/apk/res/android">
+                       <application>
+                           <activity exported="true" android:name="com.mparticle.lints.Activity1">
+                               <intent-filter>
+                                   <action android:name="android.intent.action.VIEW" />
+                   
+                                   <category android:name="android.intent.category.HOME" />
+                                   <category android:name="android.intent.category.LAUNCHER" />
+                                   <category android:name="android.intent.category.DEFAULT" />
+                                   <category android:name="android.intent.category.BROWSABLE" />
+                               </intent-filter>
+                           </activity>
+                   
+                           <activity exported="true" android:name="com.mparticle.lints.Activity2">
+                           </activity>
+                   
+                           <activity exported="true" android:name="com.mparticle.lints.Activity3">
+                               <intent-filter>
+                                   <action android:name="android.intent.action.SEND"/>
+                                   <category android:name="android.intent.category.DEFAULT"/>
+                                   <data android:mimeType="text/plain"/>
+                               </intent-filter>
+                           </activity>
+                            <receiver android:name="com.mparticle.ReferrerReceiver" android:exported="true"/>
+                       </application>
+                   </manifest>
+                   """
+        lint()
+            .files(xml(FN_ANDROID_MANIFEST_XML, source))
+            .run()
+            .expectContains("ReferrerReceiver should be removed [" + ReferrerReceiverDetector.ISSUE.id + "]")
     }
 
     /**
@@ -70,46 +62,43 @@ class ReferrerReceiverTest : LintDetectorTest() {
     @Throws(Exception::class)
     @Test
     fun testHasProperNoReceiver() {
-        val result = lintProject(
-            xml(
-                FN_ANDROID_MANIFEST_XML,
-                "" +
-                    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
-                    "<manifest package=\"com.mparticle.lints\"\n" +
-                    "          xmlns:android=\"http://schemas.android.com/apk/res/android\">\n" +
-                    "    <application>\n" +
-                    "        <activity exported=\"true\" android:name=\"com.mparticle.lints" +
-                    ".Activity1\">\n" +
-                    "            <intent-filter>\n" +
-                    "                <action android:name=\"android.intent.action.VIEW\" />\n" +
-                    "\n" +
-                    "                <category android:name=\"android.intent.category.HOME\" />\n" +
-                    "                <category android:name=\"android.intent.category.LAUNCHER\" />\n" +
-                    "                <category android:name=\"android.intent.category.DEFAULT\" />\n" +
-                    "                <category android:name=\"android.intent.category.BROWSABLE\" " +
-                    "/>\n" +
-                    "            </intent-filter>\n" +
-                    "        </activity>\n" +
-                    "\n" +
-                    "        <activity exported=\"true\" android:name=\"com.mparticle.lints" +
-                    ".Activity2\">\n" +
-                    "        </activity>\n" +
-                    "\n" +
-                    "        <activity exported=\"true\" android:name=\"com.mparticle.lints" +
-                    ".Activity3\">\n" +
-                    "            <intent-filter>\n" +
-                    "                <action android:name=\"android.intent.action.SEND\"/>\n" +
-                    "                <category android:name=\"android.intent.category.DEFAULT\"/>\n" +
-                    "                <data android:mimeType=\"text/plain\"/>\n" +
-                    "            </intent-filter>\n" +
-                    "        </activity>\n" +
-                    "\n" +
-                    "         </receiver>\n" +
-                    "    </application>\n" +
-                    "</manifest>"
-            )
-        )
-        assertThat(result)
-            .isEqualTo(Constants.NO_WARNINGS)
+        @Language("XML")
+        val source = """<?xml version="1.0" encoding="utf-8" ?>
+                    <manifest package="com.mparticle.lints"
+                              xmlns:android="http://schemas.android.com/apk/res/android" >
+                        <application>
+                            <activity 
+                                exported="true" 
+                                android:name="com.mparticle.lints.Activity1">
+                                <intent-filter>
+                                    <action android:name="android.intent.action.VIEW" /> 
+                     
+                                    <category android:name="android.intent.category.HOME" />
+                                    <category android:name="android.intent.category.LAUNCHER" /> 
+                                    <category android:name="android.intent.category.DEFAULT" />
+                                    <category android:name="android.intent.category.BROWSABLE" />
+                                </intent-filter>
+                            </activity>
+                            <activity exported="true" 
+                                android:name="com.mparticle.lints.Activity2">
+                            </activity> 
+                    
+                            <activity exported="true"
+                                android:name="com.mparticle.lints.Activity3"> 
+                                <intent-filter>
+                                    <action android:name="android.intent.action.SEND"/> 
+                                    <category android:name="android.intent.category.DEFAULT"/> 
+                                    <data android:mimeType="text/plain"/> 
+                                </intent-filter>
+                            </activity>
+                        </application> 
+                    </manifest>
+                    """
+
+        lint()
+            .files(xml(FN_ANDROID_MANIFEST_XML, source))
+            .run()
+            .expectErrorCount(0)
+            .expectWarningCount(0)
     }
 }
