@@ -11,11 +11,11 @@ import com.android.tools.lint.detector.api.Location
 import com.android.tools.lint.detector.api.Position
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
-import com.intellij.psi.PsiClass
-import com.intellij.psi.util.PsiTreeUtil
+import com.android.tools.lint.detector.api.UastLintUtils.Companion.tryResolveUDeclaration
 import com.mparticle.lints.basedetectors.BaseDetector
 import org.jetbrains.uast.UBlockExpression
 import org.jetbrains.uast.UCallExpression
+import org.jetbrains.uast.UClass
 import org.jetbrains.uast.UDeclarationsExpression
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UExpression
@@ -24,6 +24,9 @@ import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UQualifiedReferenceExpression
 import org.jetbrains.uast.UReturnExpression
 import org.jetbrains.uast.UVariable
+import org.jetbrains.uast.getContainingUClass
+import org.jetbrains.uast.getParentOfType
+import org.jetbrains.uast.resolveToUElement
 
 class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
 
@@ -242,10 +245,7 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
      *
      */
     private fun getMethodImplementation(callExpression: UCallExpression): UExpression? {
-        return callExpression.resolve()
-            ?.let {
-                context.uastContext.getMethod(it).uastBody
-            }
+        return (callExpression.tryResolveUDeclaration() as? UMethod)?.uastBody
     }
 
     private fun isTargetMethod(targetMethodName: String, element: UCallExpression): Boolean {
@@ -253,9 +253,9 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
         if (targetMethodName.endsWith(element.methodName ?: "")) {
             // if the name matches, do the more expensive operation of resolving the method implementation,
             // and check the full qualified name
-            element.resolve()?.containingClass?.let {
-                return targetMethodName.equals("${context.uastContext.getClass(it).qualifiedName}.${element.methodName}")
-            }
+            val qualifiedClassName =
+                element.resolveToUElement()?.getContainingUClass()?.qualifiedName
+            return targetMethodName == "$qualifiedClassName.${element.methodName}"
         }
         return false
     }
@@ -266,7 +266,7 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
 
     private fun isApplicationSubClass(context: JavaContext, method: UMethod): Boolean {
         val evaluator = context.evaluator
-        return PsiTreeUtil.getParentOfType(method, PsiClass::class.java, true)
+        return method.getParentOfType(true, UClass::class.java)
             ?.let {
                 var isApplicationSubclass = evaluator.extendsClass(it, "android.app.Application", false)
                 var isApplicationClass = method.containingClass?.qualifiedName.equals("android.app.Application")

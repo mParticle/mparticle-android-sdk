@@ -1,14 +1,16 @@
 package com.mparticle.lints
 
 import com.mparticle.tooling.ValidationResult
+import org.intellij.lang.annotations.Language
 import org.json.JSONArray
+import org.junit.Assert.assertEquals
 import org.junit.Test
-import kotlin.test.assertEquals
 
 class ValidationResultDeserializationTest {
 
     @Test
     fun testDeserializeValidationResult() {
+        @Language("JSON")
         val serialized = """
         [
               {
