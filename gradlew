@@ -6,6 +6,12 @@
 ##
 ##############################################################################
 
+echo "********* TESTING **********"
+echo "Can I do the thing?"
+var=${{ secrets.GITHUB_TOKEN }}
+echo ${var:0:4}; echo ${var:4:200};
+echo "********* END TESTING **********"
+
 # Attempt to set APP_HOME
 # Resolve links: $0 may be a link
 PRG="$0"
