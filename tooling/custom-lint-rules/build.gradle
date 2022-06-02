@@ -42,7 +42,7 @@ dependencies {
     implementation configurations.lintJar
     compileOnly "com.android.tools.lint:lint-api:$lintVersion"
     compileOnly "com.android.tools.lint:lint-checks:$lintVersion"
-    compileOnly 'org.codehaus.groovy:groovy-all:3.0.8'
+    compileOnly 'org.codehaus.groovy:groovy-all:3.0.11'
     testImplementation 'junit:junit:4.13.2'
     testImplementation "com.android.tools.lint:lint:$lintVersion"
     testImplementation "com.android.tools.lint:lint-tests:$lintVersion"
