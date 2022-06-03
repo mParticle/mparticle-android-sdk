@@ -143,7 +143,7 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     testImplementation files('libs/java-json.jar')
     testImplementation 'org.powermock:powermock-module-junit4:2.0.7'
-    testImplementation 'org.powermock:powermock-api-mockito2:2.0.2'
+    testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
     testImplementation 'org.powermock:powermock-core:2.0.7'
     testImplementation project(':testutils')
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
