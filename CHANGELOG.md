@@ -1,3 +1,15 @@
+## [5.41.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.40.4...v5.41.0) (2022-06-06)
+
+
+### Features
+
+* update dependabot job ([#172](https://github.com/mParticle/mparticle-android-sdk/issues/172)) ([fbe44b2](https://github.com/mParticle/mparticle-android-sdk/commit/fbe44b2fcec1716238273d33b1a088401def5bd0))
+
+
+### Updates & Maintenance
+
+* Update Submodules ([d42983c](https://github.com/mParticle/mparticle-android-sdk/commit/d42983cb469e76c37960367d103c481e118da96c))
+
 ## [5.40.4](https://github.com/mParticle/mparticle-android-sdk/compare/v5.40.3...v5.40.4) (2022-06-02)
 
 
