@@ -48,7 +48,6 @@ class CustomAttributesTests {
                 }
         }
         val customAttributesMap = mutableMapOf<String, Any>("list" to mapOf("foo" to "bar", "this" to "that"))
-        val serialized = "{foo=bar, this=that}"
         MPEvent.Builder("Test Event")
             .customAttributes(customAttributesMap)
             .build()

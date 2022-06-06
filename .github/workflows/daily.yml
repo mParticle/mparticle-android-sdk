@@ -48,6 +48,13 @@ jobs:
           repository: mparticle/mparticle-android-sdk
           ref: ${{ inputs.branch_name }}
           submodules: recursive
+      - name: "Import GPG Key"
+        uses: crazy-max/ghaction-import-gpg@v4
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
       - name: "Create and push release branch"
         run: |
           git checkout -b regression/${{ github.run_number }}
@@ -176,7 +183,7 @@ jobs:
       - name: "Test Kits"
         run: ./gradlew -PisRelease=true clean testRelease publishReleaseLocal -c settings-kits.gradle
 
-  semantic-release:
+  semantic-release-dryrun:
     name: "Test Semantic Release - Dry Run"
     needs: [instrumented-tests, unit-tests, lint-checks, update-kits]
     runs-on: macos-11
@@ -207,9 +214,9 @@ jobs:
           -p conventional-changelog-conventionalcommits \
           semantic-release --dry-run
 
-  sync-repository:
+  delete-regression-branch:
     name: "Delete regression branch"
-    needs: semantic-release
+    needs: semantic-release-dryrun
     runs-on: ubuntu-18.04
     env:
       GITHUB_TOKEN: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}

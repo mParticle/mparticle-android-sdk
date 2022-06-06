@@ -1,0 +1,12 @@
+name: "Dependabot Branch Rebase"
+
+on:
+  push:
+    branches:
+      - development
+  workflow_dispatch:
+
+jobs:
+  rebase-branch:
+    name: "Rebase Development onto Dependabot Branch"
+    uses: mParticle/mparticle-workflows/.github/workflows/dependabot-rebase-development.yml@main
