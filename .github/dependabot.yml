@@ -4,6 +4,6 @@ updates:
       directory: "/"
       schedule:
           interval: daily
-      target-branch: "development"
+      target-branch: "chore/dependabot"
       labels: ["dependabot"]
       open-pull-requests-limit: 10

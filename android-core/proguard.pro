@@ -136,6 +136,7 @@
 -keep class com.mparticle.internal.Logger { *; }
 -keep class com.mparticle.internal.Logger$* { *; }
 -keep class com.mparticle.internal.KitsLoadedCallback { *; }
+-keep class com.mparticle.internal.listeners.InternalListenerManager { *; }
 
 -keep class com.mparticle.identity.IdentityApi { *; }
 -keep class com.mparticle.identity.IdentityApiRequest { *; }

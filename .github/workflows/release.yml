@@ -12,7 +12,7 @@ jobs:
   # SDK release is done from public main branch.
   confirm-public-repo-main-branch:
     name: "Confirm release is run from public/main branch"
-    uses: mParticle/mparticle-workflows/.github/workflows/sdk-release-repo-branch-check.yml@stable
+    uses: mParticle/mparticle-workflows/.github/workflows/sdk-release-repo-branch-check.yml@main
 
   create-release-branch:
     name: "Create Release Branch"
