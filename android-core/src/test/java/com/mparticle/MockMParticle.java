@@ -12,6 +12,9 @@ import com.mparticle.mock.MockContext;
 
 import org.mockito.Mockito;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class MockMParticle extends MParticle {
 
     public MockMParticle() {
@@ -28,6 +31,10 @@ public class MockMParticle extends MParticle {
         mMedia = Mockito.mock(MPMediaAPI.class);
         mIdentityApi = new IdentityApi(new MockContext(), mAppStateManager, mMessageManager, Internal().getConfigManager(), mKitManager, OperatingSystem.ANDROID);
         Mockito.when(mKitManager.updateKits(Mockito.any())).thenReturn(new KitsLoadedCallback());
+        MPEvent event = new MPEvent.Builder("this")
+                .customAttributes(new HashMap<String, String>())
+                .build();
+        Map<String, ?> attributes = event.getCustomAttributes();
     }
 
 

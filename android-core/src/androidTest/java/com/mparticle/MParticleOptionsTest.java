@@ -3,6 +3,8 @@ package com.mparticle;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Looper;
+
+import androidx.annotation.NonNull;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.GrantPermissionRule;
 
@@ -19,6 +21,7 @@ import com.mparticle.testutils.AndroidUtils.Mutable;
 import com.mparticle.testutils.BaseAbstractTest;
 import com.mparticle.testutils.MPLatch;
 
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -526,5 +529,33 @@ public class MParticleOptionsTest extends BaseAbstractTest {
 
         assertTrue(infoLogs.contains("ANDROID_ID will not be collected based on default settings"));
         infoLogs.clear();
+    }
+
+    @Test
+    public void testBatchCreationCallback() throws InterruptedException {
+        MParticleOptions.BatchCreationListener listener = new MParticleOptions.BatchCreationListener() {
+            @NonNull
+            @Override
+            public JSONObject onBatchCreated(@NonNull JSONObject batch) {
+                return batch;
+            }
+        };
+        MParticleOptions options = MParticleOptions.builder(mProductionContext)
+                .batchCreationListener(listener)
+                .credentials("this", "that")
+                .build();
+        assertEquals(listener, options.getBatchCreationListener());
+
+        options = MParticleOptions.builder(mProductionContext)
+                .credentials("this", "that")
+                .batchCreationListener(listener)
+                .batchCreationListener(null)
+                .build();
+        assertNull(options.getBatchCreationListener());
+
+        options = MParticleOptions.builder(mProductionContext)
+                .credentials("this", "that")
+                .build();
+        assertNull(options.getBatchCreationListener());
     }
 }

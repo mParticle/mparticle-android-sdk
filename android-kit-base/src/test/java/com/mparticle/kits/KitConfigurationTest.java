@@ -142,16 +142,16 @@ public class KitConfigurationTest {
         Map<String, String> attributes = new HashMap<String, String>();
         attributes.put("my custom attribute", "whatever");
         CommerceEvent event = new CommerceEvent.Builder(Product.ADD_TO_CART, new Product.Builder("name", "sku", 2).build()).customAttributes(attributes).build();
-        assertEquals("whatever", event.getCustomAttributes().get("my custom attribute"));
+        assertEquals("whatever", event.getCustomAttributeStrings().get("my custom attribute"));
         CommerceEvent filteredEvent = configuration.filterCommerceEvent(event);
-        assertNull(filteredEvent.getCustomAttributes().get("my custom attribute"));
+        assertNull(filteredEvent.getCustomAttributeStrings().get("my custom attribute"));
 
         //make sure we're only doing it for ADD_TO_CART
         CommerceEvent event2 = new CommerceEvent.Builder(Product.PURCHASE, new Product.Builder("name", "sku", 2).build()).customAttributes(attributes).transactionAttributes(new TransactionAttributes().setId("some id")).build();
 
-        assertEquals("whatever", event2.getCustomAttributes().get("my custom attribute"));
+        assertEquals("whatever", event2.getCustomAttributeStrings().get("my custom attribute"));
         CommerceEvent filteredEvent2 = configuration.filterCommerceEvent(event2);
-        assertEquals("whatever", filteredEvent2.getCustomAttributes().get("my custom attribute"));
+        assertEquals("whatever", filteredEvent2.getCustomAttributeStrings().get("my custom attribute"));
 
         event = new CommerceEvent.Builder(Product.CHECKOUT, new Product.Builder("name", "sku", 2).build()).checkoutOptions("cool options").build();
 

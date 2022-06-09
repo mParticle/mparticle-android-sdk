@@ -1,6 +1,5 @@
 package com.mparticle.lints
 
-import com.android.tools.lint.detector.api.skipParentheses
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiEnumConstant
@@ -34,6 +33,7 @@ import org.jetbrains.uast.getParentOfType
 import org.jetbrains.uast.getQualifiedChain
 import org.jetbrains.uast.getQualifiedParentOrThis
 import org.jetbrains.uast.kotlin.KotlinUBinaryExpression
+import org.jetbrains.uast.skipParenthesizedExprUp
 import org.jetbrains.uast.tryResolve
 import org.jetbrains.uast.util.isAssignment
 import org.jetbrains.uast.util.isConstructorCall
@@ -119,7 +119,7 @@ internal fun UExpression.getVariableElement(
     allowChainedCalls: Boolean,
     allowFields: Boolean
 ): PsiVariable? {
-    var parent = skipParentheses(getQualifiedParentOrThis().uastParent)
+    var parent = skipParenthesizedExprUp(getQualifiedParentOrThis().uastParent)
 
     // Handle some types of chained calls; e.g. you might have
     //    var = prefs.edit().put(key,value)
@@ -127,9 +127,9 @@ internal fun UExpression.getVariableElement(
     if (allowChainedCalls) {
         while (true) {
             if (parent is UQualifiedReferenceExpression) {
-                val parentParent = skipParentheses(parent.uastParent)
+                val parentParent = skipParenthesizedExprUp(parent.uastParent)
                 if (parentParent is UQualifiedReferenceExpression) {
-                    parent = skipParentheses(parentParent.uastParent)
+                    parent = skipParenthesizedExprUp(parentParent.uastParent)
                 } else if (parentParent is UVariable || parentParent is UPolyadicExpression) {
                     parent = parentParent
                     break

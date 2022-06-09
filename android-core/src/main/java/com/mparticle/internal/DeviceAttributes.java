@@ -270,7 +270,7 @@ public class DeviceAttributes {
                         message = "Successfully collected " + adIdInfo.advertiser.descriptiveName + " Advertising ID.";
                     }
                 }
-            }catch (JSONException jse) {
+            } catch (JSONException jse) {
                 Logger.debug("Failed while building device-customAttributes object: ", jse.toString());
             }
         }

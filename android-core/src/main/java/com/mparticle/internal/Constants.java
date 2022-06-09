@@ -392,6 +392,9 @@ public class Constants {
         String API_KEY = "api_key";
         String DATA = "data";
         String ALIAS_REQUEST_TYPE = "alias";
+
+        //batch was mutated
+        String MODIFIED_BATCH = "mb";
     }
 
     public interface Commerce {

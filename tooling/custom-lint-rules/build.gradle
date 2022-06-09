@@ -1,18 +1,23 @@
 import proguard.gradle.ProGuardTask
 
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'kotlin'
+apply plugin: 'com.android.lint'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 buildscript {
+    ext {
+        lintVersion = '30.1.3'
+    }
     repositories {
         mavenCentral()
         google()
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "com.android.tools.build:gradle:$gradle_version"
         classpath 'com.guardsquare:proguard-gradle:7.1.0'
     }
 }
@@ -35,17 +40,17 @@ dependencies {
     lintJar files('libs/mparticle-min.jar')
     lintJar project(':tooling:common')
     implementation configurations.lintJar
-    compileOnly 'com.android.tools.lint:lint-api:26.5.3'
-    compileOnly 'com.android.tools.lint:lint-checks:26.5.3'
-    compileOnly 'org.codehaus.groovy:groovy-all:3.0.7'
+    compileOnly "com.android.tools.lint:lint-api:$lintVersion"
+    compileOnly "com.android.tools.lint:lint-checks:$lintVersion"
+    compileOnly 'org.codehaus.groovy:groovy-all:3.0.8'
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'com.android.tools.lint:lint:26.5.3'
-    testImplementation 'com.android.tools.lint:lint-tests:26.5.3'
-    testImplementation 'com.android.tools:testutils:26.5.3'
-    testImplementation 'org.easytesting:fest-assert-core:2.0M10'
+    testImplementation "com.android.tools.lint:lint:$lintVersion"
+    testImplementation "com.android.tools.lint:lint-tests:$lintVersion"
+    testImplementation "com.android.tools:testutils:$lintVersion"
 }
 
 jar {
+    dependsOn(":tooling:common:jar")
     archiveName 'lint.jar'
     manifest {
         attributes 'Manifest-Version': 1.0
@@ -83,15 +88,9 @@ task proguardCore(type: ProGuardTask) {
 }
 
 afterEvaluate {
-    if (targetBuildType != null) {
-        compileKotlin.dependsOn proguardCore
-        proguardCore.dependsOn zipSources
-        zipSources.dependsOn ":android-core:compile${targetBuildType.capitalize()}JavaWithJavac"
-    }
-}
-
-beforeEvaluate {
-    cleanTempLibraries
+    compileKotlin.dependsOn proguardCore
+    proguardCore.dependsOn zipSources
+    zipSources.dependsOn ":android-core:compile${targetBuildType.capitalize()}JavaWithJavac"
 }
 
 task cleanTempLibraries {

@@ -374,7 +374,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                         .timestamp(mAppStateManager.getSession().mLastEventTime)
                         .name(event.getEventName())
                         .flags(event.getCustomFlags())
-                        .attributes(MPUtility.enforceAttributeConstraints(event.getCustomAttributes()))
+                        .attributes(MPUtility.enforceAttributeConstraints(event.getCustomAttributeStrings()))
                         .build(mAppStateManager.getSession(), mLocation, mConfigManager.getMpid());
 
                 message.put(MessageKey.EVENT_START_TIME, mAppStateManager.getSession().mLastEventTime);

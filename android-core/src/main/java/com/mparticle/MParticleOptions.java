@@ -42,6 +42,7 @@ public class MParticleOptions {
     private Boolean mUnCaughtExceptionLogging = false;
     private MParticle.LogLevel mLogLevel = MParticle.LogLevel.DEBUG;
     private AttributionListener mAttributionListener;
+    private BatchCreationListener batchCreationListener = null;
     private LocationTracking mLocationTracking;
     private PushRegistrationHelper.PushRegistration mPushRegistration;
     private Integer mIdentityConnectionTimeout = ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS;
@@ -119,6 +120,9 @@ public class MParticleOptions {
         }
         if (builder.attributionListener != null) {
             this.mAttributionListener = builder.attributionListener;
+        }
+        if (builder.batchCreationListener != null) {
+            this.batchCreationListener = builder.batchCreationListener;
         }
         if (builder.locationTracking != null) {
             this.mLocationTracking = builder.locationTracking;
@@ -271,6 +275,11 @@ public class MParticleOptions {
         return mAttributionListener;
     }
 
+    @Nullable
+    public BatchCreationListener getBatchCreationListener() {
+        return batchCreationListener;
+    }
+
     public boolean hasLocationTracking() {
         return mLocationTracking != null;
     }
@@ -358,6 +367,7 @@ public class MParticleOptions {
         private MParticle.LogLevel logLevel = null;
         BaseIdentityTask identityTask;
         private AttributionListener attributionListener;
+        private BatchCreationListener batchCreationListener;
         private ConfigManager configManager;
         private LocationTracking locationTracking;
         private PushRegistrationHelper.PushRegistration pushRegistration;
@@ -590,6 +600,12 @@ public class MParticleOptions {
         @NonNull
         public Builder attributionListener(@Nullable AttributionListener attributionListener) {
             this.attributionListener = attributionListener;
+            return this;
+        }
+
+        @NonNull
+        public Builder batchCreationListener(@Nullable BatchCreationListener batchCreationListener) {
+            this.batchCreationListener = batchCreationListener;
             return this;
         }
 
@@ -939,5 +955,17 @@ public class MParticleOptions {
                 return new DataplanOptions(this);
             }
         }
+    }
+
+    /**
+     Custom handler to modify or block batch data before upload.
+     If set, this will be called when a new batch of data is created. By returning a different value, you can change the batch contents, or by returning 'nil' you can block the batch from being uploaded.
+     Use with care. This feature was initially added to allow the value of existing fields to be modified. If you add new data in a format that the platform is not expecting, it may be dropped or not parsed correctly.
+     Note: Use of this handler will also cause the field 'mb' (modified batch) to appear in the batch so we can distinguish for troubleshooting purposes whether data was changed.
+     Also note: Unlike other callbacks, this block will be called on the SDK queue to prevent batches from being processed out of order. Please avoid excessively blocking in this handler as this will prevent the SDK from doing other tasks.
+     */
+    public interface BatchCreationListener {
+        @NonNull
+        JSONObject onBatchCreated(@NonNull JSONObject batch);
     }
 }
