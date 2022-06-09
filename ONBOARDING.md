@@ -38,9 +38,10 @@ When running the tests for the first time, It is possible that you run into the 
 **Please set the JAVA_HOME variable in your environment to match the location of your Java
 installation.**
 
-Any version between Java 8 and 17 is required to execute gradle, **Java 18 and later versions are
-not yet supported**, make sure that you have installed a JDK and the path **JAVA_HOME** is created
-in the system Environment Variables.
+Any version between Java 8 and 11 is required to execute gradle, **Any Java versions above that are
+not supported yet.** [Latest Release Notes](https://developer.android.com/studio/releases)
+Make sure that you have installed a JDK and the path **JAVA_HOME** is created in the system
+Environment Variables.
 
 To install the JDK software, do the following:
 Go to [Official Oracle JDK download Website](https://www.oracle.com/java/technologies/downloads/)
@@ -56,11 +57,8 @@ Lastly, edit the **Path** system variable and add a new variable *%JAVA_Home%\bi
 
 Additionally If you have multiple JDKs downloaded make sure that your Gradle JDK matches Java Home.
 You can do this by going in Android Studio to:  
-    Settings
-    -> Build, Execution, Deployment
-        -> Build Tools
-            -> Gradle
-                -> and choose the matching JDK version in the **Gradle JDK** dropdown menu.
+Settings -> Build, Execution, Deployment -> Build Tools -> Gradle -> and choose the matching JDK
+version in the **Gradle JDK** dropdown menu.
 
 Remember to close and reopen your project after you've made your changes or the error message may
 persist.
@@ -111,26 +109,27 @@ buildscript {
 
 ### Testing and Publishing Kits to the Maven Local Repository
 
-To publish the Kits to mavenLocal first make sure you have only selected the current Kit you are working on in the `settings-kits.gradle`, you can do so easily by commenting out the ones not needed:
+To publish the Kits to mavenLocal first make sure you have only selected the current Kit you are
+working on in the `settings-kits.gradle`, you can do so easily by commenting out the ones not
+needed:
 
 ```groovy
 include(
         ':kits:adjust-kit',
         ':kits:adobe-kit'
-    /* ':kits:adobemedia-kit',
-        ':kits:appboy-kit',
-        ...                     */
+        /* ':kits:adobemedia-kit',
+            ':kits:appboy-kit',
+            ...                     */
 )
 ```
-This will ensure faster running times and easier error troubleshooting.
 
+This will ensure faster running times and easier error troubleshooting.
 
 Now run the following command in the terminal:
 
 `./gradlew -PisRelease=true clean testRelease publishReleaseLocal -c settings-kits.gradle`
 
 You can now work on the specific kits you need, test them and even contribute through pull requests.
-
 
 ## Read More
 
