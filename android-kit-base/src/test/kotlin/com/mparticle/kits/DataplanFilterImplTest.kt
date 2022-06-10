@@ -235,7 +235,7 @@ class DataplanFilterImplTest {
 
             dataplanPoints.put(datapoint.toString(), allowedAttributes.keys.toHashSet())
             val dataplanFilter = DataplanFilterImpl(dataplanPoints, true, Random.nextBoolean(), false, false)
-            assertEquals(allowedAttributes, dataplanFilter.transformEventForEvent(event)?.customAttributes)
+            assertEquals(allowedAttributes, dataplanFilter.transformEventForEvent(event)?.customAttributeStrings)
             diversity.remove(datapoint.type)
         }
     }
@@ -272,7 +272,7 @@ class DataplanFilterImplTest {
 
             dataplanPoints.put(datapoint.toString(), allowedAttributes.keys.toHashSet())
             val dataplanFilter = DataplanFilterImpl(dataplanPoints, Random.Default.nextBoolean(), true, false, false)
-            assertEquals(allowedAttributes, dataplanFilter.transformEventForEvent(event)?.customAttributes)
+            assertEquals(allowedAttributes, dataplanFilter.transformEventForEvent(event)?.customAttributeStrings)
             diversity.remove(datapoint.type)
         }
     }

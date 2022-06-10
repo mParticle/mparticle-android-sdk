@@ -89,7 +89,7 @@ Data Plan parsed for Kit Filtering:
             }
             val dataPoint = dataPoints[dataPointKey.toString()]
             if (blockEventAttributes) {
-                event.customAttributes = event.customAttributes?.filterKeys {
+                event.customAttributes = event.customAttributeStrings?.filterKeys {
                     // null dataPoint means there are no constraints for custom attributes
                     if (dataPoint == null || dataPoint.contains(it)) {
                         true

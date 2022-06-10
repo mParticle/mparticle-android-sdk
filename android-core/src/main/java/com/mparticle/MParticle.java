@@ -12,11 +12,12 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.util.Log;
+import android.webkit.WebView;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import android.util.Log;
-import android.webkit.WebView;
 
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.identity.IdentityApi;
@@ -109,7 +110,7 @@ public class MParticle {
         mAppContext = options.getContext();
         mConfigManager = configManager;
         mAppStateManager = appStateManager;
-        mDatabaseManager = new MParticleDBManager(mAppContext);
+        mDatabaseManager = new MParticleDBManager(mAppContext, options);
         if (options.isUncaughtExceptionLoggingEnabled()) {
             enableUncaughtExceptionLogging();
         } else {

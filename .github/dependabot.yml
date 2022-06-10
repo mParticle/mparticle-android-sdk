@@ -1,13 +1,9 @@
 version: 2
 updates:
     - package-ecosystem: gradle
-      directory: '/'
+      directory: "/"
       schedule:
           interval: daily
-      target-branch: 'development'
-      labels: ['dependabot']
+      target-branch: "chore/dependabot"
+      labels: ["dependabot"]
       open-pull-requests-limit: 10
-      ignore:
-          # - dependency-name: 'rollup'
-          # - dependency-name: 'browserify'
-          # - dependency-name: '@babel/runtime'

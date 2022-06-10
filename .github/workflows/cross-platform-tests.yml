@@ -1,6 +1,6 @@
 name: "Cross Platform Tests"
 on:
-  pull_request_target
+  pull_request
 jobs:
   cross-platform-tests:
     timeout-minutes: 30
@@ -9,7 +9,6 @@ jobs:
       - name: "Checkout Cross Platform Tests Repo"
         uses: actions/checkout@v2
         with:
-          token: ${{ secrets.ANDROID_GITHUB_PAT }}  #medium-term solution, this needs to be an MParticle/non-personal PAT
           repository: mParticle/crossplatform-sdk-tests
       - name: "Checkout Android SDK Branch"
         uses: actions/checkout@v2

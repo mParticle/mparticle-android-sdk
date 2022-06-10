@@ -1,3 +1,86 @@
+## [5.41.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.40.4...v5.41.0) (2022-06-06)
+
+
+### Features
+
+* update dependabot job ([#172](https://github.com/mParticle/mparticle-android-sdk/issues/172)) ([fbe44b2](https://github.com/mParticle/mparticle-android-sdk/commit/fbe44b2fcec1716238273d33b1a088401def5bd0))
+
+
+### Updates & Maintenance
+
+* Update Submodules ([d42983c](https://github.com/mParticle/mparticle-android-sdk/commit/d42983cb469e76c37960367d103c481e118da96c))
+
+## [5.40.4](https://github.com/mParticle/mparticle-android-sdk/compare/v5.40.3...v5.40.4) (2022-06-02)
+
+
+### Updates & Maintenance
+
+* Update Submodules ([f516c2a](https://github.com/mParticle/mparticle-android-sdk/commit/f516c2a4784da5f4d21cfd9d2847eb6ca928008a))
+
+### [5.40.3](https://github.com/mParticle/mparticle-android-sdk/compare/v5.40.2...v5.40.3) (2022-05-26)
+
+
+### Updates & Maintenance
+
+* update lint dependencies, add version field ([#146](https://github.com/mParticle/mparticle-android-sdk/issues/146)) ([f5009b0](https://github.com/mParticle/mparticle-android-sdk/commit/f5009b03c4b94c21bc1a5525cd6ec5095657f324))
+* Update Submodules ([f334a97](https://github.com/mParticle/mparticle-android-sdk/commit/f334a97b468fe75ba68b49a8295066c2d1dcba5c))
+
+### [5.40.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.40.1...v5.40.2) (2022-05-20)
+
+
+### Bug Fixes
+
+* change default batch creation error logic ([#145](https://github.com/mParticle/mparticle-android-sdk/issues/145)) ([d0cf645](https://github.com/mParticle/mparticle-android-sdk/commit/d0cf6458fc1b296beb5289f4d3a3c91505f77adc))
+
+### [5.40.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.40.0...v5.40.1) (2022-05-20)
+
+
+### Bug Fixes
+
+* rollback removal of MPEvent's info() methods ([#144](https://github.com/mParticle/mparticle-android-sdk/issues/144)) ([854b3a0](https://github.com/mParticle/mparticle-android-sdk/commit/854b3a021142e4bb9a96635ec14928f20f1f5d83))
+
+## [5.40.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.39.0...v5.40.0) (2022-05-19)
+
+
+### Features
+
+* add client side rules ([#141](https://github.com/mParticle/mparticle-android-sdk/issues/141)) ([033ec68](https://github.com/mParticle/mparticle-android-sdk/commit/033ec689ede873f4686af940f7bdd69d58ff3efc))
+
+
+### Updates & Maintenance
+
+* add BatchCreationListener integration tests ([#143](https://github.com/mParticle/mparticle-android-sdk/issues/143)) ([7642acc](https://github.com/mParticle/mparticle-android-sdk/commit/7642accebf3340afffe11edf43736f07a73afd2d))
+* Update Submodules ([94dd501](https://github.com/mParticle/mparticle-android-sdk/commit/94dd5016d4997579d83cca671737bd8a8a7d0ff5))
+
+## [5.39.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.38.2...v5.39.0) (2022-05-17)
+
+
+### Features
+
+* update customAttributes to accept Object/Any ([#134](https://github.com/mParticle/mparticle-android-sdk/issues/134)) ([44e7c4c](https://github.com/mParticle/mparticle-android-sdk/commit/44e7c4c8bcae20062dd6e74368a17a14496bd371))
+
+
+### Bug Fixes
+
+* update semantic release job in daily check ([#139](https://github.com/mParticle/mparticle-android-sdk/issues/139)) ([01921c4](https://github.com/mParticle/mparticle-android-sdk/commit/01921c41d7139ce31816b757a042d50caf4048f3))
+
+
+### Updates & Maintenance
+
+* add in release notes generator updates ([#138](https://github.com/mParticle/mparticle-android-sdk/issues/138)) ([127f0a5](https://github.com/mParticle/mparticle-android-sdk/commit/127f0a53208f89824f48900ea306e29095cae3da))
+* Update Submodules ([1e8c6e3](https://github.com/mParticle/mparticle-android-sdk/commit/1e8c6e3f7e0f077b74270478e226cc68687187a6))
+
+## [5.38.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.38.1...v5.38.2) (2022-05-13)
+
+
+### Bug Fixes
+
+* add in environment token in daily job ([#135](https://github.com/mParticle/mparticle-android-sdk/issues/135)) ([8c60184](https://github.com/mParticle/mparticle-android-sdk/commit/8c60184bbd663a30dd28e19fb278eccb85254f93))
+* add value for api in custom lint IssueRegistry ([#129](https://github.com/mParticle/mparticle-android-sdk/issues/129)) ([5b9c520](https://github.com/mParticle/mparticle-android-sdk/commit/5b9c520a43d4aa85675eb8fa1af7032dd05364bf))
+* change dependence from stable tag to branch ([#133](https://github.com/mParticle/mparticle-android-sdk/issues/133)) ([9a99b1d](https://github.com/mParticle/mparticle-android-sdk/commit/9a99b1dde404d0fba1e94ea4ff3d40805dceccfd))
+* dry run param ([#137](https://github.com/mParticle/mparticle-android-sdk/issues/137)) ([e308449](https://github.com/mParticle/mparticle-android-sdk/commit/e308449d0c52fcb06761de143e61dfdc6d46334a))
+* pass in secret to release regression job ([#136](https://github.com/mParticle/mparticle-android-sdk/issues/136)) ([92cccea](https://github.com/mParticle/mparticle-android-sdk/commit/92cccea2b52f244ac11df1d8c689106282140c9f))
+
 ## [5.38.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.38.0...v5.38.1) (2022-05-02)
 
 

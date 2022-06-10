@@ -69,10 +69,10 @@ public class MPEvent extends BaseEvent {
 
         if (builder.category != null){
             category = builder.category;
-            if (getCustomAttributes() == null){
-                setCustomAttributes(new HashMap<String, String>());
+            if (getCustomAttributeStrings() == null){
+                setCustomAttributes(new HashMap<String, Object>());
             }
-            getCustomAttributes().put(Constants.MessageKey.EVENT_CATEGORY, builder.category);
+            getCustomAttributeStrings().put(Constants.MessageKey.EVENT_CATEGORY, builder.category);
         }
         if (builder.duration != null){
             duration = builder.duration;
@@ -107,7 +107,7 @@ public class MPEvent extends BaseEvent {
     }
 
     @Override
-    public void setCustomAttributes(@Nullable Map<String, String> customAttributes) {
+    public void setCustomAttributes(@NonNull Map<String, ?> customAttributes) {
         super.setCustomAttributes(customAttributes);
     }
 
@@ -116,9 +116,7 @@ public class MPEvent extends BaseEvent {
         eventType = mpEvent.eventType;
         eventName = mpEvent.eventName;
         if (mpEvent.getCustomAttributes() != null) {
-            Map<String, String> shallowCopy = new HashMap<String, String>();
-            shallowCopy.putAll(mpEvent.getCustomAttributes());
-            setCustomAttributes(shallowCopy);
+            setCustomAttributes(mpEvent.getCustomAttributes());
         }else {
             setCustomAttributes(null);
         }
@@ -153,15 +151,15 @@ public class MPEvent extends BaseEvent {
                     .append(length).append("ms")
                     .append("\n");
         }
-        if (getCustomAttributes() != null){
+        if (getCustomAttributeStrings() != null){
             builder.append("customAttributes:\n");
-            List<String> sortedKeys = new ArrayList(getCustomAttributes().keySet());
+            List<String> sortedKeys = new ArrayList(getCustomAttributeStrings().keySet());
             Collections.sort(sortedKeys);
             for (String key : sortedKeys)
             {
                 builder.append(key)
                 .append(":")
-                .append(getCustomAttributes().get(key))
+                .append(getCustomAttributeStrings().get(key))
                 .append("\n");
             }
         }
@@ -207,7 +205,7 @@ public class MPEvent extends BaseEvent {
     @Deprecated
     @Nullable
     public Map<String, String> getInfo() {
-        return getCustomAttributes();
+        return getCustomAttributeStrings();
     }
 
     @NonNull
@@ -238,7 +236,7 @@ public class MPEvent extends BaseEvent {
                 .name(getEventName())
                 .length(getLength())
                 .flags(getCustomFlags())
-                .attributes(MPUtility.enforceAttributeConstraints(getCustomAttributes()));
+                .attributes(MPUtility.enforceAttributeConstraints(getCustomAttributeStrings()));
     }
 
     /**
@@ -251,7 +249,7 @@ public class MPEvent extends BaseEvent {
         private MParticle.EventType eventType;
         private String eventName;
         private String category;
-        private Map<String, String> customAttributes;
+        private Map<String, ?> customAttributes;
         private Double duration = null, startTime = null, endTime = null;
         private Map<String, List<String>> customFlags = null;
         private boolean entering = true;
@@ -412,7 +410,7 @@ public class MPEvent extends BaseEvent {
         }
 
         @NonNull
-        public Builder customAttributes(@Nullable Map<String, String> customAttributes) {
+        public Builder customAttributes(@Nullable Map<String, ?> customAttributes) {
             this.customAttributes = customAttributes;
             return this;
         }
@@ -542,7 +540,7 @@ public class MPEvent extends BaseEvent {
                         String key = (String)keys.next();
                         info.put(key, infoObject.getString(key));
                     }
-                    builder.customAttributes = info;
+                    builder.customAttributes = new HashMap<>(info);
                 }
                 if (json.has(EVENT_CUSTOM_FLAGS)) {
                     JSONObject flags = json.getJSONObject(EVENT_CUSTOM_FLAGS);
@@ -601,7 +599,7 @@ public class MPEvent extends BaseEvent {
                 }
                 if (customAttributes != null){
                     JSONObject jsonInfo = new JSONObject();
-                    for (Map.Entry<String, String> entry : customAttributes.entrySet())
+                    for (Map.Entry<String, ?> entry : customAttributes.entrySet())
                     {
                         jsonInfo.put(entry.getKey(), entry.getValue());
                     }
