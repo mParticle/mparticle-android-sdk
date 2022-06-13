@@ -158,6 +158,7 @@ jobs:
         run: |
           git push origin HEAD:main
           git push origin HEAD:development
+          git push -f origin HEAD:chore/dependabot
       - name: "Push release commits to internal main"
         if: ${{ github.event.inputs.dryRun == 'false' }}
         run: |

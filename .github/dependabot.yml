@@ -7,3 +7,5 @@ updates:
       target-branch: "chore/dependabot"
       labels: ["dependabot"]
       open-pull-requests-limit: 10
+      commit-message:
+        prefix: "chore"
