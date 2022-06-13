@@ -57,7 +57,7 @@ dependencies {
     androidTestCompileOnly project(':android-core')
 
     if (legacyTest()) {
-        androidTestImplementation 'com.mparticle:android-core:4.17.1'
+        androidTestImplementation 'com.mparticle:android-core:5.41.1'
     } else {
         androidTestImplementation project(':android-core')
 
