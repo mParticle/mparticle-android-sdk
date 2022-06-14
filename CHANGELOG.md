@@ -1,3 +1,15 @@
+## [5.41.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.41.0...v5.41.1) (2022-06-13)
+
+
+### Bug Fixes
+
+* forward foreground push messages to kit ([#178](https://github.com/mParticle/mparticle-android-sdk/issues/178)) ([b0bebe7](https://github.com/mParticle/mparticle-android-sdk/commit/b0bebe79f4cee67da1b258a740ca4a20b8f3bb9d))
+
+
+### Updates & Maintenance
+
+* Update Submodules ([d279ef3](https://github.com/mParticle/mparticle-android-sdk/commit/d279ef3e16984f9e835f08dc889518a23cd26adf))
+
 ## [5.41.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.40.4...v5.41.0) (2022-06-06)
 
 
