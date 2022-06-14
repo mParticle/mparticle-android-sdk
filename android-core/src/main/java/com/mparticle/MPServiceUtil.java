@@ -162,10 +162,15 @@ public class MPServiceUtil {
                     Logger.warning("FCM parsing error: " + e);
                 }
             };
-            MParticle.start(MParticleOptions
-                    .builder(mContext)
-                    .configuration(new KitsLoadedListenerConfiguration(kitsLoadedListener))
-                    .buildForInternalRestart());
+            MParticle instance = MParticle.getInstance();
+            if (instance != null) {
+                instance.Internal().getKitManager().addKitsLoadedListener(kitsLoadedListener);
+            } else {
+                MParticle.start(MParticleOptions
+                        .builder(mContext)
+                        .configuration(new KitsLoadedListenerConfiguration(kitsLoadedListener))
+                        .buildForInternalRestart());
+            }
 
         } catch (Exception e) {
             Logger.warning("FCM parsing error: " + e);

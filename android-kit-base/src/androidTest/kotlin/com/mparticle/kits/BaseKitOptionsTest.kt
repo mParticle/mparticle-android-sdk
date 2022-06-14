@@ -12,6 +12,10 @@ import org.json.JSONObject
 open class BaseKitOptionsTest : BaseCleanInstallEachTest() {
 
     override fun startMParticle(optionsBuilder: MParticleOptions.Builder) {
+        startMParticle(optionsBuilder, true)
+    }
+
+    fun startMParticle(optionsBuilder: MParticleOptions.Builder, awaitKitLoaded: Boolean) {
         AccessUtils.setCredentialsIfEmpty(optionsBuilder)
         val kitsLoadedLatch = MPLatch(1)
         var kitCount = 0
@@ -56,7 +60,9 @@ open class BaseKitOptionsTest : BaseCleanInstallEachTest() {
             kitsLoadedLatch.countDown()
         }
         super.startMParticle(optionsBuilder)
-        kitsLoadedLatch.await()
+        if (awaitKitLoaded) {
+            kitsLoadedLatch.await()
+        }
     }
 
     protected fun waitForKitToStart(kitId: Int) {
