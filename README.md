@@ -258,7 +258,7 @@ NodeMissing | The required `node` dependency is not present in the $PATH variabl
 DataPlanMissing | Unable to fetch you DataPlan, could be a problem with credentials or network connectivity
 
 ## Downloading and configuring the mParticle Kits
-For information on regarding this topic please read our [Onboarding Document](/mparticle-android-sdk/ONBOARDING)
+For information on regarding this topic please read our [Onboarding Document](ONBOARDING.md)
 
 
 ## Read More
