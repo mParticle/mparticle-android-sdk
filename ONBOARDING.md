@@ -38,10 +38,8 @@ When running the tests for the first time, It is possible that you run into the 
 **Please set the JAVA_HOME variable in your environment to match the location of your Java
 installation.**
 
-Any version between Java 8 and 11 is required to execute gradle, **Any Java versions above that are
-not supported yet.** [Latest Release Notes](https://developer.android.com/studio/releases)
-Make sure that you have installed a JDK and the path **JAVA_HOME** is created in the system
-Environment Variables.
+Make sure that you have installed the Java 11 JDK and the path **JAVA_HOME** is created in the
+system Environment Variables.
 
 To install the JDK software, do the following:
 Go to [Official Oracle JDK download Website](https://www.oracle.com/java/technologies/downloads/)
@@ -49,9 +47,15 @@ select the appropriate JDK software and click Download. The JDK software is inst
 computer in the default location; for example, at C:\Program Files\Java\jdk1.6.0_02.
 
 To set JAVA_HOME, do the following:
+
+In Windows:
 Right click My Computer and select Properties. On the Advanced tab, select Environment Variables,
 and then edit *JAVA_HOME* to point to where the JDK software is located, for example, C:\Program
-Files\Java\jdk1.6.0_02.
+Files\Java\jdk1.6.0_02
+
+In Mac:Open the `.bash_profile` file and add the following
+line: `export PATH="{PATH_TO_MY_JAVA}:$PATH"`, where *PATH_TO_MY_JAVA* is the file path for you JDK
+installation, for example, /usr/libexec/java_home
 
 Lastly, edit the **Path** system variable and add a new variable *%JAVA_Home%\bin*.
 
@@ -71,6 +75,8 @@ GitHub account, SSH is used for authentication while GPG is used for signing tag
 
 Now type the following commands `git submodule init` (creates the local configuration file for the
 submodules). followed by `git submodule update --recursive` (updates all available submodules).
+
+Or you can do it in one line with `git submodule update --init`
 
 An error regarding the Javadoc file generation, **Illegal Package Name** may come up referencing
 some files with the .kt extension, a current quick fix for this is adding the following code in
