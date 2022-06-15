@@ -257,6 +257,10 @@ DataplanViolation | DataPlan violations
 NodeMissing | The required `node` dependency is not present in the $PATH variable
 DataPlanMissing | Unable to fetch you DataPlan, could be a problem with credentials or network connectivity
 
+## Downloading and configuring the mParticle Kits
+For information on regarding this topic please read our [Onboarding Document](/mparticle-android-sdk/ONBOARDING)
+
+
 ## Read More
 
 Just by initializing the SDK you'll be set up to track user installs, engagement, and much more. Check out our doc site to learn how to add specific event tracking to your app.
