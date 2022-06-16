@@ -53,7 +53,7 @@ Right click My Computer and select Properties. On the Advanced tab, select Envir
 and then edit *JAVA_HOME* to point to where the JDK software is located, for example, C:\Program
 Files\Java\jdk1.6.0_02
 
-In Mac:Open the `.bash_profile` file and add the following
+In Mac: Open the `.bash_profile` file and add the following
 line: `export PATH="{PATH_TO_MY_JAVA}:$PATH"`, where *PATH_TO_MY_JAVA* is the file path for you JDK
 installation, for example, /usr/libexec/java_home
 

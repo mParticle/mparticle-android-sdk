@@ -7,5 +7,7 @@ updates:
       target-branch: "chore/dependabot"
       labels: ["dependabot"]
       open-pull-requests-limit: 10
+      ignore:
+        - dependency-name: "com.mparticle:android-core"
       commit-message:
         prefix: "chore"

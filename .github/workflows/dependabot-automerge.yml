@@ -11,7 +11,8 @@ jobs:
     name: "Automerge Dependabot PR"
     if: >
       ${{ github.event.workflow_run.event == 'pull_request' &&
-      github.event.workflow_run.conclusion == 'success' }}
+      github.event.workflow_run.conclusion == 'success' &&
+      github.actor == 'dependabot[bot]' }}
     env:
       GITHUB_TOKEN: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
       GIT_AUTHOR_NAME: mparticle-automation
@@ -54,7 +55,3 @@ jobs:
               pull_number: issue_number,
               merge_method: 'rebase'
             });
-  rebase-development:
-    name: "Rebase Development onto Dependabot Branch"
-    needs: [ automerge-dependabot ]
-    uses: mParticle/mparticle-workflows/.github/workflows/dependabot-rebase-development.yml@stable
