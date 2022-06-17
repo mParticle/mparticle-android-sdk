@@ -85,7 +85,7 @@ public interface MParticleUser {
      *
      * @return whether the attributes were successfully set
      */
-    boolean incrementUserAttribute(@NonNull String key, int value);
+    boolean incrementUserAttribute(@NonNull String key, Number value);
 
     /**
      * remove an attribute for the user

@@ -19,7 +19,6 @@ import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -56,7 +55,7 @@ public interface KitManager {
 
     void setUserTag(String tag, long mpid);
 
-    void incrementUserAttribute(String key, int incrementValue, String newValue, long mpid);
+    void incrementUserAttribute(String key, Number incrementValue, String newValue, long mpid);
 
     void onConsentStateUpdated(ConsentState oldState, ConsentState newState, long mpid);
 

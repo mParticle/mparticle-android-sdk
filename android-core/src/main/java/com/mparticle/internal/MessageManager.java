@@ -909,10 +909,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         }
     }
 
-    public void incrementUserAttribute(String key, int value, long mpId) {
-        Map.Entry<String, Long> entry = new HashMap.SimpleEntry<String, Long>(key, mpId);
-        Message message = mMessageHandler.obtainMessage(MessageHandler.INCREMENT_USER_ATTRIBUTE, entry);
-        message.arg1 = value;
+    public void incrementUserAttribute(String key, Number value, long mpId) {
+        IncrementUserAttributeMessage incrementUserAttributeMessage = new IncrementUserAttributeMessage(key, mpId, value);
+        Message message = mMessageHandler.obtainMessage(MessageHandler.INCREMENT_USER_ATTRIBUTE, incrementUserAttributeMessage);
         mMessageHandler.sendMessage(message);
     }
 
@@ -1061,5 +1060,17 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     boolean hasDelayedStartOccurred() {
         return delayedStartOccurred;
+    }
+
+    static class IncrementUserAttributeMessage {
+        String key;
+        Long mpid;
+        Number incrementBy;
+
+        IncrementUserAttributeMessage(String key, Long mpid, Number incrementBy) {
+            this.key = key;
+            this.mpid = mpid;
+            this.incrementBy = incrementBy;
+        }
     }
 }

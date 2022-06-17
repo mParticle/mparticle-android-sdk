@@ -202,7 +202,7 @@ import java.util.Map;
         return setUserAttribute(key, value, userMpId);
     }
 
-    public boolean incrementUserAttribute(String key, int value, long userMpId) {
+    public boolean incrementUserAttribute(String key, Number value, long userMpId) {
         if (key == null) {
             Logger.warning("incrementUserAttribute called with a null key. Ignoring...");
             return false;
