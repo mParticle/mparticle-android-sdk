@@ -4,7 +4,6 @@ import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.MParticleUser;
-import com.mparticle.internal.KitManager;
 
 import java.util.HashMap;
 import java.util.List;
@@ -113,7 +112,7 @@ public class FilteredMParticleUser implements MParticleUser {
     }
 
     @Override
-    public boolean incrementUserAttribute(String key, int value) {
+    public boolean incrementUserAttribute(String key, Number value) {
         return false;
     }
 

@@ -821,6 +821,18 @@ public class MPUtility {
         return null;
     }
 
+    public static Number addNumbers(Number number1, Number number2) {
+        if(number1 instanceof Double || number2 instanceof Double) {
+            return number1.doubleValue() + number2.doubleValue();
+        } else if(number1 instanceof Float || number2 instanceof Float) {
+            return number1.floatValue() + number2.floatValue();
+        } else if(number1 instanceof Long || number2 instanceof Long) {
+            return number1.longValue() + number2.longValue();
+        } else {
+            return number1.intValue() + number2.intValue();
+        }
+    }
+
     private interface SyncRunnable<T> {
         T run();
     }

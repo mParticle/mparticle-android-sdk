@@ -243,7 +243,7 @@ public class KitFrameworkWrapper implements KitManager {
         return queueAttribute(new AttributeChange(key, mpid, AttributeChange.TAG));
     }
 
-    boolean queueAttributeIncrement(String key, int incrementedBy, String newValue, long mpid) {
+    boolean queueAttributeIncrement(String key, Number incrementedBy, String newValue, long mpid) {
         return queueAttribute(new AttributeChange(key, incrementedBy, newValue, mpid));
     }
 
@@ -264,7 +264,7 @@ public class KitFrameworkWrapper implements KitManager {
         final Object value;
         final long mpid;
         final int type;
-        int incrementedBy;
+        Number incrementedBy;
 
         static final int REMOVE_ATTRIBUTE = 1;
         static final int SET_ATTRIBUTE = 2;
@@ -292,7 +292,7 @@ public class KitFrameworkWrapper implements KitManager {
             this.type = type;
         }
 
-        AttributeChange(String key, int incrementedBy, String newValue, long mpid) {
+        AttributeChange(String key, Number incrementedBy, String newValue, long mpid) {
             this.key = key;
             this.value = newValue;
             this.incrementedBy = incrementedBy;
@@ -397,7 +397,7 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     @Override
-    public void incrementUserAttribute(String key, int incrementValue, String newValue, long mpid) {
+    public void incrementUserAttribute(String key, Number incrementValue, String newValue, long mpid) {
         if (!queueAttributeIncrement(key, incrementValue, newValue, mpid) && mKitManager != null) {
             mKitManager.incrementUserAttribute(key, incrementValue, newValue, mpid);
         }

@@ -96,7 +96,7 @@ public class MParticleUserImpl implements MParticleUser {
     }
 
     @Override
-    public boolean incrementUserAttribute(String key, int value) {
+    public boolean incrementUserAttribute(String key, Number value) {
         return mUserDelegate.incrementUserAttribute(key, value, getId());
     }
 

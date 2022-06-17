@@ -5,7 +5,7 @@ import com.mparticle.kits.FilteredMParticleUser
 import com.mparticle.kits.KitIntegration
 
 open class UserAttributeListenerTestKit : ListenerTestKit(), KitIntegration.UserAttributeListener {
-    var onIncrementUserAttribute: ((key: String?, incrementedBy: Int, value: String?, user: FilteredMParticleUser?) -> Unit)? = null
+    var onIncrementUserAttribute: ((key: String?, incrementedBy: Number, value: String?, user: FilteredMParticleUser?) -> Unit)? = null
     var onRemoveUserAttribute: ((key: String?, user: FilteredMParticleUser?) -> Unit)? = null
     var onSetUserAttribute: ((key: String?, value: Any?, user: FilteredMParticleUser?) -> Unit)? = null
     var onSetUserTag: ((key: String?, user: FilteredMParticleUser?) -> Unit)? = null
@@ -35,7 +35,7 @@ open class UserAttributeListenerTestKit : ListenerTestKit(), KitIntegration.User
         onUserReceived?.invoke(user)
     }
 
-    override fun onIncrementUserAttribute(key: String?, incrementedBy: Int, value: String?, user: FilteredMParticleUser?) {
+    override fun onIncrementUserAttribute(key: String?, incrementedBy: Number, value: String?, user: FilteredMParticleUser?) {
         onIncrementUserAttribute?.invoke(key, incrementedBy, value, user)
         onAttributeReceived?.invoke(key, value)
         onUserReceived?.invoke(user)

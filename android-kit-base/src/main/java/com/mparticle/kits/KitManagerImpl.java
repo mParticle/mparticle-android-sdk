@@ -711,7 +711,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     }
 
     @Override
-    public void incrementUserAttribute(String key, int incrementedBy, String newValue, long mpid) {
+    public void incrementUserAttribute(String key, Number incrementedBy, String newValue, long mpid) {
         if (mDataplanFilter.isUserAttributeBlocked(key)) {
             return;
         }

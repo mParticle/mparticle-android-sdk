@@ -7,6 +7,7 @@ import android.os.Message;
 import com.mparticle.MParticle;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
+import com.mparticle.internal.MessageManager.IncrementUserAttributeMessage;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.database.tables.SessionTable;
 import com.mparticle.internal.messages.BaseMPMessage;
@@ -15,6 +16,8 @@ import com.mparticle.internal.messages.MPAliasMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -228,8 +231,8 @@ import java.util.UUID;
                 break;
             case INCREMENT_USER_ATTRIBUTE:
                 try {
-                    Map.Entry<String, Long> obj = (Map.Entry<String, Long>)msg.obj;
-                    incrementUserAttribute(obj.getKey(), msg.arg1, obj.getValue());
+                    IncrementUserAttributeMessage obj = (IncrementUserAttributeMessage)msg.obj;
+                    incrementUserAttribute(obj);
                 } catch (Exception e) {
                     Logger.error(e, "Error while incrementing user attribute: ", e.toString());
                 }
@@ -262,39 +265,44 @@ import java.util.UUID;
         }
     }
 
-    private void incrementUserAttribute(String key, int incrementValue, long mpId) {
-        TreeMap<String, String> userAttributes = mMParticleDBManager.getUserAttributeSingles(mpId);
+    private void incrementUserAttribute(IncrementUserAttributeMessage message) {
+        TreeMap<String, String> userAttributes = mMParticleDBManager.getUserAttributeSingles(message.mpid);
 
-        if (!userAttributes.containsKey(key)) {
-            TreeMap<String, List<String>> userAttributeList = mMParticleDBManager.getUserAttributeLists(mpId);
-            if (userAttributeList.containsKey(key)) {
+        if (!userAttributes.containsKey(message.key)) {
+            TreeMap<String, List<String>> userAttributeList = mMParticleDBManager.getUserAttributeLists(message.mpid);
+            if (userAttributeList.containsKey(message.key)) {
                 Logger.error("Error while attempting to increment user attribute - existing attribute is a list, which can't be incremented.");
                 return;
             }
         }
         String newValue = null;
-        String currentValue = userAttributes.get(key);
-        if (currentValue == null) {
-            newValue = Integer.toString(incrementValue);
+        String currentValueString = userAttributes.get(message.key);
+        if (currentValueString == null) {
+            newValue = message.incrementBy.toString();
         } else {
             try {
-                newValue = Integer.toString(Integer.parseInt(currentValue) + incrementValue);
-            }catch (NumberFormatException nfe) {
+                Number currentValue = NumberFormat.getInstance().parse(currentValueString);
+                newValue = MPUtility.addNumbers(currentValue, message.incrementBy).toString();
+                Logger.info("incrementing attribute: \"" + message.key + "\" from: " + currentValueString + " by: " + message.incrementBy + " to: " + newValue);
+            }catch (ParseException nfe) {
+                Logger.error("Error while attempting to increment user attribute - existing attribute is not a number.");
+                return;
+            } catch (NumberFormatException nfe) {
                 Logger.error("Error while attempting to increment user attribute - existing attribute is not a number.");
                 return;
             }
         }
         MParticleDBManager.UserAttributeResponse wrapper = new MParticleDBManager.UserAttributeResponse();
         wrapper.attributeSingles = new HashMap<String, String>(1);
-        wrapper.attributeSingles.put(key, newValue);
-        wrapper.mpId = mpId;
+        wrapper.attributeSingles.put(message.key, newValue);
+        wrapper.mpId = message.mpid;
         List<MParticleDBManager.AttributionChange> attributionChanges = mMParticleDBManager.setUserAttribute(wrapper);
         for (MParticleDBManager.AttributionChange attributeChange: attributionChanges) {
             logUserAttributeChanged(attributeChange);
         }
         MParticle instance = MParticle.getInstance();
         if (instance != null && instance.Internal().getKitManager() != null) {
-            instance.Internal().getKitManager().incrementUserAttribute(key, incrementValue, newValue, mpId);
+            instance.Internal().getKitManager().incrementUserAttribute(message.key, message.incrementBy, newValue, message.mpid);
         }
     }
 

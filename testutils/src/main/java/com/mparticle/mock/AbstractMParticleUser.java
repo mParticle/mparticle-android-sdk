@@ -49,7 +49,7 @@ public class AbstractMParticleUser implements MParticleUser {
     }
 
     @Override
-    public boolean incrementUserAttribute(@NonNull String key, int value) {
+    public boolean incrementUserAttribute(@NonNull String key, Number value) {
         return false;
     }
 
