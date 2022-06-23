@@ -430,24 +430,24 @@ public class KitConfiguration {
         return builder.build();
     }
 
-    public final Map<String, String> filterEventAttributes(MPEvent event) {
-        return filterEventAttributes(event.getEventType(), event.getEventName(), mAttributeFilters, event.getCustomAttributeStrings());
+    public final Map<String, Object> filterEventAttributes(MPEvent event) {
+        return filterEventAttributes(event.getEventType(), event.getEventName(), mAttributeFilters, event.getCustomAttributes());
     }
 
-    public final Map<String, String> filterScreenAttributes(MParticle.EventType eventType, String eventName, Map<String, String> eventAttributes) {
+    public final Map<String, Object> filterScreenAttributes(MParticle.EventType eventType, String eventName, Map<String, Object> eventAttributes) {
         return filterEventAttributes(eventType, eventName, mScreenNameFilters, eventAttributes);
     }
 
-    public final Map<String, String> filterEventAttributes(MParticle.EventType eventType, String eventName, SparseBooleanArray filter, Map<String, String> eventAttributes) {
+    public final Map<String, Object> filterEventAttributes(MParticle.EventType eventType, String eventName, SparseBooleanArray filter, Map<String, Object> eventAttributes) {
         if (eventAttributes != null && eventAttributes.size() > 0 && filter != null && filter.size() > 0) {
             String eventTypeStr = "0";
             if (eventType != null) {
                 eventTypeStr = eventType.ordinal() + "";
             }
-            Iterator<Map.Entry<String, String>> attIterator = eventAttributes.entrySet().iterator();
-            Map<String, String> newAttributes = new HashMap<String, String>();
+            Iterator<Map.Entry<String, Object>> attIterator = eventAttributes.entrySet().iterator();
+            Map<String, Object> newAttributes = new HashMap<>();
             while (attIterator.hasNext()) {
-                Map.Entry<String, String> entry = attIterator.next();
+                Map.Entry<String, Object> entry = attIterator.next();
                 String key = entry.getKey();
                 int hash = KitUtils.hashForFiltering(eventTypeStr + eventName + key);
                 if (filter.get(hash, true)) {

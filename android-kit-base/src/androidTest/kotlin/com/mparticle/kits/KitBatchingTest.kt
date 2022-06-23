@@ -4,11 +4,13 @@ import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.kits.testkits.BaseTestKit
+import com.mparticle.kits.testkits.EventTestKit
 import com.mparticle.networking.Matcher
 import com.mparticle.testutils.MPLatch
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -21,8 +23,44 @@ class KitBatchingTest : BaseKitOptionsTest() {
             .configuration(
                 KitOptions()
                     .addKit(123, BatchKit::class.java)
+                    .addKit(456, EventTestKit::class.java)
             )
         startMParticle(options)
+    }
+
+    @Test
+    fun testEventAttributesRetainsOriginalTypes() {
+        val latch = MPLatch(1)
+        var receivedEvent: MPEvent? = null
+        (MParticle.getInstance()?.getKitInstance(456) as EventTestKit).let { kit ->
+            kit.onLogEvent = { event ->
+                receivedEvent = event
+                latch.countDown()
+                null
+            }
+        }
+        val event = MPEvent.Builder("some event")
+            .customAttributes(
+                mapOf(
+                    "String" to "String",
+                    "Long" to 100L,
+                    "Double" to 1.1,
+                    "Map" to mapOf("foo" to "bar", "buzz" to false)
+                )
+            )
+            .build()
+        MParticle.getInstance()?.logEvent(event)
+        latch.await()
+
+        assertNotNull(receivedEvent)
+        receivedEvent!!.customAttributes!!.let {
+            assertTrue(it["String"] is String)
+            assertTrue(it["Long"] is Long)
+            assertTrue(it["Double"] is Double)
+            assertTrue(it["Map"] is Map<*, *>)
+            val originalAttributes = event.customAttributes!!
+            it.forEach { key, value -> assertEquals(value, originalAttributes[key]) }
+        }
     }
 
     @Test
