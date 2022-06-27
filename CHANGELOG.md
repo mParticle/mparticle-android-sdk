@@ -1,3 +1,22 @@
+## [5.41.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.41.1...v5.41.2) (2022-06-27)
+
+
+### Bug Fixes
+
+* clean up dependabot step ([#186](https://github.com/mParticle/mparticle-android-sdk/issues/186)) ([e9d5c30](https://github.com/mParticle/mparticle-android-sdk/commit/e9d5c30a4ef4f383c603bf05ceab8bafb6f3dd6e))
+* retain the original attribute value type when forwarded to kits ([#189](https://github.com/mParticle/mparticle-android-sdk/issues/189)) ([acb6ec4](https://github.com/mParticle/mparticle-android-sdk/commit/acb6ec48b03f1bb8630d23b4473376877d6eb17e))
+* update dependabot token for pull_request ([#181](https://github.com/mParticle/mparticle-android-sdk/issues/181)) ([96b76b5](https://github.com/mParticle/mparticle-android-sdk/commit/96b76b5bc3e7a69360e4949a1f211259c7964e90))
+
+
+### Documentation
+
+* Create onboarding.md file in android sdk repo ([#180](https://github.com/mParticle/mparticle-android-sdk/issues/180)) ([1a6f715](https://github.com/mParticle/mparticle-android-sdk/commit/1a6f715f076603c75f30f45c5792ab4613715672))
+
+
+### Updates & Maintenance
+
+* Update Submodules ([874f6ee](https://github.com/mParticle/mparticle-android-sdk/commit/874f6ee0eec33e41a33bb7cb9ce2c53134f04345))
+
 ## [5.41.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.41.0...v5.41.1) (2022-06-13)
 
 
