@@ -951,7 +951,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             try {
                 if (provider instanceof KitIntegration.EventListener && !provider.isDisabled() && provider.getConfiguration().shouldLogScreen(screenEvent.getEventName())) {
                     MPEvent filteredEvent = new MPEvent.Builder(screenEvent)
-                            .customAttributes(provider.getConfiguration().filterScreenAttributes(null, screenEvent.getEventName(), screenEvent.getCustomAttributeStrings()))
+                            .customAttributes(provider.getConfiguration().filterScreenAttributes(null, screenEvent.getEventName(), screenEvent.getCustomAttributes()))
                             .build();
 
                     List<CustomMapping.ProjectionResult> projectedEvents = CustomMapping.projectEvents(
