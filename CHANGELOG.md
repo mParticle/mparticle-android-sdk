@@ -1,3 +1,16 @@
+## [5.41.3](https://github.com/mParticle/mparticle-android-sdk/compare/v5.41.2...v5.41.3) (2022-07-01)
+
+
+### Bug Fixes
+
+* config migration logic causes kits to deinit on re-upgrade ([#196](https://github.com/mParticle/mparticle-android-sdk/issues/196)) ([ae210c4](https://github.com/mParticle/mparticle-android-sdk/commit/ae210c48cae363fc1d5c3ee2a4e132795e3b333c))
+* modify() call throws an exception when user is not present ([#195](https://github.com/mParticle/mparticle-android-sdk/issues/195)) ([72731d5](https://github.com/mParticle/mparticle-android-sdk/commit/72731d5da3597a3298d113a5ecc427cd773f51cd))
+
+
+### Updates & Maintenance
+
+* Update Submodules ([99fed27](https://github.com/mParticle/mparticle-android-sdk/commit/99fed275ce272535a8891e179996c305c6999dc2))
+
 ## [5.41.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.41.1...v5.41.2) (2022-06-27)
 
 
