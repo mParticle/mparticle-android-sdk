@@ -15,6 +15,8 @@ import com.mparticle.commerce.Impression;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.Promotion;
 import com.mparticle.commerce.TransactionAttributes;
+import com.mparticle.identity.IdentityApi;
+import com.mparticle.identity.IdentityApi.SingleUserIdentificationCallback;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.IdentityStateListener;
 import com.mparticle.identity.MParticleUser;
@@ -820,18 +822,6 @@ public class MParticleJSInterface {
             Logger.warning(String.format(errorMsg, (jse.getMessage() + (!MPUtility.isEmpty(previousErrorMessage) ? "\n" + previousErrorMessage : ""))));
         }
         return identityType;
-    }
-
-    abstract class SingleUserIdentificationCallback implements IdentityStateListener {
-
-        @Override
-        public void onUserIdentified(MParticleUser user, MParticleUser previousUser) {
-            MParticle.getInstance().Identity().removeIdentityStateListener(this);
-            onUserFound(user);
-        }
-
-        abstract void onUserFound(MParticleUser user);
-
     }
 
     public static void registerWebView(WebView webView, String workspaceToken) {

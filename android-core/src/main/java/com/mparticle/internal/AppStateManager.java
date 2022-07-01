@@ -12,6 +12,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 
+import androidx.annotation.Nullable;
+
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.identity.IdentityApi;
@@ -171,7 +173,9 @@ public class  AppStateManager {
                 initialize(mCurrentActivityName, previousSessionUri, previousSessionParameters, previousSessionPackage);
             } else if (isBackgrounded() && mLastStoppedTime.get() > 0) {
                 isBackToForeground = true;
-                mMessageManager.postToMessageThread(new CheckAdIdRunnable());
+                MPUtility.AdIdInfo adIdInfo =  MPUtility.getAdIdInfo(mContext);
+                String currentGoogleAdId = adIdInfo == null ? null : adIdInfo.id;
+                mMessageManager.postToMessageThread(new CheckAdIdRunnable(currentGoogleAdId, mConfigManager.getPreviousAdId()));
                 logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE,
                         mCurrentActivityName,
                         mLastStoppedTime.get() - mLastForegroundTime,
@@ -441,33 +445,43 @@ public class  AppStateManager {
         return mCurrentActivityReference;
     }
 
-    class CheckAdIdRunnable implements Runnable {
+    static class CheckAdIdRunnable implements Runnable {
+        String currentAdId;
+        String previousAdId;
+
+        CheckAdIdRunnable(@Nullable String currentAdId, @Nullable String previousAdId) {
+            this.currentAdId = currentAdId;
+            this.previousAdId = previousAdId;
+        }
 
         @Override
         public void run() {
-            String previousGoogleAdId = mConfigManager.getPreviousAdId();
-            MPUtility.AdIdInfo adIdInfo =  MPUtility.getAdIdInfo(mContext);
-            String currentGoogleAdId = adIdInfo == null ? null : adIdInfo.id;
-            if (currentGoogleAdId != null && !currentGoogleAdId.equals(previousGoogleAdId)) {
+            if (currentAdId != null && !currentAdId.equals(previousAdId)) {
                 MParticle instance = MParticle.getInstance();
                 if (instance != null) {
                     MParticleUser user = instance.Identity().getCurrentUser();
-
                     Builder builder;
                     if (user != null) {
-                        builder = new Builder(user);
+                        instance.Identity().modify(new Builder(user)
+                                .googleAdId(currentAdId, previousAdId)
+                                .build());
                     } else {
-                        builder = new Builder();
+                        instance.Identity().addIdentityStateListener(new IdentityApi.SingleUserIdentificationCallback() {
+                            @Override
+                            public void onUserFound(MParticleUser user) {
+                                instance.Identity().modify(new Builder(user)
+                                        .googleAdId(currentAdId, previousAdId)
+                                        .build());
+                            }
+                        });
                     }
-                    instance.Identity().modify(builder
-                            .googleAdId(currentGoogleAdId, previousGoogleAdId)
-                            .build());
+
                 }
             }
         }
     }
 
-    class Builder extends IdentityApiRequest.Builder {
+    static class Builder extends IdentityApiRequest.Builder {
         Builder(MParticleUser user) {
             super(user);
         }
