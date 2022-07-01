@@ -72,6 +72,7 @@ public class ConfigManager {
     static final String DATAPLAN_BLOCK_USER_ATTRIBUTES = "ua";
     static final String DATAPLAN_BLOCK_USER_IDENTITIES = "id";
     static final String KIT_CONFIG_KEY = "kit_config";
+    static final String MIGRATED_TO_KIT_SHARED_PREFS = "is_mig_kit_sp";
 
     private static final int DEVMODE_UPLOAD_INTERVAL_MILLISECONDS = 10 * 1000;
     private static final int DEFAULT_MAX_ALIAS_WINDOW_DAYS = 90;
@@ -180,7 +181,7 @@ public class ConfigManager {
     @Nullable
     @WorkerThread
     public JSONArray getLatestKitConfiguration() {
-        String oldConfig = getKitConfigPreferences().getString(KIT_CONFIG_KEY, new JSONArray().toString());
+        String oldConfig = getKitConfigPreferences().getString(KIT_CONFIG_KEY, null);
         if (!MPUtility.isEmpty(oldConfig)) {
             try {
                 return new JSONArray(oldConfig);
@@ -237,15 +238,19 @@ public class ConfigManager {
     }
 
     void migrateConfigIfNeeded() {
-        String configString = sPreferences.getString(CONFIG_JSON, null);
-        if (!MPUtility.isEmpty(configString)) {
-            try {
-                //save ourselves some time and only parse the JSONObject if might contain the embedded kits key
-                if (configString.contains("\"" + KEY_EMBEDDED_KITS + "\":")) {
-                    saveConfigJson(new JSONObject(configString), getEtag(), getIfModified(), getConfigTimestamp());
-                }
-            } catch (JSONException jse) {
+        if (!sPreferences.getBoolean(MIGRATED_TO_KIT_SHARED_PREFS, false)) {
+            sPreferences.edit().putBoolean(MIGRATED_TO_KIT_SHARED_PREFS, true).apply();
+            String configString = sPreferences.getString(CONFIG_JSON, null);
+            if (!MPUtility.isEmpty(configString)) {
+                try {
+                    //save ourselves some time and only parse the JSONObject if might contain the embedded kits key
+                    if (configString.contains("\"" + KEY_EMBEDDED_KITS + "\":")) {
+                        Logger.info("Migrating kit configuration");
+                        saveConfigJson(new JSONObject(configString), getEtag(), getIfModified(), getConfigTimestamp());
+                    }
+                } catch (JSONException jse) {
 
+                }
             }
         }
     }
