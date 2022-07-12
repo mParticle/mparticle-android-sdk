@@ -9,5 +9,6 @@ updates:
       open-pull-requests-limit: 10
       ignore:
         - dependency-name: "com.mparticle:android-core"
+        - dependency-name: "com.google.firebase:firebase-messaging"
       commit-message:
         prefix: "chore"
