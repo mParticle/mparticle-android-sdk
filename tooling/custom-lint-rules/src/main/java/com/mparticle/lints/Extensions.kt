@@ -32,7 +32,6 @@ import org.jetbrains.uast.getOutermostQualified
 import org.jetbrains.uast.getParentOfType
 import org.jetbrains.uast.getQualifiedChain
 import org.jetbrains.uast.getQualifiedParentOrThis
-import org.jetbrains.uast.kotlin.KotlinUBinaryExpression
 import org.jetbrains.uast.skipParenthesizedExprUp
 import org.jetbrains.uast.tryResolve
 import org.jetbrains.uast.util.isAssignment
@@ -60,7 +59,7 @@ internal fun UExpression.resolveValue(initializer: Expression): Value {
         return Value(initializer, eval, this)
     }
     if (this is UReferenceExpression) {
-        var reference = resolve()
+        val reference = resolve()
         if (reference is PsiEnumConstant) {
             (this as? UQualifiedReferenceExpression)?.run {
                 val className = (receiver.tryResolve() as? PsiClass)?.getQualifiedName(true)
@@ -71,22 +70,13 @@ internal fun UExpression.resolveValue(initializer: Expression): Value {
             }
         }
         if (reference is PsiVariable) {
-            val method = getParentOfType<UMethod>(UMethod::class.java) ?: null
+            val method = getParentOfType(UMethod::class.java)
             if (method != null) {
                 val collectorVisitor = VariableCollector(reference, method, initializer, true)
                 val obj = collectorVisitor.getUnresolvedObject()
                 return Value(initializer, obj, this)
             }
         }
-    }
-    if (this is KotlinUBinaryExpression) {
-        val qualifiedClassName = (this.getExpressionType() as? PsiClassReferenceType)?.reference?.qualifiedName
-        val methodName = (this as KotlinUBinaryExpression).operatorIdentifier?.name
-        val psiMethod = (this as KotlinUBinaryExpression).resolveOperator()
-        val leftValue = this.leftOperand.resolveValue(initializer)
-        val rightValue = this.rightOperand.resolveValue(initializer)
-        val method = Class.forName("kotlin.TuplesKt").getDeclaredMethod("to", Any::class.java, Any::class.java)
-//        return Value(false, UnresolvedObject())
     }
     return Value(initializer, null, this)
 }
@@ -192,7 +182,7 @@ internal fun UCallExpression.receiverClassName(stripGenerics: Boolean = true): S
     fun stripGenerics() {
         val start = className?.indexOf("<") ?: 0
         val end = className?.indexOf(">") ?: 0
-        if (start > 0 && end > 0 && end < className?.length ?: 0 - 2) {
+        if (start > 0 && end > 0 && end < (className?.length ?: (0 - 2))) {
             className = className?.removeRange(start, end + 1)
         }
         if (className?.contains(">") == true) {
@@ -231,17 +221,14 @@ internal fun PsiClass.getQualifiedName(reflectable: Boolean): String? {
 }
 
 internal fun UExpression.resolveChainedCalls(returnValue: Boolean, instance: Expression): Expression {
-    var initialInstance = instance
+    val initialInstance = instance
     var calls = (getOutermostQualified() ?: this).getQualifiedChain().toMutableList()
     calls = calls.filter { it is UCallExpression }.toMutableList()
     // check if first call is a constructor - Product.Builder().brand("") otherwise, the instance
     // argument should be the object the chain is being called on
-    if (initialInstance == null) {
-        initialInstance = (calls.removeAt(0) as UCallExpression).resolveExpression(instance, true)
-    }
     return calls.fold(initialInstance) { acc, item ->
         (item as UCallExpression).resolveExpression(acc, true)
-    }?.apply {
+    }.apply {
         if (this is MethodCall) {
             this.returnValue = returnValue
         }

@@ -10,9 +10,9 @@ jobs:
   automerge-dependabot:
     name: "Automerge Dependabot PR"
     if: >
-      ${{ github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.event == 'pull_request' &&
       github.event.workflow_run.conclusion == 'success' &&
-      github.actor == 'dependabot[bot]' }}
+      github.actor == 'dependabot[bot]'
     env:
       GITHUB_TOKEN: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
       GIT_AUTHOR_NAME: mparticle-automation

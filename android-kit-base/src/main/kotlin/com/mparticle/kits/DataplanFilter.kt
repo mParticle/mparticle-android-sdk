@@ -100,7 +100,7 @@ Data Plan parsed for Kit Filtering:
                 }
                 if (event is CommerceEvent) {
                     val productActionDatapoint = dataPoints["$dataPointKey.$PRODUCT_ACTION_PRODUCTS"]
-                    event.products?.forEach { product ->
+                    event.products?.iterator()?.forEach { product ->
                         product?.customAttributes?.apply {
                             val filteredAttributes = filterKeys {
                                 productActionDatapoint?.contains(it) ?: true
@@ -110,8 +110,8 @@ Data Plan parsed for Kit Filtering:
                         }
                     }
                     val productImpressionDatapoint = dataPoints["$dataPointKey.$PRODUCT_IMPRESSION_PRODUCTS"]
-                    if (event.impressions?.size ?: 0 > 0) {
-                        event.impressions?.forEach {
+                    if ((event.impressions?.size ?: 0) > 0) {
+                        event.impressions?.iterator()?.forEach {
                             it.products.forEach { product ->
                                 product?.customAttributes?.apply {
                                     val filteredAttributes = filterKeys {
