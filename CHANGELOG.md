@@ -1,3 +1,15 @@
+## [5.42.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.41.3...v5.42.0) (2022-07-18)
+
+
+### Features
+
+* upgrade sonarqube to 3.4 and kotlin to 1.7.10 ([#203](https://github.com/mParticle/mparticle-android-sdk/issues/203)) ([699ae9e](https://github.com/mParticle/mparticle-android-sdk/commit/699ae9e310ce9b033fc9bee0f1583d083ab60e40))
+
+
+### Updates & Maintenance
+
+* Update Submodules ([27a68d1](https://github.com/mParticle/mparticle-android-sdk/commit/27a68d18f80d83a7a975a021585a47959aa552b8))
+
 ## [5.41.3](https://github.com/mParticle/mparticle-android-sdk/compare/v5.41.2...v5.41.3) (2022-07-01)
 
 
