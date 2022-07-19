@@ -3,9 +3,6 @@ package com.mparticle.identity;
 import com.mparticle.MParticle;
 import com.mparticle.MockMParticle;
 import com.mparticle.UserAttributeListener;
-import com.mparticle.consent.ConsentState;
-
-import junit.framework.Assert;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

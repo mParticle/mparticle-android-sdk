@@ -1,0 +1,3 @@
+package com.mparticle
+
+interface UserAttributeListenerType

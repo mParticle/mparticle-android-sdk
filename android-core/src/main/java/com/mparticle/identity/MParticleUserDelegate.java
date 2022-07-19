@@ -4,7 +4,7 @@ import android.content.Context;
 import android.os.Build;
 
 import com.mparticle.MParticle;
-import com.mparticle.UserAttributeListener;
+import com.mparticle.UserAttributeListenerType;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
@@ -21,7 +21,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,10 +42,24 @@ import java.util.Map;
     }
 
     public Map<String, Object> getUserAttributes(long mpId) {
-        return mMessageManager.getUserAttributes(null, mpId);
+        Map<String, Object> stringifiedAttributes = mMessageManager.getUserAttributes(null, mpId);
+        Map<String, Object> typedAttributes = new HashMap<>();
+        for (Map.Entry<String, Object> stringifiedAttribute: stringifiedAttributes.entrySet()) {
+            String key = stringifiedAttribute.getKey();
+            Object value = stringifiedAttribute.getValue();
+            if (value instanceof String) {
+                try {
+                    value = NumberFormat.getInstance().parse(value.toString());
+                } catch (ParseException ex) {
+                    //do nothing, this just means the attribute value is a regular String
+                }
+            }
+            typedAttributes.put(key, value);
+        }
+        return typedAttributes;
     }
 
-    public Map<String, Object> getUserAttributes(final UserAttributeListener listener, long mpId) {
+    public Map<String, Object> getUserAttributes(final UserAttributeListenerType listener, long mpId) {
         return mMessageManager.getUserAttributes(listener, mpId);
     }
 

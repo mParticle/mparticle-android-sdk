@@ -24,6 +24,7 @@ import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.UserAttributeListener;
+import com.mparticle.UserAttributeListenerType;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.identity.AliasRequest;
 import com.mparticle.internal.Constants.MessageKey;
@@ -856,7 +857,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         }
     }
 
-    public Map<String, Object> getUserAttributes(final UserAttributeListener listener, long mpId) {
+    public Map<String, Object> getUserAttributes(final UserAttributeListenerType listener, long mpId) {
         return mMParticleDBManager.getUserAttributes(listener, mpId);
     }
 
@@ -895,11 +896,11 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         container.time = System.currentTimeMillis();
         container.mpId = mpId;
         if (value instanceof List) {
-            container.attributeLists = new HashMap<String, List<String>>();
+            container.attributeLists = new HashMap<>();
             container.attributeLists.put(key, (List<String>) value);
         }else {
-            container.attributeSingles = new HashMap<String, String>();
-            container.attributeSingles.put(key, (String) value);
+            container.attributeSingles = new HashMap<>();
+            container.attributeSingles.put(key, value);
         }
         if (synchronously) {
             mMessageHandler.setUserAttributes(container);

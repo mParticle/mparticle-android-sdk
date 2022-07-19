@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
+import com.mparticle.UserAttributeListenerType;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.MParticleUser;
 
@@ -24,7 +25,7 @@ public class AbstractMParticleUser implements MParticleUser {
 
     @Nullable
     @Override
-    public Map<String, Object> getUserAttributes(@Nullable UserAttributeListener listener) {
+    public Map<String, Object> getUserAttributes(@Nullable UserAttributeListenerType listener) {
         return null;
     }
 

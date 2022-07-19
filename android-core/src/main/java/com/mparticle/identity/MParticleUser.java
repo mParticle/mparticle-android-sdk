@@ -5,7 +5,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 
 import com.mparticle.MParticle;
-import com.mparticle.UserAttributeListener;
+import com.mparticle.UserAttributeListenerType;
 import com.mparticle.consent.ConsentState;
 
 import java.util.Map;
@@ -37,7 +37,7 @@ public interface MParticleUser {
      * @return
      */
     @Nullable
-    Map<String, Object> getUserAttributes(@Nullable final UserAttributeListener listener);
+    Map<String, Object> getUserAttributes(@Nullable final UserAttributeListenerType listener);
 
     /**
      * assign attributes to the User in bulk
