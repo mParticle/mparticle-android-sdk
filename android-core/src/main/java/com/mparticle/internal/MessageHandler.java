@@ -276,23 +276,12 @@ import java.util.UUID;
             }
         }
         String newValue = null;
-        Object currentValueString = userAttributes.get(message.key);
-        if (currentValueString == null) {
+        Object currentValue = userAttributes.get(message.key);
+        if (currentValue == null) {
             newValue = message.incrementBy.toString();
-        } else {
-            try {
-                if (currentValueString instanceof String) {
-                    Number currentValue = NumberFormat.getInstance().parse(currentValueString.toString());
-                    newValue = MPUtility.addNumbers(currentValue, message.incrementBy).toString();
-                    Logger.info("incrementing attribute: \"" + message.key + "\" from: " + currentValueString + " by: " + message.incrementBy + " to: " + newValue);
-                }
-            }catch (ParseException nfe) {
-                Logger.error("Error while attempting to increment user attribute - existing attribute is not a number.");
-                return;
-            } catch (NumberFormatException nfe) {
-                Logger.error("Error while attempting to increment user attribute - existing attribute is not a number.");
-                return;
-            }
+        } else if (currentValue instanceof Number) {
+            newValue = MPUtility.addNumbers((Number) currentValue, message.incrementBy).toString();
+            Logger.info("incrementing attribute: \"" + message.key + "\" from: " + currentValue + " by: " + message.incrementBy + " to: " + newValue);
         }
         MParticleDBManager.UserAttributeResponse wrapper = new MParticleDBManager.UserAttributeResponse();
         wrapper.attributeSingles = new HashMap<>(1);

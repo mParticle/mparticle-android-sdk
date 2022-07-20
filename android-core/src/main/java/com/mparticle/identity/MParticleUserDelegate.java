@@ -42,25 +42,11 @@ import java.util.Map;
     }
 
     public Map<String, Object> getUserAttributes(long mpId) {
-        Map<String, Object> stringifiedAttributes = mMessageManager.getUserAttributes(null, mpId);
-        Map<String, Object> typedAttributes = new HashMap<>();
-        for (Map.Entry<String, Object> stringifiedAttribute: stringifiedAttributes.entrySet()) {
-            String key = stringifiedAttribute.getKey();
-            Object value = stringifiedAttribute.getValue();
-            if (value instanceof String) {
-                try {
-                    value = NumberFormat.getInstance().parse(value.toString());
-                } catch (ParseException ex) {
-                    //do nothing, this just means the attribute value is a regular String
-                }
-            }
-            typedAttributes.put(key, value);
-        }
-        return typedAttributes;
+        return mMessageManager.getUserAttributes(null, mpId);
     }
 
     public Map<String, Object> getUserAttributes(final UserAttributeListenerType listener, long mpId) {
-        return mMessageManager.getUserAttributes(listener, mpId);
+        return mMessageManager.getUserAttributes(new UserAttributeListenerWrapper(listener), mpId);
     }
 
     public Map<MParticle.IdentityType, String> getUserIdentities(long mpId){

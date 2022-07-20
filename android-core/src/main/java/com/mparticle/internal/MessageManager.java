@@ -27,6 +27,7 @@ import com.mparticle.UserAttributeListener;
 import com.mparticle.UserAttributeListenerType;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.identity.AliasRequest;
+import com.mparticle.identity.UserAttributeListenerWrapper;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
 import com.mparticle.internal.database.services.MParticleDBManager;
@@ -857,7 +858,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         }
     }
 
-    public Map<String, Object> getUserAttributes(final UserAttributeListenerType listener, long mpId) {
+    public Map<String, Object> getUserAttributes(final UserAttributeListenerWrapper listener, long mpId) {
         return mMParticleDBManager.getUserAttributes(listener, mpId);
     }
 

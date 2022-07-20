@@ -2,6 +2,7 @@ package com.mparticle.identity;
 
 import com.mparticle.MParticle;
 import com.mparticle.MockMParticle;
+import com.mparticle.TypedUserAttributeListener;
 import com.mparticle.UserAttributeListener;
 
 import org.json.JSONArray;
@@ -19,6 +20,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.eq;
 
 public class MParticleUserTest {
@@ -104,10 +106,14 @@ public class MParticleUserTest {
 
 
     @Test
-    public void testGetAllUserAttributes1() throws Exception {
+    public void testGetAllUserAttributes() throws Exception {
         UserAttributeListener listener = Mockito.mock(UserAttributeListener.class);
         id.getCurrentUser().getUserAttributes(listener);
-        Mockito.verify(mp.Identity().mMessageManager, Mockito.times(1)).getUserAttributes(listener, defaultMpId);
+        Mockito.verify(mp.Identity().mMessageManager, Mockito.times(1)).getUserAttributes(any(UserAttributeListenerWrapper.class), eq(defaultMpId));
+
+        TypedUserAttributeListener typedListener = Mockito.mock(TypedUserAttributeListener.class);
+        id.getCurrentUser().getUserAttributes(typedListener);
+        Mockito.verify(mp.Identity().mMessageManager, Mockito.times(2)).getUserAttributes(any(UserAttributeListenerWrapper.class), eq(defaultMpId));
     }
 
 

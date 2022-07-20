@@ -14,6 +14,7 @@ import com.mparticle.MParticleOptions;
 import com.mparticle.TypedUserAttributeListener;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.UserAttributeListenerType;
+import com.mparticle.identity.UserAttributeListenerWrapper;
 import com.mparticle.internal.BatchId;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
@@ -559,13 +560,8 @@ public class MParticleDBManager {
             Map<String, Object> typedAttributes = new HashMap<>();
             for (Map.Entry<String, String> stringifiedAttribute: stringifiedAttributes.entrySet()) {
                 String key = stringifiedAttribute.getKey();
-                Object value = stringifiedAttribute.getValue();
-                try {
-                    value = NumberFormat.getInstance().parse(value.toString());
-                } catch (ParseException ex) {
-                    //do nothing, this just means the attribute value is a regular String
-                }
-                typedAttributes.put(key, value);
+                String value = stringifiedAttribute.getValue();
+                typedAttributes.put(key, MPUtility.toNumberOrString(value));
             }
             return typedAttributes;
         }
@@ -613,22 +609,13 @@ public class MParticleDBManager {
         return getUserAttributes(null, mpId);
     }
 
-    public Map<String, Object> getUserAttributes(final UserAttributeListenerType listener, final long mpId) {
+    public Map<String, Object> getUserAttributes(final UserAttributeListenerWrapper listener, final long mpId) {
         Map<String, Object> allUserAttributes = new HashMap<String, Object>();
         if (listener == null || Looper.getMainLooper() != Looper.myLooper()) {
             Map<String, Object> userAttributes = getUserAttributeSingles(mpId);
             Map<String, List<String>> userAttributeLists = getUserAttributeLists(mpId);
             if (listener != null) {
-                if (listener instanceof UserAttributeListener) {
-                    Map<String, String> userAttributeStrings = new HashMap<>();
-                    for (Map.Entry<String, Object> entry: userAttributes.entrySet()) {
-                        userAttributeStrings.put(entry.getKey(), entry.getValue().toString());
-                    }
-                    ((UserAttributeListener)listener).onUserAttributesReceived(userAttributeStrings, userAttributeLists, mpId);
-                }
-                if (listener instanceof TypedUserAttributeListener) {
-                    ((TypedUserAttributeListener)listener).onUserAttributesReceived(userAttributes, userAttributeLists, mpId);
-                }
+                listener.onUserAttributesReceived(userAttributes, userAttributeLists, mpId);
             }
             if (userAttributes != null) {
                 allUserAttributes.putAll(userAttributes);
@@ -648,16 +635,7 @@ public class MParticleDBManager {
                         new Handler(Looper.getMainLooper()).post(new Runnable() {
                             @Override
                             public void run() {
-                                if (listener instanceof UserAttributeListener) {
-                                    Map<String, String> userAttributeStrings = new HashMap<>();
-                                    for (Map.Entry<String, Object> entry: attributeSingles.entrySet()) {
-                                        userAttributeStrings.put(entry.getKey(), entry.getValue().toString());
-                                    }
-                                    ((UserAttributeListener)listener).onUserAttributesReceived(userAttributeStrings, attributeLists, mpId);
-                                }
-                                if (listener instanceof TypedUserAttributeListener) {
-                                    ((TypedUserAttributeListener)listener).onUserAttributesReceived(attributeSingles, attributeLists, mpId);
-                                }
+                                listener.onUserAttributesReceived(attributeSingles, attributeLists, mpId);
                             }
                         });
                     }
@@ -696,7 +674,10 @@ public class MParticleDBManager {
             if (userAttribute.attributeSingles != null) {
                 for (Map.Entry<String, Object> entry : userAttribute.attributeSingles.entrySet()) {
                     String key = entry.getKey();
-                    String attributeValue = entry.getValue().toString();
+                    String attributeValue = null;
+                    if (entry.getValue() != null) {
+                        attributeValue = entry.getValue().toString();
+                    }
                     Object oldValue = currentValues.get(key);
                     if (oldValue != null && oldValue instanceof String && ((String) oldValue).equalsIgnoreCase(attributeValue)) {
                         continue;
