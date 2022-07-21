@@ -1,3 +1,10 @@
+## [5.43.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.42.0...v5.43.0) (2022-07-21)
+
+
+### Features
+
+* update MParticleUser.incrementUserAttribute to accept Number ([#188](https://github.com/mParticle/mparticle-android-sdk/issues/188)) ([670bdd6](https://github.com/mParticle/mparticle-android-sdk/commit/670bdd60084b7b1fa2652d4bdb4f492f928f91a9))
+
 ## [5.42.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.41.3...v5.42.0) (2022-07-18)
 
 
