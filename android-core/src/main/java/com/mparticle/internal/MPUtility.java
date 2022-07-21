@@ -24,6 +24,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.view.Display;
 import android.view.WindowManager;
 
@@ -49,6 +50,8 @@ import java.net.HttpURLConnection;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -819,6 +822,33 @@ public class MPUtility {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static Number addNumbers(Number number1, Number number2) {
+        if(number1 instanceof Double || number2 instanceof Double) {
+            return number1.doubleValue() + number2.doubleValue();
+        } else if(number1 instanceof Float || number2 instanceof Float) {
+            return number1.floatValue() + number2.floatValue();
+        } else if(number1 instanceof Long || number2 instanceof Long) {
+            return number1.longValue() + number2.longValue();
+        } else {
+            return number1.intValue() + number2.intValue();
+        }
+    }
+
+    public static Object toNumberOrString(String stringValue) {
+        if (stringValue == null) {
+            return stringValue;
+        }
+        for(Character c: stringValue.toCharArray()) {
+            if (!Character.isDigit(c) && c != '.' && c != '-') {
+                return stringValue;
+            }
+        }
+        try {
+            return NumberFormat.getInstance().parse(stringValue);
+        } catch (ParseException e) { }
+        return stringValue;
     }
 
     private interface SyncRunnable<T> {

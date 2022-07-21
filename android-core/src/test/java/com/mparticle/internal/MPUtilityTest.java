@@ -231,4 +231,18 @@ public class MPUtilityTest {
         return list;
     }
 
+    @Test
+    public void testNumberDetection() {
+        assertEquals(12L, MPUtility.toNumberOrString("12"));
+        assertEquals(1.5, MPUtility.toNumberOrString("1.5"));
+        assertEquals(-1.5, MPUtility.toNumberOrString("-1.5"));
+        assertEquals(0L, MPUtility.toNumberOrString("0"));
+        //too big for a Long, should return a String
+        assertEquals(3.245987293478593E47, MPUtility.toNumberOrString("324598729347859283749857293487598237459872398475"));
+        assertEquals(3.245987293478593E46, MPUtility.toNumberOrString("32459872934785928374985729348759823745987239847.5"));
+        assertEquals("asdvasd", MPUtility.toNumberOrString("asdvasd"));
+        assertEquals("234sdvsda", MPUtility.toNumberOrString("234sdvsda"));
+        assertNull(MPUtility.toNumberOrString(null));
+    }
+
 }

@@ -11,7 +11,10 @@ import androidx.annotation.Nullable;
 
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
+import com.mparticle.TypedUserAttributeListener;
 import com.mparticle.UserAttributeListener;
+import com.mparticle.UserAttributeListenerType;
+import com.mparticle.identity.UserAttributeListenerWrapper;
 import com.mparticle.internal.BatchId;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
@@ -33,6 +36,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -549,9 +554,16 @@ public class MParticleDBManager {
      *
      */
 
-    public TreeMap<String, String> getUserAttributeSingles(long mpId) {
+    public Map<String, Object> getUserAttributeSingles(long mpId) {
         if (getDatabase() != null) {
-            return UserAttributesService.getUserAttributesSingles(getDatabase(), mpId);
+            Map<String, String> stringifiedAttributes = UserAttributesService.getUserAttributesSingles(getDatabase(), mpId);
+            Map<String, Object> typedAttributes = new HashMap<>();
+            for (Map.Entry<String, String> stringifiedAttribute: stringifiedAttributes.entrySet()) {
+                String key = stringifiedAttribute.getKey();
+                String value = stringifiedAttribute.getValue();
+                typedAttributes.put(key, MPUtility.toNumberOrString(value));
+            }
+            return typedAttributes;
         }
         return null;
     }
@@ -584,7 +596,7 @@ public class MParticleDBManager {
                     if (entryValue == null) {
                         entryValue = JSONObject.NULL;
                     }
-                    jsonAttributes.put(entry.getKey(), entryValue);
+                    jsonAttributes.put(entry.getKey(), entryValue.toString());
                 } catch (JSONException e) {
 
                 }
@@ -597,10 +609,10 @@ public class MParticleDBManager {
         return getUserAttributes(null, mpId);
     }
 
-    public Map<String, Object> getUserAttributes(final UserAttributeListener listener, final long mpId) {
+    public Map<String, Object> getUserAttributes(final UserAttributeListenerWrapper listener, final long mpId) {
         Map<String, Object> allUserAttributes = new HashMap<String, Object>();
         if (listener == null || Looper.getMainLooper() != Looper.myLooper()) {
-            Map<String, String> userAttributes = getUserAttributeSingles(mpId);
+            Map<String, Object> userAttributes = getUserAttributeSingles(mpId);
             Map<String, List<String>> userAttributeLists = getUserAttributeLists(mpId);
             if (listener != null) {
                 listener.onUserAttributesReceived(userAttributes, userAttributeLists, mpId);
@@ -618,7 +630,7 @@ public class MParticleDBManager {
                 instance.Internal().getMessageManager().getMessageHandler().post(new Runnable() {
                     @Override
                     public void run() {
-                        final Map<String, String> attributeSingles = getUserAttributeSingles(mpId);
+                        final Map<String, Object> attributeSingles = getUserAttributeSingles(mpId);
                         final Map<String, List<String>> attributeLists = getUserAttributeLists(mpId);
                         new Handler(Looper.getMainLooper()).post(new Runnable() {
                             @Override
@@ -660,9 +672,12 @@ public class MParticleDBManager {
                 }
             }
             if (userAttribute.attributeSingles != null) {
-                for (Map.Entry<String, String> entry : userAttribute.attributeSingles.entrySet()) {
+                for (Map.Entry<String, Object> entry : userAttribute.attributeSingles.entrySet()) {
                     String key = entry.getKey();
-                    String attributeValue = entry.getValue();
+                    String attributeValue = null;
+                    if (entry.getValue() != null) {
+                        attributeValue = entry.getValue().toString();
+                    }
                     Object oldValue = currentValues.get(key);
                     if (oldValue != null && oldValue instanceof String && ((String) oldValue).equalsIgnoreCase(attributeValue)) {
                         continue;
@@ -780,7 +795,7 @@ public class MParticleDBManager {
     }
 
     public static class UserAttributeResponse {
-        public Map<String, String> attributeSingles;
+        public Map<String, Object> attributeSingles;
         public Map<String, List<String>> attributeLists;
         public long time;
         public long mpId;

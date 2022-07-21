@@ -90,6 +90,7 @@ android {
         lintConfig file('lint-baseline.xml')
     }
     sourceSets {
+        main.kotlin.srcDirs += 'src/main/kotlin'
         test.java.srcDirs += 'src/test/kotlin'
         androidTest.java.srcDirs += 'src/androidTest/kotlin'
     }
@@ -162,16 +163,6 @@ configurations {
     all {
         exclude module: "httpclient"
         exclude module: "commons-logging"
-    }
-}
-
-afterEvaluate {
-    android.buildTypes.all { theBuildType ->
-        android.sourceSets.all { sourceSet ->
-            if (!sourceSet.name.startsWith("test") && !sourceSet.name.startsWith("androidTest")) {
-                sourceSet.kotlin.setSrcDirs([])
-            }
-        }
     }
 }
 

@@ -2,9 +2,13 @@ package com.mparticle.internal.database.services;
 
 import android.os.Handler;
 import android.os.Looper;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.mparticle.TypedUserAttributeListener;
 import com.mparticle.UserAttributeListener;
+import com.mparticle.identity.UserAttributeListenerWrapper;
 import com.mparticle.testutils.AndroidUtils.Mutable;
 import com.mparticle.testutils.BaseCleanInstallEachTest;
 import com.mparticle.testutils.MPLatch;
@@ -109,7 +113,7 @@ public class MParticleDBManagerTest extends BaseCleanInstallEachTest{
         final Mutable<Thread> dbAccessThread = new Mutable<Thread>(null);
         final MParticleDBManager manager = new MParticleDBManager(){
             @Override
-            public TreeMap<String, String> getUserAttributeSingles(long mpId) {
+            public Map<String, Object> getUserAttributeSingles(long mpId) {
                 dbAccessThread.value = Thread.currentThread();
                 return null;
             }
@@ -126,13 +130,14 @@ public class MParticleDBManagerTest extends BaseCleanInstallEachTest{
         //when not on the main thread, it should callback on the current thread, and access the DB on the same thread
         assertNotEquals("main", Thread.currentThread().getName());
 
-        manager.getUserAttributes(new UserAttributeListener() {
+        TypedUserAttributeListener listener = new TypedUserAttributeListener() {
             @Override
-            public void onUserAttributesReceived(@Nullable Map<String, String> userAttributes, @Nullable Map<String, List<String>> userAttributeLists, @Nullable Long mpid) {
+            public void onUserAttributesReceived(@NonNull Map<String, ?> userAttributes, @NonNull Map<String, ? extends List<String>> userAttributeLists, long mpid) {
                 callbackThread.value = Thread.currentThread();
                 latch.value.countDown();
             }
-        }, 1);
+        };
+        manager.getUserAttributes(new UserAttributeListenerWrapper(listener), 1);
 
         assertNotNull(callbackThread.value);
         assertEquals(Thread.currentThread().getName(), callbackThread.value.getName());
@@ -143,16 +148,17 @@ public class MParticleDBManagerTest extends BaseCleanInstallEachTest{
         latch.value = new MPLatch(1);
 
         //when run from the main thread, it should be called back on the main thread, but NOT access the DB on the same thread
+        TypedUserAttributeListener listener1 = new TypedUserAttributeListener() {
+            @Override
+            public void onUserAttributesReceived(@NonNull Map<String, ?> userAttributes, @NonNull Map<String, ? extends List<String>> userAttributeLists, long mpid) {
+                callbackThread.value = Thread.currentThread();
+                latch.value.countDown();
+            }
+        };
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
-                manager.getUserAttributes(new UserAttributeListener() {
-                    @Override
-                    public void onUserAttributesReceived(@Nullable Map<String, String> userAttributes, @Nullable Map<String, List<String>> userAttributeLists, @Nullable Long mpid) {
-                        callbackThread.value = Thread.currentThread();
-                        latch.value.countDown();
-                    }
-                }, 1);
+                manager.getUserAttributes(new UserAttributeListenerWrapper(listener), 1);
             }
         });
         latch.value.await();

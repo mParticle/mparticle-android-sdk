@@ -5,7 +5,7 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 
 import com.mparticle.MParticle;
-import com.mparticle.UserAttributeListener;
+import com.mparticle.UserAttributeListenerType;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.internal.listeners.ApiClass;
 import com.mparticle.segmentation.SegmentListener;
@@ -49,7 +49,7 @@ public class MParticleUserImpl implements MParticleUser {
      *
      * @return
      */
-    public Map<String, Object> getUserAttributes(final UserAttributeListener listener) {
+    public Map<String, Object> getUserAttributes(final UserAttributeListenerType listener) {
         return mUserDelegate.getUserAttributes(listener, getId());
     }
 
@@ -96,7 +96,7 @@ public class MParticleUserImpl implements MParticleUser {
     }
 
     @Override
-    public boolean incrementUserAttribute(String key, int value) {
+    public boolean incrementUserAttribute(String key, Number value) {
         return mUserDelegate.incrementUserAttribute(key, value, getId());
     }
 

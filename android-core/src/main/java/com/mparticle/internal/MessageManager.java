@@ -24,8 +24,10 @@ import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.UserAttributeListener;
+import com.mparticle.UserAttributeListenerType;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.identity.AliasRequest;
+import com.mparticle.identity.UserAttributeListenerWrapper;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
 import com.mparticle.internal.database.services.MParticleDBManager;
@@ -856,7 +858,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         }
     }
 
-    public Map<String, Object> getUserAttributes(final UserAttributeListener listener, long mpId) {
+    public Map<String, Object> getUserAttributes(final UserAttributeListenerWrapper listener, long mpId) {
         return mMParticleDBManager.getUserAttributes(listener, mpId);
     }
 
@@ -895,11 +897,11 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         container.time = System.currentTimeMillis();
         container.mpId = mpId;
         if (value instanceof List) {
-            container.attributeLists = new HashMap<String, List<String>>();
+            container.attributeLists = new HashMap<>();
             container.attributeLists.put(key, (List<String>) value);
         }else {
-            container.attributeSingles = new HashMap<String, String>();
-            container.attributeSingles.put(key, (String) value);
+            container.attributeSingles = new HashMap<>();
+            container.attributeSingles.put(key, value);
         }
         if (synchronously) {
             mMessageHandler.setUserAttributes(container);
@@ -909,10 +911,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         }
     }
 
-    public void incrementUserAttribute(String key, int value, long mpId) {
-        Map.Entry<String, Long> entry = new HashMap.SimpleEntry<String, Long>(key, mpId);
-        Message message = mMessageHandler.obtainMessage(MessageHandler.INCREMENT_USER_ATTRIBUTE, entry);
-        message.arg1 = value;
+    public void incrementUserAttribute(String key, Number value, long mpId) {
+        IncrementUserAttributeMessage incrementUserAttributeMessage = new IncrementUserAttributeMessage(key, mpId, value);
+        Message message = mMessageHandler.obtainMessage(MessageHandler.INCREMENT_USER_ATTRIBUTE, incrementUserAttributeMessage);
         mMessageHandler.sendMessage(message);
     }
 
@@ -1061,5 +1062,17 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     boolean hasDelayedStartOccurred() {
         return delayedStartOccurred;
+    }
+
+    static class IncrementUserAttributeMessage {
+        String key;
+        Long mpid;
+        Number incrementBy;
+
+        IncrementUserAttributeMessage(String key, Long mpid, Number incrementBy) {
+            this.key = key;
+            this.mpid = mpid;
+            this.incrementBy = incrementBy;
+        }
     }
 }

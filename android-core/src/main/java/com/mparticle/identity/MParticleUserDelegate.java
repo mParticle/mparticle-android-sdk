@@ -4,7 +4,7 @@ import android.content.Context;
 import android.os.Build;
 
 import com.mparticle.MParticle;
-import com.mparticle.UserAttributeListener;
+import com.mparticle.UserAttributeListenerType;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
@@ -21,7 +21,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,8 +45,8 @@ import java.util.Map;
         return mMessageManager.getUserAttributes(null, mpId);
     }
 
-    public Map<String, Object> getUserAttributes(final UserAttributeListener listener, long mpId) {
-        return mMessageManager.getUserAttributes(listener, mpId);
+    public Map<String, Object> getUserAttributes(final UserAttributeListenerType listener, long mpId) {
+        return mMessageManager.getUserAttributes(new UserAttributeListenerWrapper(listener), mpId);
     }
 
     public Map<MParticle.IdentityType, String> getUserIdentities(long mpId){
@@ -202,7 +205,7 @@ import java.util.Map;
         return setUserAttribute(key, value, userMpId);
     }
 
-    public boolean incrementUserAttribute(String key, int value, long userMpId) {
+    public boolean incrementUserAttribute(String key, Number value, long userMpId) {
         if (key == null) {
             Logger.warning("incrementUserAttribute called with a null key. Ignoring...");
             return false;

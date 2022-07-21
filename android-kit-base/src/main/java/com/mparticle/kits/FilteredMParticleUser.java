@@ -1,10 +1,16 @@
 package com.mparticle.kits;
 
+import android.util.SparseBooleanArray;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.mparticle.MParticle;
+import com.mparticle.TypedUserAttributeListener;
 import com.mparticle.UserAttributeListener;
+import com.mparticle.UserAttributeListenerType;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.MParticleUser;
-import com.mparticle.internal.KitManager;
 
 import java.util.HashMap;
 import java.util.List;
@@ -62,21 +68,35 @@ public class FilteredMParticleUser implements MParticleUser {
     }
 
     @Override
-    public Map<String, Object> getUserAttributes(final UserAttributeListener listener) {
-        return mpUser.getUserAttributes(new UserAttributeListener() {
+    public Map<String, Object> getUserAttributes(final UserAttributeListenerType listener) {
+        return mpUser.getUserAttributes(new TypedUserAttributeListener() {
             @Override
-            public void onUserAttributesReceived(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists, Long mpid) {
+            public void onUserAttributesReceived(@NonNull Map<String, ?> userAttributes, @NonNull Map<String, ? extends List<String>> userAttributeLists, long mpid) {
                 KitManagerImpl kitManager = provider.getKitManager();
                 if (kitManager != null) {
                     userAttributes = kitManager.getDataplanFilter().transformUserAttributes(userAttributes);
                     userAttributeLists = kitManager.getDataplanFilter().transformUserAttributes(userAttributeLists);
                 }
-                listener.onUserAttributesReceived((Map<String, String>)KitConfiguration.filterAttributes(
-                        provider.getConfiguration().getUserAttributeFilters(),
-                        userAttributes),
-                        (Map<String, List<String>>)KitConfiguration.filterAttributes(
-                                provider.getConfiguration().getUserAttributeFilters(),
-                                userAttributeLists), mpid);
+                SparseBooleanArray filters = provider.getConfiguration().getUserAttributeFilters();
+                if (userAttributes == null) {
+                    userAttributes = new HashMap<>();
+                }
+                if (listener instanceof UserAttributeListener) {
+                    Map<String, String> stringifiedAttributes = new HashMap<>();
+                    for (Map.Entry<String, ?> entry: userAttributes.entrySet()) {
+                        stringifiedAttributes.put(entry.getKey(), entry.getValue().toString());
+                    }
+                    ((UserAttributeListener)listener).onUserAttributesReceived(
+                            (Map<String, String>) KitConfiguration.filterAttributes(filters, stringifiedAttributes),
+                            (Map<String, List<String>>) KitConfiguration.filterAttributes(filters, userAttributeLists),
+                            mpid);
+                }
+                if (listener instanceof TypedUserAttributeListener) {
+                    ((TypedUserAttributeListener)listener).onUserAttributesReceived(
+                            KitConfiguration.filterAttributes(filters, userAttributes),
+                            (Map<String, List<String>>) KitConfiguration.filterAttributes(filters, userAttributeLists),
+                            mpid);
+                }
             }
         });
     }
@@ -113,7 +133,7 @@ public class FilteredMParticleUser implements MParticleUser {
     }
 
     @Override
-    public boolean incrementUserAttribute(String key, int value) {
+    public boolean incrementUserAttribute(String key, Number value) {
         return false;
     }
 

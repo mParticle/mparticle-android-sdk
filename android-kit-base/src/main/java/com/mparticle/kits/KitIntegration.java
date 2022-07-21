@@ -582,7 +582,7 @@ public abstract class KitIntegration {
 
     public interface UserAttributeListener {
 
-        void onIncrementUserAttribute (String key, int incrementedBy, String value, FilteredMParticleUser user);
+        void onIncrementUserAttribute (String key, Number incrementedBy, String value, FilteredMParticleUser user);
 
         void onRemoveUserAttribute(String key, FilteredMParticleUser user);
 

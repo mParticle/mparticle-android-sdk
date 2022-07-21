@@ -108,6 +108,8 @@
 -keep class com.mparticle.AttributionResult { *; }
 -keep class com.mparticle.MParticleTask { *; }
 -keep class com.mparticle.UserAttributeListener { *; }
+-keep class com.mparticle.TypedUserAttributeListener { *; }
+-keep class com.mparticle.UserAttributeListenerType { *; }
 -keep class com.mparticle.BaseEvent { *; }
 -keep class com.mparticle.BaseEvent$Type { *; }
 -keep class com.mparticle.BaseEvent$MessageType { *; }
