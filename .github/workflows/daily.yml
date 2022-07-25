@@ -90,7 +90,7 @@ jobs:
           script: ./gradlew :android-core:cAT :android-kit-base:cAT --stacktrace
       - name: "Archive Instrumented Test Results"
         uses: actions/upload-artifact@v2
-        if: ${{ always() }}
+        if: always()
         with:
           name: instrumented-test-results
           path: android-core/build/reports/androidTests/connected/**
@@ -115,10 +115,10 @@ jobs:
         run: ./gradlew test
       - name: "Print Android Unit Tests Report"
         uses: asadmansr/android-test-report-action@v1.2.0
-        if: ${{ always() }}
+        if: always()
       - name: "Archive Unit Test Results"
         uses: actions/upload-artifact@v2
-        if: ${{ always() }}
+        if: always()
         with:
           name: "unit-tests-results"
           path: ./**/build/reports/**
@@ -146,13 +146,13 @@ jobs:
         run: ./gradlew publishReleaseLocal -c settings-kits.gradle lint
       - name: "Archive Test Results"
         uses: actions/upload-artifact@v2
-        if: ${{ always() }}
+        if: always()
         with:
           name: "core-lint-results"
           path: ./**/build/reports/**
       - name: "Archive Test Kit Results"
         uses: actions/upload-artifact@v2
-        if: ${{ always() }}
+        if: always()
         with:
           name: "kit-lint-results"
           path: kits/**/build/reports/**
@@ -232,7 +232,7 @@ jobs:
           repository: ${{ github.repository }}
           ref: ${{ inputs.branch_name }}
       - name: "Delete release branch"
-        if: ${{ always() }}
+        if: always()
         run: |
           git fetch origin regression/${{ github.run_number }}
           git push --delete origin regression/${{ github.run_number }}
