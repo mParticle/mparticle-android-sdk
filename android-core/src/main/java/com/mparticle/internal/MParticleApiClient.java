@@ -26,7 +26,7 @@ public interface MParticleApiClient extends MParticleBaseClient {
         private int responseCode;
         private String errorMessage;
 
-        AliasNetworkResponse(int responseCode) {
+        public AliasNetworkResponse(int responseCode) {
             this(responseCode, null);
         }
 
