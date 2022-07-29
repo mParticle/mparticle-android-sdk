@@ -29,11 +29,4 @@ public class MockMParticle extends MParticle {
     public void setIdentityApi(IdentityApi identityApi) {
         this.mIdentityApi = identityApi;
     }
-
-    class MockInternal extends Internal {
-
-        MockInternal() {
-            super();
-        }
-    }
 }

@@ -1,17 +1,27 @@
 package com.mparticle.kits
 
-import org.json.JSONObject
+import com.mparticle.messages.KitConfigMessage
 
 class ConfiguredKitOptions : KitOptions() {
-    val testingConfiguration = mutableMapOf<Int, JSONObject?>()
+    val initialConfig = mutableMapOf<Int, KitConfigMessage>()
 
-    override fun addKit(kitId: Int, type: Class<out KitIntegration>): ConfiguredKitOptions {
-        return addKit(kitId, type, JSONObject().put("id", kitId))
+    fun addKit(type: Class<out KitIntegration>, kitId: Int): ConfiguredKitOptions {
+        return addKit(type, KitConfigMessage(id = kitId))
     }
 
-    fun addKit(kitId: Int, type: Class<out KitIntegration>, config: JSONObject?): ConfiguredKitOptions {
-        testingConfiguration[kitId] = config?.put("id", kitId)
-        super.addKit(kitId, type)
+    override fun addKit(kitId: Int, type: Class<out KitIntegration>): KitOptions {
+        return addKit(type, kitId)
+    }
+
+    fun addKit(type: Class<out KitIntegration>, kitId: Int, includeInConfig: Boolean): ConfiguredKitOptions {
+        return addKit(type, KitConfigMessage(id = kitId), includeInConfig)
+    }
+
+    fun addKit(type: Class<out KitIntegration>, config: KitConfigMessage, includeInConfig: Boolean = true): ConfiguredKitOptions {
+        if (includeInConfig) {
+            initialConfig[config.id] = config
+        }
+        super.addKit(config.id, type)
         return this
     }
 }

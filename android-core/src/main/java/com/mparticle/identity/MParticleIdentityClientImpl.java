@@ -250,7 +250,7 @@ public class MParticleIdentityClientImpl extends MParticleBaseClientImpl impleme
             }
             return httpResponse;
         } catch (JSONException e) {
-            return new IdentityHttpResponse(httpCode, e.getMessage());
+            return new IdentityHttpResponse(httpCode, e);
         }
     }
 

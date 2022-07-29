@@ -39,7 +39,7 @@ public class NetworkOptionsManager {
     }
 
 
-    static NetworkOptions defaultNetworkOptions() {
+    public static NetworkOptions defaultNetworkOptions() {
         return NetworkOptions.builder()
                 .addDomainMapping(DomainMapping.identityMapping(getDefaultUrl(Endpoint.IDENTITY))
                         .setCertificates(defaultCertificates)

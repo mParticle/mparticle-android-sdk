@@ -9,7 +9,7 @@ class CommerceListenerTestKit : ListenerTestKit(), KitIntegration.CommerceListen
     var logEvent: ((CommerceEvent?) -> List<ReportingMessage>)? = null
     var logLtvIncrease: ((BigDecimal?, BigDecimal?, String?, Map<String, String>?) -> List<ReportingMessage>)? = null
 
-    override fun logEvent(event: CommerceEvent?): List<ReportingMessage> {
+    override fun logEvent(event: CommerceEvent): List<ReportingMessage> {
         return logEvent?.invoke(event) ?: listOf()
     }
 

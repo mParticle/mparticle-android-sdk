@@ -2,11 +2,16 @@ package com.mparticle.kits
 
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
+import com.mparticle.internal.AccessUtil
 import com.mparticle.internal.AccessUtils
 import com.mparticle.kits.testkits.BaseTestKit
-import com.mparticle.testutils.MPLatch
-import org.json.JSONArray
-import org.json.JSONObject
+import com.mparticle.messages.ConfigResponseMessage
+import com.mparticle.messages.KitConfigMessage
+import com.mparticle.testing.FailureLatch
+import com.mparticle.testing.context
+import com.mparticle.testing.mockserver.EndpointType
+import com.mparticle.testing.mockserver.Server
+import com.mparticle.testing.mockserver.SuccessResponse
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -17,21 +22,21 @@ class UpdateConfigTest : BaseKitOptionsTest() {
 
     @Test
     fun testKitsLoadFromRemoteConfig() {
-        setCachedConfig(null)
-        MParticleOptions.builder(mContext)
+        mockingPlatforms.setCachedConfig(null)
+        MParticleOptions.builder(context)
             .configuration(
                 ConfiguredKitOptions {
-                    addKit(1, BaseTestKit::class.java)
-                    addKit(2, BaseTestKit::class.java, null)
-                    addKit(3, BaseTestKit::class.java)
-                    addKit(4, BaseTestKit::class.java, null)
-                    addKit(5, BaseTestKit::class.java)
+                    addKit(BaseTestKit::class.java, 1)
+                    addKit(BaseTestKit::class.java, 2, false)
+                    addKit(BaseTestKit::class.java, 3)
+                    addKit(BaseTestKit::class.java, 4, false)
+                    addKit(BaseTestKit::class.java, 5)
                 }
             ).let {
                 startMParticle(it)
             }
 
-        waitForKitToStart(1)
+        waitForKitToStart(5)
 
         MParticle.getInstance()!!.let {
             assertNotNull(it.getKitInstance(1))
@@ -44,12 +49,12 @@ class UpdateConfigTest : BaseKitOptionsTest() {
 
     @Test
     fun testStartKitWithNewRemoteConfig() {
-        setCachedConfig(null)
-        MParticleOptions.builder(mContext)
+        mockingPlatforms.setCachedConfig(null)
+        MParticleOptions.builder(context)
             .configuration(
                 ConfiguredKitOptions {
-                    addKit(1, BaseTestKit::class.java)
-                    addKit(2, BaseTestKit::class.java, null)
+                    addKit(BaseTestKit::class.java, 1)
+                    addKit(BaseTestKit::class.java, 2)
                 }
             ).let {
                 startMParticle(it)
@@ -57,17 +62,20 @@ class UpdateConfigTest : BaseKitOptionsTest() {
 
         waitForKitToStart(1)
 
-        mServer.setupConfigResponse(
-            JSONObject()
-                .put(
-                    "eks",
-                    JSONArray()
-                        .put(JSONObject().put("id", 1))
-                        .put(JSONObject().put("id", 2))
-                ).toString()
-        )
+        Server
+            .endpoint(EndpointType.Config)
+            .addResponseLogic {
+                SuccessResponse {
+                    responseObject = ConfigResponseMessage().apply {
+                        kits = listOf(
+                            KitConfigMessage(1),
+                            KitConfigMessage(2)
+                        )
+                    }
+                }
+            }
 
-        AccessUtils.getKitManager().addKitsLoadedListener { kits, previousKits, kitConfigs ->
+        AccessUtil.kitManager().addKitsLoadedListener { kits, previousKits, kitConfigs ->
             assertEquals(1, previousKits.size)
             assertEquals(2, kits.size)
             assertTrue(previousKits.containsKey(1))
@@ -78,28 +86,29 @@ class UpdateConfigTest : BaseKitOptionsTest() {
 
     @Test
     fun testShutdownKitWithNewRemoteConfig() {
-        setCachedConfig(null)
-        MParticleOptions.builder(mContext)
+        mockingPlatforms.setCachedConfig(null)
+        MParticleOptions.builder(context)
             .configuration(
                 ConfiguredKitOptions {
-                    addKit(1, BaseTestKit::class.java)
-                    addKit(2, BaseTestKit::class.java)
+                    addKit(BaseTestKit::class.java, 1)
+                    addKit(BaseTestKit::class.java, 2)
                 }
             ).let {
                 startMParticle(it)
             }
 
-        mServer.setupConfigResponse(
-            JSONObject()
-                .put(
-                    "eks",
-                    JSONArray()
-                        .put(JSONObject().put("id", 1))
-                ).toString()
-        )
+        Server
+            .endpoint(EndpointType.Config)
+            .addResponseLogic {
+                SuccessResponse {
+                    responseObject = ConfigResponseMessage().apply {
+                        kits = listOf(KitConfigMessage(1))
+                    }
+                }
+            }
 
-        val latch = MPLatch(1)
-        AccessUtils.getKitManager().addKitsLoadedListener { kits, previousKits, kitConfigs ->
+        val latch = FailureLatch()
+        AccessUtil.kitManager().addKitsLoadedListener { kits, previousKits, kitConfigs ->
             assertEquals(2, previousKits.size)
             assertEquals(1, kits.size)
             assertTrue(previousKits.containsKey(1))

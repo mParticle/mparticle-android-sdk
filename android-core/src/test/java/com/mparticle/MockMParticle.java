@@ -19,7 +19,7 @@ public class MockMParticle extends MParticle {
 
     public MockMParticle() {
         mAppContext = new MockContext();
-        mInternal = new Internal();
+        mInternal = Mockito.mock(Internal.class);
         mConfigManager = Mockito.mock(ConfigManager.class);
         mKitManager = Mockito.mock(KitFrameworkWrapper.class);
         mAppStateManager = Mockito.mock(AppStateManager.class);
@@ -29,12 +29,13 @@ public class MockMParticle extends MParticle {
         mMessageManager = Mockito.mock(MessageManager.class);
         mMessaging = Mockito.mock(MPMessagingAPI.class);
         mMedia = Mockito.mock(MPMediaAPI.class);
-        mIdentityApi = new IdentityApi(new MockContext(), mAppStateManager, mMessageManager, Internal().getConfigManager(), mKitManager, OperatingSystem.ANDROID);
         Mockito.when(mKitManager.updateKits(Mockito.any())).thenReturn(new KitsLoadedCallback());
-        MPEvent event = new MPEvent.Builder("this")
-                .customAttributes(new HashMap<String, String>())
-                .build();
-        Map<String, ?> attributes = event.getCustomAttributes();
+        Mockito.when(mInternal.getAppStateManager()).thenReturn(mAppStateManager);
+        Mockito.when(mInternal.getConfigManager()).thenReturn(mConfigManager);
+        Mockito.when(mInternal.getKitManager()).thenReturn(mKitManager);
+        Mockito.when(mInternal.getMessageManager()).thenReturn(mMessageManager);
+        mIdentityApi = new IdentityApi(new MockContext(), mAppStateManager, mMessageManager, Internal().getConfigManager(), mKitManager, OperatingSystem.ANDROID);
+
     }
 
 

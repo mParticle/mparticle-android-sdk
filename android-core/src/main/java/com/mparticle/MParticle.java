@@ -1634,7 +1634,8 @@ public class MParticle {
      * @hidden
      */
     public class Internal {
-        protected Internal() { }
+
+        private Internal() { }
 
         /**
          * The ConfigManager is tasked with incorporating server-based, run-time, and XML configuration,

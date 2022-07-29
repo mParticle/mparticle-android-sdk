@@ -75,5 +75,5 @@ dependencies {
     testImplementation 'androidx.legacy:legacy-support-v4:1.0.0'
     testImplementation project(':testutils')
 
-    androidTestImplementation project(':testutils')
+    androidTestImplementation "com.mparticle.internal:mocking:1.4.0"
 }

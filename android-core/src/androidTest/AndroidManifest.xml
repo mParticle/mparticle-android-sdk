@@ -14,7 +14,7 @@
     <application
         android:usesCleartextTraffic="true">
 
-        <activity android:exported="true" android:name=".WebViewActivity">
+        <activity android:exported="true" android:name=".internal.MParticleJSInterfaceITest$WebViewActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

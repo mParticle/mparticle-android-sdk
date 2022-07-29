@@ -14,10 +14,11 @@ import java.util.List;
 
 public final class IdentityHttpResponse {
     private ArrayList<Error> errors = new ArrayList<Error>();
-    private long mpId;
+    private Long mpId = null;
     private String context;
     private int httpCode;
     private boolean loggedIn;
+    private Exception exception;
 
     @NonNull public static final String MPID = "mpid";
     @NonNull public static final String CONTEXT = "context";
@@ -40,6 +41,11 @@ public final class IdentityHttpResponse {
     public IdentityHttpResponse(int code, @NonNull String errorString) {
         this.httpCode = code;
         this.errors.add(new Error(UNKNOWN, errorString));
+    }
+
+    public IdentityHttpResponse(int code, @NonNull Exception exception) {
+        this(code, exception.getMessage());
+        this.exception = exception;
     }
 
     public IdentityHttpResponse(int httpCode, @Nullable JSONObject jsonObject) throws JSONException {
@@ -80,7 +86,8 @@ public final class IdentityHttpResponse {
         return errors;
     }
 
-    public long getMpId() {
+    @Nullable
+    public Long getMpId() {
         return mpId;
     }
 
@@ -91,6 +98,11 @@ public final class IdentityHttpResponse {
 
     public int getHttpCode() {
         return httpCode;
+    }
+
+    @Nullable
+    public Exception getException() {
+        return exception;
     }
 
     public boolean isLoggedIn() {

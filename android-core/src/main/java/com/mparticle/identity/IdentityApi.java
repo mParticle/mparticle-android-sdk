@@ -392,7 +392,7 @@ public class IdentityApi {
                         }
                     } catch (Exception ex) {
                         ConfigManager.setIdentityRequestInProgress(false);
-                        task.setFailed(new IdentityHttpResponse(IdentityApi.UNKNOWN_ERROR, ex.toString()));
+                        task.setFailed(new IdentityHttpResponse(IdentityApi.UNKNOWN_ERROR, ex));
                     }
                 }
             }

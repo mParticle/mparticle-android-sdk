@@ -2,7 +2,6 @@ package com.mparticle.internal;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
@@ -17,7 +16,6 @@ import com.mparticle.internal.messages.MPAliasMessage;
 import com.mparticle.segmentation.SegmentListener;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.MalformedURLException;

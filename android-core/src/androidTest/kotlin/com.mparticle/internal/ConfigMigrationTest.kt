@@ -2,13 +2,14 @@ package com.mparticle.internal
 
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
-import com.mparticle.testutils.BaseCleanInstallEachTest
+import com.mparticle.testing.BaseTest
+import com.mparticle.testing.context
 import org.json.JSONObject
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
-class ConfigMigrationTest : BaseCleanInstallEachTest() {
+class ConfigMigrationTest : BaseTest() {
     private val oldConfigSharedprefsKey = "json"
 
     @Test
@@ -21,7 +22,7 @@ class ConfigMigrationTest : BaseCleanInstallEachTest() {
         assertOldConfigState(oldConfig)
 
         // initialize ConfigManager
-        val configManager = ConfigManager(mContext)
+        val configManager = ConfigManager(context)
 
         // make sure the config is in the new place and gone from the old
         assertNewConfigState(oldConfig)
@@ -38,7 +39,7 @@ class ConfigMigrationTest : BaseCleanInstallEachTest() {
         val testIfModified = "foo bar"
 
         // set metadata + config in the old place
-        ConfigManager(mContext).apply {
+        ConfigManager(context).apply {
             saveConfigJson(JSONObject(), null, testEtag, testIfModified, testTimestamp)
             setOldConfigState(oldConfig)
         }
@@ -46,7 +47,7 @@ class ConfigMigrationTest : BaseCleanInstallEachTest() {
         assertOldConfigState(oldConfig)
 
         // trigger migration, check that config metadata remained the same
-        ConfigManager(mContext).apply {
+        ConfigManager(context).apply {
             assertNewConfigState(oldConfig)
             assertEquals(oldConfig.toString(), config)
             assertEquals(testTimestamp, configTimestamp)
@@ -63,14 +64,14 @@ class ConfigMigrationTest : BaseCleanInstallEachTest() {
         val testIfModified = "foo bar"
 
         // set metadata + config in the old place
-        ConfigManager(mContext).apply {
+        ConfigManager(context).apply {
             saveConfigJson(JSONObject(), null, testEtag, testIfModified, testTimestamp)
             setOldConfigState(oldConfig)
         }
 
         assertOldConfigState(oldConfig)
 
-        MParticleOptions.builder(mContext)
+        MParticleOptions.builder(context)
             .credentials("key", "secret")
             .configMaxAgeSeconds(0)
             .build()
@@ -96,14 +97,14 @@ class ConfigMigrationTest : BaseCleanInstallEachTest() {
         val testIfModified = "foo bar"
 
         // set metadata + config in the old place
-        ConfigManager(mContext).apply {
+        ConfigManager(context).apply {
             saveConfigJson(JSONObject(), null, testEtag, testIfModified, testTimestamp)
             setOldConfigState(oldConfig)
         }
 
         assertOldConfigState(oldConfig)
 
-        MParticleOptions.builder(mContext)
+        MParticleOptions.builder(context)
             .credentials("key", "secret")
             .configMaxAgeSeconds(Integer.MAX_VALUE)
             .build()
@@ -122,18 +123,18 @@ class ConfigMigrationTest : BaseCleanInstallEachTest() {
     }
 
     private fun setOldConfigState(config: JSONObject) {
-        ConfigManager.getInstance(mContext).getKitConfigPreferences().edit().remove(ConfigManager.KIT_CONFIG_KEY)
-        ConfigManager.getPreferences(mContext).edit().putString(oldConfigSharedprefsKey, config.toString()).apply()
+        ConfigManager.getInstance(context).getKitConfigPreferences().edit().remove(ConfigManager.KIT_CONFIG_KEY)
+        ConfigManager.getPreferences(context).edit().putString(oldConfigSharedprefsKey, config.toString()).apply()
     }
 
     private fun assertOldConfigState(config: JSONObject) {
-        assertNull(ConfigManager.getInstance(mContext).getKitConfigPreferences().getString(ConfigManager.KIT_CONFIG_KEY, null))
-        assertEquals(config.toString(), ConfigManager.getPreferences(mContext).getString(oldConfigSharedprefsKey, null))
+        assertNull(ConfigManager.getInstance(context).getKitConfigPreferences().getString(ConfigManager.KIT_CONFIG_KEY, null))
+        assertEquals(config.toString(), ConfigManager.getPreferences(context).getString(oldConfigSharedprefsKey, null))
     }
 
     private fun assertNewConfigState(config: JSONObject) {
-        val configString = ConfigManager.getPreferences(mContext).getString(ConfigManager.CONFIG_JSON, null)
+        val configString = ConfigManager.getPreferences(context).getString(ConfigManager.CONFIG_JSON, null)
         assertNull(JSONObject(configString).optJSONArray(ConfigManager.KEY_EMBEDDED_KITS))
-        assertEquals(config.optString(ConfigManager.KEY_EMBEDDED_KITS, null), ConfigManager.getInstance(mContext).kitConfigPreferences.getString(ConfigManager.KIT_CONFIG_KEY, null))
+        assertEquals(config.optString(ConfigManager.KEY_EMBEDDED_KITS, null), ConfigManager.getInstance(context).kitConfigPreferences.getString(ConfigManager.KIT_CONFIG_KEY, null))
     }
 }

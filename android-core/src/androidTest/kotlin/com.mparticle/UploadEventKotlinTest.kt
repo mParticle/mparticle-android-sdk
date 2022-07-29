@@ -1,13 +1,31 @@
 package com.mparticle
 
+import android.os.Looper
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.commerce.Product
-import com.mparticle.networking.Matcher
-import com.mparticle.testutils.BaseCleanStartedEachTest
+import com.mparticle.messages.events.BaseEvent
+import com.mparticle.messages.events.BatchMessage
+import com.mparticle.messages.events.CommerceEventMessage
+import com.mparticle.messages.events.MPEventMessage
+import com.mparticle.messages.events.ScreenViewMessage
+import com.mparticle.testing.BaseStartedTest
+import com.mparticle.testing.mockserver.EndpointType
+import com.mparticle.testing.mockserver.Server
+import org.junit.BeforeClass
 import org.junit.Test
-import kotlin.test.assertNotEquals
 
-class UploadEventKotlinTest : BaseCleanStartedEachTest() {
+class UploadEventKotlinTest : BaseStartedTest() {
+
+    companion object {
+        @JvmStatic
+        @BeforeClass
+        fun beforeClass() {
+            if (Looper.myLooper() == null) {
+                Looper.prepare()
+            }
+        }
+    }
+
     @Test
     fun testMPEventUploadBypass() {
         val event = MPEvent.Builder("Should Not Upload")
@@ -18,71 +36,50 @@ class UploadEventKotlinTest : BaseCleanStartedEachTest() {
             .build()
         val event3 = MPEvent.Builder("Should Upload 2")
             .build()
-        MParticle.getInstance()?.logEvent(event)
-        MParticle.getInstance()?.logEvent(event2)
-        MParticle.getInstance()?.logEvent(event3)
-        MParticle.getInstance()?.upload()
 
-        // Wait for an event that matched Matcher"
-        // This matcher contains
-        //     1) a url (mServer.Endpoints().eventsUrl
-        //     2) a "body match" (bodyMatch {} )
-        //
-        // These 3 events are logged within the same upload loop, with the same mpid and sessionid, so they
-        // will be logged in the same upload message. This logic will basically wait until the "Should Upload"
-        // messages are received in an upload message and fail if that, or any previous message, contains the
-        // "Should Not Upload" message
-        var numUploadedEvents = 0
-        mServer.waitForVerify(
-            Matcher(mServer.Endpoints().eventsUrl).bodyMatch {
-                it.optJSONArray("msgs")?.let { messagesArray ->
-                    (0 until messagesArray.length())
-                        .any {
-                            val eventMessageName = messagesArray.getJSONObject(it).optString("n")
-                            assertNotEquals("Should Not Upload", eventMessageName)
-                            if (eventMessageName == "Should Upload 1" || eventMessageName == "Should Upload 2") {
-                                numUploadedEvents++
-                            }
-                            numUploadedEvents == 2
-                        }
-                } ?: false
+        Server
+            .endpoint(EndpointType.Events)
+            .assertWillReceive {
+                it.body.any<MPEventMessage> { it.name == "Should Upload 1" }
             }
-        )
+            .and
+            .assertWillReceive {
+                it.body.any<MPEventMessage> { it.name == "Should Upload 2" }
+            }
+            .and
+            .assertWillNotReceive {
+                it.body.any<MPEventMessage> { it.name == "Should Not Upload" }
+            }
+            .after {
+                MParticle.getInstance()?.logEvent(event)
+                MParticle.getInstance()?.logEvent(event2)
+                MParticle.getInstance()?.logEvent(event3)
+                MParticle.getInstance()?.upload()
+            }
+            .blockUntilFinished()
+        Server
+            .endpoint(EndpointType.Events)
+            .assertHasNotReceived { it.body.any<MPEventMessage> { it.name == "Should Not Upload" } }
     }
 
     @Test
     fun testMPScreenEventUploadBypass() {
-        MParticle.getInstance()?.logScreen("Should Upload 1")
-        MParticle.getInstance()?.logScreen("Should Upload 2", null)
-        MParticle.getInstance()?.logScreen("Should Upload 3", null, true)
-        MParticle.getInstance()?.logScreen("Should Not Upload ", null, false)
-        MParticle.getInstance()?.upload()
-
-        // Wait for an event that matched Matcher"
-        // This matcher contains
-        //     1) a url (mServer.Endpoints().eventsUrl
-        //     2) a "body match" (bodyMatch {} )
-        //
-        // These 3 events are logged within the same upload loop, with the same mpid and sessionid, so they
-        // will be logged in the same upload message. This logic will basically wait until the "Should Upload"
-        // messages are received in an upload message and fail if that, or any previous message, contains the
-        // "Should Not Upload" message
-        var numUploadedEvents = 0
-        mServer.waitForVerify(
-            Matcher(mServer.Endpoints().eventsUrl).bodyMatch {
-                it.optJSONArray("msgs")?.let { messagesArray ->
-                    (0 until messagesArray.length())
-                        .any {
-                            val eventMessageName = messagesArray.getJSONObject(it).optString("n")
-                            assertNotEquals("Should Not Upload", eventMessageName)
-                            if (eventMessageName == "Should Upload 1" || eventMessageName == "Should Upload 2" || eventMessageName == "Should Upload 3") {
-                                numUploadedEvents++
-                            }
-                            numUploadedEvents == 3
-                        }
-                } ?: false
+        Server
+            .endpoint(
+                EndpointType.Events
+            )
+            .assertWillReceive {
+                it.body
+                    .run { any<ScreenViewMessage> { it.name == "Should Upload 1" } }
             }
-        )
+            .after {
+                MParticle.getInstance()?.logScreen("Should Not Upload", null, false)
+                MParticle.getInstance()?.logScreen("Should Upload 1")
+                MParticle.getInstance()?.logScreen("Should Upload 2", null)
+                MParticle.getInstance()?.logScreen("Should Upload 3", null, true)
+                MParticle.getInstance()?.upload()
+            }
+            .blockUntilFinished()
     }
 
     @Test
@@ -101,35 +98,34 @@ class UploadEventKotlinTest : BaseCleanStartedEachTest() {
             .build()
         val event3 = CommerceEvent.Builder(Product.ADD_TO_CART, product3)
             .build()
-        MParticle.getInstance()?.logEvent(event)
-        MParticle.getInstance()?.logEvent(event2)
-        MParticle.getInstance()?.logEvent(event3)
-        MParticle.getInstance()?.upload()
 
-        // Wait for an event that matched Matcher"
-        // This matcher contains
-        //     1) a url (mServer.Endpoints().eventsUrl
-        //     2) a "body match" (bodyMatch {} )
-        //
-        // These 3 events are logged within the same upload loop, with the same mpid and sessionid, so they
-        // will be logged in the same upload message. This logic will basically wait until the "Should Upload"
-        // messages are received in an upload message and fail if that, or any previous message, contains the
-        // "Should Not Upload" message
-        var numUploadedEvents = 0
-        mServer.waitForVerify(
-            Matcher(mServer.Endpoints().eventsUrl).bodyMatch {
-                it.optJSONArray("msgs")?.let { messagesArray ->
-                    (0 until messagesArray.length())
-                        .any {
-                            val eventProductName = messagesArray.getJSONObject(it).optJSONObject("pd")?.optJSONArray("pl")?.optJSONObject(0)?.optString("nm")
-                            assertNotEquals("Should Not Upload", eventProductName)
-                            if (eventProductName == "Should Upload 1" || eventProductName == "Should Upload 2") {
-                                numUploadedEvents++
-                            }
-                            numUploadedEvents == 2
-                        }
-                } ?: false
+        Server
+            .endpoint(EndpointType.Events)
+            .assertWillNotReceive {
+                it.body.any<CommerceEventMessage> {
+                    it.productActionObject?.productList?.firstOrNull()?.name == "Should Not Upload"
+                }
+            }.and
+            .assertWillReceive {
+                it.body.any<CommerceEventMessage> {
+                    it.productActionObject?.productList?.firstOrNull()?.name == "Should Upload 1"
+                }
+            }.and
+            .assertWillReceive {
+                it.body.any<CommerceEventMessage> {
+                    it.productActionObject?.productList?.firstOrNull()?.name == "Should Upload 2"
+                }
             }
-        )
+            .after {
+                MParticle.getInstance()?.logEvent(event)
+                MParticle.getInstance()?.logEvent(event2)
+                MParticle.getInstance()?.logEvent(event3)
+                MParticle.getInstance()?.upload()
+            }
+            .blockUntilFinished()
     }
 }
+
+inline fun <reified EventType : BaseEvent> BatchMessage.any(isMatch: (EventType) -> Boolean) = this.messages
+    .filterIsInstance<EventType>()
+    .any(isMatch)
