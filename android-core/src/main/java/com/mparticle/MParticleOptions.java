@@ -364,7 +364,7 @@ public class MParticleOptions {
         private Integer sessionTimeout = null;
         private Integer configMaxAge = null;
         private Boolean unCaughtExceptionLogging = null;
-        private MParticle.LogLevel logLevel = null;
+        MParticle.LogLevel logLevel = null;
         BaseIdentityTask identityTask;
         private AttributionListener attributionListener;
         private BatchCreationListener batchCreationListener;
