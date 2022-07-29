@@ -30,7 +30,7 @@ public interface MParticleApiClient extends MParticleBaseClient {
             this(responseCode, null);
         }
 
-        AliasNetworkResponse(int responseCode, String errorMessage) {
+        public AliasNetworkResponse(int responseCode, String errorMessage) {
             this.responseCode = responseCode;
             this.errorMessage = errorMessage;
         }

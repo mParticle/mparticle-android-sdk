@@ -68,7 +68,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
     private final String mApiKey;
     private final Context mContext;
     Integer mDeviceRampNumber = null;
-    private static String sSupportedKits;
+    private String supportedKits;
     private JSONObject mCurrentCookies;
 
     /**
@@ -104,8 +104,8 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         mConfigUrl = configUrl;
     }
 
-    static void setSupportedKitString(String supportedKitString) {
-        sSupportedKits = supportedKitString;
+    void setSupportedKitString(String supportedKitString) {
+        supportedKits = supportedKitString;
     }
 
 
@@ -415,7 +415,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
     }
 
     private String getSupportedKitString(){
-        if (sSupportedKits == null) {
+        if (supportedKits == null) {
             MParticle instance = MParticle.getInstance();
             if (instance != null) {
                 Set<Integer> supportedKitIds = instance.Internal().getKitManager().getSupportedKits();
@@ -429,13 +429,13 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
                             buffer.append(",");
                         }
                     }
-                    sSupportedKits = buffer.toString();
+                    supportedKits = buffer.toString();
                 }
             } else {
-                sSupportedKits = "";
+                supportedKits = "";
             }
         }
-        return sSupportedKits;
+        return supportedKits;
     }
 
     public void setCookies(JSONObject serverCookies) {

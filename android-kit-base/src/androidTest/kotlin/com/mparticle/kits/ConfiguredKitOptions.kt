@@ -5,8 +5,12 @@ import com.mparticle.messages.KitConfigMessage
 class ConfiguredKitOptions : KitOptions() {
     val initialConfig = mutableMapOf<Int, KitConfigMessage>()
 
-    override fun addKit(type: Class<out KitIntegration>, kitId: Int): ConfiguredKitOptions {
+    fun addKit(type: Class<out KitIntegration>, kitId: Int): ConfiguredKitOptions {
         return addKit(type, KitConfigMessage(id = kitId))
+    }
+
+    override fun addKit(kitId: Int, type: Class<out KitIntegration>): KitOptions {
+        return addKit(type, kitId)
     }
 
     fun addKit(type: Class<out KitIntegration>, kitId: Int, includeInConfig: Boolean): ConfiguredKitOptions {
@@ -17,7 +21,7 @@ class ConfiguredKitOptions : KitOptions() {
         if (includeInConfig) {
             initialConfig[config.id] = config
         }
-        super.addKit(type, config.id)
+        super.addKit(config.id, type)
         return this
     }
 }
