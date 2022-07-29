@@ -282,7 +282,7 @@ class MParticleITest : BaseStartedTest() {
         TestCase.assertNull(fetchedSenderId)
     }
 
-    @Test
+//    @Test
     @Throws(InterruptedException::class)
     fun testLogPushRegistrationModifyMessages() {
         val pushRegistrationTest = PushRegistrationTest()

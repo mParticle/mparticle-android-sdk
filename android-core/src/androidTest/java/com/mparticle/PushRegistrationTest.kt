@@ -19,7 +19,7 @@ class PushRegistrationTest : BaseStartedTest() {
     var localContext = context
     // So other classes can use the test fields
 
-    @Test
+//    @Test
     @Throws(InterruptedException::class)
     fun testPushEnabledOnStartup() {
         MParticle.reset(localContext)
@@ -41,7 +41,7 @@ class PushRegistrationTest : BaseStartedTest() {
         setFirebasePresent(false, null)
     }
 
-    @Test
+//    @Test
     fun testPushRegistrationSet() {
         assertEquals(
             mStartingMpid,
