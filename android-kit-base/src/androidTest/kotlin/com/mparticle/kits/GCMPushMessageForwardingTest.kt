@@ -7,6 +7,7 @@ import com.mparticle.MPServiceUtil
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.kits.testkits.PushListenerTestKit
+import com.mparticle.testing.context
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
@@ -17,9 +18,13 @@ class GCMPushMessageForwardingTest : BaseKitOptionsTest() {
     fun testPushForwardedAfterSDKStarted() {
         var receivedIntent: Intent? = null
 
-        MParticleOptions.builder(mContext)
+        MParticleOptions.builder(context)
             .credentials("key", "secret")
-            .configuration(KitOptions().addKit(1, PushListenerTestKit::class.java))
+            .configuration(
+                ConfiguredKitOptions {
+                    addKit(PushListenerTestKit::class.java, 1)
+                }
+            )
             .let {
                 startMParticle(it)
             }
@@ -30,10 +35,11 @@ class GCMPushMessageForwardingTest : BaseKitOptionsTest() {
                 data = Uri.EMPTY
                 putExtras(Bundle())
             }
-        (MParticle.getInstance()?.getKitInstance(1) as PushListenerTestKit).onPushMessageReceived = { context, intent ->
-            receivedIntent = intent
-        }
-        MPServiceUtil(mContext).onHandleIntent(intent)
+        (MParticle.getInstance()?.getKitInstance(1) as PushListenerTestKit).onPushMessageReceived =
+            { context, intent ->
+                receivedIntent = intent
+            }
+        MPServiceUtil(context).onHandleIntent(intent)
 
         assertNotNull(receivedIntent)
         assertEquals(intent, receivedIntent)

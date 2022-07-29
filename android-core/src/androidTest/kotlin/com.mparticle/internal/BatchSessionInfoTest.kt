@@ -3,30 +3,29 @@ package com.mparticle.internal
 import com.mparticle.InstallReferrerHelper
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
-import com.mparticle.MParticleOptions
-import com.mparticle.networking.Matcher
-import com.mparticle.testutils.BaseCleanStartedEachTest
-import org.json.JSONObject
+import com.mparticle.internal.database.tables.MParticleDatabaseHelper
+import com.mparticle.messages.ConfigResponseMessage
+import com.mparticle.messages.events.MPEventMessage
+import com.mparticle.testing.BaseStartedTest
+import com.mparticle.testing.context
+import com.mparticle.testing.equals
+import com.mparticle.testing.mockserver.EndpointType
+import com.mparticle.testing.mockserver.Server
+import com.mparticle.testing.mustEqual
+import org.junit.Before
 import org.junit.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
-class BatchSessionInfoTest : BaseCleanStartedEachTest() {
+class BatchSessionInfoTest : BaseStartedTest() {
 
-    override fun useInMemoryDatabase() = true
-
-    override fun transformMParticleOptions(builder: MParticleOptions.Builder): MParticleOptions.Builder {
-        return builder.logLevel(MParticle.LogLevel.INFO)
+    override fun afterBeforeAll() {
+        MParticleDatabaseHelper.setDbName(null)
+        super.afterBeforeAll()
     }
 
-    override fun beforeSetup() {
-        // the condition described in the test only happened when `sessionHistory` is false,
-        // so set config to return `sessionHistory` == false
-        mServer.setupConfigResponse(
-            JSONObject()
-                .put(ConfigManager.KEY_INCLUDE_SESSION_HISTORY, false)
-                .toString()
-        )
+    @Before
+    fun before() {
+        initialConfigResponse(ConfigResponseMessage(includeSessionHistory = false))
     }
 
     /**
@@ -40,47 +39,44 @@ class BatchSessionInfoTest : BaseCleanStartedEachTest() {
      */
     @Test
     fun testProperSessionAttachedToBatch() {
-        InstallReferrerHelper.setInstallReferrer(mContext, "111")
-        (0..150).forEach { MParticle.getInstance()?.logEvent(MPEvent.Builder(it.toString()).build()) }
-
-        AccessUtils.awaitMessageHandler()
-        MParticle.getInstance()?.Internal()?.apply {
-            val sessionId = appStateManager.session.mSessionID
-            appStateManager.endSession()
-            appStateManager.ensureActiveSession()
-            InstallReferrerHelper.setInstallReferrer(mContext, "222")
-            assertNotEquals(sessionId, appStateManager.session.mSessionID)
-        }
-
         var messageCount = 0
         MParticle.getInstance()?.upload()
-        mServer.waitForVerify(
-            Matcher(mServer.Endpoints().getEventsUrl()).bodyMatch {
-                val version = it.getJSONObject("ai").getString(Constants.MessageKey.INSTALL_REFERRER)
-                if (it.has("msgs")) {
-                    var messages = it.getJSONArray("msgs")
-                    for (i in 0 until messages.length()) {
-                        if (messages.getJSONObject(i).getString("dt") == "e") {
-                            messageCount++
-                        }
-                    }
-                }
-                assertEquals("111", version)
+        Server
+            .endpoint(EndpointType.Events)
+            .assertWillReceive {
+                it.body.appInfo?.installReferrer mustEqual "111"
+                messageCount += it.body.messages.filterIsInstance<MPEventMessage>().size
                 MParticle.getInstance()?.upload()
                 messageCount >= 150
             }
-        )
+            .after {
+                InstallReferrerHelper.setInstallReferrer(context, "111")
+                (0..150).forEach { MParticle.getInstance()!!.logEvent(MPEvent.Builder(it.toString()).build()) }
 
-        MParticle.getInstance()?.apply {
-            logEvent(MPEvent.Builder("1").build())
-            upload()
-        }
-        mServer.waitForVerify(
-            Matcher(mServer.Endpoints().getEventsUrl()).bodyMatch {
-                val version = it.getJSONObject("ai").getString(Constants.MessageKey.INSTALL_REFERRER)
-                assertEquals("222", version)
-                true
+                AccessUtils.awaitMessageHandler()
+                MParticle.getInstance()?.apply {
+                    Internal().apply {
+                        val sessionId = appStateManager.session.mSessionID
+                        appStateManager.endSession()
+                        appStateManager.ensureActiveSession()
+                        InstallReferrerHelper.setInstallReferrer(context, "222")
+                        assertNotEquals(sessionId, appStateManager.session.mSessionID)
+                    }
+                    upload()
+                }
             }
-        )
+            .blockUntilFinished()
+
+        Server
+            .endpoint(EndpointType.Events)
+            .assertWillReceive {
+                it.body.appInfo?.installReferrer equals "222"
+            }
+            .after {
+                MParticle.getInstance()?.apply {
+                    logEvent(MPEvent.Builder("1").build())
+                    upload()
+                }
+            }
     }
 }

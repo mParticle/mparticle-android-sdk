@@ -2,20 +2,27 @@ package com.mparticle.kits
 
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
-import com.mparticle.Utils.randomAttributes
-import com.mparticle.Utils.randomEventType
-import com.mparticle.Utils.randomIdentities
-import com.mparticle.Utils.randomProductAction
-import com.mparticle.Utils.randomPromotionAction
-import com.mparticle.Utils.randomString
+import com.mparticle.api.identity.toIdentityType
+import com.mparticle.commerce.Product
+import com.mparticle.commerce.Promotion
 import com.mparticle.identity.IdentityApiRequest
+import com.mparticle.internal.AccessUtil
 import com.mparticle.internal.AccessUtils
 import com.mparticle.kits.DataplanFilterImpl.Companion.getEventsApiName
 import com.mparticle.kits.testkits.AttributeListenerTestKit
 import com.mparticle.kits.testkits.IdentityListenerTestKit
 import com.mparticle.kits.testkits.ListenerTestKit
 import com.mparticle.kits.testkits.UserAttributeListenerTestKit
-import com.mparticle.testutils.MPLatch
+import com.mparticle.messages.IdentityResponseMessage
+import com.mparticle.testing.FailureLatch
+import com.mparticle.testing.RandomUtils.getAlphaString
+import com.mparticle.testing.RandomUtils.randomAttributes
+import com.mparticle.testing.RandomUtils.randomEventType
+import com.mparticle.testing.RandomUtils.randomIdentities
+import com.mparticle.testing.context
+import com.mparticle.testing.mockserver.EndpointType
+import com.mparticle.testing.mockserver.Server
+import com.mparticle.testing.mockserver.SuccessResponse
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -33,12 +40,12 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
 
     @Before
     fun beforeTests() {
-        MParticleOptions.builder(mContext)
+        MParticleOptions.builder(context)
             .configuration(
-                KitOptions {
-                    addKit(-1, AttributeListenerTestKit::class.java)
-                    addKit(-2, IdentityListenerTestKit::class.java)
-                    addKit(-3, UserAttributeListenerTestKit::class.java)
+                ConfiguredKitOptions {
+                    addKit(AttributeListenerTestKit::class.java, -1)
+                    addKit(IdentityListenerTestKit::class.java, -2)
+                    addKit(UserAttributeListenerTestKit::class.java, -3)
                 }
             ).let {
                 startMParticle(it)
@@ -47,8 +54,8 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         identityListenerKitKit = MParticle.getInstance()?.getKitInstance(-2) as IdentityListenerTestKit
         userAttributeListenerKitKit = MParticle.getInstance()?.getKitInstance(-3) as UserAttributeListenerTestKit
         kitIntegrationTestKits = listOf(attributeListenerKitKit, identityListenerKitKit, userAttributeListenerKitKit)
-        assertTrue(randomAttributes().size > 0)
-        assertTrue(randomIdentities().size > 0)
+        assertTrue(randomAttributes().isNotEmpty())
+        assertTrue(randomIdentities().isNotEmpty())
     }
 
     @Test
@@ -59,7 +66,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         assertTrue(blockedAttributes.size > 0)
 
         datapoints[DataplanFilterImpl.USER_ATTRIBUTES_KEY] = allowedAttributes.keys.toHashSet()
-        AccessUtils.getKitManager().setDataplanFilter(DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), true, Random.nextBoolean()))
+        AccessUtil.kitManager().setDataplanFilter(DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), true, Random.nextBoolean()))
 
         userAttributeListenerKitKit.onSetUserAttribute = { key, value, user ->
             assertTrue(allowedAttributes.containsKey(key))
@@ -87,7 +94,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         assertTrue(blockedAttributes.size > 0)
 
         datapoints[DataplanFilterImpl.USER_ATTRIBUTES_KEY] = allowedAttributes.keys.toHashSet()
-        AccessUtils.getKitManager().setDataplanFilter(DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), true, false))
+        AccessUtil.kitManager().setDataplanFilter(DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), true, false))
 
         kitIntegrationTestKits.forEach { kit ->
             kit.onAttributeReceived = { key, value ->
@@ -143,7 +150,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         assertTrue(blockedAttributes.size > 0)
 
         datapoints[DataplanFilterImpl.USER_ATTRIBUTES_KEY] = allowedAttributes.keys.toHashSet()
-        AccessUtils.getKitManager().setDataplanFilter(DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), true, Random.nextBoolean()))
+        AccessUtil.kitManager().setDataplanFilter(DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), true, Random.nextBoolean()))
 
         var count = 0
         kitIntegrationTestKits.forEach { kit ->
@@ -178,18 +185,18 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
     @Test
     fun testBlockingInFilteredIdentityApiRequest() {
         val datapoints = getRandomDataplanPoints()
-        val allowedIdentities = randomIdentities()
-        val blockIdentities = randomIdentities().filterKeys { !allowedIdentities.containsKey(it) }
+        val allowedIdentities = randomAndroidIdentities()
+        val blockIdentities = randomAndroidIdentities().filterKeys { !allowedIdentities.containsKey(it) }
 
         datapoints[DataplanFilterImpl.USER_IDENTITIES_KEY] = allowedIdentities.keys.map { it.getEventsApiName() }.toHashSet()
-        AccessUtils.getKitManager().setDataplanFilter(DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), Random.nextBoolean(), true))
+        AccessUtil.kitManager().setDataplanFilter(DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), Random.nextBoolean(), true))
 
         MParticle.getInstance()?.Identity()?.login(
             IdentityApiRequest.withEmptyUser()
                 .userIdentities(blockIdentities + allowedIdentities)
                 .build()
         )
-        val latch = MPLatch(1)
+        val latch = FailureLatch()
         kitIntegrationTestKits.forEach { kit ->
             kit.onIdentityReceived = { identityType, value ->
                 assertTrue(allowedIdentities.containsKey(identityType))
@@ -211,20 +218,27 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
     @Test
     fun testBlockingInFilteredMParticleUser() {
         val datapoints = getRandomDataplanPoints()
-        val allowedIdentities = randomIdentities()
-        val blockedIdentities = randomIdentities().filterKeys { !allowedIdentities.containsKey(it) }
+        val allowedIdentities = randomAndroidIdentities()
+        val blockedIdentities = randomAndroidIdentities().filterKeys { !allowedIdentities.containsKey(it) }
         assertTrue(blockedIdentities.size > 0)
 
         datapoints[DataplanFilterImpl.USER_IDENTITIES_KEY] = allowedIdentities.keys.map { it.getEventsApiName() }.toHashSet()
-        AccessUtils.getKitManager().setDataplanFilter(DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), Random.nextBoolean(), true))
+        AccessUtil.kitManager().setDataplanFilter(DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), Random.nextBoolean(), true))
 
-        mServer.addConditionalLoginResponse(mStartingMpid, Random.Default.nextLong())
+        Server
+            .endpoint(EndpointType.Identity_Login)
+            .addResponseLogic {
+                SuccessResponse {
+                    responseObject = IdentityResponseMessage(Random.Default.nextLong())
+                }
+            }
+
         MParticle.getInstance()?.Identity()?.login(
             IdentityApiRequest.withEmptyUser()
                 .userIdentities(blockedIdentities + allowedIdentities)
                 .build()
         )
-        val latch = MPLatch(1)
+        val latch = FailureLatch()
         kitIntegrationTestKits.forEach { kit ->
             kit.onUserReceived = {
                 assertEquals(allowedIdentities, it?.userIdentities)
@@ -243,10 +257,10 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
 
     internal fun getRandomDataplanEventKey(): DataplanFilterImpl.DataPoint {
         return when (Random.Default.nextInt(0, 5)) {
-            0 -> DataplanFilterImpl.DataPoint(DataplanFilterImpl.CUSTOM_EVENT_KEY, randomString(5), randomEventType().ordinal.toString())
-            1 -> DataplanFilterImpl.DataPoint(DataplanFilterImpl.SCREEN_EVENT_KEY, randomString(8))
-            2 -> DataplanFilterImpl.DataPoint(DataplanFilterImpl.PRODUCT_ACTION_KEY, randomProductAction())
-            3 -> DataplanFilterImpl.DataPoint(DataplanFilterImpl.PROMOTION_ACTION_KEY, randomPromotionAction())
+            0 -> DataplanFilterImpl.DataPoint(DataplanFilterImpl.CUSTOM_EVENT_KEY, getAlphaString(5), randomEventType().ordinal.toString())
+            1 -> DataplanFilterImpl.DataPoint(DataplanFilterImpl.SCREEN_EVENT_KEY, getAlphaString(8))
+            2 -> DataplanFilterImpl.DataPoint(DataplanFilterImpl.PRODUCT_ACTION_KEY, Product.DETAIL)
+            3 -> DataplanFilterImpl.DataPoint(DataplanFilterImpl.PROMOTION_ACTION_KEY, Promotion.VIEW)
             4 -> DataplanFilterImpl.DataPoint(DataplanFilterImpl.PRODUCT_IMPRESSION_KEY)
             else -> throw IllegalArgumentException("messed this implementation up :/")
         }
@@ -258,5 +272,9 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
                 getRandomDataplanEventKey().toString() to randomAttributes().keys.toHashSet()
             }
             .toMutableMap()
+    }
+
+    private fun randomAndroidIdentities(): Map<MParticle.IdentityType, String> {
+        return randomIdentities().entries.associate { it.key.toIdentityType() to it.value }
     }
 }

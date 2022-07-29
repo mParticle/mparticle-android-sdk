@@ -5,8 +5,13 @@ import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.kits.testkits.BaseTestKit
 import com.mparticle.kits.testkits.EventTestKit
-import com.mparticle.networking.Matcher
-import com.mparticle.testutils.MPLatch
+import com.mparticle.messages.Empty
+import com.mparticle.testing.FailureLatch
+import com.mparticle.testing.context
+import com.mparticle.testing.mockserver.EndpointType
+import com.mparticle.testing.mockserver.ErrorResponse
+import com.mparticle.testing.mockserver.Server
+import com.mparticle.testing.mockserver.SuccessResponse
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
@@ -19,18 +24,19 @@ class KitBatchingTest : BaseKitOptionsTest() {
 
     @Before
     fun before() {
-        val options = MParticleOptions.builder(mContext)
+        val options = MParticleOptions.builder(context)
             .configuration(
-                KitOptions()
-                    .addKit(123, BatchKit::class.java)
-                    .addKit(456, EventTestKit::class.java)
+                ConfiguredKitOptions {
+                    addKit(BatchKit::class.java, 123)
+                    addKit(EventTestKit::class.java, 456)
+                }
             )
         startMParticle(options)
     }
 
     @Test
     fun testEventAttributesRetainsOriginalTypes() {
-        val latch = MPLatch(1)
+        val latch = FailureLatch()
         var receivedEvent: MPEvent? = null
         (MParticle.getInstance()?.getKitInstance(456) as EventTestKit).let { kit ->
             kit.onLogEvent = { event ->
@@ -65,6 +71,7 @@ class KitBatchingTest : BaseKitOptionsTest() {
 
     @Test
     fun testBatchArrives() {
+        var called = false
         MParticle.getInstance()?.apply {
             logEvent(MPEvent.Builder("some event").build())
             logEvent(MPEvent.Builder("some other event").build())
@@ -78,19 +85,26 @@ class KitBatchingTest : BaseKitOptionsTest() {
                 assertTrue(any { (it as? JSONObject)?.getString("dt") == "fr" })
                 assertTrue(any { (it as? JSONObject)?.getString("dt") == "ss" })
                 assertEquals(2, filter { (it as? JSONObject)?.getString("dt") == "e" }.size)
+                called = true
             }
         }
+        assertTrue(called)
     }
 
     @Test
     fun testBatchNotForwardedOnNetworkFailure() {
         val instance = MParticle.getInstance()!!
-        mServer.setEventsResponseLogic(500)
+        Server
+            .endpoint(EndpointType.Events)
+            .addResponseLogic { ErrorResponse(500) }
         instance.apply {
             logEvent(MPEvent.Builder("some event").build())
             upload()
         }
-        mServer.waitForVerify(Matcher(mServer.Endpoints().eventsUrl))
+        Server
+            .endpoint(EndpointType.Events)
+            .assertWillReceive { true }
+            .blockUntilFinished()
         // send another event, since batches aren't forwarded to the kits until after the upload,
         // this is the only way we can gaurantee an batch forwarding *could* have happened. Since it's
         // not supposed to happen when the upload fails, we can't await() in the kit like the previous test
@@ -98,16 +112,22 @@ class KitBatchingTest : BaseKitOptionsTest() {
             logEvent(MPEvent.Builder("some other event").build())
             upload()
         }
-        mServer.waitForVerify(Matcher(mServer.Endpoints().eventsUrl))
+        Server
+            .endpoint(EndpointType.Events)
+            .assertWillReceive { true }
+            .blockUntilFinished()
 
         val batchKit = (MParticle.getInstance()?.getKitInstance(123) as BatchKit)
         assertEquals(0, batchKit.batches.size)
 
         // see if it recovers...
-        mServer.setupHappyEvents()
-        val uploadsCount = getDatabaseContents(listOf("uploads")).getJSONArray("uploads").length()
+        Server
+            .endpoint(EndpointType.Events)
+            .addResponseLogic { SuccessResponse(Empty()) }
+        val uploadsCount = mockingPlatforms.getDatabaseContents(listOf("uploads"))["uploads"]?.size ?: 0
+        assertTrue(uploadsCount > 0)
         instance.upload()
-        for (i in 1..uploadsCount) {
+        (0 until uploadsCount).forEach {
             batchKit.await()
         }
 
@@ -117,10 +137,10 @@ class KitBatchingTest : BaseKitOptionsTest() {
     class BatchKit : BaseTestKit(), KitIntegration.BatchListener {
         var batches = mutableListOf<JSONObject>()
         override fun getName() = "Batch Kit"
-        private var latch = MPLatch(1)
+        private var latch = FailureLatch()
 
         fun await() {
-            latch = MPLatch(1)
+            latch = FailureLatch()
             latch.await()
         }
 

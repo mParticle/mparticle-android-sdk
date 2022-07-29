@@ -2,105 +2,136 @@ package com.mparticle.internal
 
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
-import com.mparticle.networking.Matcher
-import com.mparticle.testutils.BaseCleanInstallEachTest
-import com.mparticle.testutils.MPLatch
-import org.json.JSONObject
+import com.mparticle.messages.ConfigResponseMessage
+import com.mparticle.messages.KitConfigMessage
+import com.mparticle.messages.toJsonString
+import com.mparticle.testing.BaseTest
+import com.mparticle.testing.FailureLatch
+import com.mparticle.testing.context
+import com.mparticle.testing.mockserver.EndpointType
+import com.mparticle.testing.mockserver.Server
+import com.mparticle.testing.mockserver.SuccessResponse
+import com.mparticle.utils.startMParticle
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
-class ConfigRequestTests : BaseCleanInstallEachTest() {
+class ConfigRequestTests : BaseTest() {
+
+    val simpleConfigWithKits = ConfigResponseMessage(
+        id = "12345",
+        kits = listOf(KitConfigMessage(1))
+    )
 
     @Test
     fun testConfigRequestWithDataplanIdAndVersion() {
-        MParticleOptions
-            .builder(mContext)
-            .credentials("key", "secret")
-            .dataplan("dpId", 101)
-            .let {
-                startMParticle(it)
+        Server
+            .endpoint(EndpointType.Config)
+            .assertWillReceive {
+                it.url.contains("plan_id=dpId") &&
+                    it.url.contains("plan_version=101")
             }
-        mServer.waitForVerify(Matcher(mServer.Endpoints().configUrl)) {
-            assertTrue { it.url.contains("plan_id=dpId") }
-            assertTrue { it.url.contains("plan_version=101") }
-        }
+            .after {
+                MParticleOptions
+                    .builder(context)
+                    .credentials("key", "secret")
+                    .dataplan("dpId", 101)
+                    .let {
+                        startMParticle(it)
+                    }
+            }
+            .blockUntilFinished()
 
         // make sure it works on subsiquent requests
-        AccessUtils.getUploadHandler().mApiClient.fetchConfig(true)
-        (0..2).forEach {
-            mServer.waitForVerify(Matcher(mServer.Endpoints().configUrl)) {
-                assertTrue { it.url.contains("plan_id=dpId") }
-                assertTrue { it.url.contains("plan_version=101") }
+        Server
+            .endpoint(EndpointType.Config)
+            .assertWillReceive {
+                it.url.contains("plan_id=dpId") &&
+                    it.url.contains("plan_version=101")
             }
-        }
+            .after {
+                AccessUtils.uploadHandler.mApiClient.fetchConfig(true)
+            }
+            .blockUntilFinished()
     }
 
     @Test
     fun testConfigRequestWithDataplanIdNoVersion() {
-        MParticleOptions
-            .builder(mContext)
-            .credentials("key", "secret")
-            .dataplan("dpId", null)
-            .let {
-                startMParticle(it)
+        Server
+            .endpoint(EndpointType.Config)
+            .assertWillReceive {
+                it.url.contains("plan_id") &&
+                    !it.url.contains("plan_version")
             }
-        mServer.waitForVerify(Matcher(mServer.Endpoints().configUrl)) {
-            assertTrue { it.url.contains("plan_id") }
-            assertFalse { it.url.contains("plan_version") }
-        }
+            .after {
+                MParticleOptions
+                    .builder(context)
+                    .credentials("key", "secret")
+                    .dataplan("dpId", null)
+                    .let {
+                        startMParticle(it)
+                    }
+            }
+            .blockUntilFinished()
 
         // make sure it works on subsiquent requests
-        (0..2).forEach {
-            AccessUtils.getUploadHandler().mApiClient.fetchConfig(true)
-            mServer.waitForVerify(Matcher(mServer.Endpoints().configUrl)) {
-                assertTrue { it.url.contains("plan_id") }
-                assertFalse { it.url.contains("plan_version") }
+        Server
+            .endpoint(EndpointType.Config)
+            .assertWillReceive {
+                it.url.contains("plan_id") &&
+                    !it.url.contains("plan_version")
             }
-        }
+            .after {
+                AccessUtils.uploadHandler.mApiClient.fetchConfig(true)
+            }
+            .blockUntilFinished()
     }
 
     @Test
     fun testConfigRequestWithDataplanVersionButNoId() {
-        MParticleOptions
-            .builder(mContext)
-            .credentials("key", "secret")
-            .dataplan(null, 2)
-            .let {
-                startMParticle(it)
+        Server
+            .endpoint(EndpointType.Config)
+            .assertWillReceive {
+                !it.url.contains("plan_id") &&
+                    !it.url.contains("plan_version")
             }
-        mServer.waitForVerify(Matcher(mServer.Endpoints().configUrl)) {
-            assertFalse { it.url.contains("plan_id") }
-            assertFalse { it.url.contains("plan_version") }
-        }
+            .after {
+                MParticleOptions
+                    .builder(context)
+                    .credentials("key", "secret")
+                    .dataplan(null, 2)
+                    .let {
+                        startMParticle(it)
+                    }
+            }
+            .blockUntilFinished()
 
         // make sure it works on subsiquent requests
-        (0..2).forEach {
-            AccessUtils.getUploadHandler().mApiClient.fetchConfig(true)
-            mServer.waitForVerify(Matcher(mServer.Endpoints().configUrl)) {
-                assertFalse { it.url.contains("plan_id") }
-                assertFalse { it.url.contains("plan_version") }
+        Server
+            .endpoint(EndpointType.Config)
+            .assertWillReceive {
+                !it.url.contains("plan_id") &&
+                    !it.url.contains("plan_version")
             }
-        }
+            .after {
+                AccessUtils.apiClient.fetchConfig(true)
+            }
+            .blockUntilFinished()
     }
 
     @Test
     fun testRemoteConfigApplied() {
-        val latch = MPLatch(1)
+        val latch = FailureLatch(count = 1)
 
-        mServer.setupConfigResponse(simpleConfigWithKits.toString(), 100)
-        setCachedConfig(JSONObject())
-        mServer.waitForVerify(Matcher(mServer.Endpoints().configUrl)) { request ->
-            assertTrue {
-                MPUtility.isEmpty(
-                    MParticle.getInstance()!!.Internal().configManager.latestKitConfiguration
-                )
+        Server
+            .endpoint(EndpointType.Config)
+            .nextResponse { SuccessResponse(simpleConfigWithKits) }
+            .assertWillReceive {
+                true
             }
-            latch.countDown()
-        }
-        startMParticle()
-        latch.await()
-        assertEquals(simpleConfigWithKits[ConfigManager.KEY_EMBEDDED_KITS].toString(), MParticle.getInstance()?.Internal()?.configManager?.latestKitConfiguration.toString())
+            .after {
+                startMParticle(MParticleOptions.builder(context))
+            }
+            .blockUntilFinished()
+        assertEquals(simpleConfigWithKits.kits?.joinToString(", ") { it.toJsonString() }.let { "[$it]" }, MParticle.getInstance()?.Internal()?.configManager?.latestKitConfiguration.toString())
     }
 }

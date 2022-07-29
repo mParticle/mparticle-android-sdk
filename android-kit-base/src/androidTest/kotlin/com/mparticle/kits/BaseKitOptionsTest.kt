@@ -1,23 +1,19 @@
 package com.mparticle.kits
 
-import com.mparticle.AccessUtils
 import com.mparticle.Configuration
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
-import com.mparticle.testutils.BaseCleanInstallEachTest
-import com.mparticle.testutils.MPLatch
-import org.json.JSONArray
-import org.json.JSONObject
+import com.mparticle.kits.utils.setCredentialsIfEmpty
+import com.mparticle.kits.utils.startMParticle
+import com.mparticle.messages.ConfigResponseMessage
+import com.mparticle.testing.BaseTest
+import com.mparticle.testing.FailureLatch
 
-open class BaseKitOptionsTest : BaseCleanInstallEachTest() {
+open class BaseKitOptionsTest : BaseTest() {
 
-    override fun startMParticle(optionsBuilder: MParticleOptions.Builder) {
-        startMParticle(optionsBuilder, true)
-    }
-
-    fun startMParticle(optionsBuilder: MParticleOptions.Builder, awaitKitLoaded: Boolean) {
-        AccessUtils.setCredentialsIfEmpty(optionsBuilder)
-        val kitsLoadedLatch = MPLatch(1)
+    fun startMParticle(optionsBuilder: MParticleOptions.Builder) {
+        setCredentialsIfEmpty(optionsBuilder)
+        val kitsLoadedLatch = FailureLatch()
         var kitCount = 0
         val kitsLoadedListener = object : Configuration<KitManagerImpl> {
             override fun configures() = KitManagerImpl::class.java
@@ -38,37 +34,24 @@ open class BaseKitOptionsTest : BaseCleanInstallEachTest() {
         val configuredKitOptions =
             options.getConfiguration(ConfiguredKitOptions::class.java) ?: ConfiguredKitOptions()
 
-        val kitConfigurations: MutableMap<Int, JSONObject?> =
-            mutableMapOf()
-        (kitOptions.kits + configuredKitOptions.kits).forEach { id, clazz ->
-            kitConfigurations[id] = JSONObject().put("id", id)
-        }
-        configuredKitOptions.testingConfiguration.forEach { id, config ->
-            kitConfigurations[id] = config
-        }
-        kitConfigurations.values
-            .filterNotNull()
-            .fold(JSONArray()) { init, next -> init.apply { put(next) } }
+        val configResponseMessage = configuredKitOptions.initialConfig
             .let {
-                kitCount = it.length()
-                JSONObject().put("eks", it)
+                kitCount = it.size
+                ConfigResponseMessage().apply {
+                    kits = it.values.toList()
+                }
             }
-            .let {
-                mServer.setupConfigResponse(it.toString())
-            }
-        if (kitConfigurations.isEmpty()) {
+        if (configResponseMessage.kits.isNullOrEmpty()) {
             kitsLoadedLatch.countDown()
         }
-        super.startMParticle(optionsBuilder)
-        if (awaitKitLoaded) {
-            kitsLoadedLatch.await()
-        }
+        startMParticle(optionsBuilder, configResponseMessage)
+        kitsLoadedLatch.await()
     }
 
     protected fun waitForKitToStart(kitId: Int) {
-        val latch = MPLatch(1)
+        val latch = FailureLatch()
         // wait for kit to start/reload
-        com.mparticle.internal.AccessUtils.getKitManager().addKitsLoadedListener { kits, previousKits, kitConfigs ->
+        com.mparticle.internal.AccessUtil.kitManager().addKitsLoadedListener { kits, previousKits, kitConfigs ->
             if (kits.containsKey(kitId)) {
                 latch.countDown()
             }
@@ -83,8 +66,8 @@ open class BaseKitOptionsTest : BaseCleanInstallEachTest() {
     @Throws(InterruptedException::class)
     @JvmOverloads
     fun waitForKitReload(after: (() -> Unit)? = null) {
-        val latch = MPLatch(1)
-        com.mparticle.internal.AccessUtils.getKitManager()
+        val latch = FailureLatch()
+        com.mparticle.internal.AccessUtil.kitManager()
             .addKitsLoadedListener { _: Map<Int?, KitIntegration?>, _: Map<Int?, KitIntegration?>?, _: List<KitConfiguration?>? ->
                 latch.countDown()
             }

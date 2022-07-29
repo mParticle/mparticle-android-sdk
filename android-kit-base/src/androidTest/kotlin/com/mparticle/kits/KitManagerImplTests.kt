@@ -10,24 +10,34 @@ import com.mparticle.internal.KitManager
 import com.mparticle.kits.testkits.AttributeListenerTestKit
 import com.mparticle.kits.testkits.IdentityListenerTestKit
 import com.mparticle.kits.testkits.UserAttributeListenerTestKit
-import com.mparticle.networking.Matcher
-import com.mparticle.testutils.MPLatch
+import com.mparticle.messages.KitConfigMessage
+import com.mparticle.testing.FailureLatch
+import com.mparticle.testing.context
+import com.mparticle.testing.mockserver.EndpointType
+import com.mparticle.testing.mockserver.Server
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 
 class KitManagerImplTests : BaseKitOptionsTest() {
 
+    @Before
+    fun before() {
+        MParticle.setInstance(null)
+    }
+
     @Test
     fun testKitIntializationViaKitOptions() {
-        KitOptions()
-            .addKit(1001, AttributeListenerTestKit::class.java)
-            .addKit(1002, IdentityListenerTestKit::class.java)
-            .addKit(1003, UserAttributeListenerTestKit::class.java)
+        ConfiguredKitOptions {
+            addKit(AttributeListenerTestKit::class.java, 1001)
+            addKit(IdentityListenerTestKit::class.java, 1002)
+            addKit(UserAttributeListenerTestKit::class.java, 1003)
+        }
             .let {
-                MParticleOptions.builder(mContext)
+                MParticleOptions.builder(context)
                     .configuration(it)
             }
             .let {
@@ -42,40 +52,35 @@ class KitManagerImplTests : BaseKitOptionsTest() {
 
     @Test
     fun testKitConfigParsingFailsGracefullyOnReset() {
-        val latch = MPLatch(1)
+        val latch = FailureLatch()
         // somewhat contrived, but this is simulating the main thread is blocked/unresponsive
         Handler(Looper.getMainLooper()).post { latch.await() }
 
         // Force the SDK to make a config request (using the ugly internals)
-        JSONObject().put("eks", ConfigManager.getInstance(mContext).latestKitConfiguration)
+        JSONObject().put("eks", ConfigManager.getInstance(context).latestKitConfiguration)
             .let {
-                ConfigManager.getInstance(mContext).updateConfig(it)
+                ConfigManager.getInstance(context).updateConfig(it)
             }
-        MParticle.reset(mContext)
+        MParticle.reset(context)
         latch.countDown()
     }
 
     @Test
     fun testActiveKitReporting() {
-        MParticleOptions.builder(mContext)
+        MParticleOptions.builder(context)
             .configuration(
                 ConfiguredKitOptions {
-                    addKit(-1, AttributeListenerTestKit::class.java, JSONObject().put("eau", true))
-                    addKit(-2, IdentityListenerTestKit::class.java)
-                    addKit(-3, UserAttributeListenerTestKit::class.java)
-                    addKit(-4, AttributeListenerTestKit::class.java, JSONObject().put("eau", true))
-                    addKit(-5, IdentityListenerTestKit::class.java)
-                    addKit(-6, UserAttributeListenerTestKit::class.java)
-                }.apply {
-                    // do not make a config for kits with id -2 or -5..This will mimic having the
-                    // kit dependency in the classpath, but not in the /config response
-                    testingConfiguration[-2] = null
-                    testingConfiguration[-5] = null
+                    addKit(AttributeListenerTestKit::class.java, KitConfigMessage(-1).apply { excludeAnnonymousUsers = true })
+                    addKit(IdentityListenerTestKit::class.java, -2, false)
+                    addKit(UserAttributeListenerTestKit::class.java, -3)
+                    addKit(AttributeListenerTestKit::class.java, KitConfigMessage(-4).apply { excludeAnnonymousUsers = true })
+                    addKit(IdentityListenerTestKit::class.java, -5, false)
+                    addKit(UserAttributeListenerTestKit::class.java, -6)
                 }
             ).let {
                 startMParticle(it)
                 waitForKitReload() {
-                    MParticle.getInstance()?.Internal()?.configManager?.setMpid(123, false)
+                    MParticle.getInstance()?.Internal()?.configManager?.setMpid(1234, false)
                 }
             }
         val kitStatus = MParticle.getInstance()?.Internal()?.kitManager?.kitStatus
@@ -93,17 +98,24 @@ class KitManagerImplTests : BaseKitOptionsTest() {
 
         // double check that ConfigManager is generating the right string
         val expectedActiveKits = "-6,-4,-3,-1"
-        val expectedBundledKits = "-6,-5,-4,-3,-2.-1"
+        val expectedBundledKits = "-1,-2,-3,-4,-5,-6"
         assertEquals(expectedActiveKits, MParticle.getInstance()?.Internal()?.configManager?.activeModuleIds)
 
-        // check that the active kits value is sent to the server
-        MParticle.getInstance()?.apply {
-            logEvent(MPEvent.Builder("some event").build())
-            upload()
-        }
-        mServer.waitForVerify(Matcher(mServer.Endpoints().eventsUrl)) {
-            assertEquals(it.headers["x-mp-kits"], expectedActiveKits)
-            assertEquals(it.headers["x-mp-bundled-kits"], expectedBundledKits)
-        }
+        Server
+            .endpoint(EndpointType.Events)
+            .assertWillReceive {
+                it.headers?.let {
+                    assertEquals(expectedActiveKits, it["x-mp-kits"])
+                    assertEquals(expectedBundledKits, it["x-mp-bundled-kits"])
+                    true
+                } ?: false
+            }
+            .after {
+                MParticle.getInstance()?.apply {
+                    logEvent(MPEvent.Builder("some event").build())
+                    upload()
+                }
+            }
+            .blockUntilFinished()
     }
 }
