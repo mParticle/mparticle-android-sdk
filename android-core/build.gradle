@@ -180,5 +180,5 @@ configurations.all {
 }
 
 boolean useOrchestrator() {
-    return project.hasProperty('orchestrator') ? project.property('orchestrator') : false
+    return true//return project.hasProperty('orchestrator') ? project.property('orchestrator') : false
 }
