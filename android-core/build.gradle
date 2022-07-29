@@ -79,8 +79,8 @@ android {
     testOptions {
         if (useOrchestrator()) {
             execution 'ANDROIDX_TEST_ORCHESTRATOR'
-            reportDir buildDir.absolutePath + '/orchestrator-reports'
-            resultsDir buildDir.absolutePath + '/orchestrator-results'
+            reportDir buildDir.absolutePath + '/orchestrator/reports'
+            resultsDir buildDir.absolutePath + '/orchestrator/results'
         }
     }
     lintOptions {
@@ -152,6 +152,7 @@ dependencies {
 
     androidTestImplementation project(':testutils')
     if (useOrchestrator()) {
+        androidTestImplementation 'androidx.test:runner:1.4.0'
         androidTestUtil 'androidx.test:orchestrator:1.3.0'
     }
     androidTestImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
@@ -166,6 +167,5 @@ configurations {
     }
 }
 
-boolean useOrchestrator() {
-    return project.hasProperty('orchestrator') ? project.property('orchestrator') : false
+boolean useOrchestrator() { return project.hasProperty('orchestrator') ? project.property('orchestrator') : false
 }
