@@ -1,3 +1,21 @@
+## [5.44.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.43.0...v5.44.0) (2022-08-01)
+
+
+### Features
+
+* update sonarcloud check to new format ([#209](https://github.com/mParticle/mparticle-android-sdk/issues/209)) ([821d61e](https://github.com/mParticle/mparticle-android-sdk/commit/821d61e9be81d1645a044ba9c0c63da070643104))
+
+
+### Bug Fixes
+
+* reset logic, fixing orchestrator ([#213](https://github.com/mParticle/mparticle-android-sdk/issues/213)) ([f9379e9](https://github.com/mParticle/mparticle-android-sdk/commit/f9379e9597b0dc0ff5fc570f066c293675b511c6))
+
+
+### Updates & Maintenance
+
+* Update Submodules ([7c9be34](https://github.com/mParticle/mparticle-android-sdk/commit/7c9be34f702f5ab96685fa2fc34454bcb0bac8db))
+* update visibility for crossplatform testing ([#211](https://github.com/mParticle/mparticle-android-sdk/issues/211)) ([b03f210](https://github.com/mParticle/mparticle-android-sdk/commit/b03f210c81f6b38a1b8cc3999d180d38b54857cd))
+
 ## [5.43.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.42.0...v5.43.0) (2022-07-21)
 
 
