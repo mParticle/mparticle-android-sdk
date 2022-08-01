@@ -23,6 +23,7 @@ on:
         type: string
 
 jobs:
+
   confirm-public-repo:
     name: "Confirm android daily cron is run from public origin repo"
     runs-on: ubuntu-18.04
@@ -95,6 +96,33 @@ jobs:
           name: instrumented-test-results
           path: android-core/build/reports/androidTests/connected/**
 
+  instrumented-orchestrator-tests:
+    name: "Instrumented Orchestrator Tests"
+    timeout-minutes: 30
+    runs-on: macos-latest
+    steps:
+      - name: "Checkout Branch"
+        uses: actions/checkout@v2
+        with:
+          repository: mparticle/mparticle-android-sdk
+          ref: regression/${{ github.run_number }}
+      - name: "Install JDK 11"
+        uses: actions/setup-java@v2
+        with:
+          distribution: "zulu"
+          java-version: "11"
+      - name: "Run Instrumented Orchestrator Tests"
+        uses: reactivecircus/android-emulator-runner@v2.20.0
+        with:
+          api-level: 29
+          script: ./gradlew -Porchestrator=true :android-core:cAT --stacktrace
+      - name: "Archive Instrumented Orchestrator Tests Results"
+        uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: "instrumented-orchestrator-tests-results"
+          path: android-core/build/orchestrator/**
+
   unit-tests:
     name: "Unit Tests"
     timeout-minutes: 15
@@ -122,6 +150,7 @@ jobs:
         with:
           name: "unit-tests-results"
           path: ./**/build/reports/**
+
   lint-checks:
     name: "Lint Checks"
     timeout-minutes: 15
@@ -185,7 +214,7 @@ jobs:
 
   semantic-release-dryrun:
     name: "Test Semantic Release - Dry Run"
-    needs: [instrumented-tests, unit-tests, lint-checks, update-kits]
+    needs: [instrumented-tests, instrumented-orchestrator-tests, unit-tests, lint-checks, update-kits]
     runs-on: macos-11
     env:
       GITHUB_TOKEN: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}

@@ -1136,6 +1136,8 @@ public class MParticle {
             Set<String> prefFiles = new HashSet<String>();
             prefFiles.add(ConfigManager.PREFERENCES_FILE);
             prefFiles.add(Constants.PREFS_FILE);
+            prefFiles.add(ConfigManager.KIT_CONFIG_PREFERENCES);
+            prefFiles.add(ConfigManager.CONFIG_JSON);
             //urban airship kit shared preference file
             prefFiles.add("com.mparticle.kits.urbanairship");
 
