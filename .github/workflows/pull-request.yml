@@ -3,6 +3,7 @@ name: "Build and Test"
 on: [ push, workflow_dispatch, pull_request ]
 
 jobs:
+
   instrumented-tests:
     name: "Instrumented Tests"
     timeout-minutes: 30
@@ -26,6 +27,7 @@ jobs:
         with:
           name: "instrumented-tests-results"
           path: android-core/build/reports/androidTests/connected/**
+
   instrumented-orchestrator-tests:
     name: "Instrumented Orchestrator Tests"
     timeout-minutes: 30
@@ -42,7 +44,7 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2.20.0
         with:
           api-level: 29
-          script: ./gradlew -Porchestrator=true :android-core:cAT
+          script: ./gradlew -Porchestrator=true :android-core:cAT --stacktrace
       - name: "Archive Instrumented Orchestrator Tests Results"
         uses: actions/upload-artifact@v2
         if: always()
@@ -72,6 +74,7 @@ jobs:
         with:
           name: "unit-tests-results"
           path: ./**/build/reports/**
+
   lint-checks:
     name: "Lint Checks"
     timeout-minutes: 15
@@ -94,6 +97,7 @@ jobs:
         with:
           name: "lint-results"
           path: ./**/build/reports/**
+
   kotlin-lint-checks:
     name: "Kotlin Lint Checks"
     timeout-minutes: 15
@@ -116,6 +120,7 @@ jobs:
         with:
           name: "kotlin-lint-results"
           path: ./**/build/reports/**
+
   kit-compatibility-test:
       name: "Kit Compatibility Test"
       runs-on: ubuntu-latest
@@ -139,6 +144,7 @@ jobs:
           run: ./gradlew -PisRelease=true :android-kit-base:testRelease
         - name: "Run Kit Release Tests and Build"
           run: ./gradlew -PisRelease=true -p kits testRelease -c ../settings-kits.gradle
+
   automerge-dependabot:
     name: "Save PR Number for Dependabot Automerge"
     needs: [ instrumented-tests, instrumented-orchestrator-tests, unit-tests, lint-checks, kotlin-lint-checks, kit-compatibility-test ]

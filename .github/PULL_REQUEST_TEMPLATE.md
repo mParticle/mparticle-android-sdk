@@ -9,5 +9,5 @@
 ## Testing Plan
 - {explain how this has been tested, and what additional testing should be done}
 
-## Master Issue
+## Reference Issue
 - Closes https://go.mparticle.com/work/REPLACEME
