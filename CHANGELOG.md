@@ -1,3 +1,15 @@
+## [5.44.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.44.0...v5.44.1) (2022-08-10)
+
+
+### Bug Fixes
+
+* add needs statement and upgrade VMs ([#214](https://github.com/mParticle/mparticle-android-sdk/issues/214)) ([4c0c0db](https://github.com/mParticle/mparticle-android-sdk/commit/4c0c0db401e0dba40e04e99222fdd23e5fe64d1d))
+
+
+### Updates & Maintenance
+
+* Update Submodules ([765a711](https://github.com/mParticle/mparticle-android-sdk/commit/765a7112d92ff122f29666a36e62a96dd7b120c1))
+
 ## [5.44.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.43.0...v5.44.0) (2022-08-01)
 
 
