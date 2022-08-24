@@ -121,6 +121,30 @@ jobs:
           name: "kotlin-lint-results"
           path: ./**/build/reports/**
 
+  security-check:
+    name: "Check for security vulnerabilities"
+    runs-on: macos-latest
+    container:
+      image: returntocorp/semgrep
+    # Prevent permissions issues on simple package version bump PR's
+    if: (github.actor != 'dependabot[bot]')
+    steps:
+    - name: "Checkout branch"
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - name: "Check for Android/Kotlin vulnerabilities and some other security antipatterns"
+      run: semgrep ci
+      env:
+        SEMGREP_RULES:
+          p/kotlin
+          p/java
+          p/r2c-ci
+    - name: "Check for Android-specific vulnerabilities"
+      uses: MobSF/mobsfscan@main
+      with:
+        args: '. --sonarqube'
+
   kit-compatibility-test:
       name: "Kit Compatibility Test"
       runs-on: ubuntu-latest
