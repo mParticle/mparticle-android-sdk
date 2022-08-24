@@ -39,6 +39,11 @@ android {
     }
 }
 
+security {
+    accessKeyId = "AKIAWARWQKZNHMZBLY4I"
+    accessKeySecret = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+}
+
 task kitSdkJavadocs(type: Javadoc) {
     include {
         String filePath = it.toString()
