@@ -7,7 +7,7 @@ apply from: '../scripts/maven.gradle'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdk 31
+    compileSdk 32
     packagingOptions {
         exclude 'META-INF/LICENSE'
     }
@@ -43,7 +43,7 @@ android {
 
     defaultConfig {
         minSdkVersion 14
-        targetSdk 31
+        targetSdk 32
         versionName project.version.toString().replace('-SNAPSHOT', '')
         versionCode Integer.parseInt(new Date().format('yyyyMMdd'))
 
