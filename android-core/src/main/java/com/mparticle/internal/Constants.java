@@ -532,6 +532,7 @@ public class Constants {
         String IDENTITY_API_CONTEXT = "mp::identity::api::context";
         String DEVICE_APPLICATION_STAMP = "mp::device-app-stamp";
         String PREVIOUS_ANDROID_ID = "mp::previous::android::id";
+        String ANDROID_ID_MODIFY_NULL_FIRST_TIME = "mp::modify-null-first-time::android::id";
         String DISPLAY_PUSH_NOTIFICATIONS = "mp::displaypushnotifications";
         String IDENTITY_CONNECTION_TIMEOUT = "mp::connection:timeout:identity";
         String NETWORK_OPTIONS = "mp::network:options";

@@ -1197,20 +1197,19 @@ public class ConfigManager {
 
     public String getPreviousAdId() {
         MPUtility.AdIdInfo adInfo = MPUtility.getAdIdInfo(mContext);
-        String currentAdId = null;
         if (adInfo != null && !adInfo.isLimitAdTrackingEnabled) {
-            currentAdId = adInfo.id;
+            return sPreferences.getString(Constants.PrefKeys.PREVIOUS_ANDROID_ID, null);
         }
-        return sPreferences.getString(Constants.PrefKeys.PREVIOUS_ANDROID_ID, currentAdId);
+        return null;
     }
 
     public void setPreviousAdId() {
         MPUtility.AdIdInfo adInfo = MPUtility.getAdIdInfo(mContext);
-        String currentAdId = null;
         if (adInfo != null && !adInfo.isLimitAdTrackingEnabled) {
-            currentAdId = adInfo.id;
+            sPreferences.edit().putString(Constants.PrefKeys.PREVIOUS_ANDROID_ID, adInfo.id).apply();
+        } else {
+            sPreferences.edit().remove(Constants.PrefKeys.PREVIOUS_ANDROID_ID).apply();
         }
-        sPreferences.edit().putString(Constants.PrefKeys.PREVIOUS_ANDROID_ID, currentAdId).apply();
     }
 
     public int getIdentityConnectionTimeout() {

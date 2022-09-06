@@ -257,7 +257,7 @@ public class DeviceAttributes {
                 //just because there was a timing issue with the singleton
                 if (instance !=  null) {
                     if (adIdInfo.isLimitAdTrackingEnabled) {
-                        message = adIdInfo.advertiser.descriptiveName + " Advertising ID available but ad tracking is disabled on this device.";
+                        message = adIdInfo.advertiser.descriptiveName + "Advertising ID tracking is disabled on this device.";
                     } else {
                         switch (adIdInfo.advertiser) {
                             case AMAZON:
