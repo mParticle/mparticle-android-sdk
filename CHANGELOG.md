@@ -1,3 +1,15 @@
+## [5.45.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.44.2...v5.45.0) (2022-09-08)
+
+
+### Features
+
+* update dependencies for Android 13 (from dependabot) ([#234](https://github.com/mParticle/mparticle-android-sdk/issues/234)) ([4416a2d](https://github.com/mParticle/mparticle-android-sdk/commit/4416a2d898d06079f5553f91aae64bbbadfba158))
+
+
+### Updates & Maintenance
+
+* Update Submodules ([690f555](https://github.com/mParticle/mparticle-android-sdk/commit/690f555a0e8c0e332a62cdfd7b2987308f165fa8))
+
 ## [5.44.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.44.1...v5.44.2) (2022-08-19)
 
 
