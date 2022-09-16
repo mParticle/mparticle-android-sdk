@@ -82,6 +82,14 @@ The Google Play Services Ads framework is necessary to collect the Android Adver
     implementation 'com.google.android.gms:play-services-ads:11.6.2'
 ```
 
+When apps target Android 13 or above, you will need to declare a Google Play services permission in the manifest file as follows:
+
+```xml
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
+```
+
+For more information, please check out this link: [https://support.google.com/googleplay/android-developer/answer/6048248?hl=en](https://support.google.com/googleplay/android-developer/answer/6048248?hl=en)
+
 ##### Firebase Cloud Messaging
 
 mParticle supports several marketing automation and push messaging integrations. These require that mParticle register for an instance id using the Firebase Cloud Messaging framework:
