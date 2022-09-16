@@ -46,7 +46,7 @@ jobs:
         run: |
           git submodule foreach "git fetch; git reset --hard origin/main";
           git add .
-          git diff-index --quiet HEAD || git commit -m 'chore: update submodules'
+          git diff-index --quiet HEAD || git commit -m 'chore: Update submodules'
       - name: "Push kit updates to release branch"
         run: git push origin release/${{ github.run_number }}
 
