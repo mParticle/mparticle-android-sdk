@@ -1,3 +1,11 @@
+## [5.45.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.45.1...v5.45.2) (2022-09-26)
+
+
+### Updates & Maintenance
+
+* add in missing GPG step for updating submodules ([#238](https://github.com/mParticle/mparticle-android-sdk/issues/238)) ([ac9ee19](https://github.com/mParticle/mparticle-android-sdk/commit/ac9ee19a1f29a56f974ecce060a189be3a8f1d2e))
+* Update submodules ([cf4d2e0](https://github.com/mParticle/mparticle-android-sdk/commit/cf4d2e0903445db4481f3489e8936dee933ea72c))
+
 ## [5.45.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.45.0...v5.45.1) (2022-09-14)
 
 
