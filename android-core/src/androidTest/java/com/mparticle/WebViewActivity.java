@@ -11,6 +11,5 @@ public class WebViewActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.web_view_activity);
-
     }
 }

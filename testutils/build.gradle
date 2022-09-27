@@ -2,12 +2,14 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdk 32
+    namespace 'com.mparticle.testutils'
+    testNamespace 'com.mparticle.legacyTest'
+    compileSdk 33
 
     defaultConfig {
         //This is set to 21 to avoid slow multidex.
         minSdk 21
-        targetSdk 32
+        targetSdk 33
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'

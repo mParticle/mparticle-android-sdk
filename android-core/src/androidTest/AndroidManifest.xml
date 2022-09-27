@@ -1,6 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.mparticle">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-sdk android:minSdkVersion="21" tools:overrideLibrary="com.mparticle.testutils"/>
 
@@ -14,12 +13,13 @@
     <application
         android:usesCleartextTraffic="true">
 
-        <activity android:exported="true" android:name=".WebViewActivity">
+        <activity android:exported="true" android:name="com.mparticle.WebViewActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:exported="true" android:name=".MPService"/>
+        <service android:exported="true" android:name="com.mparticle.MPService" />
     </application>
+
 </manifest>
