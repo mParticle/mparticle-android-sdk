@@ -1,11 +1,14 @@
 package com.mparticle.internal;
 
+import static com.mparticle.testutils.TestingUtils.assertJsonEqual;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import androidx.test.platform.app.InstrumentationRegistry;
-import androidx.test.rule.ActivityTestRule;
 import android.util.MutableBoolean;
 import android.webkit.CookieManager;
 import android.webkit.JavascriptInterface;
@@ -14,6 +17,9 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import androidx.test.ext.junit.rules.ActivityScenarioRule;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.mparticle.BaseEvent;
 import com.mparticle.MParticle;
@@ -53,15 +59,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-import static com.mparticle.testutils.TestingUtils.assertJsonEqual;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
 
     @Rule
-    public ActivityTestRule<WebViewActivity> rule = new ActivityTestRule<WebViewActivity>(WebViewActivity.class);
+    public ActivityScenarioRule<WebViewActivity> rule = new ActivityScenarioRule<WebViewActivity>(WebViewActivity.class);
 
     private static String jsSdk;
     private static boolean sdkFetchedSuccessfully = false;
@@ -597,45 +598,46 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
 
     private void runJavascriptTest(final String testJavascript, final MParticleJSInterface jsInterface) {
         new Handler(Looper.getMainLooper()).post(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        CookieManager cookieManager = CookieManager.getInstance();
-                        cookieManager.setAcceptCookie(true);
-                        WebView wv = rule.getActivity().findViewById(R.id.web_view);
-                        wv.setWebViewClient(new WebViewClient() {
-                            @Override
-                            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-                                //Overriding the method and allowing Options response essentially
-                                //disables CORS, which will allow us to point network requests at our
-                                //local server
-                                if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
-                                    return OptionsAllowResponse.build();
-                                }
+                () -> {
+                    CookieManager cookieManager = CookieManager.getInstance();
+                    cookieManager.setAcceptCookie(true);
+                    rule.getScenario().onActivity(
+                            activity -> {
+                                WebView wv = activity.findViewById(R.id.web_view);
+                                wv.setWebViewClient(new WebViewClient() {
+                                    @Override
+                                    public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                                        //Overriding the method and allowing Options response essentially
+                                        //disables CORS, which will allow us to point network requests at our
+                                        //local server
+                                        if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
+                                            return OptionsAllowResponse.build();
+                                        }
 
-                                return null;
-                            }
-                        });
-                        cookieManager.setAcceptThirdPartyCookies(wv, true);
-                        wv.getSettings().setDomStorageEnabled(true);
-                        wv.getSettings().setJavaScriptEnabled(true);
-                        String bridgeName = MParticleJSInterface.getBridgeName(bridgeToken);
-                        wv.removeJavascriptInterface(bridgeName);
-                        wv.addJavascriptInterface(jsInterface, bridgeName);
-                        wv.setWebChromeClient(new WebChromeClient() {
-                            public void onConsoleMessage(String message, int lineNumber, String sourceID) {
-                                Logger.warning("MParticle JS sdk", message + " -- From line "
-                                        + lineNumber);
-                            }
-                        });
+                                        return null;
+                                    }
+                                });
+                                cookieManager.setAcceptThirdPartyCookies(wv, true);
+                                wv.getSettings().setDomStorageEnabled(true);
+                                wv.getSettings().setJavaScriptEnabled(true);
+                                String bridgeName = MParticleJSInterface.getBridgeName(bridgeToken);
+                                wv.removeJavascriptInterface(bridgeName);
+                                wv.addJavascriptInterface(jsInterface, bridgeName);
+                                wv.setWebChromeClient(new WebChromeClient() {
+                                    public void onConsoleMessage(String message, int lineNumber, String sourceID) {
+                                        Logger.warning("MParticle JS sdk", message + " -- From line "
+                                                + lineNumber);
+                                    }
+                                });
 
-                        String jsString = getJavascriptWrappedinHtml(testJavascript);
-                        Logger.error(jsString);
-                        wv.loadDataWithBaseURL("http://localhost/",
-                                jsString,
-                                "text/html", "utf-8",
-                                null);
-                    }
+                                String jsString = getJavascriptWrappedinHtml(testJavascript);
+                                Logger.error(jsString);
+                                wv.loadDataWithBaseURL("http://localhost/",
+                                        jsString,
+                                        "text/html", "utf-8",
+                                        null);
+                            }
+                    );
                 });
     }
 

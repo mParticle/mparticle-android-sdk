@@ -8,12 +8,14 @@ apply plugin: 'kotlin-android'
 
 
 android {
-    compileSdk 31
+    namespace 'com.mparticle.kits'
+    testNamespace 'com.mparticle.kittests'
+    compileSdk 33
     testBuildType 'debug'
 
     defaultConfig {
         minSdkVersion 14
-        targetSdk 31
+        targetSdk 33
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
 
