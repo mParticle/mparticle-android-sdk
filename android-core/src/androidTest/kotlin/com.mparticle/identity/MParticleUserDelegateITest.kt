@@ -1,231 +1,212 @@
-package com.mparticle.identity;
+package com.mparticle.identity
 
-import android.os.Handler;
-import android.os.Looper;
-import androidx.annotation.Nullable;
-import android.util.Log;
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
+import com.mparticle.MParticle
+import com.mparticle.MParticle.IdentityType
+import com.mparticle.UserAttributeListener
+import com.mparticle.consent.CCPAConsent
+import com.mparticle.consent.ConsentState
+import com.mparticle.consent.GDPRConsent
+import com.mparticle.internal.AccessUtils
+import com.mparticle.testutils.AndroidUtils
+import com.mparticle.testutils.BaseCleanStartedEachTest
+import com.mparticle.testutils.MPLatch
+import org.junit.Assert
+import org.junit.Before
+import org.junit.Test
+import java.util.*
+import java.util.concurrent.CountDownLatch
 
-import com.mparticle.MParticle;
-import com.mparticle.UserAttributeListener;
-import com.mparticle.consent.CCPAConsent;
-import com.mparticle.consent.ConsentState;
-import com.mparticle.consent.GDPRConsent;
-import com.mparticle.internal.AccessUtils;
-import com.mparticle.testutils.AndroidUtils.Mutable;
-import com.mparticle.testutils.BaseCleanStartedEachTest;
-import com.mparticle.testutils.MPLatch;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.CountDownLatch;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-public class MParticleUserDelegateITest extends BaseCleanStartedEachTest {
-    MParticleUserDelegate mUserDelegate;
-
+class MParticleUserDelegateITest : BaseCleanStartedEachTest() {
+    private lateinit var mUserDelegate: MParticleUserDelegate
     @Before
-    public void before() throws Exception {
-        mUserDelegate = MParticle.getInstance().Identity().mUserDelegate;
+    @Throws(Exception::class)
+    fun before() {
+        mUserDelegate = MParticle.getInstance()?.Identity()?.mUserDelegate!!
     }
 
     @Test
-    public void testSetGetUserIdentities() throws Exception {
-        Map<Long, Map<MParticle.IdentityType, String>> attributes = new HashMap<Long, Map<MParticle.IdentityType, String>>();
-        for (int i = 0; i < 5; i++) {
-            Long mpid = ran.nextLong();
-            Map<MParticle.IdentityType, String> pairs = new HashMap<MParticle.IdentityType, String>();
-            attributes.put(mpid, pairs);
-            for (int j = 0; j < 3; j++) {
-                MParticle.IdentityType identityType = MParticle.IdentityType.parseInt(mRandomUtils.randomInt(0, MParticle.IdentityType.values().length));
-                String value = mRandomUtils.getAlphaNumericString(mRandomUtils.randomInt(1, 25));
-                assertTrue(mUserDelegate.setUserIdentity(value, identityType, mpid));
-                pairs.put(identityType, value);
+    @Throws(Exception::class)
+    fun testSetGetUserIdentities() {
+        val attributes = HashMap<Long, Map<IdentityType, String>>()
+        for (i in 0..4) {
+            val mpid = ran.nextLong()
+            val pairs= HashMap<IdentityType, String> ()
+            attributes[mpid] = pairs
+            for (j in 0..2) {
+                val identityType =
+                    IdentityType.parseInt(mRandomUtils.randomInt(0, IdentityType.values().size))
+                val value = mRandomUtils.getAlphaNumericString(mRandomUtils.randomInt(1, 25))
+                Assert.assertTrue(mUserDelegate.setUserIdentity(value, identityType, mpid))
+                pairs[identityType] = value
             }
         }
-
-        com.mparticle.internal.AccessUtils.awaitMessageHandler();
-
-        Map<Long, Map<MParticle.IdentityType, String>> storedUsersTemp = new HashMap<Long, Map<MParticle.IdentityType, String>>();
-
-        for (Entry<Long, Map<MParticle.IdentityType, String>> user : attributes.entrySet()) {
-            Map<MParticle.IdentityType, String> storedUserAttributes = mUserDelegate.getUserIdentities(user.getKey());
-            storedUsersTemp.put(user.getKey(), storedUserAttributes);
-            for (Entry<MParticle.IdentityType, String> pairs : user.getValue().entrySet()) {
-                Object currentAttribute = storedUserAttributes.get(pairs.getKey());
+        AccessUtils.awaitMessageHandler()
+        val storedUsersTemp: MutableMap<Long, Map<IdentityType, String>> = HashMap()
+        for ((key, value) in attributes) {
+            val storedUserAttributes = mUserDelegate.getUserIdentities(key)
+            storedUsersTemp[key] = storedUserAttributes
+            for ((key1, value1) in value) {
+                val currentAttribute: Any? = storedUserAttributes[key1]
                 if (currentAttribute == null) {
-                    Log.e("Stuff", "more stuff");
+                    Log.e("Stuff", "more stuff")
                 }
-                assertEquals(storedUserAttributes.get(pairs.getKey()), pairs.getValue());
+                Assert.assertEquals(storedUserAttributes[key1], value1)
             }
         }
     }
 
     @Test
-    public void testInsertRetrieveDeleteUserAttributes() throws Exception {
+    @Throws(Exception::class)
+    fun testInsertRetrieveDeleteUserAttributes() {
         // create and store
-        Map<Long, Map<String, String>> attributes = new HashMap<Long, Map<String, String>>();
-        for (int i = 0; i < 5; i++) {
-            Long mpid = ran.nextLong();
-            Map<String, String> pairs = new HashMap<String, String>();
-            attributes.put(mpid, pairs);
-            for (int j = 0; j < 3; j++) {
-                String key = mRandomUtils.getAlphaNumericString(mRandomUtils.randomInt(1, 55)).toUpperCase();
-                String value = mRandomUtils.getAlphaNumericString(mRandomUtils.randomInt(1, 55));
-                assertTrue(mUserDelegate.setUserAttribute(key, value, mpid, false));
-                pairs.put(key, value);
+        val attributes: MutableMap<Long, Map<String, String>> = HashMap()
+        for (i in 0..4) {
+            val mpid = ran.nextLong()
+            val pairs: MutableMap<String, String> = HashMap()
+            attributes[mpid] = pairs
+            for (j in 0..2) {
+                val key =
+                    mRandomUtils.getAlphaNumericString(mRandomUtils.randomInt(1, 55)).uppercase(
+                        Locale.getDefault()
+                    )
+                val value = mRandomUtils.getAlphaNumericString(mRandomUtils.randomInt(1, 55))
+                Assert.assertTrue(mUserDelegate.setUserAttribute(key, value, mpid, false))
+                pairs[key] = value
             }
         }
-
-        AccessUtils.awaitMessageHandler();
+        AccessUtils.awaitMessageHandler()
 
         // retrieve and compare
-        for (Entry<Long, Map<String, String>> user : attributes.entrySet()) {
-            Map<String, Object> storedUserAttributes = mUserDelegate.getUserAttributes(user.getKey());
-            for (Entry<String, String> pairs : user.getValue().entrySet()) {
-                if (storedUserAttributes.get(pairs.getKey()) == null){
-                    assertNull(pairs.getValue());
+        for ((key, value) in attributes) {
+            val storedUserAttributes = mUserDelegate.getUserAttributes(key)
+            for ((key1, value1) in value) {
+                if (storedUserAttributes[key1] == null) {
+                    Assert.assertNull(value1)
                 } else {
-                    assertEquals(storedUserAttributes.get(pairs.getKey()).toString(), pairs.getValue());
+                    Assert.assertEquals(storedUserAttributes[key1].toString(), value1)
                 }
             }
         }
 
         // delete
-        for (Entry<Long, Map<String, String>> userAttributes : attributes.entrySet()) {
-            for (Entry<String, String> attribute : userAttributes.getValue().entrySet()) {
-                assertTrue(mUserDelegate.removeUserAttribute(attribute.getKey(), userAttributes.getKey()));
+        for ((key, value) in attributes) {
+            for ((key1) in value) {
+                Assert.assertTrue(mUserDelegate.removeUserAttribute(key1, key))
             }
         }
-
-        AccessUtils.awaitMessageHandler();
-
-        for (Entry<Long, Map<String, String>> userAttributes : attributes.entrySet()) {
-            Map<String, Object> storedUserAttributes = mUserDelegate.getUserAttributes(userAttributes.getKey());
-            for (Entry<String, String> attribute : userAttributes.getValue().entrySet()) {
-                assertNull(storedUserAttributes.get(attribute.getKey()));
+        AccessUtils.awaitMessageHandler()
+        for ((key, value) in attributes) {
+            val storedUserAttributes = mUserDelegate.getUserAttributes(key)
+            for ((key1) in value) {
+                Assert.assertNull(storedUserAttributes[key1])
             }
         }
     }
 
     @Test
-    public void testSetConsentState() throws Exception {
-        Long mpid = ran.nextLong();
-        Long mpid2 = ran.nextLong();
-        ConsentState state = mUserDelegate.getConsentState(mpid);
-        assertNotNull(state);
-        assertNotNull(state.getGDPRConsentState());
-        assertEquals(0, state.getGDPRConsentState().size());
-
-        ConsentState.Builder builder = ConsentState.builder();
-        builder.addGDPRConsentState("foo", GDPRConsent.builder(true).build());
-        mUserDelegate.setConsentState(builder.build(), mpid);
-        builder.addGDPRConsentState("foo2", GDPRConsent.builder(true).build());
-        mUserDelegate.setConsentState(builder.build(), mpid2);
-        builder.setCCPAConsentState(CCPAConsent.builder(false).build());
-        mUserDelegate.setConsentState(builder.build(), mpid2);
-
-        assertEquals(1, mUserDelegate.getConsentState(mpid).getGDPRConsentState().size());
-        assertTrue(mUserDelegate.getConsentState(mpid).getGDPRConsentState().containsKey("foo"));
-        assertNull(mUserDelegate.getConsentState(mpid).getCCPAConsentState());
-
-        assertEquals(2, mUserDelegate.getConsentState(mpid2).getGDPRConsentState().size());
-        assertTrue(mUserDelegate.getConsentState(mpid2).getGDPRConsentState().containsKey("foo"));
-        assertTrue(mUserDelegate.getConsentState(mpid2).getGDPRConsentState().containsKey("foo2"));
-        assertNotNull(mUserDelegate.getConsentState(mpid2).getCCPAConsentState());
+    @Throws(Exception::class)
+    fun testSetConsentState() {
+        val mpid = ran.nextLong()
+        val mpid2 = ran.nextLong()
+        val state = mUserDelegate.getConsentState(mpid)
+        Assert.assertNotNull(state)
+        Assert.assertNotNull(state.gdprConsentState)
+        Assert.assertEquals(0, state.gdprConsentState.size.toLong())
+        val builder = ConsentState.builder()
+        builder.addGDPRConsentState("foo", GDPRConsent.builder(true).build())
+        mUserDelegate.setConsentState(builder.build(), mpid)
+        builder.addGDPRConsentState("foo2", GDPRConsent.builder(true).build())
+        mUserDelegate.setConsentState(builder.build(), mpid2)
+        builder.setCCPAConsentState(CCPAConsent.builder(false).build())
+        mUserDelegate.setConsentState(builder.build(), mpid2)
+        Assert.assertEquals(1, mUserDelegate.getConsentState(mpid).gdprConsentState.size.toLong())
+        Assert.assertTrue(mUserDelegate.getConsentState(mpid).gdprConsentState.containsKey("foo"))
+        Assert.assertNull(mUserDelegate.getConsentState(mpid).ccpaConsentState)
+        Assert.assertEquals(
+            2,
+            mUserDelegate.getConsentState(mpid2).gdprConsentState.size.toLong()
+        )
+        Assert.assertTrue(mUserDelegate.getConsentState(mpid2).gdprConsentState.containsKey("foo"))
+        Assert.assertTrue(mUserDelegate.getConsentState(mpid2).gdprConsentState.containsKey("foo2"))
+        Assert.assertNotNull(mUserDelegate.getConsentState(mpid2).ccpaConsentState)
     }
 
     @Test
-    public void testRemoveConsentState() throws Exception {
-        Long mpid = ran.nextLong();
-        ConsentState state = mUserDelegate.getConsentState(mpid);
-        assertNotNull(state);
-        assertNotNull(state.getGDPRConsentState());
-        assertEquals(0, state.getGDPRConsentState().size());
-
-        ConsentState.Builder builder = ConsentState.builder();
-        builder.addGDPRConsentState("foo", GDPRConsent.builder(true).build());
-        builder.setCCPAConsentState(CCPAConsent.builder(true).build());
-        mUserDelegate.setConsentState(builder.build(), mpid);
-
-        assertEquals(1, mUserDelegate.getConsentState(mpid).getGDPRConsentState().size());
-        assertNotNull(mUserDelegate.getConsentState(mpid).getCCPAConsentState());
-        assertTrue(mUserDelegate.getConsentState(mpid).getGDPRConsentState().containsKey("foo"));
-        mUserDelegate.setConsentState(null, mpid);
-        assertEquals(0, mUserDelegate.getConsentState(mpid).getGDPRConsentState().size());
-        assertNull(mUserDelegate.getConsentState(mpid).getCCPAConsentState());
+    @Throws(Exception::class)
+    fun testRemoveConsentState() {
+        val mpid = ran.nextLong()
+        val state = mUserDelegate.getConsentState(mpid)
+        Assert.assertNotNull(state)
+        Assert.assertNotNull(state.gdprConsentState)
+        Assert.assertEquals(0, state.gdprConsentState.size.toLong())
+        val builder = ConsentState.builder()
+        builder.addGDPRConsentState("foo", GDPRConsent.builder(true).build())
+        builder.setCCPAConsentState(CCPAConsent.builder(true).build())
+        mUserDelegate.setConsentState(builder.build(), mpid)
+        Assert.assertEquals(1, mUserDelegate.getConsentState(mpid).gdprConsentState.size.toLong())
+        Assert.assertNotNull(mUserDelegate.getConsentState(mpid).ccpaConsentState)
+        Assert.assertTrue(mUserDelegate.getConsentState(mpid).gdprConsentState.containsKey("foo"))
+        mUserDelegate.setConsentState(null, mpid)
+        Assert.assertEquals(0, mUserDelegate.getConsentState(mpid).gdprConsentState.size.toLong())
+        Assert.assertNull(mUserDelegate.getConsentState(mpid).ccpaConsentState)
     }
 
     @Test
-    public void testGetUserAttributesListener() throws InterruptedException {
-        Map<String, String> attributeSingles = mRandomUtils.getRandomAttributes(5, false);
-
-        Map<String, List<String>> attributeLists = new HashMap<String, List<String>>();
-        for (Entry<String, String> entry: attributeSingles.entrySet()) {
-            attributeLists.put(entry.getKey() + entry.getValue(), Collections.singletonList(entry.getValue() + entry.getKey()));
+    @Throws(InterruptedException::class)
+    fun testGetUserAttributesListener() {
+        val attributeSingles = mRandomUtils.getRandomAttributes(5, false)
+        val attributeLists: MutableMap<String, List<String>> = HashMap()
+        for ((key, value) in attributeSingles) {
+            attributeLists[key + value] = listOf(value + key)
         }
-
-        for (Entry<String, List<String>> entry: attributeLists.entrySet()) {
-            mUserDelegate.setUserAttributeList(entry.getKey(), entry.getValue(), mStartingMpid);
+        for ((key, value) in attributeLists) {
+            mUserDelegate.setUserAttributeList(key, value, mStartingMpid)
         }
-        for (Entry<String, String> entry: attributeSingles.entrySet()) {
-            mUserDelegate.setUserAttribute(entry.getKey(), entry.getValue(), mStartingMpid);
+        for ((key, value) in attributeSingles) {
+            mUserDelegate.setUserAttribute(key, value, mStartingMpid)
         }
-        AccessUtils.awaitMessageHandler();
-
-        final Mutable<Map<String, String>> userAttributesResults = new Mutable<Map<String, String>>(null);
-        final Mutable<Map<String, List<String>>> userAttributeListResults = new Mutable<Map<String, List<String>>>(null);
+        AccessUtils.awaitMessageHandler()
+        val userAttributesResults = AndroidUtils.Mutable<Map<String, String>?>(null)
+        val userAttributeListResults = AndroidUtils.Mutable<Map<String, List<String>>?>(null)
 
         //fetch on the current (non-main) thread
-        mUserDelegate.getUserAttributes(new UserAttributeListener() {
-            @Override
-            public void onUserAttributesReceived(@Nullable Map<String, String> userAttributes, @Nullable Map<String, List<String>> userAttributeLists, @Nullable Long mpid) {
-                userAttributesResults.value = userAttributes;
-                userAttributeListResults.value = userAttributeLists;
-            }
-        }, mStartingMpid);
-
-        assertMapEquals(attributeSingles, userAttributesResults.value);
-        assertMapEquals(attributeLists, userAttributeListResults.value);
-
-        userAttributesResults.value = null;
-        userAttributeListResults.value = null;
+        mUserDelegate.getUserAttributes(UserAttributeListener { userAttributes, userAttributeLists, mpid ->
+            userAttributesResults.value = userAttributes
+            userAttributeListResults.value = userAttributeLists
+        }, mStartingMpid)
+        assertMapEquals(attributeSingles, userAttributesResults.value)
+        assertMapEquals(attributeLists, userAttributeListResults.value)
+        userAttributesResults.value = null
+        userAttributeListResults.value = null
 
         //fetch on the main thread (seperate code path)
-        final CountDownLatch latch = new MPLatch(1);
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-                mUserDelegate.getUserAttributes(new UserAttributeListener() {
-                    @Override
-                    public void onUserAttributesReceived(@Nullable Map<String, String> userAttributes, @Nullable Map<String, List<String>> userAttributeLists, @Nullable Long mpid) {
-                        userAttributesResults.value = userAttributes;
-                        userAttributeListResults.value = userAttributeLists;
-                        latch.countDown();
-                    }
-                }, mStartingMpid);
-            }
-        });
-        latch.await();
-
-        assertMapEquals(attributeSingles, userAttributesResults.value);
-        assertMapEquals(attributeLists, userAttributeListResults.value);
+        val latch: CountDownLatch = MPLatch(1)
+        Handler(Looper.getMainLooper()).post {
+            mUserDelegate.getUserAttributes(UserAttributeListener { userAttributes, userAttributeLists, mpid ->
+                userAttributesResults.value = userAttributes
+                userAttributeListResults.value = userAttributeLists
+                latch.countDown()
+            }, mStartingMpid)
+        }
+        latch.await()
+        assertMapEquals(attributeSingles, userAttributesResults.value)
+        assertMapEquals(attributeLists, userAttributeListResults.value)
     }
 
-    private void assertMapEquals(Map map1, Map map2) {
-        assertEquals(map1.toString() + "\n\nvs" + map2.toString(), map1.size(), map2.size());
-        for (Object obj: map1.entrySet()) {
-            Entry entry = (Entry)obj;
-            assertEquals(entry.getValue(), map2.get(entry.getKey()));
+    private fun assertMapEquals(map1: Map<*, *>, map2: Map<*, *>?) {
+        Assert.assertEquals(
+            """
+    $map1
+    
+    vs${map2.toString()}
+    """.trimIndent(), map1.size.toLong(), map2?.size?.toLong()
+        )
+        for (obj in map1.entries) {
+            val (key, value) = obj
+            Assert.assertEquals(value, map2?.get(key))
         }
     }
 }

@@ -1,304 +1,349 @@
-package com.mparticle.identity;
+package com.mparticle.identity
 
-import android.os.Handler;
-import android.util.MutableBoolean;
+import android.os.Handler
+import android.util.MutableBoolean
+import com.mparticle.MParticle
+import com.mparticle.internal.ConfigManager
+import com.mparticle.internal.MPUtility
+import com.mparticle.networking.MPConnection
+import com.mparticle.networking.MPConnectionTestImpl
+import com.mparticle.testutils.AndroidUtils
+import com.mparticle.testutils.BaseCleanStartedEachTest
+import com.mparticle.testutils.MPLatch
+import org.json.JSONException
+import org.json.JSONObject
+import org.junit.Assert
+import org.junit.Before
+import org.junit.Test
+import java.io.IOException
+import java.util.concurrent.CountDownLatch
 
-import com.mparticle.MParticle;
-import com.mparticle.internal.ConfigManager;
-import com.mparticle.internal.MPUtility;
-import com.mparticle.networking.MPConnection;
-import com.mparticle.networking.MPConnectionTestImpl;
-import com.mparticle.testutils.AndroidUtils;
-import com.mparticle.testutils.BaseCleanStartedEachTest;
-import com.mparticle.testutils.MPLatch;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.io.IOException;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.CountDownLatch;
-
-import static com.mparticle.identity.MParticleIdentityClientImpl.ANDROID_AAID;
-import static com.mparticle.identity.MParticleIdentityClientImpl.ANDROID_UUID;
-import static com.mparticle.identity.MParticleIdentityClientImpl.DEVICE_APPLICATION_STAMP;
-import static com.mparticle.identity.MParticleIdentityClientImpl.IDENTITY_CHANGES;
-import static com.mparticle.identity.MParticleIdentityClientImpl.IDENTITY_TYPE;
-import static com.mparticle.identity.MParticleIdentityClientImpl.NEW_VALUE;
-import static com.mparticle.identity.MParticleIdentityClientImpl.OLD_VALUE;
-import static com.mparticle.identity.MParticleIdentityClientImpl.PUSH_TOKEN;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static junit.framework.Assert.fail;
-
-public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
-    private ConfigManager mConfigManager;
-    private MParticleIdentityClientImpl mApiClient;
-
+class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
+    private var mConfigManager: ConfigManager? = null
+    private var mApiClient: MParticleIdentityClientImpl? = null
     @Before
-    public void before() throws Exception {
-        mConfigManager = MParticle.getInstance().Internal().getConfigManager();
+    @Throws(Exception::class)
+    fun before() {
+        mConfigManager = MParticle.getInstance()?.Internal()?.configManager
     }
 
-
     @Test
-    public void testModifySameData() throws Exception {
-        final CountDownLatch latch = new MPLatch(2);
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                fail("modify did not complete");
+    @Throws(Exception::class)
+    fun testModifySameData() {
+        val latch: CountDownLatch = MPLatch(2)
+        val handler = Handler()
+        handler.postDelayed({ Assert.fail("modify did not complete") }, (10 * 1000).toLong())
+        val called = AndroidUtils.Mutable(false)
+        MParticle.getInstance()?.Identity()?.modify(IdentityApiRequest.withEmptyUser().build())
+            ?.addSuccessListener {
+                latch.countDown()
+                MParticle.getInstance()?.Identity()
+                    ?.modify(IdentityApiRequest.withEmptyUser().build())
+                    ?.addSuccessListener {
+                        val currentModifyRequestCount = mServer.Requests().modify.size
+                        //make sure we made 1 or 0 modify requests. It could go either way for the first modify request,
+                        //it may have changes, it may not depending on state. The second request though, should not have
+                        //changes, and therefore it should not take place, so less than 2 requests is a good condition
+                        Assert.assertTrue(2 > currentModifyRequestCount)
+                        //handler.removeCallbacks(null)
+                        called.value = true
+                        latch.countDown()
+                    }
+                    ?.addFailureListener { Assert.fail("task failed") }
             }
-        }, 10 * 1000);
-
-        final AndroidUtils.Mutable<Boolean> called = new AndroidUtils.Mutable<Boolean>(false);
-       MParticle.getInstance().Identity().modify(IdentityApiRequest.withEmptyUser().build())
-               .addSuccessListener(new TaskSuccessListener() {
-                   @Override
-                   public void onSuccess(IdentityApiResult result) {
-                        latch.countDown();
-                        MParticle.getInstance().Identity().modify(IdentityApiRequest.withEmptyUser().build())
-                                .addSuccessListener(new TaskSuccessListener() {
-                                    @Override
-                                    public void onSuccess(IdentityApiResult result) {
-                                        int currentModifyRequestCount = mServer.Requests().getModify().size();
-                                        //make sure we made 1 or 0 modify requests. It could go either way for the first modify request,
-                                        //it may have changes, it may not depending on state. The second request though, should not have
-                                        //changes, and therefore it should not take place, so less than 2 requests is a good condition
-                                        assertTrue(2 > currentModifyRequestCount);
-                                        handler.removeCallbacks(null);
-                                        called.value = true;
-                                        latch.countDown();
-                                    }
-                                })
-                                .addFailureListener(new TaskFailureListener() {
-                                    @Override
-                                    public void onFailure(IdentityHttpResponse result) {
-                                        fail("task failed");
-                                    }
-                                });
-                   }
-               })
-               .addFailureListener(new TaskFailureListener() {
-                   @Override
-                   public void onFailure(IdentityHttpResponse result) {
-                        fail("task failed");
-                   }
-               });
-        latch.await();
-        assertTrue(called.value);
+            ?.addFailureListener { Assert.fail("task failed") }
+        latch.await()
+        Assert.assertTrue(called.value)
     }
 
     @Test
-    public void testIdentifyMessage() throws Exception {
-        int iterations = 5;
-        for (int i = 0; i < iterations; i++) {
-            final Map<MParticle.IdentityType, String> userIdentities = mRandomUtils.getRandomUserIdentities();
-            final MutableBoolean checked = new MutableBoolean(false);
-            final CountDownLatch latch = new CountDownLatch(1);
-            setApiClient(new MockIdentityApiClient() {
-                @Override
-                public void makeUrlRequest(MPConnection connection, String payload, boolean mparticle) throws IOException, JSONException {
-                    if (connection.getURL().toString().contains("/identify")) {
-                        JSONObject jsonObject = new JSONObject(payload);
-                        JSONObject knownIdentities = jsonObject.getJSONObject(MParticleIdentityClientImpl.KNOWN_IDENTITIES);
-                        assertNotNull(knownIdentities);
-                        checkStaticsAndRemove(knownIdentities);
-                        if (knownIdentities.length() != userIdentities.size()) {
-                            assertEquals(knownIdentities.length(), userIdentities.size());
+    @Throws(Exception::class)
+    fun testIdentifyMessage() {
+        val iterations = 5
+        for (i in 0 until iterations) {
+            val userIdentities = mRandomUtils.randomUserIdentities
+            val checked = MutableBoolean(false)
+            val latch = CountDownLatch(1)
+            setApiClient(object : MockIdentityApiClient {
+                @Throws(IOException::class, JSONException::class)
+                override fun makeUrlRequest(
+                    connection: MPConnection,
+                    payload: String?,
+                    mparticle: Boolean
+                ) {
+                    if (connection.url.toString().contains("/identify")) {
+                        val jsonObject = JSONObject(payload)
+                        val knownIdentities =
+                            jsonObject.getJSONObject(MParticleIdentityClientImpl.KNOWN_IDENTITIES)
+                        Assert.assertNotNull(knownIdentities)
+                        checkStaticsAndRemove(knownIdentities)
+                        if (knownIdentities.length() != userIdentities.size) {
+                            Assert.assertEquals(
+                                knownIdentities.length().toLong(),
+                                userIdentities.size.toLong()
+                            )
                         }
-                        for (Map.Entry<MParticle.IdentityType, String> identity : userIdentities.entrySet()) {
-                            String value = knownIdentities.getString(mApiClient.getStringValue(identity.getKey()));
-                            assertEquals(value, identity.getValue());
+                        for ((key, value1) in userIdentities) {
+                            val value = knownIdentities.getString(
+                                MParticleIdentityClientImpl.getStringValue(
+                                    key
+                                )
+                            )
+                            Assert.assertEquals(value, value1)
                         }
-                        checked.value = true;
-                        setApiClient(null);
-                        latch.countDown();
+                        checked.value = true
+                        setApiClient(null)
+                        latch.countDown()
                     }
                 }
-            });
-
-            mApiClient.identify(IdentityApiRequest.withEmptyUser()
+            })
+            mApiClient?.identify(
+                IdentityApiRequest.withEmptyUser()
                     .userIdentities(userIdentities)
-                    .build());
-            latch.await();
-            assertTrue(checked.value);
-        }
-
-    }
-
-    @Test
-    public void testLoginMessage() throws Exception {
-        int iterations = 5;
-        for (int i = 0; i < iterations; i++) {
-            final CountDownLatch latch = new MPLatch(1);
-            final MutableBoolean checked = new MutableBoolean(false);
-            final Map<MParticle.IdentityType, String> userIdentities = mRandomUtils.getRandomUserIdentities();
-
-            setApiClient(new MockIdentityApiClient() {
-                @Override
-                public void makeUrlRequest(MPConnection connection, String payload, boolean mparticle) throws IOException, JSONException {
-                    if (connection.getURL().toString().contains("/login")) {
-                        JSONObject jsonObject = new JSONObject(payload);
-                        JSONObject knownIdentities = jsonObject.getJSONObject(MParticleIdentityClientImpl.KNOWN_IDENTITIES);
-                        assertNotNull(knownIdentities);
-                        checkStaticsAndRemove(knownIdentities);
-                        assertEquals(knownIdentities.length(), userIdentities.size());
-                        for (Map.Entry<MParticle.IdentityType, String> identity : userIdentities.entrySet()) {
-                            String value = knownIdentities.getString(mApiClient.getStringValue(identity.getKey()));
-                            assertEquals(value, identity.getValue());
-                        }
-                        checked.value = true;
-                        latch.countDown();
-                    }
-                }
-            });
-            mApiClient.login(IdentityApiRequest.withEmptyUser()
-                    .userIdentities(userIdentities)
-                    .build());
-            latch.await();
-            assertTrue(checked.value);
+                    .build()
+            )
+            latch.await()
+            Assert.assertTrue(checked.value)
         }
     }
 
     @Test
-    public void testLogoutMessage() throws Exception {
-        int iterations = 5;
-        for (int i = 0; i < iterations; i++) {
-            final Map<MParticle.IdentityType, String> userIdentities = mRandomUtils.getRandomUserIdentities();
-            final CountDownLatch latch = new MPLatch(1);
-            final MutableBoolean checked = new MutableBoolean(false);
-            setApiClient(new MockIdentityApiClient() {
-                @Override
-                public void makeUrlRequest(MPConnection connection, String payload, boolean mparticle) throws IOException, JSONException {
-                    if (connection.getURL().toString().contains("/logout")) {
-                        JSONObject jsonObject = new JSONObject(payload);
-                        JSONObject knownIdentities = jsonObject.getJSONObject(MParticleIdentityClientImpl.KNOWN_IDENTITIES);
-                        assertNotNull(knownIdentities);
-                        checkStaticsAndRemove(knownIdentities);
-                        assertEquals(knownIdentities.length(), userIdentities.size());
-                        for (Map.Entry<MParticle.IdentityType, String> identity : userIdentities.entrySet()) {
-                            String value = knownIdentities.getString(mApiClient.getStringValue(identity.getKey()));
-                            assertEquals(value, identity.getValue());
+    @Throws(Exception::class)
+    fun testLoginMessage() {
+        val iterations = 5
+        for (i in 0 until iterations) {
+            val latch: CountDownLatch = MPLatch(1)
+            val checked = MutableBoolean(false)
+            val userIdentities = mRandomUtils.randomUserIdentities
+            setApiClient(object : MockIdentityApiClient {
+                @Throws(IOException::class, JSONException::class)
+                override fun makeUrlRequest(
+                    connection: MPConnection,
+                    payload: String?,
+                    mparticle: Boolean
+                ) {
+                    if (connection.url.toString().contains("/login")) {
+                        val jsonObject = JSONObject(payload)
+                        val knownIdentities =
+                            jsonObject.getJSONObject(MParticleIdentityClientImpl.KNOWN_IDENTITIES)
+                        Assert.assertNotNull(knownIdentities)
+                        checkStaticsAndRemove(knownIdentities)
+                        Assert.assertEquals(
+                            knownIdentities.length().toLong(),
+                            userIdentities.size.toLong()
+                        )
+                        for ((key, value1) in userIdentities) {
+                            val value = knownIdentities.getString(
+                                MParticleIdentityClientImpl.getStringValue(
+                                    key
+                                )
+                            )
+                            Assert.assertEquals(value, value1)
                         }
-                        checked.value = true;
-                        latch.countDown();
+                        checked.value = true
+                        latch.countDown()
                     }
                 }
-            });
-
-            mApiClient.logout(IdentityApiRequest.withEmptyUser()
+            })
+            mApiClient?.login(
+                IdentityApiRequest.withEmptyUser()
                     .userIdentities(userIdentities)
-                    .build());
-            latch.await();
-            assertTrue(checked.value);
+                    .build()
+            )
+            latch.await()
+            Assert.assertTrue(checked.value)
         }
     }
 
     @Test
-    public void testModifyMessage() throws Exception {
-        int iterations = 5;
-        for (int i = 1; i <= iterations; i++) {
-            mConfigManager.setMpid(i, ran.nextBoolean());
+    @Throws(Exception::class)
+    fun testLogoutMessage() {
+        val iterations = 5
+        for (i in 0 until iterations) {
+            val userIdentities = mRandomUtils.randomUserIdentities
+            val latch: CountDownLatch = MPLatch(1)
+            val checked = MutableBoolean(false)
+            setApiClient(object : MockIdentityApiClient {
+                @Throws(IOException::class, JSONException::class)
+                override fun makeUrlRequest(
+                    connection: MPConnection,
+                    payload: String?,
+                    mparticle: Boolean
+                ) {
+                    if (connection.url.toString().contains("/logout")) {
+                        val jsonObject = JSONObject(payload)
+                        val knownIdentities =
+                            jsonObject.getJSONObject(MParticleIdentityClientImpl.KNOWN_IDENTITIES)
+                        Assert.assertNotNull(knownIdentities)
+                        checkStaticsAndRemove(knownIdentities)
+                        Assert.assertEquals(
+                            knownIdentities.length().toLong(),
+                            userIdentities.size.toLong()
+                        )
+                        for ((key, value1) in userIdentities) {
+                            val value = knownIdentities.getString(
+                                MParticleIdentityClientImpl.getStringValue(
+                                    key
+                                )
+                            )
+                            Assert.assertEquals(value, value1)
+                        }
+                        checked.value = true
+                        latch.countDown()
+                    }
+                }
+            })
+            mApiClient?.logout(
+                IdentityApiRequest.withEmptyUser()
+                    .userIdentities(userIdentities)
+                    .build()
+            )
+            latch.await()
+            Assert.assertTrue(checked.value)
+        }
+    }
 
-            final Map<MParticle.IdentityType, String> oldUserIdentities = mRandomUtils.getRandomUserIdentities();
-            final Map<MParticle.IdentityType, String> newUserIdentities = mRandomUtils.getRandomUserIdentities();
-
-            ((MParticleUserImpl)MParticle.getInstance().Identity().getCurrentUser()).setUserIdentities(oldUserIdentities);
-
-            final CountDownLatch latch = new MPLatch(1);
-            final MutableBoolean checked = new MutableBoolean(false);
-            setApiClient(new MockIdentityApiClient() {
-                @Override
-                public void makeUrlRequest(MPConnection connection, String payload, boolean mparticle) throws IOException, JSONException {
-                        if (connection.getURL().toString().contains(MParticleIdentityClientImpl.MODIFY_PATH)) {
-                            JSONObject jsonObject = new JSONObject(payload);
-                            JSONArray changedIdentities = jsonObject.getJSONArray(IDENTITY_CHANGES);
-                            for (int i = 0; i < changedIdentities.length(); i++) {
-                                JSONObject changeJson = changedIdentities.getJSONObject(i);
-                                Object newValue = changeJson.getString(NEW_VALUE);
-                                Object oldValue = changeJson.getString(OLD_VALUE);
-                                MParticle.IdentityType identityType = mApiClient.getIdentityType(changeJson.getString(IDENTITY_TYPE));
-                                String nullString = JSONObject.NULL.toString();
-                                if (oldUserIdentities.get(identityType) == null) {
-                                    if(!oldValue.equals(JSONObject.NULL.toString())) {
-                                        fail();
-                                    }
-                                } else {
-                                    assertEquals(oldValue, oldUserIdentities.get(identityType));
+    @Test
+    @Throws(Exception::class)
+    fun testModifyMessage() {
+        val iterations = 5
+        for (i in 1..iterations) {
+            mConfigManager?.setMpid(i.toLong(), ran.nextBoolean())
+            val oldUserIdentities = mRandomUtils.randomUserIdentities
+            val newUserIdentities = mRandomUtils.randomUserIdentities
+            (MParticle.getInstance()
+                ?.Identity()?.currentUser as MParticleUserImpl?)?.userIdentities = oldUserIdentities
+            val latch: CountDownLatch = MPLatch(1)
+            val checked = MutableBoolean(false)
+            setApiClient(object : MockIdentityApiClient {
+                @Throws(IOException::class, JSONException::class)
+                override fun makeUrlRequest(
+                    connection: MPConnection,
+                    payload: String?,
+                    mparticle: Boolean
+                ) {
+                    if (connection.url.toString()
+                            .contains(MParticleIdentityClientImpl.MODIFY_PATH)
+                    ) {
+                        val jsonObject = JSONObject(payload)
+                        val changedIdentities =
+                            jsonObject.getJSONArray(MParticleIdentityClientImpl.IDENTITY_CHANGES)
+                        for (i in 0 until changedIdentities.length()) {
+                            val changeJson = changedIdentities.getJSONObject(i)
+                            val newValue: Any =
+                                changeJson.getString(MParticleIdentityClientImpl.NEW_VALUE)
+                            val oldValue: Any =
+                                changeJson.getString(MParticleIdentityClientImpl.OLD_VALUE)
+                            val identityType = MParticleIdentityClientImpl.getIdentityType(
+                                changeJson.getString(MParticleIdentityClientImpl.IDENTITY_TYPE)
+                            )
+                            val nullString = JSONObject.NULL.toString()
+                            if (oldUserIdentities[identityType] == null) {
+                                if (oldValue != JSONObject.NULL.toString()) {
+                                    Assert.fail()
                                 }
-                                if (newUserIdentities.get(identityType) == null) {
-                                    if(!newValue.equals(nullString)) {
-                                        fail();
-                                    }
-                                } else {
-                                    assertEquals(newValue, newUserIdentities.get(identityType));
-                                }
+                            } else {
+                                Assert.assertEquals(
+                                    oldValue,
+                                    oldUserIdentities[identityType]
+                                )
                             }
-                            setApiClient(null);
-                            checked.value = true;
-                            latch.countDown();
+                            if (newUserIdentities[identityType] == null) {
+                                if (newValue != nullString) {
+                                    Assert.fail()
+                                }
+                            } else {
+                                Assert.assertEquals(
+                                    newValue,
+                                    newUserIdentities[identityType]
+                                )
+                            }
                         }
+                        setApiClient(null)
+                        checked.value = true
+                        latch.countDown()
+                    }
                 }
-            });
-
-            mApiClient.modify(IdentityApiRequest.withEmptyUser()
+            })
+            mApiClient?.modify(
+                IdentityApiRequest.withEmptyUser()
                     .userIdentities(newUserIdentities)
-                    .build());
-            latch.await();
-            assertTrue(checked.value);
+                    .build()
+            )
+            latch.await()
+            Assert.assertTrue(checked.value)
         }
     }
 
-    private void setApiClient(final MockIdentityApiClient identityClient) {
-        mApiClient = new MParticleIdentityClientImpl(mContext, mConfigManager, MParticle.OperatingSystem.ANDROID) {
-            @Override
-            public MPConnection makeUrlRequest(Endpoint endpoint, final MPConnection connection, String payload, boolean identity) throws IOException {
+    private fun setApiClient(identityClient: MockIdentityApiClient?) {
+        mApiClient = object : MParticleIdentityClientImpl(
+            mContext,
+            mConfigManager,
+            MParticle.OperatingSystem.ANDROID
+        ) {
+            @Throws(IOException::class)
+            override fun makeUrlRequest(
+                endpoint: Endpoint,
+                connection: MPConnection,
+                payload: String,
+                identity: Boolean
+            ): MPConnection {
                 try {
-                    identityClient.makeUrlRequest(connection, payload, identity);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage());
+                    identityClient?.makeUrlRequest(connection, payload, identity)
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                    Assert.fail(e.message)
                 }
-                ((MPConnectionTestImpl)connection).setResponseCode(202);
-                return connection;
+                (connection as MPConnectionTestImpl).responseCode = 202
+                return connection
             }
-        };
-        MParticle.getInstance().Identity().setApiClient(mApiClient);
+        }
+        MParticle.getInstance()?.Identity()?.apiClient = mApiClient
     }
 
-    private void checkStaticsAndRemove(JSONObject knowIdentites) throws JSONException {
-        if (knowIdentites.has(ANDROID_AAID)) {
-            assertEquals(MPUtility.getAdIdInfo(mContext).id, knowIdentites.getString(ANDROID_AAID));
-            knowIdentites.remove(ANDROID_AAID);
+    @Throws(JSONException::class)
+    private fun checkStaticsAndRemove(knowIdentites: JSONObject) {
+        if (knowIdentites.has(MParticleIdentityClientImpl.ANDROID_AAID)) {
+            Assert.assertEquals(
+                MPUtility.getAdIdInfo(mContext).id,
+                knowIdentites.getString(MParticleIdentityClientImpl.ANDROID_AAID)
+            )
+            knowIdentites.remove(MParticleIdentityClientImpl.ANDROID_AAID)
         } else {
-            assertTrue(MPUtility.getAdIdInfo(mContext) == null || MPUtility.isEmpty(MPUtility.getAdIdInfo(mContext).id));
+            Assert.assertTrue(
+                MPUtility.getAdIdInfo(mContext) == null || MPUtility.isEmpty(
+                    MPUtility.getAdIdInfo(mContext).id
+                )
+            )
         }
-        if (knowIdentites.has(ANDROID_UUID)) {
-            assertEquals(MPUtility.getAndroidID(mContext), knowIdentites.getString(ANDROID_UUID));
-            knowIdentites.remove(ANDROID_UUID);
+        if (knowIdentites.has(MParticleIdentityClientImpl.ANDROID_UUID)) {
+            Assert.assertEquals(
+                MPUtility.getAndroidID(mContext),
+                knowIdentites.getString(MParticleIdentityClientImpl.ANDROID_UUID)
+            )
+            knowIdentites.remove(MParticleIdentityClientImpl.ANDROID_UUID)
         } else {
-            assertTrue(MPUtility.isEmpty(MPUtility.getAndroidID(mContext)));
+            Assert.assertTrue(MPUtility.isEmpty(MPUtility.getAndroidID(mContext)))
         }
-        if (knowIdentites.has(PUSH_TOKEN)) {
-            assertEquals(mConfigManager.getPushInstanceId(), knowIdentites.getString(PUSH_TOKEN));
-            knowIdentites.remove(PUSH_TOKEN);
+        if (knowIdentites.has(MParticleIdentityClientImpl.PUSH_TOKEN)) {
+            Assert.assertEquals(
+                mConfigManager?.pushInstanceId,
+                knowIdentites.getString(MParticleIdentityClientImpl.PUSH_TOKEN)
+            )
+            knowIdentites.remove(MParticleIdentityClientImpl.PUSH_TOKEN)
         } else {
-            assertNull(mConfigManager.getPushInstanceId());
+            Assert.assertNull(mConfigManager?.pushInstanceId)
         }
-        assertTrue(knowIdentites.has(DEVICE_APPLICATION_STAMP));
-        assertEquals(mConfigManager.getDeviceApplicationStamp(), knowIdentites.get(DEVICE_APPLICATION_STAMP));
-        knowIdentites.remove(DEVICE_APPLICATION_STAMP);
+        Assert.assertTrue(knowIdentites.has(MParticleIdentityClientImpl.DEVICE_APPLICATION_STAMP))
+        Assert.assertEquals(
+            mConfigManager?.deviceApplicationStamp,
+            knowIdentites[MParticleIdentityClientImpl.DEVICE_APPLICATION_STAMP]
+        )
+        knowIdentites.remove(MParticleIdentityClientImpl.DEVICE_APPLICATION_STAMP)
     }
 
-    interface MockIdentityApiClient {
-        void makeUrlRequest(MPConnection connection, String payload, boolean mparticle) throws IOException, JSONException;
+    internal interface MockIdentityApiClient {
+        @Throws(IOException::class, JSONException::class)
+        fun makeUrlRequest(connection: MPConnection, payload: String?, mparticle: Boolean)
     }
 }

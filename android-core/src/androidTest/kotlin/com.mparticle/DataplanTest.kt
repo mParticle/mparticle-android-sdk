@@ -1,236 +1,249 @@
-package com.mparticle;
+package com.mparticle
 
-import com.mparticle.internal.Constants;
-import com.mparticle.networking.Matcher;
-import com.mparticle.networking.MockServer;
-import com.mparticle.testutils.AndroidUtils;
-import com.mparticle.testutils.BaseCleanInstallEachTest;
-import com.mparticle.testutils.MPLatch;
-import com.mparticle.testutils.TestingUtils;
+import com.mparticle.internal.Constants
+import com.mparticle.networking.Matcher
+import com.mparticle.networking.MockServer
+import com.mparticle.networking.MockServer.JSONMatch
+import com.mparticle.testutils.AndroidUtils
+import com.mparticle.testutils.BaseCleanInstallEachTest
+import com.mparticle.testutils.MPLatch
+import com.mparticle.testutils.TestingUtils
+import junit.framework.TestCase
+import org.json.JSONException
+import org.json.JSONObject
+import org.junit.Assert
+import org.junit.Test
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.junit.Test;
-
-import static junit.framework.TestCase.assertNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-
-public class DataplanTest extends BaseCleanInstallEachTest {
-    TestingUtils testingUtils = TestingUtils.getInstance();
-
-
+class DataplanTest : BaseCleanInstallEachTest() {
+    var testingUtils: TestingUtils = TestingUtils.getInstance()
     @Test
-    public void noDataPlanTest() throws InterruptedException {
-        startMParticle(MParticleOptions.builder(mContext)
-                .dataplan(null, null));
-
-        final AndroidUtils.Mutable<Integer> messageCount = new AndroidUtils.Mutable<Integer>(0);
-        final MPLatch latch = new MPLatch(1);
-        MockServer.getInstance().waitForVerify(new Matcher().bodyMatch(new MockServer.JSONMatch() {
-            @Override
-            public boolean isMatch(JSONObject bodyJson) {
-                try {
-                    assertNull(bodyJson.optJSONObject(Constants.MessageKey.DATA_PLAN_CONTEXT));
-                    messageCount.value += getMessageCount(bodyJson);
-                    if (messageCount.value == 3) {
-                        latch.countDown();
-                        return true;
+    @Throws(InterruptedException::class)
+    fun noDataPlanTest() {
+        startMParticle(
+            MParticleOptions.builder(mContext)
+                .dataplan(null, null)
+        )
+        val messageCount = AndroidUtils.Mutable(0)
+        val latch = MPLatch(1)
+        MockServer.getInstance().waitForVerify(
+            Matcher().bodyMatch(
+                JSONMatch { bodyJson ->
+                    try {
+                        TestCase.assertNull(bodyJson.optJSONObject(Constants.MessageKey.DATA_PLAN_CONTEXT))
+                        messageCount.value += getMessageCount(bodyJson)
+                        if (messageCount.value == 3) {
+                            latch.countDown()
+                            return@JSONMatch true
+                        }
+                    } catch (_: JSONException) {
                     }
-                } catch (JSONException ex) {}
-                return false;
-            }
-        }), latch);
-
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().upload();
-
-        latch.await();
-        assertEquals(3, messageCount.value.intValue());
+                    false
+                }), latch
+        )
+        MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
+        MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
+        MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
+        MParticle.getInstance()?.upload()
+        latch.await()
+        Assert.assertEquals(3, messageCount.value.toInt().toLong())
     }
 
     @Test
-    public void dataplanPartialTest() throws InterruptedException {
-        startMParticle(MParticleOptions.builder(mContext)
-                .dataplan("plan1", null));
-
-        final AndroidUtils.Mutable<Integer> messageCount = new AndroidUtils.Mutable<Integer>(0);
-        final MPLatch latch = new MPLatch(1);
-        MockServer.getInstance().waitForVerify(new Matcher(mServer.Endpoints().getEventsUrl()).bodyMatch(new MockServer.JSONMatch() {
-            @Override
-            public boolean isMatch(JSONObject bodyJson) {
-                try {
-                    assertNotNull(bodyJson.optJSONObject(Constants.MessageKey.DATA_PLAN_CONTEXT));
-                    JSONObject dataplanContext = bodyJson.getJSONObject(Constants.MessageKey.DATA_PLAN_CONTEXT);
-                    JSONObject dataplanJSON = dataplanContext.getJSONObject(Constants.MessageKey.DATA_PLAN_KEY);
-                    assertEquals("plan1", dataplanJSON.getString(Constants.MessageKey.DATA_PLAN_ID));
-                    assertNull(dataplanJSON.optString(Constants.MessageKey.DATA_PLAN_VERSION, null));
-                    messageCount.value += getMessageCount(bodyJson);
-                    if (messageCount.value == 3) {
-                        latch.countDown();
-                        return true;
+    @Throws(InterruptedException::class)
+    fun dataplanPartialTest() {
+        startMParticle(
+            MParticleOptions.builder(mContext)
+                .dataplan("plan1", null)
+        )
+        val messageCount = AndroidUtils.Mutable(0)
+        val latch = MPLatch(1)
+        MockServer.getInstance().waitForVerify(
+            Matcher(mServer.Endpoints().eventsUrl).bodyMatch(
+                JSONMatch { bodyJson ->
+                    try {
+                        Assert.assertNotNull(bodyJson.optJSONObject(Constants.MessageKey.DATA_PLAN_CONTEXT))
+                        val dataplanContext =
+                            bodyJson.getJSONObject(Constants.MessageKey.DATA_PLAN_CONTEXT)
+                        val dataplanJSON =
+                            dataplanContext.getJSONObject(Constants.MessageKey.DATA_PLAN_KEY)
+                        Assert.assertEquals(
+                            "plan1",
+                            dataplanJSON.getString(Constants.MessageKey.DATA_PLAN_ID)
+                        )
+                        TestCase.assertNull(
+                            dataplanJSON.optString(
+                                Constants.MessageKey.DATA_PLAN_VERSION,
+                                null
+                            )
+                        )
+                        messageCount.value += getMessageCount(bodyJson)
+                        if (messageCount.value == 3) {
+                            latch.countDown()
+                            return@JSONMatch true
+                        }
+                    } catch (_: JSONException) {
                     }
-                } catch (JSONException ex) {}
-                return false;
-            }
-        }), latch);
-
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().upload();
-
-        latch.await();
-        assertEquals(3, messageCount.value.intValue());
+                    false
+                }), latch
+        )
+        MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
+        MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
+        MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
+        MParticle.getInstance()?.upload()
+        latch.await()
+        Assert.assertEquals(3, messageCount.value.toInt().toLong())
     }
 
     @Test
-    public void noDataPlanIdTest() throws InterruptedException {
-        startMParticle(MParticleOptions.builder(mContext)
-                .dataplan(null, 1));
-
-        final AndroidUtils.Mutable<Integer> messageCount = new AndroidUtils.Mutable<Integer>(0);
-        final MPLatch latch = new MPLatch(1);
-        MockServer.getInstance().waitForVerify(new Matcher(mServer.Endpoints().getEventsUrl()).bodyMatch(new MockServer.JSONMatch() {
-            @Override
-            public boolean isMatch(JSONObject bodyJson) {
-                try {
-                    assertNull(bodyJson.optJSONObject(Constants.MessageKey.DATA_PLAN_CONTEXT));
-                    messageCount.value += getMessageCount(bodyJson);
-                    if (messageCount.value == 3) {
-                        latch.countDown();
-                        return true;
+    @Throws(InterruptedException::class)
+    fun noDataPlanIdTest() {
+        startMParticle(
+            MParticleOptions.builder(mContext)
+                .dataplan(null, 1)
+        )
+        val messageCount = AndroidUtils.Mutable(0)
+        val latch = MPLatch(1)
+        MockServer.getInstance().waitForVerify(
+            Matcher(mServer.Endpoints().eventsUrl).bodyMatch(
+                JSONMatch { bodyJson ->
+                    try {
+                        TestCase.assertNull(bodyJson.optJSONObject(Constants.MessageKey.DATA_PLAN_CONTEXT))
+                        messageCount.value += getMessageCount(bodyJson)
+                        if (messageCount.value == 3) {
+                            latch.countDown()
+                            return@JSONMatch true
+                        }
+                    } catch (_: JSONException) {
                     }
-                } catch (JSONException ex) {}
-                return false;
-            }
-        }), latch);
-
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().upload();
-
-
-        latch.await();
-        assertEquals(3, messageCount.value.intValue());
+                    false
+                }), latch
+        )
+        MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
+        MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
+        MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
+        MParticle.getInstance()?.upload()
+        latch.await()
+        Assert.assertEquals(3, messageCount.value.toInt().toLong())
     }
 
     @Test
-    public void dataPlanSetTest() throws InterruptedException {
-        startMParticle(MParticleOptions.builder(mContext)
-                .dataplan("dataplan1", 1));
-
-        final AndroidUtils.Mutable<Integer> messageCount = new AndroidUtils.Mutable<Integer>(0);
-        final MPLatch latch = new MPLatch(1);
-        MockServer.getInstance().waitForVerify(new Matcher(mServer.Endpoints().getEventsUrl()).bodyMatch(new MockServer.JSONMatch() {
-            @Override
-            public boolean isMatch(JSONObject bodyJson) {
-                try {
-                    assertNotNull(bodyJson.optJSONObject(Constants.MessageKey.DATA_PLAN_CONTEXT));
-                    JSONObject dataplanContext = bodyJson.getJSONObject(Constants.MessageKey.DATA_PLAN_CONTEXT);
-                    JSONObject dataplanJSON = dataplanContext.getJSONObject(Constants.MessageKey.DATA_PLAN_KEY);
-                    assertEquals("dataplan1", dataplanJSON.getString(Constants.MessageKey.DATA_PLAN_ID));
-                    assertEquals("1", dataplanJSON.optString(Constants.MessageKey.DATA_PLAN_VERSION, null));
-                    JSONArray messages = bodyJson.optJSONArray("msgs");
-                    messageCount.value += getMessageCount(bodyJson);
-                    if (messageCount.value == 3) {
-                        latch.countDown();
-                        return true;
+    @Throws(InterruptedException::class)
+    fun dataPlanSetTest() {
+        startMParticle(
+            MParticleOptions.builder(mContext)
+                .dataplan("dataplan1", 1)
+        )
+        val messageCount = AndroidUtils.Mutable(0)
+        val latch = MPLatch(1)
+        MockServer.getInstance().waitForVerify(
+            Matcher(mServer.Endpoints().eventsUrl).bodyMatch(
+                JSONMatch { bodyJson ->
+                    try {
+                        Assert.assertNotNull(bodyJson.optJSONObject(Constants.MessageKey.DATA_PLAN_CONTEXT))
+                        val dataplanContext =
+                            bodyJson.getJSONObject(Constants.MessageKey.DATA_PLAN_CONTEXT)
+                        val dataplanJSON =
+                            dataplanContext.getJSONObject(Constants.MessageKey.DATA_PLAN_KEY)
+                        Assert.assertEquals(
+                            "dataplan1",
+                            dataplanJSON.getString(Constants.MessageKey.DATA_PLAN_ID)
+                        )
+                        Assert.assertEquals(
+                            "1",
+                            dataplanJSON.optString(Constants.MessageKey.DATA_PLAN_VERSION, "")
+                        )
+                        messageCount.value += getMessageCount(bodyJson)
+                        if (messageCount.value == 3) {
+                            latch.countDown()
+                            return@JSONMatch true
+                        }
+                    } catch (ex: Exception) {
+                        Assert.fail(ex.toString())
                     }
-                } catch (Exception ex) {
-                    fail(ex.toString());
-                }
-                return false;
-            }
-        }), latch);
-
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().upload();
-
-        latch.await();
-        assertEquals(3, messageCount.value.intValue());
+                    false
+                }), latch
+        )
+        MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
+        MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
+        MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
+        MParticle.getInstance()?.upload()
+        latch.await()
+        Assert.assertEquals(3, messageCount.value.toInt().toLong())
     }
 
     @Test
-    public void dataplanChanged() throws InterruptedException {
-        startMParticle(MParticleOptions.builder(mContext)
-                .dataplan("dataplan1", 1));
-
-        final AndroidUtils.Mutable<Integer> totalMessageCount = new AndroidUtils.Mutable<Integer>(0);
-        final AndroidUtils.Mutable<Integer> dataplan1MessageCount = new AndroidUtils.Mutable<Integer>(0);
-        final AndroidUtils.Mutable<Integer> dataplan2MessageCount = new AndroidUtils.Mutable<Integer>(0);
-        final MPLatch latch = new MPLatch(1);
-        MockServer.getInstance().waitForVerify(new Matcher(mServer.Endpoints().getEventsUrl()).bodyMatch(new MockServer.JSONMatch() {
-            @Override
-            public boolean isMatch(JSONObject bodyJson) {
+    @Throws(InterruptedException::class)
+    fun dataplanChanged() {
+        startMParticle(
+            MParticleOptions.builder(mContext)
+                .dataplan("dataplan1", 1)
+        )
+        val totalMessageCount = AndroidUtils.Mutable(0)
+        val dataplan1MessageCount = AndroidUtils.Mutable(0)
+        val dataplan2MessageCount = AndroidUtils.Mutable(0)
+        val latch = MPLatch(1)
+        MockServer.getInstance()
+            .waitForVerify(Matcher(mServer.Endpoints().eventsUrl).bodyMatch { bodyJson ->
                 try {
-                    assertNotNull(bodyJson.optJSONObject(Constants.MessageKey.DATA_PLAN_CONTEXT));
-                    JSONObject dataplanContext = bodyJson.getJSONObject(Constants.MessageKey.DATA_PLAN_CONTEXT);
-                    JSONObject dataplanJSON = dataplanContext.getJSONObject(Constants.MessageKey.DATA_PLAN_KEY);
-                    String dataplanId = dataplanJSON.getString(Constants.MessageKey.DATA_PLAN_ID);
-                    Integer dataplanVersion = dataplanJSON.optInt(Constants.MessageKey.DATA_PLAN_VERSION, -1);
-
-                    int messageCount = getMessageCount(bodyJson);
-                    if (new Integer(1).equals(dataplanVersion)) {
-                        assertEquals("dataplan1", dataplanId);
-                        dataplan1MessageCount.value += messageCount;
+                    Assert.assertNotNull(bodyJson.optJSONObject(Constants.MessageKey.DATA_PLAN_CONTEXT))
+                    val dataplanContext =
+                        bodyJson.getJSONObject(Constants.MessageKey.DATA_PLAN_CONTEXT)
+                    val dataplanJSON =
+                        dataplanContext.getJSONObject(Constants.MessageKey.DATA_PLAN_KEY)
+                    val dataplanId = dataplanJSON.getString(Constants.MessageKey.DATA_PLAN_ID)
+                    val dataplanVersion =
+                        dataplanJSON.optInt(Constants.MessageKey.DATA_PLAN_VERSION, -1)
+                    val messageCount = getMessageCount(bodyJson)
+                    if (1 == dataplanVersion) {
+                        Assert.assertEquals("dataplan1", dataplanId)
+                        dataplan1MessageCount.value += messageCount
                     }
-                    if (new Integer(2).equals(dataplanVersion)) {
-                        assertEquals("dataplan1", dataplanId);
-                        dataplan2MessageCount.value += messageCount;
+                    if (2 == dataplanVersion) {
+                        Assert.assertEquals("dataplan1", dataplanId)
+                        dataplan2MessageCount.value += messageCount
                     }
-                    totalMessageCount.value += messageCount;
+                    totalMessageCount.value += messageCount
                     if (totalMessageCount.value == 5) {
-                        latch.countDown();
+                        latch.countDown()
                     }
-                } catch (Exception ex) {
-                    fail(ex.toString());
+                } catch (ex: Exception) {
+                    Assert.fail(ex.toString())
                 }
-                return false;
-            }
-        }), latch);
-
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-
-
-        MParticle.setInstance(null);
-        startMParticle(MParticleOptions.builder(mContext)
-                .dataplan("dataplan1", 2));
-
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().logEvent(testingUtils.getRandomMPEventRich());
-        MParticle.getInstance().upload();
+                false
+            }, latch)
+        MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
+        MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
+        MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
+        MParticle.setInstance(null)
+        startMParticle(
+            MParticleOptions.builder(mContext)
+                .dataplan("dataplan1", 2)
+        )
+        MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
+        MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
+        MParticle.getInstance()?.upload()
 
         //not sure why it needs upload() twice, but this cuts the runtime down from 10s to .7s
-        MParticle.getInstance().upload();
-        MParticle.getInstance().upload();
-        latch.await();
-        assertEquals(3, dataplan1MessageCount.value.intValue());
-        assertEquals(2, dataplan2MessageCount.value.intValue());
-
-        assertEquals(5, totalMessageCount.value.intValue());
+        MParticle.getInstance()?.upload()
+        MParticle.getInstance()?.upload()
+        latch.await()
+        Assert.assertEquals(3, dataplan1MessageCount.value.toInt().toLong())
+        Assert.assertEquals(2, dataplan2MessageCount.value.toInt().toLong())
+        Assert.assertEquals(5, totalMessageCount.value.toInt().toLong())
     }
 
-    private int getMessageCount(JSONObject bodyJson) throws JSONException {
-        int count = 0;
-        JSONArray messages = bodyJson.optJSONArray("msgs");
+    @Throws(JSONException::class)
+    private fun getMessageCount(bodyJson: JSONObject): Int {
+        var count = 0
+        val messages = bodyJson.optJSONArray("msgs")
         if (messages != null) {
-            for (int i = 0; i < messages.length(); i++) {
-                JSONObject messageJSON = messages.getJSONObject(i);
-                if (messageJSON.getString("dt").equals("e")) {
-                    count++;
+            for (i in 0 until messages.length()) {
+                val messageJSON = messages.getJSONObject(i)
+                if (messageJSON.getString("dt") == "e") {
+                    count++
                 }
             }
         }
-        return count;
+        return count
     }
 }

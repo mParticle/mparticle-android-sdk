@@ -1,96 +1,80 @@
-package com.mparticle.identity;
+package com.mparticle.identity
 
-import com.mparticle.MParticle;
-import com.mparticle.MParticleOptions;
-import com.mparticle.internal.ConfigManager;
-import com.mparticle.internal.MPUtility;
-import com.mparticle.networking.IdentityRequest;
-import com.mparticle.networking.Matcher;
-import com.mparticle.networking.MockServer;
-import com.mparticle.networking.Request;
-import com.mparticle.testutils.AndroidUtils.Mutable;
-import com.mparticle.testutils.BaseCleanInstallEachTest;
-import com.mparticle.testutils.MPLatch;
+import com.mparticle.MParticle
+import com.mparticle.MParticle.IdentityType
+import com.mparticle.MParticleOptions
+import com.mparticle.internal.ConfigManager
+import com.mparticle.internal.MPUtility
+import com.mparticle.networking.IdentityRequest
+import com.mparticle.networking.Matcher
+import com.mparticle.networking.MockServer
+import com.mparticle.networking.MockServer.JSONMatch
+import com.mparticle.networking.Request
+import com.mparticle.testutils.AndroidUtils
+import com.mparticle.testutils.BaseCleanInstallEachTest
+import com.mparticle.testutils.MPLatch
+import junit.framework.TestCase
+import org.json.JSONException
+import org.junit.Assert
+import org.junit.Test
+import java.util.concurrent.CountDownLatch
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.junit.Test;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static junit.framework.Assert.fail;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertNull;
-
-public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
-
+class IdentityApiStartTest : BaseCleanInstallEachTest() {
     @Test
-    public void testInitialIdentitiesPresentWithAndroidId() throws Exception {
-        final Map<MParticle.IdentityType, String> identities = mRandomUtils.getRandomUserIdentities();
-
-        IdentityApiRequest request = IdentityApiRequest.withEmptyUser()
-                .userIdentities(identities)
-                .build();
-        startMParticle(MParticleOptions.builder(mContext)
+    @Throws(Exception::class)
+    fun testInitialIdentitiesPresentWithAndroidId() {
+        val identities = mRandomUtils.randomUserIdentities
+        val request = IdentityApiRequest.withEmptyUser()
+            .userIdentities(identities)
+            .build()
+        startMParticle(
+            MParticleOptions.builder(mContext)
                 .androidIdEnabled(true)
-                .identify(request));
-
-        assertTrue(mServer.Requests().getIdentify().size() == 1);
-        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), identities, true);
+                .identify(request)
+        )
+        Assert.assertTrue(mServer.Requests().identify.size == 1)
+        assertIdentitiesMatch(mServer.Requests().identify[0], identities, true)
     }
 
     @Test
-    public void testInitialIdentitiesPresentWithoutAndroidId() throws Exception {
-        final Map<MParticle.IdentityType, String> identities = mRandomUtils.getRandomUserIdentities();
-
-        IdentityApiRequest request = IdentityApiRequest.withEmptyUser()
-                .userIdentities(identities)
-                .build();
-        startMParticle(MParticleOptions.builder(mContext)
+    @Throws(Exception::class)
+    fun testInitialIdentitiesPresentWithoutAndroidId() {
+        val identities = mRandomUtils.randomUserIdentities
+        val request = IdentityApiRequest.withEmptyUser()
+            .userIdentities(identities)
+            .build()
+        startMParticle(
+            MParticleOptions.builder(mContext)
                 .androidIdEnabled(false)
-                .identify(request));
-
-        assertTrue(mServer.Requests().getIdentify().size() == 1);
-        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), identities, false);
-    }
-
-
-    @Test
-    public void testNoInitialIdentityNoStoredIdentity() throws Exception {
-        startMParticle();
-
-        assertEquals(mServer.Requests().getIdentify().size(), 1);
-        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), new HashMap<>(), false);
+                .identify(request)
+        )
+        Assert.assertTrue(mServer.Requests().identify.size == 1)
+        assertIdentitiesMatch(mServer.Requests().identify[0], identities, false)
     }
 
     @Test
-    public void testNoInitialIdentity() throws Exception {
+    @Throws(Exception::class)
+    fun testNoInitialIdentityNoStoredIdentity() {
+        startMParticle()
+        TestCase.assertEquals(mServer.Requests().identify.size, 1)
+        assertIdentitiesMatch(mServer.Requests().identify[0], HashMap(), false)
+    }
 
-        final Long currentMpid = ran.nextLong();
-        final Map<MParticle.IdentityType, String> identities = mRandomUtils.getRandomUserIdentities();
-
-        startMParticle();
-
-        MParticle.getInstance().Internal().getConfigManager().setMpid(currentMpid, ran.nextBoolean());
-
-        for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()) {
-            AccessUtils.setUserIdentity(entry.getValue(), entry.getKey(), currentMpid);
+    @Test
+    @Throws(Exception::class)
+    fun testNoInitialIdentity() {
+        val currentMpid = ran.nextLong()
+        val identities = mRandomUtils.randomUserIdentities
+        startMParticle()
+        MParticle.getInstance()?.Internal()?.configManager?.setMpid(currentMpid, ran.nextBoolean())
+        for ((key, value) in identities) {
+            AccessUtils.setUserIdentity(value, key, currentMpid)
         }
-        com.mparticle.internal.AccessUtils.awaitMessageHandler();
-
-        mServer = MockServer.getNewInstance(mContext);
-        startMParticle();
-
-        assertEquals(mServer.Requests().getIdentify().size(), 1);
-        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), identities, false);
+        com.mparticle.internal.AccessUtils.awaitMessageHandler()
+        mServer = MockServer.getNewInstance(mContext)
+        startMParticle()
+        TestCase.assertEquals(mServer.Requests().identify.size, 1)
+        assertIdentitiesMatch(mServer.Requests().identify[0], identities, false)
     }
 
     /**
@@ -100,104 +84,116 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
      * after it is used in the modify() request
      */
     @Test
-    public void testLogNotificationBackgroundTest() throws InterruptedException {
-        assertNull(ConfigManager.getInstance(mContext).getPushInstanceId());
-        final String instanceId = mRandomUtils.getAlphaNumericString(10);
-        com.mparticle.internal.AccessUtils.setPushInPushRegistrationHelper(mContext, instanceId, mRandomUtils.getAlphaNumericString(15));
-
-        final Mutable<Boolean> called = new Mutable<Boolean>(false);
-        CountDownLatch latch = new MPLatch(1);
+    @Throws(InterruptedException::class)
+    fun testLogNotificationBackgroundTest() {
+        TestCase.assertNull(ConfigManager.getInstance(mContext).pushInstanceId)
+        val instanceId = mRandomUtils.getAlphaNumericString(10)
+        com.mparticle.internal.AccessUtils.setPushInPushRegistrationHelper(
+            mContext,
+            instanceId,
+            mRandomUtils.getAlphaNumericString(15)
+        )
+        val called = AndroidUtils.Mutable(false)
+        var latch: CountDownLatch = MPLatch(1)
         /**
          * This tests that a modify request is sent when the previous Push InstanceId is empty, with the value of "null"
          */
-        mServer.waitForVerify(new Matcher(mServer.Endpoints().getModifyUrl(mStartingMpid)).bodyMatch(new MockServer.JSONMatch() {
-            @Override
-            public boolean isMatch(JSONObject jsonObject) {
-                if (jsonObject.has("identity_changes")) {
-                    try {
-                        JSONArray identityChanges = jsonObject.getJSONArray("identity_changes");
-                        assertEquals(1, identityChanges.length());
-                        JSONObject identityChange = identityChanges.getJSONObject(0);
-
-                        assertEquals("null", identityChange.getString("old_value"));
-                        assertEquals(instanceId, identityChange.getString("new_value"));
-                        assertEquals("push_token", identityChange.getString("identity_type"));
-                        called.value = true;
-                    } catch (JSONException jse) {
-                        jse.toString();
+        mServer.waitForVerify(
+            Matcher(mServer.Endpoints().getModifyUrl(mStartingMpid)).bodyMatch(
+                JSONMatch { jsonObject ->
+                    if (jsonObject.has("identity_changes")) {
+                        try {
+                            val identityChanges = jsonObject.getJSONArray("identity_changes")
+                            TestCase.assertEquals(1, identityChanges.length())
+                            val identityChange = identityChanges.getJSONObject(0)
+                            TestCase.assertEquals("null", identityChange.getString("old_value"))
+                            TestCase.assertEquals(instanceId, identityChange.getString("new_value"))
+                            TestCase.assertEquals(
+                                "push_token",
+                                identityChange.getString("identity_type")
+                            )
+                            called.value = true
+                        } catch (jse: JSONException) {
+                            jse.toString()
+                        }
+                        return@JSONMatch true
                     }
-                    return true;
-                }
-                return false;
-            }
-        }), latch);
-
-        startMParticle();
-        latch.await();
-        assertTrue(called.value);
-
-        MParticle.setInstance(null);
-        called.value = false;
-
-        final String newInstanceId = mRandomUtils.getAlphaNumericString(15);
-        com.mparticle.internal.AccessUtils.setPushInPushRegistrationHelper(mContext, newInstanceId, mRandomUtils.getAlphaNumericString(15));
-
-
-        latch = new CountDownLatch(1);
+                    false
+                }), latch
+        )
+        startMParticle()
+        latch.await()
+        Assert.assertTrue(called.value)
+        MParticle.setInstance(null)
+        called.value = false
+        val newInstanceId = mRandomUtils.getAlphaNumericString(15)
+        com.mparticle.internal.AccessUtils.setPushInPushRegistrationHelper(
+            mContext,
+            newInstanceId,
+            mRandomUtils.getAlphaNumericString(15)
+        )
+        latch = CountDownLatch(1)
         /**
          * tests that the modify request was made with the correct value for the instanceId set while
          * the SDK was stopped
          */
-        mServer.waitForVerify(new Matcher(mServer.Endpoints().getModifyUrl(mStartingMpid)).bodyMatch(new MockServer.JSONMatch() {
-            @Override
-            public boolean isMatch(JSONObject jsonObject) {
-                if (jsonObject.has("identity_changes")) {
-                    try {
-                        JSONArray identityChanges = jsonObject.getJSONArray("identity_changes");
-                        assertEquals(1, identityChanges.length());
-                        JSONObject identityChange = identityChanges.getJSONObject(0);
-
-                        assertEquals(instanceId, identityChange.getString("old_value"));
-                        assertEquals(newInstanceId, identityChange.getString("new_value"));
-                        assertEquals("push_token", identityChange.getString("identity_type"));
-                        called.value = true;
-                    } catch (JSONException jse) {
-                        jse.toString();
+        mServer.waitForVerify(
+            Matcher(mServer.Endpoints().getModifyUrl(mStartingMpid)).bodyMatch(
+                JSONMatch { jsonObject ->
+                    if (jsonObject.has("identity_changes")) {
+                        try {
+                            val identityChanges = jsonObject.getJSONArray("identity_changes")
+                            TestCase.assertEquals(1, identityChanges.length())
+                            val identityChange = identityChanges.getJSONObject(0)
+                            TestCase.assertEquals(instanceId, identityChange.getString("old_value"))
+                            TestCase.assertEquals(
+                                newInstanceId,
+                                identityChange.getString("new_value")
+                            )
+                            TestCase.assertEquals(
+                                "push_token",
+                                identityChange.getString("identity_type")
+                            )
+                            called.value = true
+                        } catch (jse: JSONException) {
+                            jse.toString()
+                        }
+                        return@JSONMatch true
                     }
-                    return true;
-                }
-                return false;
-            }
-        }), latch);
-
-        startMParticle();
-        latch.await();
-        assertTrue(called.value);
+                    false
+                }), latch
+        )
+        startMParticle()
+        latch.await()
+        Assert.assertTrue(called.value)
     }
 
-    private void assertIdentitiesMatch(Request request, Map<MParticle.IdentityType, String> identities, boolean androidIdEnabled) throws Exception {
-        assertTrue(request instanceof IdentityRequest);
-        IdentityRequest identityRequest = request.asIdentityRequest();
-        assertNotNull(identityRequest);
-
-        JSONObject knownIdentities = identityRequest.getBody().known_identities;
-        assertNotNull(knownIdentities);
-
+    @Throws(Exception::class)
+    private fun assertIdentitiesMatch(
+        request: Request,
+        identities: Map<IdentityType, String>,
+        androidIdEnabled: Boolean
+    ) {
+        Assert.assertTrue(request is IdentityRequest)
+        val identityRequest = request.asIdentityRequest()
+        Assert.assertNotNull(identityRequest)
+        val knownIdentities = identityRequest.body.known_identities
+        Assert.assertNotNull(knownIdentities)
         if (androidIdEnabled) {
-            assertNotNull(knownIdentities.remove("android_uuid"));
+            Assert.assertNotNull(knownIdentities.remove("android_uuid"))
         } else {
-            assertFalse(knownIdentities.has("android_uuid"));
+            TestCase.assertFalse(knownIdentities.has("android_uuid"))
         }
-        assertNotNull(knownIdentities.remove("device_application_stamp"));
-
-        assertEquals(knownIdentities.length(), identities.size());
-
-        Iterator<String> keys = knownIdentities.keys();
-        Map<MParticle.IdentityType, String> copy = new HashMap<MParticle.IdentityType, String>(identities);
-
+        Assert.assertNotNull(knownIdentities.remove("device_application_stamp"))
+        TestCase.assertEquals(knownIdentities.length(), identities.size)
+        val keys = knownIdentities.keys()
+        val copy: Map<IdentityType, String> = HashMap(identities)
         while (keys.hasNext()) {
-            String key = keys.next();
-            assertEquals(copy.get(MParticleIdentityClientImpl.getIdentityType(key)), knownIdentities.getString(key));
+            val key = keys.next()
+            TestCase.assertEquals(
+                copy[MParticleIdentityClientImpl.getIdentityType(key)],
+                knownIdentities.getString(key)
+            )
         }
     }
 
@@ -213,83 +209,81 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
      * @throws InterruptedException
      */
     @Test
-    public void testPushRegistrationModifyRequest() throws InterruptedException, JSONException {
-        final Long startingMpid = ran.nextLong();
-        mServer.setupHappyIdentify(startingMpid, 200);
-        final Mutable<Boolean> logPushRegistrationCalled = new Mutable<Boolean>(false);
-        final CountDownLatch identifyLatch = new MPLatch(1);
-        final CountDownLatch modifyLatch = new MPLatch(1);
-
-        MParticle.start(MParticleOptions.builder(mContext).credentials("key", "value").build());
-
-        MParticle.getInstance().Identity().addIdentityStateListener(new IdentityStateListener() {
-            @Override
-            public void onUserIdentified(MParticleUser user, MParticleUser previousUser) {
-                assertTrue(logPushRegistrationCalled.value);
-                identifyLatch.countDown();
-                MParticle.getInstance().Identity().removeIdentityStateListener(this);
-            }
-        });
-        mServer.waitForVerify(new Matcher(mServer.Endpoints().getModifyUrl(startingMpid)), modifyLatch);
-
-        String pushRegistration = null;
-        for (int i = 0; i < 5; i++) {
-            MParticle.getInstance().logPushRegistration(pushRegistration = mRandomUtils.getAlphaString(12),  "senderId");
+    @Throws(InterruptedException::class, JSONException::class)
+    fun testPushRegistrationModifyRequest() {
+        val startingMpid = ran.nextLong()
+        mServer.setupHappyIdentify(startingMpid, 200)
+        val logPushRegistrationCalled = AndroidUtils.Mutable(false)
+        val identifyLatch: CountDownLatch = MPLatch(1)
+        val modifyLatch: CountDownLatch = MPLatch(1)
+        MParticle.start(MParticleOptions.builder(mContext).credentials("key", "value").build())
+        MParticle.getInstance()?.Identity()
+            ?.addIdentityStateListener(object : IdentityStateListener {
+                override fun onUserIdentified(user: MParticleUser, previousUser: MParticleUser?) {
+                    Assert.assertTrue(logPushRegistrationCalled.value)
+                    identifyLatch.countDown()
+                    MParticle.getInstance()?.Identity()?.removeIdentityStateListener(this)
+                }
+            })
+        mServer.waitForVerify(Matcher(mServer.Endpoints().getModifyUrl(startingMpid)), modifyLatch)
+        var pushRegistration: String? = null
+        for (i in 0..4) {
+            MParticle.getInstance()
+                ?.logPushRegistration(
+                    mRandomUtils.getAlphaString(12).also { pushRegistration = it },
+                    "senderId"
+                )
         }
-        logPushRegistrationCalled.value = true;
-
-        identifyLatch.await();
-        modifyLatch.await();
-
-        List<Request> modifyRequests = mServer.Requests().getModify();
-        assertEquals(1, modifyRequests.size());
-        JSONObject body = modifyRequests.get(0).getBodyJson();
-        JSONArray identityChanges = body.getJSONArray("identity_changes");
-        assertEquals(1, identityChanges.length());
-        JSONObject identityChange = identityChanges.getJSONObject(0);
-        assertEquals(pushRegistration, identityChange.getString("new_value"));
-        assertEquals("push_token", identityChange.getString("identity_type"));
+        logPushRegistrationCalled.value = true
+        identifyLatch.await()
+        modifyLatch.await()
+        val modifyRequests = mServer.Requests().modify
+        TestCase.assertEquals(1, modifyRequests.size)
+        val body = modifyRequests[0].bodyJson
+        val identityChanges = body.getJSONArray("identity_changes")
+        TestCase.assertEquals(1, identityChanges.length())
+        val identityChange = identityChanges.getJSONObject(0)
+        TestCase.assertEquals(pushRegistration, identityChange.getString("new_value"))
+        TestCase.assertEquals("push_token", identityChange.getString("identity_type"))
 
         //make sure the mDeferredModifyPushRegistrationListener was successfully removed from the IdentityApi
-        assertEquals(0, AccessUtils.getIdentityStateListeners().size());
+        TestCase.assertEquals(0, AccessUtils.getIdentityStateListeners().size)
     }
 
     @Test
-    public void testOperatingSystemSetProperly() throws InterruptedException {
-        final Mutable<Boolean> called = new Mutable<Boolean>(false);
-        final CountDownLatch latch = new MPLatch(1);
-        mServer.waitForVerify(new Matcher(mServer.Endpoints().getIdentifyUrl()), new MockServer.RequestReceivedCallback() {
-            @Override
-            public void onRequestReceived(Request request) {
-                assertEquals("fire", request.asIdentityRequest().getBody().clientSdk.platform);
-                called.value = true;
-                latch.countDown();
-            }
-        });
-        MParticle.start(MParticleOptions.builder(mContext)
+    @Throws(InterruptedException::class)
+    fun testOperatingSystemSetProperly() {
+        val called = AndroidUtils.Mutable(false)
+        val latch: CountDownLatch = MPLatch(1)
+        mServer.waitForVerify(Matcher(mServer.Endpoints().identifyUrl)) { request ->
+            TestCase.assertEquals("fire", request.asIdentityRequest().body.clientSdk.platform)
+            called.value = true
+            latch.countDown()
+        }
+        MParticle.start(
+            MParticleOptions.builder(mContext)
                 .credentials("key", "secret")
                 .operatingSystem(MParticle.OperatingSystem.FIRE_OS)
-                .build());
-        latch.await();
-        assertTrue(called.value);
-
-        MParticle.setInstance(null);
-        called.value = false;
-        final CountDownLatch latch1 = new MPLatch(1);
-        mServer.waitForVerify(new Matcher(mServer.Endpoints().getIdentifyUrl()), new MockServer.RequestReceivedCallback() {
-            @Override
-            public void onRequestReceived(Request request) {
-                assertEquals("fire", request.asIdentityRequest().getBody().clientSdk.platform);
-                called.value = true;
-                latch1.countDown();
-            }
-        });
-        MParticle.start(MParticleOptions.builder(mContext)
+                .build()
+        )
+        latch.await()
+        Assert.assertTrue(called.value)
+        MParticle.setInstance(null)
+        called.value = false
+        val latch1: CountDownLatch = MPLatch(1)
+        mServer.waitForVerify(Matcher(mServer.Endpoints().identifyUrl)) { request ->
+            TestCase.assertEquals("fire", request.asIdentityRequest().body.clientSdk.platform)
+            called.value = true
+            latch1.countDown()
+        }
+        MParticle.start(
+            MParticleOptions.builder(mContext)
                 .credentials("key", "secret")
                 .operatingSystem(MParticle.OperatingSystem.FIRE_OS)
-                .build());
-        latch1.await();
-        assertTrue(called.value);
+                .build()
+        )
+        latch1.await()
+        Assert.assertTrue(called.value)
     }
 
     /**
@@ -298,17 +292,19 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
      * on the applications initial install
      */
     @Test
-    public void testPushRegistrationInMParticleOptions() {
-        Exception ex = null;
+    fun testPushRegistrationInMParticleOptions() {
+        var ex: Exception? = null
         try {
-            startMParticle(MParticleOptions
+            startMParticle(
+                MParticleOptions
                     .builder(mContext)
                     .pushRegistration("instanceId", "senderId")
-                    .environment(MParticle.Environment.Development));
-            assertTrue(MPUtility.isDevEnv());
-        } catch (Exception e) {
-            ex = e;
+                    .environment(MParticle.Environment.Development)
+            )
+            Assert.assertTrue(MPUtility.isDevEnv())
+        } catch (e: Exception) {
+            ex = e
         }
-        assertNull(ex);
+        TestCase.assertNull(ex)
     }
 }

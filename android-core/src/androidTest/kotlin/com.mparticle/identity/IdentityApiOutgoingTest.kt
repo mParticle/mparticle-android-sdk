@@ -1,74 +1,81 @@
-package com.mparticle.identity;
+package com.mparticle.identity
 
-import com.mparticle.MParticle;
-import com.mparticle.networking.IdentityRequest;
-import com.mparticle.networking.Matcher;
-import com.mparticle.networking.MockServer;
-import com.mparticle.networking.MockServer.IdentityMatcher;
-import com.mparticle.testutils.BaseCleanStartedEachTest;
+import com.mparticle.MParticle
+import com.mparticle.networking.IdentityRequest.IdentityRequestBody
+import com.mparticle.networking.Matcher
+import com.mparticle.networking.MockServer.IdentityMatcher
+import com.mparticle.testutils.BaseCleanStartedEachTest
+import org.junit.Test
 
-import org.junit.Test;
-
-public final class IdentityApiOutgoingTest extends BaseCleanStartedEachTest {
-
+class IdentityApiOutgoingTest : BaseCleanStartedEachTest() {
     @Test
-    public void testLogin() throws Exception {
-        MParticle.getInstance().Identity().login();
-        mServer.waitForVerify(new Matcher(mServer.Endpoints().getLoginUrl()).bodyMatch(new IdentityMatcher() {
-            @Override
-            protected boolean isIdentityMatch(IdentityRequest.IdentityRequestBody identityRequest) {
-                return mStartingMpid.equals(identityRequest.previousMpid);
+    @Throws(Exception::class)
+    fun testLogin() {
+        MParticle.getInstance()?.Identity()?.login()
+        mServer.waitForVerify(Matcher(mServer.Endpoints().loginUrl).bodyMatch(object :
+            IdentityMatcher() {
+            override fun isIdentityMatch(identityRequest: IdentityRequestBody): Boolean {
+                return mStartingMpid == identityRequest.previousMpid
             }
-        }));
+        }))
     }
 
     @Test
-    public void testLoginNonEmpty() throws Exception {
-        MParticle.getInstance().Identity().login(IdentityApiRequest.withEmptyUser().build());
-        mServer.waitForVerify(new Matcher(mServer.Endpoints().getLoginUrl()).bodyMatch(new IdentityMatcher() {
-            @Override
-            protected boolean isIdentityMatch(IdentityRequest.IdentityRequestBody identityRequest) {
-                return mStartingMpid.equals(identityRequest.previousMpid);
+    @Throws(Exception::class)
+    fun testLoginNonEmpty() {
+        MParticle.getInstance()?.Identity()?.login(IdentityApiRequest.withEmptyUser().build())
+        mServer.waitForVerify(Matcher(mServer.Endpoints().loginUrl).bodyMatch(object :
+            IdentityMatcher() {
+            override fun isIdentityMatch(identityRequest: IdentityRequestBody): Boolean {
+                return mStartingMpid == identityRequest.previousMpid
             }
-        }));
+        }))
     }
 
     @Test
-    public void testLogout() throws Exception {
-        MParticle.getInstance().Identity().logout();
-        mServer.waitForVerify(new Matcher(mServer.Endpoints().getLogoutUrl()).bodyMatch(new IdentityMatcher() {
-            @Override
-            protected boolean isIdentityMatch(IdentityRequest.IdentityRequestBody identityRequest) {
-                return mStartingMpid.equals(identityRequest.previousMpid);
+    @Throws(Exception::class)
+    fun testLogout() {
+        MParticle.getInstance()?.Identity()?.logout()
+        mServer.waitForVerify(Matcher(mServer.Endpoints().logoutUrl).bodyMatch(object :
+            IdentityMatcher() {
+            override fun isIdentityMatch(identityRequest: IdentityRequestBody): Boolean {
+                return mStartingMpid == identityRequest.previousMpid
             }
-        }));
+        }))
     }
 
     @Test
-    public void testLogoutNonEmpty() throws Exception {
-        MParticle.getInstance().Identity().logout(IdentityApiRequest.withEmptyUser().build());
-        mServer.waitForVerify(new Matcher(mServer.Endpoints().getLogoutUrl()).bodyMatch(new IdentityMatcher() {
-            @Override
-            protected boolean isIdentityMatch(IdentityRequest.IdentityRequestBody identityRequest) {
-                return mStartingMpid.equals(identityRequest.previousMpid);
+    @Throws(Exception::class)
+    fun testLogoutNonEmpty() {
+        MParticle.getInstance()?.Identity()?.logout(IdentityApiRequest.withEmptyUser().build())
+        mServer.waitForVerify(Matcher(mServer.Endpoints().logoutUrl).bodyMatch(object :
+            IdentityMatcher() {
+            override fun isIdentityMatch(identityRequest: IdentityRequestBody): Boolean {
+                return mStartingMpid == identityRequest.previousMpid
             }
-        }));
+        }))
     }
 
     @Test
-    public void testModify() throws Exception {
-        MParticle.getInstance().Identity().modify(IdentityApiRequest.withEmptyUser().customerId(ran.nextLong() + "").build());
-        mServer.waitForVerify(new Matcher(mServer.Endpoints().getModifyUrl(mStartingMpid)));
+    @Throws(Exception::class)
+    fun testModify() {
+        MParticle.getInstance()
+            ?.Identity()?.modify(
+                IdentityApiRequest.withEmptyUser().customerId(ran.nextLong().toString() + "")
+                    .build()
+            )
+        mServer.waitForVerify(Matcher(mServer.Endpoints().getModifyUrl(mStartingMpid)))
     }
 
     @Test
-    public void testIdentify() throws Exception {
-        MParticle.getInstance().Identity().identify(IdentityApiRequest.withEmptyUser().build());
-        mServer.waitForVerify(new Matcher(mServer.Endpoints().getIdentifyUrl()).bodyMatch(new IdentityMatcher() {
-            @Override
-            protected boolean isIdentityMatch(IdentityRequest.IdentityRequestBody identityRequest) {
-                return mStartingMpid.equals(identityRequest.previousMpid);
+    @Throws(Exception::class)
+    fun testIdentify() {
+        MParticle.getInstance()?.Identity()?.identify(IdentityApiRequest.withEmptyUser().build())
+        mServer.waitForVerify(Matcher(mServer.Endpoints().identifyUrl).bodyMatch(object :
+            IdentityMatcher() {
+            override fun isIdentityMatch(identityRequest: IdentityRequestBody): Boolean {
+                return mStartingMpid == identityRequest.previousMpid
             }
-        }));
+        }))
     }
 }

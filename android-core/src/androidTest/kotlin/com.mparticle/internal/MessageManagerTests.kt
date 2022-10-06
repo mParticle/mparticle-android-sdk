@@ -1,173 +1,163 @@
-package com.mparticle.internal;
+package com.mparticle.internal
 
-import android.content.Context;
-import android.content.SharedPreferences;
+import android.content.Context
+import com.mparticle.MParticle
+import com.mparticle.MParticleOptions
+import com.mparticle.internal.database.tables.SessionTable
+import com.mparticle.testutils.BaseCleanInstallEachTest
+import org.junit.Assert
+import org.junit.Test
 
-import com.mparticle.AccessUtils;
-import com.mparticle.MParticle;
-import com.mparticle.MParticleOptions;
-import com.mparticle.internal.database.tables.SessionTable;
-import com.mparticle.internal.messages.BaseMPMessage;
-import com.mparticle.testutils.BaseCleanInstallEachTest;
-
-import junit.framework.Assert;
-
-import org.junit.Test;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-public class MessageManagerTests extends BaseCleanInstallEachTest {
-
-
+class MessageManagerTests : BaseCleanInstallEachTest() {
     @Test
-    public void testInstallReferrerMigration() throws Exception {
+    @Throws(Exception::class)
+    fun testInstallReferrerMigration() {
         //test previously installed
-        setFirstRunLegacy(true, "key");
-        assertNull(MParticle.getInstance());
-        startMParticle();
-        getMessageManager().setFirstRunForAST(true);
-
-        assertTrue(getMessageManager().isFirstRunForMessage());
-        assertTrue(getMessageManager().isFirstRunForAST());
-
-        setFirstRunLegacy(false, "key");
-        MParticle.setInstance(null);
-        startMParticle();
-        assertFalse(getMessageManager().isFirstRunForMessage());
-        assertFalse(getMessageManager().isFirstRunForAST());
+        setFirstRunLegacy(true, "key")
+        Assert.assertNull(MParticle.getInstance())
+        startMParticle()
+        messageManager.isFirstRunForAST = true
+        Assert.assertTrue(messageManager.isFirstRunForMessage)
+        Assert.assertTrue(messageManager.isFirstRunForAST)
+        setFirstRunLegacy(false, "key")
+        MParticle.setInstance(null)
+        startMParticle()
+        Assert.assertFalse(messageManager.isFirstRunForMessage)
+        Assert.assertFalse(messageManager.isFirstRunForAST)
     }
 
     @Test
-    public void testInstallReferrerFlags() throws Exception {
+    @Throws(Exception::class)
+    fun testInstallReferrerFlags() {
         // test that both AST and First Run flags get properly flipped when their
         // corresponding setters get called
-        setFirstRunLegacy(true, "key");
-        assertNull(MParticle.getInstance());
-        startMParticle();
-        getMessageManager().setFirstRunForAST(true);
-
-        assertTrue(getMessageManager().isFirstRunForAST());
-        getMessageManager().setFirstRunForAST(false);
-        assertFalse(getMessageManager().isFirstRunForAST());
-
-        assertTrue(getMessageManager().isFirstRunForMessage());
-        getMessageManager().setFirstRunForMessage(false);
-        assertFalse(getMessageManager().isFirstRunForMessage());
+        setFirstRunLegacy(true, "key")
+        Assert.assertNull(MParticle.getInstance())
+        startMParticle()
+        messageManager.isFirstRunForAST = true
+        Assert.assertTrue(messageManager.isFirstRunForAST)
+        messageManager.isFirstRunForAST = false
+        Assert.assertFalse(messageManager.isFirstRunForAST)
+        Assert.assertTrue(messageManager.isFirstRunForMessage)
+        messageManager.isFirstRunForMessage = false
+        Assert.assertFalse(messageManager.isFirstRunForMessage)
 
         // same thing, but make sure nothing funky happens when the order gets
         // reversed
-        MParticle.setInstance(null);
-        setFirstRunLegacy(true, "key");
-        assertNull(MParticle.getInstance());
-        startMParticle();
-
-        assertTrue(getMessageManager().isFirstRunForMessage());
-        getMessageManager().setFirstRunForMessage(false);
-        assertFalse(getMessageManager().isFirstRunForMessage());
-
-        assertTrue(getMessageManager().isFirstRunForAST());
-        getMessageManager().setFirstRunForAST(false);
-        assertFalse(getMessageManager().isFirstRunForAST());
+        MParticle.setInstance(null)
+        setFirstRunLegacy(true, "key")
+        Assert.assertNull(MParticle.getInstance())
+        startMParticle()
+        Assert.assertTrue(messageManager.isFirstRunForMessage)
+        messageManager.isFirstRunForMessage = false
+        Assert.assertFalse(messageManager.isFirstRunForMessage)
+        Assert.assertTrue(messageManager.isFirstRunForAST)
+        messageManager.isFirstRunForAST = false
+        Assert.assertFalse(messageManager.isFirstRunForAST)
 
         // test that the flags remain persisted when the application restarts
-        MParticle.setInstance(null);
-        assertNull(MParticle.getInstance());
-        startMParticle();
-
-        assertFalse(getMessageManager().isFirstRunForMessage());
-        assertFalse(getMessageManager().isFirstRunForAST());
-
+        MParticle.setInstance(null)
+        Assert.assertNull(MParticle.getInstance())
+        startMParticle()
+        Assert.assertFalse(messageManager.isFirstRunForMessage)
+        Assert.assertFalse(messageManager.isFirstRunForAST)
     }
 
     @Test
-    public void testDuplicateSessionEnds() throws Exception {
-        startMParticle();
-        InternalSession session = new InternalSession();
-        session.start(mContext);
-        getMessageManager().startSession(session);
-        com.mparticle.internal.AccessUtils.awaitMessageHandler();
-        BaseMPMessage message = getMessageManager().getMParticleDBManager().getSessionForSessionEndMessage(session.mSessionID, null, session.getMpids());
-        Assert.assertNotNull(message);
-        getMessageManager().getMParticleDBManager().updateSessionStatus(session.mSessionID, SessionTable.SessionTableColumns.STATUS);
-        message = getMessageManager().getMParticleDBManager().getSessionForSessionEndMessage(session.mSessionID, null , session.getMpids());
-        Assert.assertNull(message);
+    @Throws(Exception::class)
+    fun testDuplicateSessionEnds() {
+        startMParticle()
+        val session = InternalSession()
+        session.start(mContext)
+        messageManager.startSession(session)
+        AccessUtils.awaitMessageHandler()
+        var message = messageManager.mParticleDBManager.getSessionForSessionEndMessage(
+            session.mSessionID,
+            null,
+            session.mpids
+        )
+        Assert.assertNotNull(message)
+        messageManager.mParticleDBManager.updateSessionStatus(
+            session.mSessionID,
+            SessionTable.SessionTableColumns.STATUS
+        )
+        message = messageManager.mParticleDBManager.getSessionForSessionEndMessage(
+            session.mSessionID,
+            null,
+            session.mpids
+        )
+        Assert.assertNull(message)
     }
 
     @Test
-    public void testInstallReferrerFlagsEdgeCases() throws Exception {
-        setFirstRunLegacy(true, "key");
+    @Throws(Exception::class)
+    fun testInstallReferrerFlagsEdgeCases() {
+        setFirstRunLegacy(true, "key")
 
         //start SDK, and send only AST, but not First Run message
-        assertNull(MParticle.getInstance());
-        startMParticle();
-        getMessageManager().setFirstRunForAST(true);
-
-        assertTrue(getMessageManager().isFirstRunForAST());
-        getMessageManager().setFirstRunForAST(false);
-        assertFalse(getMessageManager().isFirstRunForAST());
+        Assert.assertNull(MParticle.getInstance())
+        startMParticle()
+        messageManager.isFirstRunForAST = true
+        Assert.assertTrue(messageManager.isFirstRunForAST)
+        messageManager.isFirstRunForAST = false
+        Assert.assertFalse(messageManager.isFirstRunForAST)
 
         //restart SDK, and assert that AST message has been flagged, but First Run message has not
-        MParticle.setInstance(null);
-        assertNull(MParticle.getInstance());
-        startMParticle();
-
-        assertTrue(getMessageManager().isFirstRunForMessage());
-        assertFalse(getMessageManager().isFirstRunForAST());
-
-
-        setFirstRunLegacy(true, "key");
+        MParticle.setInstance(null)
+        Assert.assertNull(MParticle.getInstance())
+        startMParticle()
+        Assert.assertTrue(messageManager.isFirstRunForMessage)
+        Assert.assertFalse(messageManager.isFirstRunForAST)
+        setFirstRunLegacy(true, "key")
 
         //start SDK, and send only First Run message, but not AST
-        MParticle.setInstance(null);
-        assertNull(MParticle.getInstance());
-        startMParticle();
-        assertTrue(getMessageManager().isFirstRunForMessage());
-        getMessageManager().setFirstRunForMessage(false);
-        assertFalse(getMessageManager().isFirstRunForMessage());
+        MParticle.setInstance(null)
+        Assert.assertNull(MParticle.getInstance())
+        startMParticle()
+        Assert.assertTrue(messageManager.isFirstRunForMessage)
+        messageManager.isFirstRunForMessage = false
+        Assert.assertFalse(messageManager.isFirstRunForMessage)
 
         //restart SDK, and assert that First Run message has been flagged as sent, but AST has not
-        MParticle.setInstance(null);
-        assertNull(MParticle.getInstance());
-        startMParticle();
-
-        assertFalse(getMessageManager().isFirstRunForMessage());
-        assertTrue(getMessageManager().isFirstRunForAST());
-
+        MParticle.setInstance(null)
+        Assert.assertNull(MParticle.getInstance())
+        startMParticle()
+        Assert.assertFalse(messageManager.isFirstRunForMessage)
+        Assert.assertTrue(messageManager.isFirstRunForAST)
     }
 
     @Test
-    public void testDelayedStartInvoked() throws InterruptedException {
-        MParticleOptions options = MParticleOptions.builder(mContext).credentials("key", "secret").build();
-        MParticle.start(options);
-        MessageManager messageManager = AccessUtils.getMessageManager();
-        assertFalse(messageManager.hasDelayedStartOccurred());
-        MessageHandler handler = com.mparticle.internal.AccessUtils.getMessageHandler();
-        handler.sendMessage(handler.obtainMessage());
-        com.mparticle.internal.AccessUtils.awaitMessageHandler();
-        assertTrue(messageManager.hasDelayedStartOccurred());
-
+    @Throws(InterruptedException::class)
+    fun testDelayedStartInvoked() {
+        val options = MParticleOptions.builder(mContext).credentials("key", "secret").build()
+        MParticle.start(options)
+        val messageManager = com.mparticle.AccessUtils.getMessageManager()
+        Assert.assertFalse(messageManager.hasDelayedStartOccurred())
+        val handler = AccessUtils.getMessageHandler()
+        handler.sendMessage(handler.obtainMessage())
+        AccessUtils.awaitMessageHandler()
+        Assert.assertTrue(messageManager.hasDelayedStartOccurred())
     }
 
     /**
      * simulates the install state to settings pre 5.0.9 || pre 4.17.1
      * @param firstRun
      */
-    private void setFirstRunLegacy(boolean firstRun, String key) {
-        SharedPreferences sharedPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+    private fun setFirstRunLegacy(firstRun: Boolean, key: String) {
+        val sharedPreferences =
+            mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE)
         sharedPreferences.edit()
-                .remove(Constants.PrefKeys.FIRSTRUN_AST + key)
-                .remove(Constants.PrefKeys.FIRSTRUN_MESSAGE + key)
-                .apply();
+            .remove(Constants.PrefKeys.FIRSTRUN_AST + key)
+            .remove(Constants.PrefKeys.FIRSTRUN_MESSAGE + key)
+            .apply()
         if (firstRun) {
-            sharedPreferences.edit().remove(Constants.PrefKeys.FIRSTRUN_OBSELETE + key).apply();
+            sharedPreferences.edit().remove(Constants.PrefKeys.FIRSTRUN_OBSELETE + key).apply()
         } else {
-            sharedPreferences.edit().putBoolean(Constants.PrefKeys.FIRSTRUN_OBSELETE + key, false).apply();
+            sharedPreferences.edit().putBoolean(Constants.PrefKeys.FIRSTRUN_OBSELETE + key, false)
+                .apply()
         }
     }
 
-    private MessageManager getMessageManager() {
-        return AccessUtils.getMessageManager();
-    }
+    private val messageManager: MessageManager
+        get() = com.mparticle.AccessUtils.getMessageManager()
 }

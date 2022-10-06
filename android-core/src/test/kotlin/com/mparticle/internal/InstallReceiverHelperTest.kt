@@ -1,19 +1,17 @@
-package com.mparticle.internal;
+package com.mparticle.internal
 
-import android.content.Context;
+import android.content.Context
+import com.mparticle.mock.MockContext
+import com.mparticle.InstallReferrerHelper
+import org.junit.Test
+import java.lang.Exception
 
-import com.mparticle.InstallReferrerHelper;
-import com.mparticle.mock.MockContext;
-
-import org.junit.Test;
-
-public class InstallReceiverHelperTest {
-
+class InstallReceiverHelperTest {
     @Test
-    public void testNullInputs() throws Exception {
-        Context context = new MockContext();
-        InstallReferrerHelper.setInstallReferrer(null, "");
-        InstallReferrerHelper.setInstallReferrer(context, "");
-        InstallReferrerHelper.setInstallReferrer(null, null);
+    @Throws(Exception::class)
+    fun testNullInputs() {
+        val context: Context = MockContext()
+        InstallReferrerHelper.setInstallReferrer(context, "")
+        InstallReferrerHelper.setInstallReferrer(context, null)
     }
 }

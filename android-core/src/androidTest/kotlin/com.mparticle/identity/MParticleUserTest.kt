@@ -1,52 +1,48 @@
-package com.mparticle.identity;
+package com.mparticle.identity
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import com.mparticle.MParticle
+import com.mparticle.testutils.BaseCleanStartedEachTest
+import com.mparticle.testutils.MPLatch
+import org.junit.Assert
+import org.junit.Test
 
-import com.mparticle.MParticle;
-import com.mparticle.testutils.BaseCleanStartedEachTest;
-import com.mparticle.testutils.MPLatch;
-
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-public class MParticleUserTest extends BaseCleanStartedEachTest {
-
+class MParticleUserTest : BaseCleanStartedEachTest() {
     @Test
-    public void testFirstLastSeenTime() throws InterruptedException {
-        MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
-        long userFirstSeen = user.getFirstSeenTime();
-        assertNotNull(user.getFirstSeenTime());
-        assertEquals(user.getLastSeenTime(), System.currentTimeMillis(), 10);
-
-        assertTrue(user.getFirstSeenTime() <= user.getLastSeenTime());
-
-        long newMpid = ran.nextLong();
-        mServer.addConditionalLoginResponse(mStartingMpid, newMpid);
-        final MPLatch latch = new MPLatch(1);
-        MParticle.getInstance().Identity().login()
-                .addFailureListener(new TaskFailureListener() {
-                    @Override
-                    public void onFailure(@Nullable IdentityHttpResponse result) {
-                        fail("Identity Request Failed");
-                    }
-                })
-                .addSuccessListener(new TaskSuccessListener() {
-                    @Override
-                    public void onSuccess(@NonNull IdentityApiResult result) {
-                        latch.countDown();
-                    }
-                });
-        latch.await();
-        MParticleUser user1 = MParticle.getInstance().Identity().getCurrentUser();
-        assertEquals(newMpid, user1.getId());
-        assertNotNull(user1.getFirstSeenTime());
-        assertTrue(user1.getFirstSeenTime() >= user.getLastSeenTime());
-        assertEquals(user1.getLastSeenTime(), System.currentTimeMillis(), 10);
-        assertEquals(userFirstSeen, user.getFirstSeenTime());
+    @Throws(InterruptedException::class)
+    fun testFirstLastSeenTime() {
+        val user = MParticle.getInstance()?.Identity()?.currentUser
+        val userFirstSeen = user?.firstSeenTime
+        Assert.assertNotNull(user?.firstSeenTime)
+        user?.lastSeenTime?.let {
+            Assert.assertEquals(
+                it.toFloat(),
+                System.currentTimeMillis().toFloat(),
+                10f
+            )
+        }
+        if (user != null) {
+            Assert.assertTrue(user.firstSeenTime <= user.lastSeenTime)
+        }
+        val newMpid = ran.nextLong()
+        mServer.addConditionalLoginResponse(mStartingMpid, newMpid)
+        val latch = MPLatch(1)
+        MParticle.getInstance()?.Identity()?.login()
+            ?.addFailureListener { Assert.fail("Identity Request Failed") }
+            ?.addSuccessListener { latch.countDown() }
+        latch.await()
+        val user1 = MParticle.getInstance()?.Identity()?.currentUser
+        Assert.assertEquals(newMpid, user1?.id)
+        Assert.assertNotNull(user1?.firstSeenTime)
+        if (user != null) {
+            Assert.assertTrue(user1?.firstSeenTime!! >= user.lastSeenTime)
+        }
+        if (user1 != null) {
+            Assert.assertEquals(
+                user1.lastSeenTime.toFloat(),
+                System.currentTimeMillis().toFloat(),
+                10f
+            )
+        }
+        Assert.assertEquals(userFirstSeen, user?.firstSeenTime)
     }
 }

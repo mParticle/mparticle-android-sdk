@@ -1,51 +1,44 @@
-package com.mparticle.networking;
+package com.mparticle.networking
 
-import java.util.Map;
+object AccessUtils {
+    val defaultNetworkOptions: NetworkOptions
+        get() = NetworkOptionsManager.defaultNetworkOptions()
 
-public class AccessUtils {
-
-    public static NetworkOptions getDefaultNetworkOptions() {
-        return NetworkOptionsManager.defaultNetworkOptions();
-    }
-
-    public static boolean equals(NetworkOptions networkOptions1, NetworkOptions networkOptions2) {
-        if (networkOptions1 == networkOptions2) {
-            return true;
+    fun equals(networkOptions1: NetworkOptions, networkOptions2: NetworkOptions): Boolean {
+        if (networkOptions1 === networkOptions2) {
+            return true
         }
         if (networkOptions1.pinningDisabledInDevelopment != networkOptions2.pinningDisabledInDevelopment) {
-            return false;
+            return false
         }
-        for (Map.Entry<MParticleBaseClientImpl.Endpoint, DomainMapping> entry : networkOptions1.domainMappings.entrySet()) {
-            DomainMapping other = networkOptions2.domainMappings.get(entry.getKey());
-            if (other == null || !equals(entry.getValue(), other)) {
-                return false;
+        for ((key, value) in networkOptions1.domainMappings) {
+            val other = networkOptions2.domainMappings[key]
+            if (other == null || !equals(value, other)) {
+                return false
             }
         }
-        return true;
+        return true
     }
 
-    public static boolean equals(DomainMapping domainMapping1, DomainMapping domainMapping2) {
-        if (domainMapping1 == domainMapping2) {
-            return true;
+    fun equals(domainMapping1: DomainMapping, domainMapping2: DomainMapping): Boolean {
+        if (domainMapping1 === domainMapping2) {
+            return true
         }
-        if (domainMapping1.getUrl().equals(domainMapping2.getUrl()) && domainMapping1.getType() == domainMapping2.getType()) {
-            for (int i = 0; i < domainMapping1.getCertificates().size(); i++) {
-                if (!equals(domainMapping1.getCertificates().get(i), (domainMapping2.getCertificates().get(i)))) {
-                    return false;
+        if (domainMapping1.url == domainMapping2.url && domainMapping1.type == domainMapping2.type) {
+            for (i in domainMapping1.certificates.indices) {
+                if (!equals(domainMapping1.certificates[i], domainMapping2.certificates[i])) {
+                    return false
                 }
             }
         }
-        return true;
+        return true
     }
 
-    public static boolean equals(Certificate certificate1, Certificate certificate2) {
+    fun equals(certificate1: Certificate, certificate2: Certificate): Boolean {
         if (certificate1 == certificate2) {
-            return true;
+            return true
         }
-        if (((certificate1.getCertificate() == certificate2.getCertificate()) || certificate1.getCertificate().equals(certificate2.getCertificate()))
-                && ((certificate1.getAlias() == certificate2.getAlias()) || certificate1.getAlias().equals(certificate2.getAlias()))) {
-            return true;
-        }
-        return false;
+        return ((certificate1.certificate === certificate2.certificate || certificate1.certificate == certificate2.certificate)
+                && (certificate1.alias === certificate2.alias || certificate1.alias == certificate2.alias))
     }
 }
