@@ -39,7 +39,9 @@ class BatchCreationCallbackTests : BaseCleanInstallEachTest() {
                     ?.any { it.optString("n") == "test event" }
                     ?.also { isMatch ->
                         val modified = it.remove(Constants.MessageKey.MODIFIED_BATCH)
-                        assertTrue(modified.toString().toBooleanStrict())
+                        if (modified != null) {
+                            assertTrue(modified.toString().toBooleanStrict())
+                        }
                         if (isMatch) {
                             // check new key
                             assertJsonEqual(it, receivedBatch)
@@ -81,7 +83,9 @@ class BatchCreationCallbackTests : BaseCleanInstallEachTest() {
         mServer.waitForVerify(
             Matcher(mServer.Endpoints().eventsUrl).bodyMatch {
                 val modified = it.remove(Constants.MessageKey.MODIFIED_BATCH)
-                assertTrue(modified.toString().toBooleanStrict())
+                if (modified != null) {
+                    assertTrue(modified.toString().toBooleanStrict())
+                }
                 it.toString() == newBatch.toString()
             }
         )

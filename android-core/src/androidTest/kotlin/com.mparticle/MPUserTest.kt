@@ -170,13 +170,13 @@ class MPUserTest : BaseCleanStartedEachTest() {
             // remove just 1
             removeUserAttribute("fuzz")
             android_test_hack()
-            assertEquals(1, userAttributes?.size)
+            assertEquals(1, userAttributes.size)
             assertEquals("bar", userAttributes["foo"])
 
             // remove last
             removeUserAttribute("foo")
             android_test_hack()
-            assertEquals(0, userAttributes?.size)
+            assertEquals(0, userAttributes.size)
         }
     }
 
