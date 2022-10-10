@@ -155,7 +155,7 @@ public class MParticleIdentityClientImpl extends MParticleBaseClientImpl impleme
 
         JSONObject identitiesJson = new JSONObject();
         MPUtility.AdIdInfo adIdInfo = MPUtility.getAdIdInfo(mContext);
-        if (adIdInfo != null) {
+        if (adIdInfo != null && !adIdInfo.isLimitAdTrackingEnabled) {
             switch (adIdInfo.advertiser) {
                 case AMAZON:
                     identitiesJson.put(FIRE_AID, adIdInfo.id);
