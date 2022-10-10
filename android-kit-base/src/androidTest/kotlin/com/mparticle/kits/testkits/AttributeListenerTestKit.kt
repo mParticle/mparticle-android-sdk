@@ -23,8 +23,8 @@ open class AttributeListenerTestKit : ListenerTestKit(), KitIntegration.Attribut
 
     override fun setAllUserAttributes(userAttributes: Map<String, String>, userAttributeLists: Map<String, MutableList<String>>) {
         setAllUserAttributes?.invoke(userAttributes, userAttributeLists)
-        userAttributes?.forEach { onAttributeReceived?.invoke(it.key, it.value) }
-        userAttributeLists?.forEach { onAttributeReceived?.invoke(it.key, it.value) }
+        userAttributes.forEach { onAttributeReceived?.invoke(it.key, it.value) }
+        userAttributeLists.forEach { onAttributeReceived?.invoke(it.key, it.value) }
     }
 
     override fun setUserAttribute(attributeKey: String, attributeValue: String?) {
