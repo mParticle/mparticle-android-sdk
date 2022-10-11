@@ -720,4 +720,3 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
     }
 }
 
-
