@@ -33,7 +33,7 @@ class DataplanFilterImplTest {
 
     @Test
     fun testParseDataplan() {
-        val dataplan = File("src/test/java/com/mparticle/kits/sample_dataplan.json")
+        val dataplan = File("src/test/kotlin/com/mparticle/kits/sample_dataplan.json")
             .readText()
             .toJSON()
         val dataplanOptions = MParticleOptions.DataplanOptions.builder()
@@ -72,7 +72,7 @@ class DataplanFilterImplTest {
             dataPoints.getValue(USER_IDENTITIES_KEY).also {
                 assertNull(it)
             }
-            dataPoints.getValue("$PRODUCT_IMPRESSION_KEY").also {
+            dataPoints.getValue(PRODUCT_IMPRESSION_KEY).also {
                 assertEquals(hashSetOf("com_attribute_1", "com_attribute_2"), it)
             }
             dataPoints.getValue("$PRODUCT_IMPRESSION_KEY.$PRODUCT_IMPRESSION_PRODUCTS").also {
@@ -86,7 +86,7 @@ class DataplanFilterImplTest {
 
     @Test
     fun testParseDataplan2() {
-        val dataplan = File("src/test/java/com/mparticle/kits/sample_dataplan2.json")
+        val dataplan = File("src/test/kotlin/com/mparticle/kits/sample_dataplan2.json")
             .readText()
             .toJSON()
         val dataplanOptions = MParticleOptions.DataplanOptions.builder()
@@ -134,10 +134,10 @@ class DataplanFilterImplTest {
             dataPoints.getValue("$CUSTOM_EVENT_KEY.something something something.navigation").also {
                 assertNull(it)
             }
-            dataPoints.getValue("$USER_ATTRIBUTES_KEY").also {
+            dataPoints.getValue(USER_ATTRIBUTES_KEY).also {
                 assertEquals(hashSetOf("my attribute", "my other attribute", "a third attribute"), it)
             }
-            dataPoints.getValue("$USER_IDENTITIES_KEY").also { assertNull(it) }
+            dataPoints.getValue(USER_IDENTITIES_KEY).also { assertNull(it) }
             dataPoints.getValue("$CUSTOM_EVENT_KEY.SocialEvent.social").also {
                 assertEquals(hashSetOf<String>(), it)
             }
@@ -153,7 +153,7 @@ class DataplanFilterImplTest {
             dataPoints.getValue("$PROMOTION_ACTION_KEY.click").also {
                 assertEquals(hashSetOf("eventAttribute1", "eventAttribute2"), it)
             }
-            dataPoints.getValue("$PRODUCT_IMPRESSION_KEY").also {
+            dataPoints.getValue(PRODUCT_IMPRESSION_KEY).also {
                 assertEquals(hashSetOf("thing1"), it)
             }
             dataPoints.getValue("$PRODUCT_IMPRESSION_KEY.$PRODUCT_ACTION_PRODUCTS").also {
@@ -197,7 +197,7 @@ class DataplanFilterImplTest {
                 customAttributes = randomAttributes()
             }
 
-            dataplanPoints.put(datapoint.toString(), null)
+            dataplanPoints[datapoint.toString()] = null
 
             val dataplanFilter = DataplanFilterImpl(dataplanPoints, true, Random.nextBoolean(), false, false)
             assertEquals(event.toString(), dataplanFilter.transformEventForEvent(event)?.toString())
@@ -233,7 +233,7 @@ class DataplanFilterImplTest {
                 customAttributes = allowedAttributes
             }
 
-            dataplanPoints.put(datapoint.toString(), allowedAttributes.keys.toHashSet())
+            dataplanPoints[datapoint.toString()] = allowedAttributes.keys.toHashSet()
             val dataplanFilter = DataplanFilterImpl(dataplanPoints, true, Random.nextBoolean(), false, false)
             assertEquals(allowedAttributes, dataplanFilter.transformEventForEvent(event)?.customAttributeStrings)
             diversity.remove(datapoint.type)
@@ -270,7 +270,7 @@ class DataplanFilterImplTest {
                 customAttributes = allowedAttributes + blockedAttributes
             }
 
-            dataplanPoints.put(datapoint.toString(), allowedAttributes.keys.toHashSet())
+            dataplanPoints[datapoint.toString()] = allowedAttributes.keys.toHashSet()
             val dataplanFilter = DataplanFilterImpl(dataplanPoints, Random.Default.nextBoolean(), true, false, false)
             assertEquals(allowedAttributes, dataplanFilter.transformEventForEvent(event)?.customAttributeStrings)
             diversity.remove(datapoint.type)
@@ -333,7 +333,7 @@ class DataplanFilterImplTest {
     }
 
     fun randomString(length: Int): String {
-        return (0..length - 1).map {
+        return (0 until length).map {
             chars[Random.Default.nextInt(0, chars.size - 1)]
         }.joinToString("")
     }
