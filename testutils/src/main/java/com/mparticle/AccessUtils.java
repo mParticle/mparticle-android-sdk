@@ -3,7 +3,6 @@ package com.mparticle;
 import android.content.Context;
 import android.os.Build;
 import android.os.Message;
-import android.os.MessageQueue;
 
 import androidx.annotation.RequiresApi;
 
@@ -12,9 +11,6 @@ import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MessageManager;
 
-import java.lang.reflect.Field;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 public class AccessUtils {

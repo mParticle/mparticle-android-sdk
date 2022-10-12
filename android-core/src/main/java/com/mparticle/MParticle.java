@@ -1143,20 +1143,22 @@ public class MParticle {
 
             String sharedPrefsDirectory = context.getFilesDir().getPath().replace("files", "shared_prefs/");
             File[] files = new File(sharedPrefsDirectory).listFiles();
-            for (File file : files) {
-                String sharedPreferenceName = file.getPath().replace(sharedPrefsDirectory, "").replace(".xml", "");
-                // it is going to be difficult/impossible to come up with a finite list of Kit SharedPreference files, with the custom kits
-                // coming, so we will look for any kit shared preference files by their prefix "mp::kit::"
-                if (sharedPreferenceName.startsWith("mp::kit::")
-                        || sharedPreferenceName.startsWith(ConfigManager.PREFERENCES_FILE + ":")
-                        || prefFiles.contains(sharedPreferenceName)) {
-                    SharedPreferences sharedPreferences = context.getSharedPreferences(sharedPreferenceName, Context.MODE_PRIVATE);
-                    if (sharedPreferences != null) {
-                        sharedPreferences.edit()
-                                .clear()
-                                .commit();
+            if (files != null && files.length > 0) {
+                for (File file : files) {
+                    String sharedPreferenceName = file.getPath().replace(sharedPrefsDirectory, "").replace(".xml", "");
+                    // it is going to be difficult/impossible to come up with a finite list of Kit SharedPreference files, with the custom kits
+                    // coming, so we will look for any kit shared preference files by their prefix "mp::kit::"
+                    if (sharedPreferenceName.startsWith("mp::kit::")
+                            || sharedPreferenceName.startsWith(ConfigManager.PREFERENCES_FILE + ":")
+                            || prefFiles.contains(sharedPreferenceName)) {
+                        SharedPreferences sharedPreferences = context.getSharedPreferences(sharedPreferenceName, Context.MODE_PRIVATE);
+                        if (sharedPreferences != null) {
+                            sharedPreferences.edit()
+                                    .clear()
+                                    .commit();
+                        }
+                        file.delete();
                     }
-                    file.delete();
                 }
             }
             if (deleteDatabase) {
@@ -1181,18 +1183,15 @@ public class MParticle {
     public static void reset(@NonNull final Context context, @Nullable final ResetListener callback) {
         final HandlerThread handlerThread = new HandlerThread("mParticleShutdownHandler");
             handlerThread.start();
-            new Handler(handlerThread.getLooper()).post(new Runnable() {
-                @Override
-                public void run() {
-                    reset(context);
-                    if (callback != null) {
-                        try {
-                            callback.onReset();
-                        } catch (Exception ignored) {
-                        }
+            new Handler(handlerThread.getLooper()).post(() -> {
+                reset(context);
+                if (callback != null) {
+                    try {
+                        callback.onReset();
+                    } catch (Exception ignored) {
                     }
-                    handlerThread.quit();
                 }
+                handlerThread.quit();
             });
     }
 

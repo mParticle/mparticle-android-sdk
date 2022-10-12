@@ -313,14 +313,14 @@ class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
     private fun checkStaticsAndRemove(knowIdentites: JSONObject) {
         if (knowIdentites.has(MParticleIdentityClientImpl.ANDROID_AAID)) {
             Assert.assertEquals(
-                MPUtility.getAdIdInfo(mContext).id,
+                MPUtility.getAdIdInfo(mContext)?.id,
                 knowIdentites.getString(MParticleIdentityClientImpl.ANDROID_AAID)
             )
             knowIdentites.remove(MParticleIdentityClientImpl.ANDROID_AAID)
         } else {
             Assert.assertTrue(
                 MPUtility.getAdIdInfo(mContext) == null || MPUtility.isEmpty(
-                    MPUtility.getAdIdInfo(mContext).id
+                    MPUtility.getAdIdInfo(mContext)?.id
                 )
             )
         }
