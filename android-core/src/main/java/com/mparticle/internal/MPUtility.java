@@ -124,7 +124,6 @@ public class MPUtility {
 
     @WorkerThread
     @Nullable
-    @TargetApi(Build.VERSION_CODES.ECLAIR)
     public static AdIdInfo getAdIdInfo(Context context) {
         String packageName = context.getPackageName();
         PackageManager packageManager = context.getPackageManager();
