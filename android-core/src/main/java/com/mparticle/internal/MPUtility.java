@@ -159,7 +159,7 @@ public class MPUtility {
             String advertisingId = (String) getId.invoke(advertisingInfo);
             return new AdIdInfo(advertisingId, limitAdTrackingEnabled, AdIdInfo.Advertiser.GOOGLE);
         } catch (Exception e) {
-            Logger.error(TAG, e.toString());
+            Logger.info(TAG, "Google Advertising ID does not exist on device: " + e.getMessage());
         }
         return null;
     }
@@ -177,7 +177,7 @@ public class MPUtility {
                 return new AdIdInfo(advertisingID, limitAdTracking, AdIdInfo.Advertiser.AMAZON);
             }
         } catch (Exception e) {
-            Logger.error(TAG, e.toString());
+            Logger.info(TAG, "Amazon ID does not exist on device: " + e.getMessage());
         }
         return null;
     }
