@@ -25,11 +25,10 @@ import org.junit.Test
 import kotlin.random.Random
 
 class DataplanBlockingUserTests : BaseKitOptionsTest() {
-    lateinit var attributeListenerKitKit: AttributeListenerTestKit
-    lateinit var identityListenerKitKit: IdentityListenerTestKit
-    lateinit var userAttributeListenerKitKit: UserAttributeListenerTestKit
-
-    lateinit var kitIntegrationTestKits: List<ListenerTestKit>
+    private lateinit var attributeListenerKitKit: AttributeListenerTestKit
+    private lateinit var identityListenerKitKit: IdentityListenerTestKit
+    private lateinit var userAttributeListenerKitKit: UserAttributeListenerTestKit
+    private lateinit var kitIntegrationTestKits: List<ListenerTestKit>
 
     @Before
     fun beforeTests() {
@@ -47,8 +46,8 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         identityListenerKitKit = MParticle.getInstance()?.getKitInstance(-2) as IdentityListenerTestKit
         userAttributeListenerKitKit = MParticle.getInstance()?.getKitInstance(-3) as UserAttributeListenerTestKit
         kitIntegrationTestKits = listOf(attributeListenerKitKit, identityListenerKitKit, userAttributeListenerKitKit)
-        assertTrue(randomAttributes().size > 0)
-        assertTrue(randomIdentities().size > 0)
+        assertTrue(randomAttributes().isNotEmpty())
+        assertTrue(randomIdentities().isNotEmpty())
     }
 
     @Test
@@ -56,16 +55,16 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         val datapoints = getRandomDataplanPoints()
         val allowedAttributes = randomAttributes()
         val blockedAttributes = randomAttributes().filterKeys { !allowedAttributes.containsKey(it) }
-        assertTrue(blockedAttributes.size > 0)
+        assertTrue(blockedAttributes.isNotEmpty())
 
         datapoints[DataplanFilterImpl.USER_ATTRIBUTES_KEY] = allowedAttributes.keys.toHashSet()
         AccessUtils.getKitManager().setDataplanFilter(DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), true, Random.nextBoolean()))
 
-        userAttributeListenerKitKit.onSetUserAttribute = { key, value, user ->
+        userAttributeListenerKitKit.onSetUserAttribute = { key, _, _ ->
             assertTrue(allowedAttributes.containsKey(key))
             assertFalse(blockedAttributes.containsKey(key))
         }
-        attributeListenerKitKit.setUserAttribute = { key, value ->
+        attributeListenerKitKit.setUserAttribute = { key, _ ->
             assertTrue(allowedAttributes.containsKey(key))
             assertFalse(blockedAttributes.containsKey(key))
         }
@@ -84,13 +83,13 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         val datapoints = getRandomDataplanPoints()
         val allowedAttributes = randomAttributes()
         val blockedAttributes = randomAttributes().filterKeys { !allowedAttributes.containsKey(it) }
-        assertTrue(blockedAttributes.size > 0)
+        assertTrue(blockedAttributes.isNotEmpty())
 
         datapoints[DataplanFilterImpl.USER_ATTRIBUTES_KEY] = allowedAttributes.keys.toHashSet()
-        AccessUtils.getKitManager().setDataplanFilter(DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), true, false))
+        AccessUtils.getKitManager().setDataplanFilter(DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), blockUserAttributes = true, blockUserIdentities = false))
 
         kitIntegrationTestKits.forEach { kit ->
-            kit.onAttributeReceived = { key, value ->
+            kit.onAttributeReceived = { key, _ ->
                 assertTrue(allowedAttributes.containsKey(key))
                 assertFalse(blockedAttributes.containsKey(key))
             }
@@ -108,7 +107,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
                 count++
             }
         }
-        userAttributeListenerKitKit.onRemoveUserAttribute = { key, user ->
+        userAttributeListenerKitKit.onRemoveUserAttribute = { key, _ ->
             assertTrue(allowedAttributes.containsKey(key))
             assertFalse(blockedAttributes.containsKey(key))
             // make sure these are the attributes that are being removed
@@ -140,25 +139,25 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         val datapoints = getRandomDataplanPoints()
         val allowedAttributes = randomAttributes().map { it.key to listOf(it.value) }.toMap()
         val blockedAttributes = randomAttributes().map { it.key to listOf(it.value) }.toMap().filterKeys { !allowedAttributes.containsKey(it) }
-        assertTrue(blockedAttributes.size > 0)
+        assertTrue(blockedAttributes.isNotEmpty())
 
         datapoints[DataplanFilterImpl.USER_ATTRIBUTES_KEY] = allowedAttributes.keys.toHashSet()
         AccessUtils.getKitManager().setDataplanFilter(DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), true, Random.nextBoolean()))
 
         var count = 0
         kitIntegrationTestKits.forEach { kit ->
-            kit.onAttributeReceived = { key, value ->
+            kit.onAttributeReceived = { key, _ ->
                 assertTrue(allowedAttributes.containsKey(key))
                 assertFalse(blockedAttributes.containsKey(key))
                 count++
             }
         }
-        userAttributeListenerKitKit.onSetUserAttributeList = { key, value, user ->
+        userAttributeListenerKitKit.onSetUserAttributeList = { key, _, _ ->
             assertTrue(allowedAttributes.containsKey(key))
             assertFalse(blockedAttributes.containsKey(key))
             count++
         }
-        attributeListenerKitKit.setUserAttributeList = { key, value ->
+        attributeListenerKitKit.setUserAttributeList = { key, _ ->
             assertTrue(allowedAttributes.containsKey(key))
             assertFalse(blockedAttributes.containsKey(key))
             count++
@@ -191,12 +190,12 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         )
         val latch = MPLatch(1)
         kitIntegrationTestKits.forEach { kit ->
-            kit.onIdentityReceived = { identityType, value ->
+            kit.onIdentityReceived = { identityType, _ ->
                 assertTrue(allowedIdentities.containsKey(identityType))
                 assertFalse(blockIdentities.containsKey(identityType))
             }
         }
-        identityListenerKitKit.onLoginCompleted = { user, request ->
+        identityListenerKitKit.onLoginCompleted = { _, request ->
             assertEquals(allowedIdentities, request?.userIdentities)
             latch.countDown()
         }
@@ -213,7 +212,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         val datapoints = getRandomDataplanPoints()
         val allowedIdentities = randomIdentities()
         val blockedIdentities = randomIdentities().filterKeys { !allowedIdentities.containsKey(it) }
-        assertTrue(blockedIdentities.size > 0)
+        assertTrue(blockedIdentities.isNotEmpty())
 
         datapoints[DataplanFilterImpl.USER_IDENTITIES_KEY] = allowedIdentities.keys.map { it.getEventsApiName() }.toHashSet()
         AccessUtils.getKitManager().setDataplanFilter(DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), Random.nextBoolean(), true))
@@ -241,7 +240,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         assertEquals(allowedIdentities + blockedIdentities, MParticle.getInstance()?.Identity()?.currentUser?.userIdentities)
     }
 
-    internal fun getRandomDataplanEventKey(): DataplanFilterImpl.DataPoint {
+    private fun getRandomDataplanEventKey(): DataplanFilterImpl.DataPoint {
         return when (Random.Default.nextInt(0, 5)) {
             0 -> DataplanFilterImpl.DataPoint(DataplanFilterImpl.CUSTOM_EVENT_KEY, randomString(5), randomEventType().ordinal.toString())
             1 -> DataplanFilterImpl.DataPoint(DataplanFilterImpl.SCREEN_EVENT_KEY, randomString(8))
@@ -252,7 +251,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         }
     }
 
-    fun getRandomDataplanPoints(): MutableMap<String, HashSet<String>> {
+    private fun getRandomDataplanPoints(): MutableMap<String, HashSet<String>> {
         return (0..Random.Default.nextInt(0, 10))
             .associate {
                 getRandomDataplanEventKey().toString() to randomAttributes().keys.toHashSet()
