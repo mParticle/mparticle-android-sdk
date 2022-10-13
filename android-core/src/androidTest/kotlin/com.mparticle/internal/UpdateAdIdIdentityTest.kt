@@ -25,7 +25,7 @@ class UpdateAdIdIdentityTest : BaseCleanInstallEachTest() {
         )
 
         // execute CheckAdIdRunnable without a current user
-        AppStateManager.CheckAdIdRunnable("newAdId", "oldAdId", false).run()
+        AppStateManager.CheckAdIdRunnable("newAdId", "oldAdId").run()
         assertNull(MParticle.getInstance()!!.Identity().currentUser)
 
         // set a current user

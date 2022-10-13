@@ -175,13 +175,7 @@ public class  AppStateManager {
                 isBackToForeground = true;
                 MPUtility.AdIdInfo adIdInfo =  MPUtility.getAdIdInfo(mContext);
                 String currentGoogleAdId = (adIdInfo == null ? null : (adIdInfo.isLimitAdTrackingEnabled ? null : adIdInfo.id));
-                boolean modifyNullFirstTime = mPreferences.getBoolean(Constants.PrefKeys.ANDROID_ID_MODIFY_NULL_FIRST_TIME, true);
-                mMessageManager.postToMessageThread(new CheckAdIdRunnable(currentGoogleAdId, mConfigManager.getPreviousAdId(), modifyNullFirstTime));
-                if (currentGoogleAdId == null && modifyNullFirstTime) {
-                    mPreferences.edit().putBoolean(Constants.PrefKeys.ANDROID_ID_MODIFY_NULL_FIRST_TIME, false).apply();
-                } else if (currentGoogleAdId != null) {
-                    mPreferences.edit().remove(Constants.PrefKeys.ANDROID_ID_MODIFY_NULL_FIRST_TIME).apply();
-                }
+                mMessageManager.postToMessageThread(new CheckAdIdRunnable(currentGoogleAdId, mConfigManager.getPreviousAdId()));
                 logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE,
                         mCurrentActivityName,
                         mLastStoppedTime.get() - mLastForegroundTime,
@@ -454,18 +448,15 @@ public class  AppStateManager {
     static class CheckAdIdRunnable implements Runnable {
         String currentAdId;
         String previousAdId;
-        boolean modifyNullFirstTime;
 
-        CheckAdIdRunnable(@Nullable String currentAdId, @Nullable String previousAdId, boolean modifyNullFirstTime) {
+        CheckAdIdRunnable(@Nullable String currentAdId, @Nullable String previousAdId) {
             this.currentAdId = currentAdId;
             this.previousAdId = previousAdId;
-            this.modifyNullFirstTime = modifyNullFirstTime;
         }
 
         @Override
         public void run() {
-            if ((currentAdId != null && !currentAdId.equals(previousAdId)) ||
-                    (currentAdId == null && modifyNullFirstTime)) {
+            if (currentAdId != null && !currentAdId.equals(previousAdId)) {
                 MParticle instance = MParticle.getInstance();
                 if (instance != null) {
                     MParticleUser user = instance.Identity().getCurrentUser();
