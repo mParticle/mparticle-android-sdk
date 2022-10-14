@@ -79,8 +79,10 @@ Kit | Maven Artifact
 The Google Play Services Ads framework is necessary to collect the Android Advertisting ID. AAID collection is required by all attribution and audience integrations, and many other integrations. Include the `-ads` artifact, a subset of [Google Play Services](https://developers.google.com/android/guides/setup):
 
 ```groovy
-    implementation 'com.google.android.gms:play-services-ads:11.6.2'
+    implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
 ```
+
+If your app does not declare this permission when targeting Android 13 or higher, the advertising ID is automatically removed and replaced with a string of zeroes.
 
 When apps target Android 13 or above, you will need to declare a Google Play services permission in the manifest file as follows:
 
