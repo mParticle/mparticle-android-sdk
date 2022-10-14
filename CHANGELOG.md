@@ -1,3 +1,31 @@
+## [5.46.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.45.2...v5.46.0) (2022-10-14)
+
+
+### Features
+
+* Bump up compile SDK to 33 and ktlint version ([#245](https://github.com/mParticle/mparticle-android-sdk/issues/245)) ([67dc378](https://github.com/mParticle/mparticle-android-sdk/commit/67dc378ae98a97a6b9c8cf5545125c14ceffcdb5))
+* Port android core module java instrumented and unit tests to kotlin - phase1 ([#249](https://github.com/mParticle/mparticle-android-sdk/issues/249)) ([62e4254](https://github.com/mParticle/mparticle-android-sdk/commit/62e42545d73ae2c9b8e50d54f3dbedfd9dd1b431))
+* Port android core module java instrumented and unit tests to kotlin (p2) ([#250](https://github.com/mParticle/mparticle-android-sdk/issues/250)) ([23434d2](https://github.com/mParticle/mparticle-android-sdk/commit/23434d2a4918ef58a7872401f8602c84b177610d))
+* Ported Android Kit Base tests to Kotlin ([#253](https://github.com/mParticle/mparticle-android-sdk/issues/253)) ([c21dd71](https://github.com/mParticle/mparticle-android-sdk/commit/c21dd71405e56ff48ac6db3455899588243133c6))
+* update isLimitAdTracking logic for Android 13 ([#233](https://github.com/mParticle/mparticle-android-sdk/issues/233)) ([f7b9284](https://github.com/mParticle/mparticle-android-sdk/commit/f7b92845dd0eebe236d1aa836d50161f8bce82f8))
+
+
+### Bug Fixes
+
+* Convert MParticleTest.java file to kotlin and fix failing test ([#251](https://github.com/mParticle/mparticle-android-sdk/issues/251)) ([604c1b9](https://github.com/mParticle/mparticle-android-sdk/commit/604c1b976e753a282bf0173b559f0427c144fe47))
+
+
+### Documentation
+
+* Update copy in readme for android 13 ([#255](https://github.com/mParticle/mparticle-android-sdk/issues/255)) ([c9a648d](https://github.com/mParticle/mparticle-android-sdk/commit/c9a648d87eb5b6586a6693b75ffa54fe711b02f2))
+
+
+### Updates & Maintenance
+
+* add in missing inherit in rebase job ([2197610](https://github.com/mParticle/mparticle-android-sdk/commit/2197610fe1381d941f3f6b5f99afc64965decc52))
+* Update submodules ([7bdaf63](https://github.com/mParticle/mparticle-android-sdk/commit/7bdaf63c9444c78ed1063b7039179cfdd645a506))
+* Update to kotlin 1.7.20 ([#247](https://github.com/mParticle/mparticle-android-sdk/issues/247)) ([c9e1729](https://github.com/mParticle/mparticle-android-sdk/commit/c9e1729b6ab8817e4c7b0661ae25b3ffb6df4404))
+
 ## [5.45.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.45.1...v5.45.2) (2022-09-26)
 
 
