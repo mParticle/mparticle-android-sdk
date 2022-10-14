@@ -54,7 +54,6 @@ public class ConfigManager {
     public static final String KEY_EMBEDDED_KITS = "eks";
     static final String KEY_UPLOAD_INTERVAL = "uitl";
     static final String KEY_SESSION_TIMEOUT = "stl";
-    public static final String KEY_AAID_LAT = "rdlat";
     public static final String VALUE_APP_DEFINED = "appdefined";
     public static final String VALUE_CUE_CATCH = "forcecatch";
     public static final String PREFERENCES_FILE = "mp_preferences";
@@ -89,7 +88,6 @@ public class ConfigManager {
 
     private boolean mSendOoEvents;
     private JSONObject mProviderPersistence;
-    private boolean mRestrictAAIDfromLAT = true;
     private int mRampValue = -1;
     private int mUserBucket = -1;
 
@@ -422,7 +420,6 @@ public class ConfigManager {
             mInfluenceOpenTimeout = 30 * 60 * 1000;
         }
 
-        mRestrictAAIDfromLAT = responseJSON.optBoolean(KEY_AAID_LAT, true);
         mIncludeSessionHistory = responseJSON.optBoolean(KEY_INCLUDE_SESSION_HISTORY, true);
         if (responseJSON.has(KEY_DEVICE_PERFORMANCE_METRICS_DISABLED)) {
             MessageManager.devicePerformanceMetricsDisabled = responseJSON.optBoolean(KEY_DEVICE_PERFORMANCE_METRICS_DISABLED, false);
@@ -476,18 +473,6 @@ public class ConfigManager {
 
     public boolean getIncludeSessionHistory() {
         return mIncludeSessionHistory;
-    }
-
-    /**
-     * Indicates if the Android Advertising ID should be collected regardless of the limit ad tracking
-     * setting. Google allows the usage of AAID regardless of the LAT setting for cases of anonymous analytics,
-     * attribution, etc. By default, this will return True, which means that that SDK should *not* collect AAID
-     * when the user has enable limit ad tracking.
-     *
-     * @return true if AAID should only be send when LAT is disabled.
-     */
-    public boolean getRestrictAAIDBasedOnLAT() {
-        return mRestrictAAIDfromLAT;
     }
 
     /**
@@ -1212,20 +1197,19 @@ public class ConfigManager {
 
     public String getPreviousAdId() {
         MPUtility.AdIdInfo adInfo = MPUtility.getAdIdInfo(mContext);
-        String currentAdId = null;
-        if (adInfo != null) {
-            currentAdId = adInfo.id;
+        if (adInfo != null && !adInfo.isLimitAdTrackingEnabled) {
+            return sPreferences.getString(Constants.PrefKeys.PREVIOUS_ANDROID_ID, null);
         }
-        return sPreferences.getString(Constants.PrefKeys.PREVIOUS_ANDROID_ID, currentAdId);
+        return null;
     }
 
     public void setPreviousAdId() {
         MPUtility.AdIdInfo adInfo = MPUtility.getAdIdInfo(mContext);
-        String currentAdId = null;
-        if (adInfo != null) {
-            currentAdId = adInfo.id;
+        if (adInfo != null && !adInfo.isLimitAdTrackingEnabled) {
+            sPreferences.edit().putString(Constants.PrefKeys.PREVIOUS_ANDROID_ID, adInfo.id).apply();
+        } else {
+            sPreferences.edit().remove(Constants.PrefKeys.PREVIOUS_ANDROID_ID).apply();
         }
-        sPreferences.edit().putString(Constants.PrefKeys.PREVIOUS_ANDROID_ID, currentAdId).apply();
     }
 
     public int getIdentityConnectionTimeout() {

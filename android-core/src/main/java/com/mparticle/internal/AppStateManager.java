@@ -141,7 +141,7 @@ public class  AppStateManager {
             String previousSessionPackage = null;
             String previousSessionUri = null;
             String previousSessionParameters = null;
-            if (activity != null){
+            if (activity != null) {
                 ComponentName callingApplication = activity.getCallingActivity();
                 if (callingApplication != null) {
                     previousSessionPackage = callingApplication.getPackageName();
@@ -174,7 +174,7 @@ public class  AppStateManager {
             } else if (isBackgrounded() && mLastStoppedTime.get() > 0) {
                 isBackToForeground = true;
                 MPUtility.AdIdInfo adIdInfo =  MPUtility.getAdIdInfo(mContext);
-                String currentGoogleAdId = adIdInfo == null ? null : adIdInfo.id;
+                String currentGoogleAdId = (adIdInfo == null ? null : (adIdInfo.isLimitAdTrackingEnabled ? null : adIdInfo.id));
                 mMessageManager.postToMessageThread(new CheckAdIdRunnable(currentGoogleAdId, mConfigManager.getPreviousAdId()));
                 logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE,
                         mCurrentActivityName,
@@ -204,7 +204,7 @@ public class  AppStateManager {
                 }
                 instance.Internal().getKitManager().onActivityResumed(activity);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
                 Logger.verbose("Failed while trying to track activity resume: " + e.getMessage());
         }
     }
@@ -460,7 +460,6 @@ public class  AppStateManager {
                 MParticle instance = MParticle.getInstance();
                 if (instance != null) {
                     MParticleUser user = instance.Identity().getCurrentUser();
-                    Builder builder;
                     if (user != null) {
                         instance.Identity().modify(new Builder(user)
                                 .googleAdId(currentAdId, previousAdId)
@@ -475,7 +474,6 @@ public class  AppStateManager {
                             }
                         });
                     }
-
                 }
             }
         }

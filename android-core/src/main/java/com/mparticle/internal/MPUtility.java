@@ -19,14 +19,12 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
 import android.provider.Settings;
+import android.telephony.TelephonyManager;
+import android.view.Display;
+import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
-
-import android.telephony.TelephonyManager;
-import android.text.TextUtils;
-import android.view.Display;
-import android.view.WindowManager;
 
 import com.google.android.instantapps.InstantApps;
 import com.mparticle.MParticle;
@@ -74,6 +72,7 @@ public class MPUtility {
     static final String NO_BLUETOOTH = "none";
     private static String sOpenUDID;
     private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
+    private static final String TAG = MPUtility.class.toString();
 
     public static long getAvailableMemory(Context context) {
         ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
@@ -124,7 +123,7 @@ public class MPUtility {
     }
 
     @WorkerThread
-    @TargetApi(Build.VERSION_CODES.ECLAIR)
+    @Nullable
     public static AdIdInfo getAdIdInfo(Context context) {
         String packageName = context.getPackageName();
         PackageManager packageManager = context.getPackageManager();
@@ -159,8 +158,8 @@ public class MPUtility {
             Method getId = advertisingInfo.getClass().getMethod("getId");
             String advertisingId = (String) getId.invoke(advertisingInfo);
             return new AdIdInfo(advertisingId, limitAdTrackingEnabled, AdIdInfo.Advertiser.GOOGLE);
-        } catch (Exception cnfe) {
-
+        } catch (Exception e) {
+            Logger.info(TAG, "Could not locate Google Play Ads Identifier library");
         }
         return null;
     }
@@ -177,8 +176,8 @@ public class MPUtility {
             if (advertisingID != null) {
                 return new AdIdInfo(advertisingID, limitAdTracking, AdIdInfo.Advertiser.AMAZON);
             }
-        } catch (Exception ex) {
-
+        } catch (Exception e) {
+            Logger.info(TAG, "Could not locate Amazon ID on device: " + e.getMessage());
         }
         return null;
     }
@@ -353,7 +352,7 @@ public class MPUtility {
     @TargetApi(Build.VERSION_CODES.CUPCAKE)
     @Nullable
     public static String getAndroidID(Context context) {
-        if (!MParticle.isAndroidIdDisabled()) {
+        if (MParticle.isAndroidIdEnabled()) {
             return Settings.Secure.getString(context.getContentResolver(), "android_id");
         } else {
             return null;

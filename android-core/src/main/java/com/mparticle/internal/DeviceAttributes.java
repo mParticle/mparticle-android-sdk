@@ -256,8 +256,8 @@ public class DeviceAttributes {
                 //check instance nullability here and decline to act if it is not available. Don't want to have the case where we are overriding isLimiAdTrackingEnabled
                 //just because there was a timing issue with the singleton
                 if (instance !=  null) {
-                    if (adIdInfo.isLimitAdTrackingEnabled && instance.Internal().getConfigManager().getRestrictAAIDBasedOnLAT()) {
-                        message = adIdInfo.advertiser.descriptiveName + " Advertising ID available but ad tracking is disabled on this device.";
+                    if (adIdInfo.isLimitAdTrackingEnabled) {
+                        message = adIdInfo.advertiser.descriptiveName + " Advertising ID tracking is disabled on this device.";
                     } else {
                         switch (adIdInfo.advertiser) {
                             case AMAZON:

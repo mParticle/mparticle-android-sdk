@@ -7,7 +7,6 @@ import com.mparticle.MParticle
 import com.mparticle.MockMParticle
 import com.mparticle.SdkListener
 import com.mparticle.identity.AliasResponse
-import com.mparticle.internal.MPUtility.AdIdInfo
 import com.mparticle.internal.MParticleApiClient.AliasNetworkResponse
 import com.mparticle.internal.MParticleApiClientImpl.MPRampException
 import com.mparticle.internal.MParticleApiClientImpl.MPThrottleException
@@ -31,10 +30,8 @@ import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
 import java.io.IOException
-import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import kotlin.collections.ArrayList
 
 @RunWith(PowerMockRunner::class)
 class UploadHandlerTest {
@@ -141,86 +138,6 @@ class UploadHandlerTest {
         val attributes =
             DeviceAttributes(MParticle.OperatingSystem.ANDROID).getDeviceInfo(MockContext())
         Assert.assertNotNull(attributes)
-    }
-
-    @Test
-    @PrepareForTest(MPUtility::class)
-    @Throws(Exception::class)
-    fun testGetAAIDAllDefaults() {
-        val AAID = UUID.randomUUID().toString()
-        Mockito.`when`(mConfigManager.restrictAAIDBasedOnLAT).thenReturn(true)
-        PowerMockito.mockStatic(MPUtility::class.java)
-        Mockito.`when`(
-            MPUtility.getAdIdInfo(
-                Mockito.any(
-                    Context::class.java
-                )
-            )
-        ).thenReturn(AdIdInfo(AAID, false, AdIdInfo.Advertiser.AMAZON))
-        val attributes =
-            DeviceAttributes(MParticle.OperatingSystem.FIRE_OS).getDeviceInfo(MockContext())
-        Assert.assertFalse(attributes.getBoolean("lat"))
-        Assert.assertEquals(AAID, attributes.getString("faid"))
-    }
-
-    @Test
-    @PrepareForTest(MPUtility::class)
-    @Throws(Exception::class)
-    fun testGetAAIDLATTrueRestrictTrue() {
-        val AAID = UUID.randomUUID().toString()
-        Mockito.`when`(mConfigManager.restrictAAIDBasedOnLAT).thenReturn(true)
-        PowerMockito.mockStatic(MPUtility::class.java)
-        Mockito.`when`(
-            MPUtility.getAdIdInfo(
-                Mockito.any(
-                    Context::class.java
-                )
-            )
-        ).thenReturn(AdIdInfo(AAID, true, AdIdInfo.Advertiser.GOOGLE))
-        val attributes =
-            DeviceAttributes(MParticle.OperatingSystem.ANDROID).getDeviceInfo(MockContext())
-        Assert.assertTrue(attributes.getBoolean("lat"))
-        Assert.assertFalse(attributes.has("gaid"))
-    }
-
-    @Test
-    @PrepareForTest(MPUtility::class)
-    @Throws(Exception::class)
-    fun testGetAAIDLATTrueRestrictFalse() {
-        val AAID = UUID.randomUUID().toString()
-        Mockito.`when`(mConfigManager.restrictAAIDBasedOnLAT).thenReturn(false)
-        PowerMockito.mockStatic(MPUtility::class.java)
-        Mockito.`when`(
-            MPUtility.getAdIdInfo(
-                Mockito.any(
-                    Context::class.java
-                )
-            )
-        ).thenReturn(AdIdInfo(AAID, true, AdIdInfo.Advertiser.AMAZON))
-        val attributes =
-            DeviceAttributes(MParticle.OperatingSystem.FIRE_OS).getDeviceInfo(MockContext())
-        Assert.assertTrue(attributes.getBoolean("lat"))
-        Assert.assertEquals(AAID, attributes.getString("faid"))
-    }
-
-    @Test
-    @PrepareForTest(MPUtility::class)
-    @Throws(Exception::class)
-    fun testGetAAIDLATFalseRestrictLatFalse() {
-        val AAID = UUID.randomUUID().toString()
-        Mockito.`when`(mConfigManager.restrictAAIDBasedOnLAT).thenReturn(false)
-        PowerMockito.mockStatic(MPUtility::class.java)
-        Mockito.`when`(
-            MPUtility.getAdIdInfo(
-                Mockito.any(
-                    Context::class.java
-                )
-            )
-        ).thenReturn(AdIdInfo(AAID, false, AdIdInfo.Advertiser.GOOGLE))
-        val attributes =
-            DeviceAttributes(MParticle.OperatingSystem.ANDROID).getDeviceInfo(MockContext())
-        Assert.assertFalse(attributes.getBoolean("lat"))
-        Assert.assertEquals(AAID, attributes.getString("gaid"))
     }
 
     @Test

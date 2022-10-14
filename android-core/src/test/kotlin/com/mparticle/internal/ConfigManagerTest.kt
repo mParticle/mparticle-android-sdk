@@ -153,30 +153,6 @@ class ConfigManagerTest {
 
     @Test
     @Throws(Exception::class)
-    fun testRestrictAAIDBasedOnLAT() {
-        val testManager = ConfigManager(
-            context,
-            MParticle.Environment.Production,
-            "some api key",
-            "some api secret",
-            null,
-            null,
-            null,
-            null,
-            null
-        )
-        Assert.assertTrue(testManager.restrictAAIDBasedOnLAT)
-        val config = JSONObject()
-        config.put("rdlat", "false")
-        testManager.updateConfig(config)
-        Assert.assertFalse(testManager.restrictAAIDBasedOnLAT)
-        config.put("rdlat", "true")
-        testManager.updateConfig(config)
-        Assert.assertTrue(testManager.restrictAAIDBasedOnLAT)
-    }
-
-    @Test
-    @Throws(Exception::class)
     fun testDelayedStart() {
         /* val called = arrayOfNulls<Boolean>(3)
             MParticle.setInstance(new MockMParticle() {
@@ -395,68 +371,6 @@ class ConfigManagerTest {
     fun testGetUserBucket() {
         val bucket = manager.userBucket
         Assert.assertTrue(bucket >= 0 && bucket <= 100)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testRestrictLatNoConfig() {
-        Assert.assertTrue(manager.restrictAAIDBasedOnLAT)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testRestrictLatFromConfig() {
-        Assert.assertTrue(manager.restrictAAIDBasedOnLAT)
-        val config = JSONObject()
-        config.put("rdlat", false)
-        manager.updateConfig(config)
-        Assert.assertFalse(manager.restrictAAIDBasedOnLAT)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testRestrictLatTrueToFalse() {
-        Assert.assertTrue(manager.restrictAAIDBasedOnLAT)
-        val config = JSONObject()
-        config.put("rdlat", false)
-        manager.updateConfig(config)
-        Assert.assertFalse(manager.restrictAAIDBasedOnLAT)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testRestrictLatFalseToTrue() {
-        Assert.assertTrue(manager.restrictAAIDBasedOnLAT)
-        val config = JSONObject()
-        config.put("rdlat", false)
-        manager.updateConfig(config)
-        config.put("rdlat", "true")
-        manager.updateConfig(config)
-        Assert.assertTrue(manager.restrictAAIDBasedOnLAT)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testRestrictLatFalseToNoConfig() {
-        Assert.assertTrue(manager.restrictAAIDBasedOnLAT)
-        val config = JSONObject()
-        config.put("rdlat", false)
-        manager.updateConfig(config)
-        config.remove("rdlat")
-        manager.updateConfig(config)
-        Assert.assertTrue(manager.restrictAAIDBasedOnLAT)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testRestrictLatTrueToNoConfig() {
-        Assert.assertTrue(manager.restrictAAIDBasedOnLAT)
-        val config = JSONObject()
-        config.put("rdlat", true)
-        manager.updateConfig(config)
-        config.remove("rdlat")
-        manager.updateConfig(config)
-        Assert.assertTrue(manager.restrictAAIDBasedOnLAT)
     }
 
     @Test
