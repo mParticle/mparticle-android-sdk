@@ -1,6 +1,7 @@
 package com.mparticle.internal
 
 import android.content.SharedPreferences
+import androidx.test.filters.LargeTest
 import com.mparticle.internal.MParticleApiClientImpl.MPConfigException
 import com.mparticle.internal.MParticleApiClientImpl.MPThrottleException
 import com.mparticle.mock.MockContext
@@ -362,7 +363,7 @@ class MParticleApiClientImplTest {
         Assert.assertNotNull(ex)
     }
 
-    @Test
+    @LargeTest
     @PrepareForTest(URL::class, MParticleApiClientImpl::class)
     @Throws(
         Exception::class
