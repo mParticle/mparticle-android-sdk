@@ -26,14 +26,14 @@ jobs:
       GIT_COMMITTER_EMAIL: developers@mparticle.com
     steps:
       - name: "Checkout development branch"
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
           repository: mparticle/mparticle-android-sdk
           ref: development
           submodules: recursive
       - name: "Import GPG Key"
-        uses: crazy-max/ghaction-import-gpg@v4
+        uses: crazy-max/ghaction-import-gpg@v5
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
@@ -72,13 +72,13 @@ jobs:
       GIT_COMMITTER_EMAIL: developers@mparticle.com
     steps:
       - name: "Checkout public main branch"
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
           fetch-depth: 0
           ref: main
       - name: "Import GPG Key"
-        uses: crazy-max/ghaction-import-gpg@v4
+        uses: crazy-max/ghaction-import-gpg@v5
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
@@ -125,13 +125,13 @@ jobs:
       mavenSigningKeyPassword: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_PASSWORD }}
     steps:
       - name: "Checkout release branch"
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: mparticle/mparticle-android-sdk
           ref: release/${{ github.run_number }}
           submodules: recursive
       - name: "Install JDK 11"
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           distribution: "zulu"
           java-version: "11"
@@ -152,7 +152,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - name: "Checkout main branch"
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
           repository: ${{ github.repository }}
