@@ -1,3 +1,16 @@
+## [5.47.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.46.0...v5.47.0) (2022-10-18)
+
+
+### Features
+
+* Port android core module java instrumented and unit tests to kotlin (phase 3) ([#257](https://github.com/mParticle/mparticle-android-sdk/issues/257)) ([e8cb3db](https://github.com/mParticle/mparticle-android-sdk/commit/e8cb3db906b3b38c52a9533eecd6b20c3672fd2c))
+
+
+### Updates & Maintenance
+
+* Update github actions that are deprecated ([#258](https://github.com/mParticle/mparticle-android-sdk/issues/258)) ([db13ae0](https://github.com/mParticle/mparticle-android-sdk/commit/db13ae02dbbd971c781cc1a40cdaba06486e3799))
+* Update submodules ([9f0524f](https://github.com/mParticle/mparticle-android-sdk/commit/9f0524f988674c4b781c9b0f80d04d2f129ee1be))
+
 ## [5.46.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.45.2...v5.46.0) (2022-10-14)
 
 
