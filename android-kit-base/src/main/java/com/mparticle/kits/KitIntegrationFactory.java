@@ -99,7 +99,7 @@ public class KitIntegrationFactory {
 
     private Class loadKit(String className) {
         try {
-            return Class.forName(className);
+            return Class.forName(className);  // nosemgrep
         } catch (Exception e) {
             Logger.verbose("Kit not bundled: ", className);
         }
