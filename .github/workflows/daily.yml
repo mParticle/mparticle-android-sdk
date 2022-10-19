@@ -90,7 +90,7 @@ jobs:
           api-level: 29
           script: ./gradlew :android-core:cAT :android-kit-base:cAT --stacktrace
       - name: "Archive Instrumented Test Results"
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: always()
         with:
           name: instrumented-test-results
