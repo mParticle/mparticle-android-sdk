@@ -4,6 +4,9 @@ on:
   pull_request:
 
 jobs:
+  pr-check-hadcoded-secrets:
+    name: "Check PR for hardcoded secrets"
+    uses: mParticle/mparticle-workflows/.github/workflows/security-hardcoded-secrets.yml@main
   pr-branch-check-name:
     name: "Check PR for semantic branch name"
     uses: mParticle/mparticle-workflows/.github/workflows/pr-branch-check-name.yml@main
