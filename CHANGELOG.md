@@ -1,3 +1,10 @@
+## [5.47.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.47.0...v5.47.1) (2022-10-19)
+
+
+### Updates & Maintenance
+
+* add security-hardcoded-secrets job ([#260](https://github.com/mParticle/mparticle-android-sdk/issues/260)) ([c8ec3fe](https://github.com/mParticle/mparticle-android-sdk/commit/c8ec3fe2deeed99ddc09d3e2dfdd041b93c5965b))
+
 ## [5.47.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.46.0...v5.47.0) (2022-10-18)
 
 
