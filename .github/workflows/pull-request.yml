@@ -121,6 +121,12 @@ jobs:
           name: "kotlin-lint-results"
           path: ./**/build/reports/**
 
+  security-checks:
+    name: "Security Lint Checks"
+    uses: mparticle/mparticle-workflows/.github/workflows/security-checks.yml@stable
+    with:
+      base_branch: "development"
+
   kit-compatibility-test:
       name: "Kit Compatibility Test"
       runs-on: ubuntu-latest

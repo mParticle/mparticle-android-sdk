@@ -1,0 +1,6 @@
+# Test paths
+android-core/src/androidTest/
+android-core/src/test/
+android-kit-base/src/test/
+android-kit-base/src/androidTest/
+testutils/

@@ -337,7 +337,7 @@ public class InternalListenerManager implements InternalListener {
         if (isObfuscated(simpleClassName)) {
             try {
                 List<Class> superClasses = new ArrayList<Class>();
-                Class clazz = Class.forName(className);
+                Class clazz = Class.forName(className);  // nosemgrep
                 superClasses.add(clazz.getSuperclass());
                 for (Class interfce : clazz.getInterfaces()) {
                     superClasses.add(interfce);

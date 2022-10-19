@@ -827,7 +827,7 @@ public class MParticleJSInterface {
     public static void registerWebView(WebView webView, String workspaceToken) {
         if (webView != null) {
             String bridgeName = getBridgeName(workspaceToken);
-            webView.addJavascriptInterface(
+            webView.addJavascriptInterface(  // mobsf-ignore: webview_javascript_interface
                     new MParticleJSInterface(),
                     bridgeName
             );
