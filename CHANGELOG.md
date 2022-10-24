@@ -1,3 +1,10 @@
+## [5.47.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.47.1...v5.47.2) (2022-10-24)
+
+
+### Updates & Maintenance
+
+* Update submodules ([9b98f0b](https://github.com/mParticle/mparticle-android-sdk/commit/9b98f0b93224e624bfe8df773cf19b9a2914f76f))
+
 ## [5.47.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.47.0...v5.47.1) (2022-10-19)
 
 
