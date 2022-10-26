@@ -111,14 +111,17 @@ public class NetworkConnection extends BaseNetworkConnection {
 
             // TLS 1.2 and over isn't enabled or supported on older Android devices
             // If we can't instantiate it on this device, fall back to some version of TLS
+            SSLContext context = null;
             try {
-                SSLContext context = SSLContext.getInstance("TLSv1.2");
+                context = SSLContext.getInstance("TLSv1.2");
             }
             catch (NoSuchAlgorithmException ex) {
-                SSLContext context = SSLContext.getInstance("TLS");  // nosemgrep
+                context = SSLContext.getInstance("TLS");  // nosemgrep
             }
-            context.init(null, tmf.getTrustManagers(), null);
-            mSocketFactory = context.getSocketFactory();
+            finally {
+                context.init(null, tmf.getTrustManagers(), null);
+                mSocketFactory = context.getSocketFactory();
+            }
         }
         return mSocketFactory;
     }
