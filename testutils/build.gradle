@@ -50,7 +50,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     compileOnly project(':android-core')
     compileOnly project(':android-kit-base')
-    compileOnly 'org.mockito:mockito-android:4.8.0'
+    compileOnly 'org.mockito:mockito-android:4.8.1'
 
     api 'androidx.annotation:annotation:1.5.0'
     api 'androidx.test.ext:junit:1.1.3'
