@@ -1,3 +1,20 @@
+## [5.48.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.47.4...v5.48.0) (2022-11-03)
+
+
+### Features
+
+* Investigate dependabot automerge Mockito library upgrade. ([#264](https://github.com/mParticle/mparticle-android-sdk/issues/264)) ([982bf29](https://github.com/mParticle/mparticle-android-sdk/commit/982bf299283608f5c7987bea28d5b9da2844d1d5))
+
+
+### Bug Fixes
+
+* mParticle crashing on push notifications for android 12 and above ([#266](https://github.com/mParticle/mparticle-android-sdk/issues/266)) ([88ddb94](https://github.com/mParticle/mparticle-android-sdk/commit/88ddb9415d5f240482540c0c0b3e26b818838d96))
+
+
+### Updates & Maintenance
+
+* Update submodules ([4ffafcf](https://github.com/mParticle/mparticle-android-sdk/commit/4ffafcf4fa1c94811fd4f498bb3c0237363f61a8))
+
 ## [5.47.4](https://github.com/mParticle/mparticle-android-sdk/compare/v5.47.3...v5.47.4) (2022-11-02)
 
 
