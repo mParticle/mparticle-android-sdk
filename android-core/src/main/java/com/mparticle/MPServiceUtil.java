@@ -1,5 +1,7 @@
 package com.mparticle;
 
+import static android.content.Context.NOTIFICATION_SERVICE;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -9,18 +11,17 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
+
 import androidx.annotation.RequiresApi;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
+import com.mparticle.internal.KitsLoadedListener;
 import com.mparticle.internal.KitsLoadedListenerConfiguration;
 import com.mparticle.internal.Logger;
-import com.mparticle.internal.KitsLoadedListener;
 import com.mparticle.messaging.MPMessagingAPI;
 import com.mparticle.messaging.ProviderCloudMessage;
-
-import static android.content.Context.NOTIFICATION_SERVICE;
 
 public class MPServiceUtil {
     public static final String NOTIFICATION_CHANNEL = "com.mparticle.default";
@@ -136,10 +137,17 @@ public class MPServiceUtil {
         Intent pe = message.getDefaultOpenIntent(mContext, message);
         pe.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         pe.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent actionIntent = PendingIntent.getActivity(mContext, 0, pe, PendingIntent.FLAG_UPDATE_CURRENT);
-        if (actionIntent != null) {
+
+        PendingIntent pendingIntent;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            pendingIntent = PendingIntent.getActivity
+                    (mContext, 0, pe, PendingIntent.FLAG_MUTABLE);
+        } else {
+            pendingIntent = PendingIntent.getActivity(mContext, 0, pe, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
+        if (pendingIntent != null) {
             try {
-                actionIntent.send();
+                pendingIntent.send();
             } catch (PendingIntent.CanceledException e) {
 
             }
