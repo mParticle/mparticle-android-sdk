@@ -1,5 +1,7 @@
 package com.mparticle.messaging;
 
+import static com.mparticle.MPServiceUtil.NOTIFICATION_CHANNEL;
+
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -11,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -24,8 +27,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Set;
-
-import static com.mparticle.MPServiceUtil.NOTIFICATION_CHANNEL;
 
 /**
  * Representation of an FCM/push sent by a 3rd party such as Urban Airship or Mixpanel.
@@ -150,7 +151,15 @@ public class ProviderCloudMessage implements Parcelable {
         intent.setClass(context, MPService.class);
         intent.putExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA, message);
 
-        return PendingIntent.getService(context, id.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            pendingIntent = PendingIntent.getService
+                    (context, id.hashCode(), intent, PendingIntent.FLAG_MUTABLE);
+        } else {
+            pendingIntent = PendingIntent.getService(context, id.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
+
+        return pendingIntent;
     }
 
     @Nullable
