@@ -2,12 +2,12 @@ package com.mparticle.messaging;
 
 import android.content.Context;
 import android.content.IntentFilter;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.mparticle.MPService;
-import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
@@ -61,11 +61,11 @@ public class MPMessagingAPI {
         ConfigManager.getInstance(mContext).setPushSenderId(senderId);
         if (!MPUtility.isFirebaseAvailable()) {
             Logger.error("Push is enabled but Firebase Cloud Messaging library not found - you must add com.google.firebase:firebase-messaging:10.2.1 or later to your application.");
-        }else if (!MPUtility.isServiceAvailable(mContext, MPService.class)){
+        } else if (!MPUtility.isServiceAvailable(mContext, MPService.class)) {
             Logger.error("Push is enabled but you have not added <service android:name=\"com.mparticle.MPService\" /> to the <application> section of your AndroidManifest.xml.");
-        }else if (!MPUtility.checkPermission(mContext, "com.google.android.c2dm.permission.RECEIVE")){
+        } else if (!MPUtility.checkPermission(mContext, "com.google.android.c2dm.permission.RECEIVE")){
             Logger.error("Attempted to enable push notifications without required permission: ", "\"com.google.android.c2dm.permission.RECEIVE\".");
-        }else {
+        } else {
             PushRegistrationHelper.requestInstanceId(mContext, senderId);
         }
     }
