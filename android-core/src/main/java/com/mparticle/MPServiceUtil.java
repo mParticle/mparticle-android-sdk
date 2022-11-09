@@ -156,7 +156,6 @@ public class MPServiceUtil {
 
     private void generateCloudMessage(final Intent intent) {
         try {
-
             KitsLoadedListener kitsLoadedListener = () -> {
                 try {
                     MParticle instance = MParticle.getInstance();
