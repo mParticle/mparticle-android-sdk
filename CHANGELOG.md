@@ -1,3 +1,11 @@
+## [5.48.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.48.0...v5.48.1) (2022-11-10)
+
+
+### Updates & Maintenance
+
+* Fix sonarcloud job for forked repos ([#268](https://github.com/mParticle/mparticle-android-sdk/issues/268)) ([cf79eb7](https://github.com/mParticle/mparticle-android-sdk/commit/cf79eb7592c289ab724135b130b70157295cda7f))
+* Update submodules ([1eff17c](https://github.com/mParticle/mparticle-android-sdk/commit/1eff17c3940aeabb28e51d67493069267db9d978))
+
 ## [5.48.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.47.4...v5.48.0) (2022-11-03)
 
 
