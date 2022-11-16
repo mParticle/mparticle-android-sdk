@@ -7,7 +7,10 @@ import android.os.Looper
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.internal.ConfigManager
+import com.mparticle.internal.JsonReportingMessage
 import com.mparticle.internal.KitManager.KitStatus
+import com.mparticle.internal.OnKitManagerLoaded
+import com.mparticle.internal.ReportingManager
 import com.mparticle.mock.MockContext
 import com.mparticle.mock.MockCoreCallbacks
 import com.mparticle.mock.MockKitConfiguration
@@ -17,6 +20,7 @@ import com.mparticle.mock.MockMParticle
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,16 +28,22 @@ import org.mockito.Mockito
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 @RunWith(PowerMockRunner::class)
 class KitManagerTest {
     private lateinit var manager: KitManagerImpl
-    @Before
+
+    private val reportingManager : ReportingManager = Mockito.mock<ReportingManager>(
+        ReportingManager::class.java)
+
+        @Before
     @Throws(Exception::class)
     fun setUp() {
         val mockMp: MParticle = MockMParticle()
         MParticle.setInstance(mockMp)
-        manager = MockKitManagerImpl(MockContext(), null, MockCoreCallbacks())
+        manager = MockKitManagerImpl(MockContext(), reportingManager, MockCoreCallbacks())
         Assert.assertNotNull(manager.providers)
         val mockKitFactory = MockKitIntegrationFactory()
         manager.setKitFactory(mockKitFactory)
@@ -54,19 +64,28 @@ class KitManagerTest {
         Assert.assertNotNull(manager.providers)
         val array = configJson.optJSONArray(ConfigManager.KEY_EMBEDDED_KITS)
         Assert.assertNotNull(array)
-        manager.updateKits(array)
-        val providers = manager.providers
-        if (array != null) {
-            Assert.assertEquals(array.length().toLong(), providers.size.toLong())
+        val latch = CountDownLatch(1)
+        manager.updateKits(array)?.onKitsLoaded(object : OnKitManagerLoaded{
+            override fun onKitManagerLoaded() {
+                val providers = manager.providers
+                if (array != null) {
+                    Assert.assertEquals(array.length().toLong(), providers.size.toLong())
+                }
+                Assert.assertNotNull(providers[37])
+                Assert.assertNotNull(providers[56])
+                Assert.assertNotNull(providers[64])
+                Assert.assertNotNull(providers[68])
+                latch.countDown()
+            }
+
+        })
+        if(!latch.await(15, TimeUnit.SECONDS)){
+            fail()
         }
-        Assert.assertNotNull(providers[37])
-        Assert.assertNotNull(providers[56])
-        Assert.assertNotNull(providers[64])
-        Assert.assertNotNull(providers[68])
         manager.updateKits(JSONArray())
-        Assert.assertEquals(0, providers.size.toLong())
+        Assert.assertEquals(0,  manager.providers.size.toLong())
         manager.updateKits(configJson.optJSONArray(ConfigManager.KEY_EMBEDDED_KITS))
-        Assert.assertEquals(4, providers.size.toLong())
+        Assert.assertEquals(4, manager.providers.size.toLong())
     }
 
     @Test

@@ -3,11 +3,7 @@ package com.mparticle.internal
 import android.app.Activity
 import android.content.Context
 import android.net.Uri
-import com.mparticle.BaseEvent
-import com.mparticle.MPEvent
-import com.mparticle.MParticle
-import com.mparticle.MParticleOptions
-import com.mparticle.MockMParticle
+import com.mparticle.*
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.internal.KitFrameworkWrapper.CoreCallbacksImpl
 import com.mparticle.internal.PushRegistrationHelper.PushRegistration
@@ -16,6 +12,7 @@ import org.json.JSONArray
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -122,26 +119,23 @@ class KitFrameworkWrapperTest {
         wrapper.logEvent(commerceEvent)
         Mockito.verify(
             mockKitManager, Mockito.times(0)
-        ).logEvent(Mockito.any(MPEvent::class.java))
+        ).logEvent(anyObject())
         Mockito.verify(
             mockKitManager, Mockito.times(0)
-        ).logScreen(Mockito.any(MPEvent::class.java))
+        ).logScreen(anyObject())
         Mockito.verify(
             mockKitManager, Mockito.times(0)
-        ).logEvent(Mockito.any(CommerceEvent::class.java))
+        ).logEvent(anyObject())
         Mockito.verify(
             mockKitManager, Mockito.times(0)
         ).setUserAttribute(Mockito.anyString(), Mockito.anyString(), Mockito.anyLong())
         wrapper.replayEvents()
         Mockito.verify(
-            mockKitManager, Mockito.times(1)
-        ).logEvent(Mockito.any(MPEvent::class.java))
+            mockKitManager, Mockito.times(2)
+        ).logEvent(anyObject())
         Mockito.verify(
             mockKitManager, Mockito.times(1)
-        ).logScreen(Mockito.any(MPEvent::class.java))
-        Mockito.verify(
-            mockKitManager, Mockito.times(1)
-        ).logEvent(Mockito.any(CommerceEvent::class.java))
+        ).logScreen(anyObject())
         Mockito.verify(
             mockKitManager, Mockito.times(1)
         ).setUserAttribute(Mockito.eq("a key"), Mockito.eq("a value"), Mockito.anyLong())
@@ -367,11 +361,11 @@ class KitFrameworkWrapperTest {
         wrapper.setKitManager(mockKitManager)
         Mockito.verify(
             mockKitManager, Mockito.times(0)
-        ).logEvent(Mockito.any(MPEvent::class.java))
+        ).logEvent(anyObject())
         wrapper.logEvent(event)
         Mockito.verify(
             mockKitManager, Mockito.times(1)
-        ).logEvent(Mockito.any(MPEvent::class.java))
+        ).logEvent(anyObject())
     }
 
     @Test
@@ -403,11 +397,11 @@ class KitFrameworkWrapperTest {
         wrapper.setKitManager(mockKitManager)
         Mockito.verify(
             mockKitManager, Mockito.times(0)
-        ).logEvent(Mockito.any(CommerceEvent::class.java))
+        ).logEvent(anyObject())
         wrapper.logEvent(event)
         Mockito.verify(
             mockKitManager, Mockito.times(1)
-        ).logEvent(Mockito.any(CommerceEvent::class.java))
+        ).logEvent(anyObject())
     }
 
     @Test
@@ -438,11 +432,11 @@ class KitFrameworkWrapperTest {
         wrapper.setKitManager(mockKitManager)
         Mockito.verify(
             mockKitManager, Mockito.times(0)
-        ).logEvent(Mockito.any(BaseEvent::class.java))
+        ).logEvent(anyObject())
         wrapper.logEvent(event)
         Mockito.verify(
             mockKitManager, Mockito.times(1)
-        ).logEvent(Mockito.any(BaseEvent::class.java))
+        ).logEvent(anyObject())
     }
 
     @Test

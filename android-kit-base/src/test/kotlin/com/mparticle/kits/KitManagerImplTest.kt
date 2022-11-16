@@ -526,7 +526,7 @@ class KitManagerImplTest {
             logMPEventCalled++
         }
 
-        override fun logCommerceEvent(event: CommerceEvent) {
+        override fun logCommerceEvent(event: CommerceEvent?) {
             super.logCommerceEvent(event)
             logCommerceEventCalled++
         }

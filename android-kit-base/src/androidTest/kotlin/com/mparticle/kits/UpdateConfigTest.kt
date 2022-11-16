@@ -67,13 +67,13 @@ class UpdateConfigTest : BaseKitOptionsTest() {
                 ).toString()
         )
 
-        AccessUtils.getKitManager().addKitsLoadedListener { kits, previousKits, kitConfigs ->
+        AccessUtils.getKitManager().addKitsLoadedListener(getKitsLoadedListener { kits, previousKits, kitConfigs ->
             assertEquals(1, previousKits.size)
             assertEquals(2, kits.size)
             assertTrue(previousKits.containsKey(1))
             assertTrue(kits.containsKey(1))
             assertTrue(kits.containsKey(2))
-        }
+        })
     }
 
     @Test
@@ -99,14 +99,15 @@ class UpdateConfigTest : BaseKitOptionsTest() {
         )
 
         val latch = MPLatch(1)
-        AccessUtils.getKitManager().addKitsLoadedListener { kits, previousKits, kitConfigs ->
+        AccessUtils.getKitManager().addKitsLoadedListener(getKitsLoadedListener { kits, previousKits, kitConfigs ->
             assertEquals(2, previousKits.size)
             assertEquals(1, kits.size)
             assertTrue(previousKits.containsKey(1))
             assertTrue(previousKits.containsKey(2))
             assertTrue(kits.containsKey(1))
             latch.countDown()
-        }
+        })
+
         AccessUtils.forceFetchConfig()
         latch.await()
     }

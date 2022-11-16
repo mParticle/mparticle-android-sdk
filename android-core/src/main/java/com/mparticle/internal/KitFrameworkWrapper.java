@@ -259,6 +259,15 @@ public class KitFrameworkWrapper implements KitManager {
         return true;
     }
 
+    @Nullable
+    @Override
+    public Uri getSurveyUrl(int kitId, @Nullable Map<String, String> userAttributes, @Nullable Map<String, ? extends List<String>> userAttributeLists) {
+        if (mKitManager != null) {
+            return mKitManager.getSurveyUrl(kitId, userAttributes, userAttributeLists);
+        }
+        return null;
+    }
+
     static class AttributeChange {
         final String key;
         final Object value;
@@ -422,14 +431,6 @@ public class KitFrameworkWrapper implements KitManager {
         if (mKitManager != null) {
             mKitManager.setOptOut(optOutStatus);
         }
-    }
-
-    @Override
-    public Uri getSurveyUrl(int kitId, Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists) {
-        if (mKitManager != null) {
-            return mKitManager.getSurveyUrl(kitId, userAttributes, userAttributeLists);
-        }
-        return null;
     }
 
     @Override
