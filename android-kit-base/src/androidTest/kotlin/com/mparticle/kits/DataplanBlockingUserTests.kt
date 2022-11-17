@@ -62,13 +62,15 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         assertTrue(blockedAttributes.isNotEmpty())
 
         datapoints[DataplanFilterImpl.USER_ATTRIBUTES_KEY] = allowedAttributes.keys.toHashSet()
-        AccessUtils.getKitManager().dataplanFilter = (DataplanFilterImpl(
-            datapoints,
-            Random.nextBoolean(),
-            Random.nextBoolean(),
-            true,
-            Random.nextBoolean()
-        ))
+        AccessUtils.getKitManager().dataplanFilter = (
+            DataplanFilterImpl(
+                datapoints,
+                Random.nextBoolean(),
+                Random.nextBoolean(),
+                true,
+                Random.nextBoolean()
+            )
+            )
 
         userAttributeListenerKitKit.onSetUserAttribute = { key, _, _ ->
             assertTrue(allowedAttributes.containsKey(key))
@@ -100,13 +102,15 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         assertTrue(blockedAttributes.isNotEmpty())
 
         datapoints[DataplanFilterImpl.USER_ATTRIBUTES_KEY] = allowedAttributes.keys.toHashSet()
-        AccessUtils.getKitManager().dataplanFilter = (DataplanFilterImpl(
-            datapoints,
-            Random.nextBoolean(),
-            Random.nextBoolean(),
-            blockUserAttributes = true,
-            blockUserIdentities = false
-        ))
+        AccessUtils.getKitManager().dataplanFilter = (
+            DataplanFilterImpl(
+                datapoints,
+                Random.nextBoolean(),
+                Random.nextBoolean(),
+                blockUserAttributes = true,
+                blockUserIdentities = false
+            )
+            )
 
         kitIntegrationTestKits.forEach { kit ->
             kit.onAttributeReceived = { key, _ ->
@@ -167,13 +171,15 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         assertTrue(blockedAttributes.isNotEmpty())
 
         datapoints[DataplanFilterImpl.USER_ATTRIBUTES_KEY] = allowedAttributes.keys.toHashSet()
-        AccessUtils.getKitManager().dataplanFilter = (DataplanFilterImpl(
-            datapoints,
-            Random.nextBoolean(),
-            Random.nextBoolean(),
-            true,
-            Random.nextBoolean()
-        ))
+        AccessUtils.getKitManager().dataplanFilter = (
+            DataplanFilterImpl(
+                datapoints,
+                Random.nextBoolean(),
+                Random.nextBoolean(),
+                true,
+                Random.nextBoolean()
+            )
+            )
 
         var count = 0
         kitIntegrationTestKits.forEach { kit ->
@@ -217,13 +223,15 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
 
         datapoints[DataplanFilterImpl.USER_IDENTITIES_KEY] =
             allowedIdentities.keys.map { it.getEventsApiName() }.toHashSet()
-        AccessUtils.getKitManager().dataplanFilter = (DataplanFilterImpl(
-            datapoints,
-            Random.nextBoolean(),
-            Random.nextBoolean(),
-            Random.nextBoolean(),
-            true
-        ))
+        AccessUtils.getKitManager().dataplanFilter = (
+            DataplanFilterImpl(
+                datapoints,
+                Random.nextBoolean(),
+                Random.nextBoolean(),
+                Random.nextBoolean(),
+                true
+            )
+            )
 
         MParticle.getInstance()?.Identity()?.login(
             IdentityApiRequest.withEmptyUser()
@@ -261,13 +269,15 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
 
         datapoints[DataplanFilterImpl.USER_IDENTITIES_KEY] =
             allowedIdentities.keys.map { it.getEventsApiName() }.toHashSet()
-        AccessUtils.getKitManager().dataplanFilter = (DataplanFilterImpl(
-            datapoints,
-            Random.nextBoolean(),
-            Random.nextBoolean(),
-            Random.nextBoolean(),
-            true
-        ))
+        AccessUtils.getKitManager().dataplanFilter = (
+            DataplanFilterImpl(
+                datapoints,
+                Random.nextBoolean(),
+                Random.nextBoolean(),
+                Random.nextBoolean(),
+                true
+            )
+            )
 
         mServer.addConditionalLoginResponse(mStartingMpid, Random.Default.nextLong())
         MParticle.getInstance()?.Identity()?.login(

@@ -2,18 +2,18 @@ package com.mparticle.internal
 
 import android.app.Activity
 import android.content.Context
-import com.mparticle.BaseEvent
-import com.mparticle.MPEvent
-import com.mparticle.consent.ConsentState
-import com.mparticle.MParticle.IdentityType
 import android.content.Intent
 import android.location.Location
 import android.net.Uri
 import android.os.Bundle
-import com.mparticle.MParticleOptions.DataplanOptions
 import com.mparticle.AttributionResult
-import com.mparticle.identity.MParticleUser
+import com.mparticle.BaseEvent
+import com.mparticle.MPEvent
+import com.mparticle.MParticle.IdentityType
+import com.mparticle.MParticleOptions.DataplanOptions
+import com.mparticle.consent.ConsentState
 import com.mparticle.identity.IdentityApiRequest
+import com.mparticle.identity.MParticleUser
 import org.jetbrains.annotations.Nullable
 import org.json.JSONArray
 import java.lang.Exception
@@ -30,7 +30,6 @@ interface KitManager : AndroidLifecycleCallbacks {
     fun logBatch(jsonObject: String?)
     fun logout()
 
-
     fun setUserTag(tag: String?, mpid: Long)
     fun onConsentStateUpdated(oldState: ConsentState?, newState: ConsentState?, mpid: Long)
     fun setUserIdentity(id: String?, identityType: IdentityType?)
@@ -44,7 +43,6 @@ interface KitManager : AndroidLifecycleCallbacks {
     fun updateKits(jsonArray: JSONArray?): KitsLoadedCallback?
     fun updateDataplan(dataplanOptions: DataplanOptions?)
     val kitStatus: Map<Int, KitStatus>
-
 
     fun onSessionEnd()
     fun onSessionStart()
@@ -89,7 +87,7 @@ interface KitManager : AndroidLifecycleCallbacks {
     fun isKitActive(kitId: Int): Boolean
     fun getKitInstance(kitId: Int): Any?
     fun installReferrerUpdated()
-    val attributionResults: Map<Int, AttributionResult?> //Check Value nullable
+    val attributionResults: Map<Int, AttributionResult?> // Check Value nullable
 
     enum class KitStatus {
         NOT_CONFIGURED, STOPPED, ACTIVE

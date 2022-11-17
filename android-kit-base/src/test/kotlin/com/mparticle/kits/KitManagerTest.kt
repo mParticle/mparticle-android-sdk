@@ -7,7 +7,6 @@ import android.os.Looper
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.internal.ConfigManager
-import com.mparticle.internal.JsonReportingMessage
 import com.mparticle.internal.KitManager.KitStatus
 import com.mparticle.internal.OnKitManagerLoaded
 import com.mparticle.internal.ReportingManager
@@ -35,10 +34,11 @@ import java.util.concurrent.TimeUnit
 class KitManagerTest {
     private lateinit var manager: KitManagerImpl
 
-    private val reportingManager : ReportingManager = Mockito.mock<ReportingManager>(
-        ReportingManager::class.java)
+    private val reportingManager: ReportingManager = Mockito.mock<ReportingManager>(
+        ReportingManager::class.java
+    )
 
-        @Before
+    @Before
     @Throws(Exception::class)
     fun setUp() {
         val mockMp: MParticle = MockMParticle()
@@ -65,7 +65,7 @@ class KitManagerTest {
         val array = configJson.optJSONArray(ConfigManager.KEY_EMBEDDED_KITS)
         Assert.assertNotNull(array)
         val latch = CountDownLatch(1)
-        manager.updateKits(array)?.onKitsLoaded(object : OnKitManagerLoaded{
+        manager.updateKits(array)?.onKitsLoaded(object : OnKitManagerLoaded {
             override fun onKitManagerLoaded() {
                 val providers = manager.providers
                 if (array != null) {
@@ -77,13 +77,12 @@ class KitManagerTest {
                 Assert.assertNotNull(providers[68])
                 latch.countDown()
             }
-
         })
-        if(!latch.await(15, TimeUnit.SECONDS)){
+        if (!latch.await(15, TimeUnit.SECONDS)) {
             fail()
         }
         manager.updateKits(JSONArray())
-        Assert.assertEquals(0,  manager.providers.size.toLong())
+        Assert.assertEquals(0, manager.providers.size.toLong())
         manager.updateKits(configJson.optJSONArray(ConfigManager.KEY_EMBEDDED_KITS))
         Assert.assertEquals(4, manager.providers.size.toLong())
     }

@@ -8,7 +8,6 @@ import com.mparticle.testutils.BaseCleanInstallEachTest
 import com.mparticle.testutils.MPLatch
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.concurrent.CountDownLatch
 
 open class BaseKitOptionsTest : BaseCleanInstallEachTest() {
 
@@ -24,11 +23,13 @@ open class BaseKitOptionsTest : BaseCleanInstallEachTest() {
             override fun configures() = KitManagerImpl::class.java
 
             override fun apply(kitManager: KitManagerImpl) {
-                kitManager.addKitsLoadedListener(getKitsLoadedListener { kits, _, kitConfigs ->
-                    if (kitConfigs.size == kitCount) {
-                        kitsLoadedLatch.countDown()
+                kitManager.addKitsLoadedListener(
+                    getKitsLoadedListener { kits, _, kitConfigs ->
+                        if (kitConfigs.size == kitCount) {
+                            kitsLoadedLatch.countDown()
+                        }
                     }
-                })
+                )
             }
         }
 
@@ -70,11 +71,13 @@ open class BaseKitOptionsTest : BaseCleanInstallEachTest() {
         val latch = MPLatch(1)
         // wait for kit to start/reload
         com.mparticle.internal.AccessUtils.getKitManager()
-            .addKitsLoadedListener(getKitsLoadedListener { kits, _, _ ->
-                if (kits.containsKey(kitId)) {
-                    latch.countDown()
+            .addKitsLoadedListener(
+                getKitsLoadedListener { kits, _, _ ->
+                    if (kits.containsKey(kitId)) {
+                        latch.countDown()
+                    }
                 }
-            })
+            )
         // check if the kit has already been started and short-circut if it has
         if (MParticle.getInstance()?.isKitActive(kitId) == true) {
             latch.countDown()
