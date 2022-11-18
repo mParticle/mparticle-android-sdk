@@ -73,7 +73,7 @@ class MessageManagerTest {
     @PrepareForTest(MessageManager::class, MPUtility::class)
     @Throws(Exception::class)
     fun testGetStateInfo() {
-        PowerMockito.mockStatic(MPUtility::class.java, Answers.RETURNS_MOCKS.get())
+        PowerMockito.mockStatic(MPUtility::class.java, Answers.RETURNS_MOCKS)
         val stateInfo = MessageManager.getStateInfo()
         Assert.assertNotNull(stateInfo.getLong(MessageKey.STATE_INFO_AVAILABLE_MEMORY))
         Assert.assertNotNull(stateInfo.getLong(MessageKey.STATE_INFO_TOTAL_MEMORY))
@@ -97,7 +97,7 @@ class MessageManagerTest {
     @PrepareForTest(MessageManager::class, MPUtility::class)
     @Throws(Exception::class)
     fun testGetTotalMemory() {
-        PowerMockito.mockStatic(MPUtility::class.java, Answers.RETURNS_MOCKS.get())
+        PowerMockito.mockStatic(MPUtility::class.java, Answers.RETURNS_MOCKS)
         val prefs = context.getSharedPreferences(null, 0)
         val memory = MPUtility.getTotalMemory(context)
         Assert.assertEquals(-1, prefs.getLong(Constants.MiscStorageKeys.TOTAL_MEMORY, -1))
@@ -110,7 +110,7 @@ class MessageManagerTest {
     @PrepareForTest(MessageManager::class, MPUtility::class)
     @Throws(Exception::class)
     fun testGetSystemMemoryThreshold() {
-        PowerMockito.mockStatic(MPUtility::class.java, Answers.RETURNS_MOCKS.get())
+        PowerMockito.mockStatic(MPUtility::class.java, Answers.RETURNS_MOCKS)
         val prefs = context.getSharedPreferences(null, 0)
         val memory = MPUtility.getSystemMemoryThreshold(context)
         Assert.assertEquals(-1, prefs.getLong(Constants.MiscStorageKeys.MEMORY_THRESHOLD, -1))

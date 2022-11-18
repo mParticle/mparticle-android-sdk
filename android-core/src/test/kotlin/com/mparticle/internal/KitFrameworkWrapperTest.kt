@@ -3,7 +3,12 @@ package com.mparticle.internal
 import android.app.Activity
 import android.content.Context
 import android.net.Uri
-import com.mparticle.*
+import com.mparticle.BaseEvent
+import com.mparticle.MPEvent
+import com.mparticle.MParticle
+import com.mparticle.MParticleOptions
+import com.mparticle.MockMParticle
+import com.mparticle.anyObject
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.internal.KitFrameworkWrapper.CoreCallbacksImpl
 import com.mparticle.internal.PushRegistrationHelper.PushRegistration

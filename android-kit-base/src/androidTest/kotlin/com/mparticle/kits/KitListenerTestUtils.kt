@@ -1,10 +1,10 @@
 package com.mparticle.kits
 
 fun getKitsLoadedListener(
-    action: ( 
-        kits: Map<Int, KitIntegration?>, 
-        previousKits: Map<Int, KitIntegration?>, 
-        kitConfigs: List<KitConfiguration> 
+    action: (
+        kits: Map<Int, KitIntegration?>,
+        previousKits: Map<Int, KitIntegration?>,
+        kitConfigs: List<KitConfiguration>
     ) -> Unit
 ): KitManagerImpl.KitsLoadedListener {
     return object : KitManagerImpl.KitsLoadedListener {

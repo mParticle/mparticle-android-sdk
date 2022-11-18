@@ -10,16 +10,29 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
 import androidx.annotation.MainThread
-import com.mparticle.*
+import com.mparticle.AttributionError
+import com.mparticle.AttributionListener
+import com.mparticle.AttributionResult
+import com.mparticle.BaseEvent
+import com.mparticle.MPEvent
+import com.mparticle.MParticle
 import com.mparticle.MParticle.IdentityType
+import com.mparticle.MParticleOptions
 import com.mparticle.MParticleOptions.DataplanOptions
+import com.mparticle.UserAttributeListener
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.consent.ConsentState
 import com.mparticle.identity.IdentityApiRequest
 import com.mparticle.identity.IdentityStateListener
 import com.mparticle.identity.MParticleUser
-import com.mparticle.internal.*
+import com.mparticle.internal.Constants
+import com.mparticle.internal.CoreCallbacks
+import com.mparticle.internal.KitManager
 import com.mparticle.internal.KitManager.KitStatus
+import com.mparticle.internal.KitsLoadedCallback
+import com.mparticle.internal.Logger
+import com.mparticle.internal.MPUtility
+import com.mparticle.internal.ReportingManager
 import com.mparticle.kits.KitIntegration.ActivityListener
 import com.mparticle.kits.KitIntegration.ApplicationStateListener
 import com.mparticle.kits.KitIntegration.AttributeListener
@@ -36,8 +49,12 @@ import org.json.JSONObject
 import java.lang.Exception
 import java.lang.ref.WeakReference
 import java.math.BigDecimal
-import java.util.*
+import java.util.LinkedList
+import java.util.TreeMap
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+import kotlin.collections.HashSet
 
 open class KitManagerImpl( // ================================================================================
     // KitIntegration.EventListener forwarding
