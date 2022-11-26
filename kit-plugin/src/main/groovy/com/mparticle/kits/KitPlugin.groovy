@@ -11,6 +11,7 @@ class KitPlugin implements Plugin<Project> {
 
         //formerly in kit-common.gradle
         target.apply(plugin: 'com.android.library')
+        target.apply(plugin: 'org.jlleitschuh.gradle.ktlint')
         target.group = 'com.mparticle'
         target.buildscript.repositories.add(target.repositories.mavenLocal())
         target.buildscript.repositories.add(target.repositories.google())

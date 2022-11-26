@@ -569,7 +569,6 @@ public class KitConfiguration {
         return true;
     }
 
-
     protected boolean shouldLogEvent(MPEvent event) {
         if (!shouldIncludeFromAttributeValueFiltering(event.getCustomAttributeStrings())) {
             return false;

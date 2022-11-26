@@ -84,6 +84,7 @@ jobs:
         with:
           distribution: "zulu"
           java-version: "11"
+          cache: "gradle"
       - name: "Run Instrumented Tests"
         uses: reactivecircus/android-emulator-runner@v2.26.0
         with:
@@ -112,6 +113,7 @@ jobs:
         with:
           distribution: "zulu"
           java-version: "11"
+          cache: "gradle"
       - name: "Run Instrumented Orchestrator Tests"
         uses: reactivecircus/android-emulator-runner@v2.26.0
         with:
@@ -140,6 +142,7 @@ jobs:
         with:
           distribution: "zulu"
           java-version: "11"
+          cache: "gradle"
       - name: "Run Unit Tests"
         run: ./gradlew test
       - name: "Print Android Unit Tests Report"
@@ -168,6 +171,7 @@ jobs:
         with:
           distribution: "zulu"
           java-version: "11"
+          cache: "gradle"
       - name: "Run Android Core SDK Lint"
         run: ./gradlew lint
       - name: "Setup Android Kit Lint"
@@ -185,6 +189,42 @@ jobs:
         if: always()
         with:
           name: "kit-lint-results"
+          path: kits/**/build/reports/**
+
+  kotlin-lint-checks:
+    name: "Kotlin Lint Checks"
+    timeout-minutes: 15
+    runs-on: macos-latest
+    needs: create-regression-branch
+    steps:
+      - name: "Checkout Branch"
+        uses: actions/checkout@v3
+        with:
+          ref: regression/${{ github.run_number }}
+          submodules: recursive
+      - name: "Install JDK 11"
+        uses: actions/setup-java@v3
+        with:
+          distribution: "zulu"
+          java-version: "11"
+          cache: "gradle"
+      - name: "Run Android Core SDK Lint"
+        run: ./gradlew lint
+      - name: "Setup Android Kit Kotlin Lint"
+        run: ./gradlew publishReleaseLocal
+      - name: "Run Android Kit Kotlin Lint"
+        run: ./gradlew publishReleaseLocal -c settings-kits.gradle ktlintCheck
+      - name: "Archive Test Results"
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: "core-ktlint-results"
+          path: ./**/build/reports/**
+      - name: "Archive Test Kit Results"
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: "kit-ktlint-results"
           path: kits/**/build/reports/**
 
   update-kits:
@@ -208,6 +248,7 @@ jobs:
         with:
           distribution: "zulu"
           java-version: "11"
+          cache: "gradle"
       - name: "Build Android Core"
         run: ./gradlew -PisRelease=true clean publishReleaseLocal
       - name: "Test Kits"
