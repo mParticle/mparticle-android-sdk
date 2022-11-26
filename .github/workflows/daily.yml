@@ -208,8 +208,8 @@ jobs:
           distribution: "zulu"
           java-version: "11"
           cache: "gradle"
-      - name: "Run Android Core SDK Lint"
-        run: ./gradlew lint
+      - name: "Run Android Core SDK Kotlin Lint"
+        run: ./gradlew ktlintCheck
       - name: "Setup Android Kit Kotlin Lint"
         run: ./gradlew publishReleaseLocal
       - name: "Run Android Kit Kotlin Lint"
