@@ -6,7 +6,7 @@ import org.junit.Test
 
 class KitPluginTest {
     @Test
-    public void greeterPluginAddsGreetingTaskToProject() {
+    void greeterPluginAddsGreetingTaskToProject() {
         Project project = ProjectBuilder.builder().build()
 
         project.pluginManager.apply 'com.mparticle.kit'
