@@ -148,19 +148,4 @@ jobs:
   automerge-dependabot:
     name: "Save PR Number for Dependabot Automerge"
     needs: [ instrumented-tests, instrumented-orchestrator-tests, unit-tests, lint-checks, kotlin-lint-checks, kit-compatibility-test ]
-    if: github.actor == 'dependabot[bot]' && github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - name: "Checkout PR branch"
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-          fetch-depth: 0
-      - name: "Save Pull Request Number"
-        run: |
-          mkdir -p ./pr
-          echo ${{ github.event.number }} > ./pr/NR
-      - uses: actions/upload-artifact@v3
-        with:
-          name: pr
-          path: pr/
+    uses: mParticle/mparticle-workflows/.github/workflows/dependabot-save-pr-number.yml@main

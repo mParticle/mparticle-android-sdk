@@ -1,4 +1,5 @@
 package com.mparticle.kits
+
 import com.android.build.gradle.LibraryExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
