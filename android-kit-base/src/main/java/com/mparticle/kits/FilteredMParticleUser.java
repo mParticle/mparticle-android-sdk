@@ -3,7 +3,6 @@ package com.mparticle.kits;
 import android.util.SparseBooleanArray;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.mparticle.MParticle;
 import com.mparticle.TypedUserAttributeListener;
@@ -61,7 +60,7 @@ public class FilteredMParticleUser implements MParticleUser {
         if (kitManager != null) {
             userAttributes = kitManager.getDataplanFilter().transformUserAttributes(userAttributes);
         }
-        return (Map<String, Object>)KitConfiguration.filterAttributes(
+        return (Map<String, Object>) KitConfiguration.filterAttributes(
                 provider.getConfiguration().getUserAttributeFilters(),
                 userAttributes
         );
@@ -83,16 +82,20 @@ public class FilteredMParticleUser implements MParticleUser {
                 }
                 if (listener instanceof UserAttributeListener) {
                     Map<String, String> stringifiedAttributes = new HashMap<>();
-                    for (Map.Entry<String, ?> entry: userAttributes.entrySet()) {
-                        stringifiedAttributes.put(entry.getKey(), entry.getValue().toString());
+                    for (Map.Entry<String, ?> entry : userAttributes.entrySet()) {
+                        if (entry.getValue() != null) {
+                            stringifiedAttributes.put(entry.getKey(), entry.getValue().toString());
+                        } else {
+                            stringifiedAttributes.put(entry.getKey(), "");
+                        }
                     }
-                    ((UserAttributeListener)listener).onUserAttributesReceived(
+                    ((UserAttributeListener) listener).onUserAttributesReceived(
                             (Map<String, String>) KitConfiguration.filterAttributes(filters, stringifiedAttributes),
                             (Map<String, List<String>>) KitConfiguration.filterAttributes(filters, userAttributeLists),
                             mpid);
                 }
                 if (listener instanceof TypedUserAttributeListener) {
-                    ((TypedUserAttributeListener)listener).onUserAttributesReceived(
+                    ((TypedUserAttributeListener) listener).onUserAttributesReceived(
                             KitConfiguration.filterAttributes(filters, userAttributes),
                             (Map<String, List<String>>) KitConfiguration.filterAttributes(filters, userAttributeLists),
                             mpid);
