@@ -19,15 +19,15 @@ public class MockKitConfiguration extends KitConfiguration {
 
     @Override
     public KitConfiguration parseConfiguration(JSONObject json) throws JSONException {
-        mTypeFilters = new MockSparseBooleanArray();
-        mNameFilters = new MockSparseBooleanArray();
-        mAttributeFilters = new MockSparseBooleanArray();
-        mScreenNameFilters = new MockSparseBooleanArray();
-        mScreenAttributeFilters = new MockSparseBooleanArray();
-        mUserIdentityFilters = new MockSparseBooleanArray();
-        mUserAttributeFilters = new MockSparseBooleanArray();
-        mCommerceAttributeFilters = new MockSparseBooleanArray();
-        mCommerceEntityFilters = new MockSparseBooleanArray();
+       setEventTypeFilters(new MockSparseBooleanArray());
+       setEventNameFilters(new MockSparseBooleanArray());
+       setEventAttributeFilters(new MockSparseBooleanArray());
+       setScreenNameFilters(new MockSparseBooleanArray());
+       setScreenAttributeFilters( new MockSparseBooleanArray());
+       setUserIdentityFilters( new MockSparseBooleanArray());
+       setUserAttributeFilters(new MockSparseBooleanArray());
+       setCommerceEntityFilters( new MockSparseBooleanArray());
+       setCommerceAttributeFilters(new MockSparseBooleanArray());
         return super.parseConfiguration(json);
     }
 

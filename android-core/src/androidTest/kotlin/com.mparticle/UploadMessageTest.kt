@@ -18,7 +18,7 @@ import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Test
 import java.io.IOException
-import java.util.concurrent.CountDownLatch
+import java.util.concurrent.*
 
 class UploadMessageTest : BaseCleanStartedEachTest() {
     /**

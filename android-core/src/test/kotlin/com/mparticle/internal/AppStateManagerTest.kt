@@ -13,6 +13,7 @@ import com.mparticle.testutils.AndroidUtils
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentMatchers.isNull
 import org.mockito.Mockito
 
 class AppStateManagerTest {
@@ -86,7 +87,7 @@ class AppStateManagerTest {
                 Mockito.anyString(),
                 Mockito.anyString(),
                 Mockito.eq("this is data string 1"),
-                Mockito.isNull(String::class.java),
+                isNull(),
                 Mockito.eq("package name 1"),
                 Mockito.anyLong(),
                 Mockito.anyLong(),
@@ -106,7 +107,7 @@ class AppStateManagerTest {
                 Mockito.anyString(),
                 Mockito.anyString(),
                 Mockito.eq("this is data string 2"),
-                Mockito.isNull(String::class.java),
+                isNull(),
                 Mockito.eq("package name 2"),
                 Mockito.anyLong(),
                 Mockito.anyLong(),

@@ -10,6 +10,7 @@ import com.mparticle.internal.ConfigManager
 import com.mparticle.internal.KitManager.KitStatus
 import com.mparticle.internal.OnKitManagerLoaded
 import com.mparticle.internal.ReportingManager
+import com.mparticle.kits.MockitoHelper.anyObject
 import com.mparticle.mock.MockContext
 import com.mparticle.mock.MockCoreCallbacks
 import com.mparticle.mock.MockKitConfiguration
@@ -55,11 +56,7 @@ class KitManagerTest {
     fun testUpdateKits() {
         PowerMockito.mockStatic(Looper::class.java)
         val looper = PowerMockito.mock(Looper::class.java)
-        Mockito.`when`(Looper.myLooper()).thenReturn(looper)
-        Mockito.`when`(Looper.getMainLooper()).thenReturn(looper)
         val configJson = JSONObject(TestConstants.SAMPLE_EK_CONFIG)
-        manager.updateKits(null)
-        Assert.assertNotNull(manager.providers)
         manager.updateKits(JSONArray())
         Assert.assertNotNull(manager.providers)
         val array = configJson.optJSONArray(ConfigManager.KEY_EMBEDDED_KITS)
@@ -96,7 +93,6 @@ class KitManagerTest {
     @Test
     @Throws(Exception::class)
     fun testLogScreen() {
-        manager.logScreen(null)
         manager.logScreen(MPEvent.Builder("name").build())
     }
 
@@ -112,22 +108,18 @@ class KitManagerTest {
     fun testSetUserAttribute() {
         manager.setUserAttribute("key", "value", 1)
         manager.setUserAttribute("key", null, 1)
-        manager.setUserAttribute(null, null, 1)
     }
 
     @Test
     @Throws(Exception::class)
     fun testRemoveUserAttribute() {
-        manager.removeUserAttribute(null, 1)
         manager.removeUserAttribute("", 1)
     }
 
     @Test
     @Throws(Exception::class)
     fun testSetUserIdentity() {
-        manager.setUserIdentity("", null)
         manager.setUserIdentity("", MParticle.IdentityType.CustomerId)
-        manager.setUserIdentity(null, MParticle.IdentityType.CustomerId)
     }
 
     @Test
@@ -149,8 +141,6 @@ class KitManagerTest {
     fun testGetActiveModuleIds() {
         PowerMockito.mockStatic(Looper::class.java)
         val looper = PowerMockito.mock(Looper::class.java)
-        Mockito.`when`(Looper.myLooper()).thenReturn(looper)
-        Mockito.`when`(Looper.getMainLooper()).thenReturn(looper)
         val configJson = JSONObject(TestConstants.SAMPLE_EK_CONFIG)
         val array = configJson.optJSONArray(ConfigManager.KEY_EMBEDDED_KITS)
         manager.updateKits(array)
@@ -172,8 +162,6 @@ class KitManagerTest {
     fun testGetSurveyUrl() {
         PowerMockito.mockStatic(Looper::class.java)
         val looper = PowerMockito.mock(Looper::class.java)
-        Mockito.`when`(Looper.myLooper()).thenReturn(looper)
-        Mockito.`when`(Looper.getMainLooper()).thenReturn(looper)
         val configJson = JSONObject(TestConstants.SAMPLE_EK_CONFIG)
         val array = configJson.optJSONArray(ConfigManager.KEY_EMBEDDED_KITS)
         manager.updateKits(array)
@@ -185,12 +173,14 @@ class KitManagerTest {
         val uri = Mockito.mock(Uri::class.java)
         Mockito.`when`(
             mockForesee.getSurveyUrl(
-                Mockito.any(
-                    MutableMap::class.java
-                ) as MutableMap<String, String>?,
-                Mockito.any(
-                    MutableMap::class.java
-                ) as MutableMap<String, MutableList<String>>?
+                com.mparticle.kits.anyObject(),
+                com.mparticle.kits.anyObject()
+//                Mockito.any(
+//                    MutableMap::class.java
+//                ) as MutableMap<String, String>?,
+//                Mockito.any(
+//                    MutableMap::class.java
+//                ) as MutableMap<String, MutableList<String>>?
             )
         ).thenReturn(uri)
         manager.providers[MParticle.ServiceProviders.FORESEE_ID] = (mockForesee as KitIntegration)
@@ -210,3 +200,10 @@ class KitManagerTest {
         Assert.assertNotNull(manager.context)
     }
 }
+
+fun <T> anyObject(): T {
+    Mockito.any<T>()
+    return uninitialized()
+}
+@Suppress("UNCHECKED_CAST")
+fun <T> uninitialized(): T = null as T

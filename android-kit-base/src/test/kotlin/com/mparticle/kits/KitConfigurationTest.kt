@@ -65,7 +65,7 @@ class KitConfigurationTest {
                 if (filters.has("et")) {
                     Assert.assertEquals(
                         filters.getJSONObject("et").length().toLong(),
-                        configuration.eventTypeFilters.size().toLong()
+                        configuration.eventTypeFilters!!.size().toLong()
                     )
                 }
                 if (filters.has("ec")) {
@@ -107,27 +107,27 @@ class KitConfigurationTest {
                 if (filters.has("cea")) {
                     Assert.assertEquals(
                         filters.getJSONObject("cea").length().toLong(),
-                        configuration.commerceAttributeFilters.size().toLong()
+                        configuration.commerceAttributeFilters!!.size().toLong()
                     )
                 }
                 if (filters.has("ent")) {
                     Assert.assertEquals(
                         filters.getJSONObject("ent").length().toLong(),
-                        configuration.commerceEntityFilters.size().toLong()
+                        configuration.commerceEntityFilters!!.size().toLong()
                     )
                 }
                 if (filters.has("afa")) {
                     val entityAttFilters = filters.getJSONObject("afa")
                     Assert.assertEquals(
                         entityAttFilters.length().toLong(),
-                        configuration.commerceEntityAttributeFilters.size.toLong()
+                        configuration.commerceEntityAttributeFilters!!.size.toLong()
                     )
                     val keys: MutableIterator<Any?> = entityAttFilters.keys()
                     while (keys.hasNext()) {
                         val key: String = keys.next() as String
                         Assert.assertEquals(
                             entityAttFilters.getJSONObject(key).length().toLong(),
-                            configuration.commerceEntityAttributeFilters[key.toInt()]
+                            configuration.commerceEntityAttributeFilters!![key.toInt()]
                                 ?.size()?.toLong()
                         )
                     }
@@ -153,7 +153,7 @@ class KitConfigurationTest {
                     Assert.assertNotNull(configuration.defaultEventProjection)
                     Assert.assertEquals(
                         projections.length().toLong(),
-                        (configuration.customMappingList.size + 1).toLong()
+                        (configuration.getCustomMappingList()!!.size + 1).toLong()
                     )
                 }
             }
@@ -179,7 +179,7 @@ class KitConfigurationTest {
                 .customAttributes(attributes).build()
         Assert.assertEquals("whatever", event.customAttributeStrings?.get("my custom attribute"))
         val filteredEvent = configuration.filterCommerceEvent(event)
-        Assert.assertNull(filteredEvent.customAttributeStrings?.get("my custom attribute"))
+        Assert.assertNull(filteredEvent!!.customAttributeStrings?.get("my custom attribute"))
 
         // make sure we're only doing it for ADD_TO_CART
         var event2 =
@@ -193,19 +193,19 @@ class KitConfigurationTest {
         var filteredEvent2 = configuration.filterCommerceEvent(event2)
         Assert.assertEquals(
             "whatever",
-            filteredEvent2.customAttributeStrings?.get("my custom attribute")
+            filteredEvent2!!.customAttributeStrings?.get("my custom attribute")
         )
         event = CommerceEvent.Builder(Product.CHECKOUT, Product.Builder("name", "sku", 2.0).build())
             .checkoutOptions("cool options").build()
         Assert.assertEquals("cool options", event.checkoutOptions)
         filteredEvent2 = configuration.filterCommerceEvent(event)
-        Assert.assertNull(filteredEvent2.checkoutOptions)
+        Assert.assertNull(filteredEvent2!!.checkoutOptions)
         event =
             CommerceEvent.Builder(Product.ADD_TO_CART, Product.Builder("name", "sku", 2.0).build())
                 .checkoutOptions("cool options").build()
         Assert.assertEquals("cool options", event.checkoutOptions)
         filteredEvent2 = configuration.filterCommerceEvent(event)
-        Assert.assertEquals("cool options", filteredEvent2.checkoutOptions)
+        Assert.assertEquals("cool options", filteredEvent2!!.checkoutOptions)
         event2 =
             CommerceEvent.Builder(Product.PURCHASE, Product.Builder("name", "sku", 2.0).build())
                 .customAttributes(attributes).transactionAttributes(
@@ -213,7 +213,7 @@ class KitConfigurationTest {
                 ).build()
         Assert.assertEquals("cool affiliation", event2.transactionAttributes?.affiliation)
         filteredEvent2 = configuration.filterCommerceEvent(event2)
-        Assert.assertNull(filteredEvent2.transactionAttributes?.affiliation)
+        Assert.assertNull(filteredEvent2!!.transactionAttributes?.affiliation)
     }
 
     @Test
@@ -234,7 +234,7 @@ class KitConfigurationTest {
                 Assert.assertEquals(1, imp.products.size.toLong())
             }
         }
-        event = configuration.filterCommerceEvent(event)
+        event = configuration.filterCommerceEvent(event)!!
         Assert.assertNull(event.products)
         var impressionList2 = event.impressions
         if (impressionList2 != null) {
@@ -258,7 +258,7 @@ class KitConfigurationTest {
             }
         }
         event.products?.size?.let { Assert.assertEquals(1, it.toLong()) }
-        event = configuration.filterCommerceEvent(event)
+        event = configuration.filterCommerceEvent(event)!!
         event.products?.size?.let { Assert.assertEquals(1, it.toLong()) }
         impressionList2 = event.impressions
         if (impressionList2 != null) {
@@ -283,7 +283,7 @@ class KitConfigurationTest {
         )
         Assert.assertEquals("the creative", event.promotions?.get(0)?.creative)
         var filteredEvent = configuration.filterCommerceEvent(event)
-        Assert.assertNull(filteredEvent.promotions?.get(0)?.creative)
+        Assert.assertNull(filteredEvent!!.promotions?.get(0)?.creative)
         Assert.assertEquals("promotion name", filteredEvent.promotions?.get(0)?.name)
         val attributes: MutableMap<String, String> = HashMap()
         attributes["my custom product attribute"] = "whatever"
@@ -301,7 +301,7 @@ class KitConfigurationTest {
         Assert.assertEquals("cool brand", event.products?.get(0)?.brand)
         configuration = MockKitConfiguration.createKitConfiguration(JSONObject(COMMERCE_FILTERS_2))
         filteredEvent = configuration.filterCommerceEvent(event)
-        Assert.assertNull(filteredEvent.products?.get(0)?.customAttributes?.get("my custom product attribute"))
+        Assert.assertNull(filteredEvent!!.products?.get(0)?.customAttributes?.get("my custom product attribute"))
         Assert.assertNull(filteredEvent.products?.get(0)?.brand)
     }
 

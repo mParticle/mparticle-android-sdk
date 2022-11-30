@@ -7,11 +7,15 @@ import java.util.List;
 
 /**
  * Class representing an impression of one of more {@link Product} objects.
- *
  */
 public class Impression {
     private String mListName = null;
     private List<Product> mProducts;
+
+    public Impression(@NonNull String listName) {
+        super();
+        mListName = listName;
+    }
 
     /**
      * Create an Impression object.

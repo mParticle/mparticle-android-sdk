@@ -6,7 +6,6 @@ import androidx.annotation.Nullable;
 
 /**
  * Class encaspulating the parameters of a given Product CommerceEvent.
- *
  */
 public class TransactionAttributes {
     private String mAffiliation = null;
@@ -32,9 +31,8 @@ public class TransactionAttributes {
 
     /**
      * Create a TransactionAttributes object to be associated with a {@link CommerceEvent}.
-     *
+     * <p>
      * Note that transaction ID is required for {@link Product#PURCHASE} and {@link Product#REFUND} events.
-     *
      */
     public TransactionAttributes() {
         super();
@@ -42,7 +40,7 @@ public class TransactionAttributes {
 
     /**
      * Create a TransactionAttributes object to be associated with a {@link CommerceEvent}.
-     *
+     * <p>
      * Note that transaction ID is required for {@link Product#PURCHASE} and {@link Product#REFUND} events.
      *
      * @param transactionId a unique ID for this transaction
@@ -53,7 +51,7 @@ public class TransactionAttributes {
     }
 
     @NonNull
-    public TransactionAttributes setId(@NonNull String id) {
+    public TransactionAttributes setId(String id) {
         mId = id;
         return this;
     }

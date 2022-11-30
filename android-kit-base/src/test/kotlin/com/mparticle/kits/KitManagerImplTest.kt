@@ -11,6 +11,7 @@ import com.mparticle.identity.IdentityApi
 import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.CoreCallbacks
 import com.mparticle.kits.KitIntegration.AttributeListener
+import com.mparticle.kits.MockitoHelper.anyObject
 import com.mparticle.mock.MockKitConfiguration
 import com.mparticle.mock.MockKitManagerImpl
 import com.mparticle.mock.MockMParticle
@@ -23,11 +24,13 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
+import org.mockito.kotlin.mock
 import java.util.LinkedList
 
 class KitManagerImplTest {
     var mparticle: MParticle? = null
     var mockIdentity: IdentityApi? = null
+
     @Before
     fun before() {
         mockIdentity = Mockito.mock(IdentityApi::class.java)
@@ -71,10 +74,8 @@ class KitManagerImplTest {
         )
         Mockito.`when`(
             factory.createInstance(
-                Mockito.any(
-                    KitManagerImpl::class.java
-                ),
-                Mockito.any(KitConfiguration::class.java)
+                anyObject(),
+                any(KitConfiguration::class.java)
             )
         ).thenReturn(mockKit)
         manager.updateKits(kitConfiguration)
@@ -109,10 +110,8 @@ class KitManagerImplTest {
         )
         Mockito.`when`(
             factory.createInstance(
-                Mockito.any(
-                    KitManagerImpl::class.java
-                ),
-                Mockito.any(KitConfiguration::class.java)
+                any(KitManagerImpl::class.java),
+                any(KitConfiguration::class.java)
             )
         ).thenReturn(mockKit)
         manager.updateKits(kitConfiguration)
@@ -145,10 +144,8 @@ class KitManagerImplTest {
         )
         Mockito.`when`(
             factory.createInstance(
-                Mockito.any(
-                    KitManagerImpl::class.java
-                ),
-                Mockito.any(KitConfiguration::class.java)
+                any(KitManagerImpl::class.java),
+                any(KitConfiguration::class.java)
             )
         ).thenReturn(mockKit)
         manager.updateKits(kitConfiguration)
@@ -181,10 +178,8 @@ class KitManagerImplTest {
         )
         Mockito.`when`(
             factory.createInstance(
-                Mockito.any(
-                    KitManagerImpl::class.java
-                ),
-                Mockito.any(KitConfiguration::class.java)
+                any(KitManagerImpl::class.java),
+                any(KitConfiguration::class.java)
             )
         ).thenReturn(mockKit)
         manager.updateKits(kitConfiguration)
@@ -222,10 +217,8 @@ class KitManagerImplTest {
         )
         Mockito.`when`(
             factory.createInstance(
-                Mockito.any(
-                    KitManagerImpl::class.java
-                ),
-                Mockito.any(KitConfiguration::class.java)
+                any(KitManagerImpl::class.java),
+                any(KitConfiguration::class.java),
             )
         ).thenReturn(mockKit)
         manager.updateKits(kitConfiguration)
@@ -260,10 +253,8 @@ class KitManagerImplTest {
         )
         Mockito.`when`(
             factory.createInstance(
-                Mockito.any(
-                    KitManagerImpl::class.java
-                ),
-                Mockito.any(KitConfiguration::class.java)
+                any(KitManagerImpl::class.java),
+                any(KitConfiguration::class.java)
             )
         ).thenReturn(mockKit)
         manager.updateKits(kitConfiguration)
@@ -294,6 +285,7 @@ class KitManagerImplTest {
         manager.setKitFactory(factory)
         Mockito.`when`(factory.isSupported(Mockito.anyInt())).thenReturn(true)
         val mockKit = Mockito.mock(KitIntegration::class.java)
+        mockKit.setConfiguration(MockKitConfiguration())
         Mockito.`when`(mockKit.configuration).thenReturn(
             Mockito.mock(
                 KitConfiguration::class.java
@@ -301,10 +293,8 @@ class KitManagerImplTest {
         )
         Mockito.`when`(
             factory.createInstance(
-                Mockito.any(
-                    KitManagerImpl::class.java
-                ),
-                Mockito.any(KitConfiguration::class.java)
+                any(KitManagerImpl::class.java),
+                any(KitConfiguration::class.java)
             )
         ).thenReturn(mockKit)
         manager.updateKits(kitConfiguration)
@@ -346,10 +336,8 @@ class KitManagerImplTest {
         )
         Mockito.`when`(
             factory.createInstance(
-                Mockito.any(
-                    KitManagerImpl::class.java
-                ),
-                Mockito.any(KitConfiguration::class.java)
+                any(KitManagerImpl::class.java),
+                any(KitConfiguration::class.java)
             )
         ).thenReturn(mockKit)
         manager.updateKits(kitConfiguration)
@@ -498,10 +486,8 @@ class KitManagerImplTest {
         )
         Mockito.`when`(
             factory.createInstance(
-                Mockito.any(
-                    KitManagerImpl::class.java
-                ),
-                Mockito.any(KitConfiguration::class.java)
+                any(KitManagerImpl::class.java),
+                any(KitConfiguration::class.java)
             )
         ).thenReturn(mockKit)
         manager.setOptOut(true)
@@ -526,7 +512,7 @@ class KitManagerImplTest {
             logMPEventCalled++
         }
 
-        override fun logCommerceEvent(event: CommerceEvent?) {
+        override fun logCommerceEvent(event: CommerceEvent) {
             super.logCommerceEvent(event)
             logCommerceEventCalled++
         }

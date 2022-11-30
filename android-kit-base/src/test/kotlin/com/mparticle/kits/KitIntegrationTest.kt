@@ -9,7 +9,8 @@ import com.mparticle.kits.KitIntegration.AttributeListener
 import com.mparticle.mock.MockMParticle
 import org.junit.Assert
 import org.junit.Test
-import org.mockito.Mockito
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import java.util.LinkedList
 
 class KitIntegrationTest {
@@ -18,29 +19,28 @@ class KitIntegrationTest {
     fun testGetAllUserAttributesWithoutLists() {
         MParticle.setInstance(MockMParticle())
         val integration: KitIntegration = object : KitIntegration() {
-            override fun getName(): String? {
-                return null
-            }
+            override val name: String
+                get() = ""
 
             override fun onKitCreate(
                 settings: Map<String, String>,
                 context: Context
-            ): List<ReportingMessage>? {
-                return null
+            ): List<ReportingMessage> {
+                return listOf()
             }
 
             override fun setOptOut(optedOut: Boolean): List<ReportingMessage>? {
                 return null
             }
         }
-        integration.configuration = Mockito.mock(KitConfiguration::class.java)
+        integration.setConfiguration(mock<KitConfiguration>())
         val attributes: MutableMap<String, Any> = HashMap()
         attributes["key 1"] = "value 1"
         val list: MutableList<String> = LinkedList()
         list.add("value 2")
         list.add("value 3")
         attributes["key 2"] = list
-        Mockito.`when`(
+        whenever(
             MParticle.getInstance()!!.Identity().currentUser!!.userAttributes
         ).thenReturn(attributes)
         val filteredAttributes = integration.allUserAttributes
@@ -85,29 +85,26 @@ class KitIntegrationTest {
     fun testGetAllUserAttributesWithoutListsWithFilters() {
         MParticle.setInstance(MockMParticle())
         val integration: KitIntegration = object : KitIntegration() {
-            override fun getName(): String? {
-                return null
-            }
+            override val name: String
+                get() = ""
 
             override fun onKitCreate(
                 settings: Map<String, String>,
                 context: Context
-            ): List<ReportingMessage>? {
-                return null
+            ): List<ReportingMessage> {
+                return listOf()
             }
 
             override fun setOptOut(optedOut: Boolean): List<ReportingMessage>? {
                 return null
             }
         }
-        val configuration = Mockito.mock(
-            KitConfiguration::class.java
-        )
+        val configuration = mock<KitConfiguration>()
         val mockArray = MockSparseBooleanArray()
         mockArray.put(MPUtility.mpHash("key 4"), false)
         mockArray.put(MPUtility.mpHash("key 3"), false)
-        Mockito.`when`(configuration.userAttributeFilters).thenReturn(mockArray)
-        integration.configuration = configuration
+        whenever(configuration.userAttributeFilters).thenReturn(mockArray)
+        integration.setConfiguration(configuration)
         val attributes: MutableMap<String, Any> = HashMap()
         attributes["key 1"] = "value 1"
         attributes["key 4"] = "value 4"
@@ -116,7 +113,7 @@ class KitIntegrationTest {
         list.add("value 3")
         attributes["key 2"] = list
         attributes["key 3"] = list
-        Mockito.`when`(
+        whenever(
             MParticle.getInstance()!!.Identity().currentUser!!.userAttributes
         ).thenReturn(attributes)
         val filteredAttributes = integration.allUserAttributes
@@ -131,14 +128,14 @@ class KitIntegrationTest {
     fun testGetAllUserAttributesWithLists() {
         MParticle.setInstance(MockMParticle())
         val integration: KitIntegration = AttributeListenerIntegration()
-        integration.configuration = Mockito.mock(KitConfiguration::class.java)
+        integration.setConfiguration(mock<KitConfiguration>())
         val attributes: MutableMap<String, Any> = HashMap()
         attributes["key 1"] = "value 1"
         val list: MutableList<String> = LinkedList()
         list.add("value 2")
         list.add("value 3")
         attributes["key 2"] = list
-        Mockito.`when`(
+        whenever(
             MParticle.getInstance()!!.Identity().currentUser!!.userAttributes
         ).thenReturn(attributes)
         val filteredAttributes = integration.allUserAttributes
@@ -151,14 +148,12 @@ class KitIntegrationTest {
     fun testGetAllUserAttributesWithListsAndFilters() {
         MParticle.setInstance(MockMParticle())
         val integration: KitIntegration = AttributeListenerIntegration()
-        val configuration = Mockito.mock(
-            KitConfiguration::class.java
-        )
+        val configuration = mock<KitConfiguration>()
+        integration.setConfiguration(configuration)
         val mockArray = MockSparseBooleanArray()
         mockArray.put(MPUtility.mpHash("key 4"), false)
         mockArray.put(MPUtility.mpHash("key 3"), false)
-        Mockito.`when`(configuration.userAttributeFilters).thenReturn(mockArray)
-        integration.configuration = configuration
+        whenever(configuration.userAttributeFilters).thenReturn(mockArray)
         val attributes: MutableMap<String, Any> = HashMap()
         attributes["key 1"] = "value 1"
         attributes["key 4"] = "value 4"
@@ -167,7 +162,7 @@ class KitIntegrationTest {
         list.add("value 3")
         attributes["key 2"] = list
         attributes["key 3"] = list
-        Mockito.`when`(
+        whenever(
             MParticle.getInstance()!!.Identity().currentUser!!.userAttributes
         ).thenReturn(attributes)
         val filteredAttributes = integration.allUserAttributes
@@ -178,15 +173,15 @@ class KitIntegrationTest {
     }
 
     private inner class AttributeListenerIntegration : KitIntegration(), AttributeListener {
-        override fun setUserAttribute(attributeKey: String, attributeValue: String) {}
-        override fun setUserAttributeList(attributeKey: String, attributeValueList: List<String>) {}
+        override fun setUserAttribute(attributeKey: String, attributeValue: String?) {}
+        override fun setUserAttributeList(attributeKey: String, attributeValueList: List<String?>?) {}
         override fun supportsAttributeLists(): Boolean {
             return true
         }
 
         override fun setAllUserAttributes(
-            userAttributes: Map<String, String>,
-            userAttributeLists: Map<String, List<String>>
+            userAttributes: Map<String, String?>?,
+            userAttributeLists: Map<String, List<String>?>?
         ) {
         }
 
@@ -197,15 +192,14 @@ class KitIntegrationTest {
             return null
         }
 
-        override fun getName(): String? {
-            return null
-        }
+        override val name: String
+            get() = ""
 
         override fun onKitCreate(
             settings: Map<String, String>,
             context: Context
-        ): List<ReportingMessage>? {
-            return null
+        ): List<ReportingMessage> {
+            return listOf()
         }
 
         override fun setOptOut(optedOut: Boolean): List<ReportingMessage> ? {

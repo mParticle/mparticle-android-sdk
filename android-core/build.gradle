@@ -137,7 +137,7 @@ dependencies {
 
     api 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0'
 
-    lintPublish project( path: ':tooling:custom-lint-rules', configuration: 'lintBuild')
+    lintPublish project(path: ':tooling:custom-lint-rules', configuration: 'lintBuild')
 
     //the junit tests seem to explicitly need this dependency while
     //working in Android studio, but from the command line it's not necessary
@@ -168,5 +168,6 @@ configurations {
     }
 }
 
-boolean useOrchestrator() { return project.hasProperty('orchestrator') ? project.property('orchestrator') : false
+boolean useOrchestrator() {
+    return project.hasProperty('orchestrator') ? project.property('orchestrator') : false
 }

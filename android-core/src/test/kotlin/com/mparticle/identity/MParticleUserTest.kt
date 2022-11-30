@@ -12,6 +12,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.isNull
 import org.mockito.Mockito
 
 class MParticleUserTest {
@@ -217,7 +218,7 @@ class MParticleUserTest {
             mp?.Identity()?.mMessageManager,
             Mockito.times(1)
         )?.logUserIdentityChangeMessage(
-            Mockito.isNull(JSONObject::class.java),
+            isNull(),
             argument2.capture(),
             argument3.capture(),
             argument4.capture()
@@ -260,7 +261,7 @@ class MParticleUserTest {
             Mockito.times(1)
         )?.logUserIdentityChangeMessage(
             argument2.capture(),
-            Mockito.isNull(JSONObject::class.java),
+            isNull(),
             argument3.capture(),
             argument4.capture()
         )

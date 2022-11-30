@@ -73,7 +73,7 @@ open class KitManagerImpl( // ==================================================
     private var kitConfigurations: List<KitConfiguration> = ArrayList()
     private val mAttributionResultsMap: MutableMap<Int, AttributionResult> = TreeMap()
     private val kitsLoadedListeners = ArrayList<KitsLoadedListener>()
-    var providers = ConcurrentHashMap<Int, KitIntegration?>()
+    var providers = ConcurrentHashMap<Int, KitIntegration>()
 
     init {
         mKitIntegrationFactory = KitIntegrationFactory()
@@ -95,7 +95,7 @@ open class KitManagerImpl( // ==================================================
      * Need this method so that we can override it during unit tests.
      */
     @Throws(JSONException::class)
-    protected open fun createKitConfiguration(configuration: JSONObject?): KitConfiguration {
+    protected open fun createKitConfiguration(configuration: JSONObject): KitConfiguration {
         return KitConfiguration.createKitConfiguration(configuration)
     }
 
@@ -119,20 +119,20 @@ open class KitManagerImpl( // ==================================================
         integrationAttributes: Map<String?, String?>?
     ) {
         mCoreCallbacks.setIntegrationAttributes(
-            kitIntegration.configuration.kitId,
+            kitIntegration.configuration?.kitId!!,
             integrationAttributes
         )
     }
 
     fun getIntegrationAttributes(kitIntegration: KitIntegration): Map<String, String> {
-        return mCoreCallbacks.getIntegrationAttributes(kitIntegration.configuration.kitId)
+        return mCoreCallbacks.getIntegrationAttributes(kitIntegration.configuration?.kitId!!)
     }
 
     fun clearIntegrationAttributes(kitIntegration: KitIntegration) {
         setIntegrationAttributes(kitIntegration, null)
     }
 
-    override fun updateKits(kitConfigs: JSONArray?): KitsLoadedCallback? {
+    override fun updateKits(kitConfigs: JSONArray): KitsLoadedCallback? {
         val callback = KitsLoadedCallback()
         runOnKitThread {
             kitConfigurations = parseKitConfigurations(kitConfigs)
@@ -207,7 +207,7 @@ open class KitManagerImpl( // ==================================================
                             this@KitManagerImpl,
                             configuration
                         )
-                        if (activeKit.isDisabled ||
+                        if (activeKit == null || activeKit!!.isDisabled ||
                             !configuration.shouldIncludeFromConsentRules(user)
                         ) {
                             Logger.debug("Kit id configured but is filtered or disabled: $currentModuleID")
@@ -218,14 +218,14 @@ open class KitManagerImpl( // ==================================================
                         providers[currentModuleID] = activeKit
                         mCoreCallbacks.kitListener.kitStarted(currentModuleID)
                     } else {
-                        activeKit.configuration = configuration
+                        activeKit.setConfiguration(configuration)
                         if (activeKit.isDisabled ||
                             !configuration.shouldIncludeFromConsentRules(user)
                         ) {
                             continue
                         }
                         activeIds.add(currentModuleID)
-                        activeKit.onSettingsUpdated(configuration.settings)
+                        activeKit.onSettingsUpdated(configuration.getSettings())
                     }
                 } catch (e: Exception) {
                     mCoreCallbacks.kitListener.kitExcluded(
@@ -257,7 +257,7 @@ open class KitManagerImpl( // ==================================================
 
     private fun initializeKit(activeKit: KitIntegration?) {
         Logger.debug("Initializing kit: " + activeKit!!.name)
-        activeKit.onKitCreate(activeKit.configuration.settings, context)
+        activeKit.onKitCreate(activeKit.configuration!!.getSettings(), context)
         if (activeKit is ActivityListener) {
             val activityWeakReference = currentActivity
             if (activityWeakReference != null) {
@@ -277,7 +277,7 @@ open class KitManagerImpl( // ==================================================
             }
         }
         if (activeKit is AttributeListener) {
-            syncUserIdentities(activeKit as AttributeListener, activeKit.configuration)
+            syncUserIdentities(activeKit as AttributeListener, activeKit.configuration!!)
         }
         val instance = MParticle.getInstance()
         if (instance != null) {
@@ -296,7 +296,7 @@ open class KitManagerImpl( // ==================================================
             }
         }
         val intent =
-            Intent(MParticle.ServiceProviders.BROADCAST_ACTIVE + activeKit.configuration.kitId)
+            Intent(MParticle.ServiceProviders.BROADCAST_ACTIVE + activeKit.configuration?.kitId!!)
         context.sendBroadcast(intent)
     }
 
@@ -336,7 +336,7 @@ open class KitManagerImpl( // ==================================================
                 if (!provider!!.isDisabled) {
                     provider.setLocation(location)
                     mCoreCallbacks.kitListener.onKitApiCalled(
-                        provider.configuration.kitId,
+                        provider.configuration!!.kitId,
                         true,
                         location
                     )
@@ -359,7 +359,7 @@ open class KitManagerImpl( // ==================================================
     ) {
         for (provider in providers.values) {
             try {
-                if (!provider!!.isDisabled) {
+                if (!provider.isDisabled) {
                     val report = provider.logNetworkPerformance(
                         url,
                         startTime,
@@ -372,7 +372,7 @@ open class KitManagerImpl( // ==================================================
                     )
                     reportingManager.logAll(report)
                     mCoreCallbacks.kitListener.onKitApiCalled(
-                        provider.configuration.kitId,
+                        provider.configuration!!.kitId,
                         !MPUtility.isEmpty(report),
                         url,
                         startTime,
@@ -397,7 +397,7 @@ open class KitManagerImpl( // ==================================================
                     val messages = provider.setOptOut(optOutStatus)
                     reportingManager.logAll(messages)
                     mCoreCallbacks.kitListener.onKitApiCalled(
-                        provider.configuration.kitId,
+                        provider.configuration!!.kitId,
                         !MPUtility.isEmpty(messages),
                         optOutStatus
                     )
@@ -426,7 +426,7 @@ open class KitManagerImpl( // ==================================================
                     event!!
                 )
                 mCoreCallbacks.kitListener.onKitApiCalled(
-                    provider.configuration.kitId,
+                    provider.configuration!!.kitId,
                     !MPUtility.isEmpty(messages),
                     event
                 )
@@ -434,7 +434,7 @@ open class KitManagerImpl( // ==================================================
             } catch (e: Exception) {
                 Logger.warning("Failed to call logMPEvent for kit: " + provider!!.name + ": " + e.message)
                 mCoreCallbacks.kitListener.onKitApiCalled(
-                    provider.configuration.kitId,
+                    provider.configuration!!.kitId,
                     false,
                     event,
                     e
@@ -444,24 +444,24 @@ open class KitManagerImpl( // ==================================================
         if (event is MPEvent) {
             logMPEvent(event)
         } else if (event is CommerceEvent) {
-            logCommerceEvent(event as CommerceEvent?)
+            logCommerceEvent(event)
         }
     }
 
     // ================================================================================
     // KitIntegration.CommerceListener forwarding
     // ================================================================================
-    protected open fun logCommerceEvent(event: CommerceEvent?) {
+    protected open fun logCommerceEvent(event: CommerceEvent) {
         for (provider in providers.values) {
             try {
                 if (!provider!!.isDisabled) {
-                    val filteredEvent = provider.configuration.filterCommerceEvent(event)
+                    val filteredEvent = provider.configuration!!.filterCommerceEvent(event)
                     if (filteredEvent != null) {
                         if (provider is CommerceListener) {
                             val projectedEvents = CustomMapping.projectEvents(
                                 filteredEvent,
-                                provider.configuration.customMappingList,
-                                provider.configuration.defaultCommerceCustomMapping
+                                provider.configuration!!.getCustomMappingList(),
+                                provider.configuration!!.defaultCommerceCustomMapping
                             )
                             if (projectedEvents != null && projectedEvents.size > 0) {
                                 val masterMessage =
@@ -471,15 +471,15 @@ open class KitManagerImpl( // ==================================================
                                     val result = projectedEvents[i]
                                     var report: List<ReportingMessage?>? = null
                                     var messageType: String? = null
-                                    if (result.mpEvent != null) {
-                                        val projectedEvent = projectedEvents[i].mpEvent
+                                    if (result.mPEvent != null) {
+                                        val projectedEvent = projectedEvents[i].mPEvent!!
                                         report =
                                             (provider as KitIntegration.EventListener).logEvent(
                                                 projectedEvent
                                             )
                                         mCoreCallbacks.kitListener.onKitApiCalled(
                                             "logMPEvent()",
-                                            provider.configuration.kitId,
+                                            provider.configuration!!.kitId,
                                             !MPUtility.isEmpty(report),
                                             projectedEvent
                                         )
@@ -490,7 +490,7 @@ open class KitManagerImpl( // ==================================================
                                             (provider as CommerceListener).logEvent(projectedEvent)
                                         mCoreCallbacks.kitListener.onKitApiCalled(
                                             "logMPEvent()",
-                                            provider.configuration.kitId,
+                                            provider.configuration!!.kitId,
                                             !MPUtility.isEmpty(report),
                                             projectedEvent
                                         )
@@ -504,7 +504,7 @@ open class KitManagerImpl( // ==================================================
                                                     projectedEvents[i].projectionId,
                                                     messageType,
                                                     message!!.eventName,
-                                                    message.eventTypeString
+                                                    message.eventTypeString!!
                                                 )
                                             )
                                         }
@@ -518,7 +518,7 @@ open class KitManagerImpl( // ==================================================
                                     (provider as CommerceListener).logEvent(filteredEvent)
                                 mCoreCallbacks.kitListener.onKitApiCalled(
                                     "logMPEvent()",
-                                    provider.configuration.kitId,
+                                    provider.configuration!!.kitId,
                                     !MPUtility.isEmpty(reporting),
                                     filteredEvent
                                 )
@@ -539,7 +539,7 @@ open class KitManagerImpl( // ==================================================
                                         )
                                     mCoreCallbacks.kitListener.onKitApiCalled(
                                         "logMPEvent()",
-                                        provider.configuration.kitId,
+                                        provider.configuration!!.kitId,
                                         !MPUtility.isEmpty(reporting),
                                         expandedEvent
                                     )
@@ -563,7 +563,7 @@ open class KitManagerImpl( // ==================================================
     // ================================================================================
     // KitIntegration.PushListener forwarding
     // ================================================================================
-    override fun onMessageReceived(context: Context?, intent: Intent?): Boolean {
+    override fun onMessageReceived(context: Context, intent: Intent): Boolean {
         for (provider in providers.values) {
             if (provider is PushListener) {
                 try {
@@ -572,7 +572,7 @@ open class KitManagerImpl( // ==================================================
                             (provider as PushListener).willHandlePushMessage(intent)
                         mCoreCallbacks.kitListener.onKitApiCalled(
                             "willHandlePushMessage()",
-                            provider.configuration.kitId,
+                            provider.configuration!!.kitId,
                             willHandlePush,
                             intent
                         )
@@ -580,7 +580,7 @@ open class KitManagerImpl( // ==================================================
                             (provider as PushListener).onPushMessageReceived(context, intent)
                             mCoreCallbacks.kitListener.onKitApiCalled(
                                 "onPushMessageReceived()",
-                                provider.configuration.kitId,
+                                provider.configuration!!.kitId,
                                 null,
                                 context,
                                 intent
@@ -598,7 +598,7 @@ open class KitManagerImpl( // ==================================================
         return false
     }
 
-    override fun onPushRegistration(token: String?, senderId: String?): Boolean {
+    override fun onPushRegistration(token: String, senderId: String?): Boolean {
         for (provider in providers.values) {
             if (provider is PushListener) {
                 try {
@@ -606,7 +606,7 @@ open class KitManagerImpl( // ==================================================
                         val onPushRegistration =
                             (provider as PushListener).onPushRegistration(token, senderId)
                         mCoreCallbacks.kitListener.onKitApiCalled(
-                            provider.configuration.kitId,
+                            provider.configuration!!.kitId,
                             onPushRegistration,
                             token,
                             senderId
@@ -643,13 +643,13 @@ open class KitManagerImpl( // ==================================================
                     !provider.isDisabled
                 ) {
                     val filteredAttributeSingles = KitConfiguration.filterAttributes(
-                        provider.configuration.userAttributeFilters,
+                        provider.configuration!!.userAttributeFilters,
                         userAttributes
-                    ) as Map<String, String?>
+                    ) as Map<String, String?>?
                     val filteredAttributeLists = KitConfiguration.filterAttributes(
-                        provider.configuration.userAttributeFilters,
+                        provider.configuration!!.userAttributeFilters,
                         userAttributeLists
-                    ) as Map<String, List<String>?>
+                    ) as Map<String, List<String>?>?
                     if (provider is AttributeListener) {
                         if ((provider as AttributeListener).supportsAttributeLists()) {
                             (provider as AttributeListener).setAllUserAttributes(
@@ -659,8 +659,10 @@ open class KitManagerImpl( // ==================================================
                         } else {
                             val singlesCopy: MutableMap<String, String?> =
                                 HashMap(filteredAttributeSingles)
-                            for ((key, value) in filteredAttributeLists) {
-                                singlesCopy[key] = KitUtils.join(value)
+                            filteredAttributeLists?.let {
+                                it.forEach {
+                                    singlesCopy[it.key] = KitUtils.join(it.value)
+                                }
                             }
                             (provider as AttributeListener).setAllUserAttributes(
                                 singlesCopy,
@@ -680,8 +682,10 @@ open class KitManagerImpl( // ==================================================
                         } else {
                             val singlesCopy: MutableMap<String, String?> =
                                 HashMap(filteredAttributeSingles)
-                            for ((key, value) in filteredAttributeLists) {
-                                singlesCopy[key] = KitUtils.join(value)
+                            filteredAttributeLists?.let {
+                                it.forEach {
+                                    singlesCopy[it.key] = KitUtils.join(it.value)
+                                }
                             }
                             (provider as KitIntegration.UserAttributeListener).onSetAllUserAttributes(
                                 singlesCopy, HashMap(),
@@ -718,7 +722,7 @@ open class KitManagerImpl( // ==================================================
         }
     }
 
-    override fun setUserAttribute(attributeKey: String?, attributeValue: String?, mpid: Long) {
+    override fun setUserAttribute(attributeKey: String, attributeValue: String?, mpid: Long) {
         if (mDataplanFilter.isUserAttributeBlocked(attributeKey)) {
             return
         }
@@ -732,7 +736,7 @@ open class KitManagerImpl( // ==================================================
     }
 
     override fun setUserAttributeList(
-        attributeKey: String?,
+        attributeKey: String,
         valuesList: List<String?>?,
         mpid: Long
     ) {
@@ -750,14 +754,14 @@ open class KitManagerImpl( // ==================================================
 
     private fun setUserAttribute(
         provider: KitIntegration?,
-        attributeKey: String?,
+        attributeKey: String,
         valueList: List<String?>?,
         mpid: Long
     ) {
         if ((provider is AttributeListener || provider is KitIntegration.UserAttributeListener) &&
             !provider.isDisabled &&
             KitConfiguration.shouldForwardAttribute(
-                    provider.configuration.userAttributeFilters,
+                    provider.configuration!!.userAttributeFilters,
                     attributeKey
                 )
         ) {
@@ -790,15 +794,15 @@ open class KitManagerImpl( // ==================================================
     }
 
     private fun setUserAttribute(
-        provider: KitIntegration?,
-        attributeKey: String?,
+        provider: KitIntegration,
+        attributeKey: String,
         attributeValue: String?,
         mpid: Long
     ) {
         if ((provider is AttributeListener || provider is KitIntegration.UserAttributeListener) &&
             !provider.isDisabled &&
             KitConfiguration.shouldForwardAttribute(
-                    provider.configuration.userAttributeFilters,
+                    provider.configuration!!.userAttributeFilters,
                     attributeKey
                 )
         ) {
@@ -815,7 +819,7 @@ open class KitManagerImpl( // ==================================================
         }
     }
 
-    override fun removeUserAttribute(key: String?, mpid: Long) {
+    override fun removeUserAttribute(key: String, mpid: Long) {
         if (mDataplanFilter.isUserAttributeBlocked(key)) {
             return
         }
@@ -824,7 +828,7 @@ open class KitManagerImpl( // ==================================================
                 if ((provider is AttributeListener || provider is KitIntegration.UserAttributeListener) &&
                     !provider.isDisabled &&
                     KitConfiguration.shouldForwardAttribute(
-                            provider.configuration.userAttributeFilters,
+                            provider.configuration!!.userAttributeFilters,
                             key
                         )
                 ) {
@@ -845,8 +849,8 @@ open class KitManagerImpl( // ==================================================
     }
 
     override fun incrementUserAttribute(
-        key: String?,
-        incrementedBy: Number?,
+        key: String,
+        incrementedBy: Number,
         newValue: String?,
         mpid: Long
     ) {
@@ -856,7 +860,7 @@ open class KitManagerImpl( // ==================================================
         for (provider in providers.values) {
             try {
                 if (!provider!!.isDisabled && KitConfiguration.shouldForwardAttribute(
-                        provider.configuration.userAttributeFilters,
+                        provider.configuration!!.userAttributeFilters,
                         key
                     )
                 ) if (provider is KitIntegration.UserAttributeListener) {
@@ -876,7 +880,7 @@ open class KitManagerImpl( // ==================================================
         }
     }
 
-    override fun setUserTag(tag: String?, mpid: Long) {
+    override fun setUserTag(tag: String, mpid: Long) {
         if (mDataplanFilter.isUserAttributeBlocked(tag)) {
             return
         }
@@ -884,7 +888,7 @@ open class KitManagerImpl( // ==================================================
             try {
                 if (provider is KitIntegration.UserAttributeListener && !provider.isDisabled &&
                     KitConfiguration.shouldForwardAttribute(
-                            provider.configuration.userAttributeFilters,
+                            provider.configuration!!.userAttributeFilters,
                             tag
                         )
                 ) {
@@ -899,13 +903,13 @@ open class KitManagerImpl( // ==================================================
         }
     }
 
-    override fun setUserIdentity(id: String?, identityType: IdentityType?) {
+    override fun setUserIdentity(id: String, identityType: IdentityType) {
         if (mDataplanFilter.isUserIdentityBlocked(identityType)) {
             return
         }
         for (provider in providers.values) {
             try {
-                if (provider is AttributeListener && !provider.isDisabled && provider.configuration.shouldSetIdentity(
+                if (provider is AttributeListener && !provider.isDisabled && provider.configuration!!.shouldSetIdentity(
                         identityType
                     )
                 ) {
@@ -917,7 +921,7 @@ open class KitManagerImpl( // ==================================================
         }
     }
 
-    override fun removeUserIdentity(identityType: IdentityType?) {
+    override fun removeUserIdentity(identityType: IdentityType) {
         if (mDataplanFilter.isUserIdentityBlocked(identityType)) {
             return
         }
@@ -955,17 +959,17 @@ open class KitManagerImpl( // ==================================================
         }
         for (provider in providers.values) {
             try {
-                if (provider is KitIntegration.EventListener && !provider.isDisabled && provider.configuration.shouldLogEvent(
+                if (provider is KitIntegration.EventListener && !provider.isDisabled && provider.configuration!!.shouldLogEvent(
                         event
                     )
                 ) {
                     val eventCopy = MPEvent(event)
                     eventCopy.customAttributes =
-                        provider.configuration.filterEventAttributes(eventCopy)
+                        provider.configuration!!.filterEventAttributes(eventCopy)
                     val projectedEvents = CustomMapping.projectEvents(
                         eventCopy,
-                        provider.configuration.customMappingList,
-                        provider.configuration.defaultEventProjection
+                        provider.configuration!!.getCustomMappingList(),
+                        provider.configuration!!.defaultEventProjection
                     )
                     val reportingMessages: MutableList<ReportingMessage?> = LinkedList()
                     if (projectedEvents == null) {
@@ -985,7 +989,7 @@ open class KitManagerImpl( // ==================================================
                             messages =
                                 (provider as KitIntegration.EventListener).logEvent(eventCopy)
                             mCoreCallbacks.kitListener.onKitApiCalled(
-                                provider.configuration.kitId,
+                                provider.configuration!!.kitId,
                                 !MPUtility.isEmpty(messages),
                                 eventCopy
                             )
@@ -997,11 +1001,11 @@ open class KitManagerImpl( // ==================================================
                         val masterMessage = ReportingMessage.fromEvent(provider, eventCopy)
                         var forwarded = false
                         for (i in projectedEvents.indices) {
-                            val projectedEvent = projectedEvents[i].mpEvent
+                            val projectedEvent = projectedEvents[i].mPEvent!!
                             val messages =
                                 (provider as KitIntegration.EventListener).logEvent(projectedEvent)
                             mCoreCallbacks.kitListener.onKitApiCalled(
-                                provider.configuration.kitId,
+                                provider.configuration!!.kitId,
                                 !MPUtility.isEmpty(messages),
                                 projectedEvent
                             )
@@ -1012,7 +1016,7 @@ open class KitManagerImpl( // ==================================================
                                         projectedEvents[i].projectionId,
                                         ReportingMessage.MessageType.EVENT,
                                         message!!.eventName,
-                                        message.eventTypeString
+                                        message.eventTypeString!!
                                     )
                                     masterMessage.addProjectionReport(report)
                                 }
@@ -1030,7 +1034,7 @@ open class KitManagerImpl( // ==================================================
         }
     }
 
-    override fun logBatch(batch: String?) {
+    override fun logBatch(batch: String) {
         for (provider in providers.values) {
             try {
                 if (provider is BatchListener) {
@@ -1057,7 +1061,7 @@ open class KitManagerImpl( // ==================================================
                         (provider as KitIntegration.EventListener).leaveBreadcrumb(breadcrumb)
                     reportingManager.logAll(report)
                     mCoreCallbacks.kitListener.onKitApiCalled(
-                        provider.configuration.kitId,
+                        provider.configuration!!.kitId,
                         !MPUtility.isEmpty(report),
                         breadcrumb
                     )
@@ -1076,7 +1080,7 @@ open class KitManagerImpl( // ==================================================
                         (provider as KitIntegration.EventListener).logError(message, eventData)
                     reportingManager.logAll(report)
                     mCoreCallbacks.kitListener.onKitApiCalled(
-                        provider.configuration.kitId,
+                        provider.configuration!!.kitId,
                         !MPUtility.isEmpty(report),
                         message,
                         eventData
@@ -1103,7 +1107,7 @@ open class KitManagerImpl( // ==================================================
                     )
                     reportingManager.logAll(report)
                     mCoreCallbacks.kitListener.onKitApiCalled(
-                        provider.configuration.kitId,
+                        provider.configuration!!.kitId,
                         !MPUtility.isEmpty(report),
                         exception,
                         message,
@@ -1116,7 +1120,7 @@ open class KitManagerImpl( // ==================================================
         }
     }
 
-    override fun logScreen(screenEvent: MPEvent?) {
+    override fun logScreen(screenEvent: MPEvent) {
         var screenEvent: MPEvent? = screenEvent
         if (mDataplanFilter != null) {
             screenEvent = mDataplanFilter.transformEventForEvent(screenEvent)
@@ -1126,13 +1130,13 @@ open class KitManagerImpl( // ==================================================
         }
         for (provider in providers.values) {
             try {
-                if (provider is KitIntegration.EventListener && !provider.isDisabled && provider.configuration.shouldLogScreen(
+                if (provider is KitIntegration.EventListener && !provider.isDisabled && provider.configuration!!.shouldLogScreen(
                         screenEvent!!.eventName
                     )
                 ) {
                     val filteredEvent = MPEvent.Builder(screenEvent)
                         .customAttributes(
-                            provider.configuration.filterScreenAttributes(
+                            provider.configuration!!.filterScreenAttributes(
                                 null,
                                 screenEvent.eventName,
                                 screenEvent.customAttributes
@@ -1142,9 +1146,9 @@ open class KitManagerImpl( // ==================================================
                     val projectedEvents = CustomMapping.projectEvents(
                         filteredEvent,
                         true,
-                        provider.configuration.customMappingList,
-                        provider.configuration.defaultEventProjection,
-                        provider.configuration.defaultScreenCustomMapping
+                        provider.configuration!!.getCustomMappingList(),
+                        provider.configuration!!.defaultEventProjection,
+                        provider.configuration!!.defaultScreenCustomMapping
                     )
                     if (projectedEvents == null) {
                         val eventName = filteredEvent.eventName
@@ -1154,7 +1158,7 @@ open class KitManagerImpl( // ==================================================
                             eventInfo
                         )
                         mCoreCallbacks.kitListener.onKitApiCalled(
-                            provider.configuration.kitId,
+                            provider.configuration!!.kitId,
                             !MPUtility.isEmpty(report),
                             eventName,
                             eventInfo
@@ -1176,10 +1180,10 @@ open class KitManagerImpl( // ==================================================
                         var forwarded = false
                         for (projectedEvent in projectedEvents) {
                             val report =
-                                (provider as KitIntegration.EventListener).logEvent(projectedEvent.mpEvent)
+                                (provider as KitIntegration.EventListener).logEvent(projectedEvent.mPEvent!!)
                             mCoreCallbacks.kitListener.onKitApiCalled(
                                 "logMPEvent()",
-                                provider.configuration.kitId,
+                                provider.configuration!!.kitId,
                                 !MPUtility.isEmpty(report),
                                 projectedEvent
                             )
@@ -1190,7 +1194,7 @@ open class KitManagerImpl( // ==================================================
                                         projectedEvent.projectionId,
                                         ReportingMessage.MessageType.EVENT,
                                         message!!.eventName,
-                                        message.eventTypeString
+                                        message.eventTypeString!!
                                     )
                                     masterMessage.setMessageType(ReportingMessage.MessageType.SCREEN_VIEW)
                                     masterMessage.setScreenName(message.eventName)
@@ -1652,13 +1656,13 @@ open class KitManagerImpl( // ==================================================
         val provider = providers[serviceId]
         return provider?.getSurveyUrl(
             KitConfiguration.filterAttributes(
-                provider.configuration.userAttributeFilters,
+                provider.configuration!!.userAttributeFilters,
                 userAttributes
-            ) as Map<String?, String?>,
+            ) as Map<String?, String?>?,
             KitConfiguration.filterAttributes(
-                provider.configuration.userAttributeFilters,
+                provider.configuration?.userAttributeFilters,
                 userAttributeLists
-            ) as Map<String?, List<String?>?>
+            ) as Map<String?, List<String?>?>?
         )
     }
 

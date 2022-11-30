@@ -16,7 +16,7 @@ public class MockKit extends KitIntegration {
     }
 
     @Override
-    protected List<ReportingMessage> onKitCreate(Map<String, String> settings, Context context) {return null;}
+    public List<ReportingMessage> onKitCreate(Map<String, String> settings, Context context) {return null;}
 
     @Override
     public List<ReportingMessage> setOptOut(boolean optedOut) {

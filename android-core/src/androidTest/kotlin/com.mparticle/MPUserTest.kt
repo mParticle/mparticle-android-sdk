@@ -53,11 +53,11 @@ class MPUserTest : BaseCleanStartedEachTest() {
 
             getUserAttributes(object : TypedUserAttributeListener {
                 override fun onUserAttributesReceived(
-                    userAttributes: Map<String, Any?>,
-                    userAttributeLists: Map<String, List<String?>?>,
+                    userAttributes: Map<String, Any?>?,
+                    userAttributeLists: Map<String, List<String?>?>?,
                     mpid: Long
                 ) {
-                    assertEquals(6, userAttributes.size)
+                    assertEquals(6, userAttributes!!.size)
                     assertEquals("bar", userAttributes["foo"])
                     assertEquals(123L, userAttributes["fooInt"])
                     assertEquals(12345L, userAttributes["fooLong"])

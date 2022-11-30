@@ -8,7 +8,6 @@ class KitUtilsTest {
     @Test
     @Throws(Exception::class)
     fun testSanitizeAttributeKey() {
-        Assert.assertNull(KitUtils.sanitizeAttributeKey(null))
         Assert.assertEquals("", KitUtils.sanitizeAttributeKey(""))
         Assert.assertEquals("TestTest", KitUtils.sanitizeAttributeKey("\$TestTest"))
         Assert.assertEquals("$", KitUtils.sanitizeAttributeKey("$$"))

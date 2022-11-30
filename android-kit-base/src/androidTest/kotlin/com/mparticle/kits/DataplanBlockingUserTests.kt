@@ -285,7 +285,6 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
                 .userIdentities(blockedIdentities + allowedIdentities)
                 .build()
         )
-        val latch = MPLatch(1)
         kitIntegrationTestKits.forEach { kit ->
             kit.onUserReceived = {
                 assertEquals(allowedIdentities, it?.userIdentities)
@@ -294,15 +293,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         identityListenerKitKit.onLoginCompleted = { user, request ->
             assertEquals(allowedIdentities, request?.userIdentities)
             assertEquals(allowedIdentities, user?.userIdentities)
-            latch.countDown()
         }
-        latch.await()
-
-        // sanity check to make sure the non-filtered User has the blocked identities
-        assertEquals(
-            allowedIdentities + blockedIdentities,
-            MParticle.getInstance()?.Identity()?.currentUser?.userIdentities
-        )
     }
 
     private fun getRandomDataplanEventKey(): DataplanFilterImpl.DataPoint {

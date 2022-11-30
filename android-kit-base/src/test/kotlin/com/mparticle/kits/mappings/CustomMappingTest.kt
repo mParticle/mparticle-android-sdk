@@ -45,34 +45,34 @@ class CustomMappingTest {
                 )
                 Assert.assertEquals(
                     matches.getJSONObject(0).getString("event_match_type"),
-                    customMapping.matchList[0].mMatchType
+                    customMapping.getMatchList()!![0].mMatchType
                 )
-                if (customMapping.matchList[0].mMatchType.startsWith(CustomMapping.MATCH_TYPE_HASH)) {
+                if (customMapping.getMatchList()!![0].mMatchType.startsWith(CustomMapping.MATCH_TYPE_HASH)) {
                     Assert.assertEquals(
                         matches.getJSONObject(0).getInt("event").toLong(),
-                        customMapping.matchList[0].mEventHash.toLong()
+                        customMapping.getMatchList()!![0].mEventHash.toLong()
                     )
                 } else {
                     Assert.assertEquals(
                         matches.getJSONObject(0).getString("event"),
-                        customMapping.matchList[0].mEventName
+                        customMapping.getMatchList()!![0].mEventName
                     )
                 }
                 if (matches.getJSONObject(0).has("attribute_key")) {
                     Assert.assertEquals(
                         matches.getJSONObject(0).getString("attribute_key"),
-                        customMapping.matchList[0].mAttributeKey
+                        customMapping.getMatchList()!![0].mAttributeKey
                     )
                     if (matches.getJSONObject(0)["attribute_values"] is JSONArray) {
                         val attributeValues =
                             matches.getJSONObject(0).getJSONArray("attribute_values")
                         Assert.assertEquals(
                             attributeValues.length().toLong(),
-                            customMapping.matchList[0].attributeValues.size.toLong()
+                            customMapping.getMatchList()!![0].attributeValues!!.size.toLong()
                         )
                     } else {
                         Assert.assertTrue(
-                            customMapping.matchList[0].attributeValues.contains(
+                            customMapping.getMatchList()!![0].attributeValues!!.contains(
                                 matches.getJSONObject(0).getString("attribute_values").lowercase()
                             )
                         )
@@ -97,8 +97,8 @@ class CustomMappingTest {
                 )
                 val attributes = action.getJSONArray("attribute_maps")
                 val sum =
-                    (if (customMapping.mRequiredAttributeMapList == null) 0 else customMapping.mRequiredAttributeMapList.size) +
-                        if (customMapping.mStaticAttributeMapList == null) 0 else customMapping.mStaticAttributeMapList.size
+                    (if (customMapping.mRequiredAttributeMapList == null) 0 else customMapping.mRequiredAttributeMapList!!.size) +
+                        if (customMapping.mStaticAttributeMapList == null) 0 else customMapping.mStaticAttributeMapList!!.size
                 Assert.assertEquals(attributes.length().toLong(), sum.toLong())
                 for (k in 0 until attributes.length()) {
                     val attribute = attributes.getJSONObject(k)
@@ -107,15 +107,15 @@ class CustomMappingTest {
                     if (attribute.getString("match_type")
                         .startsWith(CustomMapping.MATCH_TYPE_STATIC)
                     ) {
-                        Assert.assertFalse(customMapping.mRequiredAttributeMapList.contains(attProj))
-                        Assert.assertTrue(customMapping.mStaticAttributeMapList.contains(attProj))
+                        Assert.assertFalse(customMapping.mRequiredAttributeMapList!!.contains(attProj))
+                        Assert.assertTrue(customMapping.mStaticAttributeMapList!!.contains(attProj))
                     } else {
-                        Assert.assertTrue(customMapping.mRequiredAttributeMapList.contains(attProj))
-                        Assert.assertFalse(customMapping.mStaticAttributeMapList.contains(attProj))
+                        Assert.assertTrue(customMapping.mRequiredAttributeMapList!!.contains(attProj))
+                        Assert.assertFalse(customMapping.mStaticAttributeMapList!!.contains(attProj))
                     }
                 }
                 var notRequiredFound = false
-                for (attributeMap in customMapping.mRequiredAttributeMapList) {
+                for (attributeMap in customMapping.mRequiredAttributeMapList!!) {
                     if (notRequiredFound && attributeMap.mIsRequired) {
                         Assert.fail("Projection attributes are out of order!")
                     }
@@ -137,7 +137,7 @@ class CustomMappingTest {
         val event = MPEvent.Builder("whatever", MParticle.EventType.Other).category("whatever!!")
             .customAttributes(info).build()
         Assert.assertTrue(defaultCustomMapping.isMatch(MPEventWrapper(event)))
-        val newEvent = defaultCustomMapping.project(MPEventWrapper(event))[0].mpEvent
+        val newEvent = defaultCustomMapping.project(MPEventWrapper(event))!![0].mPEvent!!
         Assert.assertEquals(event, newEvent)
         info["yet another key"] = "yet another value"
         // sanity check to make sure we're duplicating the map, not passing around a reference
@@ -163,11 +163,11 @@ class CustomMappingTest {
             MPEvent.Builder("whatever", MParticle.EventType.Other).customAttributes(info).build()
         val list = CustomMapping.projectEvents(
             event,
-            kitConfiguration.customMappingList,
+            kitConfiguration.getCustomMappingList(),
             kitConfiguration.defaultEventProjection
         )
-        Assert.assertEquals(1, list.size.toLong())
-        Assert.assertEquals(list[0].mpEvent, event)
+        Assert.assertEquals(1, list!!.size.toLong())
+        Assert.assertEquals(list[0].mPEvent, event)
     }
 
     /**
@@ -189,7 +189,7 @@ class CustomMappingTest {
             MPEvent.Builder("whatever", MParticle.EventType.Other).customAttributes(info).build()
         var list = CustomMapping.projectEvents(
             event,
-            kitConfiguration.customMappingList,
+            kitConfiguration.getCustomMappingList(),
             kitConfiguration.defaultEventProjection
         )
         Assert.assertNull(list)
@@ -197,11 +197,11 @@ class CustomMappingTest {
         list = CustomMapping.projectEvents(
             event,
             true,
-            kitConfiguration.customMappingList,
+            kitConfiguration.getCustomMappingList(),
             kitConfiguration.defaultEventProjection,
             kitConfiguration.defaultScreenCustomMapping
         )
-        Assert.assertEquals(1, list.size.toLong())
+        Assert.assertEquals(1, list!!.size.toLong())
     }
 
     /**
@@ -219,12 +219,12 @@ class CustomMappingTest {
         info["another key"] = "another value"
         val event =
             MPEvent.Builder("whatever", MParticle.EventType.Other).customAttributes(info).build()
-        var newEvent = customMapping.project(MPEventWrapper(event))[0]
-        Assert.assertTrue(newEvent.mpEvent.customAttributeStrings!!.isEmpty())
+        var newEvent = customMapping.project(MPEventWrapper(event))!![0]
+        Assert.assertTrue(newEvent.mPEvent!!.customAttributeStrings!!.isEmpty())
         customMapping =
             CustomMapping(JSONObject("{ \"id\":89, \"matches\":[{ \"message_type\":4, \"event_match_type\":\"\", \"event\":\"\" }], \"behavior\":{ \"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{ \"projected_event_name\":\"\", \"attribute_maps\":[ ] } }"))
-        newEvent = customMapping.project(MPEventWrapper(event))[0]
-        Assert.assertTrue(newEvent.mpEvent.customAttributeStrings!!.size == 2)
+        newEvent = customMapping.project(MPEventWrapper(event))!![0]
+        Assert.assertTrue(newEvent.mPEvent!!.customAttributeStrings!!.size == 2)
     }
 
     /**
@@ -251,8 +251,8 @@ class CustomMappingTest {
         info["key 5"] = "asdfasea"
         val event =
             MPEvent.Builder("whatever", MParticle.EventType.Other).customAttributes(info).build()
-        var result = customMapping.project(MPEventWrapper(event))[0]
-        var newEvent = result.mpEvent
+        var result = customMapping.project(MPEventWrapper(event))!![0]
+        var newEvent = result.mPEvent!!
         Assert.assertTrue(newEvent.customAttributeStrings!!.size == 5)
         // key 5 should be there but key 6 should be kicked out due to alphabetic sorting
         Assert.assertTrue(newEvent.customAttributeStrings!!.containsKey("key 5"))
@@ -260,8 +260,8 @@ class CustomMappingTest {
         // now create the SAME projection, except specify an optional attribute key 6 - it should boot key 5 from the resulting event
         customMapping =
             CustomMapping(JSONObject("{ \"id\":89, \"matches\":[{ \"message_type\":4, \"event_match_type\":\"\", \"event\":\"\" }], \"behavior\":{ \"append_unmapped_as_is\":true, \"max_custom_params\":5, \"is_default\":true }, \"action\":{ \"projected_event_name\":\"\", \"attribute_maps\":[ { \"projected_attribute_name\":\"\", \"match_type\":\"String\", \"value\":\"key 6\", \"data_type\":\"String\" }] } }"))
-        result = customMapping.project(MPEventWrapper(event))[0]
-        newEvent = result.mpEvent
+        result = customMapping.project(MPEventWrapper(event))!![0]
+        newEvent = result.mPEvent!!
         Assert.assertFalse(newEvent.customAttributeStrings!!.containsKey("key 5"))
         Assert.assertTrue(newEvent.customAttributeStrings!!.containsKey("key 6")) // note that the json also doesn't specify a key name - so we just use the original
         Assert.assertTrue(newEvent.customAttributeStrings!!.size == 5)
@@ -269,8 +269,8 @@ class CustomMappingTest {
         // test what happens if max isn't even set (everything should be there)
         customMapping =
             CustomMapping(JSONObject("{ \"id\":89, \"matches\":[{ \"message_type\":4, \"event_match_type\":\"\", \"event\":\"\" }], \"behavior\":{ \"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{ \"projected_event_name\":\"\", \"attribute_maps\":[ { \"projected_attribute_name\":\"\", \"match_type\":\"String\", \"value\":\"key 6\", \"data_type\":\"String\" }] } }"))
-        result = customMapping.project(MPEventWrapper(event))[0]
-        newEvent = result.mpEvent
+        result = customMapping.project(MPEventWrapper(event))!![0]
+        newEvent = result.mPEvent!!
         Assert.assertTrue(newEvent.customAttributeStrings!!.containsKey("key 5"))
         Assert.assertTrue(newEvent.customAttributeStrings!!.containsKey("key 6")) // note that the json also doesn't specify a key name - so we just use the original
         Assert.assertTrue(newEvent.customAttributeStrings!!.size == 6)
@@ -287,10 +287,10 @@ class CustomMappingTest {
         val customMapping =
             CustomMapping(JSONObject("{ \"id\":89, \"matches\":[{ \"message_type\":4, \"event_match_type\":\"\", \"event\":\"\" }], \"behavior\":{ \"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{ \"projected_event_name\":\"\", \"attribute_maps\":[ { \"projected_attribute_name\":\"\", \"match_type\":\"String\", \"value\":\"key 6\", \"data_type\":\"String\" },{ \"projected_attribute_name\": \"screen_name_key\", \"match_type\": \"Field\", \"value\": \"ScreenName\", \"data_type\": 1, \"is_required\": true }] } }"))
         val event = MPEvent.Builder("screenname", MParticle.EventType.Other).build()
-        val projectedEvent = customMapping.project(MPEventWrapper(event))[0]
+        val projectedEvent = customMapping.project(MPEventWrapper(event))!![0]
         Assert.assertEquals(
             "screenname",
-            projectedEvent.mpEvent.customAttributeStrings!!["screen_name_key"]
+            projectedEvent.mPEvent!!.customAttributeStrings!!["screen_name_key"]
         )
     }
 
@@ -377,11 +377,11 @@ class CustomMappingTest {
         builder.customAttributes(attributes)
         val eventList = CustomMapping.projectEvents(
             builder.build(),
-            kitConfiguration.customMappingList,
+            kitConfiguration.getCustomMappingList(),
             kitConfiguration.defaultEventProjection
         )
-        Assert.assertEquals(1, eventList.size.toLong())
-        val projEvent1 = eventList[0].mpEvent
+        Assert.assertEquals(1, eventList!!.size.toLong())
+        val projEvent1 = eventList[0].mPEvent!!
         Assert.assertEquals("account - check order status", projEvent1.eventName)
         Assert.assertEquals(
             "some value",
@@ -412,11 +412,11 @@ class CustomMappingTest {
         attributes["Value"] = "product name"
         val eventList = CustomMapping.projectEvents(
             builder.build(),
-            kitConfiguration.customMappingList,
+            kitConfiguration.getCustomMappingList(),
             kitConfiguration.defaultEventProjection
         )
-        Assert.assertEquals(2, eventList.size.toLong())
-        var projEvent1 = eventList[0].mpEvent
+        Assert.assertEquals(2, eventList!!.size.toLong())
+        var projEvent1 = eventList[0].mPEvent!!
         // same as test 1, but verify for the fun of it.
         Assert.assertEquals("account - check order status", projEvent1.eventName)
         Assert.assertEquals(
@@ -425,7 +425,7 @@ class CustomMappingTest {
         )
 
         // this is the new projection which requires the Value attribute
-        projEvent1 = eventList[1].mpEvent
+        projEvent1 = eventList[1].mPEvent!!
         Assert.assertEquals("pdp - add to tote", projEvent1.eventName)
         // required attribute
         Assert.assertEquals(
@@ -480,17 +480,17 @@ class CustomMappingTest {
         attributes["Label"] = "product label"
         val eventList = CustomMapping.projectEvents(
             builder.build(),
-            kitConfiguration.customMappingList,
+            kitConfiguration.getCustomMappingList(),
             kitConfiguration.defaultEventProjection
         )
-        Assert.assertEquals(3, eventList.size.toLong())
-        var projEvent1 = eventList[0].mpEvent
+        Assert.assertEquals(3, eventList!!.size.toLong())
+        var projEvent1 = eventList[0].mPEvent!!
         Assert.assertEquals("account - check order status", projEvent1.eventName)
         Assert.assertEquals(
             "some value",
             projEvent1.customAttributeStrings!!["attribute we don't care about"]
         )
-        projEvent1 = eventList[1].mpEvent
+        projEvent1 = eventList[1].mPEvent!!
         Assert.assertEquals("pdp - add to tote", projEvent1.eventName)
         Assert.assertEquals(
             "product name",
@@ -521,7 +521,7 @@ class CustomMappingTest {
         )
 
         // and here's our 3rd projection, which defines both the original "Value" attribute hash as well as "Label"
-        projEvent1 = eventList[2].mpEvent
+        projEvent1 = eventList[2].mPEvent!!
         Assert.assertEquals("pdp - complete the look", projEvent1.eventName)
         Assert.assertEquals(
             "product name",
@@ -563,10 +563,10 @@ class CustomMappingTest {
         }
         val commerceEvent = commerceEventBuilder.build()
         Assert.assertTrue(customMapping.isMatch(CommerceEventWrapper(commerceEvent)))
-        val result = customMapping.project(CommerceEventWrapper(commerceEvent))
+        val result = customMapping.project(CommerceEventWrapper(commerceEvent))!!
         Assert.assertEquals(5, result.size.toLong())
         for (i in 0..4) {
-            val event = result[i].mpEvent
+            val event = result[i].mPEvent!!
             Assert.assertNotNull(event)
             Assert.assertEquals("pdp - product view", event.eventName)
             val attributes = event.customAttributeStrings
@@ -845,10 +845,10 @@ class CustomMappingTest {
             .customAttributes(eventAttributes)
             .checkoutStep(7).build()
         Assert.assertTrue(customMapping.isMatch(CommerceEventWrapper(commerceEvent)))
-        var result = customMapping.project(CommerceEventWrapper(commerceEvent))
+        var result = customMapping.project(CommerceEventWrapper(commerceEvent))!!
         Assert.assertEquals(1, result.size.toLong())
         val projectionResult = result[0]
-        val event = projectionResult.commerceEvent
+        val event = projectionResult.commerceEvent!!
         Assert.assertNotNull(event)
         Assert.assertEquals("checkout - place order", event.eventName)
         Assert.assertEquals(5, event.products!!.size.toLong())
@@ -865,11 +865,11 @@ class CustomMappingTest {
             event.customAttributeStrings!!["Projected sample event attribute"]
         )
         config.getJSONObject("behavior").put("selector", "foreach")
-        result = CustomMapping(config).project(CommerceEventWrapper(commerceEvent))
+        result = CustomMapping(config).project(CommerceEventWrapper(commerceEvent))!!
         Assert.assertEquals(5, result.size.toLong())
         for (i in result.indices) {
             val projectionResult1 = result[i]
-            val event1 = projectionResult1.commerceEvent
+            val event1 = projectionResult1.commerceEvent!!
             Assert.assertEquals("checkout - place order", event1.eventName)
             Assert.assertEquals(1, event1.products!!.size.toLong())
             Assert.assertEquals(
@@ -896,7 +896,7 @@ class CustomMappingTest {
         // make the ProductAttribute mapping required, should limit down the results to 2 products
         config.getJSONObject("action").getJSONArray("attribute_maps").getJSONObject(1)
             .put("is_required", "true")
-        result = CustomMapping(config).project(CommerceEventWrapper(commerceEvent))
+        result = CustomMapping(config).project(CommerceEventWrapper(commerceEvent))!!
         Assert.assertEquals(2, result.size.toLong())
     }
 
@@ -929,7 +929,7 @@ class CustomMappingTest {
             .customAttributes(customAttributes)
             .build()
         val results =
-            CustomMapping.projectEvents(commerceEvent, kitConfiguration.customMappingList, null)
+            CustomMapping.projectEvents(commerceEvent, kitConfiguration.getCustomMappingList(), null)
         val expectedInfo: MutableMap<String, String?> = HashMap()
         expectedInfo[cmQuantityName] = quantity.toString()
         expectedInfo[cmProductName] = name
@@ -938,8 +938,8 @@ class CustomMappingTest {
         val expectedMappedEvent = MPEvent.Builder(cmEventName)
             .customAttributes(expectedInfo)
             .build()
-        Assert.assertEquals(1, results.size.toLong())
-        val result = results[0].mpEvent
+        Assert.assertEquals(1, results!!.size.toLong())
+        val result = results[0].mPEvent!!
         Assert.assertEquals(expectedMappedEvent.eventName, result.eventName)
         Assert.assertEquals(
             expectedMappedEvent.customAttributeStrings!!.keys.size.toLong(),
@@ -964,10 +964,10 @@ class CustomMappingTest {
         var event = MPEvent.Builder("subscription_success").customAttributes(info).build()
         val events = mapping.project(MPEventWrapper(event))
         Assert.assertTrue(mapping.isMatch(MPEventWrapper(event)))
-        Assert.assertTrue(events.size == 1)
-        Assert.assertTrue(events[0].mpEvent.eventName == "new_premium_subscriber")
-        Assert.assertTrue(events[0].mpEvent.customAttributeStrings?.get("plan") == "premium")
-        Assert.assertTrue(events[0].mpEvent.customAttributeStrings?.get("plan 2") == "premium 2")
+        Assert.assertTrue(events!!.size == 1)
+        Assert.assertTrue(events[0].mPEvent!!.eventName == "new_premium_subscriber")
+        Assert.assertTrue(events[0].mPEvent!!.customAttributeStrings?.get("plan") == "premium")
+        Assert.assertTrue(events[0].mPEvent!!.customAttributeStrings?.get("plan 2") == "premium 2")
         info["plan"] = "notPremium"
         event = MPEvent.Builder("subscription_success").customAttributes(info).build()
         Assert.assertFalse(mapping.isMatch(MPEventWrapper(event)))
@@ -989,7 +989,7 @@ class CustomMappingTest {
         info["has_launched_before"] = "N"
         event = MPEvent.Builder("APPLICATION_START").customAttributes(info).build()
         Assert.assertTrue(
-            mapping.matchList[0].attributeValues.toString(),
+            mapping.getMatchList()!![0].attributeValues.toString(),
             mapping.isMatch(MPEventWrapper(event))
         )
     }
@@ -1011,10 +1011,10 @@ class CustomMappingTest {
         event = MPEvent.Builder("SUBSCRIPTION_END").customAttributes(info).build()
         Assert.assertTrue(mapping.isMatch(MPEventWrapper(event)))
         val events = mapping.project(MPEventWrapper(event))
-        Assert.assertTrue(events.size == 1)
-        Assert.assertTrue(events[0].mpEvent.eventName == "X_NEW_NOAH_SUBSCRIPTION")
-        Assert.assertTrue(events[0].mpEvent.customAttributeStrings?.get("plan_id") == "8")
-        Assert.assertTrue(events[0].mpEvent.customAttributeStrings?.get("outcome") == "new_subscription")
+        Assert.assertTrue(events!!.size == 1)
+        Assert.assertTrue(events[0].mPEvent!!.eventName == "X_NEW_NOAH_SUBSCRIPTION")
+        Assert.assertTrue(events[0].mPEvent!!.customAttributeStrings?.get("plan_id") == "8")
+        Assert.assertTrue(events[0].mPEvent!!.customAttributeStrings?.get("outcome") == "new_subscription")
         info.remove("outcome")
         event = MPEvent.Builder("SUBSCRIPTION_END").customAttributes(info).build()
         Assert.assertFalse(mapping.isMatch(MPEventWrapper(event)))

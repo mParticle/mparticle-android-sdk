@@ -2,9 +2,11 @@ package com.mparticle.kits
 
 import com.mparticle.MParticle.IdentityType
 import com.mparticle.identity.IdentityApiRequest
+import com.mparticle.kits.MockitoHelper.anyObject
 import org.junit.Assert
 import org.junit.Test
 import org.mockito.Mockito
+import org.mockito.Mockito.`when`
 
 class FilteredApiRequestTest {
     @Test
@@ -16,14 +18,8 @@ class FilteredApiRequestTest {
         val mockConfiguration = Mockito.mock(
             KitConfiguration::class.java
         )
-        Mockito.`when`(
-            mockConfiguration.shouldSetIdentity(
-                Mockito.any(
-                    IdentityType::class.java
-                )
-            )
-        ).thenReturn(true)
-        Mockito.`when`(mockIntegration.configuration).thenReturn(mockConfiguration)
+        mockIntegration.setConfiguration(mockConfiguration)
+        `when`(mockConfiguration.shouldSetIdentity(anyObject())).thenReturn(true)
         val filteredRequest = FilteredIdentityApiRequest(request, mockIntegration)
         Assert.assertEquals(0, filteredRequest.userIdentities.size.toLong())
     }
@@ -42,14 +38,15 @@ class FilteredApiRequestTest {
         val mockConfiguration = Mockito.mock(
             KitConfiguration::class.java
         )
-        Mockito.`when`(mockConfiguration.shouldSetIdentity(IdentityType.Email)).thenReturn(true)
-        Mockito.`when`(mockConfiguration.shouldSetIdentity(IdentityType.Alias)).thenReturn(true)
-        Mockito.`when`(mockConfiguration.shouldSetIdentity(IdentityType.CustomerId))
+
+        mockIntegration.setConfiguration(mockConfiguration)
+        `when`(mockConfiguration.shouldSetIdentity(IdentityType.Email)).thenReturn(true)
+        `when`(mockConfiguration.shouldSetIdentity(IdentityType.Alias)).thenReturn(true)
+        `when`(mockConfiguration.shouldSetIdentity(IdentityType.CustomerId))
             .thenReturn(false)
-        Mockito.`when`(mockConfiguration.shouldSetIdentity(IdentityType.Google)).thenReturn(false)
-        Mockito.`when`(mockIntegration.configuration).thenReturn(mockConfiguration)
+        `when`(mockConfiguration.shouldSetIdentity(IdentityType.Google)).thenReturn(false)
+        `when`(mockIntegration.configuration).thenReturn(mockConfiguration)
         val filteredRequest = FilteredIdentityApiRequest(request, mockIntegration)
-        Assert.assertEquals(4, filteredRequest.userIdentities.size.toLong())
-        Assert.assertEquals(2, filteredRequest.getUserIdentities().size.toLong())
+        Assert.assertEquals(2, filteredRequest.userIdentities.size.toLong())
     }
 }

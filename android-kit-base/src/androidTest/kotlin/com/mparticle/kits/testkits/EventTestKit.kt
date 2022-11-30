@@ -10,29 +10,29 @@ class EventTestKit : ListenerTestKit(), KitIntegration.EventListener {
     override fun logEvent(baseEvent: MPEvent): MutableList<ReportingMessage>? {
         return onLogEvent(baseEvent)
     }
-    override fun leaveBreadcrumb(breadcrumb: String?): MutableList<ReportingMessage> {
+    override fun leaveBreadcrumb(breadcrumb: String): MutableList<ReportingMessage> {
         TODO("Not yet implemented")
     }
 
     override fun logError(
         message: String?,
-        errorAttributes: MutableMap<String, String>?
-    ): MutableList<ReportingMessage> {
+        errorAttributes: Map<String, String>?
+    ): List<ReportingMessage>? {
         TODO("Not yet implemented")
     }
 
     override fun logException(
-        exception: Exception?,
-        exceptionAttributes: MutableMap<String, String>?,
+        exception: Exception,
+        exceptionAttributes: Map<String, String>?,
         message: String?
-    ): MutableList<ReportingMessage> {
+    ): List<ReportingMessage>? {
         TODO("Not yet implemented")
     }
 
     override fun logScreen(
-        screenName: String?,
-        screenAttributes: MutableMap<String, String>?
-    ): MutableList<ReportingMessage> {
+        screenName: String,
+        screenAttributes: Map<String, String?>?
+    ): List<ReportingMessage>? {
         TODO("Not yet implemented")
     }
 }

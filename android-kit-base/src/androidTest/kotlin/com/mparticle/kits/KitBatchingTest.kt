@@ -116,7 +116,6 @@ class KitBatchingTest : BaseKitOptionsTest() {
 
     class BatchKit : BaseTestKit(), KitIntegration.BatchListener {
         var batches = mutableListOf<JSONObject>()
-        override fun getName() = "Batch Kit"
         private var latch = MPLatch(1)
 
         fun await() {
@@ -129,7 +128,10 @@ class KitBatchingTest : BaseKitOptionsTest() {
             return listOf()
         }
 
-        override fun logBatch(jsonObject: JSONObject): List<ReportingMessage> {
+        override val name: String
+            get() = "Batch Kit"
+
+        override fun logBatch(jsonObject: JSONObject): List<ReportingMessage?> {
             batches.add(jsonObject)
             latch.countDown()
             return listOf()

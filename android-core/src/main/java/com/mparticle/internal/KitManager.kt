@@ -22,25 +22,25 @@ import java.lang.ref.WeakReference
 interface KitManager : AndroidLifecycleCallbacks {
     val currentActivity: WeakReference<Activity>?
 
-    fun incrementUserAttribute(key: String?, incrementValue: Number?, newValue: String?, mpid: Long)
-    fun setUserAttribute(key: String?, value: String?, mpid: Long)
-    fun setUserAttributeList(key: String?, value: List<String?>?, mpid: Long)
-    fun removeUserAttribute(key: String?, mpid: Long)
+    fun incrementUserAttribute(key: String, incrementValue: Number, newValue: String?, mpid: Long)
+    fun setUserAttribute(key: String, value: String?, mpid: Long)
+    fun setUserAttributeList(key: String, value: List<String?>?, mpid: Long)
+    fun removeUserAttribute(key: String, mpid: Long)
 
-    fun logBatch(jsonObject: String?)
+    fun logBatch(jsonObject: String)
     fun logout()
 
-    fun setUserTag(tag: String?, mpid: Long)
+    fun setUserTag(tag: String, mpid: Long)
     fun onConsentStateUpdated(oldState: ConsentState?, newState: ConsentState?, mpid: Long)
-    fun setUserIdentity(id: String?, identityType: IdentityType?)
-    fun removeUserIdentity(id: IdentityType?)
+    fun setUserIdentity(id: String, identityType: IdentityType)
+    fun removeUserIdentity(id: IdentityType)
 
-    fun onPushRegistration(instanceId: String?, senderId: String?): Boolean
+    fun onPushRegistration(instanceId: String, senderId: String?): Boolean
 
-    fun onMessageReceived(context: Context?, intent: Intent?): Boolean
+    fun onMessageReceived(context: Context, intent: Intent): Boolean
 
-    val supportedKits: Set<Int?>?
-    fun updateKits(jsonArray: JSONArray?): KitsLoadedCallback?
+    val supportedKits: Set<Int>?
+    fun updateKits(jsonArray: JSONArray): KitsLoadedCallback?
     fun updateDataplan(dataplanOptions: DataplanOptions?)
     val kitStatus: Map<Int, KitStatus>
 
@@ -67,7 +67,7 @@ interface KitManager : AndroidLifecycleCallbacks {
     )
 
     fun logEvent(event: BaseEvent)
-    fun logScreen(screenEvent: MPEvent?)
+    fun logScreen(screenEvent: MPEvent)
     fun leaveBreadcrumb(breadcrumb: String)
     fun logError(message: String, @Nullable eventData: Map<String, String>?)
     fun logException(

@@ -17,7 +17,7 @@ import org.json.JSONArray
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -26,6 +26,8 @@ import java.lang.ref.WeakReference
 import java.util.Random
 import kotlin.collections.ArrayList
 import kotlin.collections.HashSet
+
+fun <T : Any> safeEq(value: T): T = eq(value) ?: value
 
 @RunWith(PowerMockRunner::class)
 class KitFrameworkWrapperTest {
@@ -143,7 +145,7 @@ class KitFrameworkWrapperTest {
         ).logScreen(anyObject())
         Mockito.verify(
             mockKitManager, Mockito.times(1)
-        ).setUserAttribute(Mockito.eq("a key"), Mockito.eq("a value"), Mockito.anyLong())
+        ).setUserAttribute(safeEq("a key"), safeEq("a value"), Mockito.anyLong())
     }
 
     @Test
@@ -329,13 +331,11 @@ class KitFrameworkWrapperTest {
         wrapper.setUserAttribute("a key", "a value", 1)
         val mockKitManager = Mockito.mock(KitManager::class.java)
         wrapper.setKitManager(mockKitManager)
-        Mockito.verify(
-            mockKitManager, Mockito.times(0)
-        ).setUserAttribute(Mockito.anyString(), Mockito.anyString(), Mockito.anyLong())
+        Mockito.verify(mockKitManager, Mockito.times(0)).setUserAttribute(Mockito.anyString(), Mockito.anyString(), Mockito.anyLong())
         wrapper.setUserAttribute("a key", "a value", 1)
         Mockito.verify(
             mockKitManager, Mockito.times(1)
-        ).setUserAttribute(Mockito.eq("a key"), Mockito.eq("a value"), Mockito.eq(1L))
+        ).setUserAttribute(safeEq("a key"), safeEq("a value"), safeEq(1L))
     }
 
     @Test
@@ -473,11 +473,11 @@ class KitFrameworkWrapperTest {
         wrapper.setKitManager(mockKitManager)
         Mockito.verify(
             mockKitManager, Mockito.times(0)
-        ).logScreen(Mockito.any(MPEvent::class.java))
+        ).logScreen(anyObject())
         wrapper.logScreen(event)
         Mockito.verify(
             mockKitManager, Mockito.times(1)
-        ).logScreen(Mockito.any(MPEvent::class.java))
+        ).logScreen(anyObject())
     }
 
     @Test

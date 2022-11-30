@@ -116,8 +116,8 @@ class MParticleDBManagerTest : BaseCleanInstallEachTest() {
         val listener: TypedUserAttributeListener = object : TypedUserAttributeListener {
 
             override fun onUserAttributesReceived(
-                userAttributes: Map<String, Any?>,
-                userAttributeLists: Map<String, List<String?>?>,
+                userAttributes: Map<String, Any?>?,
+                userAttributeLists: Map<String, List<String?>?>?,
                 mpid: Long
             ) {
 
@@ -136,8 +136,8 @@ class MParticleDBManagerTest : BaseCleanInstallEachTest() {
         // when run from the main thread, it should be called back on the main thread, but NOT access the DB on the same thread
         val listener1: TypedUserAttributeListener = object : TypedUserAttributeListener {
             override fun onUserAttributesReceived(
-                userAttributes: Map<String, Any?>,
-                userAttributeLists: Map<String, List<String?>?>,
+                userAttributes: Map<String, Any?>?,
+                userAttributeLists: Map<String, List<String?>?>?,
                 mpid: Long
             ) {
                 callbackThread.value = Thread.currentThread()

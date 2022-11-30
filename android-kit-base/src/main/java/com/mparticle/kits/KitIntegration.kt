@@ -1,39 +1,43 @@
-package com.mparticle.kits;
+package com.mparticle.kits
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.location.Location;
-import android.net.Uri;
-import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.mparticle.BaseEvent;
-import com.mparticle.MPEvent;
-import com.mparticle.MParticle;
-import com.mparticle.commerce.CommerceEvent;
-import com.mparticle.consent.ConsentState;
-import com.mparticle.identity.MParticleUser;
-
-import org.json.JSONObject;
-
-import java.lang.ref.WeakReference;
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
+import android.location.Location
+import android.net.Uri
+import android.os.Bundle
+import com.mparticle.BaseEvent
+import com.mparticle.MPEvent
+import com.mparticle.MParticle
+import com.mparticle.commerce.CommerceEvent
+import com.mparticle.consent.ConsentState
+import com.mparticle.identity.MParticleUser
+import com.mparticle.kits.KitUtils.join
+import org.json.JSONObject
+import java.lang.Exception
+import java.lang.IllegalArgumentException
+import java.lang.NullPointerException
+import java.lang.ref.WeakReference
+import java.math.BigDecimal
+import java.util.HashMap
 
 /**
  * Base Kit implementation - all Kits must subclass this.
  */
-public abstract class KitIntegration {
+abstract class KitIntegration {
+    var kitManager: KitManagerImpl? = null
+        private set
 
-    private static final String KIT_PREFERENCES_FILE = "mp::kit::";
-    private KitManagerImpl kitManager;
-    private KitConfiguration mKitConfiguration;
+    /**
+     * Get the configuration of the Kit. The KitConfiguration object contains
+     * all of the settings and filters of a Kit. Generally there's no need to use
+     * this API, and you can instead just call [.getSettings].
+     *
+     * @return
+     */
+    var configuration: KitConfiguration? = null
+        private set
 
     /**
      * Determine if the application is currently in the background. This is derived
@@ -41,18 +45,16 @@ public abstract class KitIntegration {
      *
      * @return true if the application is background
      */
-    protected final boolean isBackgrounded() {
-        return kitManager.isBackgrounded();
-    }
+    protected val isBackgrounded: Boolean
+        protected get() = kitManager?.isBackgrounded ?: false
 
     /**
      * Get an application Context object.
      *
      * @return an application Context, this will never be null.
      */
-    public final Context getContext() {
-        return kitManager.getContext();
-    }
+    val context: Context
+        get() = kitManager!!.context
 
     /**
      * Get a WeakReference to an Activity. The mParticle SDK maintains a WeakReference
@@ -61,24 +63,12 @@ public abstract class KitIntegration {
      *
      * @return a WeakReference to an Activity, or null.
      */
-    public final WeakReference<Activity> getCurrentActivity() {
-        return kitManager.getCurrentActivity();
-    }
+    val currentActivity: WeakReference<Activity>
+        get() = kitManager!!.currentActivity
 
-    /**
-     * Get the configuration of the Kit. The KitConfiguration object contains
-     * all of the settings and filters of a Kit. Generally there's no need to use
-     * this API, and you can instead just call {@link #getSettings()}.
-     *
-     * @return
-     */
-    public KitConfiguration getConfiguration() {
-        return mKitConfiguration;
-    }
-
-    public final KitIntegration setConfiguration(KitConfiguration configuration) {
-        mKitConfiguration = configuration;
-        return this;
+    fun setConfiguration(configuration: KitConfiguration?): KitIntegration {
+        this.configuration = configuration
+        return this
     }
 
     /**
@@ -89,95 +79,103 @@ public abstract class KitIntegration {
      *
      * @return
      */
-    public Object getInstance() {
-        return null;
+    open val instance: Any?
+        get() = null
+    open val isDisabled: Boolean
+        get() = isDisabled(false)
+
+    fun isDisabled(isOptOutEvent: Boolean): Boolean {
+        return !configuration!!.passesBracketing(kitManager!!.userBucket) ||
+            configuration!!.shouldHonorOptOut() && kitManager!!.isOptedOut && !isOptOutEvent
     }
 
-    public boolean isDisabled() {
-        return isDisabled(false);
-    }
-
-    public boolean isDisabled(boolean isOptOutEvent) {
-        return !getConfiguration().passesBracketing(kitManager.getUserBucket()) ||
-                (getConfiguration().shouldHonorOptOut() && kitManager.isOptedOut() && !isOptOutEvent);
-    }
-
-    @Deprecated
-    public final Map<MParticle.IdentityType, String> getUserIdentities() {
-        MParticle instance = MParticle.getInstance();
-        if (instance != null) {
-            MParticleUser user = instance.Identity().getCurrentUser();
-            if (user != null) {
-                Map<MParticle.IdentityType, String> identities = user.getUserIdentities();
-                identities = getKitManager().getDataplanFilter().transformIdentities(identities);
-                Map<MParticle.IdentityType, String> filteredIdentities = new HashMap<MParticle.IdentityType, String>(identities.size());
-                for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()) {
-                    if (getConfiguration().shouldSetIdentity(entry.getKey())) {
-                        filteredIdentities.put(entry.getKey(), entry.getValue());
+    @get:Deprecated("")
+    val userIdentities: Map<MParticle.IdentityType, String?>
+        get() {
+            val instance = MParticle.getInstance()
+            if (instance != null) {
+                val user = instance.Identity().currentUser
+                if (user != null) {
+                    var identities: Map<MParticle.IdentityType, String?>? = user.userIdentities
+                    identities = kitManager!!.dataplanFilter!!.transformIdentities(identities)
+                    val filteredIdentities: MutableMap<MParticle.IdentityType, String?> = HashMap(
+                        identities!!.size
+                    )
+                    for ((key, value) in identities) {
+                        if (configuration!!.shouldSetIdentity(key)) {
+                            filteredIdentities[key] = value
+                        }
                     }
+                    return identities
                 }
-                return identities;
             }
+            return HashMap()
         }
-        return new HashMap<MParticle.IdentityType, String>();
-    }
 
     /**
      * Retrieve filtered user attributes. Use this method to retrieve user attributes at any time.
      * To ensure that filtering is respected, kits must use this method rather than the public API.
      *
-     * If the KitIntegration implements the {@link AttributeListener} interface and returns true
-     * for {@link AttributeListener#supportsAttributeLists()}, this method will pass back all attributes
+     * If the KitIntegration implements the [AttributeListener] interface and returns true
+     * for [AttributeListener.supportsAttributeLists], this method will pass back all attributes
      * as they are (as String values or as List&lt;String&gt; values). Otherwise, this method will comma-separate
      * the List values and return back all String values.
      *
      * @return a Map of attributes according to the logic above.
      */
-    @Deprecated
-    public final Map<String, Object> getAllUserAttributes() {
-        MParticle instance = MParticle.getInstance();
-        if (instance != null) {
-            MParticleUser user = instance.Identity().getCurrentUser();
-            if (user != null) {
-                Map<String, Object> userAttributes = user.getUserAttributes();
-                if (kitManager != null) {
-                    userAttributes = kitManager.getDataplanFilter().transformUserAttributes(userAttributes);
-                }
-                Map<String, Object> attributes = (Map<String, Object>) KitConfiguration.filterAttributes(
-                        getConfiguration().getUserAttributeFilters(),
-                        userAttributes
-                );
-                if ((this instanceof AttributeListener) && ((AttributeListener) this).supportsAttributeLists()) {
-                    return attributes;
-                } else {
-                    for (Map.Entry<String, Object> entry : attributes.entrySet()) {
-                        if (entry.getValue() instanceof List) {
-                            attributes.put(entry.getKey(), KitUtils.join((List) entry.getValue()));
-                        }
+    @get:Deprecated("")
+    val allUserAttributes: Map<String, Any?>
+        get() {
+            val instance = MParticle.getInstance()
+            if (instance != null) {
+                val user = instance.Identity().currentUser
+                if (user != null) {
+                    var userAttributes: Map<String, Any>? = user.userAttributes
+                    if (kitManager != null) {
+                        userAttributes =
+                            kitManager!!.dataplanFilter!!.transformUserAttributes(
+                                userAttributes
+                            )
                     }
-                    return attributes;
+                    val attributes = KitConfiguration.filterAttributes(
+                        configuration?.userAttributeFilters,
+                        userAttributes
+                    ) as MutableMap<String, Any?>?
+                    return (
+                        if (this is AttributeListener && (this as AttributeListener).supportsAttributeLists()) {
+                            attributes
+                        } else {
+                            attributes?.let { list ->
+                                for ((key, value) in list) {
+                                    if (value is List<*>?) {
+                                        list[key] = join(value as List<String?>?)
+                                    }
+                                }
+                            }
+                            attributes
+                        }
+                        ) ?: mutableMapOf()
                 }
             }
+            return HashMap()
         }
-        return new HashMap<String, Object>();
-    }
+    val currentUser: MParticleUser?
+        get() {
+            val instance = MParticle.getInstance()
+            if (instance != null) {
+                val user = instance.Identity().currentUser
+                return FilteredMParticleUser.getInstance(user, this)
+            }
+            return FilteredMParticleUser.getInstance(null, this)
+        }
 
-    public final MParticleUser getCurrentUser() {
-        MParticle instance = MParticle.getInstance();
+    fun getUser(mpid: Long?): MParticleUser? {
+        val instance = MParticle.getInstance()
         if (instance != null) {
-            MParticleUser user = instance.Identity().getCurrentUser();
-            return FilteredMParticleUser.getInstance(user, this);
+            val user = instance.Identity().getUser(mpid!!)
+            return FilteredMParticleUser.getInstance(user, this)
         }
-        return FilteredMParticleUser.getInstance(null, this);
-    }
-
-    public final MParticleUser getUser(Long mpid) {
-        MParticle instance = MParticle.getInstance();
-        if (instance != null) {
-            MParticleUser user =instance.Identity().getUser(mpid);
-            return FilteredMParticleUser.getInstance(user, this);
-        }
-        return FilteredMParticleUser.getInstance(null, this);
+        return FilteredMParticleUser.getInstance(null, this)
     }
 
     /**
@@ -186,7 +184,7 @@ public abstract class KitIntegration {
      *
      * @return the name of your company/sdk
      */
-    public abstract String getName();
+    abstract val name: String
 
     /**
      * Kits must override this method and should use it for initialization. This method will only be called
@@ -198,27 +196,29 @@ public abstract class KitIntegration {
      *
      * @throws IllegalArgumentException if the kit is unable to start based on the provided settings.
      */
-    protected abstract List<ReportingMessage> onKitCreate(Map<String, String> settings, Context context) throws IllegalArgumentException;
+    @Throws(IllegalArgumentException::class)
+    abstract fun onKitCreate(
+        settings: Map<String, String>,
+        context: Context
+    ): List<ReportingMessage>
 
     /**
      * This method will be called when an integration has been disabled. Ideally, any unnecessary memory should
      * be cleaned up when this method is called. After this method is called, mParticle will no longer delegate events
      * to the kit, and on subsequent application startups, the Kit will not be initialized at all.
      */
-    protected void onKitDestroy() {
-    }
+    fun onKitDestroy() {}
 
     /**
      * Called by the KitManager when this kit is to be removed.
      */
-    final void onKitCleanup() {
+    fun onKitCleanup() {
         try {
-            Map allValues = getKitPreferences().getAll();
-            if (allValues != null && allValues.size() > 0) {
-                getKitPreferences().edit().clear().apply();
+            val allValues: Map<*, *>? = kitPreferences.all
+            if (allValues != null && allValues.size > 0) {
+                kitPreferences.edit().clear().apply()
             }
-        }catch (NullPointerException npe) {
-
+        } catch (npe: NullPointerException) {
         }
     }
 
@@ -228,9 +228,11 @@ public abstract class KitIntegration {
      *
      * @return
      */
-    protected final SharedPreferences getKitPreferences() {
-        return this.getContext().getSharedPreferences(KIT_PREFERENCES_FILE + getConfiguration().getKitId(), Context.MODE_PRIVATE);
-    }
+    protected val kitPreferences: SharedPreferences
+        protected get() = context.getSharedPreferences(
+            KIT_PREFERENCES_FILE + configuration!!.kitId,
+            Context.MODE_PRIVATE
+        )
 
     /**
      * The mParticle SDK is able to track a user's location based on provider and accuracy settings, and additionally allows
@@ -239,49 +241,52 @@ public abstract class KitIntegration {
      *
      * @param location
      */
-    public void setLocation(Location location) {
-    }
+    fun setLocation(location: Location?) {}
 
     /**
      * Retrieve the settings that are configured for this Kit, such as API key, etc
      *
      * @return a Map of settings
      */
-    public final Map<String, String> getSettings() {
-        return getConfiguration().getSettings();
+    val settings: Map<String, String>
+        get() = configuration!!.getSettings()
+
+    fun logNetworkPerformance(
+        url: String,
+        startTime: Long,
+        method: String,
+        length: Long,
+        bytesSent: Long,
+        bytesReceived: Long,
+        requestString: String?,
+        responseCode: Int
+    ): List<ReportingMessage>? {
+        return null
     }
 
-    List<ReportingMessage> logNetworkPerformance(String url, long startTime, String method, long length, long bytesSent, long bytesReceived, String requestString, int responseCode) {
-        return null;
-    }
-
-    public Uri getSurveyUrl(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists) {
-        return null;
+    fun getSurveyUrl(
+        userAttributes: Map<String?, String?>?,
+        userAttributeLists: Map<String?, List<String?>?>?
+    ): Uri? {
+        return null
     }
 
     /**
      * @param optedOut
      * @return
      */
-    public abstract List<ReportingMessage> setOptOut(boolean optedOut);
-
-    protected final KitManagerImpl getKitManager() {
-        return this.kitManager;
+    abstract fun setOptOut(optedOut: Boolean): List<ReportingMessage?>?
+    fun setKitManager(kitManager: KitManagerImpl?): KitIntegration {
+        this.kitManager = kitManager
+        return this
     }
 
-    public final KitIntegration setKitManager(KitManagerImpl kitManager) {
-        this.kitManager = kitManager;
-        return this;
+    fun logBaseEvent(baseEvent: BaseEvent): List<ReportingMessage>? {
+        return emptyList()
     }
 
-    @Nullable
-    public List<ReportingMessage> logBaseEvent(@NonNull BaseEvent baseEvent) {
-        return Collections.emptyList();
-    }
-
-    @Nullable
-    public List<ReportingMessage> logEvent(@NonNull MPEvent baseEvent) {
-        return Collections.emptyList();
+    open fun logEvent(baseEvent: MPEvent): List<ReportingMessage?>? {
+        return emptyList<ReportingMessage>()
     }
 
     /**
@@ -290,8 +295,8 @@ public abstract class KitIntegration {
      *
      * @param integrationAttributes
      */
-    protected final void setIntegrationAttributes(Map<String, String> integrationAttributes) {
-        getKitManager().setIntegrationAttributes(this, integrationAttributes);
+    protected fun setIntegrationAttributes(integrationAttributes: Map<String?, String?>?) {
+        kitManager!!.setIntegrationAttributes(this, integrationAttributes)
     }
 
     /**
@@ -300,15 +305,14 @@ public abstract class KitIntegration {
      *
      * @return
      */
-    protected final Map<String, String> getIntegrationAttributes() {
-        return getKitManager().getIntegrationAttributes(this);
-    }
+    protected val integrationAttributes: Map<String, String>
+        protected get() = kitManager!!.getIntegrationAttributes(this)
 
     /**
      * Remove all integration attributes set for this integration.
      */
-    protected final void clearIntegrationAttributes() {
-        getKitManager().clearIntegrationAttributes(this);
+    protected fun clearIntegrationAttributes() {
+        kitManager!!.clearIntegrationAttributes(this)
     }
 
     /**
@@ -318,89 +322,83 @@ public abstract class KitIntegration {
      *
      * @param intent an intent with the INSTALL_REFERRER action
      */
-    public void setInstallReferrer(Intent intent) {
-
-    }
+    fun setInstallReferrer(intent: Intent?) {}
 
     /**
      * Implement this method to listen for when settings are updated while the kit is already active.
      *
      * @param settings
      */
-    public void onSettingsUpdated(Map<String, String> settings) {
-
-    }
+    fun onSettingsUpdated(settings: Map<String, String>) {}
 
     /**
      * Queues and groups network requests on the MParticle Core network handler
      */
-    public void executeNetworkRequest(Runnable runnable) {
-        getKitManager().runOnKitThread(runnable);
+    fun executeNetworkRequest(runnable: Runnable?) {
+        kitManager!!.runOnKitThread(runnable)
     }
 
     /**
      * Indicates that the user wishes to remove personal data and shutdown a Kit and/or underlying 3rd
      * party SDK
      */
-    protected void reset() {
-
-    }
+    fun reset() {}
 
     /**
      * Kits should implement this interface when they require Activity callbacks for any reason.
-     * <p/>
+     *
+     *
      * The mParticle SDK will automatically call every method of this interface in API > 14 devices. Otherwise only
-     * {@link #onActivityStarted(Activity)} and {@link #onActivityStopped(Activity)} will be called.
+     * [.onActivityStarted] and [.onActivityStopped] will be called.
      */
-    public interface ActivityListener {
+    interface ActivityListener {
+        fun onActivityCreated(
+            activity: Activity?,
+            savedInstanceState: Bundle?
+        ): List<ReportingMessage?>?
 
-        List<ReportingMessage> onActivityCreated(Activity activity, Bundle savedInstanceState);
+        fun onActivityStarted(activity: Activity?): List<ReportingMessage?>?
+        fun onActivityResumed(activity: Activity?): List<ReportingMessage?>?
+        fun onActivityPaused(activity: Activity?): List<ReportingMessage?>?
+        fun onActivityStopped(activity: Activity?): List<ReportingMessage?>?
+        fun onActivitySaveInstanceState(
+            activity: Activity?,
+            outState: Bundle?
+        ): List<ReportingMessage?>?
 
-        List<ReportingMessage> onActivityStarted(Activity activity);
-
-        List<ReportingMessage> onActivityResumed(Activity activity);
-
-        List<ReportingMessage> onActivityPaused(Activity activity);
-
-        List<ReportingMessage> onActivityStopped(Activity activity);
-
-        List<ReportingMessage> onActivitySaveInstanceState(Activity activity, Bundle outState);
-
-        List<ReportingMessage> onActivityDestroyed(Activity activity);
+        fun onActivityDestroyed(activity: Activity?): List<ReportingMessage?>?
     }
 
     /**
      * Kit should implement this interface to listen for mParticle session-start and session-end messages.
      *
      */
-    public interface SessionListener {
+    interface SessionListener {
         /**
          * mParticle will start a new session when:
-         *  1. The app is brought to the foreground, and there isn't already an active session.
-         *  2. Any event (ie custom events, screen events, user attributes, etc) is logged by the hosting app
+         * 1. The app is brought to the foreground, and there isn't already an active session.
+         * 2. Any event (ie custom events, screen events, user attributes, etc) is logged by the hosting app
          *
          * @return
          */
-        List<ReportingMessage> onSessionStart();
+        fun onSessionStart(): List<ReportingMessage?>?
 
         /**
          * mParticle will end a session when the app is sent to the background, after the session timeout (defaulted to 60s)
          *
          * @return
          */
-        List<ReportingMessage> onSessionEnd();
+        fun onSessionEnd(): List<ReportingMessage?>?
     }
 
     /**
      * Kits should implement this interface when their underlying service has the notion
      * of a user with attributes.
      */
-    @Deprecated
-    public interface AttributeListener {
-
-        void setUserAttribute(String attributeKey, String attributeValue);
-
-        void setUserAttributeList(String attributeKey, List<String> attributeValueList);
+    @Deprecated("")
+    interface AttributeListener {
+        fun setUserAttribute(attributeKey: String, attributeValue: String?)
+        fun setUserAttributeList(attributeKey: String, attributeValueList: List<String?>?)
 
         /**
          * Indicate to the mParticle Kit framework if this AttributeListener supports attribute-values as lists.
@@ -410,15 +408,15 @@ public abstract class KitIntegration {
          *
          * @return true if this AttributeListener supports attribute values as lists.
          */
-        boolean supportsAttributeLists();
+        fun supportsAttributeLists(): Boolean
+        fun setAllUserAttributes(
+            userAttributes: Map<String, String?>?,
+            userAttributeLists: Map<String, List<String>?>?
+        )
 
-        void setAllUserAttributes(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists);
-
-        void removeUserAttribute(String key);
-
-        void setUserIdentity(MParticle.IdentityType identityType, String identity);
-
-        void removeUserIdentity(MParticle.IdentityType identityType);
+        fun removeUserAttribute(key: String)
+        fun setUserIdentity(identityType: MParticle.IdentityType, identity: String)
+        fun removeUserIdentity(identityType: MParticle.IdentityType)
 
         /**
          * The mParticle SDK exposes a logout API, allowing developers to track an event
@@ -427,15 +425,13 @@ public abstract class KitIntegration {
          *
          * @return Kits should return a List of ReportingMessages indicating that the logout was processed one or more times, or null if it was not processed
          */
-        List<ReportingMessage> logout();
-
+        fun logout(): List<ReportingMessage?>?
     }
 
     /**
      * Kits should implement this interface in order to listen for eCommerce events
      */
-    public interface CommerceListener {
-
+    interface CommerceListener {
         /**
          * The mParticle SDK exposes a basic lifetime-value-increase API. This allows developers to increase the value associated with a user
          * in the case where no particular event is appropriate.
@@ -446,19 +442,25 @@ public abstract class KitIntegration {
          * @param contextInfo    an optional Map of attributes to associate with the LTV increase
          * @return Kits should return a List of ReportingMessages indicating that the LTV increase was processed one or more times, or null if it was not processed
          */
-        List<ReportingMessage> logLtvIncrease(BigDecimal valueIncreased, BigDecimal valueTotal, String eventName, Map<String, String> contextInfo);
+        fun logLtvIncrease(
+            valueIncreased: BigDecimal?,
+            valueTotal: BigDecimal?,
+            eventName: String,
+            contextInfo: Map<String, String?>?
+        ): List<ReportingMessage>
 
         /**
          * The mParticle SDK exposes a rich eCommerce API, allowing developers to keep track of purchases and many other
          * product-related interactions.
-         * <p/>
+         *
+         *
          * CommerceEvents may contain several Products, Impressions, and/or Promotions. Depending on the nature of your SDK's API, you should iterate over
          * the items within a CommerceEvent and forward several discrete events, returning a ReportingMessage for each API call.
          *
          * @param event the CommerceEvent that was logged
          * @return Kits should return a List of ReportingMessages indicating that the CommerceEvent was processed one or more times, or null if it was not processed
          */
-        List<ReportingMessage> logEvent(CommerceEvent event);
+        fun logEvent(event: CommerceEvent?): List<ReportingMessage?>?
     }
 
     /**
@@ -467,8 +469,7 @@ public abstract class KitIntegration {
      * with the mParticle SDKs public API - it is the reasonability of Kit-writers to faithfully
      * map the appropriate mParticle APIs onto the proper APIs in their service.
      */
-    public interface EventListener {
-
+    interface EventListener {
         /**
          * The mParticle SDK exposes a breadcrumb API, allowing developers to track transactions as they occur.
          * Implementing Kits may optionally forward breadcrumbs to their SDK as regular events if there is no direct API analogue.
@@ -476,7 +477,7 @@ public abstract class KitIntegration {
          * @param breadcrumb a human-readable, typically short label of a step in a transaction, funnel, etc
          * @return Kits should return a List of ReportingMessages indicating that the breadcrumb was processed one or more times, or null if it was not processed
          */
-        List<ReportingMessage> leaveBreadcrumb(String breadcrumb);
+        fun leaveBreadcrumb(breadcrumb: String): List<ReportingMessage>?
 
         /**
          * The mParticle SDK exposes an error API, allowing developers to keep track of handled errors.
@@ -485,7 +486,10 @@ public abstract class KitIntegration {
          * @param errorAttributes optional attributes to associate with the error
          * @return Kits should return a List of ReportingMessages indicating that the error was processed one or more times, or null if it was not processed
          */
-        List<ReportingMessage> logError(String message, Map<String, String> errorAttributes);
+        fun logError(
+            message: String?,
+            errorAttributes: Map<String, String>?
+        ): List<ReportingMessage>?
 
         /**
          * The mParticle SDK exposes an exception API, allowing developers to keep track of handled exceptions.
@@ -495,7 +499,11 @@ public abstract class KitIntegration {
          * @param exceptionAttributes optional attributes to associate with the error
          * @return Kits should return a List of ReportingMessages indicating that the exception was processed one or more times, or null if it was not processed
          */
-        List<ReportingMessage> logException(Exception exception, Map<String, String> exceptionAttributes, String message);
+        fun logException(
+            exception: Exception,
+            exceptionAttributes: Map<String, String>?,
+            message: String?
+        ): List<ReportingMessage>?
 
         /**
          * The mParticle SDK exposes a general event API, allowing developers to keep track of any activity with their app.
@@ -503,7 +511,7 @@ public abstract class KitIntegration {
          * @param event the MPEvent that was logged.
          * @return Kits should return a List of ReportingMessages indicating that the MPEvent was processed one or more times, or null if it was not processed
          */
-        List<ReportingMessage> logEvent(MPEvent event);
+        fun logEvent(event: MPEvent): List<ReportingMessage>?
 
         /**
          * The mParticle SDK exposes a screen-view API, allowing developers to keep track of screens that are viewed by the user. Some mParticle integrations
@@ -513,14 +521,16 @@ public abstract class KitIntegration {
          * @param screenAttributes optional Map of attributes associated with this event
          * @return Kits should return a List of ReportingMessages indicating that the screen-view was processed one or more times, or null if it was not processed
          */
-        List<ReportingMessage> logScreen(String screenName, Map<String, String> screenAttributes);
+        fun logScreen(
+            screenName: String,
+            screenAttributes: Map<String, String?>?
+        ): List<ReportingMessage>?
     }
 
     /**
      * Kits should implement this interface when they have Google Cloud Messaging/push features.
      */
-    public interface PushListener {
-
+    interface PushListener {
         /**
          * Kits must implement this method to inspect a push message to determine if it's intended for their
          * SDK. Typically, a given push service will include a predefined key within the payload of a
@@ -529,16 +539,16 @@ public abstract class KitIntegration {
          * @param intent the Intent object from the push-received broadcast
          * @return true if this push should be handled by the given Kit
          */
-        boolean willHandlePushMessage(Intent intent);
+        fun willHandlePushMessage(intent: Intent?): Boolean
 
         /**
-         * If a Kit returns true from {@link #willHandlePushMessage(Intent)}, this method will be called immediately after.
+         * If a Kit returns true from [.willHandlePushMessage], this method will be called immediately after.
          * Kits should implement this method to show or otherwise react to a received push message.
          *
          * @param context
          * @param pushIntent
          */
-        void onPushMessageReceived(Context context, Intent pushIntent);
+        fun onPushMessageReceived(context: Context?, pushIntent: Intent?)
 
         /**
          * This method will be called when the mParticle SDK successfully registers to receive
@@ -549,57 +559,81 @@ public abstract class KitIntegration {
          * @param senderId the senderid with permissions for this instanceId
          * @return true if the push registration was processed.
          */
-        boolean onPushRegistration(String instanceId, String senderId);
+        fun onPushRegistration(instanceId: String?, senderId: String?): Boolean
     }
 
-    public interface ApplicationStateListener {
-
+    interface ApplicationStateListener {
         /**
          * Application has entered the foreground
          */
-        void onApplicationForeground();
+        fun onApplicationForeground()
 
         /**
          * Application has been sent to the background or terminated
          */
-        void onApplicationBackground();
-
+        fun onApplicationBackground()
     }
 
-    public interface IdentityListener {
+    interface IdentityListener {
+        fun onIdentifyCompleted(
+            mParticleUser: MParticleUser?,
+            identityApiRequest: FilteredIdentityApiRequest?
+        )
 
-        void onIdentifyCompleted(MParticleUser mParticleUser, FilteredIdentityApiRequest identityApiRequest);
+        fun onLoginCompleted(
+            mParticleUser: MParticleUser?,
+            identityApiRequest: FilteredIdentityApiRequest?
+        )
 
-        void onLoginCompleted(MParticleUser mParticleUser, FilteredIdentityApiRequest identityApiRequest);
+        fun onLogoutCompleted(
+            mParticleUser: MParticleUser?,
+            identityApiRequest: FilteredIdentityApiRequest?
+        )
 
-        void onLogoutCompleted(MParticleUser mParticleUser, FilteredIdentityApiRequest identityApiRequest);
+        fun onModifyCompleted(
+            mParticleUser: MParticleUser?,
+            identityApiRequest: FilteredIdentityApiRequest?
+        )
 
-        void onModifyCompleted(MParticleUser mParticleUser, FilteredIdentityApiRequest identityApiRequest);
-
-        void onUserIdentified(MParticleUser mParticleUser);
-
+        fun onUserIdentified(mParticleUser: MParticleUser?)
     }
 
-    public interface UserAttributeListener {
+    interface UserAttributeListener {
+        fun onIncrementUserAttribute(
+            key: String,
+            incrementedBy: Number,
+            value: String?,
+            user: FilteredMParticleUser?
+        )
 
-        void onIncrementUserAttribute (String key, Number incrementedBy, String value, FilteredMParticleUser user);
+        fun onRemoveUserAttribute(key: String, user: FilteredMParticleUser?)
+        fun onSetUserAttribute(key: String, value: Any?, user: FilteredMParticleUser?)
+        fun onSetUserTag(key: String, user: FilteredMParticleUser?)
+        fun onSetUserAttributeList(
+            attributeKey: String,
+            attributeValueList: List<String?>?,
+            user: FilteredMParticleUser?
+        )
 
-        void onRemoveUserAttribute(String key, FilteredMParticleUser user);
+        fun onSetAllUserAttributes(
+            userAttributes: Map<String, String?>?,
+            userAttributeLists: Map<String, List<String>?>?,
+            user: FilteredMParticleUser?
+        )
 
-        void onSetUserAttribute(String key, Object value, FilteredMParticleUser user);
-
-        void onSetUserTag(String key, FilteredMParticleUser user);
-
-        void onSetUserAttributeList(String attributeKey, List<String> attributeValueList, FilteredMParticleUser user);
-
-        void onSetAllUserAttributes(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists, FilteredMParticleUser user);
-
-        boolean supportsAttributeLists();
-
-        void onConsentStateUpdated(ConsentState oldState, ConsentState newState, FilteredMParticleUser user);
+        fun supportsAttributeLists(): Boolean
+        fun onConsentStateUpdated(
+            oldState: ConsentState?,
+            newState: ConsentState?,
+            user: FilteredMParticleUser?
+        )
     }
 
-    public interface BatchListener {
-        List<ReportingMessage> logBatch(JSONObject jsonObject);
+    interface BatchListener {
+        fun logBatch(jsonObject: JSONObject): List<ReportingMessage?>
+    }
+
+    companion object {
+        private const val KIT_PREFERENCES_FILE = "mp::kit::"
     }
 }
