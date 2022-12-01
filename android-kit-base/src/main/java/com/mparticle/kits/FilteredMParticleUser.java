@@ -86,7 +86,7 @@ public class FilteredMParticleUser implements MParticleUser {
                         if (entry.getValue() != null) {
                             stringifiedAttributes.put(entry.getKey(), entry.getValue().toString());
                         } else {
-                            stringifiedAttributes.put(entry.getKey(), "");
+                            stringifiedAttributes.put(entry.getKey(), null);
                         }
                     }
                     ((UserAttributeListener) listener).onUserAttributesReceived(
