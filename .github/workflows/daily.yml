@@ -256,7 +256,7 @@ jobs:
 
   semantic-release-dryrun:
     name: "Test Semantic Release - Dry Run"
-    needs: [instrumented-tests, instrumented-orchestrator-tests, unit-tests, lint-checks, update-kits]
+    needs: [instrumented-tests, instrumented-orchestrator-tests, unit-tests, lint-checks, kotlin-lint-checks, update-kits]
     runs-on: macos-latest
     env:
       GITHUB_TOKEN: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
