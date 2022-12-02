@@ -1,3 +1,17 @@
+## [5.48.3](https://github.com/mParticle/mparticle-android-sdk/compare/v5.48.2...v5.48.3) (2022-12-02)
+
+
+### Bug Fixes
+
+* Error handle null user attribute better and add use case to test file ([#290](https://github.com/mParticle/mparticle-android-sdk/issues/290)) ([8412478](https://github.com/mParticle/mparticle-android-sdk/commit/8412478cd8d701c8056ad7f39b346534e6da4dc2))
+* Error handle null user attribute value ([#288](https://github.com/mParticle/mparticle-android-sdk/issues/288)) ([73872df](https://github.com/mParticle/mparticle-android-sdk/commit/73872dff61c6994d233ce40cb362af1c7a049c7a))
+
+
+### Updates & Maintenance
+
+* Add in ktlintCheck to daily cron job ([#284](https://github.com/mParticle/mparticle-android-sdk/issues/284)) ([1d23a5f](https://github.com/mParticle/mparticle-android-sdk/commit/1d23a5fa75a1aa8410260faf9f1cb9b6d6041f57))
+* Update submodules ([375b0d3](https://github.com/mParticle/mparticle-android-sdk/commit/375b0d364d3b739b22d0ce1dd0d3322f9b5e0fcd))
+
 ## [5.48.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.48.1...v5.48.2) (2022-11-18)
 
 
