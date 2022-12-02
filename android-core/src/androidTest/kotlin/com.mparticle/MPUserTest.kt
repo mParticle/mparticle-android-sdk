@@ -32,6 +32,7 @@ class MPUserTest : BaseCleanStartedEachTest() {
             setUserAttribute("fooDouble", 10.15)
             setUserAttribute("fooNegInt", -10L)
             setUserAttribute("fooNegLong", -1010L)
+            this.userAttributes.put("fooNull", null)
             android_test_hack()
 
             getUserAttributes(object : UserAttributeListener {
@@ -48,6 +49,7 @@ class MPUserTest : BaseCleanStartedEachTest() {
                     assertEquals("10.15", userAttributes["fooDouble"])
                     assertEquals("-10", userAttributes["fooNegInt"])
                     assertEquals("-1010", userAttributes["fooNegLong"])
+                    assertEquals(null, userAttributes["fooNull"])
                 }
             })
 
@@ -64,6 +66,7 @@ class MPUserTest : BaseCleanStartedEachTest() {
                     assertEquals(10.15, userAttributes["fooDouble"])
                     assertEquals(-10L, userAttributes["fooNegInt"])
                     assertEquals(-1010L, userAttributes["fooNegLong"])
+                    assertEquals(null, userAttributes["fooNull"])
                 }
             })
         }

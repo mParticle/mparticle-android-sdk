@@ -11,9 +11,6 @@ import androidx.annotation.Nullable;
 
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
-import com.mparticle.TypedUserAttributeListener;
-import com.mparticle.UserAttributeListener;
-import com.mparticle.UserAttributeListenerType;
 import com.mparticle.identity.UserAttributeListenerWrapper;
 import com.mparticle.internal.BatchId;
 import com.mparticle.internal.ConfigManager;
@@ -36,8 +33,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.NumberFormat;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
