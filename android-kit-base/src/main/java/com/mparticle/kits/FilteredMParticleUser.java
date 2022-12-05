@@ -3,6 +3,7 @@ package com.mparticle.kits;
 import android.util.SparseBooleanArray;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.mparticle.MParticle;
 import com.mparticle.TypedUserAttributeListener;
@@ -24,6 +25,7 @@ public class FilteredMParticleUser implements MParticleUser {
         this.provider = provider;
     }
 
+    @Nullable
     static FilteredMParticleUser getInstance(MParticleUser user, KitIntegration provider) {
         if (user != null) {
             return new FilteredMParticleUser(user, provider);

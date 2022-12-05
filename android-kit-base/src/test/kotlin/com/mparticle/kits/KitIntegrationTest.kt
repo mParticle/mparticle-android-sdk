@@ -204,8 +204,8 @@ class KitIntegrationTest {
         override fun onKitCreate(
             settings: Map<String, String>,
             context: Context
-        ): List<ReportingMessage>? {
-            return null
+        ): List<ReportingMessage> {
+            return emptyList()
         }
 
         override fun setOptOut(optedOut: Boolean): List<ReportingMessage> ? {

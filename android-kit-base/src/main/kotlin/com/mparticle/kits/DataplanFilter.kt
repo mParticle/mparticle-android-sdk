@@ -10,7 +10,7 @@ import com.mparticle.internal.Logger
 import org.json.JSONArray
 import org.json.JSONObject
 
-internal interface DataplanFilter {
+interface DataplanFilter {
     fun <T : BaseEvent> transformEventForEvent(event: T?): T?
     fun transformIdentities(identities: Map<MParticle.IdentityType, String?>?): Map<MParticle.IdentityType, String?>?
     fun <T> transformUserAttributes(attributes: Map<String, T>?): Map<String, T>?
