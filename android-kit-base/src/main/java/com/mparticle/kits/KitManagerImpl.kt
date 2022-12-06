@@ -117,7 +117,7 @@ open class KitManagerImpl(//====================================================
 
     fun setIntegrationAttributes(
         kitIntegration: KitIntegration,
-        integrationAttributes: Map<String?, String?>?
+        integrationAttributes: Map<String, String?>?
     ) {
         mCoreCallbacks.setIntegrationAttributes(
             kitIntegration.configuration!!.kitId,
@@ -145,17 +145,21 @@ open class KitManagerImpl(//====================================================
         return callback
     }
 
-    override fun updateDataplan(dataplanOptions: DataplanOptions) {
-        mDataplanFilter = try {
-            Logger.info("Updating Data Plan")
-            Logger.debug(dataplanOptions.toString())
-            DataplanFilterImpl(dataplanOptions)
-        } catch (ex: Exception) {
-            Logger.warning(
-                ex,
-                "Failed to parse DataplanOptions, Dataplan filtering for Kits will not be applied"
-            )
-            Logger.info("Clearing Data Plan")
+    override fun updateDataplan(dataplanOptions: DataplanOptions?) {
+        mDataplanFilter = if (dataplanOptions != null) {
+            try {
+                Logger.info("Updating Data Plan")
+                Logger.debug(dataplanOptions.toString())
+                DataplanFilterImpl(dataplanOptions!!)
+            } catch (ex: Exception) {
+                Logger.warning(
+                    ex,
+                    "Failed to parse DataplanOptions, Dataplan filtering for Kits will not be applied"
+                )
+                Logger.info("Clearing Data Plan")
+                DataplanFilterImpl.EMPTY
+            }
+        } else {
             DataplanFilterImpl.EMPTY
         }
     }
@@ -1018,7 +1022,7 @@ open class KitManagerImpl(//====================================================
         }
     }
 
-    override fun logBatch(batch: String?) {
+    override fun logBatch(batch: String) {
         for (provider in providers.values) {
             try {
                 if (provider is BatchListener) {
@@ -1425,7 +1429,7 @@ open class KitManagerImpl(//====================================================
 
     override fun onIdentifyCompleted(
         mParticleUser: MParticleUser,
-        identityApiRequest: IdentityApiRequest?
+        identityApiRequest: IdentityApiRequest
     ) {
         for (provider in providers.values) {
             try {
@@ -1445,7 +1449,7 @@ open class KitManagerImpl(//====================================================
 
     override fun onLoginCompleted(
         mParticleUser: MParticleUser,
-        identityApiRequest: IdentityApiRequest?
+        identityApiRequest: IdentityApiRequest
     ) {
         for (provider in providers.values) {
             try {
@@ -1465,7 +1469,7 @@ open class KitManagerImpl(//====================================================
 
     override fun onLogoutCompleted(
         mParticleUser: MParticleUser,
-        identityApiRequest: IdentityApiRequest?
+        identityApiRequest: IdentityApiRequest
     ) {
         for (provider in providers.values) {
             try {

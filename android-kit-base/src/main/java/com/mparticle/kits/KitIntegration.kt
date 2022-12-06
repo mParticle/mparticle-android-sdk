@@ -14,15 +14,10 @@ import android.net.Uri
 import android.os.Bundle
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.consent.ConsentState
-import com.mparticle.internal.KitManager
-import org.jetbrains.annotations.Nullable
 import org.json.JSONObject
-import java.lang.Exception
 import java.lang.IllegalArgumentException
-import java.lang.NullPointerException
 import java.lang.ref.WeakReference
 import java.math.BigDecimal
-import java.util.HashMap
 import kotlin.Exception
 
 
@@ -35,9 +30,8 @@ interface LegacyKitIntegration {
  * Base Kit implementation - all Kits must subclass this.
  */
 abstract class KitIntegration : LegacyKitIntegration {
-    // why is returning the concrete class instead of abstracion? - should it be nullable?
-    lateinit var kitManager //nullable or lateinit? - what to do if null  should reference kitmanagerimpl or kitManager?
-            : KitManagerImpl
+
+    lateinit var kitManager: KitManagerImpl
         private set
 
     /**
@@ -46,9 +40,8 @@ abstract class KitIntegration : LegacyKitIntegration {
      * this API, and you can instead just call [.getSettings].
      *
      * @return
-     */ //public with private setter...but.. should be accesible?
-    lateinit var configuration //nullable or lateinit? - what to do if null
-            : KitConfiguration
+     */
+    lateinit var configuration: KitConfiguration
         private set
 
     /**
@@ -56,20 +49,29 @@ abstract class KitIntegration : LegacyKitIntegration {
      * by the mParticle SDK based on whether there is currently an Activity visible.
      *
      * @return true if the application is background
-     */ //nullable or default?
-    protected val isBackgrounded: Boolean
-        protected get() {
-            checkKitManager()
-            return kitManager.isBackgrounded
-        }
+     */
+    protected val isBackgrounded: Boolean = kitManager.get()?.isBackgrounded ?: false
 
     /**
      * Get an application Context object.
      *
      * @return an application Context, this will never be null.
-     */ //nullable?
-//    val context: Context
-//        get() = kitManager!!.context // should be accesible?
+     */
+    val context: Context = kitManager.get(true)!!.context
+
+    private fun KitManagerImpl.get(throwException: Boolean = false): KitManagerImpl? =
+        if (!this@KitIntegration::kitManager.isInitialized) {
+            if (throwException) {
+                throw RuntimeException("Kit manager not initialized")
+            } else null
+        } else kitManager
+
+    private fun KitConfiguration.get(throwException: Boolean = false): KitConfiguration? =
+        if (!this@KitIntegration::configuration.isInitialized) {
+            if (throwException) {
+                throw RuntimeException("Configuration not initialized")
+            } else null
+        } else configuration
 
     /**
      * Get a WeakReference to an Activity. The mParticle SDK maintains a WeakReference
@@ -78,9 +80,7 @@ abstract class KitIntegration : LegacyKitIntegration {
      *
      * @return a WeakReference to an Activity, or null.
      */
-    val currentActivity: WeakReference<Activity>?
-        get() =// should be accesible?
-            if (this::kitManager.isInitialized) kitManager.currentActivity else null//.getCurrentActivity()
+    fun getCurrentActivity(): WeakReference<Activity>? = kitManager.get()?.currentActivity
 
     fun setConfiguration(configuration: KitConfiguration): KitIntegration {
         this.configuration = configuration
@@ -94,70 +94,34 @@ abstract class KitIntegration : LegacyKitIntegration {
      * the mParticle SDK has no analogue or abstraction.
      *
      * @return
-     */ // maybe we can get the casted value - nullable?
-//    open val instance: Any?
-//        get() = null
+     */
     open fun <T> getInstance(): T? = null
 
-    private fun checkConfiguration() {
-        if (!this::configuration.isInitialized) {
-            throw RuntimeException("Configuration should be initialized")
-        }
-    }
-
-    private fun checkKitManager() {
-        if (!this::kitManager.isInitialized) {
-            throw RuntimeException("KitManager should be initialized")
-        }
-    }
-
     open fun isDisabled(): Boolean = isDisabled(false)
-//    open val isDisabled: Boolean
-//        get() = isDisabled(false)
 
-    @Throws(RuntimeException::class) //should return false is the logic cannot be run?
-    fun isDisabled(isOptOutEvent: Boolean): Boolean { //what happens if kitmanager is null or not initialized
-        checkKitManager()
-        checkConfiguration()
-        return !configuration.passesBracketing(kitManager.userBucket) || configuration.shouldHonorOptOut()
-                && kitManager.isOptedOut && !isOptOutEvent
+
+    @Throws(RuntimeException::class)
+    fun isDisabled(isOptOutEvent: Boolean): Boolean {
+        val kitManager = kitManager.get(true)!!
+        val config = configuration.get(true)!!
+        return !config.passesBracketing(kitManager.userBucket) || config.shouldHonorOptOut() && kitManager.isOptedOut && !isOptOutEvent
     }
 
-    //which is the new function?
     @Deprecated("Use the async version")
     override fun getUserIdentities(): Map<IdentityType, String?> {
-//            val instance = MParticle.getInstance() //in which scenario the instance can be null?
-//            if (instance != null) {
-//            val user = instance.Identity().currentUser
-//                if (user != null) {
-       try {
-
-           checkKitManager()
-           checkConfiguration()
-       } catch (e: Exception) {
-           return mutableMapOf()
-       }
-        return MParticle.getInstance()?.Identity()?.currentUser?.let {
-//                var identities: Map<IdentityType, String?>? = it.userIdentities
+        var returnValue: Map<IdentityType, String?>? = mutableMapOf()
+        MParticle.getInstance()?.Identity()?.currentUser?.let {
             val transformedIdentities =
-                kitManager.dataplanFilter?.transformIdentities(it.userIdentities)
-//                val filteredIdentities: MutableMap<IdentityType, String?> = HashMap(
-//                    identities!!.size
-//                )
+                kitManager.get()?.dataplanFilter?.transformIdentities(it.userIdentities)
 
-            transformedIdentities?.filter {
-                configuration.shouldSetIdentity(it.key)
-            } ?: mutableMapOf()
-//                for ((key, value) in identities) {
-//                    if (configuration!!.shouldSetIdentity(key)) {
-//                        filteredIdentities[key] = value
-//                    }
-//                }
-//                return identities
-        } ?: mutableMapOf()
-//            }
-//            return HashMap()
-    }//in which scenario the instance can be null?//map value can be null?
+            configuration.get()?.let { config ->
+                returnValue = transformedIdentities?.filter {
+                    config.shouldSetIdentity(it.key)
+                }
+            }
+        }
+        return returnValue ?: mutableMapOf()
+    }
 
     /**
      * Retrieve filtered user attributes. Use this method to retrieve user attributes at any time.
@@ -172,35 +136,17 @@ abstract class KitIntegration : LegacyKitIntegration {
      */
     @Deprecated("")
     override fun getAllUserAttributes(): Map<String, Any?> {
-        // get() { //map value can be null?
-//            val instance = MParticle.getInstance() //in which scenario the instance can be null?
-//            if (instance != null) {
-//                val user = MParticle.getInstance().Identity().currentUser
-//                if (user != null) {
+        val transformedUserAttributes = kitManager.get()?.dataplanFilter?.transformUserAttributes(
+            MParticle.getInstance()?.Identity()?.currentUser?.userAttributes
+        )
 
-
-//        if (kitManager != null) {
-//                        userAttributes =
-        try {
-
-            checkKitManager()
-            checkConfiguration()
-        } catch (e: Exception) {
-            return mutableMapOf()
+        var attributes: MutableMap<String, Any?> = mutableMapOf()
+        configuration.get()?.let { config ->
+            KitConfiguration.filterAttributes(
+                config.userAttributeFilters, transformedUserAttributes
+            )?.toMutableMap()?.let { attributes = it }
         }
-        val transformedUserAttributes = kitManager.dataplanFilter?.transformUserAttributes(
-                MParticle.getInstance()?.Identity()?.currentUser?.userAttributes
-            )
 
-        val attributes: MutableMap<String, Any?> = KitConfiguration.filterAttributes(
-            configuration.userAttributeFilters,
-            transformedUserAttributes
-        )?.toMutableMap() ?: mutableMapOf()
-//        }
-//        val attributes = KitConfiguration.filterAttributes(
-//            configuration!!.userAttributeFilters,
-//            userAttributes
-//        ) as MutableMap<String, Any?>
         return if (this is AttributeListener && (this as AttributeListener).supportsAttributeLists()) {
             attributes
         } else {
@@ -212,39 +158,16 @@ abstract class KitIntegration : LegacyKitIntegration {
                 }
             }
             attributes
-//            for ((key, value) in attributes) {
-//                if (value is List<*>) {
-//                    attributes[key] = KitUtils.join(value as List<*>?)
-//                }
-//            }
-//            attributes
         }
-//                }
-//            }
-//        return HashMap()
-    }//in which scenario the instance can be null?
+    }
 
-    //should be nullable?
     val currentUser: MParticleUser?
         get() = getUser()
-//        get() { //should be nullable?
-//            val instance = MParticle.getInstance() //in which scenario the instance can be null?
-//            if (instance != null) {
-//                val user = instance.Identity().currentUser
-//                return FilteredMParticleUser.getInstance(user, this)
-//            }
-//            return FilteredMParticleUser.getInstance(null, this)
-//        }
 
-    fun getUser(mpid: Long? = null): MParticleUser? { //should be nullable?
-        val identity =
-            MParticle.getInstance()?.Identity() //in which scenario the instance can be null?
-//        if (instance != null) {
+    fun getUser(mpid: Long? = null): MParticleUser? {
+        val identity = MParticle.getInstance()?.Identity()
         val user = mpid?.let { identity?.getUser(it) } ?: identity?.currentUser
         return user?.let { FilteredMParticleUser.getInstance(it, this) }
-//        return FilteredMParticleUser.getInstance(user, this)
-//        }
-//        return FilteredMParticleUser.getInstance(null, this)
     }
 
     /**
@@ -269,7 +192,7 @@ abstract class KitIntegration : LegacyKitIntegration {
     abstract fun onKitCreate(
         settings: Map<String, String>,
         context: Context
-    ): List<ReportingMessage> //nullable context, nullable string and key,value?
+    ): List<ReportingMessage>
 
     /**
      * This method will be called when an integration has been disabled. Ideally, any unnecessary memory should
@@ -281,16 +204,9 @@ abstract class KitIntegration : LegacyKitIntegration {
     /**
      * Called by the KitManager when this kit is to be removed.
      */
-    fun onKitCleanup() { //why try/catch?
-//        try {
+    fun onKitCleanup() {
         kitPreferences.edit().clear().apply()
-//            val allValues: Map<*, *>? = kitPreferences.all
-//            if (allValues != null && allValues.size > 0) {
-//                kitPreferences.edit().clear().apply()
-//            }
-//        } catch (npe: NullPointerException) {
-//        }
-    }//what to do if configuration is null?
+    }
 
     /**
      * Get the SharedPreferences file for this Kit. Kits should use this rather than their own file, as the mParticle SDK
@@ -299,13 +215,9 @@ abstract class KitIntegration : LegacyKitIntegration {
      * @return
      */
     protected val kitPreferences: SharedPreferences
-        get() {//what to do if configuration is null?
-            val kitManager = getCheckedKitManager()
-            val config = getCheckedConfiguration()
-            return kitManager.context.getSharedPreferences(
-                "$KIT_PREFERENCES_FILE${config.kitId}",
-//                        KIT_PREFERENCES_FILE +configuration!!.kitId,
-                Context.MODE_PRIVATE
+        get() {
+            return kitManager.get(true)!!.context.getSharedPreferences(
+                "$KIT_PREFERENCES_FILE${configuration.kitId}", Context.MODE_PRIVATE
             )
         }
 
@@ -322,48 +234,35 @@ abstract class KitIntegration : LegacyKitIntegration {
      * Retrieve the settings that are configured for this Kit, such as API key, etc
      *
      * @return a Map of settings
-     */ // nullable map and key, value = what if configuration is null?
+     */
     val settings: Map<String, String>
-        get() = configuration?.settings ?: mutableMapOf()
+        get() = configuration.get()?.settings ?: mutableMapOf()
 
     open fun logNetworkPerformance(
-        url: String?,
-        startTime: Long,
-        method: String?,
-        length: Long,
-        bytesSent: Long,
-        bytesReceived: Long,
-        requestString: String?,
-        responseCode: Int
-    ): List<ReportingMessage> {
-        return emptyList()
-    }
+        url: String?, startTime: Long, method: String?, length: Long,
+        bytesSent: Long, bytesReceived: Long, requestString: String?, responseCode: Int
+    ): List<ReportingMessage> = emptyList()
+
 
     open fun getSurveyUrl(
         userAttributes: Map<String, String?>?,
         userAttributeLists: Map<String, List<String?>?>?
-    ): Uri? {
-        return null
-    }
+    ): Uri? = null
 
     /**
      * @param optedOut
      * @return
      */
-    abstract fun setOptOut(optedOut: Boolean): List<ReportingMessage> // return type nullable and reportingMessage nullable?
+    abstract fun setOptOut(optedOut: Boolean): List<ReportingMessage>
 
-    fun setKitManager(kitManager: KitManagerImpl): KitIntegration { //nullable??
+    fun setKitManager(kitManager: KitManagerImpl): KitIntegration {
         this.kitManager = kitManager
         return this
     }
 
-    fun logBaseEvent(baseEvent: BaseEvent): List<ReportingMessage> { //if nullable why returns empty list?
-        return emptyList()
-    }
+    open fun logBaseEvent(baseEvent: BaseEvent): List<ReportingMessage> = emptyList()
 
-    open fun logEvent(baseEvent: MPEvent): List<ReportingMessage> { // if null why return empty list
-        return emptyList()
-    }
+    open fun logEvent(baseEvent: MPEvent): List<ReportingMessage> = emptyList()
 
     /**
      * Set integration attributes. Integration attributes are designed to facilitate communication between a kit
@@ -371,9 +270,9 @@ abstract class KitIntegration : LegacyKitIntegration {
      *
      * @param integrationAttributes
      */
-    protected fun setIntegrationAttributes(integrationAttributes: Map<String, String?>?) { // param nullable, key, value pair nullable? - what to do if kitManager is null
-        kitManager?.setIntegrationAttributes(this, integrationAttributes)
-    }// nullable? key,value pair nullable? - what to do if kitmanager is null?
+    protected fun setIntegrationAttributes(integrationAttributes: Map<String, String?>?) {
+        kitManager.get()?.setIntegrationAttributes(this, integrationAttributes)
+    }
 
     /**
      * Get integration attributes. Integration attributes are designed to facilitate communication between a kit
@@ -382,15 +281,13 @@ abstract class KitIntegration : LegacyKitIntegration {
      * @return
      */
     protected fun getIntegrationAttributes(): Map<String, String> =
-        kitManager?.getIntegrationAttributes(this) ?: emptyMap()
-//        protected get() =// nullable? key,value pair nullable? - what to do if kitmanager is null?
-//            kitManager!!.getIntegrationAttributes(this)
+        kitManager.get()?.getIntegrationAttributes(this) ?: mapOf()
 
     /**
      * Remove all integration attributes set for this integration.
      */
-    protected fun clearIntegrationAttributes() { // what to do if kitmanager null?
-        kitManager?.clearIntegrationAttributes(this)
+    protected fun clearIntegrationAttributes() {
+        kitManager.get()?.clearIntegrationAttributes(this)
     }
 
     /**
@@ -400,22 +297,20 @@ abstract class KitIntegration : LegacyKitIntegration {
      *
      * @param intent an intent with the INSTALL_REFERRER action
      */
-    open fun setInstallReferrer(intent: Intent?) { // intent can be nullable?
-    }
+    open fun setInstallReferrer(intent: Intent?) {}
 
     /**
      * Implement this method to listen for when settings are updated while the kit is already active.
      *
      * @param settings
      */
-    fun onSettingsUpdated(settings: Map<String, String>) { //onsettings updated nullable? key,value pair nullable?
-    }
+    fun onSettingsUpdated(settings: Map<String, String>) {}
 
     /**
      * Queues and groups network requests on the MParticle Core network handler
      */
-    fun executeNetworkRequest(runnable: Runnable?) { // nullable runnable? - what if kitmanager is null?
-        kitManager?.runOnKitThread(runnable)
+    fun executeNetworkRequest(runnable: Runnable?) {
+        kitManager.get()?.runOnKitThread(runnable)
     }
 
     /**
@@ -434,16 +329,16 @@ abstract class KitIntegration : LegacyKitIntegration {
     interface ActivityListener {
         fun onActivityCreated(
             activity: Activity,
-            @Nullable savedInstanceState: Bundle?
+            savedInstanceState: Bundle?
         ): List<ReportingMessage?>?
 
-        fun onActivityStarted(activity: Activity): List<ReportingMessage> //returns nullable?
-        fun onActivityResumed(activity: Activity): List<ReportingMessage> //returns nullable?
-        fun onActivityPaused(activity: Activity): List<ReportingMessage> //returns nullable?
-        fun onActivityStopped(activity: Activity): List<ReportingMessage> //returns nullable?
+        fun onActivityStarted(activity: Activity): List<ReportingMessage>
+        fun onActivityResumed(activity: Activity): List<ReportingMessage>
+        fun onActivityPaused(activity: Activity): List<ReportingMessage>
+        fun onActivityStopped(activity: Activity): List<ReportingMessage>
         fun onActivitySaveInstanceState(
             activity: Activity,
-            @Nullable outState: Bundle?
+            outState: Bundle?
         ): List<ReportingMessage>
 
         fun onActivityDestroyed(activity: Activity): List<ReportingMessage>
@@ -461,31 +356,25 @@ abstract class KitIntegration : LegacyKitIntegration {
          *
          * @return
          */
-        fun onSessionStart(): List<ReportingMessage> //nullable, accept nulls within list?
+        fun onSessionStart(): List<ReportingMessage>
 
         /**
          * mParticle will end a session when the app is sent to the background, after the session timeout (defaulted to 60s)
          *
          * @return
          */
-        fun onSessionEnd(): List<ReportingMessage> //nullable, accept nulls within list?
+        fun onSessionEnd(): List<ReportingMessage>
     }
 
     /**
      * Kits should implement this interface when their underlying service has the notion
      * of a user with attributes.
      */
-    @Deprecated("") //which instead? - can we remove or divide the implementation and compose in the child class?
+    @Deprecated("")
     interface AttributeListener {
-        fun setUserAttribute(
-            attributeKey: String,
-            attributeValue: String?
-        ) //value nullable, aceepts nulls? - what about key?
+        fun setUserAttribute(attributeKey: String, attributeValue: String?)
 
-        fun setUserAttributeList(
-            attributeKey: String,
-            attributeValueList: List<String?>?
-        ) //list nullable, aceepts nulls? - what about key?
+        fun setUserAttributeList(attributeKey: String, attributeValueList: List<String?>?)
 
         /**
          * Indicate to the mParticle Kit framework if this AttributeListener supports attribute-values as lists.
@@ -499,11 +388,11 @@ abstract class KitIntegration : LegacyKitIntegration {
         fun setAllUserAttributes(
             userAttributes: Map<String, String?>?,
             userAttributeLists: Map<String, List<String?>?>?
-        ) //define nullables
+        )
 
-        fun removeUserAttribute(key: String) //accept key null? -should do this..
-        fun setUserIdentity(identityType: IdentityType, identity: String) //define nullables
-        fun removeUserIdentity(identityType: IdentityType) //accept identityType null? -should do this..
+        fun removeUserAttribute(key: String)
+        fun setUserIdentity(identityType: IdentityType, identity: String)
+        fun removeUserIdentity(identityType: IdentityType)
 
         /**
          * The mParticle SDK exposes a logout API, allowing developers to track an event
@@ -512,7 +401,7 @@ abstract class KitIntegration : LegacyKitIntegration {
          *
          * @return Kits should return a List of ReportingMessages indicating that the logout was processed one or more times, or null if it was not processed
          */
-        fun logout(): List<ReportingMessage> //nullable return
+        fun logout(): List<ReportingMessage>
     }
 
     /**
@@ -530,11 +419,9 @@ abstract class KitIntegration : LegacyKitIntegration {
          * @return Kits should return a List of ReportingMessages indicating that the LTV increase was processed one or more times, or null if it was not processed
          */
         fun logLtvIncrease(
-            valueIncreased: BigDecimal,
-            valueTotal: BigDecimal,
-            eventName: String,
+            valueIncreased: BigDecimal, valueTotal: BigDecimal, eventName: String,
             contextInfo: Map<String, String?>?
-        ): List<ReportingMessage> //define nullables
+        ): List<ReportingMessage>
 
         /**
          * The mParticle SDK exposes a rich eCommerce API, allowing developers to keep track of purchases and many other
@@ -547,7 +434,7 @@ abstract class KitIntegration : LegacyKitIntegration {
          * @param event the CommerceEvent that was logged
          * @return Kits should return a List of ReportingMessages indicating that the CommerceEvent was processed one or more times, or null if it was not processed
          */
-        fun logEvent(event: CommerceEvent): List<ReportingMessage> //define nullables
+        fun logEvent(event: CommerceEvent): List<ReportingMessage>
     }
 
     /**
@@ -564,7 +451,7 @@ abstract class KitIntegration : LegacyKitIntegration {
          * @param breadcrumb a human-readable, typically short label of a step in a transaction, funnel, etc
          * @return Kits should return a List of ReportingMessages indicating that the breadcrumb was processed one or more times, or null if it was not processed
          */
-        fun leaveBreadcrumb(breadcrumb: String): List<ReportingMessage> //define nullables
+        fun leaveBreadcrumb(breadcrumb: String): List<ReportingMessage>
 
         /**
          * The mParticle SDK exposes an error API, allowing developers to keep track of handled errors.
@@ -576,7 +463,7 @@ abstract class KitIntegration : LegacyKitIntegration {
         fun logError(
             message: String,
             errorAttributes: Map<String, String?>?
-        ): List<ReportingMessage> //define nullables
+        ): List<ReportingMessage>
 
         /**
          * The mParticle SDK exposes an exception API, allowing developers to keep track of handled exceptions.
@@ -590,7 +477,7 @@ abstract class KitIntegration : LegacyKitIntegration {
             exception: Exception,
             exceptionAttributes: Map<String, String?>?,
             message: String?
-        ): List<ReportingMessage> //define nullables
+        ): List<ReportingMessage>
 
         /**
          * The mParticle SDK exposes a general event API, allowing developers to keep track of any activity with their app.
@@ -598,7 +485,7 @@ abstract class KitIntegration : LegacyKitIntegration {
          * @param event the MPEvent that was logged.
          * @return Kits should return a List of ReportingMessages indicating that the MPEvent was processed one or more times, or null if it was not processed
          */
-        fun logEvent(event: MPEvent): List<ReportingMessage> //define nullables
+        fun logEvent(event: MPEvent): List<ReportingMessage>
 
         /**
          * The mParticle SDK exposes a screen-view API, allowing developers to keep track of screens that are viewed by the user. Some mParticle integrations
@@ -611,7 +498,7 @@ abstract class KitIntegration : LegacyKitIntegration {
         fun logScreen(
             screenName: String,
             screenAttributes: Map<String, String?>?
-        ): List<ReportingMessage> //define nullables
+        ): List<ReportingMessage>
     }
 
     /**
@@ -626,7 +513,7 @@ abstract class KitIntegration : LegacyKitIntegration {
          * @param intent the Intent object from the push-received broadcast
          * @return true if this push should be handled by the given Kit
          */
-        fun willHandlePushMessage(intent: Intent?): Boolean //define nullables
+        fun willHandlePushMessage(intent: Intent?): Boolean
 
         /**
          * If a Kit returns true from [.willHandlePushMessage], this method will be called immediately after.
@@ -635,7 +522,7 @@ abstract class KitIntegration : LegacyKitIntegration {
          * @param context
          * @param pushIntent
          */
-        fun onPushMessageReceived(context: Context, pushIntent: Intent?) //define nullables
+        fun onPushMessageReceived(context: Context, pushIntent: Intent?)
 
         /**
          * This method will be called when the mParticle SDK successfully registers to receive
@@ -646,7 +533,7 @@ abstract class KitIntegration : LegacyKitIntegration {
          * @param senderId the senderid with permissions for this instanceId
          * @return true if the push registration was processed.
          */
-        fun onPushRegistration(instanceId: String?, senderId: String?): Boolean //define nullables
+        fun onPushRegistration(instanceId: String?, senderId: String?): Boolean
     }
 
     interface ApplicationStateListener {
@@ -665,22 +552,22 @@ abstract class KitIntegration : LegacyKitIntegration {
         fun onIdentifyCompleted(
             mParticleUser: MParticleUser?,
             identityApiRequest: FilteredIdentityApiRequest
-        ) //define nullables
+        )
 
         fun onLoginCompleted(
             mParticleUser: MParticleUser?,
             identityApiRequest: FilteredIdentityApiRequest
-        ) //define nullables
+        )
 
         fun onLogoutCompleted(
             mParticleUser: MParticleUser?,
             identityApiRequest: FilteredIdentityApiRequest
-        ) //define nullables
+        )
 
         fun onModifyCompleted(
             mParticleUser: MParticleUser?,
             identityApiRequest: FilteredIdentityApiRequest
-        ) //define nullables
+        )
 
         fun onUserIdentified(mParticleUser: MParticleUser?)
     }
@@ -688,48 +575,43 @@ abstract class KitIntegration : LegacyKitIntegration {
     interface UserAttributeListener {
         fun onIncrementUserAttribute(
             key: String,
-            incrementedBy: Number?,
+            incrementedBy: Number,
             value: String?,
             user: FilteredMParticleUser?
-        ) //define nullables
+        )
 
-        fun onRemoveUserAttribute(key: String, user: FilteredMParticleUser?) //define nullables
+        fun onRemoveUserAttribute(key: String, user: FilteredMParticleUser?)
 
-        fun onSetUserAttribute(
-            key: String,
-            value: Any?,
-            user: FilteredMParticleUser?
-        ) //define nullables
+        fun onSetUserAttribute(key: String, value: Any?, user: FilteredMParticleUser?)
 
-        fun onSetUserTag(key: String, user: FilteredMParticleUser?) //define nullables
+        fun onSetUserTag(key: String, user: FilteredMParticleUser?)
 
         fun onSetUserAttributeList(
             attributeKey: String,
             attributeValueList: List<String?>?,
             user: FilteredMParticleUser?
-        ) //define nullables
+        )
 
         fun onSetAllUserAttributes(
             userAttributes: Map<String, String?>?,
             userAttributeLists: Map<String, List<String?>?>?,
             user: FilteredMParticleUser?
-        ) //define nullables
+        )
 
-        fun supportsAttributeLists(): Boolean //define nullables
+        fun supportsAttributeLists(): Boolean
 
         fun onConsentStateUpdated(
             oldState: ConsentState?,
             newState: ConsentState?,
             user: FilteredMParticleUser?
-        ) //define nullables
+        )
     }
 
     interface BatchListener {
-        fun logBatch(jsonObject: JSONObject): List<ReportingMessage> //define nullables
+        fun logBatch(jsonObject: JSONObject): List<ReportingMessage>
     }
 
     companion object {
         private const val KIT_PREFERENCES_FILE = "mp::kit::"
     }
-}
 }

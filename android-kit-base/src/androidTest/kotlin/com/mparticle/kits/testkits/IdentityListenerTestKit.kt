@@ -11,22 +11,22 @@ open class IdentityListenerTestKit : ListenerTestKit(), KitIntegration.IdentityL
     var onModifyCompleted: ((mParticleUser: MParticleUser?, identityApiRequest: FilteredIdentityApiRequest?) -> Unit)? = null
     var onUserIdentified: ((mParticleUser: MParticleUser?) -> Unit)? = null
 
-    override fun onLogoutCompleted(mParticleUser: MParticleUser?, identityApiRequest: FilteredIdentityApiRequest?) {
+    override fun onLogoutCompleted(mParticleUser: MParticleUser?, identityApiRequest: FilteredIdentityApiRequest) {
         onLogoutCompleted?.invoke(mParticleUser, identityApiRequest)
         onUserReceived?.invoke(mParticleUser)
     }
 
-    override fun onLoginCompleted(mParticleUser: MParticleUser?, identityApiRequest: FilteredIdentityApiRequest?) {
+    override fun onLoginCompleted(mParticleUser: MParticleUser?, identityApiRequest: FilteredIdentityApiRequest) {
         onLoginCompleted?.invoke(mParticleUser, identityApiRequest)
         onUserReceived?.invoke(mParticleUser)
     }
 
-    override fun onIdentifyCompleted(mParticleUser: MParticleUser?, identityApiRequest: FilteredIdentityApiRequest?) {
+    override fun onIdentifyCompleted(mParticleUser: MParticleUser?, identityApiRequest: FilteredIdentityApiRequest) {
         onIdentifyCompleted?.invoke(mParticleUser, identityApiRequest)
         onUserReceived?.invoke(mParticleUser)
     }
 
-    override fun onModifyCompleted(mParticleUser: MParticleUser?, identityApiRequest: FilteredIdentityApiRequest?) {
+    override fun onModifyCompleted(mParticleUser: MParticleUser?, identityApiRequest: FilteredIdentityApiRequest) {
         onModifyCompleted?.invoke(mParticleUser, identityApiRequest)
         onUserReceived?.invoke(mParticleUser)
     }
