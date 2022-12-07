@@ -16,7 +16,7 @@ public class MockKitManagerImpl extends KitManagerImpl {
 
     public MockKitManagerImpl() {
         this(new MockContext(), Mockito.mock(ReportingManager.class), Mockito.mock(CoreCallbacks.class));
-        Mockito.when(mCoreCallbacks.getKitListener()).thenReturn(CoreCallbacks.KitListener.EMPTY);
+        Mockito.when(getMCoreCallbacks().getKitListener()).thenReturn(CoreCallbacks.KitListener.EMPTY);
     }
 
     public MockKitManagerImpl(Context context, ReportingManager reportingManager, CoreCallbacks coreCallbacks) {

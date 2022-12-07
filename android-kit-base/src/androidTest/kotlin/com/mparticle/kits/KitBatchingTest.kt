@@ -36,7 +36,7 @@ class KitBatchingTest : BaseKitOptionsTest() {
             kit.onLogEvent = { event ->
                 receivedEvent = event
                 latch.countDown()
-                null
+                emptyList()
             }
         }
         val event = MPEvent.Builder("some event")

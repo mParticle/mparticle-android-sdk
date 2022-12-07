@@ -490,7 +490,7 @@ class KitManagerImplTest {
         manager.setKitFactory(factory)
         Mockito.`when`(factory.isSupported(Mockito.anyInt())).thenReturn(true)
         val mockKit = Mockito.mock(KitIntegration::class.java)
-        Mockito.`when`(mockKit.isDisabled).thenReturn(true)
+        Mockito.`when`(mockKit.isDisabled()).thenReturn(true)
         Mockito.`when`(mockKit.configuration).thenReturn(
             Mockito.mock(
                 KitConfiguration::class.java
@@ -507,7 +507,7 @@ class KitManagerImplTest {
         manager.setOptOut(true)
         manager.updateKits(kitConfiguration)
         Assert.assertEquals(0, manager.providers.size)
-        Mockito.`when`(mockKit.isDisabled).thenReturn(false)
+        Mockito.`when`(mockKit.isDisabled()).thenReturn(false)
         manager.setOptOut(false)
         Assert.assertEquals(2, manager.providers.size)
     }

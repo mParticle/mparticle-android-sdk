@@ -78,7 +78,6 @@ class KitManagerTest {
     @Test
     @Throws(Exception::class)
     fun testLogScreen() {
-        manager.logScreen(null)
         manager.logScreen(MPEvent.Builder("name").build())
     }
 
@@ -94,22 +93,18 @@ class KitManagerTest {
     fun testSetUserAttribute() {
         manager.setUserAttribute("key", "value", 1)
         manager.setUserAttribute("key", null, 1)
-        manager.setUserAttribute(null, null, 1)
     }
 
     @Test
     @Throws(Exception::class)
     fun testRemoveUserAttribute() {
-        manager.removeUserAttribute(null, 1)
         manager.removeUserAttribute("", 1)
     }
 
     @Test
     @Throws(Exception::class)
     fun testSetUserIdentity() {
-        manager.setUserIdentity("", null)
         manager.setUserIdentity("", MParticle.IdentityType.CustomerId)
-        manager.setUserIdentity(null, MParticle.IdentityType.CustomerId)
     }
 
     @Test
@@ -121,7 +116,6 @@ class KitManagerTest {
     @Test
     @Throws(Exception::class)
     fun testOnActivityStarted() {
-        manager.onActivityStarted(null)
         manager.onActivityStarted(Mockito.mock(Activity::class.java))
     }
 

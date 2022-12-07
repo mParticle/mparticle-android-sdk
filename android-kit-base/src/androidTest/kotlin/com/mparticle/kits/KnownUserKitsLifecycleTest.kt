@@ -64,7 +64,7 @@ class KnownUserKitsLifecycleTest : BaseKitOptionsTest() {
 
         @Throws(IllegalArgumentException::class)
         override fun onKitCreate(
-            settings: Map<String, String>?,
+            settings: Map<String, String>,
             context: Context
         ): List<ReportingMessage> {
             return emptyList()

@@ -40,6 +40,7 @@ import com.mparticle.consent.ConsentState
 import android.os.Looper
 import android.os.HandlerThread
 import androidx.annotation.MainThread
+import androidx.annotation.VisibleForTesting
 import com.mparticle.BaseEvent
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
@@ -62,7 +63,7 @@ open class KitManagerImpl(//====================================================
     //================================================================================
     val context: Context,
     private val reportingManager: ReportingManager,
-    protected val mCoreCallbacks: CoreCallbacks,
+     val mCoreCallbacks: CoreCallbacks,
     options: MParticleOptions?
 ) : KitManager, AttributionListener, UserAttributeListener, IdentityStateListener {
     private var mKitHandler: Handler? = null
@@ -439,14 +440,14 @@ open class KitManagerImpl(//====================================================
         if (event is MPEvent) {
             logMPEvent(event)
         } else if (event is CommerceEvent) {
-            logCommerceEvent(event as CommerceEvent?)
+            logCommerceEvent(event as CommerceEvent)
         }
     }
 
     //================================================================================
     // KitIntegration.CommerceListener forwarding
     //================================================================================
-    protected open fun logCommerceEvent(event: CommerceEvent?) {
+    protected open fun logCommerceEvent(event: CommerceEvent) {
         for (provider in providers.values) {
             try {
                 if (!provider!!.isDisabled()) {

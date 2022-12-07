@@ -142,7 +142,7 @@ class AppStateManagerInstrumentedTest : BaseCleanStartedEachTest() {
         }
 
         override fun onApplicationForeground() {
-            Assert.assertNotNull(currentActivity.get())
+            Assert.assertNotNull(currentActivity?.get())
             onApplicationForegroundCalled = true
             latch.countDown()
         }

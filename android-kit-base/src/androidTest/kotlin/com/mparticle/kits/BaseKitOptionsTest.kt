@@ -23,11 +23,17 @@ open class BaseKitOptionsTest : BaseCleanInstallEachTest() {
             override fun configures() = KitManagerImpl::class.java
 
             override fun apply(kitManager: KitManagerImpl) {
-                kitManager.addKitsLoadedListener { kits, previousKits, kitConfigs ->
-                    if (kitConfigs.size == kitCount) {
-                        kitsLoadedLatch.countDown()
+                kitManager.addKitsLoadedListener(object : KitManagerImpl.KitsLoadedListener {
+                    override fun onKitsLoaded(
+                        kits: Map<Int, KitIntegration?>?,
+                        previousKits: Map<Int, KitIntegration?>?,
+                        kitConfigs: List<KitConfiguration>?
+                    ) {
+                        if ((kitConfigs?.size ?: 0) == kitCount) {
+                            kitsLoadedLatch.countDown()
+                        }
                     }
-                }
+                })
             }
         }
 
@@ -68,11 +74,18 @@ open class BaseKitOptionsTest : BaseCleanInstallEachTest() {
     protected fun waitForKitToStart(kitId: Int) {
         val latch = MPLatch(1)
         // wait for kit to start/reload
-        com.mparticle.internal.AccessUtils.getKitManager().addKitsLoadedListener { kits, previousKits, kitConfigs ->
-            if (kits.containsKey(kitId)) {
-                latch.countDown()
-            }
-        }
+        com.mparticle.internal.AccessUtils.getKitManager()
+            .addKitsLoadedListener(object : KitManagerImpl.KitsLoadedListener {
+                override fun onKitsLoaded(
+                    kits: Map<Int, KitIntegration?>?,
+                    previousKits: Map<Int, KitIntegration?>?,
+                    kitConfigs: List<KitConfiguration>?
+                ) {
+                    if (kits?.containsKey(kitId) == true) {
+                        latch.countDown()
+                    }
+                }
+            })
         // check if the kit has already been started and short-circut if it has
         if (MParticle.getInstance()?.isKitActive(kitId) == true) {
             latch.countDown()
@@ -85,9 +98,15 @@ open class BaseKitOptionsTest : BaseCleanInstallEachTest() {
     fun waitForKitReload(after: (() -> Unit)? = null) {
         val latch = MPLatch(1)
         com.mparticle.internal.AccessUtils.getKitManager()
-            .addKitsLoadedListener { _: Map<Int?, KitIntegration?>, _: Map<Int?, KitIntegration?>?, _: List<KitConfiguration?>? ->
-                latch.countDown()
-            }
+            .addKitsLoadedListener(object : KitManagerImpl.KitsLoadedListener {
+                override fun onKitsLoaded(
+                    kits: Map<Int, KitIntegration?>?,
+                    previousKits: Map<Int, KitIntegration?>?,
+                    kitConfigs: List<KitConfiguration>?
+                ) {
+                    latch.countDown()
+                }
+            })
         after?.invoke()
         latch.await()
     }

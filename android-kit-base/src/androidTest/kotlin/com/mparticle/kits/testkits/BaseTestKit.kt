@@ -5,9 +5,11 @@ import com.mparticle.kits.KitIntegration
 import com.mparticle.kits.ReportingMessage
 
 open class BaseTestKit : KitIntegration() {
-    open override fun onKitCreate(settings: Map<String, String>?, context: Context): List<ReportingMessage> {
-        return listOf()
-    }
+
+    override fun onKitCreate(
+        settings: Map<String, String>,
+        context: Context
+    ): List<ReportingMessage> = listOf()
 
     open override fun setOptOut(optedOut: Boolean): List<ReportingMessage> {
         // do nothing
@@ -18,5 +20,7 @@ open class BaseTestKit : KitIntegration() {
         return this::class.java.simpleName
     }
 
-    open override fun getInstance() = this
+    override fun <T> getInstance(): T? {
+        return super.getInstance() as T?
+    }
 }

@@ -58,7 +58,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         assertTrue(blockedAttributes.isNotEmpty())
 
         datapoints[DataplanFilterImpl.USER_ATTRIBUTES_KEY] = allowedAttributes.keys.toHashSet()
-        AccessUtils.getKitManager().setDataplanFilter(DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), true, Random.nextBoolean()))
+        AccessUtils.getKitManager().dataplanFilter = (DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), true, Random.nextBoolean()))
 
         userAttributeListenerKitKit.onSetUserAttribute = { key, _, _ ->
             assertTrue(allowedAttributes.containsKey(key))
@@ -72,7 +72,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         AccessUtils.awaitMessageHandler()
 
         kitIntegrationTestKits.forEach { kit ->
-            assertEquals(kit.name, allowedAttributes, kit.allUserAttributes)
+            assertEquals(kit.getName(), allowedAttributes, kit.getAllUserAttributes())
         }
         // sanity check to make sure the non-filtered User has the blocked identities
         assertEquals(allowedAttributes + blockedAttributes, MParticle.getInstance()?.Identity()?.currentUser?.userAttributes)
@@ -86,7 +86,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         assertTrue(blockedAttributes.isNotEmpty())
 
         datapoints[DataplanFilterImpl.USER_ATTRIBUTES_KEY] = allowedAttributes.keys.toHashSet()
-        AccessUtils.getKitManager().setDataplanFilter(DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), blockUserAttributes = true, blockUserIdentities = false))
+        AccessUtils.getKitManager().dataplanFilter = (DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), blockUserAttributes = true, blockUserIdentities = false))
 
         kitIntegrationTestKits.forEach { kit ->
             kit.onAttributeReceived = { key, _ ->
@@ -125,7 +125,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         assertEquals(count, allowedAttributes.size * 4)
 
         kitIntegrationTestKits.forEach {
-            assertEquals(0, it.allUserAttributes.size)
+            assertEquals(0, it.getAllUserAttributes().size)
         }
         // sanity check to make sure the non-filtered User has the blocked identities
         assertEquals(0, MParticle.getInstance()?.Identity()?.currentUser?.userAttributes?.size)
@@ -142,7 +142,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         assertTrue(blockedAttributes.isNotEmpty())
 
         datapoints[DataplanFilterImpl.USER_ATTRIBUTES_KEY] = allowedAttributes.keys.toHashSet()
-        AccessUtils.getKitManager().setDataplanFilter(DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), true, Random.nextBoolean()))
+        AccessUtils.getKitManager().dataplanFilter = (DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), true, Random.nextBoolean()))
 
         var count = 0
         kitIntegrationTestKits.forEach { kit ->
@@ -167,8 +167,8 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
 
         assertEquals(count, allowedAttributes.size * 4)
         kitIntegrationTestKits.forEach { kit ->
-            assertEquals(allowedAttributes.size, kit.allUserAttributes.size)
-            assertEquals(allowedAttributes.keys, kit.allUserAttributes.keys)
+            assertEquals(allowedAttributes.size, kit.getAllUserAttributes().size)
+            assertEquals(allowedAttributes.keys, kit.getAllUserAttributes().keys)
         }
         // sanity check to make sure the non-filtered User has the blocked attributes
         assertEquals(allowedAttributes + blockedAttributes, MParticle.getInstance()?.Identity()?.currentUser?.userAttributes)
@@ -181,7 +181,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         val blockIdentities = randomIdentities().filterKeys { !allowedIdentities.containsKey(it) }
 
         datapoints[DataplanFilterImpl.USER_IDENTITIES_KEY] = allowedIdentities.keys.map { it.getEventsApiName() }.toHashSet()
-        AccessUtils.getKitManager().setDataplanFilter(DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), Random.nextBoolean(), true))
+        AccessUtils.getKitManager().dataplanFilter = (DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), Random.nextBoolean(), true))
 
         MParticle.getInstance()?.Identity()?.login(
             IdentityApiRequest.withEmptyUser()
@@ -201,7 +201,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         }
         latch.await()
         kitIntegrationTestKits.forEach { kit ->
-            assertEquals(allowedIdentities, kit.userIdentities)
+            assertEquals(allowedIdentities, kit.getUserIdentities())
         }
         // sanity check to make sure the non-filtered User has the blocked identities
         assertEquals(allowedIdentities + blockIdentities, MParticle.getInstance()?.Identity()?.currentUser?.userIdentities)
@@ -215,7 +215,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         assertTrue(blockedIdentities.isNotEmpty())
 
         datapoints[DataplanFilterImpl.USER_IDENTITIES_KEY] = allowedIdentities.keys.map { it.getEventsApiName() }.toHashSet()
-        AccessUtils.getKitManager().setDataplanFilter(DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), Random.nextBoolean(), true))
+        AccessUtils.getKitManager().dataplanFilter = (DataplanFilterImpl(datapoints, Random.nextBoolean(), Random.nextBoolean(), Random.nextBoolean(), true))
 
         mServer.addConditionalLoginResponse(mStartingMpid, Random.Default.nextLong())
         MParticle.getInstance()?.Identity()?.login(

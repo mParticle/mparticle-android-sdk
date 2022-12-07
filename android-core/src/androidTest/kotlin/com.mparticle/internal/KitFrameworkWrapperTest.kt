@@ -90,8 +90,8 @@ class KitFrameworkWrapperTest : BaseCleanStartedEachTest() {
         val latch: CountDownLatch = MPLatch(1)
         val called = MutableBoolean(false)
         setKitManager(object : StubKitManager(mContext) {
-            override fun onModifyCompleted(user: MParticleUser, request: IdentityApiRequest) {
-                Assert.assertEquals(mStartingMpid.toLong(), user.id)
+            override fun onModifyCompleted(user: MParticleUser?, request: IdentityApiRequest) {
+                Assert.assertEquals(mStartingMpid.toLong(), user?.id)
                 called.value = true
                 latch.countDown()
             }
@@ -111,8 +111,8 @@ class KitFrameworkWrapperTest : BaseCleanStartedEachTest() {
         val latch: CountDownLatch = MPLatch(1)
         val called = MutableBoolean(false)
         setKitManager(object : StubKitManager(mContext) {
-            override fun onModifyCompleted(user: MParticleUser, request: IdentityApiRequest) {
-                Assert.assertEquals(mStartingMpid.toLong(), user.id)
+            override fun onModifyCompleted(user: MParticleUser?, request: IdentityApiRequest) {
+                Assert.assertEquals(mStartingMpid.toLong(), user?.id)
                 called.value = true
                 latch.countDown()
             }
@@ -126,8 +126,8 @@ class KitFrameworkWrapperTest : BaseCleanStartedEachTest() {
         Assert.assertTrue(called.value)
         called.value = false
         setKitManager(object : StubKitManager(mContext) {
-            override fun onModifyCompleted(user: MParticleUser, request: IdentityApiRequest) {
-                Assert.assertEquals(mpid2, user.id)
+            override fun onModifyCompleted(user: MParticleUser?, request: IdentityApiRequest) {
+                Assert.assertEquals(mpid2, user?.id)
                 called.value = true
                 latch2.countDown()
             }

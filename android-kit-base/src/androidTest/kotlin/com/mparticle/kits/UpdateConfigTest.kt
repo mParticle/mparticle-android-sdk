@@ -67,13 +67,20 @@ class UpdateConfigTest : BaseKitOptionsTest() {
                 ).toString()
         )
 
-        AccessUtils.getKitManager().addKitsLoadedListener { kits, previousKits, kitConfigs ->
-            assertEquals(1, previousKits.size)
-            assertEquals(2, kits.size)
-            assertTrue(previousKits.containsKey(1))
-            assertTrue(kits.containsKey(1))
-            assertTrue(kits.containsKey(2))
-        }
+        AccessUtils.getKitManager()
+            .addKitsLoadedListener(object : KitManagerImpl.KitsLoadedListener {
+                override fun onKitsLoaded(
+                    kits: Map<Int, KitIntegration?>?,
+                    previousKits: Map<Int, KitIntegration?>?,
+                    kitConfigs: List<KitConfiguration>?
+                ) {
+                    assertEquals(1, previousKits?.size)
+                    assertEquals(2, kits?.size)
+                    assertTrue(previousKits?.containsKey(1) == true)
+                    assertTrue(kits?.containsKey(1) == true)
+                    assertTrue(kits?.containsKey(2) == true)
+                }
+            })
     }
 
     @Test
@@ -99,14 +106,20 @@ class UpdateConfigTest : BaseKitOptionsTest() {
         )
 
         val latch = MPLatch(1)
-        AccessUtils.getKitManager().addKitsLoadedListener { kits, previousKits, kitConfigs ->
-            assertEquals(2, previousKits.size)
-            assertEquals(1, kits.size)
-            assertTrue(previousKits.containsKey(1))
-            assertTrue(previousKits.containsKey(2))
-            assertTrue(kits.containsKey(1))
-            latch.countDown()
-        }
+        AccessUtils.getKitManager().addKitsLoadedListener (object : KitManagerImpl.KitsLoadedListener {
+            override fun onKitsLoaded(
+                kits: Map<Int, KitIntegration?>?,
+                previousKits: Map<Int, KitIntegration?>?,
+                kitConfigs: List<KitConfiguration>?
+            ) {
+                assertEquals(2, previousKits?.size)
+                assertEquals(1, kits?.size)
+                assertTrue(previousKits?.containsKey(1) == true)
+                assertTrue(previousKits?.containsKey(2) == true)
+                assertTrue(kits?.containsKey(1) == true)
+                latch.countDown()
+            }
+        })
         AccessUtils.forceFetchConfig()
         latch.await()
     }
