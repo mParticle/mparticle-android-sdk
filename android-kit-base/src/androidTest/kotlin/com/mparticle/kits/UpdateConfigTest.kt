@@ -106,7 +106,7 @@ class UpdateConfigTest : BaseKitOptionsTest() {
         )
 
         val latch = MPLatch(1)
-        AccessUtils.getKitManager().addKitsLoadedListener (object : KitManagerImpl.KitsLoadedListener {
+        AccessUtils.getKitManager().addKitsLoadedListener(object : KitManagerImpl.KitsLoadedListener {
             override fun onKitsLoaded(
                 kits: Map<Int, KitIntegration?>?,
                 previousKits: Map<Int, KitIntegration?>?,

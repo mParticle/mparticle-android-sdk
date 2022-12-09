@@ -2,24 +2,23 @@ package com.mparticle.kits
 
 import android.app.Activity
 import android.content.Context
-import com.mparticle.MParticle.IdentityType
-import com.mparticle.MParticle
-import com.mparticle.identity.MParticleUser
-import android.content.SharedPreferences
-import com.mparticle.BaseEvent
-import com.mparticle.MPEvent
 import android.content.Intent
+import android.content.SharedPreferences
 import android.location.Location
 import android.net.Uri
 import android.os.Bundle
+import com.mparticle.BaseEvent
+import com.mparticle.MPEvent
+import com.mparticle.MParticle
+import com.mparticle.MParticle.IdentityType
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.consent.ConsentState
+import com.mparticle.identity.MParticleUser
 import org.json.JSONObject
 import java.lang.IllegalArgumentException
 import java.lang.ref.WeakReference
 import java.math.BigDecimal
 import kotlin.Exception
-
 
 interface LegacyKitIntegration {
     fun getUserIdentities(): Map<IdentityType, String?>
@@ -31,7 +30,7 @@ interface LegacyKitIntegration {
  */
 abstract class KitIntegration : LegacyKitIntegration {
 
-    lateinit var kitManager: KitManagerImpl
+    var kitManager: KitManagerImpl? = null
         private set
 
     /**
@@ -41,7 +40,7 @@ abstract class KitIntegration : LegacyKitIntegration {
      *
      * @return
      */
-    lateinit var configuration: KitConfiguration
+    var configuration: KitConfiguration? = null
         private set
 
     /**
@@ -50,28 +49,14 @@ abstract class KitIntegration : LegacyKitIntegration {
      *
      * @return true if the application is background
      */
-    protected val isBackgrounded: Boolean = kitManager.get()?.isBackgrounded ?: false
+    protected val isBackgrounded: Boolean = kitManager?.isBackgrounded ?: false
 
     /**
      * Get an application Context object.
      *
      * @return an application Context, this will never be null.
      */
-    val context: Context = kitManager.get(true)!!.context
-
-    private fun KitManagerImpl.get(throwException: Boolean = false): KitManagerImpl? =
-        if (!this@KitIntegration::kitManager.isInitialized) {
-            if (throwException) {
-                throw RuntimeException("Kit manager not initialized")
-            } else null
-        } else kitManager
-
-    private fun KitConfiguration.get(throwException: Boolean = false): KitConfiguration? =
-        if (!this@KitIntegration::configuration.isInitialized) {
-            if (throwException) {
-                throw RuntimeException("Configuration not initialized")
-            } else null
-        } else configuration
+    val context: Context? = kitManager?.context
 
     /**
      * Get a WeakReference to an Activity. The mParticle SDK maintains a WeakReference
@@ -80,7 +65,7 @@ abstract class KitIntegration : LegacyKitIntegration {
      *
      * @return a WeakReference to an Activity, or null.
      */
-    fun getCurrentActivity(): WeakReference<Activity>? = kitManager.get()?.currentActivity
+    fun getCurrentActivity(): WeakReference<Activity>? = kitManager?.currentActivity
 
     fun setConfiguration(configuration: KitConfiguration): KitIntegration {
         this.configuration = configuration
@@ -95,16 +80,18 @@ abstract class KitIntegration : LegacyKitIntegration {
      *
      * @return
      */
-    open fun <T> getInstance(): T? = null
+    open fun getInstance(): Any? = null
 
     open fun isDisabled(): Boolean = isDisabled(false)
 
-
     @Throws(RuntimeException::class)
     fun isDisabled(isOptOutEvent: Boolean): Boolean {
-        val kitManager = kitManager.get(true)!!
-        val config = configuration.get(true)!!
-        return !config.passesBracketing(kitManager.userBucket) || config.shouldHonorOptOut() && kitManager.isOptedOut && !isOptOutEvent
+        if (kitManager == null || configuration == null) return true
+        return try {
+            !configuration?.passesBracketing(kitManager?.userBucket!!)!! || configuration?.shouldHonorOptOut()!! && kitManager?.isOptedOut!! && !isOptOutEvent
+        } catch (e: Exception) {
+            false
+        }
     }
 
     @Deprecated("Use the async version")
@@ -112,9 +99,9 @@ abstract class KitIntegration : LegacyKitIntegration {
         var returnValue: Map<IdentityType, String?>? = mutableMapOf()
         MParticle.getInstance()?.Identity()?.currentUser?.let {
             val transformedIdentities =
-                kitManager.get()?.dataplanFilter?.transformIdentities(it.userIdentities)
+                kitManager?.dataplanFilter?.transformIdentities(it.userIdentities)
 
-            configuration.get()?.let { config ->
+            configuration?.let { config ->
                 returnValue = transformedIdentities?.filter {
                     config.shouldSetIdentity(it.key)
                 }
@@ -136,12 +123,12 @@ abstract class KitIntegration : LegacyKitIntegration {
      */
     @Deprecated("")
     override fun getAllUserAttributes(): Map<String, Any?> {
-        val transformedUserAttributes = kitManager.get()?.dataplanFilter?.transformUserAttributes(
+        val transformedUserAttributes = kitManager?.dataplanFilter?.transformUserAttributes(
             MParticle.getInstance()?.Identity()?.currentUser?.userAttributes
         )
 
         var attributes: MutableMap<String, Any?> = mutableMapOf()
-        configuration.get()?.let { config ->
+        configuration?.let { config ->
             KitConfiguration.filterAttributes(
                 config.userAttributeFilters, transformedUserAttributes
             )?.toMutableMap()?.let { attributes = it }
@@ -153,7 +140,6 @@ abstract class KitIntegration : LegacyKitIntegration {
             attributes.forEach {
                 if (it.value is List<*>) {
                     val key = it.key
-                    attributes.remove(key)
                     attributes[key] = KitUtils.join((it.value as List<*>).map { it.toString() })
                 }
             }
@@ -205,7 +191,7 @@ abstract class KitIntegration : LegacyKitIntegration {
      * Called by the KitManager when this kit is to be removed.
      */
     fun onKitCleanup() {
-        kitPreferences.edit().clear().apply()
+        kitPreferences?.edit()?.clear()?.apply()
     }
 
     /**
@@ -214,11 +200,11 @@ abstract class KitIntegration : LegacyKitIntegration {
      *
      * @return
      */
-    protected val kitPreferences: SharedPreferences
+    protected val kitPreferences: SharedPreferences?
         get() {
-            return kitManager.get(true)!!.context.getSharedPreferences(
-                "$KIT_PREFERENCES_FILE${configuration.kitId}", Context.MODE_PRIVATE
-            )
+            return if (kitManager != null && configuration != null) kitManager!!.context.getSharedPreferences(
+                "$KIT_PREFERENCES_FILE${configuration!!.kitId}", Context.MODE_PRIVATE
+            ) else null
         }
 
     /**
@@ -236,13 +222,18 @@ abstract class KitIntegration : LegacyKitIntegration {
      * @return a Map of settings
      */
     val settings: Map<String, String>
-        get() = configuration.get()?.settings ?: mutableMapOf()
+        get() = configuration?.settings ?: mutableMapOf()
 
     open fun logNetworkPerformance(
-        url: String?, startTime: Long, method: String?, length: Long,
-        bytesSent: Long, bytesReceived: Long, requestString: String?, responseCode: Int
+        url: String?,
+        startTime: Long,
+        method: String?,
+        length: Long,
+        bytesSent: Long,
+        bytesReceived: Long,
+        requestString: String?,
+        responseCode: Int
     ): List<ReportingMessage> = emptyList()
-
 
     open fun getSurveyUrl(
         userAttributes: Map<String, String?>?,
@@ -271,7 +262,7 @@ abstract class KitIntegration : LegacyKitIntegration {
      * @param integrationAttributes
      */
     protected fun setIntegrationAttributes(integrationAttributes: Map<String, String?>?) {
-        kitManager.get()?.setIntegrationAttributes(this, integrationAttributes)
+        kitManager?.setIntegrationAttributes(this, integrationAttributes)
     }
 
     /**
@@ -281,13 +272,13 @@ abstract class KitIntegration : LegacyKitIntegration {
      * @return
      */
     protected fun getIntegrationAttributes(): Map<String, String> =
-        kitManager.get()?.getIntegrationAttributes(this) ?: mapOf()
+        kitManager?.getIntegrationAttributes(this) ?: mapOf()
 
     /**
      * Remove all integration attributes set for this integration.
      */
     protected fun clearIntegrationAttributes() {
-        kitManager.get()?.clearIntegrationAttributes(this)
+        kitManager?.clearIntegrationAttributes(this)
     }
 
     /**
@@ -310,7 +301,7 @@ abstract class KitIntegration : LegacyKitIntegration {
      * Queues and groups network requests on the MParticle Core network handler
      */
     fun executeNetworkRequest(runnable: Runnable?) {
-        kitManager.get()?.runOnKitThread(runnable)
+        kitManager?.runOnKitThread(runnable)
     }
 
     /**
@@ -330,7 +321,7 @@ abstract class KitIntegration : LegacyKitIntegration {
         fun onActivityCreated(
             activity: Activity,
             savedInstanceState: Bundle?
-        ): List<ReportingMessage?>?
+        ): List<ReportingMessage>
 
         fun onActivityStarted(activity: Activity): List<ReportingMessage>
         fun onActivityResumed(activity: Activity): List<ReportingMessage>
@@ -419,7 +410,9 @@ abstract class KitIntegration : LegacyKitIntegration {
          * @return Kits should return a List of ReportingMessages indicating that the LTV increase was processed one or more times, or null if it was not processed
          */
         fun logLtvIncrease(
-            valueIncreased: BigDecimal, valueTotal: BigDecimal, eventName: String,
+            valueIncreased: BigDecimal,
+            valueTotal: BigDecimal,
+            eventName: String,
             contextInfo: Map<String, String?>?
         ): List<ReportingMessage>
 

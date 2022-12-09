@@ -20,7 +20,5 @@ open class BaseTestKit : KitIntegration() {
         return this::class.java.simpleName
     }
 
-    override fun <T> getInstance(): T? {
-        return super.getInstance() as T?
-    }
+    override fun getInstance(): Any? = this
 }

@@ -64,17 +64,13 @@ class KitManagerImplTest {
         manager.setKitFactory(factory)
         Mockito.`when`(factory.isSupported(Mockito.anyInt())).thenReturn(true)
         val mockKit = Mockito.mock(KitIntegration::class.java)
-        Mockito.`when`(mockKit.configuration).thenReturn(
-            Mockito.mock(
-                KitConfiguration::class.java
-            )
-        )
+        mockKit.setConfiguration(Mockito.mock(KitConfiguration::class.java))
         Mockito.`when`(
             factory.createInstance(
-                Mockito.any(
+                anyObject(
                     KitManagerImpl::class.java
                 ),
-                Mockito.any(KitConfiguration::class.java)
+                anyObject(KitConfiguration::class.java)
             )
         ).thenReturn(mockKit)
         manager.updateKits(kitConfiguration)
@@ -102,17 +98,13 @@ class KitManagerImplTest {
         manager.setKitFactory(factory)
         Mockito.`when`(factory.isSupported(Mockito.anyInt())).thenReturn(true)
         val mockKit = Mockito.mock(KitIntegration::class.java)
-        Mockito.`when`(mockKit.configuration).thenReturn(
-            Mockito.mock(
-                KitConfiguration::class.java
-            )
-        )
+        mockKit.setConfiguration(Mockito.mock(KitConfiguration::class.java))
         Mockito.`when`(
             factory.createInstance(
-                Mockito.any(
+                anyObject(
                     KitManagerImpl::class.java
                 ),
-                Mockito.any(KitConfiguration::class.java)
+                anyObject(KitConfiguration::class.java)
             )
         ).thenReturn(mockKit)
         manager.updateKits(kitConfiguration)
@@ -138,17 +130,13 @@ class KitManagerImplTest {
         manager.setKitFactory(factory)
         Mockito.`when`(factory.isSupported(Mockito.anyInt())).thenReturn(true)
         val mockKit = Mockito.mock(KitIntegration::class.java)
-        Mockito.`when`(mockKit.configuration).thenReturn(
-            Mockito.mock(
-                KitConfiguration::class.java
-            )
-        )
+        mockKit.setConfiguration(Mockito.mock(KitConfiguration::class.java))
         Mockito.`when`(
             factory.createInstance(
-                Mockito.any(
+                anyObject(
                     KitManagerImpl::class.java
                 ),
-                Mockito.any(KitConfiguration::class.java)
+                anyObject(KitConfiguration::class.java)
             )
         ).thenReturn(mockKit)
         manager.updateKits(kitConfiguration)
@@ -174,17 +162,13 @@ class KitManagerImplTest {
         manager.setKitFactory(factory)
         Mockito.`when`(factory.isSupported(Mockito.anyInt())).thenReturn(true)
         val mockKit = Mockito.mock(KitIntegration::class.java)
-        Mockito.`when`(mockKit.configuration).thenReturn(
-            Mockito.mock(
-                KitConfiguration::class.java
-            )
-        )
+        mockKit.setConfiguration(Mockito.mock(KitConfiguration::class.java))
         Mockito.`when`(
             factory.createInstance(
-                Mockito.any(
+                anyObject(
                     KitManagerImpl::class.java
                 ),
-                Mockito.any(KitConfiguration::class.java)
+                anyObject(KitConfiguration::class.java)
             )
         ).thenReturn(mockKit)
         manager.updateKits(kitConfiguration)
@@ -215,17 +199,13 @@ class KitManagerImplTest {
         manager.setKitFactory(factory)
         Mockito.`when`(factory.isSupported(Mockito.anyInt())).thenReturn(true)
         val mockKit = Mockito.mock(KitIntegration::class.java)
-        Mockito.`when`(mockKit.configuration).thenReturn(
-            Mockito.mock(
-                KitConfiguration::class.java
-            )
-        )
+        mockKit.setConfiguration(Mockito.mock(KitConfiguration::class.java))
         Mockito.`when`(
             factory.createInstance(
-                Mockito.any(
+                anyObject(
                     KitManagerImpl::class.java
                 ),
-                Mockito.any(KitConfiguration::class.java)
+                anyObject(KitConfiguration::class.java)
             )
         ).thenReturn(mockKit)
         manager.updateKits(kitConfiguration)
@@ -253,17 +233,13 @@ class KitManagerImplTest {
         manager.setKitFactory(factory)
         Mockito.`when`(factory.isSupported(Mockito.anyInt())).thenReturn(true)
         val mockKit = Mockito.mock(KitIntegration::class.java)
-        Mockito.`when`(mockKit.configuration).thenReturn(
-            Mockito.mock(
-                KitConfiguration::class.java
-            )
-        )
+        mockKit.setConfiguration(Mockito.mock(KitConfiguration::class.java))
         Mockito.`when`(
             factory.createInstance(
-                Mockito.any(
+                anyObject(
                     KitManagerImpl::class.java
                 ),
-                Mockito.any(KitConfiguration::class.java)
+                anyObject(KitConfiguration::class.java)
             )
         ).thenReturn(mockKit)
         manager.updateKits(kitConfiguration)
@@ -294,17 +270,13 @@ class KitManagerImplTest {
         manager.setKitFactory(factory)
         Mockito.`when`(factory.isSupported(Mockito.anyInt())).thenReturn(true)
         val mockKit = Mockito.mock(KitIntegration::class.java)
-        Mockito.`when`(mockKit.configuration).thenReturn(
-            Mockito.mock(
-                KitConfiguration::class.java
-            )
-        )
+        mockKit.setConfiguration(Mockito.mock(KitConfiguration::class.java))
         Mockito.`when`(
             factory.createInstance(
-                Mockito.any(
+                anyObject(
                     KitManagerImpl::class.java
                 ),
-                Mockito.any(KitConfiguration::class.java)
+                anyObject(KitConfiguration::class.java)
             )
         ).thenReturn(mockKit)
         manager.updateKits(kitConfiguration)
@@ -339,17 +311,13 @@ class KitManagerImplTest {
         manager.setKitFactory(factory)
         Mockito.`when`(factory.isSupported(Mockito.anyInt())).thenReturn(true)
         val mockKit = Mockito.mock(KitIntegration::class.java)
-        Mockito.`when`(mockKit.configuration).thenReturn(
-            Mockito.mock(
-                KitConfiguration::class.java
-            )
-        )
+        mockKit.setConfiguration(Mockito.mock(KitConfiguration::class.java))
         Mockito.`when`(
             factory.createInstance(
-                Mockito.any(
+                anyObject(
                     KitManagerImpl::class.java
                 ),
-                Mockito.any(KitConfiguration::class.java)
+                anyObject(KitConfiguration::class.java)
             )
         ).thenReturn(mockKit)
         manager.updateKits(kitConfiguration)
@@ -376,10 +344,8 @@ class KitManagerImplTest {
         Mockito.`when`((integration as AttributeListener).supportsAttributeLists()).thenReturn(true)
         Mockito.`when`((integration2 as AttributeListener).supportsAttributeLists())
             .thenReturn(false)
-        Mockito.`when`(integration.configuration)
-            .thenReturn(MockKitConfiguration.createKitConfiguration())
-        Mockito.`when`(integration2.configuration)
-            .thenReturn(MockKitConfiguration.createKitConfiguration())
+        integration.setConfiguration(MockKitConfiguration.createKitConfiguration())
+        integration2.setConfiguration(MockKitConfiguration.createKitConfiguration())
         manager.providers[5] = integration
         manager.providers[6] = integration2
         val userAttributeSingles: MutableMap<String, String> = HashMap()
@@ -418,10 +384,8 @@ class KitManagerImplTest {
         Mockito.`when`((integration as AttributeListener).supportsAttributeLists()).thenReturn(true)
         Mockito.`when`((integration2 as AttributeListener).supportsAttributeLists())
             .thenReturn(false)
-        Mockito.`when`(integration.configuration)
-            .thenReturn(MockKitConfiguration.createKitConfiguration())
-        Mockito.`when`(integration2.configuration)
-            .thenReturn(MockKitConfiguration.createKitConfiguration())
+        integration.setConfiguration(MockKitConfiguration.createKitConfiguration())
+        integration2.setConfiguration(MockKitConfiguration.createKitConfiguration())
         manager.providers[5] = integration
         manager.providers[6] = integration2
         val attributeList: MutableList<String> = LinkedList()
@@ -450,10 +414,8 @@ class KitManagerImplTest {
         Mockito.`when`((integration as AttributeListener).supportsAttributeLists()).thenReturn(true)
         Mockito.`when`((integration2 as AttributeListener).supportsAttributeLists())
             .thenReturn(false)
-        Mockito.`when`(integration.configuration)
-            .thenReturn(MockKitConfiguration.createKitConfiguration())
-        Mockito.`when`(integration2.configuration)
-            .thenReturn(MockKitConfiguration.createKitConfiguration())
+        integration.setConfiguration(MockKitConfiguration.createKitConfiguration())
+        integration2.setConfiguration(MockKitConfiguration.createKitConfiguration())
         (manager as KitManagerImpl).providers[5] = integration
         (manager as KitManagerImpl).providers[6] = integration2
         val mpEvent = TestingUtils().randomMPEventSimple
@@ -491,17 +453,13 @@ class KitManagerImplTest {
         Mockito.`when`(factory.isSupported(Mockito.anyInt())).thenReturn(true)
         val mockKit = Mockito.mock(KitIntegration::class.java)
         Mockito.`when`(mockKit.isDisabled()).thenReturn(true)
-        Mockito.`when`(mockKit.configuration).thenReturn(
-            Mockito.mock(
-                KitConfiguration::class.java
-            )
-        )
+        mockKit.setConfiguration(Mockito.mock(KitConfiguration::class.java))
         Mockito.`when`(
             factory.createInstance(
-                Mockito.any(
+                anyObject(
                     KitManagerImpl::class.java
                 ),
-                Mockito.any(KitConfiguration::class.java)
+                anyObject(KitConfiguration::class.java)
             )
         ).thenReturn(mockKit)
         manager.setOptOut(true)

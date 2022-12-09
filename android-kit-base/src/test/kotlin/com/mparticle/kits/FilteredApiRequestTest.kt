@@ -13,17 +13,15 @@ class FilteredApiRequestTest {
         val mockIntegration = Mockito.mock(
             KitIntegration::class.java
         )
-        val mockConfiguration = Mockito.mock(
-            KitConfiguration::class.java
-        )
+        val configMock = Mockito.mock(KitConfiguration::class.java)
+        mockIntegration.setConfiguration(configMock)
         Mockito.`when`(
-            mockConfiguration.shouldSetIdentity(
-                Mockito.any(
+            configMock.shouldSetIdentity(
+                anyObject(
                     IdentityType::class.java
                 )
             )
         ).thenReturn(true)
-        Mockito.`when`(mockIntegration.configuration).thenReturn(mockConfiguration)
         val filteredRequest = FilteredIdentityApiRequest(request, mockIntegration)
         Assert.assertEquals(0, filteredRequest.userIdentities.size.toLong())
     }
@@ -47,7 +45,7 @@ class FilteredApiRequestTest {
         Mockito.`when`(mockConfiguration.shouldSetIdentity(IdentityType.CustomerId))
             .thenReturn(false)
         Mockito.`when`(mockConfiguration.shouldSetIdentity(IdentityType.Google)).thenReturn(false)
-        Mockito.`when`(mockIntegration.configuration).thenReturn(mockConfiguration)
+        mockIntegration.setConfiguration(mockConfiguration)
         val filteredRequest = FilteredIdentityApiRequest(request, mockIntegration)
         Assert.assertEquals(4, filteredRequest.userIdentities.size.toLong())
         Assert.assertEquals(2, filteredRequest.getUserIdentities().size.toLong())

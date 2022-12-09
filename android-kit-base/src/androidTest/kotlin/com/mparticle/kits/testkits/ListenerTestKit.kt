@@ -23,5 +23,4 @@ abstract class ListenerTestKit : BaseTestKit() {
         context: Context
     ): List<ReportingMessage> = onKitCreate?.invoke(settings, context)
         ?: listOf()
-
 }

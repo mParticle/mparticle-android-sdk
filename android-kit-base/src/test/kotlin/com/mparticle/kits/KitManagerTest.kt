@@ -8,6 +8,7 @@ import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.internal.ConfigManager
 import com.mparticle.internal.KitManager.KitStatus
+import com.mparticle.internal.ReportingManager
 import com.mparticle.mock.MockContext
 import com.mparticle.mock.MockCoreCallbacks
 import com.mparticle.mock.MockKitConfiguration
@@ -33,7 +34,7 @@ class KitManagerTest {
     fun setUp() {
         val mockMp: MParticle = MockMParticle()
         MParticle.setInstance(mockMp)
-        manager = MockKitManagerImpl(MockContext(), null, MockCoreCallbacks())
+        manager = MockKitManagerImpl(MockContext(), Mockito.mock(ReportingManager::class.java), MockCoreCallbacks())
         Assert.assertNotNull(manager.providers)
         val mockKitFactory = MockKitIntegrationFactory()
         manager.setKitFactory(mockKitFactory)
@@ -157,14 +158,14 @@ class KitManagerTest {
         val config = JSONObject()
         config.put(KitConfiguration.KEY_ID, 100)
         val mockConfig = MockKitConfiguration().parseConfiguration(config)
-        Mockito.`when`(mockForesee.configuration).thenReturn(mockConfig)
+        mockForesee.setConfiguration(mockConfig)
         val uri = Mockito.mock(Uri::class.java)
         Mockito.`when`(
             mockForesee.getSurveyUrl(
-                Mockito.any(
+                anyObject(
                     MutableMap::class.java
                 ) as MutableMap<String, String>?,
-                Mockito.any(
+                anyObject(
                     MutableMap::class.java
                 ) as MutableMap<String, MutableList<String>>?
             )

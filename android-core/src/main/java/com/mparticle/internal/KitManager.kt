@@ -25,8 +25,13 @@ interface Events {
     fun logError(message: String, eventData: Map<String, String?>?)
     fun logException(exception: Exception, eventData: Map<String, String?>?, message: String?)
     fun logNetworkPerformance(
-        url: String, startTime: Long, method: String, length: Long,
-        bytesSent: Long, bytesReceived: Long, requestString: String?,
+        url: String,
+        startTime: Long,
+        method: String,
+        length: Long,
+        bytesSent: Long,
+        bytesReceived: Long,
+        requestString: String?,
         responseCode: Int
     )
 }
@@ -81,15 +86,23 @@ interface KitIntegrationOperations {
     fun setLocation(location: Location?)
     fun setOptOut(optOutStatus: Boolean)
     fun getSurveyUrl(
-        serviceProviderId: Int, userAttributes: Map<String, String?>?,
+        serviceProviderId: Int,
+        userAttributes: Map<String, String?>?,
         userAttributeLists: Map<String, List<String?>?>?
     ): Uri?
 
     fun reset()
 }
 
-interface KitManager : Events, ActivityLifecycleCallbacks, Session, Identity, ApplicationState,
-    Push, UserAttributes, KitIntegrationOperations {
+interface KitManager :
+    Events,
+    ActivityLifecycleCallbacks,
+    Session,
+    Identity,
+    ApplicationState,
+    Push,
+    UserAttributes,
+    KitIntegrationOperations {
 
     val supportedKits: Set<Int>
     val kitStatus: Map<Int, KitStatus>

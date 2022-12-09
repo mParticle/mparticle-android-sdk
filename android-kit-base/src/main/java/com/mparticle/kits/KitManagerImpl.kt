@@ -2,53 +2,46 @@ package com.mparticle.kits
 
 import android.app.Activity
 import android.content.Context
-import com.mparticle.internal.ReportingManager
-import com.mparticle.internal.CoreCallbacks
-import com.mparticle.MParticleOptions
-import com.mparticle.internal.KitManager
-import com.mparticle.AttributionListener
-import com.mparticle.identity.IdentityStateListener
-import com.mparticle.AttributionResult
-import com.mparticle.internal.KitsLoadedCallback
-import com.mparticle.MParticleOptions.DataplanOptions
-import com.mparticle.identity.MParticleUser
 import android.content.Intent
 import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
-import com.mparticle.kits.KitIntegration.ActivityListener
-import com.mparticle.kits.KitIntegration.AttributeListener
-import com.mparticle.kits.KitManagerImpl
-import com.mparticle.kits.KitIntegration.PushListener
-import com.mparticle.internal.KitManager.KitStatus
-import com.mparticle.kits.KitIntegration.CommerceListener
-import com.mparticle.kits.mappings.CustomMapping.ProjectionResult
-import com.mparticle.kits.mappings.CustomMapping
-import com.mparticle.kits.ReportingMessage.ProjectionReport
-import com.mparticle.kits.CommerceEventUtils
-import com.mparticle.kits.KitUtils
-import com.mparticle.kits.FilteredMParticleUser
-import com.mparticle.kits.KitIntegration.BatchListener
-import com.mparticle.kits.KitIntegration.SessionListener
-import com.mparticle.kits.KitIntegration.ApplicationStateListener
-import com.mparticle.AttributionError
-import com.mparticle.kits.KitIntegration.IdentityListener
-import com.mparticle.identity.IdentityApiRequest
-import com.mparticle.kits.FilteredIdentityApiRequest
-import com.mparticle.consent.ConsentState
-import android.os.Looper
 import android.os.HandlerThread
+import android.os.Looper
 import androidx.annotation.MainThread
-import androidx.annotation.VisibleForTesting
+import com.mparticle.AttributionError
+import com.mparticle.AttributionListener
+import com.mparticle.AttributionResult
 import com.mparticle.BaseEvent
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
+import com.mparticle.MParticleOptions
+import com.mparticle.MParticleOptions.DataplanOptions
 import com.mparticle.UserAttributeListener
 import com.mparticle.commerce.CommerceEvent
+import com.mparticle.consent.ConsentState
+import com.mparticle.identity.IdentityApiRequest
+import com.mparticle.identity.IdentityStateListener
+import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.Constants
+import com.mparticle.internal.CoreCallbacks
+import com.mparticle.internal.KitManager
+import com.mparticle.internal.KitManager.KitStatus
+import com.mparticle.internal.KitsLoadedCallback
 import com.mparticle.internal.Logger
 import com.mparticle.internal.MPUtility
+import com.mparticle.internal.ReportingManager
+import com.mparticle.kits.KitIntegration.ActivityListener
+import com.mparticle.kits.KitIntegration.ApplicationStateListener
+import com.mparticle.kits.KitIntegration.AttributeListener
+import com.mparticle.kits.KitIntegration.BatchListener
+import com.mparticle.kits.KitIntegration.CommerceListener
+import com.mparticle.kits.KitIntegration.IdentityListener
+import com.mparticle.kits.KitIntegration.PushListener
+import com.mparticle.kits.KitIntegration.SessionListener
+import com.mparticle.kits.ReportingMessage.ProjectionReport
+import com.mparticle.kits.mappings.CustomMapping
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -58,12 +51,12 @@ import java.math.BigDecimal
 import java.util.*
 import java.util.concurrent.*
 
-open class KitManagerImpl(//================================================================================
+open class KitManagerImpl( // ================================================================================
     // KitIntegration.EventListener forwarding
-    //================================================================================
+    // ================================================================================
     val context: Context,
     private val reportingManager: ReportingManager,
-     val mCoreCallbacks: CoreCallbacks,
+    val mCoreCallbacks: CoreCallbacks,
     options: MParticleOptions?
 ) : KitManager, AttributionListener, UserAttributeListener, IdentityStateListener {
     private var mKitHandler: Handler? = null
@@ -180,7 +173,7 @@ open class KitManagerImpl(//====================================================
     protected fun configureKits(kitConfigurations: List<KitConfiguration>) {
 
         val instance = MParticle.getInstance()
-            ?: //if MParticle has been dereferenced, abandon ship. This will run again when it is restarted
+            ?: // if MParticle has been dereferenced, abandon ship. This will run again when it is restarted
             return
         val user = instance.Identity().currentUser
         val activeIds = HashSet<Int>()
@@ -258,34 +251,26 @@ open class KitManagerImpl(//====================================================
         Logger.debug("Initializing kit: " + activeKit!!.getName())
         activeKit.onKitCreate(activeKit.configuration!!.settings, context)
         if (activeKit is ActivityListener) {
-            val activityWeakReference = currentActivity
+            val activityWeakReference = currentActivity.get()
             if (activityWeakReference != null) {
-                val activity = activityWeakReference.get()
-                if (activity != null) {
-                    val listener = activeKit as ActivityListener
-                    reportingManager.logAll(
-                        listener.onActivityCreated(activity, null)
-                    )
-                    reportingManager.logAll(
-                        listener.onActivityStarted(activity)
-                    )
-                    reportingManager.logAll(
-                        listener.onActivityResumed(activity)
-                    )
-                }
+                val listener = activeKit as ActivityListener
+                reportingManager.logAll(
+                    listener.onActivityCreated(activityWeakReference, null)
+                )
+                reportingManager.logAll(
+                    listener.onActivityStarted(activityWeakReference)
+                )
+                reportingManager.logAll(
+                    listener.onActivityResumed(activityWeakReference)
+                )
             }
         }
         if (activeKit is AttributeListener) {
             syncUserIdentities(activeKit as AttributeListener, activeKit.configuration)
         }
         val instance = MParticle.getInstance()
-        if (instance != null) {
-            val mockInstallReferrer = getMockInstallReferrerIntent(
-                instance.installReferrer!!
-            )
-            if (mockInstallReferrer != null) {
-                activeKit.setInstallReferrer(mockInstallReferrer)
-            }
+        instance?.installReferrer?.let {
+            activeKit.setInstallReferrer(getMockInstallReferrerIntent(it))
         }
         if (activeKit is PushListener) {
             val senderId = mCoreCallbacks.pushSenderId
@@ -325,13 +310,13 @@ open class KitManagerImpl(//====================================================
     }
 
     override fun getKitInstance(kitId: Int): Any? {
-        val kit = providers[kitId]
-        return kit?.getInstance<Any>()
+        val kit: KitIntegration? = providers[kitId]
+        return kit?.getInstance()
     }
 
-    //================================================================================
+    // ================================================================================
     // General KitIntegration forwarding
-    //================================================================================
+    // ================================================================================
     override fun setLocation(location: Location?) {
         for (provider in providers.values) {
             try {
@@ -444,9 +429,9 @@ open class KitManagerImpl(//====================================================
         }
     }
 
-    //================================================================================
+    // ================================================================================
     // KitIntegration.CommerceListener forwarding
-    //================================================================================
+    // ================================================================================
     protected open fun logCommerceEvent(event: CommerceEvent) {
         for (provider in providers.values) {
             try {
@@ -556,9 +541,9 @@ open class KitManagerImpl(//====================================================
         }
     }
 
-    //================================================================================
+    // ================================================================================
     // KitIntegration.PushListener forwarding
-    //================================================================================
+    // ================================================================================
     override fun onMessageReceived(context: Context, intent: Intent): Boolean {
         for (provider in providers.values) {
             if (provider is PushListener) {
@@ -621,9 +606,9 @@ open class KitManagerImpl(//====================================================
         return false
     }
 
-    //================================================================================
+    // ================================================================================
     // KitIntegration.AttributeListener forwarding
-    //================================================================================
+    // ================================================================================
     override fun onUserAttributesReceived(
         userAttributes: Map<String, String>?,
         userAttributeLists: Map<String, List<String>>?,
@@ -635,8 +620,8 @@ open class KitManagerImpl(//====================================================
         userAttributeLists = mDataplanFilter.transformUserAttributes(userAttributeLists)
         for (provider in providers.values) {
             try {
-                if ((provider is AttributeListener || provider is KitIntegration.UserAttributeListener)
-                    && !provider.isDisabled()
+                if ((provider is AttributeListener || provider is KitIntegration.UserAttributeListener) &&
+                    !provider.isDisabled()
                 ) {
                     val filteredAttributeSingles = KitConfiguration.filterAttributes(
                         provider.configuration!!.userAttributeFilters,
@@ -680,7 +665,8 @@ open class KitManagerImpl(//====================================================
                                 singlesCopy[key] = KitUtils.join(value)
                             }
                             (provider as KitIntegration.UserAttributeListener).onSetAllUserAttributes(
-                                singlesCopy, HashMap(), FilteredMParticleUser.getInstance(
+                                singlesCopy, HashMap(),
+                                FilteredMParticleUser.getInstance(
                                     mpid!!, provider
                                 )
                             )
@@ -747,12 +733,12 @@ open class KitManagerImpl(//====================================================
         valueList: List<String?>?,
         mpid: Long
     ) {
-        if ((provider is AttributeListener || provider is KitIntegration.UserAttributeListener)
-            && !provider.isDisabled()
-            && KitConfiguration.shouldForwardAttribute(
-                provider.configuration!!.userAttributeFilters,
-                attributeKey
-            )
+        if ((provider is AttributeListener || provider is KitIntegration.UserAttributeListener) &&
+            !provider.isDisabled() &&
+            KitConfiguration.shouldForwardAttribute(
+                    provider.configuration!!.userAttributeFilters,
+                    attributeKey
+                )
         ) {
             if (provider is AttributeListener) {
                 if ((provider as AttributeListener).supportsAttributeLists()) {
@@ -788,12 +774,12 @@ open class KitManagerImpl(//====================================================
         attributeValue: String?,
         mpid: Long
     ) {
-        if ((provider is AttributeListener || provider is KitIntegration.UserAttributeListener)
-            && !provider.isDisabled()
-            && KitConfiguration.shouldForwardAttribute(
-                provider.configuration!!.userAttributeFilters,
-                attributeKey
-            )
+        if ((provider is AttributeListener || provider is KitIntegration.UserAttributeListener) &&
+            !provider.isDisabled() &&
+            KitConfiguration.shouldForwardAttribute(
+                    provider.configuration!!.userAttributeFilters,
+                    attributeKey
+                )
         ) {
             if (provider is AttributeListener) {
                 (provider as AttributeListener).setUserAttribute(attributeKey, attributeValue)
@@ -814,12 +800,12 @@ open class KitManagerImpl(//====================================================
         }
         for (provider in providers.values) {
             try {
-                if ((provider is AttributeListener || provider is KitIntegration.UserAttributeListener)
-                    && !provider.isDisabled()
-                    && KitConfiguration.shouldForwardAttribute(
-                        provider.configuration!!.userAttributeFilters,
-                        key
-                    )
+                if ((provider is AttributeListener || provider is KitIntegration.UserAttributeListener) &&
+                    !provider.isDisabled() &&
+                    KitConfiguration.shouldForwardAttribute(
+                            provider.configuration!!.userAttributeFilters,
+                            key
+                        )
                 ) {
                     if (provider is AttributeListener) {
                         (provider as AttributeListener).removeUserAttribute(key)
@@ -875,11 +861,11 @@ open class KitManagerImpl(//====================================================
         }
         for (provider in providers.values) {
             try {
-                if (provider is KitIntegration.UserAttributeListener && !provider.isDisabled()
-                    && KitConfiguration.shouldForwardAttribute(
-                        provider.configuration!!.userAttributeFilters,
-                        tag
-                    )
+                if (provider is KitIntegration.UserAttributeListener && !provider.isDisabled() &&
+                    KitConfiguration.shouldForwardAttribute(
+                            provider.configuration!!.userAttributeFilters,
+                            tag
+                        )
                 ) {
                     (provider as KitIntegration.UserAttributeListener).onSetUserTag(
                         tag,
@@ -965,8 +951,8 @@ open class KitManagerImpl(//====================================================
                         var messages: List<ReportingMessage?>? = null
                         if (eventCopy.customAttributeStrings != null && eventCopy.customAttributeStrings!!.containsKey(
                                 METHOD_NAME
-                            )
-                            && eventCopy.customAttributeStrings!![METHOD_NAME] == LOG_LTV
+                            ) &&
+                            eventCopy.customAttributeStrings!![METHOD_NAME] == LOG_LTV
                         ) {
                             messages = (provider as CommerceListener).logLtvIncrease(
                                 BigDecimal(eventCopy.customAttributeStrings!![RESERVED_KEY_LTV]),
@@ -1204,9 +1190,9 @@ open class KitManagerImpl(//====================================================
         }
     }
 
-    //================================================================================
+    // ================================================================================
     // KitIntegration.ActivityListener forwarding
-    //================================================================================
+    // ================================================================================
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         for (provider in providers.values) {
             try {
@@ -1363,9 +1349,9 @@ open class KitManagerImpl(//====================================================
     override val attributionResults: Map<Int, AttributionResult>
         get() = mAttributionResultsMap
 
-    //================================================================================
+    // ================================================================================
     // AttributionListener forwarding
-    //================================================================================
+    // ================================================================================
     override fun onResult(result: AttributionResult) {
         mAttributionResultsMap[result.serviceProviderId] = result
         val instance = MParticle.getInstance()
@@ -1405,11 +1391,11 @@ open class KitManagerImpl(//====================================================
         }
     }
 
-    //================================================================================
+    // ================================================================================
     // IdentityListener forwarding
-    //================================================================================
+    // ================================================================================
     override fun onUserIdentified(mParticleUser: MParticleUser, previousUser: MParticleUser?) {
-        //due to consent forwarding rules we need to re-verify kits whenever the user changes
+        // due to consent forwarding rules we need to re-verify kits whenever the user changes
         reloadKits()
         for (provider in providers.values) {
             try {
@@ -1439,7 +1425,8 @@ open class KitManagerImpl(//====================================================
                         FilteredMParticleUser.getInstance(
                             mParticleUser,
                             provider
-                        ), FilteredIdentityApiRequest(identityApiRequest, provider)
+                        ),
+                        FilteredIdentityApiRequest(identityApiRequest, provider)
                     )
                 }
             } catch (e: Exception) {
@@ -1459,7 +1446,8 @@ open class KitManagerImpl(//====================================================
                         FilteredMParticleUser.getInstance(
                             mParticleUser,
                             provider
-                        ), FilteredIdentityApiRequest(identityApiRequest, provider)
+                        ),
+                        FilteredIdentityApiRequest(identityApiRequest, provider)
                     )
                 }
             } catch (e: Exception) {
@@ -1479,7 +1467,8 @@ open class KitManagerImpl(//====================================================
                         FilteredMParticleUser.getInstance(
                             mParticleUser,
                             provider
-                        ), FilteredIdentityApiRequest(identityApiRequest, provider)
+                        ),
+                        FilteredIdentityApiRequest(identityApiRequest, provider)
                     )
                 }
             } catch (e: Exception) {
@@ -1499,7 +1488,8 @@ open class KitManagerImpl(//====================================================
                         FilteredMParticleUser.getInstance(
                             mParticleUser,
                             provider
-                        ), FilteredIdentityApiRequest(identityApiRequest, provider)
+                        ),
+                        FilteredIdentityApiRequest(identityApiRequest, provider)
                     )
                 }
             } catch (e: Exception) {
@@ -1513,7 +1503,7 @@ open class KitManagerImpl(//====================================================
         newState: ConsentState?,
         mpid: Long
     ) {
-        //Due to consent forwarding rules we need to re-initialize kits whenever the user changes.
+        // Due to consent forwarding rules we need to re-initialize kits whenever the user changes.
         reloadKits()
         for (provider in providers.values) {
             if (provider is KitIntegration.UserAttributeListener && !provider.isDisabled()) {

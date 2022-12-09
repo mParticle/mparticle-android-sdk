@@ -6,6 +6,7 @@ import com.mparticle.MParticle
 import com.mparticle.MParticle.IdentityType
 import com.mparticle.internal.MPUtility
 import com.mparticle.kits.KitIntegration.AttributeListener
+import com.mparticle.mock.MockKitManagerImpl
 import com.mparticle.mock.MockMParticle
 import org.junit.Assert
 import org.junit.Test
@@ -34,6 +35,7 @@ class KitIntegrationTest {
             }
         }
         integration.setConfiguration(Mockito.mock(KitConfiguration::class.java))
+        integration.setKitManager(MockKitManagerImpl())
         val attributes: MutableMap<String, Any> = HashMap()
         attributes["key 1"] = "value 1"
         val list: MutableList<String> = LinkedList()
@@ -108,6 +110,7 @@ class KitIntegrationTest {
         mockArray.put(MPUtility.mpHash("key 3"), false)
         Mockito.`when`(configuration.userAttributeFilters).thenReturn(mockArray)
         integration.setConfiguration(configuration)
+        integration.setKitManager(MockKitManagerImpl())
         val attributes: MutableMap<String, Any> = HashMap()
         attributes["key 1"] = "value 1"
         attributes["key 4"] = "value 4"
@@ -132,6 +135,7 @@ class KitIntegrationTest {
         MParticle.setInstance(MockMParticle())
         val integration: KitIntegration = AttributeListenerIntegration()
         integration.setConfiguration(Mockito.mock(KitConfiguration::class.java))
+        integration.setKitManager(MockKitManagerImpl())
         val attributes: MutableMap<String, Any> = HashMap()
         attributes["key 1"] = "value 1"
         val list: MutableList<String> = LinkedList()
@@ -151,14 +155,14 @@ class KitIntegrationTest {
     fun testGetAllUserAttributesWithListsAndFilters() {
         MParticle.setInstance(MockMParticle())
         val integration: KitIntegration = AttributeListenerIntegration()
-        val configuration = Mockito.mock(
-            KitConfiguration::class.java
-        )
+        val configuration = Mockito.mock(KitConfiguration::class.java)
         val mockArray = MockSparseBooleanArray()
         mockArray.put(MPUtility.mpHash("key 4"), false)
         mockArray.put(MPUtility.mpHash("key 3"), false)
-        Mockito.`when`(configuration.userAttributeFilters).thenReturn(mockArray)
+        val kitManager = MockKitManagerImpl()
+        integration.setKitManager(kitManager)
         integration.setConfiguration(configuration)
+        Mockito.`when`(configuration.userAttributeFilters).thenReturn(mockArray)
         val attributes: MutableMap<String, Any> = HashMap()
         attributes["key 1"] = "value 1"
         attributes["key 4"] = "value 4"
