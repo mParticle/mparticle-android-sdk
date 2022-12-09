@@ -646,7 +646,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     @Override
     public void logNotification(int contentId, String payload, String appState, int newBehavior) {
-        try{
+        try {
             BaseMPMessage message = new BaseMPMessage.Builder(MessageType.PUSH_RECEIVED)
                     .timestamp(System.currentTimeMillis())
                     .name("gcm")
@@ -664,7 +664,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             message.put(MessageKey.APP_STATE, appState);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
 
-        }catch (JSONException e) {
+        } catch (JSONException e) {
 
         }
 
