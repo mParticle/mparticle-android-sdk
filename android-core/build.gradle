@@ -153,7 +153,7 @@ dependencies {
 
     androidTestImplementation project(':testutils')
     if (useOrchestrator()) {
-        androidTestImplementation 'androidx.test:runner:1.4.0'
+        androidTestImplementation 'androidx.test:runner:1.5.1'
         androidTestUtil 'androidx.test:orchestrator:1.4.2'
     }
     androidTestImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
