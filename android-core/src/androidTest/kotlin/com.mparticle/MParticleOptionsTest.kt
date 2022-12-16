@@ -27,6 +27,7 @@ import java.util.concurrent.CountDownLatch
 class MParticleOptionsTest : BaseAbstractTest() {
     lateinit var mContext: Context
     private lateinit var mProductionContext: Context
+
     @Before
     fun before() {
         if (Looper.myLooper() == null) {
@@ -404,6 +405,46 @@ class MParticleOptionsTest : BaseAbstractTest() {
     }
 
     @Test
+    fun testAddingWrapperValidVersion() {
+        val options = MParticleOptions.builder(mContext).credentials("test", "test")
+            .wrapperSdkVersion(WrapperSdk.WrapperSdkUnity, "test").build()
+        Assert.assertEquals("test", options.wrapperSdkVersion.version)
+        Assert.assertEquals(WrapperSdk.WrapperSdkUnity, options.wrapperSdkVersion.sdk)
+    }
+
+    @Test
+    fun testAddingWrapperValidVersionWithNone() {
+        val options = MParticleOptions.builder(mContext).credentials("test", "test")
+            .wrapperSdkVersion(WrapperSdk.WrapperNone, null).build()
+        Assert.assertNull(options.wrapperSdkVersion.version)
+        Assert.assertEquals(WrapperSdk.WrapperNone, options.wrapperSdkVersion.sdk)
+    }
+
+    @Test
+    fun testAddingWrapperInvalidVersion() {
+        val builder =
+            MParticleOptions.builder(mContext).credentials("test", "test")
+                .wrapperSdkVersion(WrapperSdk.WrapperFlutter, "test")
+        with(builder.build()) {
+            Assert.assertEquals("test", this.wrapperSdkVersion.version)
+            Assert.assertEquals(WrapperSdk.WrapperFlutter, this.wrapperSdkVersion.sdk)
+        }
+        builder.wrapperSdkVersion(WrapperSdk.WrapperXamarin, null)
+        with(builder.build()) {
+            Assert.assertEquals("test", this.wrapperSdkVersion.version)
+            Assert.assertEquals(WrapperSdk.WrapperFlutter, this.wrapperSdkVersion.sdk)
+        }
+    }
+
+    @Test
+    fun testAddingWrapperWithoutValues() {
+        val options =
+            MParticleOptions.builder(mContext).credentials("test", "test").build()
+        Assert.assertNull(options.wrapperSdkVersion.version)
+        Assert.assertEquals(WrapperSdk.WrapperNone, options.wrapperSdkVersion.sdk)
+    }
+
+    @Test
     @Throws(InterruptedException::class)
     fun setOperatingSystemTest() {
         val called = AndroidUtils.Mutable(false)
@@ -444,6 +485,7 @@ class MParticleOptionsTest : BaseAbstractTest() {
 
     @get:Rule
     var mRuntimePermissionRule = GrantPermissionRule.grant(Manifest.permission.ACCESS_FINE_LOCATION)
+
     @Test
     @Throws(InterruptedException::class)
     fun testLocationTracking() {

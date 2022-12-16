@@ -96,9 +96,10 @@ public class MParticle {
     @NonNull protected boolean locationTrackingEnabled = false;
     @NonNull protected Internal mInternal = new Internal();
     private IdentityStateListener mDeferredModifyPushRegistrationListener;
+    @NonNull protected WrapperSdkVersion wrapperSdkVersion;
 
     protected MParticle() { }
-    
+
     private MParticle(MParticleOptions options) {
         ConfigManager configManager = new ConfigManager(options);
         configManager.setUploadInterval(options.getUploadInterval());
@@ -119,6 +120,7 @@ public class MParticle {
         mMessageManager = new MessageManager(configManager, appStateManager, mKitManager, sDevicePerformanceMetricsDisabled, mDatabaseManager, options);
         mConfigManager.setNetworkOptions(options.getNetworkOptions());
         mPreferences = options.getContext().getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+        wrapperSdkVersion = options.getWrapperSdkVersion();
     }
 
     /**
@@ -398,7 +400,7 @@ public class MParticle {
             mMessageManager.logEvent(event);
             Logger.debug("Logged commerce event - \n", event.toString());
             mKitManager.logEvent(event);
-        }   
+        }
     }
 
     /**
