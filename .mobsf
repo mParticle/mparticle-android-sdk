@@ -1,0 +1,23 @@
+---
+- ignore-paths:
+  - android-core/src/androidTest/
+  - android-core/src/test/
+  - android-kit-base/src/test/
+  - android-kit-base/src/androidTest/
+  - testutils/
+
+  ignore-rules:
+  - hardcoded_api_key
+  - hardcoded_username
+  - android_kotlin_hardcoded
+  - hardcoded_secret
+  - android_detect_tapjacking
+  - android_tapjacking
+  - android_prevent_screenshot
+  - android_root_detection
+  - android_safetynet
+  - android_safetynet_api
+  - android_certificate_transparency
+  - android_certificate_pinning
+  - android_ssl_pinning
+  - accept_self_signed_certificate

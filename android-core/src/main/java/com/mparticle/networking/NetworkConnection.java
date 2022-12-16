@@ -108,9 +108,10 @@ public class NetworkConnection extends BaseNetworkConnection {
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
             tmf.init(keyStore);
 
-            SSLContext context = SSLContext.getInstance("TLS");
+            SSLContext context = SSLContext.getInstance("TLS");  // nosemgrep
             context.init(null, tmf.getTrustManagers(), null);
             mSocketFactory = context.getSocketFactory();
+
         }
         return mSocketFactory;
     }

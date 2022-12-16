@@ -48,7 +48,7 @@ emulator -list-avds
 
 # start Emulator (not sure if we actually have to run this as sudo or not
 echo "run: sudo -E sudo -u $USER -E bash -c \"./emulator -avd test -verbose -no-snapshot -no-window -camera-back none -camera-front none -selinux permissive -qemu -m 2048 &\""
-sudo -E sudo -u $USER -E bash -c "${ANDROID_HOME}/emulator/emulator -avd test -verbose -no-snapshot -no-window -camera-back none -camera-front none -selinux permissive -qemu -m 2048 &"
+sudo -E sudo -u "$USER" -E bash -c "${ANDROID_HOME}/emulator/emulator -avd test -verbose -no-snapshot -no-window -camera-back none -camera-front none -selinux permissive -qemu -m 2048 &"
 
 echo "run: adb shell input keyevent 82 &"
 adb shell input keyevent 82 &
@@ -60,7 +60,7 @@ until [[ "$bootanim" =~ "stopped" ]]; do
   adb reconnect offline
   adb devices
   bootanim=`adb -e shell getprop init.svc.bootanim 2>&1 &`
-  echo "Waiting for emulator, status is: " $bootanim
+  echo "Waiting for emulator, status is: $bootanim"
   sleep 1
   echo
 done
