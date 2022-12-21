@@ -38,7 +38,7 @@ public class MessageService extends MessageTable {
         Set<String> sessionIds = new HashSet<String>();
         Cursor cursor = null;
         try {
-            cursor = database.rawQuery("SELECT DISTINCT " + MessageTableColumns.SESSION_ID + " FROM " + MessageTableColumns.TABLE_NAME);
+            cursor = database.rawQuery("SELECT DISTINCT " + MessageTableColumns.SESSION_ID + " FROM " + MessageTableColumns.TABLE_NAME);  // mobsf-ignore: sqlite_injection
             while(cursor.moveToNext()) {
                 sessionIds.add(cursor.getString(0));
             }
