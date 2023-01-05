@@ -1,3 +1,18 @@
+## [5.49.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.48.4...v5.49.0) (2023-01-05)
+
+
+### Features
+
+* Adding method to change update interval after initialization ([#301](https://github.com/mParticle/mparticle-android-sdk/issues/301)) ([e23ad37](https://github.com/mParticle/mparticle-android-sdk/commit/e23ad37a70e175ad574dc1391377478e0a5a9408))
+* Adding WrapperSdk, WrapperSdkVersion - adding this values to MParticleOptions and MParticle ([#295](https://github.com/mParticle/mparticle-android-sdk/issues/295)) ([fe27e48](https://github.com/mParticle/mparticle-android-sdk/commit/fe27e4872adca4ff4766e1a2372a9259a8ed0b3c))
+
+
+### Updates & Maintenance
+
+* Add semgrep, mobsf static analysis ([#289](https://github.com/mParticle/mparticle-android-sdk/issues/289)) ([aab45d0](https://github.com/mParticle/mparticle-android-sdk/commit/aab45d0c33f8c47324f4d472d2aad16b917611fc))
+* Update PULL_REQUEST_TEMPLATE.md ([#293](https://github.com/mParticle/mparticle-android-sdk/issues/293)) ([b54c6bd](https://github.com/mParticle/mparticle-android-sdk/commit/b54c6bd5e466063515187a73c8c16a95efc0a11c))
+* Update submodules ([f682db7](https://github.com/mParticle/mparticle-android-sdk/commit/f682db7377a6f1ff117748f48c0979a930c669f9))
+
 ## [5.48.4](https://github.com/mParticle/mparticle-android-sdk/compare/v5.48.3...v5.48.4) (2022-12-08)
 
 
