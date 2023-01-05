@@ -25,7 +25,6 @@ import org.junit.Test
 import java.io.File
 import java.util.Arrays
 import java.util.concurrent.CountDownLatch
-import kotlin.collections.HashMap
 
 class MParticleTest : BaseCleanStartedEachTest() {
     private val configResponse =
@@ -253,7 +252,9 @@ class MParticleTest : BaseCleanStartedEachTest() {
         MParticle.getInstance()!!.Messaging().enablePushNotifications(senderId)
         var fetchedSenderId: String? =
             MParticle.getInstance()!!.mInternal.getConfigManager().getPushSenderId()
-        Assert.assertTrue(MParticle.getInstance()!!.mInternal.getConfigManager().isPushEnabled() ?: false)
+        Assert.assertTrue(
+            MParticle.getInstance()!!.mInternal.getConfigManager().isPushEnabled() ?: false
+        )
         Assert.assertEquals(senderId, fetchedSenderId)
         val otherSenderId = "senderIdLogPushRegistration"
         MParticle.getInstance()!!.logPushRegistration("instanceId", otherSenderId)
@@ -261,7 +262,9 @@ class MParticleTest : BaseCleanStartedEachTest() {
         Assert.assertEquals(otherSenderId, fetchedSenderId)
         MParticle.getInstance()!!.Messaging().disablePushNotifications()
         fetchedSenderId = MParticle.getInstance()!!.mInternal.getConfigManager().getPushSenderId()
-        Assert.assertFalse(MParticle.getInstance()!!.mInternal.getConfigManager().isPushEnabled() ?: false)
+        Assert.assertFalse(
+            MParticle.getInstance()!!.mInternal.getConfigManager().isPushEnabled() ?: false
+        )
         Assert.assertNull(fetchedSenderId)
     }
 
@@ -329,6 +332,14 @@ class MParticleTest : BaseCleanStartedEachTest() {
                 .logPushRegistration(newPushRegistration.instanceId, newPushRegistration.senderId)
             latch.await()
         }
+    }
+
+    @Test
+    fun testWrapperSdkVersionWithoutBeingSet() {
+        val instance = MParticle.getInstance()!!
+        Assert.assertNotNull(instance.wrapperSdkVersion)
+        Assert.assertEquals(WrapperSdk.WrapperNone, instance.wrapperSdkVersion.sdk)
+        Assert.assertNull(instance.wrapperSdkVersion.version)
     }
 
     @Test

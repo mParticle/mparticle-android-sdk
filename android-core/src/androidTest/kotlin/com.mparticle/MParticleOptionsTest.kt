@@ -27,6 +27,7 @@ import java.util.concurrent.CountDownLatch
 class MParticleOptionsTest : BaseAbstractTest() {
     lateinit var mContext: Context
     private lateinit var mProductionContext: Context
+
     @Before
     fun before() {
         if (Looper.myLooper() == null) {
@@ -444,6 +445,7 @@ class MParticleOptionsTest : BaseAbstractTest() {
 
     @get:Rule
     var mRuntimePermissionRule = GrantPermissionRule.grant(Manifest.permission.ACCESS_FINE_LOCATION)
+
     @Test
     @Throws(InterruptedException::class)
     fun testLocationTracking() {

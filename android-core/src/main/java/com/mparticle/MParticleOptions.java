@@ -1,6 +1,7 @@
 package com.mparticle;
 
 import android.content.Context;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -14,6 +15,7 @@ import com.mparticle.internal.PushRegistrationHelper;
 import com.mparticle.networking.NetworkOptions;
 import com.mparticle.networking.NetworkOptionsManager;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -169,6 +171,7 @@ public class MParticleOptions {
 
     /**
      * Query the Environment.
+     *
      * @return
      */
     @NonNull
@@ -178,6 +181,7 @@ public class MParticleOptions {
 
     /**
      * Query the API Key.
+     *
      * @return
      */
     @NonNull
@@ -187,6 +191,7 @@ public class MParticleOptions {
 
     /**
      * Query the API Secret.
+     *
      * @return
      */
     @NonNull
@@ -196,6 +201,7 @@ public class MParticleOptions {
 
     /**
      * Query the Identify Request.
+     *
      * @return
      */
     @Nullable
@@ -205,6 +211,7 @@ public class MParticleOptions {
 
     /**
      * Query whether device performance metrics are enabled or disabled.
+     *
      * @return true if the are disabled, false if they are enabled
      */
     @NonNull
@@ -213,12 +220,11 @@ public class MParticleOptions {
     }
 
     /**
-     * @deprecated
-     * This method has been replaced as the behavior has been inverted - Android ID collection is now disabled by default.
-     * <p> Use {@link MParticle#isAndroidIdEnabled()} instead.
-     *
-     * Query whether Android Id collection is enabled or disabled.
      * @return true if collection is disabled, false if it is enabled
+     * @deprecated This method has been replaced as the behavior has been inverted - Android ID collection is now disabled by default.
+     * <p> Use {@link MParticle#isAndroidIdEnabled()} instead.
+     * <p>
+     * Query whether Android Id collection is enabled or disabled.
      */
     @NonNull
     @Deprecated
@@ -228,6 +234,7 @@ public class MParticleOptions {
 
     /**
      * Query whether Android Id collection is enabled or disabled.
+     *
      * @return true if collection is enabled, false if it is disabled
      */
     @NonNull
@@ -237,6 +244,7 @@ public class MParticleOptions {
 
     /**
      * Query the uploadInterval.
+     *
      * @return the upload interval, in seconds
      * @return the upload interval, in seconds
      */
@@ -330,10 +338,10 @@ public class MParticleOptions {
 
     @Nullable
     public <T extends Configuration> T getConfiguration(Class<T> clazz) {
-        for(List<? extends Configuration> configurations: mConfigurations.values()) {
-            for (Configuration configuration: configurations) {
+        for (List<? extends Configuration> configurations : mConfigurations.values()) {
+            for (Configuration configuration : configurations) {
                 if (configuration.getClass() == clazz) {
-                    return (T)configuration;
+                    return (T) configuration;
                 }
             }
         }
@@ -387,9 +395,9 @@ public class MParticleOptions {
         /**
          * Register an Api Key and Secret to be used for the SDK. This is a required field, and your
          * app will not function properly if you do not provide a valid Key and Secret.
-         * @param apiKey the Api Key
-         * @param apiSecret the Api Secret
          *
+         * @param apiKey    the Api Key
+         * @param apiSecret the Api Secret
          * @return the instance of the builder, for chaining calls
          */
         @NonNull
@@ -404,9 +412,7 @@ public class MParticleOptions {
          * a default type of MParticle.InstallType.AutoDetect will be used.
          *
          * @param installType
-         *
          * @return the instance of the builder, for chaining calls
-         *
          * @see com.mparticle.MParticle.InstallType
          */
         @NonNull
@@ -418,6 +424,7 @@ public class MParticleOptions {
         /**
          * Indicate a known {@link com.mparticle.MParticle.Environment} the Application will be running in. If this method is not used.
          * a default Environment of MParticle.Environment.AutoDetect will be used.
+         *
          * @param environment
          * @return
          */
@@ -436,9 +443,7 @@ public class MParticleOptions {
          * and empty request will be used.
          *
          * @param identifyRequest
-         *
          * @return the instance of the builder, for chaining calls
-         *
          * @see IdentityApiRequest
          */
         @NonNull
@@ -452,9 +457,7 @@ public class MParticleOptions {
          * of an {@link #identify(IdentityApiRequest)} request.
          *
          * @param task
-         *
          * @return the instance of the builder, for chaining calls
-         *
          * @see BaseIdentityTask
          */
         @NonNull
@@ -467,7 +470,6 @@ public class MParticleOptions {
          * Disable CPU and memory usage collection.
          *
          * @param disabled
-         *
          * @return the instance of the builder, for chaining calls
          */
         @NonNull
@@ -477,17 +479,14 @@ public class MParticleOptions {
         }
 
         /**
-         * @deprecated
-         * This method has been replaced as the behavior has been inverted - Android ID collection is now disabled by default.
+         * @param disabled false to enable collection (true by default)
+         * @return the instance of the builder, for chaining calls
+         * @deprecated This method has been replaced as the behavior has been inverted - Android ID collection is now disabled by default.
          * <p> Use {@link androidIdEnabled(boolean)} instead.
-         *
-         *
+         * <p>
+         * <p>
          * By default, the SDK will NOT collect <a href="http://developer.android.com/reference/android/provider/Settings.Secure.html#ANDROID_ID">Android Id</a> for the purpose
          * of anonymous analytics. If you're not using an mParticle integration that consumes Android ID and you would like to collect it, use this API to enable collection.
-         *
-         * @param disabled false to enable collection (true by default)
-         *
-         * @return the instance of the builder, for chaining calls
          */
         @NonNull
         @Deprecated
@@ -501,7 +500,6 @@ public class MParticleOptions {
          * of anonymous analytics. If you're not using an mParticle integration that consumes Android ID and you would like to collect it, use this API to enable collection
          *
          * @param enabled true to enable collection (false by default)
-         *
          * @return the instance of the builder, for chaining calls
          */
         @NonNull
@@ -514,7 +512,6 @@ public class MParticleOptions {
          * Set the upload interval period to control how frequently uploads occur.
          *
          * @param uploadInterval the number of seconds between uploads
-         *
          * @return the instance of the builder, for chaining calls
          */
         @NonNull
@@ -529,7 +526,6 @@ public class MParticleOptions {
          * A session has ended once the application has been in the background for more than this timeout.
          *
          * @param sessionTimeout Session timeout in seconds
-         *
          * @return the instance of the builder, for chaining calls
          */
         @NonNull
@@ -540,18 +536,17 @@ public class MParticleOptions {
 
         /**
          * Set a maximum threshold for stored configuration age.
-         *
+         * <p>
          * When the SDK starts, before we attempt to fetch a fresh config from the server, we
          * will load the most recent previous config from disk. when configMaxAge is set, we will
          * check the timestamp on that config and, if it's age is greater than the threshold, instead
          * of loading it we will delete it and wait for the fresh config to arrive.
-         *
+         * <p>
          * This field is especially useful if your application often updates the kit/forwarding logic and
          * has a portion of user's who experience prolonged network interruptions. In these cases, a reasonable
          * configMaxAge will prevent those users from potentially using very forwarding logic
          *
          * @param configMaxAge the upper limit for config age, in seconds
-         *
          * @return the instance of the builder, for chaining calls
          */
         @NonNull
@@ -578,9 +573,7 @@ public class MParticleOptions {
          * <i>log messages at or above this level will be printed</i>.
          *
          * @param logLevel the preferred level of logging
-         *
          * @return the instance of the builder, for chaining calls
-         *
          * @see MParticle.LogLevel
          */
         @NonNull
@@ -591,10 +584,9 @@ public class MParticleOptions {
 
         /**
          * Register a callback for when an attribution is received.
+         *
          * @param attributionListener an instance of the AttributionListener callback
-         *
          * @return the instance of the builder, for chaining calls
-         *
          * @see AttributionListener
          */
         @NonNull
@@ -627,7 +619,6 @@ public class MParticleOptions {
          * @param provider    the provider key
          * @param minTime     the minimum time (in milliseconds) to trigger an update
          * @param minDistance the minimum distance (in meters) to trigger an update
-         *
          * @return the instance of the builder, for chaining calls
          */
         @NonNull
@@ -638,9 +629,9 @@ public class MParticleOptions {
 
         /**
          * Manually log a push registration.
-         * @param instanceId the Instance Id of the push token
-         * @param senderId the Sender Id of the push token
          *
+         * @param instanceId the Instance Id of the push token
+         * @param senderId   the Sender Id of the push token
          * @return the instance of the builder, for chaining calls
          */
         @NonNull
@@ -654,8 +645,7 @@ public class MParticleOptions {
          * <p></p>
          * A connection to the server closes after this timeout expires, for each call.
          *
-         * @param  identityConnectionTimeout the connection timeout for Identity server calls, in seconds
-         *
+         * @param identityConnectionTimeout the connection timeout for Identity server calls, in seconds
          * @return the instance of the builder, for chaining calls
          */
         @NonNull
@@ -679,6 +669,7 @@ public class MParticleOptions {
 
         /**
          * Set the Operating System. Defaults to {@link MParticle.OperatingSystem#ANDROID}
+         *
          * @param operatingSystem
          * @return
          */
@@ -692,6 +683,7 @@ public class MParticleOptions {
          * Set the {@link com.mparticle.MParticleOptions.DataplanOptions}. This object is used to
          * load a dataplan for the purpose of blocking unplanned attributes and/or events from being forwarded to kit integrations.
          * When set, this will override any block settings that have been configured in the mParticle dashboard.
+         *
          * @param dataplanOptions
          * @return
          */
@@ -704,6 +696,7 @@ public class MParticleOptions {
         /**
          * Register a {@link com.mparticle.Configuration}n. Various implementations of Configuration can modify the behavior of
          * the SDK at runtime.
+         *
          * @param configuration
          */
         public Builder configuration(Configuration configuration) {
@@ -739,19 +732,19 @@ public class MParticleOptions {
                 }
             }
             if (MPUtility.isEmpty(apiSecret)) {
-                    message = "Configuration issue: No API secret passed to start()!";
-                    if (devMode) {
-                        throw new IllegalArgumentException(message);
-                    } else {
-                        Logger.error(message);
-                    }
+                message = "Configuration issue: No API secret passed to start()!";
+                if (devMode) {
+                    throw new IllegalArgumentException(message);
+                } else {
+                    Logger.error(message);
+                }
             }
-                return new MParticleOptions(this);
-            }
+            return new MParticleOptions(this);
+        }
 
-            MParticleOptions buildForInternalRestart() {
-                return new MParticleOptions(this);
-            }
+        MParticleOptions buildForInternalRestart() {
+            return new MParticleOptions(this);
+        }
     }
 
     static class LocationTracking {
@@ -788,6 +781,7 @@ public class MParticleOptions {
 
         /**
          * Query the dataplan version document
+         *
          * @return the dataplan version as a JSONObject
          */
         @NonNull
@@ -797,6 +791,7 @@ public class MParticleOptions {
 
         /**
          * Query whether unplanned user attributes should be blocked
+         *
          * @return boolean where true indicates blocking should occur
          */
         public boolean isBlockUserAttributes() {
@@ -805,6 +800,7 @@ public class MParticleOptions {
 
         /**
          * Query whether unplanned user identities should be blocked
+         *
          * @return boolean where true indicates blocking should occur
          */
         public boolean isBlockUserIdentities() {
@@ -813,6 +809,7 @@ public class MParticleOptions {
 
         /**
          * Query whether unplanned event attributes should be blocked
+         *
          * @return boolean where true indicates blocking should occur
          */
         public boolean isBlockEventAttributes() {
@@ -821,6 +818,7 @@ public class MParticleOptions {
 
         /**
          * Query whether unplanned events should be blocked
+         *
          * @return boolean where true indicates blocking should occur
          */
         public boolean isBlockEvents() {
@@ -855,10 +853,12 @@ public class MParticleOptions {
             private boolean blockEventAttributes;
             private boolean blockEvents;
 
-            private Builder() {}
+            private Builder() {
+            }
 
             /**
              * Sets/Gets the Data Plan Version to use when evaluating block and transformation settings
+             *
              * @param dataplanVersion
              * @return the Builder instance
              */
@@ -873,6 +873,7 @@ public class MParticleOptions {
 
             /**
              * Sets/Gets the Data Plan Version to use when evaluating block and transformation settings
+             *
              * @param dataplanVersion
              * @return the Builder instance
              */
@@ -883,6 +884,7 @@ public class MParticleOptions {
 
             /**
              * Sets/Gets the Data Plan Version to use when evaluating block and transformation settings
+             *
              * @param dataplanVersion
              * @return the Builder instance
              */
@@ -897,6 +899,7 @@ public class MParticleOptions {
 
             /**
              * This flag determines if unplanned user attributes should be blocked
+             *
              * @param blockUserAttributes
              * @return the Builder instance
              */
@@ -907,6 +910,7 @@ public class MParticleOptions {
 
             /**
              * This flag determines if unplanned user identities should be blocked
+             *
              * @param blockUserIdentities
              * @return the Builder instance
              */
@@ -917,6 +921,7 @@ public class MParticleOptions {
 
             /**
              * This flag determines if unplanned event attributes should be blocked
+             *
              * @param blockEventAttributes
              * @return the Builder instance
              */
@@ -927,6 +932,7 @@ public class MParticleOptions {
 
             /**
              * This flag determines if unplanned events should be blocked
+             *
              * @param blockEvents
              * @return the Builder instance
              */
@@ -939,6 +945,7 @@ public class MParticleOptions {
              * Transform the Builder instance into an immutable {@link DataplanOptions} instance.
              * This step will check that a valid dataplan verion has been set and will return null if
              * it has not
+             *
              * @return the DataplanOptions instance, or null if a valid dataplan version was not present
              */
             @Nullable
@@ -958,11 +965,11 @@ public class MParticleOptions {
     }
 
     /**
-     Custom handler to modify or block batch data before upload.
-     If set, this will be called when a new batch of data is created. By returning a different value, you can change the batch contents, or by returning 'nil' you can block the batch from being uploaded.
-     Use with care. This feature was initially added to allow the value of existing fields to be modified. If you add new data in a format that the platform is not expecting, it may be dropped or not parsed correctly.
-     Note: Use of this handler will also cause the field 'mb' (modified batch) to appear in the batch so we can distinguish for troubleshooting purposes whether data was changed.
-     Also note: Unlike other callbacks, this block will be called on the SDK queue to prevent batches from being processed out of order. Please avoid excessively blocking in this handler as this will prevent the SDK from doing other tasks.
+     * Custom handler to modify or block batch data before upload.
+     * If set, this will be called when a new batch of data is created. By returning a different value, you can change the batch contents, or by returning 'nil' you can block the batch from being uploaded.
+     * Use with care. This feature was initially added to allow the value of existing fields to be modified. If you add new data in a format that the platform is not expecting, it may be dropped or not parsed correctly.
+     * Note: Use of this handler will also cause the field 'mb' (modified batch) to appear in the batch so we can distinguish for troubleshooting purposes whether data was changed.
+     * Also note: Unlike other callbacks, this block will be called on the SDK queue to prevent batches from being processed out of order. Please avoid excessively blocking in this handler as this will prevent the SDK from doing other tasks.
      */
     public interface BatchCreationListener {
         @NonNull
