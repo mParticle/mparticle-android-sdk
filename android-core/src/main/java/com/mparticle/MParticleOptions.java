@@ -15,6 +15,7 @@ import com.mparticle.internal.PushRegistrationHelper;
 import com.mparticle.networking.NetworkOptions;
 import com.mparticle.networking.NetworkOptionsManager;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -53,7 +54,6 @@ public class MParticleOptions {
     private MParticle.OperatingSystem mOperatingSystem = MParticle.OperatingSystem.ANDROID;
     private DataplanOptions mDataplanOptions;
     private Map<Class, List<Configuration>> mConfigurations = new HashMap();
-    private WrapperSdkVersion wrapperSdkVersion = new WrapperSdkVersion(WrapperSdk.WrapperNone, null);
 
     private MParticleOptions() {
     }
@@ -140,9 +140,6 @@ public class MParticleOptions {
         if (builder.operatingSystem != null) {
             this.mOperatingSystem = builder.operatingSystem;
         }
-        if (builder.wrapperSdkVersion != null) {
-            this.wrapperSdkVersion = builder.wrapperSdkVersion;
-        }
         this.mNetworkOptions = NetworkOptionsManager.validateAndResolve(builder.networkOptions);
         this.mDataplanId = builder.dataplanId;
         this.mDataplanVersion = builder.dataplanVersion;
@@ -190,17 +187,6 @@ public class MParticleOptions {
     @NonNull
     public String getApiKey() {
         return mApiKey;
-    }
-
-    /**
-     * Get the wrapper sdk version configured.
-     *
-     * @return an object containing WrapperSdk and version. If it wasn't configure will return the
-     * default {@link WrapperSdk.WrapperNone} with version null.
-     */
-    @NonNull
-    public WrapperSdkVersion getWrapperSdkVersion() {
-        return wrapperSdkVersion;
     }
 
     /**
@@ -401,7 +387,6 @@ public class MParticleOptions {
         private DataplanOptions dataplanOptions;
         private Map<Class, List<Configuration>> configurations = new HashMap();
         private boolean isAppDebuggable;
-        private WrapperSdkVersion wrapperSdkVersion = null;
 
         private Builder(Context context) {
             this.context = context;
@@ -446,22 +431,6 @@ public class MParticleOptions {
         @NonNull
         public Builder environment(@NonNull MParticle.Environment environment) {
             this.environment = environment;
-            return this;
-        }
-
-        /**
-         * Indicate a version for a valid {@link com.mparticle.WrapperSdk}.
-         *
-         * @param wrapperSdk
-         * @param version    should only be null if the wrapperSdk is {@link WrapperSdk.WrapperNone}
-         * @return
-         */
-        public Builder wrapperSdkVersion(@NonNull WrapperSdk wrapperSdk, String version) {
-            if (version == null && wrapperSdk != WrapperSdk.WrapperNone) {
-                return this;
-            }
-            //We shouldnt create a WrapperSdkVersion object with a null version unless the wrapperSdk is none
-            this.wrapperSdkVersion = new WrapperSdkVersion(wrapperSdk, version);
             return this;
         }
 

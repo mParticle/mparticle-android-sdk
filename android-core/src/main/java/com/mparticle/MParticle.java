@@ -52,6 +52,7 @@ import com.mparticle.messaging.MPMessagingAPI;
 import com.mparticle.messaging.ProviderCloudMessage;
 import com.mparticle.segmentation.SegmentListener;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -64,7 +65,6 @@ import java.util.Set;
 /**
  * The primary access point to the mParticle SDK. In order to use this class, you must first call {@link #start(MParticleOptions)}. You can then retrieve a reference
  * to an instance of this class via {@link #getInstance()}.
- *
  */
 @ApiClass
 public class MParticle {
@@ -73,32 +73,48 @@ public class MParticle {
      * Used to delegate messages, events, user actions, etc on to embedded kits.
      */
 
-    @NonNull protected KitFrameworkWrapper mKitManager;
+    @NonNull
+    protected KitFrameworkWrapper mKitManager;
     /**
      * The state manager is primarily concerned with Activity lifecycle and app visibility in order to manage sessions,
      * automatically log screen views, and pass lifecycle information on top embedded kits.
      */
-    @NonNull protected AppStateManager mAppStateManager;
+    @NonNull
+    protected AppStateManager mAppStateManager;
 
-    @NonNull protected ConfigManager mConfigManager;
-    @NonNull protected MessageManager mMessageManager;
+    @NonNull
+    protected ConfigManager mConfigManager;
+    @NonNull
+    protected MessageManager mMessageManager;
     private static volatile MParticle instance;
-    @NonNull protected SharedPreferences mPreferences;
-    @NonNull protected MPLocationListener mLocationListener;
-    @NonNull protected Context mAppContext;
-    @NonNull protected MPMessagingAPI mMessaging;
-    @NonNull protected MPMediaAPI mMedia;
-    @NonNull protected MParticleDBManager mDatabaseManager;
-    @NonNull protected volatile AttributionListener mAttributionListener;
-    @NonNull protected IdentityApi mIdentityApi;
+    @NonNull
+    protected SharedPreferences mPreferences;
+    @NonNull
+    protected MPLocationListener mLocationListener;
+    @NonNull
+    protected Context mAppContext;
+    @NonNull
+    protected MPMessagingAPI mMessaging;
+    @NonNull
+    protected MPMediaAPI mMedia;
+    @NonNull
+    protected MParticleDBManager mDatabaseManager;
+    @NonNull
+    protected volatile AttributionListener mAttributionListener;
+    @NonNull
+    protected IdentityApi mIdentityApi;
     static volatile boolean sAndroidIdEnabled = false;
     static volatile boolean sDevicePerformanceMetricsDisabled;
-    @NonNull protected boolean locationTrackingEnabled = false;
-    @NonNull protected Internal mInternal = new Internal();
+    @NonNull
+    protected boolean locationTrackingEnabled = false;
+    @NonNull
+    protected Internal mInternal = new Internal();
     private IdentityStateListener mDeferredModifyPushRegistrationListener;
-    @NonNull protected WrapperSdkVersion wrapperSdkVersion;
+    @NonNull
+    private WrapperSdkVersion wrapperSdkVersion = new WrapperSdkVersion(WrapperSdk.WrapperNone, null);
 
-    protected MParticle() { }
+    protected MParticle() {
+    }
 
     private MParticle(MParticleOptions options) {
         ConfigManager configManager = new ConfigManager(options);
@@ -120,7 +136,6 @@ public class MParticle {
         mMessageManager = new MessageManager(configManager, appStateManager, mKitManager, sDevicePerformanceMetricsDisabled, mDatabaseManager, options);
         mConfigManager.setNetworkOptions(options.getNetworkOptions());
         mPreferences = options.getContext().getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-        wrapperSdkVersion = options.getWrapperSdkVersion();
     }
 
     /**
@@ -222,7 +237,6 @@ public class MParticle {
     }
 
     /**
-     *
      * Use this method for your own unit testing. Using a framework such as Mockito, or
      * by extending MParticle, use this method to set a mock of mParticle.
      *
@@ -233,19 +247,16 @@ public class MParticle {
     }
 
     /**
-     *  @deprecated
-     *  This method has been replaced as the behavior has been inverted - Android ID collection is now disabled by default.
-     *  <p> Use {@link MParticle#isAndroidIdEnabled()} instead.
-     *
-     *
+     * @return false if Android ID collection is enabled. (true by default)
+     * @see MParticleOptions.Builder#androidIdEnabled(boolean)
+     * @deprecated This method has been replaced as the behavior has been inverted - Android ID collection is now disabled by default.
+     * <p> Use {@link MParticle#isAndroidIdEnabled()} instead.
+     * <p>
+     * <p>
      * Query the status of Android ID collection.
-     *
+     * <p>
      * By default, the SDK will NOT collect <a href="http://developer.android.com/reference/android/provider/Settings.Secure.html#ANDROID_ID">Android Id</a> for the purpose
      * of anonymous analytics. If you're not using an mParticle integration that consumes Android ID and you would like to collect it, use this API to enable collection
-     *
-     * @return false if Android ID collection is enabled. (true by default)
-
-     * @see MParticleOptions.Builder#androidIdEnabled(boolean)
      */
     @Deprecated
     public static boolean isAndroidIdDisabled() {
@@ -254,12 +265,11 @@ public class MParticle {
 
     /**
      * Query the status of Android ID collection.
-     *
+     * <p>
      * By default, the SDK will NOT collect <a href="http://developer.android.com/reference/android/provider/Settings.Secure.html#ANDROID_ID">Android Id</a> for the purpose
      * of anonymous analytics. If you're not using an mParticle integration that consumes Android ID and you would like to collect it, use this API to enable collection.
      *
      * @return true if Android ID collection is enabled. (false by default)
-
      * @see MParticleOptions.Builder#androidIdEnabled(boolean)
      */
     public static boolean isAndroidIdEnabled() {
@@ -267,13 +277,33 @@ public class MParticle {
     }
 
     /**
+     * Returns the wrapper sdk version
+     * @return
+     */
+    public WrapperSdkVersion getWrapperSdkVersion() {
+        return wrapperSdkVersion;
+    }
+
+    /**
+     * Set wrapper sdk, by default NONE.
+     * This can only be set once.
+     * @param wrapperSdk diffent from {@link WrapperSdk.NONE}
+     * @param version
+     */
+    public void setWrapperSdk(@NotNull WrapperSdk wrapperSdk, @NotNull String version) {
+        if (this.wrapperSdkVersion.getSdk() == WrapperSdk.WrapperNone && (wrapperSdk != WrapperSdk.WrapperNone && !version.isEmpty())) {
+            this.wrapperSdkVersion = new WrapperSdkVersion(wrapperSdk, version);
+        }
+    }
+
+    /**
      * Set the device's current IMEI.
-     *
+     * <p>
      * The mParticle SDK does not collect IMEI but you may use this API to provide it.
-     *  Collecting the IMEI is generally unnecessary and discouraged for apps in Google Play. For
-     *  apps distributed outside of Google Play, IMEI may be necessary for accurate install attribution.
-     *
-     *  The mParticle SDK does not persist this value - it must be set whenever the SDK is initialized.
+     * Collecting the IMEI is generally unnecessary and discouraged for apps in Google Play. For
+     * apps distributed outside of Google Play, IMEI may be necessary for accurate install attribution.
+     * <p>
+     * The mParticle SDK does not persist this value - it must be set whenever the SDK is initialized.
      *
      * @param deviceImei a string representing the device's current IMEI, or null to remove clear it.
      */
@@ -283,12 +313,12 @@ public class MParticle {
 
     /**
      * Get the device's current IMEI.
-     *
+     * <p>
      * The mParticle SDK does not collect IMEI but you may use the {@link #setDeviceImei(String)} API to provide it..
-     *  Collecting the IMEI is generally unnecessary and discouraged for apps in Google Play. For
-     *  apps distributed outside of Google Play, IMEI may be necessary for accurate install attribution.
-     *
-     *  The mParticle SDK does not persist this value - it must be set whenever the SDK is initialized.
+     * Collecting the IMEI is generally unnecessary and discouraged for apps in Google Play. For
+     * apps distributed outside of Google Play, IMEI may be necessary for accurate install attribution.
+     * <p>
+     * The mParticle SDK does not persist this value - it must be set whenever the SDK is initialized.
      *
      * @return a string representing the device's current IMEI, or null if not set.
      */
@@ -318,7 +348,6 @@ public class MParticle {
 
     /**
      * Query for a read-only Session API object.
-     *
      */
     @Nullable
     public Session getCurrentSession() {
@@ -361,9 +390,9 @@ public class MParticle {
 
     public void logEvent(@NonNull BaseEvent event) {
         if (event instanceof MPEvent && event.isShouldUploadEvent()) {
-            logMPEvent((MPEvent)event);
+            logMPEvent((MPEvent) event);
         } else if (event instanceof CommerceEvent && event.isShouldUploadEvent()) {
-            logCommerceEvent((CommerceEvent)event);
+            logCommerceEvent((CommerceEvent) event);
         } else {
             if (mConfigManager.isEnabled()) {
                 mAppStateManager.ensureActiveSession();
@@ -391,7 +420,6 @@ public class MParticle {
      * Log an e-Commerce related event with a {@link CommerceEvent} object.
      *
      * @param event the event to log
-     *
      * @see CommerceEvent
      */
     private void logCommerceEvent(@NonNull CommerceEvent event) {
@@ -413,7 +441,7 @@ public class MParticle {
      */
     public void logLtvIncrease(@NonNull BigDecimal valueIncreased, @Nullable String eventName, @Nullable Map<String, String> contextInfo) {
         if (valueIncreased == null) {
-            Logger.error( "ValueIncreased must not be null.");
+            Logger.error("ValueIncreased must not be null.");
             return;
         }
         if (contextInfo == null) {
@@ -450,8 +478,8 @@ public class MParticle {
     /**
      * Logs a screen view event.
      *
-     * @param screenName the name of the screen to be tracked
-     * @param eventData  a Map of data attributes to associate with this screen view
+     * @param screenName        the name of the screen to be tracked
+     * @param eventData         a Map of data attributes to associate with this screen view
      * @param shouldUploadEvent A boolean flag that indicates whether this screen event should be uploaded to mParticle when logged or only passed to kits
      */
     public void logScreen(@NonNull String screenName, @Nullable Map<String, String> eventData, @NonNull Boolean shouldUploadEvent) {
@@ -493,11 +521,11 @@ public class MParticle {
     public void leaveBreadcrumb(@NonNull String breadcrumb) {
         if (mConfigManager.isEnabled()) {
             if (MPUtility.isEmpty(breadcrumb)) {
-                Logger.error( "breadcrumb is required for leaveBreadcrumb.");
+                Logger.error("breadcrumb is required for leaveBreadcrumb.");
                 return;
             }
             if (breadcrumb.length() > Constants.LIMIT_ATTR_KEY) {
-                Logger.error( "The breadcrumb name was too long. Discarding event.");
+                Logger.error("The breadcrumb name was too long. Discarding event.");
                 return;
             }
             mAppStateManager.ensureActiveSession();
@@ -519,7 +547,7 @@ public class MParticle {
     /**
      * Logs an error event
      *
-     * @param message   the name of the error event to be tracked
+     * @param message         the name of the error event to be tracked
      * @param errorAttributes a Map of data attributes to associate with this error
      */
     public void logError(@NonNull String message, @Nullable Map<String, String> errorAttributes) {
@@ -574,7 +602,6 @@ public class MParticle {
 
     /**
      * Retrieve the current Attribution Listener.
-     *
      */
     @Nullable
     public AttributionListener getAttributionListener() {
@@ -628,7 +655,7 @@ public class MParticle {
             try {
                 LocationManager locationManager = (LocationManager) mAppContext.getSystemService(Context.LOCATION_SERVICE);
                 if (!locationManager.isProviderEnabled(provider)) {
-                    Logger.error( "That requested location provider is not available.");
+                    Logger.error("That requested location provider is not available.");
                     return;
                 }
 
@@ -653,7 +680,7 @@ public class MParticle {
                         .apply();
 
             } catch (SecurityException e) {
-                Logger.error( "The app must require the appropriate permissions to track location using this provider.");
+                Logger.error("The app must require the appropriate permissions to track location using this provider.");
             }
         }
     }
@@ -691,7 +718,6 @@ public class MParticle {
 
     /**
      * Retrieves the current setting of location tracking.
-     *
      */
     public boolean isLocationTrackingEnabled() {
         return locationTrackingEnabled;
@@ -719,7 +745,7 @@ public class MParticle {
             Logger.warning("setSessionAttribute called with null key. Ignoring...");
             return;
         }
-        if (value != null){
+        if (value != null) {
             value = value.toString();
         }
         if (mConfigManager.isEnabled()) {
@@ -793,7 +819,6 @@ public class MParticle {
      *
      * @param kitId The ID of the desired survey/feedback service.
      * @return a fully-formed URI, or null if no URL exists for the given ID.
-     *
      * @see MParticle.ServiceProviders
      */
     @Nullable
@@ -826,11 +851,8 @@ public class MParticle {
     }
 
     /**
-     * @deprecated
-     *
-     * Retrieves the current setting of automatic screen tracking.
-     *
      * @return The current setting of automatic screen tracking.
+     * @deprecated Retrieves the current setting of automatic screen tracking.
      */
     @NonNull
     @Deprecated
@@ -870,7 +892,7 @@ public class MParticle {
      * instance of the mParticle Javascript SDK is loaded within the provided WebView. Additionally,
      * the "reqiredBridgeName" value will override the generated token which is used by the Javascript SDK
      * to ensure communication only happens across matching Workspaces.
-     *
+     * <p>
      * Make sure you know what you are doing when you provide a requiredBridgeName, since a mismatch
      * with the Javascript SDK's bridgeName will result in a failure for it to forward calls to the Native SDK
      *
@@ -889,9 +911,8 @@ public class MParticle {
      * to the console. Note that while the SDK is in the Production,
      * <i>log messages at or above this level will be printed</i>.
      *
-     * @see MParticle.LogLevel
-     *
      * @param level
+     * @see MParticle.LogLevel
      */
     public static void setLogLevel(@NonNull LogLevel level) {
         if (level != null) {
@@ -906,7 +927,7 @@ public class MParticle {
      */
     @NonNull
     public MPMessagingAPI Messaging() {
-        if (mMessaging == null){
+        if (mMessaging == null) {
             mMessaging = new MPMessagingAPI(mAppContext);
         }
         return mMessaging;
@@ -934,7 +955,7 @@ public class MParticle {
      */
     @NonNull
     public MPMediaAPI Media() {
-        if (mMedia == null){
+        if (mMedia == null) {
             mMedia = new MPMediaAPI(mAppContext, new MediaCallbacks() {
                 @Override
                 public void onAudioPlaying() {
@@ -945,7 +966,7 @@ public class MParticle {
                 public void onAudioStopped() {
                     try {
                         mAppStateManager.getSession().mLastEventTime = System.currentTimeMillis();
-                    }catch (Exception e){
+                    } catch (Exception e) {
 
                     }
                 }
@@ -957,7 +978,7 @@ public class MParticle {
     /**
      * Detect whether the given service provider is active. Use this method
      * only when you need to make direct calls to an embedded SDK.
-     *
+     * <p>
      * You can also register a {@link android.content.BroadcastReceiver} with an {@link android.content.IntentFilter}, using an action of
      * {@link MParticle.ServiceProviders#BROADCAST_ACTIVE} or {@link MParticle.ServiceProviders#BROADCAST_DISABLED}
      * concatenated with the service provider ID:
@@ -967,21 +988,19 @@ public class MParticle {
      * Context.registerReceiver(yourReceiver, new IntentFilter(MParticle.ServiceProviders.BROADCAST_ACTIVE + MParticle.ServiceProviders.APPBOY));}
      * </pre>
      *
-     * @deprecated
-     *
      * @param serviceProviderId
      * @return True if you can safely make direct calls to the given service provider.
-     *
      * @see MParticle.ServiceProviders
+     * @deprecated
      */
-    public boolean isProviderActive(int serviceProviderId){
+    public boolean isProviderActive(int serviceProviderId) {
         return isKitActive(serviceProviderId);
     }
 
     /**
      * Detect whether the given service provider kit is active. Use this method
      * only when you need to make direct calls to an embedded SDK.
-     *
+     * <p>
      * You can also register a {@link android.content.BroadcastReceiver} with an {@link android.content.IntentFilter}, using an action of
      * {@link MParticle.ServiceProviders#BROADCAST_ACTIVE} or {@link MParticle.ServiceProviders#BROADCAST_DISABLED}
      * concatenated with the service provider ID:
@@ -993,10 +1012,9 @@ public class MParticle {
      *
      * @param serviceProviderId
      * @return True if you can safely make direct calls to the given service provider.
-     *
      * @see MParticle.ServiceProviders
      */
-    public boolean isKitActive(int serviceProviderId){
+    public boolean isKitActive(int serviceProviderId) {
         return mKitManager.isKitActive(serviceProviderId);
     }
 
@@ -1024,6 +1042,7 @@ public class MParticle {
 
     /**
      * Logs a Push Notification displayed to the User.
+     *
      * @param intent
      */
     public void logNotification(@NonNull Intent intent) {
@@ -1035,7 +1054,7 @@ public class MParticle {
 
     void logNotification(@NonNull ProviderCloudMessage cloudMessage, boolean startSession, @NonNull String appState, int behavior) {
         if (mConfigManager.isEnabled()) {
-            if (startSession){
+            if (startSession) {
                 mAppStateManager.ensureActiveSession();
             }
             mMessageManager.logNotification(cloudMessage.getId(), cloudMessage.getRedactedJsonPayload().toString(), appState, behavior);
@@ -1044,7 +1063,7 @@ public class MParticle {
 
     void logNotification(@NonNull ProviderCloudMessage cloudMessage, boolean startSession, @NonNull String appState) {
         if (mConfigManager.isEnabled()) {
-            if (startSession){
+            if (startSession) {
                 mAppStateManager.ensureActiveSession();
             }
             mMessageManager.logNotification(cloudMessage, appState);
@@ -1053,6 +1072,7 @@ public class MParticle {
 
     /**
      * Logs a Push Notification has been tapped or opened.
+     *
      * @param intent
      */
     public void logNotificationOpened(@NonNull Intent intent) {
@@ -1083,10 +1103,10 @@ public class MParticle {
         MParticleTask<IdentityApiResult> task = instance.mIdentityApi.identify(request);
         if (options.getIdentityTask() != null) {
             task.addFailureListener(new TaskFailureListener() {
-               @Override
-               public void onFailure(IdentityHttpResponse result) {
-                   options.getIdentityTask().setFailed(result);
-               }
+                @Override
+                public void onFailure(IdentityHttpResponse result) {
+                    options.getIdentityTask().setFailed(result);
+                }
             });
             task.addSuccessListener(new TaskSuccessListener() {
                 @Override
@@ -1105,10 +1125,10 @@ public class MParticle {
     /**
      * This method will permanently remove ALL MParticle data from the device, included SharedPreferences and Database,
      * and halt any upload or download behavior that may be in process.
-     *
+     * <p>
      * If you have any reference to the MParticle instance, you must remove your reference by setting it to "null",
      * in order to avoid any unexpected behavior.
-     *
+     * <p>
      * The SDK will be shut down and MParticle.getInstance() will return null. MParticle can be restarted by
      * calling MParticle.start().
      *
@@ -1172,10 +1192,10 @@ public class MParticle {
     /**
      * This method will permanently remove ALL MParticle data from the device, included SharedPreferences and Database,
      * and halt any upload or download behavior that may be in process.
-     *
+     * <p>
      * If you have any reference to the MParticle instance, you must remove your reference by setting it to "null",
      * in order to avoid any unexpected behavior.
-     *
+     * <p>
      * The SDK will be shut down and MParticle.getInstance() will return null. MParticle can be restarted by
      * calling MParticle.start().
      *
@@ -1184,27 +1204,28 @@ public class MParticle {
      */
     public static void reset(@NonNull final Context context, @Nullable final ResetListener callback) {
         final HandlerThread handlerThread = new HandlerThread("mParticleShutdownHandler");
-            handlerThread.start();
-            new Handler(handlerThread.getLooper()).post(() -> {
-                reset(context);
-                if (callback != null) {
-                    try {
-                        callback.onReset();
-                    } catch (Exception ignored) {
-                    }
+        handlerThread.start();
+        new Handler(handlerThread.getLooper()).post(() -> {
+            reset(context);
+            if (callback != null) {
+                try {
+                    callback.onReset();
+                } catch (Exception ignored) {
                 }
-                handlerThread.quit();
-            });
+            }
+            handlerThread.quit();
+        });
     }
 
     /**
      * NOTE: Experimental feature, adding a Listener will slow down the SDK, and should be used only
      * for development purposes. By default, InternalListeners will automatically disable in release builds.
      * In order to override this behavior, use the following adb shell command:
-     *
+     * <p>
      * {@code `adb shell setprop debug.mparticle.listener {YOUR.PACKAGE.NAME}`}
-     *
+     * <p>
      * Register an instance of {@link SdkListener} to receive callbacks about SDK events
+     *
      * @param context
      * @param listener the SdkListener implementation
      */
@@ -1365,7 +1386,6 @@ public class MParticle {
      *
      * @see MParticle#start(MParticleOptions)
      * to override this behavior.
-     *
      */
     public enum Environment {
         /**
@@ -1432,6 +1452,7 @@ public class MParticle {
         INFO(Log.INFO);
 
         public int logLevel;
+
         LogLevel(int logLevel) {
             this.logLevel = logLevel;
         }
@@ -1491,17 +1512,21 @@ public class MParticle {
         Builder(MParticleUser user) {
             super(user);
         }
-        Builder() { super(); }
+
+        Builder() {
+            super();
+        }
 
         @Override
-        @NonNull protected IdentityApiRequest.Builder pushToken(@Nullable String newPushToken, @Nullable String oldPushToken) {
+        @NonNull
+        protected IdentityApiRequest.Builder pushToken(@Nullable String newPushToken, @Nullable String oldPushToken) {
             return super.pushToken(newPushToken, oldPushToken);
         }
     }
 
     /**
      * Set or remove the integration attributes for a given integration ID.
-     *
+     * <p>
      * Integration attributes are keys and values specific to a given integration. For example,
      * many integrations have their own internal user/device ID. mParticle will store integration attributes
      * for a given device, and will be able to use these values for server-to-server communication to services.
@@ -1510,9 +1535,9 @@ public class MParticle {
      *
      * @param integrationId mParticle integration ID. This may be a {@link ServiceProviders} value if it's a kit, or
      *                      it could be any mParticle integration.
-     * @param attributes a map of attributes that will replace any current attributes. The keys are predefined by mParticle.
-     *                   Please consult with the mParticle docs or your solutions consultant for the correct value. You may
-     *                   also pass a null or empty map here to remove all of the attributes.
+     * @param attributes    a map of attributes that will replace any current attributes. The keys are predefined by mParticle.
+     *                      Please consult with the mParticle docs or your solutions consultant for the correct value. You may
+     *                      also pass a null or empty map here to remove all of the attributes.
      */
     public void setIntegrationAttributes(int integrationId, @Nullable Map<String, String> attributes) {
         this.Internal().getConfigManager().setIntegrationAttributes(integrationId, attributes);
@@ -1520,7 +1545,7 @@ public class MParticle {
 
     /**
      * Queries the current integration attributes for a given integration ID.
-     *
+     * <p>
      * Integration attributes are keys and values specific to a given integration. For example,
      * many integrations have their own internal user/device ID. mParticle will store integration attributes
      * for a given device, and will be able to use these values for server-to-server communication to services.
@@ -1530,7 +1555,8 @@ public class MParticle {
      * @param integrationId mParticle integration ID. This may be a {@link ServiceProviders} value if it's a kit, or
      *                      it could be any mParticle integration.
      */
-    @NonNull public Map<String, String> getIntegrationAttributes(int integrationId) {
+    @NonNull
+    public Map<String, String> getIntegrationAttributes(int integrationId) {
         return this.Internal().getConfigManager().getIntegrationAttributes(integrationId);
     }
 
@@ -1574,8 +1600,10 @@ public class MParticle {
         int SWRVE = 1145;
         int BLUESHIFT = 1144;
         int NEURA = 147;
-        @NonNull String BROADCAST_ACTIVE = "MPARTICLE_SERVICE_PROVIDER_ACTIVE_";
-        @NonNull String BROADCAST_DISABLED = "MPARTICLE_SERVICE_PROVIDER_DISABLED_";
+        @NonNull
+        String BROADCAST_ACTIVE = "MPARTICLE_SERVICE_PROVIDER_ACTIVE_";
+        @NonNull
+        String BROADCAST_DISABLED = "MPARTICLE_SERVICE_PROVIDER_DISABLED_";
     }
 
     /**
@@ -1589,43 +1617,53 @@ public class MParticle {
         /**
          * A special attribute string to specify the mobile number of the consumer's device.
          */
-        @NonNull String MOBILE_NUMBER = "$Mobile";
+        @NonNull
+        String MOBILE_NUMBER = "$Mobile";
         /**
          * A special attribute string to specify the user's gender.
          */
-        @NonNull String GENDER = "$Gender";
+        @NonNull
+        String GENDER = "$Gender";
         /**
          * A special attribute string to specify the user's age.
          */
-        @NonNull String AGE = "$Age";
+        @NonNull
+        String AGE = "$Age";
         /**
          * A special attribute string to specify the user's country.
          */
-        @NonNull String COUNTRY = "$Country";
+        @NonNull
+        String COUNTRY = "$Country";
         /**
          * A special attribute string to specify the user's zip code.
          */
-        @NonNull String ZIPCODE = "$Zip";
+        @NonNull
+        String ZIPCODE = "$Zip";
         /**
          * A special attribute string to specify the user's city.
          */
-        @NonNull String CITY = "$City";
+        @NonNull
+        String CITY = "$City";
         /**
          * A special attribute string to specify the user's state or region.
          */
-        @NonNull String STATE = "$State";
+        @NonNull
+        String STATE = "$State";
         /**
          * A special attribute string to specify the user's street address and apartment number.
          */
-        @NonNull String ADDRESS = "$Address";
+        @NonNull
+        String ADDRESS = "$Address";
         /**
          * A special attribute string to specify the user's first name.
          */
-        @NonNull String FIRSTNAME = "$FirstName";
+        @NonNull
+        String FIRSTNAME = "$FirstName";
         /**
          * A special attribute string to specify the user's last name.
          */
-        @NonNull String LASTNAME = "$LastName";
+        @NonNull
+        String LASTNAME = "$LastName";
     }
 
     public interface ResetListener {
@@ -1637,7 +1675,8 @@ public class MParticle {
      * @hidden
      */
     public class Internal {
-        protected Internal() { }
+        protected Internal() {
+        }
 
         /**
          * The ConfigManager is tasked with incorporating server-based, run-time, and XML configuration,

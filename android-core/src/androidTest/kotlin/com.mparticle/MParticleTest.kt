@@ -314,38 +314,6 @@ class MParticleTest : BaseCleanStartedEachTest() {
     }
 
     @Test
-    fun testWrapperSdkVersionBeingSet() {
-        val builder = MParticleOptions
-            .builder(mContext)
-            .credentials("key", "value")
-            .wrapperSdkVersion(WrapperSdk.WrapperSdkCordova, "test")
-            .environment(MParticle.Environment.Production)
-        startMParticle(transformMParticleOptions(builder))
-
-        with(MParticle.getInstance()!!) {
-            Assert.assertEquals(WrapperSdk.WrapperSdkCordova, wrapperSdkVersion.sdk)
-            Assert.assertEquals("test", wrapperSdkVersion.version)
-        }
-
-        builder.wrapperSdkVersion(WrapperSdk.WrapperFlutter, null)
-        startMParticle(transformMParticleOptions(builder))
-
-        with(MParticle.getInstance()!!) {
-            Assert.assertEquals(WrapperSdk.WrapperSdkCordova, wrapperSdkVersion.sdk)
-            Assert.assertEquals("test", wrapperSdkVersion.version)
-        }
-
-        builder.wrapperSdkVersion(WrapperSdk.WrapperNone, null)
-        startMParticle(transformMParticleOptions(builder))
-
-        with(MParticle.getInstance()!!) {
-            Assert.assertNotNull(wrapperSdkVersion)
-            Assert.assertEquals(WrapperSdk.WrapperNone, wrapperSdkVersion.sdk)
-            Assert.assertNull(wrapperSdkVersion.version)
-        }
-    }
-
-    @Test
     fun testSetLocation() {
         val location = Location("")
         MParticle.getInstance()!!.setLocation(location)

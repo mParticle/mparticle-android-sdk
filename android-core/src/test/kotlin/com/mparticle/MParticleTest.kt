@@ -113,6 +113,51 @@ class MParticleTest {
     }
 
     @Test
+    fun testSettingValidSdkWrapper() {
+        val mp: MParticle = MockMParticle()
+        mp.setWrapperSdk(WrapperSdk.WrapperFlutter, "test")
+        with(mp.wrapperSdkVersion) {
+            Assert.assertEquals("test", this.version)
+            Assert.assertEquals(WrapperSdk.WrapperFlutter, this.sdk)
+        }
+    }
+
+    @Test
+    fun testNoSettingWrapperWithEmptyVersion() {
+        val mp: MParticle = MockMParticle()
+        mp.setWrapperSdk(WrapperSdk.WrapperFlutter, "")
+        with(mp.wrapperSdkVersion) {
+            Assert.assertNull(this.version)
+            Assert.assertEquals(WrapperSdk.WrapperNone, this.sdk)
+        }
+    }
+
+    @Test
+    fun testNotSeetingSdkWrapperSecondTime() {
+        val mp: MParticle = MockMParticle()
+        mp.setWrapperSdk(WrapperSdk.WrapperFlutter, "test")
+        with(mp.wrapperSdkVersion) {
+            Assert.assertEquals("test", this.version)
+            Assert.assertEquals(WrapperSdk.WrapperFlutter, this.sdk)
+        }
+        mp.setWrapperSdk(WrapperSdk.WrapperXamarin, "test2")
+        with(mp.wrapperSdkVersion) {
+            Assert.assertEquals("test", this.version)
+            Assert.assertEquals(WrapperSdk.WrapperFlutter, this.sdk)
+        }
+    }
+
+    @Test
+    fun testGettingSdkWrapperWithoutSettingValues() {
+        val mp: MParticle = MockMParticle()
+        with(mp.wrapperSdkVersion) {
+            Assert.assertNotNull(this)
+            Assert.assertNull(this.version)
+            Assert.assertEquals(WrapperSdk.WrapperNone, this.sdk)
+        }
+    }
+
+    @Test
     @Throws(Exception::class)
     fun testSetUserAttributeList() {
         val mp: MParticle = MockMParticle()
