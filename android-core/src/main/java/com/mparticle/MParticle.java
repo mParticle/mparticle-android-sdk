@@ -64,7 +64,6 @@ import java.util.Set;
 /**
  * The primary access point to the mParticle SDK. In order to use this class, you must first call {@link #start(MParticleOptions)}. You can then retrieve a reference
  * to an instance of this class via {@link #getInstance()}.
- *
  */
 @ApiClass
 public class MParticle {
@@ -119,6 +118,21 @@ public class MParticle {
         mMessageManager = new MessageManager(configManager, appStateManager, mKitManager, sDevicePerformanceMetricsDisabled, mDatabaseManager, options);
         mConfigManager.setNetworkOptions(options.getNetworkOptions());
         mPreferences = options.getContext().getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+    }
+
+    /**
+     * Update interval time in seconds.
+     * If the interval is greater or equal than 1 and different from  the previous interval time,
+     * force uploading the messages and setting the new interval time for the future
+     *
+     * @param interval in seconds
+     */
+    public void setUpdateInterval(int interval) {
+        long intervalMillis = interval * 1000L;
+        if ( (intervalMillis >= 1 && mConfigManager.getUploadInterval() != intervalMillis)) {
+            upload();
+            mConfigManager.setUploadInterval(interval);
+        }
     }
 
     /**
