@@ -50,6 +50,35 @@ class MParticleTest : BaseCleanStartedEachTest() {
     }
 
     @Test
+    fun testSetIntervalValue() {
+        restartWithOptions(baseMParticleOptionBuilder.uploadInterval(20))
+        val mp = MParticle.getInstance()
+        Assert.assertEquals(20.toMillis(), mp?.mConfigManager?.uploadInterval)
+        mp?.setUpdateInterval(30)
+        Assert.assertEquals(30.toMillis(), mp?.mConfigManager?.uploadInterval)
+    }
+
+    @Test
+    fun testSetIntervalValueInvalidNEgativeValue() {
+        restartWithOptions(baseMParticleOptionBuilder.uploadInterval(20))
+        val mp = MParticle.getInstance()
+        Assert.assertEquals(20.toMillis(), mp?.mConfigManager?.uploadInterval)
+        mp?.setUpdateInterval(-1)
+        Assert.assertEquals(20.toMillis(), mp?.mConfigManager?.uploadInterval)
+    }
+
+    @Test
+    fun testSetIntervalValueInvalidZeroValue() {
+        restartWithOptions(baseMParticleOptionBuilder.uploadInterval(20))
+        val mp = MParticle.getInstance()
+        Assert.assertEquals(20.toMillis(), mp?.mConfigManager?.uploadInterval)
+        mp?.setUpdateInterval(0)
+        Assert.assertEquals(20.toMillis(), mp?.mConfigManager?.uploadInterval)
+    }
+
+    private fun Int.toMillis() = this * 1000L
+
+    @Test
     fun testSetInstallReferrer() {
         MParticle.getInstance()!!.installReferrer = "foo install referrer"
         Assert.assertEquals("foo install referrer", MParticle.getInstance()!!.installReferrer)

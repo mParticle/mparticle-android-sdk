@@ -5,6 +5,7 @@ import com.mparticle.MParticleOptions;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.internal.AppStateManager;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 
 
@@ -29,13 +30,20 @@ public class BaseCleanStartedEachTest extends BaseAbstractTest {
         }
         MParticle.setInstance(null);
         beforeSetup();
-        MParticleOptions.Builder builder = MParticleOptions
+        startMParticle(transformMParticleOptions(getBaseMParticleOptionBuilder()));
+        AppStateManager.mInitialized = false;
+    }
+
+    protected MParticleOptions.Builder getBaseMParticleOptionBuilder() {
+        return MParticleOptions
                 .builder(mContext)
                 .credentials("key", "value")
                 .identify(IdentityApiRequest.withEmptyUser().build())
                 .environment(MParticle.Environment.Production);
-        startMParticle(transformMParticleOptions(builder));
-        AppStateManager.mInitialized = false;
+    }
+
+    protected void restartWithOptions(@NotNull MParticleOptions.Builder options) throws InterruptedException {
+        startMParticle(options);
     }
 
     //Override this if you need to do something simple like add or remove a network options before.

@@ -139,6 +139,21 @@ public class MParticle {
     }
 
     /**
+     * Update interval time in seconds.
+     * If the interval is greater or equal than 1 and different from  the previous interval time,
+     * force uploading the messages and setting the new interval time for the future
+     *
+     * @param interval in seconds
+     */
+    public void setUpdateInterval(int interval) {
+        long intervalMillis = interval * 1000L;
+        if ( (intervalMillis >= 1 && mConfigManager.getUploadInterval() != intervalMillis)) {
+            upload();
+            mConfigManager.setUploadInterval(interval);
+        }
+    }
+
+    /**
      * Start the mParticle SDK and begin tracking a user session. This method must be called prior to {@link #getInstance()}.
      *
      * @param options Required to initialize the SDK properly
