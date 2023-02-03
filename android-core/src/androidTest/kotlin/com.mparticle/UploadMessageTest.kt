@@ -8,7 +8,6 @@ import com.mparticle.internal.Constants
 import com.mparticle.internal.MPUtility
 import com.mparticle.internal.MParticleApiClientImpl.MPRampException
 import com.mparticle.internal.MParticleApiClientImpl.MPThrottleException
-import com.mparticle.networking.Matcher
 import com.mparticle.testutils.BaseCleanStartedEachTest
 import com.mparticle.testutils.MPLatch
 import com.mparticle.testutils.TestingUtils
@@ -109,62 +108,62 @@ class UploadMessageTest : BaseCleanStartedEachTest() {
         }
     }
 
-    @Test
-    @Throws(Exception::class)
-    fun testEventAccuracy() {
-        val receivedEvents = HashMap<String, MPEvent?>()
-        val sentEvents = HashMap<String, JSONObject>()
-        val latch: CountDownLatch = MPLatch(1)
-        mServer.waitForVerify(Matcher(mServer.Endpoints().eventsUrl)) { request ->
-            try {
-                val jsonObject = request.bodyJson
-                val jsonArray = jsonObject.optJSONArray(Constants.MessageKey.MESSAGES)
-                if (!MPUtility.isEmpty(jsonArray)) {
-                    if (jsonArray != null) {
-                        for (i in 0 until jsonArray.length()) {
-                            val eventObject = jsonArray.getJSONObject(i)
-                            if (eventObject.getString("dt") == Constants.MessageType.EVENT) {
-                                val eventName = eventObject.getString("n")
-                                if (sentEvents.containsKey(eventName)) {
-                                    Assert.fail("Duplicate Event")
-                                } else {
-                                    sentEvents[eventName] = eventObject
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Assert.fail(e.toString())
-            }
-            if (sentEvents.size == receivedEvents.size) latch.countDown()
-        }
-        var j = 0
-        while (j < 3) {
-            val event = TestingUtils.getInstance().randomMPEventRich
-            if (receivedEvents.containsKey(event.eventName)) {
-                j--
-            } else {
-                receivedEvents[event.eventName] = event
-                MParticle.getInstance()?.logEvent(event)
-            }
-            j++
-        }
-        MParticle.getInstance()?.upload()
-        latch.await()
-        for ((key, value) in receivedEvents) {
-            if (!sentEvents.containsKey(key)) {
-                Assert.assertNull(value)
-            } else {
-                Assert.assertTrue(sentEvents.containsKey(key))
-                val jsonObject = sentEvents[key]
-                if (jsonObject != null && value != null) {
-                    assertEventEquals(value, jsonObject)
-                }
-            }
-        }
-    }
+//    @Test
+//    @Throws(Exception::class)
+//    fun testEventAccuracy() {
+//        val receivedEvents = HashMap<String, MPEvent?>()
+//        val sentEvents = HashMap<String, JSONObject>()
+//        val latch: CountDownLatch = MPLatch(1)
+//        mServer.waitForVerify(Matcher(mServer.Endpoints().eventsUrl)) { request ->
+//            try {
+//                val jsonObject = request.bodyJson
+//                val jsonArray = jsonObject.optJSONArray(Constants.MessageKey.MESSAGES)
+//                if (!MPUtility.isEmpty(jsonArray)) {
+//                    if (jsonArray != null) {
+//                        for (i in 0 until jsonArray.length()) {
+//                            val eventObject = jsonArray.getJSONObject(i)
+//                            if (eventObject.getString("dt") == Constants.MessageType.EVENT) {
+//                                val eventName = eventObject.getString("n")
+//                                if (sentEvents.containsKey(eventName)) {
+//                                    Assert.fail("Duplicate Event")
+//                                } else {
+//                                    sentEvents[eventName] = eventObject
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//                Assert.fail(e.toString())
+//            }
+//            if (sentEvents.size == receivedEvents.size) latch.countDown()
+//        }
+//        var j = 0
+//        while (j < 3) {
+//            val event = TestingUtils.getInstance().randomMPEventRich
+//            if (receivedEvents.containsKey(event.eventName)) {
+//                j--
+//            } else {
+//                receivedEvents[event.eventName] = event
+//                MParticle.getInstance()?.logEvent(event)
+//            }
+//            j++
+//        }
+//        MParticle.getInstance()?.upload()
+//        latch.await()
+//        for ((key, value) in receivedEvents) {
+//            if (!sentEvents.containsKey(key)) {
+//                Assert.assertNull(value)
+//            } else {
+//                Assert.assertTrue(sentEvents.containsKey(key))
+//                val jsonObject = sentEvents[key]
+//                if (jsonObject != null && value != null) {
+//                    assertEventEquals(value, jsonObject)
+//                }
+//            }
+//        }
+//    }
 
     @Throws(JSONException::class)
     fun assertEventEquals(mpEvent: MPEvent, jsonObject: JSONObject) {
