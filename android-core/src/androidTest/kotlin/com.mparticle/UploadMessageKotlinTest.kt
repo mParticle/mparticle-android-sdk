@@ -1,14 +1,6 @@
 package com.mparticle
 
-import android.os.SystemClock
-import com.mparticle.internal.Constants
-import com.mparticle.internal.UploadHandler
-import com.mparticle.networking.Matcher
 import com.mparticle.testutils.BaseCleanStartedEachTest
-import org.junit.Test
-import java.util.TreeSet
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class UploadMessageKotlinTest : BaseCleanStartedEachTest() {
     val uploadInterval = 100
