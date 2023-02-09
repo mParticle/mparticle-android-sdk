@@ -1158,7 +1158,7 @@ public class MParticle {
             //"commit" will force all async writes stemming from an "apply" call to finish. We need to do this
             //because we need to ensure that the "getMpids()" call is returning all calls that have been made
             // up to this point, otherwise we will miss deleting some files.
-            context.getSharedPreferences(ConfigManager.PREFERENCES_FILE, Context.MODE_PRIVATE).edit().commit();
+            context.getSharedPreferences(ConfigManager.PREFERENCES_FILE, Context.MODE_PRIVATE).edit().clear().commit();
             if (instance != null) {
                 if (instance.isLocationTrackingEnabled()) {
                     instance.disableLocationTracking();
