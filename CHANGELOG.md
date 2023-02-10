@@ -1,3 +1,15 @@
+## [5.49.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.49.0...v5.49.1) (2023-02-10)
+
+
+### Bug Fixes
+
+* Removing flaky tests ([#317](https://github.com/mParticle/mparticle-android-sdk/issues/317)) ([b937fbb](https://github.com/mParticle/mparticle-android-sdk/commit/b937fbb890691974356879ae9ee39e717cd1e67e)), closes [#311](https://github.com/mParticle/mparticle-android-sdk/issues/311)
+
+
+### Updates & Maintenance
+
+* Update submodules ([6d51f18](https://github.com/mParticle/mparticle-android-sdk/commit/6d51f18d27cd13d1cb3131c39821cc1c293262c4))
+
 ## [5.49.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.48.4...v5.49.0) (2023-01-05)
 
 
