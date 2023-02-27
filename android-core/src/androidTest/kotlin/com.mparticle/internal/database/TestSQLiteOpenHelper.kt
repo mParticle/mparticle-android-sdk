@@ -12,7 +12,10 @@ class TestSQLiteOpenHelper @JvmOverloads constructor(
     databaseName: String?,
     version: Int = 1
 ) : SQLiteOpenHelper(
-    InstrumentationRegistry.getInstrumentation().context, databaseName, null, version
+    InstrumentationRegistry.getInstrumentation().context,
+    databaseName,
+    null,
+    version
 ) {
     @JvmField
     var onCreateLatch: CountDownLatch = MPLatch(1)

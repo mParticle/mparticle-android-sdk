@@ -13,7 +13,9 @@ class DataplanDetectorTest : LintDetectorTest() {
     @Test
     fun testCollection() {
         val sdkHome = System.getenv("ANDROID_HOME") ?: "${System.getProperty("user.home")}/Library/Android/sdk"
-        @Language("KT") val source = """
+
+        @Language("KT")
+        val source = """
                 package com.mparticle.lints
                 import android.app.Application
                 import com.mparticle.MParticle

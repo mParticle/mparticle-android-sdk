@@ -11,6 +11,7 @@ import java.util.concurrent.CountDownLatch
 open class BaseTableTest : BaseCleanInstallEachTest() {
     var onCreateLatch: CountDownLatch = MPLatch(1)
     var onUpgradeLatch: CountDownLatch = MPLatch(1)
+
     @Throws(InterruptedException::class)
     protected fun runTest(helper: SQLiteOpenHelperWrapper?, oldVersion: Int = 6) {
         InstrumentationRegistry.getInstrumentation().targetContext.deleteDatabase(DB_NAME)

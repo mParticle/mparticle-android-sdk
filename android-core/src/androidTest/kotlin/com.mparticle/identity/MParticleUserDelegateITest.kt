@@ -21,6 +21,7 @@ import java.util.concurrent.CountDownLatch
 
 class MParticleUserDelegateITest : BaseCleanStartedEachTest() {
     private lateinit var mUserDelegate: MParticleUserDelegate
+
     @Before
     @Throws(Exception::class)
     fun before() {
@@ -209,7 +210,8 @@ class MParticleUserDelegateITest : BaseCleanStartedEachTest() {
     
     vs$map2
             """.trimIndent(),
-            map1.size.toLong(), map2?.size?.toLong()
+            map1.size.toLong(),
+            map2?.size?.toLong()
         )
         for (obj in map1.entries) {
             val (key, value) = obj

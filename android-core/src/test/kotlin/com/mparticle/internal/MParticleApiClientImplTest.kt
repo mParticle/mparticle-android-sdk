@@ -27,6 +27,7 @@ class MParticleApiClientImplTest {
     private lateinit var mockConnection: MPConnection
     private lateinit var configManager: ConfigManager
     private lateinit var sharedPrefs: MockSharedPreferences
+
     @Throws(Exception::class)
     fun setup() {
         configManager = Mockito.mock(ConfigManager::class.java)

@@ -10,6 +10,7 @@ import kotlin.math.abs
 
 class AliasRequestTest {
     private var random = Random()
+
     @Test
     fun testAliasRequestBuilder() {
         val sourceUser = Mockito.mock(MParticleUser::class.java)

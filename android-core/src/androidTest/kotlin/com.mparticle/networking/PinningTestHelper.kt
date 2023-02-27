@@ -34,7 +34,8 @@ class PinningTestHelper internal constructor(
                 MParticleApiClientImpl(
                     MParticle.getInstance()!!.Internal().configManager,
                     context.getSharedPreferences(
-                        Constants.PREFS_FILE, Context.MODE_PRIVATE
+                        Constants.PREFS_FILE,
+                        Context.MODE_PRIVATE
                     ),
                     context
                 )

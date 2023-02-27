@@ -168,7 +168,6 @@ class KitConfigurationTest {
     @Test
     @Throws(Exception::class)
     fun testFilterCommerceAttributes() {
-
         // CUSTOM ATTRIBUTES
         val configuration =
             MockKitConfiguration.createKitConfiguration(JSONObject(COMMERCE_FILTERS))

@@ -103,12 +103,14 @@ class KitFrameworkWrapperTest {
         ).thenReturn(registration)
         wrapper.replayEvents()
         Mockito.verify(
-            mockKitManager, Mockito.times(0)
+            mockKitManager,
+            Mockito.times(0)
         ).onPushRegistration(Mockito.anyString(), Mockito.anyString())
         wrapper.onPushRegistration("whatever", "whatever")
         wrapper.replayEvents()
         Mockito.verify(
-            mockKitManager, Mockito.times(1)
+            mockKitManager,
+            Mockito.times(1)
         ).onPushRegistration(Mockito.anyString(), Mockito.anyString())
         wrapper.replayEvents()
         wrapper.kitsLoaded = false
@@ -121,29 +123,37 @@ class KitFrameworkWrapperTest {
         wrapper.setUserAttribute("a key", "a value", 1)
         wrapper.logEvent(commerceEvent)
         Mockito.verify(
-            mockKitManager, Mockito.times(0)
+            mockKitManager,
+            Mockito.times(0)
         ).logEvent(Mockito.any(MPEvent::class.java))
         Mockito.verify(
-            mockKitManager, Mockito.times(0)
+            mockKitManager,
+            Mockito.times(0)
         ).logScreen(Mockito.any(MPEvent::class.java))
         Mockito.verify(
-            mockKitManager, Mockito.times(0)
+            mockKitManager,
+            Mockito.times(0)
         ).logEvent(Mockito.any(CommerceEvent::class.java))
         Mockito.verify(
-            mockKitManager, Mockito.times(0)
+            mockKitManager,
+            Mockito.times(0)
         ).setUserAttribute(Mockito.anyString(), Mockito.anyString(), Mockito.anyLong())
         wrapper.replayEvents()
         Mockito.verify(
-            mockKitManager, Mockito.times(1)
+            mockKitManager,
+            Mockito.times(1)
         ).logEvent(Mockito.any(MPEvent::class.java))
         Mockito.verify(
-            mockKitManager, Mockito.times(1)
+            mockKitManager,
+            Mockito.times(1)
         ).logScreen(Mockito.any(MPEvent::class.java))
         Mockito.verify(
-            mockKitManager, Mockito.times(1)
+            mockKitManager,
+            Mockito.times(1)
         ).logEvent(Mockito.any(CommerceEvent::class.java))
         Mockito.verify(
-            mockKitManager, Mockito.times(1)
+            mockKitManager,
+            Mockito.times(1)
         ).setUserAttribute(Mockito.eq("a key"), Mockito.eq("a value"), Mockito.anyLong())
     }
 
@@ -331,11 +341,13 @@ class KitFrameworkWrapperTest {
         val mockKitManager = Mockito.mock(KitManager::class.java)
         wrapper.setKitManager(mockKitManager)
         Mockito.verify(
-            mockKitManager, Mockito.times(0)
+            mockKitManager,
+            Mockito.times(0)
         ).setUserAttribute(Mockito.anyString(), Mockito.anyString(), Mockito.anyLong())
         wrapper.setUserAttribute("a key", "a value", 1)
         Mockito.verify(
-            mockKitManager, Mockito.times(1)
+            mockKitManager,
+            Mockito.times(1)
         ).setUserAttribute(Mockito.eq("a key"), Mockito.eq("a value"), Mockito.eq(1L))
     }
 
@@ -366,11 +378,13 @@ class KitFrameworkWrapperTest {
         val mockKitManager = Mockito.mock(KitManager::class.java)
         wrapper.setKitManager(mockKitManager)
         Mockito.verify(
-            mockKitManager, Mockito.times(0)
+            mockKitManager,
+            Mockito.times(0)
         ).logEvent(Mockito.any(MPEvent::class.java))
         wrapper.logEvent(event)
         Mockito.verify(
-            mockKitManager, Mockito.times(1)
+            mockKitManager,
+            Mockito.times(1)
         ).logEvent(Mockito.any(MPEvent::class.java))
     }
 
@@ -402,11 +416,13 @@ class KitFrameworkWrapperTest {
         val mockKitManager = Mockito.mock(KitManager::class.java)
         wrapper.setKitManager(mockKitManager)
         Mockito.verify(
-            mockKitManager, Mockito.times(0)
+            mockKitManager,
+            Mockito.times(0)
         ).logEvent(Mockito.any(CommerceEvent::class.java))
         wrapper.logEvent(event)
         Mockito.verify(
-            mockKitManager, Mockito.times(1)
+            mockKitManager,
+            Mockito.times(1)
         ).logEvent(Mockito.any(CommerceEvent::class.java))
     }
 
@@ -437,11 +453,13 @@ class KitFrameworkWrapperTest {
         val mockKitManager = Mockito.mock(KitManager::class.java)
         wrapper.setKitManager(mockKitManager)
         Mockito.verify(
-            mockKitManager, Mockito.times(0)
+            mockKitManager,
+            Mockito.times(0)
         ).logEvent(Mockito.any(BaseEvent::class.java))
         wrapper.logEvent(event)
         Mockito.verify(
-            mockKitManager, Mockito.times(1)
+            mockKitManager,
+            Mockito.times(1)
         ).logEvent(Mockito.any(BaseEvent::class.java))
     }
 
@@ -473,11 +491,13 @@ class KitFrameworkWrapperTest {
         val mockKitManager = Mockito.mock(KitManager::class.java)
         wrapper.setKitManager(mockKitManager)
         Mockito.verify(
-            mockKitManager, Mockito.times(0)
+            mockKitManager,
+            Mockito.times(0)
         ).logScreen(Mockito.any(MPEvent::class.java))
         wrapper.logScreen(event)
         Mockito.verify(
-            mockKitManager, Mockito.times(1)
+            mockKitManager,
+            Mockito.times(1)
         ).logScreen(Mockito.any(MPEvent::class.java))
     }
 
@@ -499,7 +519,8 @@ class KitFrameworkWrapperTest {
         wrapper.setKitManager(mockKitManager)
         Assert.assertFalse(wrapper.isKitActive(0))
         Mockito.verify(
-            mockKitManager, Mockito.times(1)
+            mockKitManager,
+            Mockito.times(1)
         ).isKitActive(Mockito.anyInt())
         Mockito.`when`(mockKitManager.isKitActive(Mockito.anyInt())).thenReturn(true)
         Assert.assertTrue(wrapper.isKitActive(0))
@@ -572,7 +593,8 @@ class KitFrameworkWrapperTest {
             Mockito.mock(
                 KitFrameworkWrapper::class.java
             ),
-            mockConfigManager, mockAppStateManager
+            mockConfigManager,
+            mockAppStateManager
         )
         Assert.assertEquals(mockActivity, coreCallbacks.currentActivity.get())
         Assert.assertEquals(mockKitConfiguration, coreCallbacks.latestKitConfiguration)

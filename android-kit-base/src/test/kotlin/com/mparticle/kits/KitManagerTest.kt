@@ -28,6 +28,7 @@ import org.powermock.modules.junit4.PowerMockRunner
 @RunWith(PowerMockRunner::class)
 class KitManagerTest {
     private lateinit var manager: KitManagerImpl
+
     @Before
     @Throws(Exception::class)
     fun setUp() {
