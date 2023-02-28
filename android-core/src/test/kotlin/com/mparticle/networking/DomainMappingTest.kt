@@ -10,6 +10,7 @@ import kotlin.collections.HashMap
 class DomainMappingTest {
     private var random = Random()
     var randomUtils = RandomUtils()
+
     @Test
     fun nullCertificatesNotAdded() {
         val certificates: MutableList<Certificate?> = ArrayList()

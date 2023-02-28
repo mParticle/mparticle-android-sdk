@@ -10,6 +10,7 @@ import org.junit.Test
 
 class UpgradeMessageTableTest : BaseTableTest() {
     private val helper = MParticleDatabaseHelper(mContext)
+
     @Test
     @Throws(InterruptedException::class)
     fun addMessageTableTest() {

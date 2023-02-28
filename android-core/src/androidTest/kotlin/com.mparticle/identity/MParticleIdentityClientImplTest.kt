@@ -21,6 +21,7 @@ import java.util.concurrent.CountDownLatch
 class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
     private var mConfigManager: ConfigManager? = null
     private var mApiClient: MParticleIdentityClientImpl? = null
+
     @Before
     @Throws(Exception::class)
     fun before() {

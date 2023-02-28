@@ -25,6 +25,7 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
     var mpid1: Long = 0
     var mpid2: Long = 0
     var mpid3: Long = 0
+
     @Before
     fun before() {
         mConfigManager = MParticle.getInstance()!!.Internal().configManager

@@ -58,7 +58,8 @@ class MessageManagerTest {
         manager = MessageManager(
             context,
             configManager,
-            MParticle.InstallType.AutoDetect, appStateManager,
+            MParticle.InstallType.AutoDetect,
+            appStateManager,
             Mockito.mock(MParticleDBManager::class.java),
             messageHandler,
             uploadHandler
@@ -231,7 +232,9 @@ class MessageManagerTest {
         )
         event.length?.let { lenght ->
             Assert.assertEquals(
-                message.getDouble(MessageKey.EVENT_DURATION), lenght, 2.0
+                message.getDouble(MessageKey.EVENT_DURATION),
+                lenght,
+                2.0
             )
         }
         val attrs = message.getJSONObject(MessageKey.ATTRIBUTES)

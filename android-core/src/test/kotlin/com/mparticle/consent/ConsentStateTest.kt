@@ -90,10 +90,12 @@ class ConsentStateTest {
         Assert.assertEquals(2, state.build().gdprConsentState.size.toLong())
         Assert.assertNotNull(state.build().ccpaConsentState)
         Assert.assertEquals(
-            false, state.build().gdprConsentState["foo-purpose-1"]?.isConsented
+            false,
+            state.build().gdprConsentState["foo-purpose-1"]?.isConsented
         )
         Assert.assertEquals(
-            true, state.build().gdprConsentState["foo-purpose-2"]?.isConsented
+            true,
+            state.build().gdprConsentState["foo-purpose-2"]?.isConsented
         )
         Assert.assertEquals(false, state.build().ccpaConsentState?.isConsented)
     }
@@ -112,10 +114,12 @@ class ConsentStateTest {
         Assert.assertEquals(2, state.build().gdprConsentState.size.toLong())
         Assert.assertNotNull(state.build().ccpaConsentState)
         Assert.assertEquals(
-            false, state.build().gdprConsentState["foo-purpose-1"]?.isConsented
+            false,
+            state.build().gdprConsentState["foo-purpose-1"]?.isConsented
         )
         Assert.assertEquals(
-            true, state.build().gdprConsentState["foo-purpose-2"]?.isConsented
+            true,
+            state.build().gdprConsentState["foo-purpose-2"]?.isConsented
         )
         Assert.assertEquals(true, state.build().ccpaConsentState?.isConsented)
     }
@@ -146,16 +150,20 @@ class ConsentStateTest {
         Assert.assertNotNull(state)
         Assert.assertEquals(1, state.build().gdprConsentState.size.toLong())
         Assert.assertEquals(
-            false, state.build().gdprConsentState["foo-purpose-1"]?.isConsented
+            false,
+            state.build().gdprConsentState["foo-purpose-1"]?.isConsented
         )
         Assert.assertEquals(
-            "foo document", state.build().gdprConsentState["foo-purpose-1"]?.document
+            "foo document",
+            state.build().gdprConsentState["foo-purpose-1"]?.document
         )
         Assert.assertEquals(
-            "foo hardware id", state.build().gdprConsentState["foo-purpose-1"]?.hardwareId
+            "foo hardware id",
+            state.build().gdprConsentState["foo-purpose-1"]?.hardwareId
         )
         Assert.assertEquals(
-            "foo location", state.build().gdprConsentState["foo-purpose-1"]?.location
+            "foo location",
+            state.build().gdprConsentState["foo-purpose-1"]?.location
         )
         Assert.assertEquals(
             5,
@@ -195,16 +203,20 @@ class ConsentStateTest {
         Assert.assertNotNull(state)
         Assert.assertEquals(1, state.build().gdprConsentState.size.toLong())
         Assert.assertEquals(
-            false, state.build().gdprConsentState["foo-purpose-1"]?.isConsented
+            false,
+            state.build().gdprConsentState["foo-purpose-1"]?.isConsented
         )
         Assert.assertEquals(
-            "foo document", state.build().gdprConsentState["foo-purpose-1"]?.document
+            "foo document",
+            state.build().gdprConsentState["foo-purpose-1"]?.document
         )
         Assert.assertEquals(
-            "foo hardware id", state.build().gdprConsentState["foo-purpose-1"]?.hardwareId
+            "foo hardware id",
+            state.build().gdprConsentState["foo-purpose-1"]?.hardwareId
         )
         Assert.assertEquals(
-            "foo location", state.build().gdprConsentState["foo-purpose-1"]?.location
+            "foo location",
+            state.build().gdprConsentState["foo-purpose-1"]?.location
         )
         Assert.assertEquals(
             5,

@@ -13,6 +13,7 @@ import java.net.MalformedURLException
 class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
     var defaultUrls = HashMap<MParticleBaseClientImpl.Endpoint, MPUrl>()
     var apiKey = mRandomUtils.getAlphaString(10)
+
     @Before
     @Throws(InterruptedException::class, MalformedURLException::class)
     fun before() {

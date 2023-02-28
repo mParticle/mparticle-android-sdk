@@ -26,8 +26,8 @@ class NetworkOptionsManagerTest {
             )
         )
         for (
-            certificate in refinedNetworkOptions.domainMappings[MParticleBaseClientImpl.Endpoint.IDENTITY]!!
-                .certificates
+        certificate in refinedNetworkOptions.domainMappings[MParticleBaseClientImpl.Endpoint.IDENTITY]!!
+            .certificates
         ) {
             if (certificate.alias == "intca") {
                 Assert.assertEquals(certificate.certificate, Constants.GODADDY_INTERMEDIATE_CRT)
