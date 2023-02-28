@@ -4,7 +4,7 @@ import com.mparticle.BaseEvent
 import com.mparticle.modernization.MParticleMediator
 import java.math.BigDecimal
 
- class MpKit(private val mediator: MParticleMediator) : MParticleKitInternal{
+ class MpKit(private val mediator: MParticleMediator) : MParticleKitInternal(){
     override fun logEvent(event: BaseEvent) {
         TODO("Not yet implemented")
     }

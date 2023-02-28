@@ -1,23 +1,22 @@
 package com.mparticle.modernization.identity
 
-import com.mparticle.MParticleOptions
 import com.mparticle.identity.IdentityApiRequest
+import com.mparticle.identity.IdentityApiResult
 import com.mparticle.identity.MParticleUser
-import com.mparticle.modernization.InternalIdentity
 import com.mparticle.modernization.MParticleCallback
 import com.mparticle.modernization.MParticleMediator
-import java.math.BigDecimal
 
-internal class MParticleFakeIdentityImpl(private val mediator : MParticleMediator) : InternalIdentity {
-    override fun identify(request: IdentityApiRequest, callback: IdentityCallback) {
+internal class MParticleFakeIdentityImpl(private val mediator : MParticleMediator) :
+    InternalIdentity {
+    override suspend fun identify(request: IdentityApiRequest): IdentityApiResult {
         TODO("Not yet implemented")
     }
 
-    override fun modify(request: IdentityApiRequest, callback: IdentityCallback) {
+    override suspend fun modify(request: IdentityApiRequest): IdentityApiResult {
         TODO("Not yet implemented")
     }
 
-    override fun logout(request: IdentityApiRequest, callback: IdentityCallback) {
+    override suspend fun logout(request: IdentityApiRequest): IdentityApiResult {
         TODO("Not yet implemented")
     }
 
@@ -25,7 +24,11 @@ internal class MParticleFakeIdentityImpl(private val mediator : MParticleMediato
         TODO("Not yet implemented")
     }
 
-    override fun login(request: IdentityApiRequest, callback: IdentityCallback) {
+    override suspend fun logout(): IdentityApiResult {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun login(request: IdentityApiRequest): IdentityApiResult {
         TODO("Not yet implemented")
     }
 
@@ -33,11 +36,23 @@ internal class MParticleFakeIdentityImpl(private val mediator : MParticleMediato
         TODO("Not yet implemented")
     }
 
+    override suspend fun login(): IdentityApiResult {
+        TODO("Not yet implemented")
+    }
+
     override fun getUser(mpId: Long?, callback: IdentityCallback) {
         TODO("Not yet implemented")
     }
 
+    override suspend fun getUser(mpId: Long): IdentityApiResult {
+        TODO("Not yet implemented")
+    }
+
     override fun getUsers(callback: MParticleCallback<List<MParticleUser>, Unit>) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getUsers(): List<MParticleUser> {
         TODO("Not yet implemented")
     }
 

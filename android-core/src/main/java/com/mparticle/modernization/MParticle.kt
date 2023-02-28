@@ -1,8 +1,10 @@
 package com.mparticle.modernization
 
 import com.mparticle.MParticleOptions
-import com.mparticle.internal.KitManager
+import com.mparticle.modernization.data_uploader.MParticleDataUploader
 import com.mparticle.modernization.event_logging.MParticleEventLogging
+import com.mparticle.modernization.identity.MParticleIdentity
+import com.mparticle.modernization.kit.MParticleKitManager
 
 class MParticle private constructor(private val options: MParticleOptions) {
     private var mediator: MParticleMediator = MParticleMediator()
@@ -13,14 +15,17 @@ class MParticle private constructor(private val options: MParticleOptions) {
 
     companion object {
         private var _instance: MParticle? = null
-        fun getInstance(): MParticle? = _instance
+
+        @Throws(MParticleInitializationException::class)
+        fun getInstance(): MParticle = _instance ?: throw MParticleInitializationException()
 
         fun start(options: MParticleOptions) {
             _instance = MParticle(options)
         }
     }
 
-    fun KitManager(): KitManager? = mediator.kitManager as KitManager?
+    fun KitManager(): MParticleKitManager? = mediator.kitManager as MParticleKitManager?
     fun Identity(): MParticleIdentity? = mediator.identity as MParticleIdentity?
     fun EventLogging(): MParticleEventLogging? = mediator.eventLogging
+    fun DataUploading() : MParticleDataUploader? = mediator.dataUploader
 }

@@ -3,12 +3,23 @@ package com.mparticle.modernization.kit
 import com.mparticle.BaseEvent
 import java.math.BigDecimal
 
-interface MParticleKit {
-    fun logEvent(event: BaseEvent)
-    fun leaveBreadcrumb(breadcrumb: String)
-    fun logError(message: String, params: Map<String, String>? = null)
-    fun logLtvIncrease(valueIncreased: BigDecimal, eventName: String? = null, params: Map<String, String>? = null)
-    fun logException(exception: Exception, message: String? = null, params: Map<String, String>? = null)
+abstract class MParticleKit {
+    open fun logEvent(event: BaseEvent) {}
+   open fun leaveBreadcrumb(breadcrumb: String) {}
+    open fun logError(message: String, params: Map<String, String>? = null) {}
+   open fun logLtvIncrease(
+        valueIncreased: BigDecimal,
+        eventName: String? = null,
+        params: Map<String, String>? = null
+    ) {
+    }
+
+    open fun logException(
+        exception: Exception,
+        message: String? = null,
+        params: Map<String, String>? = null
+    ) {
+    }
 }
 
-interface MParticleKitInternal : MParticleKit
+ abstract class MParticleKitInternal : MParticleKit()

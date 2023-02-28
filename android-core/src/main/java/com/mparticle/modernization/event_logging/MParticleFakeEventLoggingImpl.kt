@@ -8,7 +8,7 @@ import com.mparticle.modernization.identity.IdentityCallback
 import com.mparticle.modernization.kit.MParticleKit
 import java.math.BigDecimal
 
-internal class MParticleFakeEventLoggingImpl(private val mediator: MParticleMediator, ) : MParticleEventLogging {
+internal class MParticleFakeEventLoggingImpl(private val mediator: MParticleMediator ) : MParticleEventLogging {
 
     override fun logEvent(event: BaseEvent) {
         TODO("Not yet implemented")

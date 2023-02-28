@@ -1,4 +1,6 @@
 package com.mparticle.modernization.data_uploader
 
-class MParticleFakeDataUploadingImpl : MParticleDataUploading {
+import com.mparticle.modernization.MParticleMediator
+
+internal class MParticleFakeDataUploadingImpl(private val mediator : MParticleMediator) : MParticleDataUploader {
 }

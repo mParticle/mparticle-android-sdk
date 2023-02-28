@@ -1,8 +1,11 @@
 package com.mparticle.modernization
 
 import com.mparticle.MParticleOptions
+import com.mparticle.modernization.data_uploader.MParticleDataUploader
+import com.mparticle.modernization.data_uploader.MParticleFakeDataUploadingImpl
 import com.mparticle.modernization.event_logging.MParticleEventLogging
 import com.mparticle.modernization.event_logging.MParticleFakeEventLoggingImpl
+import com.mparticle.modernization.identity.InternalIdentity
 import com.mparticle.modernization.identity.MParticleFakeIdentityImpl
 import com.mparticle.modernization.kit.KitManagerInternal
 import com.mparticle.modernization.kit.MParticleKit
@@ -10,9 +13,10 @@ import com.mparticle.modernization.kit.MParticleKitManagerImpl
 import com.mparticle.modernization.kit.MpKit
 
 class MParticleMediator {
-    var eventLogging: MParticleEventLogging? = null
+    internal var eventLogging: MParticleEventLogging? = null
     internal var identity: InternalIdentity? = null
-    var kitManager: KitManagerInternal? = null
+    internal var kitManager: KitManagerInternal? = null
+    internal var dataUploader : MParticleDataUploader? = null
 
     private var kits: MutableList<MParticleKit> = mutableListOf()
 
@@ -21,6 +25,7 @@ class MParticleMediator {
         registerComponent(MParticleKitManagerImpl(kits))
         registerComponent(MParticleFakeIdentityImpl(this))
         registerComponent(MParticleFakeEventLoggingImpl(this))
+        registerComponent(MParticleFakeDataUploadingImpl(this))
     }
 
     private fun registerKits(options: MParticleOptions): MutableList<MParticleKit> =

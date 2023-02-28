@@ -6,7 +6,7 @@ import java.math.BigDecimal
 
 internal class MParticleKitManagerImpl(
     private val kits: MutableList<MParticleKit>
-) : KitManagerInternal {
+) : KitManagerInternal() {
 
     override fun logEvent(event: BaseEvent) {
         TODO("Not yet implemented")
