@@ -1,3 +1,15 @@
+## [5.50.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.49.2...v5.50.0) (2023-02-28)
+
+
+### Features
+
+* Fixing dependabot automerged dependencies ([#331](https://github.com/mParticle/mparticle-android-sdk/issues/331)) ([#334](https://github.com/mParticle/mparticle-android-sdk/issues/334)) ([33f29a6](https://github.com/mParticle/mparticle-android-sdk/commit/33f29a6056a3b9954a42ea068c786ae6aac9cdd5))
+
+
+### Updates & Maintenance
+
+* Update submodules ([312800e](https://github.com/mParticle/mparticle-android-sdk/commit/312800edd6a7587f017dd73f4242031ea53b6b80))
+
 ## [5.49.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.49.1...v5.49.2) (2023-02-14)
 
 
