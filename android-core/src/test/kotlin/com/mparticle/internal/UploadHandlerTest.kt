@@ -37,6 +37,7 @@ import java.util.concurrent.TimeUnit
 class UploadHandlerTest {
     private lateinit var handler: UploadHandler
     private lateinit var mConfigManager: ConfigManager
+
     @Before
     @Throws(Exception::class)
     fun setUp() {
@@ -46,7 +47,9 @@ class UploadHandlerTest {
         )
         mConfigManager = MParticle.getInstance()?.Internal()?.configManager!!
         handler = UploadHandler(
-            MockContext(), mConfigManager, stateManager,
+            MockContext(),
+            mConfigManager,
+            stateManager,
             Mockito.mock(
                 MessageManager::class.java
             ),
@@ -197,7 +200,8 @@ class UploadHandlerTest {
             Mockito.mock(ConfigManager::class.java),
             Mockito.mock(AppStateManager::class.java),
             Mockito.mock(MessageManager::class.java),
-            database, Mockito.mock(KitFrameworkWrapper::class.java)
+            database,
+            Mockito.mock(KitFrameworkWrapper::class.java)
         ) {
             override fun shouldDelete(statusCode: Int): Boolean {
                 return false
@@ -241,7 +245,8 @@ class UploadHandlerTest {
             Mockito.mock(ConfigManager::class.java),
             Mockito.mock(AppStateManager::class.java),
             Mockito.mock(MessageManager::class.java),
-            database, Mockito.mock(KitFrameworkWrapper::class.java)
+            database,
+            Mockito.mock(KitFrameworkWrapper::class.java)
         ) {
             override fun shouldDelete(statusCode: Int): Boolean {
                 return true

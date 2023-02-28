@@ -14,7 +14,8 @@ class NetworkOptionsTest {
                 .addCertificate("godaddy", random.getAlphaNumericString(24, 256))
                 .addCertificate(
                     Certificate.with(
-                        "random", random.getAlphaNumericString(24, 256)
+                        "random",
+                        random.getAlphaNumericString(24, 256)
                     )!!
                 ).build()
         ).addDomainMapping(
@@ -22,7 +23,8 @@ class NetworkOptionsTest {
                 .addCertificate("random1", random.getAlphaNumericString(24, 256))
                 .addCertificate(
                     Certificate.with(
-                        "random2", random.getAlphaNumericString(24, 256)
+                        "random2",
+                        random.getAlphaNumericString(24, 256)
                     )!!
                 ).addCertificate("random3", random.getAlphaNumericString(24, 256)).build()
         ).addDomainMapping(
@@ -60,7 +62,8 @@ class NetworkOptionsTest {
             if (domainMapping1.url == domainMapping2.url && domainMapping1.type == domainMapping2.type) {
                 for (i in domainMapping1.certificates.indices) {
                     if (!equals(
-                            domainMapping1.certificates[i], domainMapping2.certificates[i]
+                            domainMapping1.certificates[i],
+                            domainMapping2.certificates[i]
                         )
                     ) {
                         return false

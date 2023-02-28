@@ -16,6 +16,7 @@ import org.junit.Test
 
 class DataplanTest : BaseCleanInstallEachTest() {
     var testingUtils: TestingUtils = TestingUtils.getInstance()
+
     @Test
     @Throws(InterruptedException::class)
     fun noDataPlanTest() {

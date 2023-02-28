@@ -16,6 +16,7 @@ class MessageServiceTest : BaseMPServiceTest() {
     var mpid1 by Delegates.notNull<Long>()
     var mpid2 by Delegates.notNull<Long>()
     var mpid3 by Delegates.notNull<Long>()
+
     @Before
     @Throws(Exception::class)
     fun before() {
@@ -29,13 +30,18 @@ class MessageServiceTest : BaseMPServiceTest() {
     fun testMessagesForUploadByMpid() {
         for (i in 0..19) {
             MessageService.insertMessage(
-                database, "apiKey", mpMessage,
-                mpid1, null, null
+                database,
+                "apiKey",
+                mpMessage,
+                mpid1,
+                null,
+                null
             )
         }
         Assert.assertEquals(
             MessageService.getMessagesForUpload(
-                database, true,
+                database,
+                true,
                 mpid1
             ).size.toLong(),
             20
@@ -61,14 +67,16 @@ class MessageServiceTest : BaseMPServiceTest() {
         }
         Assert.assertEquals(
             MessageService.getMessagesForUpload(
-                database, true,
+                database,
+                true,
                 mpid1
             ).size.toLong(),
             20
         )
         Assert.assertEquals(
             MessageService.getMessagesForUpload(
-                database, true,
+                database,
+                true,
                 mpid2
             ).size.toLong(),
             0
@@ -84,20 +92,26 @@ class MessageServiceTest : BaseMPServiceTest() {
         Assert.assertEquals(MessageService.getMessagesForUpload(database).size.toLong(), 20)
         for (i in 0..34) {
             MessageService.insertMessage(
-                database, "apiKey", mpMessage,
-                mpid2, null, null
+                database,
+                "apiKey",
+                mpMessage,
+                mpid2,
+                null,
+                null
             )
         }
         Assert.assertEquals(
             MessageService.getMessagesForUpload(
-                database, true,
+                database,
+                true,
                 mpid1
             ).size.toLong(),
             20
         )
         Assert.assertEquals(
             MessageService.getMessagesForUpload(
-                database, true,
+                database,
+                true,
                 mpid2
             ).size.toLong(),
             35
@@ -117,14 +131,16 @@ class MessageServiceTest : BaseMPServiceTest() {
         )
         Assert.assertEquals(
             MessageService.getMessagesForUpload(
-                database, true,
+                database,
+                true,
                 mpid1
             ).size.toLong(),
             0
         )
         Assert.assertEquals(
             MessageService.getMessagesForUpload(
-                database, true,
+                database,
+                true,
                 mpid2
             ).size.toLong(),
             0
@@ -147,8 +163,12 @@ class MessageServiceTest : BaseMPServiceTest() {
         val previousSession = UUID.randomUUID().toString()
         for (i in 0..19) {
             MessageService.insertMessage(
-                database, "apiKey", getMpMessage(currentSession),
-                mpid1, null, null
+                database,
+                "apiKey",
+                getMpMessage(currentSession),
+                mpid1,
+                null,
+                null
             )
         }
         for (i in 0..29) {
@@ -163,8 +183,12 @@ class MessageServiceTest : BaseMPServiceTest() {
         }
         for (i in 0..34) {
             MessageService.insertMessage(
-                database, "apiKey", getMpMessage(currentSession),
-                mpid2, null, null
+                database,
+                "apiKey",
+                getMpMessage(currentSession),
+                mpid2,
+                null,
+                null
             )
         }
         Assert.assertEquals(
@@ -180,21 +204,27 @@ class MessageServiceTest : BaseMPServiceTest() {
         )
         Assert.assertEquals(
             MessageService.getSessionHistory(
-                database, previousSession, true,
+                database,
+                previousSession,
+                true,
                 mpid1
             ).size.toLong(),
             20
         )
         Assert.assertEquals(
             MessageService.getSessionHistory(
-                database, previousSession, true,
+                database,
+                previousSession,
+                true,
                 mpid2
             ).size.toLong(),
             35
         )
         Assert.assertEquals(
             MessageService.getSessionHistory(
-                database, previousSession, false,
+                database,
+                previousSession,
+                false,
                 mpid1
             ).size.toLong(),
             35
@@ -224,8 +254,12 @@ class MessageServiceTest : BaseMPServiceTest() {
             testMessage = getMpMessage(currentSession, testMpid)
             testMessages[testMessage.toString()] = testMessage
             MessageService.insertMessage(
-                database, "apiKey", testMessage,
-                testMpid, null, null
+                database,
+                "apiKey",
+                testMessage,
+                testMpid,
+                null,
+                null
             )
         }
         Assert.assertEquals(

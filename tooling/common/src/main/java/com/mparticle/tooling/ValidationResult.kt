@@ -10,7 +10,6 @@ data class ValidationResult(val eventType: String? = null, val data: ValidationR
 
         fun from(json: String?, arguments: List<String>): List<ValidationResult>? {
             return try {
-
                 val jsonArray = JSONObject(json).getJSONArray("results")
                 from(jsonArray, arguments)
             } catch (jse: JSONException) {

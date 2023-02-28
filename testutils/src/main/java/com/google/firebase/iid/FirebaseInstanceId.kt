@@ -9,6 +9,7 @@ class FirebaseInstanceId {
     companion object {
         @JvmStatic
         fun getInstance() = FirebaseInstanceId()
+
         @JvmStatic
         fun setToken(token: String?) {
             FirebaseInstanceIdToken.token = token
