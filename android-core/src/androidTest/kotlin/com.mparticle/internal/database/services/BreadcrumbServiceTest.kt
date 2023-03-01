@@ -72,7 +72,8 @@ class BreadcrumbServiceTest : BaseMPServiceTest() {
             expectedCount.toLong()
         )
         Assert.assertEquals(
-            BreadcrumbService.getBreadcrumbs(database, mContext, 2L).length().toLong(), 0
+            BreadcrumbService.getBreadcrumbs(database, mContext, 2L).length().toLong(),
+            0
         )
         for (i in 0 until expectedCount - 1) {
             BreadcrumbService.insertBreadcrumb(database, mContext, message, "apiKey", 2L)
@@ -86,7 +87,8 @@ class BreadcrumbServiceTest : BaseMPServiceTest() {
             (expectedCount - 1).toLong()
         )
         Assert.assertEquals(
-            BreadcrumbService.getBreadcrumbs(database, mContext, 3L).length().toLong(), 0
+            BreadcrumbService.getBreadcrumbs(database, mContext, 3L).length().toLong(),
+            0
         )
     }
 

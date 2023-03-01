@@ -72,7 +72,6 @@ class UpgradeVersionTest : BaseTableTest() {
     @Test
     @Throws(InterruptedException::class, JSONException::class)
     fun testDowngradeTable() {
-
         // Open database and insert some values
         var baseDatabase = TestSQLiteOpenHelper(helper, DB_NAME, Int.MAX_VALUE)
         baseDatabase.onCreateLatch.await()

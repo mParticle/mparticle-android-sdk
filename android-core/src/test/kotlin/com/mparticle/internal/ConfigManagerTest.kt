@@ -24,6 +24,7 @@ class ConfigManagerTest {
     lateinit var mockMp: MParticle
     private val ran = Random()
     private val randomUtils = RandomUtils()
+
     @Before
     @Throws(Exception::class)
     fun setUp() {
@@ -412,7 +413,8 @@ class ConfigManagerTest {
         Assert.assertEquals(
             "{\"1\":{\"test-key\":\"value 2\"},\"12\":{\"test-key\":\"value 3\"}}",
             ConfigManager.sPreferences.getString(
-                ATTRIBUTES, null
+                ATTRIBUTES,
+                null
             )
         )
     }

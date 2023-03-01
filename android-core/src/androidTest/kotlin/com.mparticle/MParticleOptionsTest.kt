@@ -355,14 +355,16 @@ class MParticleOptionsTest : BaseAbstractTest() {
         // default upload interval for production
         startMParticle()
         Assert.assertEquals(
-            MParticle.getInstance()?.mInternal?.configManager?.uploadInterval, 10000L
+            MParticle.getInstance()?.mInternal?.configManager?.uploadInterval,
+            10000L
         )
         MParticle.setInstance(null)
 
         // default upload interval for production
         startMParticle(MParticleOptions.builder(mProductionContext))
         Assert.assertEquals(
-            MParticle.getInstance()?.mInternal?.configManager?.uploadInterval, 600000L
+            MParticle.getInstance()?.mInternal?.configManager?.uploadInterval,
+            600000L
         )
         MParticle.setInstance(null)
         startMParticle(
@@ -370,7 +372,8 @@ class MParticleOptionsTest : BaseAbstractTest() {
                 .uploadInterval(123)
         )
         Assert.assertEquals(
-            MParticle.getInstance()?.mInternal?.configManager?.uploadInterval, 123000L
+            MParticle.getInstance()?.mInternal?.configManager?.uploadInterval,
+            123000L
         )
         MParticle.setInstance(null)
         startMParticle(
@@ -378,7 +381,8 @@ class MParticleOptionsTest : BaseAbstractTest() {
                 .uploadInterval(-123)
         )
         Assert.assertEquals(
-            MParticle.getInstance()?.mInternal?.configManager?.uploadInterval, 600000L
+            MParticle.getInstance()?.mInternal?.configManager?.uploadInterval,
+            600000L
         )
         MParticle.setInstance(null)
     }
@@ -501,7 +505,8 @@ class MParticleOptionsTest : BaseAbstractTest() {
                 .identityConnectionTimeout(123)
         )
         Assert.assertEquals(
-            MParticle.getInstance()?.mInternal?.configManager?.identityConnectionTimeout, 123000
+            MParticle.getInstance()?.mInternal?.configManager?.identityConnectionTimeout,
+            123000
         )
         Assert.assertEquals(
             MParticle.getInstance()?.mInternal?.configManager?.connectionTimeout,

@@ -120,7 +120,6 @@ class MParticleDBManagerTest : BaseCleanInstallEachTest() {
                 userAttributeLists: Map<String, List<String?>?>,
                 mpid: Long
             ) {
-
                 callbackThread.value = Thread.currentThread()
                 latch.value.countDown()
             }

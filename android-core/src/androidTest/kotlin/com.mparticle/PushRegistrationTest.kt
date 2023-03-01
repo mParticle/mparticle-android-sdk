@@ -46,7 +46,8 @@ class PushRegistrationTest : BaseCleanStartedEachTest() {
     @Test
     fun testPushRegistrationSet() {
         Assert.assertEquals(
-            mStartingMpid.toLong(), MParticle.getInstance()?.Identity()?.currentUser?.id
+            mStartingMpid.toLong(),
+            MParticle.getInstance()?.Identity()?.currentUser?.id
         )
         for (setPush in setPushes) {
             val pushRegistration = PushRegistration(

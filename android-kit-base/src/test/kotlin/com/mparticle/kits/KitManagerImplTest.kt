@@ -28,6 +28,7 @@ import java.util.LinkedList
 class KitManagerImplTest {
     var mparticle: MParticle? = null
     var mockIdentity: IdentityApi? = null
+
     @Before
     fun before() {
         mockIdentity = Mockito.mock(IdentityApi::class.java)
