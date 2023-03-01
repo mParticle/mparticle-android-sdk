@@ -1,16 +1,19 @@
-package com.mparticle.modernization.kit
+package com.mparticle.modernization.event_logging.example_impl
 
 import com.mparticle.BaseEvent
-import com.mparticle.modernization.MParticleMediator
+import com.mparticle.modernization.core.MParticleMediator
+import com.mparticle.modernization.event_logging.MParticleEventLogging
 import java.math.BigDecimal
 
- class MpKit(private val mediator: MParticleMediator) : MParticleKitInternal(){
+internal class MParticleEventLoggingImpl(private val mediator: MParticleMediator) :
+    MParticleEventLogging {
+
     override fun logEvent(event: BaseEvent) {
         TODO("Not yet implemented")
     }
 
     override fun leaveBreadcrumb(breadcrumb: String) {
-        TODO("Not yet implemented")
+        mediator.kitManager?.leaveBreadcrumb(breadcrumb)
     }
 
     override fun logError(message: String, params: Map<String, String>?) {

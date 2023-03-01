@@ -1,4 +1,4 @@
-package com.mparticle.modernization
+package com.mparticle.modernization.core
 
 import com.mparticle.MParticleOptions
 import com.mparticle.modernization.data_uploader.MParticleDataUploader
@@ -27,5 +27,5 @@ class MParticle private constructor(private val options: MParticleOptions) {
     fun KitManager(): MParticleKitManager? = mediator.kitManager as MParticleKitManager?
     fun Identity(): MParticleIdentity? = mediator.identity as MParticleIdentity?
     fun EventLogging(): MParticleEventLogging? = mediator.eventLogging
-    fun DataUploading() : MParticleDataUploader? = mediator.dataUploader
+    fun DataUploading(): MParticleDataUploader? = mediator.dataUploader
 }

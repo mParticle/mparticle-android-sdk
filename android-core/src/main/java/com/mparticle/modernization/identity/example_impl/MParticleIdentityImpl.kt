@@ -1,12 +1,14 @@
-package com.mparticle.modernization.identity
+package com.mparticle.modernization.identity.example_impl
 
 import com.mparticle.identity.IdentityApiRequest
 import com.mparticle.identity.IdentityApiResult
 import com.mparticle.identity.MParticleUser
 import com.mparticle.modernization.MParticleCallback
-import com.mparticle.modernization.MParticleMediator
+import com.mparticle.modernization.core.MParticleMediator
+import com.mparticle.modernization.identity.IdentityCallback
+import com.mparticle.modernization.identity.InternalIdentity
 
-internal class MParticleFakeIdentityImpl(private val mediator : MParticleMediator) :
+internal class MParticleIdentityImpl(private val mediator: MParticleMediator) :
     InternalIdentity {
     override suspend fun identify(request: IdentityApiRequest): IdentityApiResult {
         TODO("Not yet implemented")
@@ -44,7 +46,7 @@ internal class MParticleFakeIdentityImpl(private val mediator : MParticleMediato
         TODO("Not yet implemented")
     }
 
-    override suspend fun getUser(mpId: Long): IdentityApiResult {
+    override suspend fun getUser(mpId: Long?): IdentityApiResult {
         TODO("Not yet implemented")
     }
 
