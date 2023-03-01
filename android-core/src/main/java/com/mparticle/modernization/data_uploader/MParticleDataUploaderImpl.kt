@@ -1,7 +1,7 @@
 package com.mparticle.modernization.data_uploader
 
-import com.mparticle.modernization.core.MParticleMediator
 import com.mparticle.modernization.config.UploadingConfiguration
+import com.mparticle.modernization.core.MParticleMediator
 import com.mparticle.modernization.launch
 
 internal class MParticleDataUploaderImpl(
@@ -18,10 +18,9 @@ internal class MParticleDataUploaderImpl(
     }
 
     override suspend fun configure() {
-        //setup uploading every X based on uploadingConfiguration rules and server settings we might inject
+        // setup uploading every X based on uploadingConfiguration rules and server settings we might inject
     }
 
     private fun Int.getStrategy(): MParticleUploadingStrategy? =
         strategies.firstOrNull { it.type() == this }
-
 }

@@ -18,10 +18,10 @@ class MParticleBreadcrumbUploading(private val dataRepository: MParticleDataRepo
                 it.addBreadcurmbData()?.let { insertBreadcrumb(it) }
             }
         }
-        if(immediateUpload){ sendData()}
+        if (immediateUpload) { sendData() }
     }
 
-    private suspend fun sendData(){}
+    private suspend fun sendData() {}
 
     private fun BaseMPMessage?.addBreadcurmbData(): BaseMPMessage? = null
     private fun Any.convert(): BaseMPMessage? {

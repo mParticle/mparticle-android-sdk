@@ -57,5 +57,4 @@ internal class MParticleIdentityImpl(private val mediator: MParticleMediator) :
     override suspend fun getUsers(): List<MParticleUser> {
         TODO("Not yet implemented")
     }
-
 }

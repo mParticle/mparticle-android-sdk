@@ -13,12 +13,13 @@ interface MParticleDataUploader : MParticleComponent {
      * default this is false
      */
     suspend fun upload(
-        @NotNull data: Any, @NotNull type: Int, @NotNull immediateUpload: Boolean = false
+        @NotNull data: Any,
+        @NotNull type: Int,
+        @NotNull immediateUpload: Boolean = false
     )
 
     /**
      * Trigger data uploader configuration. Called on DataUploader initialization
      */
     suspend fun configure() {}
-
 }

@@ -8,5 +8,4 @@ class XKit(private val mediator: MParticleMediator) : MParticleKitInternal() {
     override fun logEvent(event: BaseEvent) {
         TODO("Not yet implemented")
     }
-
 }

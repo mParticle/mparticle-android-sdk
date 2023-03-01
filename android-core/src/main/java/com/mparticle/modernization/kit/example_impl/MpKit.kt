@@ -12,5 +12,4 @@ class MpKit(private val mediator: MParticleMediator) : MParticleKitInternal() {
             mediator.dataUploader?.upload(breadcrumb, MParticleUploaderTypes.BREADCRUMB.type)
         }
     }
-
 }
