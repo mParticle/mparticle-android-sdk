@@ -1,4 +1,4 @@
-package com.mparticle.modernization.kit.example_impl
+package com.mparticle.modernization.kit.example
 
 import android.util.Log
 import com.mparticle.BaseEvent

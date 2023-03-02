@@ -1,4 +1,4 @@
-package com.mparticle.modernization.data_uploader.example_impl
+package com.mparticle.modernization.uploading.example
 
 enum class MParticleUploaderTypes(val type: Int) {
     EVENT(1), BREADCRUMB(2), DEFAULT(-1);

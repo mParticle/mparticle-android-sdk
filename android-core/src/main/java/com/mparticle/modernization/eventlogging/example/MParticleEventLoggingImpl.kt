@@ -1,8 +1,8 @@
-package com.mparticle.modernization.event_logging.example_impl
+package com.mparticle.modernization.eventlogging.example
 
 import com.mparticle.BaseEvent
 import com.mparticle.modernization.core.MParticleMediator
-import com.mparticle.modernization.event_logging.MParticleEventLogging
+import com.mparticle.modernization.eventlogging.MParticleEventLogging
 import java.math.BigDecimal
 
 internal class MParticleEventLoggingImpl(private val mediator: MParticleMediator) :

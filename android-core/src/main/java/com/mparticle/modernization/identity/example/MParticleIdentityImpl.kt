@@ -1,4 +1,4 @@
-package com.mparticle.modernization.identity.example_impl
+package com.mparticle.modernization.identity.example
 
 import com.mparticle.identity.IdentityApiRequest
 import com.mparticle.identity.IdentityApiResult

@@ -1,4 +1,4 @@
-package com.mparticle.modernization.data_uploader
+package com.mparticle.modernization.uploading
 
 import com.mparticle.modernization.core.MParticleComponent
 import org.jetbrains.annotations.NotNull

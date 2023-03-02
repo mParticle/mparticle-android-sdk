@@ -1,4 +1,4 @@
-package com.mparticle.modernization.event_logging
+package com.mparticle.modernization.eventlogging
 
 import com.mparticle.BaseEvent
 import com.mparticle.modernization.core.MParticleComponent

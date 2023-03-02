@@ -1,7 +1,7 @@
 package com.mparticle.modernization.kit
 
 import com.mparticle.BaseEvent
-import com.mparticle.modernization.event_logging.MParticleEventLogging
+import com.mparticle.modernization.eventlogging.MParticleEventLogging
 import java.math.BigDecimal
 
 abstract class MParticleKit : MParticleEventLogging {

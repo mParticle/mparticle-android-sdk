@@ -1,9 +1,9 @@
-package com.mparticle.modernization.data_uploader.example_impl
+package com.mparticle.modernization.uploading.example
 
 import com.mparticle.internal.messages.BaseMPMessage
 import com.mparticle.modernization.config.UploadingConfiguration
 import com.mparticle.modernization.data.MParticleDataRepository
-import com.mparticle.modernization.data_uploader.MParticleUploadingStrategy
+import com.mparticle.modernization.uploading.MParticleUploadingStrategy
 
 class MParticleBreadcrumbUploading(private val dataRepository: MParticleDataRepository) :
     MParticleUploadingStrategy {

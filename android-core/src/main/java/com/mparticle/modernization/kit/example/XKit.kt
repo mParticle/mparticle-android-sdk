@@ -1,4 +1,4 @@
-package com.mparticle.modernization.kit.example_impl
+package com.mparticle.modernization.kit.example
 
 import com.mparticle.BaseEvent
 import com.mparticle.modernization.core.MParticleMediator

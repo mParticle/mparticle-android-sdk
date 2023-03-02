@@ -1,10 +1,10 @@
 package com.mparticle.modernization.core
 
 import com.mparticle.MParticleOptions
-import com.mparticle.modernization.data_uploader.MParticleDataUploader
-import com.mparticle.modernization.event_logging.MParticleEventLogging
+import com.mparticle.modernization.eventlogging.MParticleEventLogging
 import com.mparticle.modernization.identity.MParticleIdentity
 import com.mparticle.modernization.kit.MParticleKitManager
+import com.mparticle.modernization.uploading.MParticleDataUploader
 
 class MParticle private constructor(private val options: MParticleOptions) {
     private var mediator: MParticleMediator = MParticleMediator()

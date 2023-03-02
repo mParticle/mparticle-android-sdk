@@ -1,17 +1,17 @@
 package com.mparticle.modernization.core
 
 import com.mparticle.MParticleOptions
-import com.mparticle.modernization.data_uploader.MParticleDataUploader
-import com.mparticle.modernization.data_uploader.MParticleDataUploaderImpl
-import com.mparticle.modernization.data_uploader.MParticleUploadingStrategy
-import com.mparticle.modernization.event_logging.MParticleEventLogging
-import com.mparticle.modernization.event_logging.example_impl.MParticleEventLoggingImpl
+import com.mparticle.modernization.eventlogging.MParticleEventLogging
+import com.mparticle.modernization.eventlogging.example.MParticleEventLoggingImpl
 import com.mparticle.modernization.identity.InternalIdentity
-import com.mparticle.modernization.identity.example_impl.MParticleIdentityImpl
+import com.mparticle.modernization.identity.example.MParticleIdentityImpl
 import com.mparticle.modernization.kit.KitManagerInternal
 import com.mparticle.modernization.kit.MParticleKit
 import com.mparticle.modernization.kit.MParticleKitManagerImpl
-import com.mparticle.modernization.kit.example_impl.MpKit
+import com.mparticle.modernization.kit.example.MpKit
+import com.mparticle.modernization.uploading.MParticleDataUploader
+import com.mparticle.modernization.uploading.MParticleDataUploaderImpl
+import com.mparticle.modernization.uploading.MParticleUploadingStrategy
 import kotlinx.coroutines.CloseableCoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob

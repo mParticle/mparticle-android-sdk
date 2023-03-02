@@ -1,4 +1,4 @@
-package com.mparticle.modernization.data_uploader
+package com.mparticle.modernization.uploading
 
 import com.mparticle.modernization.config.UploadingConfiguration
 import com.mparticle.modernization.core.MParticleMediator
