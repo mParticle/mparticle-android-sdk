@@ -8,7 +8,7 @@ import com.mparticle.modernization.core.MParticleComponent
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 
-interface MParticleIdentity : MParticleComponent {
+internal interface MParticleIdentity : MParticleComponent {
 
     /**
      * Login
@@ -91,4 +91,4 @@ internal interface InternalIdentity : MParticleIdentity {
     suspend fun login(@NotNull request: IdentityApiRequest): IdentityApiResult
 }
 
-interface IdentityListener
+internal interface IdentityListener

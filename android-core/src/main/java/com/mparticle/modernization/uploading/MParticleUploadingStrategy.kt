@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable
 /**
  * Data uploading strategies for different data types
  */
-interface MParticleUploadingStrategy {
+internal interface MParticleUploadingStrategy {
     /** Upload set of data
      *
      * @param data any type of data to upload

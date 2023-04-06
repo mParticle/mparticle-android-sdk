@@ -5,7 +5,7 @@ import com.mparticle.modernization.kit.MParticleKitInternal
 import com.mparticle.modernization.launch
 import com.mparticle.modernization.uploading.example.MParticleUploaderTypes
 
-class MpKit(private val mediator: MParticleMediator) : MParticleKitInternal() {
+internal class MpKit(private val mediator: MParticleMediator) : MParticleKitInternal() {
 
     override fun leaveBreadcrumb(breadcrumb: String) {
         mediator.launch {

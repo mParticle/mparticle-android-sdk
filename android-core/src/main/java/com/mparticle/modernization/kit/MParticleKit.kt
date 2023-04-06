@@ -4,7 +4,7 @@ import com.mparticle.BaseEvent
 import com.mparticle.modernization.eventlogging.MParticleEventLogging
 import java.math.BigDecimal
 
-abstract class MParticleKit : MParticleEventLogging {
+internal abstract class MParticleKit : MParticleEventLogging {
 
     override fun logEvent(event: BaseEvent) {
     }
@@ -30,4 +30,4 @@ abstract class MParticleKit : MParticleEventLogging {
     }
 }
 
-abstract class MParticleKitInternal : MParticleKit()
+internal abstract class MParticleKitInternal : MParticleKit()

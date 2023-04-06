@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import java.math.BigDecimal
 
-interface MParticleEventLogging : MParticleComponent {
+internal interface MParticleEventLogging : MParticleComponent {
     // All common, commerce, screen, pushRegistration, notification, notificationOpened and NetworkPerformance events should be logged with the same function
     /**
      * Log an event - TODO review EventBuilder to be able to build all type of events

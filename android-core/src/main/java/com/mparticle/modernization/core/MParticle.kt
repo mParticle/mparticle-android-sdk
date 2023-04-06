@@ -6,7 +6,7 @@ import com.mparticle.modernization.identity.MParticleIdentity
 import com.mparticle.modernization.kit.MParticleKitManager
 import com.mparticle.modernization.uploading.MParticleDataUploader
 
-class MParticle private constructor(private val options: MParticleOptions) {
+internal class MParticle private constructor(private val options: MParticleOptions) {
     private var mediator: MParticleMediator = MParticleMediator()
 
     init {

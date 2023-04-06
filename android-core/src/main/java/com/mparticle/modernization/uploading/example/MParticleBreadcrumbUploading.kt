@@ -5,7 +5,7 @@ import com.mparticle.modernization.config.UploadingConfiguration
 import com.mparticle.modernization.data.MParticleDataRepository
 import com.mparticle.modernization.uploading.MParticleUploadingStrategy
 
-class MParticleBreadcrumbUploading(private val dataRepository: MParticleDataRepository) :
+internal class MParticleBreadcrumbUploading(private val dataRepository: MParticleDataRepository) :
     MParticleUploadingStrategy {
     override suspend fun upload(
         data: Any,

@@ -1,3 +1,3 @@
 package com.mparticle.modernization.core
 
-interface MParticleComponent
+internal interface MParticleComponent

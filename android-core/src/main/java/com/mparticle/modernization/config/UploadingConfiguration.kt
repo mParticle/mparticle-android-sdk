@@ -1,3 +1,3 @@
 package com.mparticle.modernization.config
 
-interface UploadingConfiguration
+internal interface UploadingConfiguration

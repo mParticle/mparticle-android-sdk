@@ -18,7 +18,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.asCoroutineDispatcher
 import java.util.concurrent.Executors
 
-class MParticleMediator {
+internal class MParticleMediator {
     internal var eventLogging: MParticleEventLogging? = null
     internal var identity: InternalIdentity? = null
     internal var kitManager: KitManagerInternal? = null

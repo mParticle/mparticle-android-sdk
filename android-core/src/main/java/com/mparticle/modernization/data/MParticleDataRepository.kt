@@ -2,7 +2,7 @@ package com.mparticle.modernization.data
 
 import com.mparticle.internal.messages.BaseMPMessage
 
-class MParticleDataRepository {
+internal class MParticleDataRepository {
 
     suspend fun updateSession(data: BaseMPMessage) {}
 

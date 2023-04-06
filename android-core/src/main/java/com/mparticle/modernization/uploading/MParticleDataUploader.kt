@@ -3,7 +3,7 @@ package com.mparticle.modernization.uploading
 import com.mparticle.modernization.core.MParticleComponent
 import org.jetbrains.annotations.NotNull
 
-interface MParticleDataUploader : MParticleComponent {
+internal interface MParticleDataUploader : MParticleComponent {
     /**
      * Upload set of data using provided strategies. Decision made base on [type]
      *

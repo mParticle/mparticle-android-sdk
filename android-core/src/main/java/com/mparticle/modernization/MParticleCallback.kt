@@ -1,6 +1,6 @@
 package com.mparticle.modernization
 
-abstract class MParticleCallback<S, E> {
+internal abstract class MParticleCallback<S, E> {
     var isSuccessFul: Boolean = false
     var isCompleted: Boolean = false
 
