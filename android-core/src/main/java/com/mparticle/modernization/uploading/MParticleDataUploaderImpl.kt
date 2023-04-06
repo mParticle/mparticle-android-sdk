@@ -4,10 +4,10 @@ import com.mparticle.modernization.config.UploadingConfiguration
 import com.mparticle.modernization.core.MParticleMediator
 import com.mparticle.modernization.launch
 
- internal class MParticleDataUploaderImpl(
-     private val mediator: MParticleMediator,
-     private val strategies: List<MParticleUploadingStrategy>,
-     private val uploadingConfiguration: UploadingConfiguration? = null
+internal class MParticleDataUploaderImpl(
+    private val mediator: MParticleMediator,
+    private val strategies: List<MParticleUploadingStrategy>,
+    private val uploadingConfiguration: UploadingConfiguration? = null
 ) : MParticleDataUploader {
     init {
         mediator.launch { configure() }
