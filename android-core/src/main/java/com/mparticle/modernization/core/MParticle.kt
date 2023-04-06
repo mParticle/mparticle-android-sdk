@@ -16,8 +16,8 @@ internal class MParticle private constructor(private val options: MParticleOptio
     companion object {
         private var _instance: MParticle? = null
 
-        @Throws(MParticleInitializationException::class)
-        fun getInstance(): MParticle = _instance ?: throw MParticleInitializationException()
+        @Throws(Exception::class)
+        fun getInstance(): MParticle = _instance ?: throw Exception("MParticle must be started before getting the instance")
 
         fun start(options: MParticleOptions) {
             _instance = MParticle(options)

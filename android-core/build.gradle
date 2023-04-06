@@ -112,7 +112,8 @@ task coreSdkJavadocs(type: Javadoc) {
         exclude {
             String filePath = it.toString()
             filePath.contains('/com/mparticle/internal/') ||
-                    filePath.contains('/com/mparticle/kits/')
+                    filePath.contains('/com/mparticle/kits/') ||
+                    filePath.contains('/com/mparticle/modernization/')
         }
     }
 }
