@@ -1,13 +1,14 @@
 package com.mparticle.modernization.core
 
 import com.mparticle.MParticleOptions
+import com.mparticle.modernization.data.MParticleDataRepository
 import com.mparticle.modernization.eventlogging.MParticleEventLogging
 import com.mparticle.modernization.identity.MParticleIdentity
 import com.mparticle.modernization.kit.MParticleKitManager
-import com.mparticle.modernization.uploading.MParticleDataUploader
+import com.mparticle.modernization.datahandler.MParticleDataHandler
 
 internal class MParticle private constructor(private val options: MParticleOptions) {
-    private var mediator: MParticleMediator = MParticleMediator()
+    private var mediator: MParticleMediator = MParticleMediator(MParticleDataRepository())
 
     init {
         mediator.configure(options)
@@ -27,5 +28,4 @@ internal class MParticle private constructor(private val options: MParticleOptio
     fun KitManager(): MParticleKitManager? = mediator.kitManager as MParticleKitManager?
     fun Identity(): MParticleIdentity? = mediator.identity as MParticleIdentity?
     fun EventLogging(): MParticleEventLogging? = mediator.eventLogging
-    fun DataUploading(): MParticleDataUploader? = mediator.dataUploader
 }

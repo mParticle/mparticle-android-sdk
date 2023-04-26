@@ -8,6 +8,10 @@ import com.mparticle.modernization.core.MParticleMediator
 import com.mparticle.modernization.identity.IdentityCallback
 import com.mparticle.modernization.identity.InternalIdentity
 
+/**
+ * I would recomend using two implementations coroutine/callbacks, being the coroutine one the internal.
+ * The one with callback could use the coroutine implementation.
+ */
 internal class MParticleIdentityImpl(private val mediator: MParticleMediator) :
     InternalIdentity {
     override suspend fun identify(request: IdentityApiRequest): IdentityApiResult {

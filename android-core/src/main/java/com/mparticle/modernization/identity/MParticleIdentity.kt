@@ -91,4 +91,3 @@ internal interface InternalIdentity : MParticleIdentity {
     suspend fun login(@NotNull request: IdentityApiRequest): IdentityApiResult
 }
 
-internal interface IdentityListener
