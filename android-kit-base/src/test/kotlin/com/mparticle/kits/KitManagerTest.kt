@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Looper
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
+import com.mparticle.MParticleOptions
 import com.mparticle.internal.ConfigManager
 import com.mparticle.internal.KitManager.KitStatus
 import com.mparticle.mock.MockContext
@@ -36,7 +37,7 @@ class KitManagerTest {
         MParticle.setInstance(mockMp)
         manager = MockKitManagerImpl(MockContext(), null, MockCoreCallbacks())
         Assert.assertNotNull(manager.providers)
-        val mockKitFactory = MockKitIntegrationFactory()
+        val mockKitFactory = MockKitIntegrationFactory(MParticleOptions.builder(MockContext()).build())
         manager.setKitFactory(mockKitFactory)
     }
 
