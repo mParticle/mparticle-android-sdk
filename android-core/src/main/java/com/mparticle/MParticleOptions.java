@@ -54,6 +54,7 @@ public class MParticleOptions {
     private MParticle.OperatingSystem mOperatingSystem = MParticle.OperatingSystem.ANDROID;
     private DataplanOptions mDataplanOptions;
     private Map<Class, List<Configuration>> mConfigurations = new HashMap();
+    private Map<Integer, Object> localKits = new HashMap<>();
 
     private MParticleOptions() {
     }
@@ -145,6 +146,7 @@ public class MParticleOptions {
         this.mDataplanVersion = builder.dataplanVersion;
         this.mDataplanOptions = builder.dataplanOptions;
         this.mConfigurations = builder.configurations;
+        this.localKits = builder.localKits;
     }
 
     /**
@@ -177,6 +179,16 @@ public class MParticleOptions {
     @NonNull
     public MParticle.Environment getEnvironment() {
         return mEnvironment;
+    }
+
+    /**
+     * Get list of local kits
+     *
+     * @return
+     */
+    @NonNull
+    public Map<Integer, Object> getLocalKits() {
+        return localKits;
     }
 
     /**
@@ -387,6 +399,7 @@ public class MParticleOptions {
         private DataplanOptions dataplanOptions;
         private Map<Class, List<Configuration>> configurations = new HashMap();
         private boolean isAppDebuggable;
+        private Map<Integer, Object> localKits = new HashMap<>();
 
         private Builder(Context context) {
             this.context = context;
@@ -419,6 +432,17 @@ public class MParticleOptions {
         public Builder installType(@NonNull MParticle.InstallType installType) {
             this.installType = installType;
             return this;
+        }
+
+        /**
+         * Add local kits
+         * @param kits
+         * @return
+         */
+        @NonNull
+        public Builder localKits(@NonNull Map<Integer, Object> kits) {
+            this.localKits = kits;
+            return  this;
         }
 
         /**

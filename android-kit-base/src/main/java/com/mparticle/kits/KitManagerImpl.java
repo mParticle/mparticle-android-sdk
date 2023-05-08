@@ -84,7 +84,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         mContext = context;
         mReportingManager = reportingManager;
         mCoreCallbacks = coreCallbacks;
-        mKitIntegrationFactory = new KitIntegrationFactory();
+        mKitIntegrationFactory = new KitIntegrationFactory(options);
         MParticle instance = MParticle.getInstance();
         if (instance != null) {
             instance.Identity().addIdentityStateListener(this);
@@ -1404,6 +1404,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     Logger.error("Exception while starting kit: " + kitId + ": " + e.getMessage());
                 }
             }
+        }
+        for(Map.Entry<Integer, LocalKit> entry : mKitIntegrationFactory.localKits.entrySet()){
+            configurations.add(entry.getValue().getConfiguration());
         }
         return configurations;
     }
