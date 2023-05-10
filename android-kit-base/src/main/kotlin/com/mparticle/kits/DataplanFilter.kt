@@ -101,7 +101,7 @@ Data Plan parsed for Kit Filtering:
                 if (event is CommerceEvent) {
                     val productActionDatapoint = dataPoints["$dataPointKey.$PRODUCT_ACTION_PRODUCTS"]
                     event.products?.iterator()?.forEach { product ->
-                        product?.customAttributes?.apply {
+                        product?.customAttributes?.toMutableMap()?.apply {
                             val filteredAttributes = filterKeys {
                                 productActionDatapoint?.contains(it) ?: true
                             }
@@ -113,7 +113,7 @@ Data Plan parsed for Kit Filtering:
                     if ((event.impressions?.size ?: 0) > 0) {
                         event.impressions?.iterator()?.forEach {
                             it.products.forEach { product ->
-                                product?.customAttributes?.apply {
+                                product?.customAttributes?.toMutableMap()?.apply {
                                     val filteredAttributes = filterKeys {
                                         productImpressionDatapoint?.contains(it) ?: true
                                     }
