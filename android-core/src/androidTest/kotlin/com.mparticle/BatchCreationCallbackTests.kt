@@ -52,6 +52,29 @@ class BatchCreationCallbackTests : BaseCleanInstallEachTest() {
     }
 
     @Test
+    fun testNullBatchCreationListener() {
+        val options = MParticleOptions.builder(mContext)
+            .batchCreationListener(null)
+        startMParticle(options)
+        val targetEventName = "should send"
+
+        MParticle.getInstance()?.apply {
+            logEvent(MPEvent.Builder(targetEventName).build())
+            upload()
+        }
+
+        //Because the BatchCreationListener is null, the event wouldn't be inserted and therefore sent
+        mServer.Requests().events.any {
+            it.bodyJson.optJSONArray("msgs")
+                ?.toList()
+                ?.filterIsInstance<JSONObject>()
+                ?.any { it.optString("n") == targetEventName } ?: false
+        }.let {
+            assertFalse { it }
+        }
+    }
+
+    @Test
     fun testListenerModified() {
         var newBatch = JSONObject().put("the whole", "batch")
         val targetEventName = "should not send"
