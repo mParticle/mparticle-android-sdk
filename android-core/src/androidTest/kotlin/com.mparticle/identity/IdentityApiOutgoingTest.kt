@@ -13,7 +13,8 @@ class IdentityApiOutgoingTest : BaseCleanStartedEachTest() {
     fun testLogin() {
         MParticle.getInstance()?.Identity()?.login()
         mServer.waitForVerify(
-            Matcher(mServer.Endpoints().loginUrl).bodyMatch(object :
+            Matcher(mServer.Endpoints().loginUrl).bodyMatch(
+                object :
                     IdentityMatcher() {
                     override fun isIdentityMatch(identityRequest: IdentityRequestBody): Boolean {
                         return mStartingMpid == identityRequest.previousMpid
@@ -28,7 +29,8 @@ class IdentityApiOutgoingTest : BaseCleanStartedEachTest() {
     fun testLoginNonEmpty() {
         MParticle.getInstance()?.Identity()?.login(IdentityApiRequest.withEmptyUser().build())
         mServer.waitForVerify(
-            Matcher(mServer.Endpoints().loginUrl).bodyMatch(object :
+            Matcher(mServer.Endpoints().loginUrl).bodyMatch(
+                object :
                     IdentityMatcher() {
                     override fun isIdentityMatch(identityRequest: IdentityRequestBody): Boolean {
                         return mStartingMpid == identityRequest.previousMpid
@@ -43,7 +45,8 @@ class IdentityApiOutgoingTest : BaseCleanStartedEachTest() {
     fun testLogout() {
         MParticle.getInstance()?.Identity()?.logout()
         mServer.waitForVerify(
-            Matcher(mServer.Endpoints().logoutUrl).bodyMatch(object :
+            Matcher(mServer.Endpoints().logoutUrl).bodyMatch(
+                object :
                     IdentityMatcher() {
                     override fun isIdentityMatch(identityRequest: IdentityRequestBody): Boolean {
                         return mStartingMpid == identityRequest.previousMpid
@@ -58,7 +61,8 @@ class IdentityApiOutgoingTest : BaseCleanStartedEachTest() {
     fun testLogoutNonEmpty() {
         MParticle.getInstance()?.Identity()?.logout(IdentityApiRequest.withEmptyUser().build())
         mServer.waitForVerify(
-            Matcher(mServer.Endpoints().logoutUrl).bodyMatch(object :
+            Matcher(mServer.Endpoints().logoutUrl).bodyMatch(
+                object :
                     IdentityMatcher() {
                     override fun isIdentityMatch(identityRequest: IdentityRequestBody): Boolean {
                         return mStartingMpid == identityRequest.previousMpid
@@ -83,7 +87,8 @@ class IdentityApiOutgoingTest : BaseCleanStartedEachTest() {
     fun testIdentify() {
         MParticle.getInstance()?.Identity()?.identify(IdentityApiRequest.withEmptyUser().build())
         mServer.waitForVerify(
-            Matcher(mServer.Endpoints().identifyUrl).bodyMatch(object :
+            Matcher(mServer.Endpoints().identifyUrl).bodyMatch(
+                object :
                     IdentityMatcher() {
                     override fun isIdentityMatch(identityRequest: IdentityRequestBody): Boolean {
                         return mStartingMpid == identityRequest.previousMpid

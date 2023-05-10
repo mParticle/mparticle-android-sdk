@@ -1,3 +1,62 @@
+## [5.50.4](https://github.com/mParticle/mparticle-android-sdk/compare/v5.50.3...v5.50.4) (2023-05-03)
+
+
+### Updates & Maintenance
+
+* Update submodules ([9ed4e70](https://github.com/mParticle/mparticle-android-sdk/commit/9ed4e70d77aba4ada08d9a8b715b2115b75a7341))
+
+## [5.50.3](https://github.com/mParticle/mparticle-android-sdk/compare/v5.50.2...v5.50.3) (2023-03-31)
+
+
+### Updates & Maintenance
+
+* Update submodules ([4e5e921](https://github.com/mParticle/mparticle-android-sdk/commit/4e5e921ff9a80dd2a1f0ad9615ebbf052029ecb4))
+
+## [5.50.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.50.1...v5.50.2) (2023-03-30)
+
+
+### Updates & Maintenance
+
+* Update submodules ([d036eb8](https://github.com/mParticle/mparticle-android-sdk/commit/d036eb821519d2afd60eadede46cc3a6a6abbbbe))
+
+## [5.50.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.50.0...v5.50.1) (2023-03-24)
+
+
+### Updates & Maintenance
+
+* Update submodules ([474b192](https://github.com/mParticle/mparticle-android-sdk/commit/474b1924162433ec8d3a48102688b131b0268dd9))
+
+## [5.50.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.49.2...v5.50.0) (2023-02-28)
+
+
+### Features
+
+* Fixing dependabot automerged dependencies ([#331](https://github.com/mParticle/mparticle-android-sdk/issues/331)) ([#334](https://github.com/mParticle/mparticle-android-sdk/issues/334)) ([33f29a6](https://github.com/mParticle/mparticle-android-sdk/commit/33f29a6056a3b9954a42ea068c786ae6aac9cdd5))
+
+
+### Updates & Maintenance
+
+* Update submodules ([312800e](https://github.com/mParticle/mparticle-android-sdk/commit/312800edd6a7587f017dd73f4242031ea53b6b80))
+
+## [5.49.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.49.1...v5.49.2) (2023-02-14)
+
+
+### Updates & Maintenance
+
+* Update submodules ([598dd69](https://github.com/mParticle/mparticle-android-sdk/commit/598dd69af7c546a790c6155d3731626d56f9e260))
+
+## [5.49.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.49.0...v5.49.1) (2023-02-10)
+
+
+### Bug Fixes
+
+* Removing flaky tests ([#317](https://github.com/mParticle/mparticle-android-sdk/issues/317)) ([b937fbb](https://github.com/mParticle/mparticle-android-sdk/commit/b937fbb890691974356879ae9ee39e717cd1e67e)), closes [#311](https://github.com/mParticle/mparticle-android-sdk/issues/311)
+
+
+### Updates & Maintenance
+
+* Update submodules ([6d51f18](https://github.com/mParticle/mparticle-android-sdk/commit/6d51f18d27cd13d1cb3131c39821cc1c293262c4))
+
 ## [5.49.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.48.4...v5.49.0) (2023-01-05)
 
 

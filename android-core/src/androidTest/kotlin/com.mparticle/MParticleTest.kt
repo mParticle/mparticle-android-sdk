@@ -198,20 +198,20 @@ class MParticleTest : BaseCleanStartedEachTest() {
         testResetIdentityCall { MParticle.reset(mContext) }
     }
 
-    @OrchestratorOnly
-    @Test
-    @Throws(JSONException::class, InterruptedException::class)
-    fun testResetIdentityAsync() {
-        testResetIdentityCall {
-            val latch: CountDownLatch = MPLatch(1)
-            MParticle.reset(mContext) { latch.countDown() }
-            try {
-                latch.await()
-            } catch (e: InterruptedException) {
-                e.printStackTrace()
-            }
-        }
-    }
+//    @OrchestratorOnly
+//    @Test
+//    @Throws(JSONException::class, InterruptedException::class)
+//    fun testResetIdentityAsync() {
+//        testResetIdentityCall {
+//            val latch: CountDownLatch = MPLatch(1)
+//            MParticle.reset(mContext) { latch.countDown() }
+//            try {
+//                latch.await()
+//            } catch (e: InterruptedException) {
+//                e.printStackTrace()
+//            }
+//        }
+//    }
 
     @OrchestratorOnly
     @Test

@@ -334,7 +334,8 @@ class MParticleJSInterfaceTest : MParticleJSInterface() {
         for (i in MParticle.EventType.values().indices) {
             Assert.assertEquals(
                 i.toString() + "",
-                MParticle.EventType.values()[i], jsInterfaceInstance.convertEventType(i)
+                MParticle.EventType.values()[i],
+                jsInterfaceInstance.convertEventType(i)
             )
         }
     }

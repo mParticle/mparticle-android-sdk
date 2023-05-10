@@ -15,6 +15,7 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
     private lateinit var identityClient: MParticleBaseClientImpl
     private val defaultUrls = HashMap<MParticleBaseClientImpl.Endpoint, MPUrl>()
     private var apiKey = mRandomUtils.getAlphaString(8)
+
     @Before
     @Throws(InterruptedException::class, MalformedURLException::class)
     fun beforeClass() {

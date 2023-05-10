@@ -16,6 +16,7 @@ import java.util.concurrent.CountDownLatch
 
 class AppStateManagerInstrumentedTest : BaseCleanStartedEachTest() {
     var mAppStateManager: AppStateManager? = null
+
     @Before
     @Throws(Exception::class)
     fun before() {

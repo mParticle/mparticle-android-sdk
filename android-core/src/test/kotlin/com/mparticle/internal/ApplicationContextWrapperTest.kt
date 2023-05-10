@@ -61,6 +61,7 @@ class ApplicationContextWrapperTest {
 
     private lateinit var recorder: ActivityLifecycleCallbackRecorder
     private lateinit var tester: ActivityLifecycleCallbackRecordTester
+
     @Test
     fun testRegisterActivityLifecycleCallbacksActivity1() {
         Mockito.`when`(instance.Internal().kitManager.currentActivity).thenReturn(activity1Ref)
