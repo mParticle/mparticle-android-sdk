@@ -85,7 +85,7 @@ class BatchCreationCallbackTests : BaseCleanInstallEachTest() {
 
     @Test
     fun testNullOnBatchCreatedShouldNOTsend() {
-        val targetEventName = "should send"
+        val targetEventName = "should not send"
 
         val options = MParticleOptions.builder(mContext)
             .batchCreationListener { null }
