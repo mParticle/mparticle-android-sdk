@@ -52,18 +52,59 @@ class BatchCreationCallbackTests : BaseCleanInstallEachTest() {
     }
 
     @Test
-    fun testNullBatchCreationListener() {
+    fun testNullBatchCreationSENDwithoutModify() {
+        val targetEventName = "should send without modified"
+
         val options = MParticleOptions.builder(mContext)
             .batchCreationListener(null)
         startMParticle(options)
-        val targetEventName = "should send"
 
         MParticle.getInstance()?.apply {
             logEvent(MPEvent.Builder(targetEventName).build())
             upload()
         }
 
-        // Because the BatchCreationListener is null, the event wouldn't be inserted and therefore sent
+        mServer.waitForVerify(
+            Matcher(mServer.Endpoints().eventsUrl).bodyMatch {
+                it.optJSONArray("msgs")
+                    ?.toList()
+                    ?.filterIsInstance<JSONObject>()
+                    ?.any { it.optString("n") == targetEventName && it.optString("mb").isNullOrEmpty() } ?: false
+            }
+        )
+
+        mServer.Requests().events.any {
+            it.bodyJson.optJSONArray("msgs")
+                ?.toList()
+                ?.filterIsInstance<JSONObject>()
+                ?.any { it.optString("n") == targetEventName && it.optString("mb").isNullOrEmpty() } ?: false
+        }.let {
+            assertTrue { it }
+        }
+    }
+
+    @Test
+    fun testNullOnBatchCreatedShouldNOTsend() {
+        val targetEventName = "should send"
+
+        val options = MParticleOptions.builder(mContext)
+            .batchCreationListener { null }
+        startMParticle(options)
+
+        MParticle.getInstance()?.apply {
+            logEvent(MPEvent.Builder(targetEventName).build())
+            upload()
+        }
+
+        mServer.waitForVerify(
+            Matcher(mServer.Endpoints().eventsUrl).bodyMatch {
+                it.optJSONArray("msgs")
+                    ?.toList()
+                    ?.filterIsInstance<JSONObject>()
+                    ?.any { it.optString("n") == targetEventName } ?: false
+            }
+        )
+
         mServer.Requests().events.any {
             it.bodyJson.optJSONArray("msgs")
                 ?.toList()
