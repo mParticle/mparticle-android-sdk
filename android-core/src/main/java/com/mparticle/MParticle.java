@@ -1508,7 +1508,7 @@ public class MParticle {
                     if (user != null) {
                         Identity().removeIdentityStateListener(this);
                         Logger.verbose("Sending previously deferred logPushRegistration Modify request.");
-                        sendPushTokenModifyRequest(user, newInstanceId, oldInstanceId);
+                        sendPushTokenModifyRequest(user, newInstanceId, oldInstanceId); 
                     }
                 }
             };
