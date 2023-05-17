@@ -15,7 +15,6 @@ import com.mparticle.internal.PushRegistrationHelper;
 import com.mparticle.networking.NetworkOptions;
 import com.mparticle.networking.NetworkOptionsManager;
 
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -54,6 +53,7 @@ public class MParticleOptions {
     private MParticle.OperatingSystem mOperatingSystem = MParticle.OperatingSystem.ANDROID;
     private DataplanOptions mDataplanOptions;
     private Map<Class, List<Configuration>> mConfigurations = new HashMap();
+    private List<Object> sideloadedKits = new ArrayList<>();
 
     private MParticleOptions() {
     }
@@ -145,6 +145,7 @@ public class MParticleOptions {
         this.mDataplanVersion = builder.dataplanVersion;
         this.mDataplanOptions = builder.dataplanOptions;
         this.mConfigurations = builder.configurations;
+        this.sideloadedKits = builder.sideloadedKits;
     }
 
     /**
@@ -177,6 +178,16 @@ public class MParticleOptions {
     @NonNull
     public MParticle.Environment getEnvironment() {
         return mEnvironment;
+    }
+
+    /**
+     * Get list of sideloadedKits kits
+     *
+     * @return
+     */
+    @NonNull
+    public List<Object> getSideloadedKits() {
+        return sideloadedKits;
     }
 
     /**
@@ -387,6 +398,7 @@ public class MParticleOptions {
         private DataplanOptions dataplanOptions;
         private Map<Class, List<Configuration>> configurations = new HashMap();
         private boolean isAppDebuggable;
+        private List<Object> sideloadedKits = new ArrayList<>();
 
         private Builder(Context context) {
             this.context = context;
@@ -418,6 +430,18 @@ public class MParticleOptions {
         @NonNull
         public Builder installType(@NonNull MParticle.InstallType installType) {
             this.installType = installType;
+            return this;
+        }
+
+        /**
+         * Add locsideloadedKitsal kits
+         *
+         * @param kits
+         * @return
+         */
+        @NonNull
+        public Builder sideloadedKits(@NonNull List<Object> kits) {
+            this.sideloadedKits = kits;
             return this;
         }
 
