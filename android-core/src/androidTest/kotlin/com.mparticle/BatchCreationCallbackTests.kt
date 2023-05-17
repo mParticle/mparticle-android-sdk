@@ -63,7 +63,7 @@ class BatchCreationCallbackTests : BaseCleanInstallEachTest() {
             upload()
         }
 
-        //Because the BatchCreationListener is null, the event wouldn't be inserted and therefore sent
+        // Because the BatchCreationListener is null, the event wouldn't be inserted and therefore sent
         mServer.Requests().events.any {
             it.bodyJson.optJSONArray("msgs")
                 ?.toList()
