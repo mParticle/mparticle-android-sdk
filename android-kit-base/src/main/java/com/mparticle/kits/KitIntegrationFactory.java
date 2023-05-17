@@ -1,7 +1,5 @@
 package com.mparticle.kits;
 
-import androidx.annotation.NonNull;
-
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.internal.Logger;
@@ -16,24 +14,17 @@ import java.util.Set;
 public class KitIntegrationFactory {
 
     final Map<Integer, Class> supportedKits = new HashMap<>();
-    final static Map<Integer, LocalKit> localKits = new HashMap<>();
+    final static Map<Integer, LocalKit> sideloadedKits = new HashMap<>();
+    private static int minSideloadedKitId = 10000000;
+    private static int sideloadedKitNextId = minSideloadedKitId;
 
     public KitIntegrationFactory(MParticleOptions options) {
         mergeIntegrations(options);
         loadIntegrations();
     }
 
-    public static int generateRandomKey() {
-        boolean exist = true;
-        int value = (int) (Math.random() * (Integer.MAX_VALUE + 1));
-        while (exist) {
-            if (!getKnownIntegrations().containsKey(value)) {
-                exist = false;
-            } else {
-                value = (int) (Math.random() * (Integer.MAX_VALUE + 1));
-            }
-        }
-        return value;
+    public static int getSideloadedKitId() {
+        return sideloadedKitNextId++;
     }
 
     /**
@@ -77,17 +68,28 @@ public class KitIntegrationFactory {
         kits.put(MParticle.ServiceProviders.SWRVE, "com.mparticle.kits.SwrveKit");
         kits.put(MParticle.ServiceProviders.BLUESHIFT, "com.mparticle.kits.BlueshiftKit");
         kits.put(MParticle.ServiceProviders.NEURA, "com.mparticle.kits.NeuraKit");
-        for (Map.Entry<Integer, LocalKit> entry : localKits.entrySet()) {
+        for (Map.Entry<Integer, LocalKit> entry : sideloadedKits.entrySet()) {
             kits.put(entry.getKey(), ((LocalKit) entry.getValue()).getKit().getClass().getName());
         }
         return kits;
     }
 
     public KitIntegration createInstance(KitManagerImpl manager, KitConfiguration configuration) throws JSONException, ClassNotFoundException {
-        KitIntegration kit = createInstance(manager, configuration.getKitId());
+        KitIntegration kit = null;
+        if (configuration.getKitId() >= minSideloadedKitId) {
+            kit = retrieveSideloadedKit(manager, configuration);
+        } else {
+            kit = createInstance(manager, configuration.getKitId());
+        }
         if (kit != null) {
             kit.setConfiguration(configuration);
         }
+        return kit;
+    }
+
+    private KitIntegration retrieveSideloadedKit(KitManagerImpl manager, KitConfiguration configuration) {
+        KitIntegration kit = sideloadedKits.get(configuration.getKitId()).getKit();
+        kit.setKitManager(manager);
         return kit;
     }
 
@@ -106,10 +108,10 @@ public class KitIntegrationFactory {
     }
 
     private void mergeIntegrations(MParticleOptions options) {
-        for (Map.Entry<Integer, Object> entry : options.getLocalKits().entrySet()) {
-            if (entry.getValue() != null && entry.getValue() instanceof LocalKit &&
-                    ((LocalKit) entry.getValue()).getKit() != null && !getKnownIntegrations().containsKey(entry.getKey())) {
-                localKits.put(entry.getKey(), (LocalKit) entry.getValue());
+        for (Object entry : options.getSideloadedKits()) {
+            if (entry != null && entry instanceof LocalKit &&
+                    (((LocalKit) entry).getKit() != null && !getKnownIntegrations().containsKey(((LocalKit) entry).getConfiguration().getKitId()))) {
+                sideloadedKits.put(((LocalKit) entry).getConfiguration().getKitId(), (LocalKit) entry);
             }
         }
     }

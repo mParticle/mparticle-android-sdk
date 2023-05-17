@@ -15,7 +15,6 @@ import com.mparticle.internal.PushRegistrationHelper;
 import com.mparticle.networking.NetworkOptions;
 import com.mparticle.networking.NetworkOptionsManager;
 
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -54,7 +53,7 @@ public class MParticleOptions {
     private MParticle.OperatingSystem mOperatingSystem = MParticle.OperatingSystem.ANDROID;
     private DataplanOptions mDataplanOptions;
     private Map<Class, List<Configuration>> mConfigurations = new HashMap();
-    private Map<Integer, Object> localKits = new HashMap<>();
+    private List<Object> sideloadedKits = new ArrayList<>();
 
     private MParticleOptions() {
     }
@@ -146,7 +145,7 @@ public class MParticleOptions {
         this.mDataplanVersion = builder.dataplanVersion;
         this.mDataplanOptions = builder.dataplanOptions;
         this.mConfigurations = builder.configurations;
-        this.localKits = builder.localKits;
+        this.sideloadedKits = builder.sideloadedKits;
     }
 
     /**
@@ -182,13 +181,13 @@ public class MParticleOptions {
     }
 
     /**
-     * Get list of local kits
+     * Get list of sideloadedKits kits
      *
      * @return
      */
     @NonNull
-    public Map<Integer, Object> getLocalKits() {
-        return localKits;
+    public List<Object> getSideloadedKits() {
+        return sideloadedKits;
     }
 
     /**
@@ -399,7 +398,7 @@ public class MParticleOptions {
         private DataplanOptions dataplanOptions;
         private Map<Class, List<Configuration>> configurations = new HashMap();
         private boolean isAppDebuggable;
-        private Map<Integer, Object> localKits = new HashMap<>();
+        private List<Object> sideloadedKits = new ArrayList<>();
 
         private Builder(Context context) {
             this.context = context;
@@ -435,14 +434,15 @@ public class MParticleOptions {
         }
 
         /**
-         * Add local kits
+         * Add locsideloadedKitsal kits
+         *
          * @param kits
          * @return
          */
         @NonNull
-        public Builder localKits(@NonNull Map<Integer, Object> kits) {
-            this.localKits = kits;
-            return  this;
+        public Builder sideloadedKits(@NonNull List<Object> kits) {
+            this.sideloadedKits = kits;
+            return this;
         }
 
         /**

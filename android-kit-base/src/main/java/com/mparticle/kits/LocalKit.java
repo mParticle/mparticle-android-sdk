@@ -16,7 +16,7 @@ public class LocalKit {
 
     private JSONObject getMinimumObject() throws JSONException {
         JSONObject obj = new JSONObject();
-        obj.put("id", KitIntegrationFactory.generateRandomKey());
+        obj.put("id", KitIntegrationFactory.getSideloadedKitId());
         return obj;
     }
 
