@@ -52,6 +52,70 @@ class BatchCreationCallbackTests : BaseCleanInstallEachTest() {
     }
 
     @Test
+    fun testNullBatchCreationSENDwithoutModify() {
+        val targetEventName = "should send without modified"
+
+        val options = MParticleOptions.builder(mContext)
+            .batchCreationListener(null)
+        startMParticle(options)
+
+        MParticle.getInstance()?.apply {
+            logEvent(MPEvent.Builder(targetEventName).build())
+            upload()
+        }
+
+        mServer.waitForVerify(
+            Matcher(mServer.Endpoints().eventsUrl).bodyMatch {
+                it.optJSONArray("msgs")
+                    ?.toList()
+                    ?.filterIsInstance<JSONObject>()
+                    ?.any { it.optString("n") == targetEventName && it.optString("mb").isNullOrEmpty() } ?: false
+            }
+        )
+
+        mServer.Requests().events.any {
+            it.bodyJson.optJSONArray("msgs")
+                ?.toList()
+                ?.filterIsInstance<JSONObject>()
+                ?.any { it.optString("n") == targetEventName && it.optString("mb").isNullOrEmpty() } ?: false
+        }.let {
+            assertTrue { it }
+        }
+    }
+
+    @Test
+    fun testNullOnBatchCreatedShouldNOTsend() {
+        val targetEventName = "should not send"
+
+        val options = MParticleOptions.builder(mContext)
+            .batchCreationListener { null }
+        startMParticle(options)
+
+        MParticle.getInstance()?.apply {
+            logEvent(MPEvent.Builder(targetEventName).build())
+            upload()
+        }
+
+        mServer.waitForVerify(
+            Matcher(mServer.Endpoints().eventsUrl).bodyMatch {
+                it.optJSONArray("msgs")
+                    ?.toList()
+                    ?.filterIsInstance<JSONObject>()
+                    ?.any { it.optString("n") == targetEventName } ?: false
+            }
+        )
+
+        mServer.Requests().events.any {
+            it.bodyJson.optJSONArray("msgs")
+                ?.toList()
+                ?.filterIsInstance<JSONObject>()
+                ?.any { it.optString("n") == targetEventName } ?: false
+        }.let {
+            assertFalse { it }
+        }
+    }
+
+    @Test
     fun testListenerModified() {
         var newBatch = JSONObject().put("the whole", "batch")
         val targetEventName = "should not send"
