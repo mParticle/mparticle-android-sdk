@@ -435,7 +435,7 @@ public class KitConfiguration {
     }
 
     public final Map<String, Object> filterScreenAttributes(MParticle.EventType eventType, String eventName, Map<String, Object> eventAttributes) {
-        return filterEventAttributes(eventType, eventName, mScreenNameFilters, eventAttributes);
+        return filterEventAttributes(eventType, eventName, mScreenAttributeFilters, eventAttributes);
     }
 
     public final Map<String, Object> filterEventAttributes(MParticle.EventType eventType, String eventName, SparseBooleanArray filter, Map<String, Object> eventAttributes) {
