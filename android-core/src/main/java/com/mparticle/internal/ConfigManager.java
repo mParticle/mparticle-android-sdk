@@ -319,10 +319,12 @@ public class ConfigManager {
                     .putString(Constants.PrefKeys.ETAG, etag)
                     .putString(Constants.PrefKeys.IF_MODIFIED, lastModified)
                     .apply();
-            getKitConfigPreferences()
-                    .edit()
-                    .putString(KIT_CONFIG_KEY, kitConfigString)
-                    .apply();
+            if (kitConfigString != null && !kitConfigString.isEmpty()) {
+                getKitConfigPreferences()
+                        .edit()
+                        .putString(KIT_CONFIG_KEY, kitConfigString)
+                        .apply();
+            }
         } else {
             Logger.debug("clearing current configurations");
             clearConfig();
@@ -353,10 +355,12 @@ public class ConfigManager {
         JSONArray kitConfig = responseJSON.has(KEY_EMBEDDED_KITS) ? (JSONArray) responseJSON.remove(KEY_EMBEDDED_KITS) : null;
         saveConfigJson(responseJSON, kitConfig, etag, lastModified, System.currentTimeMillis());
         updateCoreConfig(responseJSON, true);
-        updateKitConfig(kitConfig);
+        if (kitConfig != null) {
+            updateKitConfig(kitConfig);
+        }
     }
 
-    public synchronized void reloadCoreConfig(JSONObject responseJSON) throws JSONException  {
+    public synchronized void reloadCoreConfig(JSONObject responseJSON) throws JSONException {
         updateCoreConfig(responseJSON, false);
     }
 
@@ -449,7 +453,7 @@ public class ConfigManager {
     public String getActiveModuleIds() {
         Map<Integer, KitManager.KitStatus> kitStatusMap = MParticle.getInstance().Internal().getKitManager().getKitStatus();
         List<Integer> activeKits = new ArrayList<>();
-        for (Map.Entry<Integer, KitManager.KitStatus> kitStatus: kitStatusMap.entrySet()) {
+        for (Map.Entry<Integer, KitManager.KitStatus> kitStatus : kitStatusMap.entrySet()) {
             KitManager.KitStatus status = kitStatus.getValue();
             switch (status) {
                 case ACTIVE:
@@ -462,7 +466,7 @@ public class ConfigManager {
             return "";
         } else {
             StringBuilder builder = new StringBuilder(activeKits.size() * 3);
-            for (Integer kitId: activeKits) {
+            for (Integer kitId : activeKits) {
                 builder.append(kitId);
                 builder.append(",");
             }
@@ -545,7 +549,7 @@ public class ConfigManager {
     }
 
     public String getApiSecret() {
-        return sPreferences.getString(Constants.PrefKeys.API_SECRET,null);
+        return sPreferences.getString(Constants.PrefKeys.API_SECRET, null);
     }
 
     public void setCredentials(String apiKey, String secret) {
@@ -578,7 +582,7 @@ public class ConfigManager {
     public static MParticle.Environment getEnvironment() {
         if (sPreferences != null) {
             int env = sPreferences.getInt(Constants.PrefKeys.ENVIRONMENT, MParticle.Environment.Production.getValue());
-            for(MParticle.Environment environment: MParticle.Environment.values()) {
+            for (MParticle.Environment environment : MParticle.Environment.values()) {
                 if (environment.getValue() == env) {
                     return environment;
                 }
@@ -736,11 +740,11 @@ public class ConfigManager {
         return getPreferences(context).getBoolean(Constants.PrefKeys.DISPLAY_PUSH_NOTIFICATIONS, false);
     }
 
-    static SharedPreferences getPreferences(Context context){
+    static SharedPreferences getPreferences(Context context) {
         return context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
     }
 
-    SharedPreferences getKitConfigPreferences(){
+    SharedPreferences getKitConfigPreferences() {
         return mContext.getSharedPreferences(KIT_CONFIG_PREFERENCES, Context.MODE_PRIVATE);
     }
 
@@ -867,6 +871,7 @@ public class ConfigManager {
     }
 
     private static boolean sInProgress;
+
     public static void setIdentityRequestInProgress(boolean inProgress) {
         sInProgress = inProgress;
     }
@@ -892,8 +897,8 @@ public class ConfigManager {
         boolean isBackgroundAst = false;
         try {
             isBackgroundAst = (message.getMessageType().equals(Constants.MessageType.APP_STATE_TRANSITION) && message.get(Constants.MessageKey.STATE_TRANSITION_TYPE).equals(Constants.StateTransitionType.STATE_TRANS_BG));
+        } catch (JSONException ex) {
         }
-        catch (JSONException ex) {}
         boolean shouldTrigger = message.getMessageType().equals(Constants.MessageType.PUSH_RECEIVED)
                 || message.getMessageType().equals(Constants.MessageType.COMMERCE_EVENT)
                 || isBackgroundAst;
@@ -1236,7 +1241,7 @@ public class ConfigManager {
         if (MPUtility.isEmpty(mpIdChangeListeners)) {
             return;
         }
-        for (IdentityApi.MpIdChangeListener listenerRef: new ArrayList<IdentityApi.MpIdChangeListener>(mpIdChangeListeners)) {
+        for (IdentityApi.MpIdChangeListener listenerRef : new ArrayList<IdentityApi.MpIdChangeListener>(mpIdChangeListeners)) {
             if (listenerRef != null) {
                 listenerRef.onMpIdChanged(mpid, previousMpid);
             }
@@ -1275,6 +1280,7 @@ public class ConfigManager {
 
     /**
      * the maximum allowed age of "start_time" in an AliasRequest, in days
+     *
      * @return
      */
     public int getAliasMaxWindow() {
@@ -1294,7 +1300,7 @@ public class ConfigManager {
     }
 
     private void onConfigLoaded(ConfigType configType, Boolean isNew) {
-        Logger.debug("Loading " + (isNew ? "new ": "cached ") + configType.name().toLowerCase(Locale.ROOT) + " config");
+        Logger.debug("Loading " + (isNew ? "new " : "cached ") + configType.name().toLowerCase(Locale.ROOT) + " config");
         for (ConfigLoadedListener listener : new ArrayList<ConfigLoadedListener>(configUpdatedListeners)) {
             if (listener != null) {
                 listener.onConfigUpdated(configType, isNew);
