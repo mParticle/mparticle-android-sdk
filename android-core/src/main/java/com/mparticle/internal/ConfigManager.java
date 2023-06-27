@@ -355,7 +355,7 @@ public class ConfigManager {
         JSONArray kitConfig = responseJSON.has(KEY_EMBEDDED_KITS) ? (JSONArray) responseJSON.remove(KEY_EMBEDDED_KITS) : null;
         saveConfigJson(responseJSON, kitConfig, etag, lastModified, System.currentTimeMillis());
         updateCoreConfig(responseJSON, true);
-        if (kitConfig != null) {
+        if (kitConfig != null && kitConfig.length()>=1) {
             updateKitConfig(kitConfig);
         }
     }
