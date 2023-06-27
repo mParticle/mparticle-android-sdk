@@ -479,7 +479,7 @@ class KitManagerImplTest {
     fun testMParticleConfigureKitsFromOptions() {
         val sideloadedKit = Mockito.mock(KitIntegration::class.java)
         Mockito.`when`(sideloadedKit.onKitCreate(Mockito.any(), Mockito.any())).thenReturn(null)
-        val kitWrapper = Mockito.mock(LocalKit::class.java)
+        val kitWrapper = Mockito.mock(MPSideloadedKit::class.java)
 
         val kitId = KitIntegrationFactory.getSideloadedKitId()
         val configJSONObj = JSONObject().apply { put("id", kitId) }
@@ -514,7 +514,7 @@ class KitManagerImplTest {
     fun testMParticleUpdateEmptyConfigKitWithKitOptions() {
         val sideloadedKit = Mockito.mock(KitIntegration::class.java)
         Mockito.`when`(sideloadedKit.onKitCreate(Mockito.any(), Mockito.any())).thenReturn(null)
-        val kitWrapper = Mockito.mock(LocalKit::class.java)
+        val kitWrapper = Mockito.mock(MPSideloadedKit::class.java)
 
         val kitId = KitIntegrationFactory.getSideloadedKitId()
         val configJSONObj = JSONObject().apply { put("id", kitId) }

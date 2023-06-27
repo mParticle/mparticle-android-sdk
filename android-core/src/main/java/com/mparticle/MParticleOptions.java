@@ -10,6 +10,7 @@ import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.IdentityStateListener;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Logger;
+import com.mparticle.internal.MPSideloadedKit;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.PushRegistrationHelper;
 import com.mparticle.networking.NetworkOptions;
@@ -53,7 +54,7 @@ public class MParticleOptions {
     private MParticle.OperatingSystem mOperatingSystem = MParticle.OperatingSystem.ANDROID;
     private DataplanOptions mDataplanOptions;
     private Map<Class, List<Configuration>> mConfigurations = new HashMap();
-    private List<Object> sideloadedKits = new ArrayList<>();
+    private List<MPSideloadedKit> sideloadedKits = new ArrayList<>();
 
     private MParticleOptions() {
     }
@@ -186,7 +187,7 @@ public class MParticleOptions {
      * @return
      */
     @NonNull
-    public List<Object> getSideloadedKits() {
+    public List<MPSideloadedKit> getSideloadedKits() {
         return sideloadedKits;
     }
 
@@ -398,7 +399,7 @@ public class MParticleOptions {
         private DataplanOptions dataplanOptions;
         private Map<Class, List<Configuration>> configurations = new HashMap();
         private boolean isAppDebuggable;
-        private List<Object> sideloadedKits = new ArrayList<>();
+        private List<MPSideloadedKit> sideloadedKits = new ArrayList<>();
 
         private Builder(Context context) {
             this.context = context;
@@ -440,7 +441,7 @@ public class MParticleOptions {
          * @return
          */
         @NonNull
-        public Builder sideloadedKits(@NonNull List<Object> kits) {
+        public Builder sideloadedKits(@NonNull List<MPSideloadedKit> kits) {
             this.sideloadedKits = kits;
             return this;
         }

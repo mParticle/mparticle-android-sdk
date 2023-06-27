@@ -3,6 +3,7 @@ package com.mparticle.kits;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.internal.Logger;
+import com.mparticle.internal.MPSideloadedKit;
 
 import org.json.JSONException;
 
@@ -14,7 +15,7 @@ import java.util.Set;
 public class KitIntegrationFactory {
 
     final Map<Integer, Class> supportedKits = new HashMap<>();
-    final static Map<Integer, LocalKit> sideloadedKits = new HashMap<>();
+    final static Map<Integer, MPSideloadedKit> sideloadedKits = new HashMap<>();
     private static int minSideloadedKitId = 10000000;
     private static int sideloadedKitNextId = minSideloadedKitId;
 
@@ -68,8 +69,8 @@ public class KitIntegrationFactory {
         kits.put(MParticle.ServiceProviders.SWRVE, "com.mparticle.kits.SwrveKit");
         kits.put(MParticle.ServiceProviders.BLUESHIFT, "com.mparticle.kits.BlueshiftKit");
         kits.put(MParticle.ServiceProviders.NEURA, "com.mparticle.kits.NeuraKit");
-        for (Map.Entry<Integer, LocalKit> entry : sideloadedKits.entrySet()) {
-            kits.put(entry.getKey(), ((LocalKit) entry.getValue()).getKit().getClass().getName());
+        for (Map.Entry<Integer, MPSideloadedKit> entry : sideloadedKits.entrySet()) {
+            kits.put(entry.getKey(), ((MPSideloadedKit) entry.getValue()).getKit().getClass().getName());
         }
         return kits;
     }
@@ -88,9 +89,13 @@ public class KitIntegrationFactory {
     }
 
     private KitIntegration retrieveSideloadedKit(KitManagerImpl manager, KitConfiguration configuration) {
-        KitIntegration kit = sideloadedKits.get(configuration.getKitId()).getKit();
-        kit.setKitManager(manager);
-        return kit;
+        try {
+            KitIntegration kit = (KitIntegration) sideloadedKits.get(configuration.getKitId()).getKit();
+            kit.setKitManager(manager);
+            return kit;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public KitIntegration createInstance(KitManagerImpl manager, int moduleId) throws JSONException, ClassNotFoundException {
@@ -108,10 +113,9 @@ public class KitIntegrationFactory {
     }
 
     private void mergeIntegrations(MParticleOptions options) {
-        for (Object entry : options.getSideloadedKits()) {
-            if (entry != null && entry instanceof LocalKit &&
-                    (((LocalKit) entry).getKit() != null && !getKnownIntegrations().containsKey(((LocalKit) entry).getConfiguration().getKitId()))) {
-                sideloadedKits.put(((LocalKit) entry).getConfiguration().getKitId(), (LocalKit) entry);
+        for (MPSideloadedKit entry : options.getSideloadedKits()) {
+            if (entry.getKit() instanceof KitIntegration && !getKnownIntegrations().containsKey(((KitIntegration) entry.getKit()).getConfiguration().getKitId())) {
+                sideloadedKits.put(((KitIntegration) entry.getKit()).getConfiguration().getKitId(), entry);
             }
         }
     }

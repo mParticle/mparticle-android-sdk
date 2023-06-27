@@ -32,6 +32,7 @@ import com.mparticle.internal.KitsLoadedCallback;
 import com.mparticle.internal.CoreCallbacks;
 import com.mparticle.internal.KitManager;
 import com.mparticle.internal.Logger;
+import com.mparticle.internal.MPSideloadedKit;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.ReportingManager;
 import com.mparticle.kits.mappings.CustomMapping;
@@ -56,6 +57,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class KitManagerImpl implements KitManager, AttributionListener, UserAttributeListener, IdentityStateListener {
 
     private static HandlerThread kitHandlerThread;
+
     static {
         kitHandlerThread = new HandlerThread("mParticle_kit_thread");
         kitHandlerThread.start();
@@ -1405,8 +1407,11 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 }
             }
         }
-        for (Map.Entry<Integer, LocalKit> entry : mKitIntegrationFactory.sideloadedKits.entrySet()) {
-            configurations.add(entry.getValue().getConfiguration());
+        for (Map.Entry<Integer, MPSideloadedKit> entry : mKitIntegrationFactory.sideloadedKits.entrySet()) {
+            try {
+                configurations.add(((KitIntegration) entry.getValue().getKit()).getConfiguration());
+            } catch (Exception e) {
+            }
         }
         return configurations;
     }

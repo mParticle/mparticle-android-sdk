@@ -38,8 +38,8 @@ public class KitConfiguration {
     private final static String KEY_FILTERS = "hs";
     private final static String KEY_BRACKETING = "bk";
     private final static String KEY_ATTRIBUTE_VALUE_FILTERING_SHOULD_INCLUDE_MATCHES = "i";
-    private final static String KEY_ATTRIBUTE_VALUE_FILTERING_ATTRIBUTE= "a";
-    private final static String KEY_ATTRIBUTE_VALUE_FILTERING_VALUE= "v";
+    private final static String KEY_ATTRIBUTE_VALUE_FILTERING_ATTRIBUTE = "a";
+    private final static String KEY_ATTRIBUTE_VALUE_FILTERING_VALUE = "v";
     private final static String KEY_EVENT_TYPES_FILTER = "et";
     private final static String KEY_EVENT_NAMES_FILTER = "ec";
     private final static String KEY_EVENT_ATTRIBUTES_FILTER = "ea";
@@ -114,7 +114,7 @@ public class KitConfiguration {
         return mScreenAttributeFilters;
     }
 
-    public static KitConfiguration createKitConfiguration(JSONObject json) throws JSONException{
+    public static KitConfiguration createKitConfiguration(JSONObject json) throws JSONException {
         return new KitConfiguration().parseConfiguration(json);
     }
 
@@ -123,7 +123,7 @@ public class KitConfiguration {
     }
 
     public KitConfiguration parseConfiguration(JSONObject json) throws JSONException {
-        kitId = json.getInt(KEY_ID);
+        kitId = json.optInt(KEY_ID, KitIntegrationFactory.getSideloadedKitId());
         if (json.has(KEY_ATTRIBUTE_VALUE_FILTERING)) {
             avfIsActive = true;
             try {
@@ -329,7 +329,7 @@ public class KitConfiguration {
             if (consented != null && consented == ccpaConsent.isConsented()) {
                 return true;
             }
-         }
+        }
         return false;
     }
 
@@ -489,7 +489,7 @@ public class KitConfiguration {
                 && attributes.size() > 0) {
             Map newAttributes = new HashMap(attributes.size());
             for (Map.Entry<String, ?> attribute : attributes.entrySet()) {
-                if ( shouldForwardAttribute(attributeFilters, attribute.getKey())) {
+                if (shouldForwardAttribute(attributeFilters, attribute.getKey())) {
                     newAttributes.put(attribute.getKey(), attribute.getValue());
                 }
             }
@@ -645,7 +645,7 @@ public class KitConfiguration {
 
     boolean shouldSetIdentity(MParticle.IdentityType identityType) {
         SparseBooleanArray userIdentityFilters = getUserIdentityFilters();
-        return  userIdentityFilters == null ||
+        return userIdentityFilters == null ||
                 userIdentityFilters.size() == 0 ||
                 userIdentityFilters.get(identityType.getValue(), true);
     }
