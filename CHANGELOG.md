@@ -1,3 +1,16 @@
+## [5.51.3](https://github.com/mParticle/mparticle-android-sdk/compare/v5.51.2...v5.51.3) (2023-06-28)
+
+
+### Bug Fixes
+
+* Fixing initialization & de-initialization issue on kits. ([#393](https://github.com/mParticle/mparticle-android-sdk/issues/393)) ([d02b5b3](https://github.com/mParticle/mparticle-android-sdk/commit/d02b5b37eb4863aa7b475c4117a4db691a324614))
+* Kit integration forwarding unplanned/blocked events when fired early on app run ([#394](https://github.com/mParticle/mparticle-android-sdk/issues/394)) ([b99a1c6](https://github.com/mParticle/mparticle-android-sdk/commit/b99a1c6b961e18693808a18368c01572b3b4831e))
+
+
+### Updates & Maintenance
+
+* Update submodules ([1ba89e3](https://github.com/mParticle/mparticle-android-sdk/commit/1ba89e3006c35ea259c338fde022235fa2db4846))
+
 ## [5.51.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.51.1...v5.51.2) (2023-06-21)
 
 
