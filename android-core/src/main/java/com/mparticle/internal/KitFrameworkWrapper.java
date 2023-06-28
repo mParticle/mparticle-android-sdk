@@ -77,12 +77,13 @@ public class KitFrameworkWrapper implements KitManager {
                             .onKitsLoaded(() -> {
                                         mKitManager = kitManager;
                                         setKitsLoaded(true);
+                                        updateDataplan(mCoreCallbacks.getDataplanOptions());
                                     }
                             );
                 } else {
                     mKitManager = kitManager;
+                    updateDataplan(mCoreCallbacks.getDataplanOptions());
                 }
-                updateDataplan(mCoreCallbacks.getDataplanOptions());
             } catch (Exception e) {
                 Logger.debug("No Kit Framework detected.");
                 setKitsLoaded(true);
@@ -128,7 +129,7 @@ public class KitFrameworkWrapper implements KitManager {
             disableQueuing();
         }
         List<KitsLoadedListener> kitsLoadedListenersCopy = new ArrayList<>(kitsLoadedListeners);
-        for (KitsLoadedListener kitsLoadedListener: kitsLoadedListenersCopy) {
+        for (KitsLoadedListener kitsLoadedListener : kitsLoadedListenersCopy) {
             if (kitsLoadedListener != null) {
                 kitsLoadedListener.onKitsLoaded();
             }
@@ -198,7 +199,7 @@ public class KitFrameworkWrapper implements KitManager {
                         break;
                     case AttributeChange.INCREMENT_ATTRIBUTE:
                         if (attributeChange.value instanceof String) {
-                            mKitManager.incrementUserAttribute(attributeChange.key, attributeChange.incrementedBy, (String)attributeChange.value, attributeChange.mpid);
+                            mKitManager.incrementUserAttribute(attributeChange.key, attributeChange.incrementedBy, (String) attributeChange.value, attributeChange.mpid);
                         }
                         break;
                     case AttributeChange.TAG:
