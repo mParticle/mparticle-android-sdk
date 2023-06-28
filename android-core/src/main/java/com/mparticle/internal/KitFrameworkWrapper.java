@@ -630,7 +630,7 @@ public class KitFrameworkWrapper implements KitManager {
             mKitManager.onModifyCompleted(user, request);
         }
     }
-    
+
     @Override
     public void onConsentStateUpdated(ConsentState oldState, ConsentState newState, long mpid) {
         if (mKitManager != null) {
