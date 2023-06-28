@@ -319,7 +319,7 @@ public class ConfigManager {
                     .putString(Constants.PrefKeys.ETAG, etag)
                     .putString(Constants.PrefKeys.IF_MODIFIED, lastModified)
                     .apply();
-            if (kitConfigString != null && !kitConfigString.isEmpty()) {
+            if (kitConfigString == null || (kitConfigString != null && !kitConfigString.isEmpty())) {
                 getKitConfigPreferences()
                         .edit()
                         .putString(KIT_CONFIG_KEY, kitConfigString)
@@ -355,9 +355,7 @@ public class ConfigManager {
         JSONArray kitConfig = responseJSON.has(KEY_EMBEDDED_KITS) ? (JSONArray) responseJSON.remove(KEY_EMBEDDED_KITS) : null;
         saveConfigJson(responseJSON, kitConfig, etag, lastModified, System.currentTimeMillis());
         updateCoreConfig(responseJSON, true);
-        if (kitConfig != null && kitConfig.length()>=1) {
-            updateKitConfig(kitConfig);
-        }
+        updateKitConfig(kitConfig);
     }
 
     public synchronized void reloadCoreConfig(JSONObject responseJSON) throws JSONException {
