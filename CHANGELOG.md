@@ -1,3 +1,34 @@
+## [5.51.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.51.1...v5.51.2) (2023-06-21)
+
+
+### Updates & Maintenance
+
+* Update submodules ([bfd28bc](https://github.com/mParticle/mparticle-android-sdk/commit/bfd28bc245af308e05bf28a046de7f979de889ae))
+
+## [5.51.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.51.0...v5.51.1) (2023-06-13)
+
+
+### Updates & Maintenance
+
+* Update submodules ([3aabaae](https://github.com/mParticle/mparticle-android-sdk/commit/3aabaae963030555440d40272e22e09a290fb963))
+
+## [5.51.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.50.4...v5.51.0) (2023-06-05)
+
+
+### Features
+
+* cache AVD for faster connected test runs ([#319](https://github.com/mParticle/mparticle-android-sdk/issues/319)) ([c24d38d](https://github.com/mParticle/mparticle-android-sdk/commit/c24d38d766b34421bf42d90105c5064521857183))
+
+
+### Bug Fixes
+
+* SQDSDKS-5287 unable to drop batches nullability ([#379](https://github.com/mParticle/mparticle-android-sdk/issues/379)) ([04af4e9](https://github.com/mParticle/mparticle-android-sdk/commit/04af4e932ea0b575df745d36c64a7fb0305dc2a8))
+
+
+### Updates & Maintenance
+
+* Update submodules ([03289e1](https://github.com/mParticle/mparticle-android-sdk/commit/03289e14e72b87f1e57b192152ad1dfcc1bf8608))
+
 ## [5.50.4](https://github.com/mParticle/mparticle-android-sdk/compare/v5.50.3...v5.50.4) (2023-05-03)
 
 
