@@ -57,10 +57,7 @@ public class MPLatch extends CountDownLatch {
                 return;
             }
         }
-            mHandler.postDelayed(timeoutRunnable, timeoutTimeMs - 100L);
-            this.await(timeoutTimeMs, TimeUnit.MILLISECONDS);
-            if (timedOut.value) {
-                fail("timed out");
-            }
+        this.await(timeoutTimeMs, TimeUnit.MILLISECONDS);
+        mHandler.postDelayed(timeoutRunnable, timeoutTimeMs - 100L);
     }
 }

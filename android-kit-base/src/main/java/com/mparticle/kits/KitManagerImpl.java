@@ -155,6 +155,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         runOnKitThread(() -> {
                     kitConfigurations = parseKitConfigurations(kitConfigs);
                     runOnMainThread(() -> {
+                        updateDataplan(mCoreCallbacks.getDataplanOptions());
                         configureKits(kitConfigurations);
                         callback.setKitsLoaded();
                     });
