@@ -80,14 +80,6 @@ public abstract class KitIntegration implements SideloadedKit {
         return mKitConfiguration;
     }
 
-    @Override
-    public final void setJSONConfiguration(@NotNull JSONObject configuration) {
-        try {
-            mKitConfiguration = KitConfiguration.createKitConfiguration(configuration);
-        } catch (JSONException e) {
-        }
-    }
-
     public final KitIntegration setConfiguration(KitConfiguration configuration) {
         mKitConfiguration = configuration;
         return this;

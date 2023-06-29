@@ -32,7 +32,6 @@ import com.mparticle.internal.KitsLoadedCallback;
 import com.mparticle.internal.CoreCallbacks;
 import com.mparticle.internal.KitManager;
 import com.mparticle.internal.Logger;
-import com.mparticle.internal.MPSideloadedKit;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.ReportingManager;
 import com.mparticle.kits.mappings.CustomMapping;
@@ -205,6 +204,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         HashMap<Integer, KitIntegration> previousKits = new HashMap<>(providers);
 
         if (kitConfigurations != null) {
+            for(Map.Entry<Integer, MPSideloadedKit> sideloadedKit : mKitIntegrationFactory.sideloadedKits.entrySet()){
+                kitConfigurations.add(sideloadedKit.getValue().getConfiguration());
+            }
             for (KitConfiguration configuration : kitConfigurations) {
                 try {
                     int currentModuleID = configuration.getKitId();
@@ -1409,7 +1411,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         }
         for (Map.Entry<Integer, MPSideloadedKit> entry : mKitIntegrationFactory.sideloadedKits.entrySet()) {
             try {
-                configurations.add(((KitIntegration) entry.getValue().getKit()).getConfiguration());
+                configurations.add(((KitIntegration) entry.getValue()).getConfiguration());
             } catch (Exception e) {
             }
         }
