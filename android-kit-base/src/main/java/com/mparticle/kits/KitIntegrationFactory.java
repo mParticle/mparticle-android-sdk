@@ -1,11 +1,18 @@
 package com.mparticle.kits;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
+import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Logger;
+import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.SideloadedKit;
 
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -93,14 +100,45 @@ public class KitIntegrationFactory {
     }
 
     private void loadSideloadedIntegrations(MParticleOptions options) {
+        SharedPreferences prefs = options.getContext().getSharedPreferences(ConfigManager.KIT_CONFIG_PREFERENCES, Context.MODE_PRIVATE);
+        String oldConfig = prefs.getString(ConfigManager.KIT_CONFIG_KEY, "");
+        JSONArray array = new JSONArray();
+        if (!MPUtility.isEmpty(oldConfig)) {
+            try {
+                array = new JSONArray(oldConfig);
+            } catch (Exception jse) {
+
+            }
+        }
         for (SideloadedKit entry : options.getSideloadedKits()) {
             if (entry instanceof MPSideloadedKit && !knownIntegrations.containsKey(((MPSideloadedKit) entry).getConfiguration().getKitId())) {
                 int kitId = ((MPSideloadedKit) entry).getConfiguration().getKitId();
                 Class kitClazz = entry.getClass();
                 knownIntegrations.put(kitId, kitClazz.getName());
                 sideloadedKits.put(kitId, (MPSideloadedKit) entry);
+
+
+                try {
+                    boolean kitAdded = false;
+                    for (int i = 0; i < array.length(); i++) {
+                        JSONObject object = array.getJSONObject(i);
+                        if (object.getInt("id") == kitId) {
+                            kitAdded = true;
+                        }
+                    }
+                    if (!kitAdded) {
+                        JSONObject obj = new JSONObject();
+                        obj.put("id", kitId);
+                        array.put(obj);
+                        Logger.debug("Saving sideloaded kit with " + kitId + " to preferences.");
+                    }
+                } catch (JSONException e) {
+                    Logger.error("Error while trying to save sideloaded kit to preferences");
+                    throw new RuntimeException(e);
+                }
             }
         }
+        prefs.edit().putString(ConfigManager.KIT_CONFIG_KEY, array.toString()).apply();
     }
 
     private void loadIntegrations(MParticleOptions options) {

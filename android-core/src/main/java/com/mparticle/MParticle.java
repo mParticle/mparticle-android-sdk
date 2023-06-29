@@ -38,7 +38,6 @@ import com.mparticle.internal.InternalSession;
 import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPLocationListener;
-import com.mparticle.internal.MPSideloadedKit;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MParticleJSInterface;
 import com.mparticle.internal.MessageManager;

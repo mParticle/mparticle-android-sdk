@@ -70,7 +70,7 @@ public class ConfigManager {
     static final String DATAPLAN_BLOCK_EVENT_ATTRIBUTES = "ea";
     static final String DATAPLAN_BLOCK_USER_ATTRIBUTES = "ua";
     static final String DATAPLAN_BLOCK_USER_IDENTITIES = "id";
-    static final String KIT_CONFIG_KEY = "kit_config";
+    public static final String KIT_CONFIG_KEY = "kit_config";
     static final String MIGRATED_TO_KIT_SHARED_PREFS = "is_mig_kit_sp";
 
     private static final int DEVMODE_UPLOAD_INTERVAL_MILLISECONDS = 10 * 1000;
@@ -320,15 +320,31 @@ public class ConfigManager {
                     .putString(Constants.PrefKeys.IF_MODIFIED, lastModified)
                     .apply();
             if (kitConfigString == null || (kitConfigString != null && !kitConfigString.isEmpty())) {
-                getKitConfigPreferences()
-                        .edit()
-                        .putString(KIT_CONFIG_KEY, kitConfigString)
-                        .apply();
+                combineKitConfig(kitConfig);
             }
         } else {
             Logger.debug("clearing current configurations");
             clearConfig();
         }
+    }
+
+    void combineKitConfig(JSONArray kitConfig) {
+        SharedPreferences prefs = getKitConfigPreferences();
+        String config = prefs.getString(KIT_CONFIG_KEY, "");
+        if (!MPUtility.isEmpty(config)) {
+            try {
+                JSONArray array = new JSONArray(config);
+                for (int i = 0; i < array.length(); i++) {
+                    kitConfig.put(array.get(i));
+                }
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        getKitConfigPreferences()
+                .edit()
+                .putString(KIT_CONFIG_KEY, kitConfig.toString())
+                .apply();
     }
 
     void clearConfig() {

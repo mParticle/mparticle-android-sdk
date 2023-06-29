@@ -205,8 +205,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         HashMap<Integer, KitIntegration> previousKits = new HashMap<>(providers);
 
         if (kitConfigurations != null) {
-            for(Map.Entry<Integer, MPSideloadedKit> sideloadedKit : mKitIntegrationFactory.sideloadedKits.entrySet()){
+            for (Map.Entry<Integer, MPSideloadedKit> sideloadedKit : mKitIntegrationFactory.sideloadedKits.entrySet()) {
                 kitConfigurations.add(sideloadedKit.getValue().getConfiguration());
+                Logger.debug("Merging sideloaded kit " + sideloadedKit.getKey() + " to kits config while configuring kits");
             }
             for (KitConfiguration configuration : kitConfigurations) {
                 try {
