@@ -1,18 +1,11 @@
 package com.mparticle.kits;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
-import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Logger;
-import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.SideloadedKit;
 
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -22,12 +15,13 @@ import java.util.Set;
 public class KitIntegrationFactory {
 
     final Map<Integer, Class> supportedKits = new HashMap<>();
-    final Map<Integer, MPSideloadedKit> sideloadedKits = new HashMap<>();
-    private static int minSideloadedKitId = 10000000;
+    public static int minSideloadedKitId = 1000000;
     private static int sideloadedKitNextId = minSideloadedKitId;
     private Map<Integer, String> knownIntegrations = new HashMap<Integer, String>();
 
     public KitIntegrationFactory(MParticleOptions options) {
+        supportedKits.clear();
+        knownIntegrations.clear();
         setupKnownIntegrations();
         loadIntegrations(options);
     }
@@ -90,8 +84,7 @@ public class KitIntegrationFactory {
             try {
                 Constructor<KitIntegration> constructor = supportedKits.get(moduleId).getConstructor();
                 constructor.setAccessible(true);
-                return constructor.newInstance()
-                        .setKitManager(manager);
+                return constructor.newInstance().setKitManager(manager);
             } catch (Exception e) {
                 Logger.debug(e, "Failed to create Kit with ID: " + moduleId);
             }
@@ -100,45 +93,13 @@ public class KitIntegrationFactory {
     }
 
     private void loadSideloadedIntegrations(MParticleOptions options) {
-        SharedPreferences prefs = options.getContext().getSharedPreferences(ConfigManager.KIT_CONFIG_PREFERENCES, Context.MODE_PRIVATE);
-        String oldConfig = prefs.getString(ConfigManager.KIT_CONFIG_KEY, "");
-        JSONArray array = new JSONArray();
-        if (!MPUtility.isEmpty(oldConfig)) {
-            try {
-                array = new JSONArray(oldConfig);
-            } catch (Exception jse) {
-
-            }
-        }
         for (SideloadedKit entry : options.getSideloadedKits()) {
             if (entry instanceof MPSideloadedKit && !knownIntegrations.containsKey(((MPSideloadedKit) entry).getConfiguration().getKitId())) {
                 int kitId = ((MPSideloadedKit) entry).getConfiguration().getKitId();
                 Class kitClazz = entry.getClass();
                 knownIntegrations.put(kitId, kitClazz.getName());
-                sideloadedKits.put(kitId, (MPSideloadedKit) entry);
-
-
-                try {
-                    boolean kitAdded = false;
-                    for (int i = 0; i < array.length(); i++) {
-                        JSONObject object = array.getJSONObject(i);
-                        if (object.getInt("id") == kitId) {
-                            kitAdded = true;
-                        }
-                    }
-                    if (!kitAdded) {
-                        JSONObject obj = new JSONObject();
-                        obj.put("id", kitId);
-                        array.put(obj);
-                        Logger.debug("Saving sideloaded kit with " + kitId + " to preferences.");
-                    }
-                } catch (JSONException e) {
-                    Logger.error("Error while trying to save sideloaded kit to preferences");
-                    throw new RuntimeException(e);
-                }
             }
         }
-        prefs.edit().putString(ConfigManager.KIT_CONFIG_KEY, array.toString()).apply();
     }
 
     private void loadIntegrations(MParticleOptions options) {
@@ -179,6 +140,6 @@ public class KitIntegrationFactory {
     }
 
     public boolean isSupported(int kitModuleId) {
-        return supportedKits.containsKey(kitModuleId);
+        return supportedKits.containsKey(kitModuleId) || kitModuleId >= minSideloadedKitId;
     }
 }

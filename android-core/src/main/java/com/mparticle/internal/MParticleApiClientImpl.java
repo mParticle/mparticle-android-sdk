@@ -186,6 +186,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
             } else if (connection.getResponseCode() == 400) {
                 throw new MPConfigException();
             } else if (connection.getResponseCode() == 304) {
+                mConfigManager.configUpToDate();
                 Logger.verbose("Config request deferred, configuration already up-to-date.");
             } else {
                 Logger.error("Config request failed- " + connection.getResponseCode() + ": " + connection.getResponseMessage());

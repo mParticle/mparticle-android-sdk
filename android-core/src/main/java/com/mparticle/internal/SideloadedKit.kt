@@ -1,3 +1,7 @@
 package com.mparticle.internal
 
-interface SideloadedKit
+import org.json.JSONObject
+
+interface SideloadedKit {
+    fun getJsonConfig(): JSONObject?
+}

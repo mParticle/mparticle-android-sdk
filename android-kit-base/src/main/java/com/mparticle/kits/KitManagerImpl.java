@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.util.Log;
 
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
@@ -205,10 +206,6 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         HashMap<Integer, KitIntegration> previousKits = new HashMap<>(providers);
 
         if (kitConfigurations != null) {
-            for (Map.Entry<Integer, MPSideloadedKit> sideloadedKit : mKitIntegrationFactory.sideloadedKits.entrySet()) {
-                kitConfigurations.add(sideloadedKit.getValue().getConfiguration());
-                Logger.debug("Merging sideloaded kit " + sideloadedKit.getKey() + " to kits config while configuring kits");
-            }
             for (KitConfiguration configuration : kitConfigurations) {
                 try {
                     int currentModuleID = configuration.getKitId();
@@ -217,15 +214,21 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                         continue;
                     }
                     if (!mKitIntegrationFactory.isSupported(configuration.getKitId())) {
-                        Logger.debug("Kit id configured but is not bundled: " + currentModuleID);
                         continue;
                     }
                     KitIntegration activeKit = providers.get(currentModuleID);
                     if (activeKit == null) {
-                        activeKit = mKitIntegrationFactory.createInstance(KitManagerImpl.this, configuration);
-                        if (activeKit.isDisabled() ||
-                                !configuration.shouldIncludeFromConsentRules(user)) {
-                            Logger.debug("Kit id configured but is filtered or disabled: " + currentModuleID);
+                        boolean activeKitInstanceCreated = false;
+                        try {
+                            if (mKitIntegrationFactory.supportedKits.containsKey(configuration.getKitId())) {
+                                activeKit = mKitIntegrationFactory.createInstance(KitManagerImpl.this, configuration);
+                                activeKitInstanceCreated = activeKit != null;
+                            }} catch (Exception npe) {}
+                        if (!activeKitInstanceCreated && configuration.getKitId() >= KitIntegrationFactory.minSideloadedKitId) {
+                            Logger.verbose("De-initializing sideloaded kit with id: " + configuration.getKitId());
+                            continue;
+                        }
+                        if (!activeKitInstanceCreated || activeKit.isDisabled() || !configuration.shouldIncludeFromConsentRules(user)) {
                             continue;
                         }
                         activeIds.add(currentModuleID);
@@ -1409,12 +1412,6 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     mCoreCallbacks.getKitListener().kitExcluded(kitId, "exception while starting. Exception: " + e.getMessage());
                     Logger.error("Exception while starting kit: " + kitId + ": " + e.getMessage());
                 }
-            }
-        }
-        for (Map.Entry<Integer, MPSideloadedKit> entry : mKitIntegrationFactory.sideloadedKits.entrySet()) {
-            try {
-                configurations.add(((KitIntegration) entry.getValue()).getConfiguration());
-            } catch (Exception e) {
             }
         }
         return configurations;

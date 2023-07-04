@@ -9,7 +9,11 @@ abstract class MPSideloadedKit : KitIntegration() {
     }
 
     fun addFilters(filters: MPSideloadedFilters): MPSideloadedKit {
+        configuration = configuration.applyFilters(filters)
         return this
     }
 
+    private fun KitConfiguration.applyFilters(filters: MPSideloadedFilters): KitConfiguration {
+        return this
+    }
 }

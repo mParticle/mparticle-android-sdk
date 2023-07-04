@@ -87,5 +87,4 @@ class MPSideloadedFilters {
     fun addMessageTypeFilter(messageTypeConstant: String): MPSideloadedFilters {
         return this
     }
-
 }
