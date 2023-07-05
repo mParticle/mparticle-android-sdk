@@ -319,12 +319,10 @@ public class ConfigManager {
                     .putString(Constants.PrefKeys.ETAG, etag)
                     .putString(Constants.PrefKeys.IF_MODIFIED, lastModified)
                     .apply();
-            if (kitConfigString == null || (kitConfigString != null && !kitConfigString.isEmpty())) {
-                getKitConfigPreferences()
-                        .edit()
-                        .putString(KIT_CONFIG_KEY, kitConfigString)
-                        .apply();
-            }
+            getKitConfigPreferences()
+                    .edit()
+                    .putString(KIT_CONFIG_KEY, kitConfigString)
+                    .apply();
         } else {
             Logger.debug("clearing current configurations");
             clearConfig();
