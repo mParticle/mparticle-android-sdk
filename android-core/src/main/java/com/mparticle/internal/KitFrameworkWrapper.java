@@ -70,6 +70,7 @@ public class KitFrameworkWrapper implements KitManager {
                 KitManager kitManager = constructor.newInstance(mContext, mReportingManager, mCoreCallbacks, mOptions);
                 JSONArray configuration = mCoreCallbacks.getLatestKitConfiguration();
                 Logger.debug("Kit Framework loaded.");
+                this.mKitManager = kitManager;
                 if (!MPUtility.isEmpty(configuration)) {
                     Logger.debug("Restoring previous Kit configuration.");
                     kitManager
@@ -81,7 +82,6 @@ public class KitFrameworkWrapper implements KitManager {
                                     }
                             );
                 } else {
-                    mKitManager = kitManager;
                     updateDataplan(mCoreCallbacks.getDataplanOptions());
                 }
             } catch (Exception e) {

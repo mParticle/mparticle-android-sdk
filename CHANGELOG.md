@@ -1,3 +1,10 @@
+## [5.51.4](https://github.com/mParticle/mparticle-android-sdk/compare/v5.51.3...v5.51.4) (2023-07-05)
+
+
+### Bug Fixes
+
+* Kit Initialization & De-Initialization. ([#398](https://github.com/mParticle/mparticle-android-sdk/issues/398)) ([42560f1](https://github.com/mParticle/mparticle-android-sdk/commit/42560f153b7d5636dbbb5a8ef01040514ddccc8d))
+
 ## [5.51.3](https://github.com/mParticle/mparticle-android-sdk/compare/v5.51.2...v5.51.3) (2023-06-28)
 
 
