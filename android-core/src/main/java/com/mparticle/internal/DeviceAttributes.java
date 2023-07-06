@@ -59,7 +59,7 @@ public class DeviceAttributes {
 
     /**
      * Generates a collection of application attributes that will not change during an app's process.
-     * <p>
+     *
      * This contains logic that MUST only be called once per app run.
      *
      * @param appContext the application context
@@ -170,7 +170,7 @@ public class DeviceAttributes {
 
     /**
      * Generates a collection of device attributes that will not change during an app's process.
-     * <p>
+     *
      * This contains logic that MUST only be called once per app run.
      *
      * @param appContext the application context

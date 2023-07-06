@@ -137,7 +137,7 @@ public abstract class KitIntegration implements SideloadedKit {
     /**
      * Retrieve filtered user attributes. Use this method to retrieve user attributes at any time.
      * To ensure that filtering is respected, kits must use this method rather than the public API.
-     * <p>
+     *
      * If the KitIntegration implements the {@link AttributeListener} interface and returns true
      * for {@link AttributeListener#supportsAttributeLists()}, this method will pass back all attributes
      * as they are (as String values or as List&lt;String&gt; values). Otherwise, this method will comma-separate
@@ -414,7 +414,7 @@ public abstract class KitIntegration implements SideloadedKit {
 
         /**
          * Indicate to the mParticle Kit framework if this AttributeListener supports attribute-values as lists.
-         * <p>
+         * 
          * If an AttributeListener returns false, the setUserAttributeList method will never be called. Instead, setUserAttribute
          * will be called with the attribute-value lists combined as a csv.
          *
