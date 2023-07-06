@@ -228,7 +228,7 @@ class KitManagerImplTest {
             KitIntegrationFactory::class.java
         )
         manager.setKitFactory(factory)
-        Mockito.`when`(factory.getSupportedKits()).thenReturn(createKitsMap(listOf(1, 2,3)).keys)
+        Mockito.`when`(factory.getSupportedKits()).thenReturn(createKitsMap(listOf(1, 2, 3)).keys)
         Mockito.`when`(factory.isSupported(Mockito.anyInt())).thenReturn(true)
         val mockKit = Mockito.mock(KitIntegration::class.java)
         Mockito.`when`(mockKit.configuration).thenReturn(
@@ -525,7 +525,6 @@ class KitManagerImplTest {
 
     @Test
     fun testMParticleUpdateEmptyConfigKitWithKitOptions() {
-
         val sideloadedKit = Mockito.mock(MPSideloadedKit::class.java)
         Mockito.`when`(sideloadedKit.onKitCreate(Mockito.any(), Mockito.any())).thenReturn(null)
 
@@ -538,7 +537,7 @@ class KitManagerImplTest {
             .sideloadedKits(mutableListOf(sideloadedKit) as List<SideloadedKit>).build()
         val manager: KitManagerImpl = MockKitManagerImpl(options)
         val factory = Mockito.mock(KitIntegrationFactory::class.java)
-        Mockito.`when`(factory.getSupportedKits()).thenReturn( createKitsMap(listOf(kitId), MPSideloadedKit::class.java).keys)
+        Mockito.`when`(factory.getSupportedKits()).thenReturn(createKitsMap(listOf(kitId), MPSideloadedKit::class.java).keys)
         manager.setKitFactory(factory)
 
         Mockito.`when`(factory.isSupported(Mockito.anyInt())).thenReturn(true)
@@ -578,7 +577,7 @@ class KitManagerImplTest {
             KitIntegrationFactory::class.java
         )
         manager.setKitFactory(factory)
-        Mockito.`when`(factory.getSupportedKits()).thenReturn( createKitsMap(listOf(1, idOne, idTwo), MPSideloadedKit::class.java).keys)
+        Mockito.`when`(factory.getSupportedKits()).thenReturn(createKitsMap(listOf(1, idOne, idTwo), MPSideloadedKit::class.java).keys)
         Mockito.`when`(factory.isSupported(Mockito.anyInt())).thenReturn(true)
         val sideloadedKit = Mockito.mock(KitIntegration::class.java)
         Mockito.`when`(sideloadedKit.isDisabled).thenReturn(false)
@@ -617,7 +616,7 @@ class KitManagerImplTest {
             KitIntegrationFactory::class.java
         )
         manager.setKitFactory(factory)
-        Mockito.`when`(factory.getSupportedKits()).thenReturn( createKitsMap(listOf(1,2)).keys)
+        Mockito.`when`(factory.getSupportedKits()).thenReturn(createKitsMap(listOf(1, 2)).keys)
         Mockito.`when`(factory.isSupported(Mockito.anyInt())).thenReturn(true)
         val mockKit = Mockito.mock(KitIntegration::class.java)
         Mockito.`when`(mockKit.isDisabled).thenReturn(true)
