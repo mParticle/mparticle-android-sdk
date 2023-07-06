@@ -4,13 +4,17 @@ import org.json.JSONArray
 
 object SideloadedKitsUtils {
 
-    fun combineConfig(kitConfig: JSONArray, kits: List<SideloadedKit>): JSONArray {
+    fun combineConfig(kitConfig: JSONArray?, kits: List<SideloadedKit>): JSONArray {
+        var kitArray: JSONArray? = kitConfig
+        if (kitArray == null) {
+            kitArray = JSONArray()
+        }
         kits.forEach { kit ->
             kit.getJsonConfig()?.let {
-                kitConfig.put(it)
+                kitArray.put(it)
             } ?: kotlin.run { Logger.debug("Issue with kit ${kit.javaClass.simpleName}") }
         }
-        return kitConfig
+        return kitArray
     }
 
     fun removeSideloadedKitsAndCombine(kitConfig: JSONArray, kits: List<SideloadedKit>): JSONArray {

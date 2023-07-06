@@ -220,7 +220,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     if (activeKit == null) {
                         boolean activeKitInstanceCreated = false;
                         try {
-                            if (mKitIntegrationFactory.supportedKits.containsKey(configuration.getKitId())) {
+                            if (getSupportedKits().contains(configuration.getKitId())) {
                                 activeKit = mKitIntegrationFactory.createInstance(KitManagerImpl.this, configuration);
                                 activeKitInstanceCreated = activeKit != null;
                             }} catch (Exception npe) {}

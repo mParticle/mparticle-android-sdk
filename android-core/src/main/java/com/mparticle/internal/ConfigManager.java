@@ -151,6 +151,8 @@ public class ConfigManager {
         mMaxConfigAge = configMaxAge;
         if (sideloadedKits != null) {
             this.sideloadedKits = sideloadedKits;
+        } else {
+            this.sideloadedKits = new ArrayList<>();
         }
         if (configurations != null) {
             for (Configuration configuration : configurations) {

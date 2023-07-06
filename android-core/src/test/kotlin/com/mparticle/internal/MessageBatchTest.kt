@@ -27,6 +27,7 @@ class MessageBatchTest {
             null,
             null,
             null,
+            null,
             null
         )
         var sessionHistory = true
@@ -71,6 +72,7 @@ class MessageBatchTest {
             MParticle.Environment.Production,
             "some api key",
             "some api secret",
+            null,
             null,
             null,
             null,
