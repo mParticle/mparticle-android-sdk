@@ -695,14 +695,14 @@ class ConfigManagerTest {
         }
 
         // test defaults
-        Assert.assertNull(manager.config)
+        Assert.assertTrue(manager.config?.isEmpty()!!)
         Assert.assertNull(manager.etag)
         Assert.assertNull(manager.ifModified)
         Assert.assertNull(manager.configTimestamp)
 
         // test reload() does not set config
         manager.reloadCoreConfig(newConfigJson)
-        Assert.assertNull(manager.config)
+        Assert.assertTrue(manager.config?.isEmpty()!!)
         Assert.assertNull(manager.etag)
         Assert.assertNull(manager.ifModified)
         Assert.assertNull(manager.configTimestamp)

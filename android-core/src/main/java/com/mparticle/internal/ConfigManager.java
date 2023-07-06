@@ -283,7 +283,7 @@ public class ConfigManager {
 
     @Nullable
     String getConfig() {
-        return sPreferences.getString(CONFIG_JSON, null);
+        return sPreferences.getString(CONFIG_JSON, "");
     }
 
     void setConfigTimestamp(Long timestamp) {
