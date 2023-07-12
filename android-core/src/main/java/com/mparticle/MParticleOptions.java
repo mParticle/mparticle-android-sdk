@@ -435,7 +435,7 @@ public class MParticleOptions {
         }
 
         /**
-         * Add locsideloadedKitsal kits
+         * Add sideloaded kits
          *
          * @param kits
          * @return

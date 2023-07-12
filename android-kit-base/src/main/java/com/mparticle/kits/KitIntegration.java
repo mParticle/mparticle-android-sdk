@@ -33,7 +33,7 @@ import java.util.Map;
 /**
  * Base Kit implementation - all Kits must subclass this.
  */
-public abstract class KitIntegration implements SideloadedKit {
+public abstract class KitIntegration {
 
     private static final String KIT_PREFERENCES_FILE = "mp::kit::";
     private KitManagerImpl kitManager;
@@ -80,7 +80,6 @@ public abstract class KitIntegration implements SideloadedKit {
         return mKitConfiguration;
     }
 
-    @Override
     public JSONObject getJsonConfig() {
         if(mKitConfiguration!=null){
             return mKitConfiguration.convertToJsonObject();
