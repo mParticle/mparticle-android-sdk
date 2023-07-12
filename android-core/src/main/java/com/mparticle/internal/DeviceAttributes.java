@@ -47,19 +47,24 @@ public class DeviceAttributes {
     }
 
     private int getSideloadedKitsCount() {
-        Set<Integer> kits = MParticle.getInstance().Internal().getKitManager().getSupportedKits();
-        int count = 0;
-        for (Integer kitId : kits) {
-            if (kitId >= 1000000) {
-                count++;
+        try {
+            Set<Integer> kits = MParticle.getInstance().Internal().getKitManager().getSupportedKits();
+            int count = 0;
+            for (Integer kitId : kits) {
+                if (kitId >= 1000000) {
+                    count++;
+                }
             }
+            return count;
+        } catch (Exception e) {
+            Logger.debug("Exception while adding sideloadedKitsCount to Device Attribute");
+            return 0;
         }
-        return count;
     }
 
     /**
      * Generates a collection of application attributes that will not change during an app's process.
-     *
+     * <p>
      * This contains logic that MUST only be called once per app run.
      *
      * @param appContext the application context
@@ -170,7 +175,7 @@ public class DeviceAttributes {
 
     /**
      * Generates a collection of device attributes that will not change during an app's process.
-     *
+     * <p>
      * This contains logic that MUST only be called once per app run.
      *
      * @param appContext the application context
