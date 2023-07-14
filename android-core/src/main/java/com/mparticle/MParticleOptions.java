@@ -442,7 +442,15 @@ public class MParticleOptions {
          */
         @NonNull
         public Builder sideloadedKits(@NonNull List<SideloadedKit> kits) {
-            this.sideloadedKits = kits;
+            List<SideloadedKit> _kits = new ArrayList<>();
+            for (SideloadedKit kit : kits) {
+                if (kit.kitId() < 1000000) {
+                    Logger.error("Sideloaded kit " + kit.getName() + " must have a kitId greater or equal than 1000000, current one is " + kit.kitId() + " and will not be included.");
+                } else {
+                    _kits.add(kit);
+                }
+            }
+            this.sideloadedKits = _kits;
             return this;
         }
 

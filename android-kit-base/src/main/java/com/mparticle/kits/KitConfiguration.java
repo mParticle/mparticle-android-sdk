@@ -461,7 +461,7 @@ public class KitConfiguration {
     }
 
     public KitConfiguration parseConfiguration(JSONObject json) throws JSONException {
-        kitId = json.optInt(KEY_ID, KitIntegrationFactory.getSideloadedKitId());
+        kitId = json.optInt(KEY_ID);
         if (json.has(KEY_ATTRIBUTE_VALUE_FILTERING)) {
             avfIsActive = true;
             try {

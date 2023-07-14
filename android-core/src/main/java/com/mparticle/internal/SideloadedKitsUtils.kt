@@ -5,32 +5,26 @@ import org.json.JSONArray
 object SideloadedKitsUtils {
 
     fun combineConfig(kitConfig: JSONArray?, kits: List<SideloadedKit>): JSONArray {
-        var kitArray: JSONArray? = kitConfig
-        if (kitArray == null) {
-            kitArray = JSONArray()
-        }
-        kits.forEach { kit ->
-            kit.getJsonConfig()?.let {
-                kitArray.put(it)
-            } ?: kotlin.run { Logger.debug("Issue with kit ${kit.javaClass.simpleName}") }
-        }
-        return kitArray
-    }
-
-    fun removeSideloadedKitsAndCombine(kitConfig: JSONArray, kits: List<SideloadedKit>): JSONArray {
         var results = JSONArray()
-        if (!kits.isEmpty()) {
-            val sideloadedIds = kits.map { it.getJsonConfig()?.optInt("id", -100) }
+        var addedIds = mutableSetOf<Int>()
+        kitConfig?.let { kitConfig ->
             for (i in 0 until kitConfig.length()) {
-                val obj = kitConfig.getJSONObject(i)
-                val id = obj.optInt("id", -1)
-                if (id != -1 && !sideloadedIds.contains(id)) {
-                    results.put(obj)
+                val kit = kitConfig.getJSONObject(i)
+                val id = kit.optInt("id", -1)
+                if (id != -1 && id < 1000000 && !addedIds.contains(id)) {
+                    results.put(kit)
+                    addedIds.add(id)
                 }
             }
-        } else {
-            results = kitConfig
         }
-        return combineConfig(results, kits)
+        kits.forEach { kit ->
+            if (!addedIds.contains(kit.kitId())) {
+                kit.getJsonConfig()?.let {
+                    results.put(it)
+                    addedIds.add(kit.kitId())
+                }
+            }
+        }
+        return results
     }
 }

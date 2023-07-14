@@ -357,7 +357,7 @@ public class ConfigManager {
             String config = getKitConfigPreferences().getString(KIT_CONFIG_KEY, "");
             if (!config.isEmpty()) {
                 JSONArray kitConfig = new JSONArray(config);
-                JSONArray combined = SideloadedKitsUtils.INSTANCE.removeSideloadedKitsAndCombine(kitConfig, sideloadedKits);
+                JSONArray combined = SideloadedKitsUtils.INSTANCE.combineConfig(kitConfig, sideloadedKits);
                 getKitConfigPreferences()
                         .edit()
                         .putString(KIT_CONFIG_KEY, combined.toString())

@@ -15,19 +15,14 @@ import java.util.Set;
 public class KitIntegrationFactory {
 
     final Map<Integer, Class> supportedKits = new HashMap<>();
-    public static int minSideloadedKitId = 1000000;
-    private static int sideloadedKitNextId = minSideloadedKitId;
     private Map<Integer, String> knownIntegrations = new HashMap<Integer, String>();
+    private Map<Integer, MPSideloadedKit> sideloadedKitMap = new HashMap<>();
 
     public KitIntegrationFactory(MParticleOptions options) {
         supportedKits.clear();
         knownIntegrations.clear();
         setupKnownIntegrations();
         loadIntegrations(options);
-    }
-
-    public static int getSideloadedKitId() {
-        return sideloadedKitNextId++;
     }
 
     /**
@@ -72,7 +67,15 @@ public class KitIntegrationFactory {
     }
 
     public KitIntegration createInstance(KitManagerImpl manager, KitConfiguration configuration) throws JSONException, ClassNotFoundException {
-        KitIntegration kit = createInstance(manager, configuration.getKitId());
+        KitIntegration kit;
+        if (configuration.getKitId() >= MPSideloadedKit.MIN_SIDELOADED_KIT) {
+            kit = sideloadedKitMap.get(configuration.getKitId());
+            if (kit != null && kit.getKitManager() == null) {
+                kit.setKitManager(manager);
+            }
+        } else {
+            kit = createInstance(manager, configuration.getKitId());
+        }
         if (kit != null) {
             kit.setConfiguration(configuration);
         }
@@ -93,11 +96,13 @@ public class KitIntegrationFactory {
     }
 
     private void loadSideloadedIntegrations(MParticleOptions options) {
+        sideloadedKitMap.clear();
         for (SideloadedKit entry : options.getSideloadedKits()) {
-            if (entry instanceof MPSideloadedKit && !knownIntegrations.containsKey(((MPSideloadedKit) entry).getConfiguration().getKitId())) {
+            if (entry instanceof MPSideloadedKit && !supportedKits.containsKey(((MPSideloadedKit) entry).getConfiguration().getKitId())) {
                 int kitId = ((MPSideloadedKit) entry).getConfiguration().getKitId();
-                Class kitClazz = entry.getClass();
-                knownIntegrations.put(kitId, kitClazz.getName());
+                supportedKits.put(kitId, entry.getClass());
+                sideloadedKitMap.put(kitId, (MPSideloadedKit) entry);
+                Logger.debug(((MPSideloadedKit) entry).getName() + " detected with kit id " + kitId);
             }
         }
     }
@@ -140,6 +145,6 @@ public class KitIntegrationFactory {
     }
 
     public boolean isSupported(int kitModuleId) {
-        return supportedKits.containsKey(kitModuleId) || kitModuleId >= minSideloadedKitId;
+        return supportedKits.containsKey(kitModuleId) || kitModuleId >= MPSideloadedKit.MIN_SIDELOADED_KIT;
     }
 }

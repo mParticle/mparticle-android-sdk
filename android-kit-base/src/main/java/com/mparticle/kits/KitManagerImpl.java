@@ -223,8 +223,10 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                             if (getSupportedKits().contains(configuration.getKitId())) {
                                 activeKit = mKitIntegrationFactory.createInstance(KitManagerImpl.this, configuration);
                                 activeKitInstanceCreated = activeKit != null;
-                            }} catch (Exception npe) {}
-                        if (!activeKitInstanceCreated && configuration.getKitId() >= KitIntegrationFactory.minSideloadedKitId) {
+                            }
+                        } catch (Exception npe) {
+                        }
+                        if (!activeKitInstanceCreated && configuration.getKitId() >= MPSideloadedKit.MIN_SIDELOADED_KIT) {
                             Logger.verbose("De-initializing sideloaded kit with id: " + configuration.getKitId());
                             continue;
                         }

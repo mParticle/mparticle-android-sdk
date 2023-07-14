@@ -495,7 +495,7 @@ class KitManagerImplTest {
     fun testMParticleConfigureKitsFromOptions() {
         val sideloadedKit = Mockito.mock(MPSideloadedKit::class.java)
         Mockito.`when`(sideloadedKit.onKitCreate(Mockito.any(), Mockito.any())).thenReturn(null)
-        val kitId = KitIntegrationFactory.getSideloadedKitId()
+        val kitId = 6000000
         val configJSONObj = JSONObject().apply { put("id", kitId) }
         val mockedKitConfig = KitConfiguration.createKitConfiguration(configJSONObj)
         Mockito.`when`(sideloadedKit.configuration).thenReturn(mockedKitConfig)
@@ -528,7 +528,7 @@ class KitManagerImplTest {
         val sideloadedKit = Mockito.mock(MPSideloadedKit::class.java)
         Mockito.`when`(sideloadedKit.onKitCreate(Mockito.any(), Mockito.any())).thenReturn(null)
 
-        val kitId = KitIntegrationFactory.getSideloadedKitId()
+        val kitId = 6000000
         val configJSONObj = JSONObject().apply { put("id", kitId) }
         val mockedKitConfig = KitConfiguration.createKitConfiguration(configJSONObj)
         Mockito.`when`(sideloadedKit.configuration).thenReturn(mockedKitConfig)
@@ -564,8 +564,8 @@ class KitManagerImplTest {
     @Test
     fun testSideloadedKitAdded() {
         val manager: KitManagerImpl = MockKitManagerImpl()
-        val idOne = KitIntegrationFactory.getSideloadedKitId()
-        val idTwo = KitIntegrationFactory.getSideloadedKitId()
+        val idOne = 6000000
+        val idTwo = 6000001
         val kitConfiguration = JSONArray()
             .apply {
                 put(JSONObject().apply { put("id", 1) })
