@@ -494,7 +494,6 @@ class KitManagerImplTest {
     @Test
     fun testMParticleConfigureKitsFromOptions() {
         val sideloadedKit = Mockito.mock(MPSideloadedKit::class.java)
-        Mockito.`when`(sideloadedKit.onKitCreate(Mockito.any(), Mockito.any())).thenReturn(null)
         val kitId = 6000000
         val configJSONObj = JSONObject().apply { put("id", kitId) }
         val mockedKitConfig = KitConfiguration.createKitConfiguration(configJSONObj)
@@ -526,8 +525,6 @@ class KitManagerImplTest {
     @Test
     fun testMParticleUpdateEmptyConfigKitWithKitOptions() {
         val sideloadedKit = Mockito.mock(MPSideloadedKit::class.java)
-        Mockito.`when`(sideloadedKit.onKitCreate(Mockito.any(), Mockito.any())).thenReturn(null)
-
         val kitId = 6000000
         val configJSONObj = JSONObject().apply { put("id", kitId) }
         val mockedKitConfig = KitConfiguration.createKitConfiguration(configJSONObj)
