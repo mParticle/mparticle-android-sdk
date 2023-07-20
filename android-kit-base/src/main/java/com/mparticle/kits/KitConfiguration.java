@@ -33,20 +33,20 @@ public class KitConfiguration {
     private final static int ENTITY_PRODUCT = 1;
     private final static int ENTITY_PROMOTION = 2;
     final static String KEY_ID = "id";
-    private final static String KEY_ATTRIBUTE_VALUE_FILTERING = "avf";
+    final static String KEY_ATTRIBUTE_VALUE_FILTERING = "avf";
     private final static String KEY_PROPERTIES = "as";
     private final static String KEY_FILTERS = "hs";
     private final static String KEY_BRACKETING = "bk";
     private final static String KEY_ATTRIBUTE_VALUE_FILTERING_SHOULD_INCLUDE_MATCHES = "i";
-    private final static String KEY_ATTRIBUTE_VALUE_FILTERING_ATTRIBUTE= "a";
-    private final static String KEY_ATTRIBUTE_VALUE_FILTERING_VALUE= "v";
-    private final static String KEY_EVENT_TYPES_FILTER = "et";
-    private final static String KEY_EVENT_NAMES_FILTER = "ec";
-    private final static String KEY_EVENT_ATTRIBUTES_FILTER = "ea";
-    private final static String KEY_SCREEN_NAME_FILTER = "svec";
-    private final static String KEY_SCREEN_ATTRIBUTES_FILTER = "svea";
-    private final static String KEY_USER_IDENTITY_FILTER = "uid";
-    private final static String KEY_USER_ATTRIBUTE_FILTER = "ua";
+    final static String KEY_ATTRIBUTE_VALUE_FILTERING_ATTRIBUTE = "a";
+    private final static String KEY_ATTRIBUTE_VALUE_FILTERING_VALUE = "v";
+    final static String KEY_EVENT_TYPES_FILTER = "et";
+    final static String KEY_EVENT_NAMES_FILTER = "ec";
+    final static String KEY_EVENT_ATTRIBUTES_FILTER = "ea";
+    final static String KEY_SCREEN_NAME_FILTER = "svec";
+    final static String KEY_SCREEN_ATTRIBUTES_FILTER = "svea";
+    final static String KEY_USER_IDENTITY_FILTER = "uid";
+    final static String KEY_USER_ATTRIBUTE_FILTER = "ua";
     private final static String KEY_EVENT_ATTRIBUTE_ADD_USER = "eaa";
     private final static String KEY_EVENT_ATTRIBUTE_REMOVE_USER = "ear";
     private final static String KEY_EVENT_ATTRIBUTE_SINGLE_ITEM_USER = "eas";
@@ -56,8 +56,8 @@ public class KitConfiguration {
     private final static String KEY_COMMERCE_ENTITY_FILTERS = "ent";
     private final static String KEY_COMMERCE_ENTITY_ATTRIBUTE_FILTERS = "afa";
     private final static String KEY_CONSENT_FORWARDING_RULES = "crvf";
-    private final static String KEY_CONSENT_FORWARDING_RULES_SHOULD_INCLUDE_MATCHES = "i";
-    private final static String KEY_CONSENT_FORWARDING_RULES_ARRAY = "v";
+    final static String KEY_CONSENT_FORWARDING_RULES_SHOULD_INCLUDE_MATCHES = "i";
+    final static String KEY_CONSENT_FORWARDING_RULES_ARRAY = "v";
     private final static String KEY_CONSENT_FORWARDING_RULES_VALUE_CONSENTED = "c";
     private final static String KEY_CONSENT_FORWARDING_RULES_VALUE_HASH = "h";
     private final static String KEY_EXCLUDE_ANONYMOUS_USERS = "eau";
@@ -114,8 +114,346 @@ public class KitConfiguration {
         return mScreenAttributeFilters;
     }
 
-    public static KitConfiguration createKitConfiguration(JSONObject json) throws JSONException{
+    public static KitConfiguration createKitConfiguration(JSONObject json) throws JSONException {
         return new KitConfiguration().parseConfiguration(json);
+    }
+
+    public KitConfiguration applySideloadedKits(MPSideloadedFilters sideloadedFilters) {
+        Map<String, JSONObject> sideloadedFiltersMap = sideloadedFilters.getFilters();
+        if (sideloadedFiltersMap.containsKey(KEY_ATTRIBUTE_VALUE_FILTERING)) {
+            JSONObject avfShouldIncludeMatchesJSONObject = sideloadedFiltersMap.get(KEY_ATTRIBUTE_VALUE_FILTERING);
+            if (avfShouldIncludeMatchesJSONObject.has(KEY_ATTRIBUTE_VALUE_FILTERING_SHOULD_INCLUDE_MATCHES)) {
+                try {
+                    this.avfShouldIncludeMatches = avfShouldIncludeMatchesJSONObject.getBoolean(KEY_ATTRIBUTE_VALUE_FILTERING_SHOULD_INCLUDE_MATCHES);
+                } catch (JSONException e) {
+                }
+            }
+            if (avfShouldIncludeMatchesJSONObject.has(KEY_ATTRIBUTE_VALUE_FILTERING_ATTRIBUTE)) {
+                try {
+                    this.avfHashedAttribute = avfShouldIncludeMatchesJSONObject.getInt(KEY_ATTRIBUTE_VALUE_FILTERING_ATTRIBUTE);
+                } catch (JSONException e) {
+                }
+            }
+            if (avfShouldIncludeMatchesJSONObject.has(KEY_ATTRIBUTE_VALUE_FILTERING_VALUE)) {
+                try {
+                    this.avfHashedValue = avfShouldIncludeMatchesJSONObject.getInt(KEY_ATTRIBUTE_VALUE_FILTERING_VALUE);
+                } catch (JSONException e) {
+                }
+            }
+        }
+
+        if (sideloadedFiltersMap.containsKey(KEY_EVENT_TYPES_FILTER)) {
+            try {
+                JSONObject typeFiltersSparseArray = sideloadedFiltersMap.get(KEY_EVENT_TYPES_FILTER);
+                if (typeFiltersSparseArray != null && typeFiltersSparseArray.length() > 0) {
+                    this.mTypeFilters = convertToSparseArray(typeFiltersSparseArray);
+                }
+            } catch (Exception e) {
+            }
+        }
+
+        if (sideloadedFiltersMap.containsKey(KEY_EVENT_NAMES_FILTER)) {
+            try {
+                JSONObject nameFiltersSparseArray = sideloadedFiltersMap.get(KEY_EVENT_NAMES_FILTER);
+                if (nameFiltersSparseArray != null && nameFiltersSparseArray.length() > 0) {
+                    this.mNameFilters = convertToSparseArray(nameFiltersSparseArray);
+                }
+            } catch (Exception e) {
+            }
+        }
+
+        if (sideloadedFiltersMap.containsKey(KEY_EVENT_ATTRIBUTES_FILTER)) {
+            try {
+                JSONObject attrFiltersSparseArray = sideloadedFiltersMap.get(KEY_EVENT_ATTRIBUTES_FILTER);
+                if (attrFiltersSparseArray != null && attrFiltersSparseArray.length() > 0) {
+                    this.mAttributeFilters = convertToSparseArray(attrFiltersSparseArray);
+                }
+            } catch (Exception e) {
+            }
+        }
+
+        if (sideloadedFiltersMap.containsKey(KEY_SCREEN_NAME_FILTER)) {
+            try {
+                JSONObject screenNameFilterSparseArray = sideloadedFiltersMap.get(KEY_SCREEN_NAME_FILTER);
+                if (screenNameFilterSparseArray != null && screenNameFilterSparseArray.length() > 0) {
+                    this.mScreenNameFilters = convertToSparseArray(screenNameFilterSparseArray);
+                }
+            } catch (Exception e) {
+            }
+        }
+
+        if (sideloadedFiltersMap.containsKey(KEY_SCREEN_ATTRIBUTES_FILTER)) {
+            try {
+                JSONObject screenAttrFilterSparseArray = sideloadedFiltersMap.get(KEY_SCREEN_ATTRIBUTES_FILTER);
+                if (screenAttrFilterSparseArray != null && screenAttrFilterSparseArray.length() > 0) {
+                    this.mScreenAttributeFilters = convertToSparseArray(screenAttrFilterSparseArray);
+                }
+            } catch (Exception e) {
+            }
+        }
+
+        if (sideloadedFiltersMap.containsKey(KEY_USER_IDENTITY_FILTER)) {
+            try {
+                JSONObject userIdentityFilterSparseArray = sideloadedFiltersMap.get(KEY_USER_IDENTITY_FILTER);
+                if (userIdentityFilterSparseArray != null && userIdentityFilterSparseArray.length() > 0) {
+                    this.mUserIdentityFilters = convertToSparseArray(userIdentityFilterSparseArray);
+                }
+            } catch (Exception e) {
+            }
+        }
+
+        if (sideloadedFiltersMap.containsKey(KEY_COMMERCE_ATTRIBUTE_FILTER)) {
+            try {
+                JSONObject commerceAttrFilterSparseArray = sideloadedFiltersMap.get(KEY_COMMERCE_ATTRIBUTE_FILTER);
+                if (commerceAttrFilterSparseArray != null && commerceAttrFilterSparseArray.length() > 0) {
+                    this.mCommerceAttributeFilters = convertToSparseArray(commerceAttrFilterSparseArray);
+                }
+            } catch (Exception e) {
+            }
+        }
+
+        if (sideloadedFiltersMap.containsKey(KEY_COMMERCE_ENTITY_FILTERS)) {
+            try {
+                JSONObject commerceEntityFilterSparseArray = sideloadedFiltersMap.get(KEY_COMMERCE_ENTITY_FILTERS);
+                if (commerceEntityFilterSparseArray != null && commerceEntityFilterSparseArray.length() > 0) {
+                    this.mCommerceAttributeFilters = convertToSparseArray(commerceEntityFilterSparseArray);
+                }
+            } catch (Exception e) {
+            }
+        }
+
+        if (sideloadedFiltersMap.containsKey(KEY_EVENT_ATTRIBUTE_ADD_USER)) {
+            try {
+                JSONObject attrAddToUserMap = sideloadedFiltersMap.get(KEY_EVENT_ATTRIBUTE_ADD_USER);
+                if (attrAddToUserMap != null && attrAddToUserMap.length() > 0) {
+                    this.mAttributeAddToUser = convertToSparseMap(attrAddToUserMap);
+                }
+            } catch (Exception e) {
+            }
+        }
+
+        if (sideloadedFiltersMap.containsKey(KEY_EVENT_ATTRIBUTE_REMOVE_USER)) {
+            try {
+                JSONObject attrRemovalFromUserMap = sideloadedFiltersMap.get(KEY_EVENT_ATTRIBUTE_REMOVE_USER);
+                if (attrRemovalFromUserMap != null && attrRemovalFromUserMap.length() > 0) {
+                    this.mAttributeRemoveFromUser = convertToSparseMap(attrRemovalFromUserMap);
+                }
+            } catch (Exception e) {
+            }
+        }
+
+        if (sideloadedFiltersMap.containsKey(KEY_EVENT_ATTRIBUTE_SINGLE_ITEM_USER)) {
+            try {
+                JSONObject attrSingleItemUserMap = sideloadedFiltersMap.get(KEY_EVENT_ATTRIBUTE_SINGLE_ITEM_USER);
+                if (attrSingleItemUserMap != null && attrSingleItemUserMap.length() > 0) {
+                    this.mAttributeSingleItemUser = convertToSparseMap(attrSingleItemUserMap);
+                }
+            } catch (Exception e) {
+            }
+        }
+
+        return this;
+    }
+
+    public SparseBooleanArray getValueFromSideloadedFilterToSparseArray(Map<String, JSONObject> sideloadedFiltersMap, String key) {
+        SparseBooleanArray result = null;
+        JSONObject value = sideloadedFiltersMap.get(key);
+        if (value != null && value.length() > 0) {
+            result = convertToSparseArray(value);
+        }
+        return result;
+    }
+
+    public Map<Integer, String> getValueFromSideloadedFilterToMap(Map<String, JSONObject> sideloadedFiltersMap, String key) {
+        Map<Integer, String> result = null;
+        JSONObject value = sideloadedFiltersMap.get(key);
+        if (value != null && value.length() > 0) {
+            result = convertToSparseMap(value);
+        }
+        return result;
+    }
+
+    private JSONObject getKeyFilters() throws JSONException {
+        JSONObject keyFilters = new JSONObject();
+        JSONObject typeFilters = convertSparseArrayToJsonObject(this.mTypeFilters);
+        if (typeFilters != null) {
+            keyFilters.put(KEY_EVENT_TYPES_FILTER, typeFilters);
+        }
+
+        JSONObject mNameFilters = convertSparseArrayToJsonObject(this.mNameFilters);
+        if (mNameFilters != null) {
+            keyFilters.put(KEY_EVENT_NAMES_FILTER, mNameFilters);
+        }
+
+        JSONObject mAttributeFilters = convertSparseArrayToJsonObject(this.mAttributeFilters);
+        if (mAttributeFilters != null) {
+            keyFilters.put(KEY_EVENT_ATTRIBUTES_FILTER, mAttributeFilters);
+        }
+
+        JSONObject mScreenNameFilters = convertSparseArrayToJsonObject(this.mScreenNameFilters);
+        if (mScreenNameFilters != null) {
+            keyFilters.put(KEY_SCREEN_NAME_FILTER, mScreenNameFilters);
+        }
+
+        JSONObject mScreenAttributeFilters = convertSparseArrayToJsonObject(this.mScreenAttributeFilters);
+        if (mScreenAttributeFilters != null) {
+            keyFilters.put(KEY_SCREEN_ATTRIBUTES_FILTER, mScreenAttributeFilters);
+        }
+
+        JSONObject mUserIdentityFilters = convertSparseArrayToJsonObject(this.mUserIdentityFilters);
+        if (mUserIdentityFilters != null) {
+            keyFilters.put(KEY_USER_IDENTITY_FILTER, mUserIdentityFilters);
+        }
+
+        JSONObject mCommerceAttributeFilters = convertSparseArrayToJsonObject(this.mCommerceAttributeFilters);
+        if (mCommerceAttributeFilters != null) {
+            keyFilters.put(KEY_COMMERCE_ATTRIBUTE_FILTER, mCommerceAttributeFilters);
+        }
+
+        JSONObject mCommerceEntityFilters = convertSparseArrayToJsonObject(this.mCommerceEntityFilters);
+        if (mCommerceEntityFilters != null) {
+            keyFilters.put(KEY_COMMERCE_ENTITY_FILTERS, mCommerceEntityFilters);
+        }
+
+        JSONObject mAttributeAddToUser = convertSparseMapToJsonObject(this.mAttributeAddToUser);
+        if (mAttributeAddToUser != null) {
+            keyFilters.put(KEY_EVENT_ATTRIBUTE_ADD_USER, mAttributeAddToUser);
+        }
+
+        JSONObject mAttributeRemoveFromUser = convertSparseMapToJsonObject(this.mAttributeRemoveFromUser);
+        if (mAttributeRemoveFromUser != null) {
+            keyFilters.put(KEY_EVENT_ATTRIBUTE_REMOVE_USER, mAttributeRemoveFromUser);
+        }
+
+        JSONObject mAttributeSingleItemUser = convertSparseMapToJsonObject(this.mAttributeSingleItemUser);
+        if (mAttributeSingleItemUser != null) {
+            keyFilters.put(KEY_EVENT_ATTRIBUTE_SINGLE_ITEM_USER, mAttributeSingleItemUser);
+        }
+        if (this.mCommerceEntityAttributeFilters != null && !this.mCommerceEntityAttributeFilters.isEmpty()) {
+            JSONObject entityFilter = new JSONObject();
+            for (Map.Entry<Integer, SparseBooleanArray> entity : this.mCommerceEntityAttributeFilters.entrySet()) {
+                JSONObject convertedObj = convertSparseArrayToJsonObject(entity.getValue());
+                entityFilter.put(Integer.toString(entity.getKey()), convertedObj);
+            }
+            keyFilters.put(KEY_COMMERCE_ENTITY_ATTRIBUTE_FILTERS, entityFilter);
+        }
+        return keyFilters;
+    }
+
+    private JSONObject getBracketing() throws JSONException {
+        JSONObject bracketing = new JSONObject();
+        if (this.lowBracket != 0) {
+            bracketing.put(KEY_BRACKETING_LOW, this.lowBracket);
+        }
+        if (this.highBracket != 101) {
+            bracketing.put(KEY_BRACKETING_HIGH, this.highBracket);
+        }
+        return bracketing;
+    }
+
+    private JSONArray getCustomMapping() {
+        JSONArray array = new JSONArray();
+        for (CustomMapping mapping : this.customMappingList) {
+            JSONObject rawJson = mapping.rawJsonProjection;
+            if (rawJson != null) {
+                array.put(rawJson);
+            }
+        }
+        return array;
+    }
+
+    private JSONObject getConsentRules() throws JSONException {
+        JSONObject consent = new JSONObject();
+        consent.put(KEY_CONSENT_FORWARDING_RULES_SHOULD_INCLUDE_MATCHES, this.consentForwardingIncludeMatches);
+        JSONArray consentArray = new JSONArray();
+        for (Map.Entry<Integer, Boolean> entry : this.mConsentForwardingRules.entrySet()) {
+            JSONObject consentObj = new JSONObject();
+            consentObj.put(KEY_CONSENT_FORWARDING_RULES_VALUE_HASH, entry.getKey());
+            consentObj.put(KEY_CONSENT_FORWARDING_RULES_VALUE_CONSENTED, entry.getValue());
+            consentArray.put(consentObj);
+        }
+        consent.put(KEY_CONSENT_FORWARDING_RULES_ARRAY, consentArray);
+        return consent;
+    }
+
+    private JSONObject getAttributeValueFiltering() throws JSONException {
+        JSONObject filtering = new JSONObject();
+        filtering.put(KEY_ATTRIBUTE_VALUE_FILTERING_SHOULD_INCLUDE_MATCHES, this.avfShouldIncludeMatches);
+        filtering.put(KEY_ATTRIBUTE_VALUE_FILTERING_ATTRIBUTE, this.avfHashedAttribute);
+        filtering.put(KEY_ATTRIBUTE_VALUE_FILTERING_VALUE, this.avfHashedValue);
+        return filtering;
+    }
+
+    public JSONObject convertToJsonObject() {
+        JSONObject object = new JSONObject();
+        try {
+            object.put(KEY_ID, this.kitId);
+
+            if (this.avfIsActive) {
+                JSONObject filtering = getAttributeValueFiltering();
+                object.put(KEY_ATTRIBUTE_VALUE_FILTERING, filtering);
+            }
+
+            if (!this.settings.isEmpty()) {
+                object.put(KEY_PROPERTIES, this.settings.toString());
+            }
+
+            JSONObject keyFilters = getKeyFilters();
+            if (keyFilters.length() > 0) {
+                object.put(KEY_FILTERS, keyFilters);
+            }
+
+            JSONObject bracketing = getBracketing();
+            if (bracketing.length() > 0) {
+                object.put(KEY_BRACKETING, bracketing);
+            }
+
+            JSONArray customMapping = getCustomMapping();
+            if (customMapping.length() > 0) {
+                object.put(KEY_PROJECTIONS, customMapping);
+            }
+
+            if (this.mConsentForwardingRules != null && !this.mConsentForwardingRules.isEmpty()) {
+                JSONObject consent = getConsentRules();
+                object.put(KEY_CONSENT_FORWARDING_RULES, consent);
+            }
+
+            object.put(KEY_EXCLUDE_ANONYMOUS_USERS, this.mExcludeAnonymousUsers);
+        } catch (JSONException jse) {
+            Logger.error("Issue while converting KitConfigurationToJsonObject: ");
+        }
+        return object;
+    }
+
+    private static JSONObject convertSparseMapToJsonObject(Map<Integer, String> map) throws JSONException {
+        if (map == null || map.size() == 0) {
+            return null;
+        }
+        JSONObject obj = new JSONObject();
+        for (Map.Entry<Integer, String> entry : map.entrySet()) {
+            try {
+            obj.put(Integer.toString(entry.getKey()), entry.getValue());
+            } catch (JSONException jse) {
+                Logger.error("Issue while parsing kit configuration: " + jse.getMessage());
+            }
+        }
+        return obj;
+    }
+
+    public static JSONObject convertSparseArrayToJsonObject(SparseBooleanArray array) throws JSONException {
+        if (array == null || array.size() == 0) {
+            return null;
+        }
+        JSONObject object = new JSONObject();
+        for (int i = 0; i < array.size(); i++) {
+            int key = array.keyAt(i);
+            try {
+            object.put(Integer.toString(key), array.get(key));
+            } catch (JSONException jse) {
+                Logger.error("Issue while parsing kit configuration: " + jse.getMessage());
+            }
+        }
+        return object;
     }
 
     public KitConfiguration() {
@@ -123,7 +461,7 @@ public class KitConfiguration {
     }
 
     public KitConfiguration parseConfiguration(JSONObject json) throws JSONException {
-        kitId = json.getInt(KEY_ID);
+        kitId = json.optInt(KEY_ID);
         if (json.has(KEY_ATTRIBUTE_VALUE_FILTERING)) {
             avfIsActive = true;
             try {
@@ -329,7 +667,7 @@ public class KitConfiguration {
             if (consented != null && consented == ccpaConsent.isConsented()) {
                 return true;
             }
-         }
+        }
         return false;
     }
 
@@ -489,7 +827,7 @@ public class KitConfiguration {
                 && attributes.size() > 0) {
             Map newAttributes = new HashMap(attributes.size());
             for (Map.Entry<String, ?> attribute : attributes.entrySet()) {
-                if ( shouldForwardAttribute(attributeFilters, attribute.getKey())) {
+                if (shouldForwardAttribute(attributeFilters, attribute.getKey())) {
                     newAttributes.put(attribute.getKey(), attribute.getValue());
                 }
             }
@@ -645,7 +983,7 @@ public class KitConfiguration {
 
     boolean shouldSetIdentity(MParticle.IdentityType identityType) {
         SparseBooleanArray userIdentityFilters = getUserIdentityFilters();
-        return  userIdentityFilters == null ||
+        return userIdentityFilters == null ||
                 userIdentityFilters.size() == 0 ||
                 userIdentityFilters.get(identityType.getValue(), true);
     }

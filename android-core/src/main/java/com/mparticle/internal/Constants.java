@@ -221,6 +221,7 @@ public class Constants {
         String LAUNCH_COUNT = "lc";
         String LAUNCH_COUNT_SINCE_UPGRADE = "lcu";
         String LAST_USE_DATE = "lud";
+        String SIDELOADED_KITS_COUNT = "sideloaded_kits_count";
         // device customAttributes
         String BUILD_ID = "bid";
         String BRAND = "b";

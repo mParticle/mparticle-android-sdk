@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.util.Log;
 
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
@@ -56,6 +57,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class KitManagerImpl implements KitManager, AttributionListener, UserAttributeListener, IdentityStateListener {
 
     private static HandlerThread kitHandlerThread;
+
     static {
         kitHandlerThread = new HandlerThread("mParticle_kit_thread");
         kitHandlerThread.start();
@@ -84,7 +86,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         mContext = context;
         mReportingManager = reportingManager;
         mCoreCallbacks = coreCallbacks;
-        mKitIntegrationFactory = new KitIntegrationFactory();
+        mKitIntegrationFactory = new KitIntegrationFactory(options);
         MParticle instance = MParticle.getInstance();
         if (instance != null) {
             instance.Identity().addIdentityStateListener(this);
@@ -204,7 +206,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         HashMap<Integer, KitIntegration> previousKits = new HashMap<>(providers);
 
         if (kitConfigurations != null) {
-            for (KitConfiguration configuration: kitConfigurations) {
+            for (KitConfiguration configuration : kitConfigurations) {
                 try {
                     int currentModuleID = configuration.getKitId();
                     if (configuration.shouldExcludeUser(user)) {
@@ -212,15 +214,23 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                         continue;
                     }
                     if (!mKitIntegrationFactory.isSupported(configuration.getKitId())) {
-                        Logger.debug("Kit id configured but is not bundled: " + currentModuleID);
                         continue;
                     }
                     KitIntegration activeKit = providers.get(currentModuleID);
                     if (activeKit == null) {
-                        activeKit = mKitIntegrationFactory.createInstance(KitManagerImpl.this, configuration);
-                        if (activeKit.isDisabled() ||
-                                !configuration.shouldIncludeFromConsentRules(user)) {
-                            Logger.debug("Kit id configured but is filtered or disabled: " + currentModuleID);
+                        boolean activeKitInstanceCreated = false;
+                        try {
+                            if (getSupportedKits().contains(configuration.getKitId())) {
+                                activeKit = mKitIntegrationFactory.createInstance(KitManagerImpl.this, configuration);
+                                activeKitInstanceCreated = activeKit != null;
+                            }
+                        } catch (Exception npe) {
+                        }
+                        if (!activeKitInstanceCreated && configuration.getKitId() >= MPSideloadedKit.MIN_SIDELOADED_KIT) {
+                            Logger.verbose("De-initializing sideloaded kit with id: " + configuration.getKitId());
+                            continue;
+                        }
+                        if (!activeKitInstanceCreated || activeKit.isDisabled() || !configuration.shouldIncludeFromConsentRules(user)) {
                             continue;
                         }
                         activeIds.add(currentModuleID);
@@ -314,13 +324,13 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     @Override
     public Map<Integer, KitStatus> getKitStatus() {
         Map<Integer, KitStatus> kitStatusMap = new HashMap<>();
-        for(Integer kitId: mKitIntegrationFactory.getSupportedKits()) {
+        for (Integer kitId : mKitIntegrationFactory.getSupportedKits()) {
             kitStatusMap.put(kitId, KitStatus.NOT_CONFIGURED);
         }
-        for(KitConfiguration kitConfiguration: kitConfigurations) {
+        for (KitConfiguration kitConfiguration : kitConfigurations) {
             kitStatusMap.put(kitConfiguration.getKitId(), KitStatus.STOPPED);
         }
-        for(Map.Entry<Integer, KitIntegration> activeKit: providers.entrySet()) {
+        for (Map.Entry<Integer, KitIntegration> activeKit : providers.entrySet()) {
             if (!activeKit.getValue().isDisabled()) {
                 kitStatusMap.put(activeKit.getKey(), KitStatus.ACTIVE);
             }
@@ -415,7 +425,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 return;
             }
         }
-        for (KitIntegration provider: providers.values()) {
+        for (KitIntegration provider : providers.values()) {
             try {
                 List<ReportingMessage> messages = provider.logBaseEvent(event);
                 mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), !MPUtility.isEmpty(messages), event);
@@ -494,7 +504,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                             List<MPEvent> events = CommerceEventUtils.expand(filteredEvent);
                             boolean forwarded = false;
                             if (events != null) {
-                                for (MPEvent expandedEvent: events) {
+                                for (MPEvent expandedEvent : events) {
                                     List<ReportingMessage> reporting = ((KitIntegration.EventListener) provider).logEvent(expandedEvent);
                                     mCoreCallbacks.getKitListener().onKitApiCalled("logMPEvent()", provider.getConfiguration().getKitId(), !MPUtility.isEmpty(reporting), expandedEvent);
                                     forwarded = forwarded || (reporting != null && reporting.size() > 0);
@@ -549,7 +559,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 try {
                     if (!provider.isDisabled()) {
                         boolean onPushRegistration = ((KitIntegration.PushListener) provider).onPushRegistration(token, senderId);
-                        mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(),onPushRegistration, token, senderId);
+                        mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), onPushRegistration, token, senderId);
                         if (onPushRegistration) {
                             ReportingMessage message = ReportingMessage.fromPushRegistrationMessage(provider);
                             getReportingManager().log(message);
@@ -719,9 +729,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         for (KitIntegration provider : providers.values()) {
             try {
                 if (!provider.isDisabled() && KitConfiguration.shouldForwardAttribute(provider.getConfiguration().getUserAttributeFilters(), key))
-                if (provider instanceof KitIntegration.UserAttributeListener) {
-                    ((KitIntegration.UserAttributeListener) provider).onIncrementUserAttribute(key, incrementedBy, newValue, FilteredMParticleUser.getInstance(mpid, provider));
-                }
+                    if (provider instanceof KitIntegration.UserAttributeListener) {
+                        ((KitIntegration.UserAttributeListener) provider).onIncrementUserAttribute(key, incrementedBy, newValue, FilteredMParticleUser.getInstance(mpid, provider));
+                    }
                 if (provider instanceof KitIntegration.AttributeListener) {
                     ((KitIntegration.AttributeListener) provider).setUserAttribute(key, newValue);
                 }
@@ -878,18 +888,16 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
     @Override
     public void logBatch(String batch) {
-        for (KitIntegration provider: providers.values()) {
+        for (KitIntegration provider : providers.values()) {
             try {
                 if (provider instanceof KitIntegration.BatchListener) {
                     JSONObject jsonObject = new JSONObject(batch);
-                    List<ReportingMessage> reportingMessages = ((KitIntegration.BatchListener)provider).logBatch(jsonObject);
+                    List<ReportingMessage> reportingMessages = ((KitIntegration.BatchListener) provider).logBatch(jsonObject);
                     getReportingManager().logAll(reportingMessages);
                 }
-            }
-            catch (JSONException jse) {
+            } catch (JSONException jse) {
                 Logger.error(jse, "Failed to call logBatch (unable to deserialize Batch) for kit" + provider.getName() + ": " + jse.getMessage());
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 Logger.warning("Failed to call logBatch for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
@@ -979,7 +987,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                                 System.currentTimeMillis(),
                                 filteredEvent.getCustomAttributeStrings());
                         boolean forwarded = false;
-                        for (CustomMapping.ProjectionResult projectedEvent: projectedEvents) {
+                        for (CustomMapping.ProjectionResult projectedEvent : projectedEvents) {
                             List<ReportingMessage> report = ((KitIntegration.EventListener) provider).logEvent(projectedEvent.getMPEvent());
                             mCoreCallbacks.getKitListener().onKitApiCalled("logMPEvent()", provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), projectedEvent);
                             if (report != null && report.size() > 0) {
@@ -1378,7 +1386,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             }
             if (mKitIntegrationFactory.supportedKits != null) {
                 for (Integer kitId : mKitIntegrationFactory.supportedKits.keySet()) {
-                    mCoreCallbacks.getKitListener().kitFound(kitId);
+                    if (mCoreCallbacks.getKitListener() != null) {
+                        mCoreCallbacks.getKitListener().kitFound(kitId);
+                    }
                 }
             }
         }
@@ -1414,7 +1424,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     }
 
     private void onKitsLoaded(Map<Integer, KitIntegration> kits, Map<Integer, KitIntegration> previousKits, List<KitConfiguration> kitConfigs) {
-        for(KitsLoadedListener listener: kitsLoadedListeners) {
+        for (KitsLoadedListener listener : kitsLoadedListeners) {
             listener.onKitsLoaded(kits, previousKits, kitConfigs);
         }
     }

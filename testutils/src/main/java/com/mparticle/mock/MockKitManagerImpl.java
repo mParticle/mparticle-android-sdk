@@ -2,6 +2,7 @@ package com.mparticle.mock;
 
 import android.content.Context;
 
+import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.internal.CoreCallbacks;
 import com.mparticle.internal.ReportingManager;
@@ -21,6 +22,11 @@ public class MockKitManagerImpl extends KitManagerImpl {
 
     public MockKitManagerImpl(Context context, ReportingManager reportingManager, CoreCallbacks coreCallbacks) {
         super(context, reportingManager, coreCallbacks, Mockito.mock(MParticleOptions.class));
+    }
+
+    public MockKitManagerImpl( MParticleOptions options) {
+        super(new MockContext(), Mockito.mock(ReportingManager.class), Mockito.mock(CoreCallbacks.class), options);
+        Mockito.when(mCoreCallbacks.getKitListener()).thenReturn(CoreCallbacks.KitListener.EMPTY);
     }
 
     @Override

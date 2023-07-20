@@ -18,6 +18,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Locale;
+import java.util.Set;
 import java.util.TimeZone;
 
 public class DeviceAttributes {
@@ -30,7 +31,10 @@ public class DeviceAttributes {
     private boolean firstCollection = true;
     private MParticle.OperatingSystem operatingSystem;
 
-    /** package-private **/ DeviceAttributes(MParticle.OperatingSystem operatingSystem) {
+    /**
+     * package-private
+     **/
+    DeviceAttributes(MParticle.OperatingSystem operatingSystem) {
         this.operatingSystem = operatingSystem;
     }
 
@@ -42,9 +46,25 @@ public class DeviceAttributes {
         return deviceImei;
     }
 
+    private int getSideloadedKitsCount() {
+        try {
+            Set<Integer> kits = MParticle.getInstance().Internal().getKitManager().getSupportedKits();
+            int count = 0;
+            for (Integer kitId : kits) {
+                if (kitId >= 1000000) {
+                    count++;
+                }
+            }
+            return count;
+        } catch (Exception e) {
+            Logger.debug("Exception while adding sideloadedKitsCount to Device Attribute");
+            return 0;
+        }
+    }
+
     /**
      * Generates a collection of application attributes that will not change during an app's process.
-     *
+     * <p>
      * This contains logic that MUST only be called once per app run.
      *
      * @param appContext the application context
@@ -59,12 +79,14 @@ public class DeviceAttributes {
             PackageManager packageManager = appContext.getPackageManager();
             String packageName = appContext.getPackageName();
             attributes.put(MessageKey.APP_PACKAGE_NAME, packageName);
+            attributes.put(MessageKey.SIDELOADED_KITS_COUNT, getSideloadedKitsCount());
             String versionCode = UNKNOWN;
             try {
                 PackageInfo pInfo = appContext.getPackageManager().getPackageInfo(packageName, 0);
                 versionCode = Integer.toString(pInfo.versionCode);
                 attributes.put(MessageKey.APP_VERSION, pInfo.versionName);
-            } catch (PackageManager.NameNotFoundException nnfe) { }
+            } catch (PackageManager.NameNotFoundException nnfe) {
+            }
 
             attributes.put(MessageKey.APP_VERSION_CODE, versionCode);
 
@@ -101,7 +123,7 @@ public class DeviceAttributes {
                 int countSinceUpgrade = userStorage.getLaunchesSinceUpgrade();
                 long upgradeDate = preferences.getLong(PrefKeys.UPGRADE_DATE, now);
 
-                if (persistedVersion < 0 || persistedVersion != pInfo.versionCode){
+                if (persistedVersion < 0 || persistedVersion != pInfo.versionCode) {
                     countSinceUpgrade = 0;
                     upgradeDate = now;
                     editor.putInt(PrefKeys.COUNTER_VERSION, pInfo.versionCode);
@@ -137,8 +159,7 @@ public class DeviceAttributes {
         SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         try {
             attributes.put(MessageKey.INSTALL_REFERRER, preferences.getString(Constants.PrefKeys.INSTALL_REFERRER, null));
-        }
-        catch (JSONException ignored) {
+        } catch (JSONException ignored) {
             // this, hopefully, should never fail
         }
     }
@@ -154,7 +175,7 @@ public class DeviceAttributes {
 
     /**
      * Generates a collection of device attributes that will not change during an app's process.
-     *
+     * <p>
      * This contains logic that MUST only be called once per app run.
      *
      * @param appContext the application context
@@ -255,7 +276,7 @@ public class DeviceAttributes {
                 MParticle instance = MParticle.getInstance();
                 //check instance nullability here and decline to act if it is not available. Don't want to have the case where we are overriding isLimiAdTrackingEnabled
                 //just because there was a timing issue with the singleton
-                if (instance !=  null) {
+                if (instance != null) {
                     if (adIdInfo.isLimitAdTrackingEnabled) {
                         message = adIdInfo.advertiser.descriptiveName + " Advertising ID tracking is disabled on this device.";
                     } else {
@@ -294,8 +315,8 @@ public class DeviceAttributes {
         }
     }
 
-    public JSONObject getDeviceInfo(Context context){
-        if (deviceInfo == null){
+    public JSONObject getDeviceInfo(Context context) {
+        if (deviceInfo == null) {
             deviceInfo = getStaticDeviceInfo(context);
         }
         updateDeviceInfo(context, deviceInfo);

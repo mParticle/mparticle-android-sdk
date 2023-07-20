@@ -123,6 +123,8 @@
 -keep class com.mparticle.consent.CCPAConsent$Builder {*;}
 
 
+-keep class com.mparticle.internal.SideloadedKit { *; }
+
 -keep class com.mparticle.internal.KitManager { *; }
 -keep class com.mparticle.internal.KitManager$* { *; }
 -keep class com.mparticle.internal.CoreCallbacks { *; }
