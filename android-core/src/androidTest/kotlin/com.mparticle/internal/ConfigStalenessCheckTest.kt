@@ -9,7 +9,6 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 class ConfigStalenessCheckTest : BaseCleanInstallEachTest() {
     val configManager: ConfigManager
@@ -83,7 +82,7 @@ class ConfigStalenessCheckTest : BaseCleanInstallEachTest() {
         latch = MPLatch(1)
 
         // after configMaxAge time has elapsed, config should be cleared after restart
-        assertTrue(configManager.config?.isEmpty()!!)
+        assertNull(configManager.config)
         assertNull(configManager.etag)
         assertNull(configManager.ifModified)
         assertNull(configManager.configTimestamp)
@@ -162,7 +161,7 @@ class ConfigStalenessCheckTest : BaseCleanInstallEachTest() {
         latch = MPLatch(1)
 
         // directly after restart, config should be cleared
-        assertTrue(configManager.config?.isEmpty()!!)
+        assertNull(configManager.config)
         assertNull(configManager.etag)
         assertNull(configManager.ifModified)
         assertNull(configManager.configTimestamp)

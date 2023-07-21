@@ -38,7 +38,6 @@ class ConfigManagerTest {
             null,
             null,
             null,
-            null,
             null
         )
         mockMp = MockMParticle()
@@ -53,7 +52,6 @@ class ConfigManagerTest {
             MParticle.Environment.Production,
             "key1",
             "secret1",
-            null,
             null,
             null,
             null,
@@ -75,7 +73,6 @@ class ConfigManagerTest {
             context,
             MParticle.Environment.Development,
             "key2",
-            null,
             null,
             null,
             null,
@@ -618,7 +615,6 @@ class ConfigManagerTest {
             null,
             null,
             null,
-            null,
             null
         )
         val newEtag = RandomUtils().getAlphaString(24)
@@ -638,7 +634,6 @@ class ConfigManagerTest {
             MParticle.Environment.Production,
             "some api key",
             "some api secret",
-            null,
             null,
             null,
             null,
@@ -695,14 +690,14 @@ class ConfigManagerTest {
         }
 
         // test defaults
-        Assert.assertTrue(manager.config?.isEmpty()!!)
+        Assert.assertNull(manager.config)
         Assert.assertNull(manager.etag)
         Assert.assertNull(manager.ifModified)
         Assert.assertNull(manager.configTimestamp)
 
         // test reload() does not set config
         manager.reloadCoreConfig(newConfigJson)
-        Assert.assertTrue(manager.config?.isEmpty()!!)
+        Assert.assertNull(manager.config)
         Assert.assertNull(manager.etag)
         Assert.assertNull(manager.ifModified)
         Assert.assertNull(manager.configTimestamp)

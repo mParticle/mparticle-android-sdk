@@ -70,7 +70,7 @@ public class ConfigManager {
     static final String DATAPLAN_BLOCK_EVENT_ATTRIBUTES = "ea";
     static final String DATAPLAN_BLOCK_USER_ATTRIBUTES = "ua";
     static final String DATAPLAN_BLOCK_USER_IDENTITIES = "id";
-    public static final String KIT_CONFIG_KEY = "kit_config";
+    static final String KIT_CONFIG_KEY = "kit_config";
     static final String MIGRATED_TO_KIT_SHARED_PREFS = "is_mig_kit_sp";
 
     private static final int DEVMODE_UPLOAD_INTERVAL_MILLISECONDS = 10 * 1000;
@@ -106,7 +106,6 @@ public class ConfigManager {
     public static final int DEFAULT_SESSION_TIMEOUT_SECONDS = 60;
     public static final int DEFAULT_UPLOAD_INTERVAL = 600;
     private List<ConfigLoadedListener> configUpdatedListeners = new ArrayList<>();
-    private List<SideloadedKit> sideloadedKits = new ArrayList<>();
 
     private ConfigManager() {
         super();
@@ -130,10 +129,10 @@ public class ConfigManager {
     }
 
     public ConfigManager(@NonNull MParticleOptions options) {
-        this(options.getContext(), options.getEnvironment(), options.getApiKey(), options.getApiSecret(), options.getDataplanOptions(), options.getDataplanId(), options.getDataplanVersion(), options.getConfigMaxAge(), options.getConfigurationsForTarget(ConfigManager.class), options.getSideloadedKits());
+        this(options.getContext(), options.getEnvironment(), options.getApiKey(), options.getApiSecret(), options.getDataplanOptions(), options.getDataplanId(), options.getDataplanVersion(), options.getConfigMaxAge(), options.getConfigurationsForTarget(ConfigManager.class));
     }
 
-    public ConfigManager(@NonNull Context context, @Nullable MParticle.Environment environment, @Nullable String apiKey, @Nullable String apiSecret, @Nullable MParticleOptions.DataplanOptions dataplanOptions, @Nullable String dataplanId, @Nullable Integer dataplanVersion, @Nullable Integer configMaxAge, @Nullable List<Configuration<ConfigManager>> configurations, @Nullable List<SideloadedKit> sideloadedKits) {
+    public ConfigManager(@NonNull Context context, @Nullable MParticle.Environment environment, @Nullable String apiKey, @Nullable String apiSecret, @Nullable MParticleOptions.DataplanOptions dataplanOptions, @Nullable String dataplanId, @Nullable Integer dataplanVersion, @Nullable Integer configMaxAge, @Nullable List<Configuration<ConfigManager>> configurations) {
         mContext = context.getApplicationContext();
         sPreferences = getPreferences(mContext);
         if (apiKey != null || apiSecret != null) {
@@ -149,11 +148,6 @@ public class ConfigManager {
         mDataplanVersion = dataplanVersion;
         mDataplanId = dataplanId;
         mMaxConfigAge = configMaxAge;
-        if (sideloadedKits != null) {
-            this.sideloadedKits = sideloadedKits;
-        } else {
-            this.sideloadedKits = new ArrayList<>();
-        }
         if (configurations != null) {
             for (Configuration configuration : configurations) {
                 configuration.apply(this);
@@ -283,7 +277,7 @@ public class ConfigManager {
 
     @Nullable
     String getConfig() {
-        return sPreferences.getString(CONFIG_JSON, "");
+        return sPreferences.getString(CONFIG_JSON, null);
     }
 
     void setConfigTimestamp(Long timestamp) {
@@ -327,7 +321,7 @@ public class ConfigManager {
                     .apply();
             getKitConfigPreferences()
                     .edit()
-                    .putString(KIT_CONFIG_KEY, SideloadedKitsUtils.INSTANCE.combineConfig(kitConfig, sideloadedKits).toString())
+                    .putString(KIT_CONFIG_KEY, kitConfigString)
                     .apply();
         } else {
             Logger.debug("clearing current configurations");
@@ -352,26 +346,7 @@ public class ConfigManager {
         updateConfig(responseJSON, null, null);
     }
 
-    public synchronized void configUpToDate() throws JSONException {
-        try {
-            String config = getKitConfigPreferences().getString(KIT_CONFIG_KEY, "");
-            if (!config.isEmpty()) {
-                JSONArray kitConfig = new JSONArray(config);
-                JSONArray combined = SideloadedKitsUtils.INSTANCE.combineConfig(kitConfig, sideloadedKits);
-                getKitConfigPreferences()
-                        .edit()
-                        .putString(KIT_CONFIG_KEY, combined.toString())
-                        .apply();
-                onConfigLoaded(ConfigType.KIT, kitConfig != combined);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-    }
-
-    public synchronized void updateConfig(JSONObject responseJSON, String etag, String
-            lastModified) throws JSONException {
+    public synchronized void updateConfig(JSONObject responseJSON, String etag, String lastModified) throws JSONException {
         if (responseJSON == null) {
             responseJSON = new JSONObject();
         }
@@ -394,8 +369,7 @@ public class ConfigManager {
         }
     }
 
-    private synchronized void updateCoreConfig(JSONObject responseJSON, boolean newConfig) throws
-            JSONException {
+    private synchronized void updateCoreConfig(JSONObject responseJSON, boolean newConfig) throws JSONException {
         SharedPreferences.Editor editor = sPreferences.edit();
         if (responseJSON.has(KEY_UNHANDLED_EXCEPTIONS)) {
             mLogUnhandledExceptions = responseJSON.getString(KEY_UNHANDLED_EXCEPTIONS);
@@ -699,8 +673,7 @@ public class ConfigManager {
         }
     }
 
-    public void setPushRegistrationInBackground(PushRegistrationHelper.PushRegistration
-                                                        pushRegistration) {
+    public void setPushRegistrationInBackground(PushRegistrationHelper.PushRegistration pushRegistration) {
         String oldInstanceId = getPushInstanceId();
         if (oldInstanceId == null) {
             oldInstanceId = "";

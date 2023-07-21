@@ -12,10 +12,10 @@ import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.PushRegistrationHelper;
-import com.mparticle.internal.SideloadedKit;
 import com.mparticle.networking.NetworkOptions;
 import com.mparticle.networking.NetworkOptionsManager;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -54,7 +54,6 @@ public class MParticleOptions {
     private MParticle.OperatingSystem mOperatingSystem = MParticle.OperatingSystem.ANDROID;
     private DataplanOptions mDataplanOptions;
     private Map<Class, List<Configuration>> mConfigurations = new HashMap();
-    private List<SideloadedKit> sideloadedKits = new ArrayList<>();
 
     private MParticleOptions() {
     }
@@ -146,7 +145,6 @@ public class MParticleOptions {
         this.mDataplanVersion = builder.dataplanVersion;
         this.mDataplanOptions = builder.dataplanOptions;
         this.mConfigurations = builder.configurations;
-        this.sideloadedKits = builder.sideloadedKits;
     }
 
     /**
@@ -179,16 +177,6 @@ public class MParticleOptions {
     @NonNull
     public MParticle.Environment getEnvironment() {
         return mEnvironment;
-    }
-
-    /**
-     * Get list of sideloadedKits kits
-     *
-     * @return
-     */
-    @NonNull
-    public List<SideloadedKit> getSideloadedKits() {
-        return sideloadedKits;
     }
 
     /**
@@ -399,7 +387,6 @@ public class MParticleOptions {
         private DataplanOptions dataplanOptions;
         private Map<Class, List<Configuration>> configurations = new HashMap();
         private boolean isAppDebuggable;
-        private List<SideloadedKit> sideloadedKits = new ArrayList<>();
 
         private Builder(Context context) {
             this.context = context;
@@ -431,26 +418,6 @@ public class MParticleOptions {
         @NonNull
         public Builder installType(@NonNull MParticle.InstallType installType) {
             this.installType = installType;
-            return this;
-        }
-
-        /**
-         * Add sideloaded kits
-         *
-         * @param kits
-         * @return
-         */
-        @NonNull
-        public Builder sideloadedKits(@NonNull List<SideloadedKit> kits) {
-            List<SideloadedKit> _kits = new ArrayList<>();
-            for (SideloadedKit kit : kits) {
-                if (kit.kitId() < 1000000) {
-                    Logger.error("Sideloaded kit " + kit.getName() + " must have a kitId greater or equal than 1000000, current one is " + kit.kitId() + " and will not be included.");
-                } else {
-                    _kits.add(kit);
-                }
-            }
-            this.sideloadedKits = _kits;
             return this;
         }
 
