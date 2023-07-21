@@ -3,10 +3,12 @@ package com.mparticle.internal
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.testutils.BaseCleanInstallEachTest
+import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class ConfigMigrationTest : BaseCleanInstallEachTest() {
     private val oldConfigSharedprefsKey = "json"
@@ -81,7 +83,7 @@ class ConfigMigrationTest : BaseCleanInstallEachTest() {
 
         // make sure config is deleted
         MParticle.getInstance()!!.Internal().configManager.let {
-            assertNull(it.config)
+            assertTrue(it.config?.isEmpty()!!)
             assertNull(it.configTimestamp)
             assertNull(it.etag)
             assertNull(it.ifModified)
@@ -127,13 +129,12 @@ class ConfigMigrationTest : BaseCleanInstallEachTest() {
     }
 
     private fun assertOldConfigState(config: JSONObject) {
-        assertNull(ConfigManager.getInstance(mContext).getKitConfigPreferences().getString(ConfigManager.KIT_CONFIG_KEY, null))
-        assertEquals(config.toString(), ConfigManager.getPreferences(mContext).getString(oldConfigSharedprefsKey, null))
+        assertEquals(config.toString(), ConfigManager.getPreferences(mContext).getString(oldConfigSharedprefsKey, JSONArray().toString()))
     }
 
     private fun assertNewConfigState(config: JSONObject) {
-        val configString = ConfigManager.getPreferences(mContext).getString(ConfigManager.CONFIG_JSON, null)
+        val configString = ConfigManager.getPreferences(mContext).getString(ConfigManager.CONFIG_JSON, JSONArray().toString())
         assertNull(JSONObject(configString).optJSONArray(ConfigManager.KEY_EMBEDDED_KITS))
-        assertEquals(config.optString(ConfigManager.KEY_EMBEDDED_KITS, null), ConfigManager.getInstance(mContext).kitConfigPreferences.getString(ConfigManager.KIT_CONFIG_KEY, null))
+        assertEquals(config.optString(ConfigManager.KEY_EMBEDDED_KITS, JSONArray().toString()), ConfigManager.getInstance(mContext).kitConfigPreferences.getString(ConfigManager.KIT_CONFIG_KEY, JSONArray().toString()))
     }
 }

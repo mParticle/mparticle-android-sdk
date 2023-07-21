@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -16,7 +17,10 @@ import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.MParticleUser;
+import com.mparticle.internal.SideloadedKit;
 
+import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
@@ -74,6 +78,13 @@ public abstract class KitIntegration {
      */
     public KitConfiguration getConfiguration() {
         return mKitConfiguration;
+    }
+
+    public JSONObject getJsonConfig() {
+        if(mKitConfiguration!=null){
+            return mKitConfiguration.convertToJsonObject();
+        }
+        return null;
     }
 
     public final KitIntegration setConfiguration(KitConfiguration configuration) {
@@ -174,7 +185,7 @@ public abstract class KitIntegration {
     public final MParticleUser getUser(Long mpid) {
         MParticle instance = MParticle.getInstance();
         if (instance != null) {
-            MParticleUser user =instance.Identity().getUser(mpid);
+            MParticleUser user = instance.Identity().getUser(mpid);
             return FilteredMParticleUser.getInstance(user, this);
         }
         return FilteredMParticleUser.getInstance(null, this);
@@ -195,7 +206,6 @@ public abstract class KitIntegration {
      *
      * @param settings the settings that have been configured in mParticle UI. Use this to extract your API key, etc
      * @param context  an Application Context object
-     *
      * @throws IllegalArgumentException if the kit is unable to start based on the provided settings.
      */
     protected abstract List<ReportingMessage> onKitCreate(Map<String, String> settings, Context context) throws IllegalArgumentException;
@@ -217,7 +227,7 @@ public abstract class KitIntegration {
             if (allValues != null && allValues.size() > 0) {
                 getKitPreferences().edit().clear().apply();
             }
-        }catch (NullPointerException npe) {
+        } catch (NullPointerException npe) {
 
         }
     }
@@ -371,13 +381,12 @@ public abstract class KitIntegration {
 
     /**
      * Kit should implement this interface to listen for mParticle session-start and session-end messages.
-     *
      */
     public interface SessionListener {
         /**
          * mParticle will start a new session when:
-         *  1. The app is brought to the foreground, and there isn't already an active session.
-         *  2. Any event (ie custom events, screen events, user attributes, etc) is logged by the hosting app
+         * 1. The app is brought to the foreground, and there isn't already an active session.
+         * 2. Any event (ie custom events, screen events, user attributes, etc) is logged by the hosting app
          *
          * @return
          */
@@ -404,7 +413,7 @@ public abstract class KitIntegration {
 
         /**
          * Indicate to the mParticle Kit framework if this AttributeListener supports attribute-values as lists.
-         *
+         * 
          * If an AttributeListener returns false, the setUserAttributeList method will never be called. Instead, setUserAttribute
          * will be called with the attribute-value lists combined as a csv.
          *
@@ -546,7 +555,7 @@ public abstract class KitIntegration {
          * sync tokens as they're updated.
          *
          * @param instanceId the device instance ID registered with the FCM scope
-         * @param senderId the senderid with permissions for this instanceId
+         * @param senderId   the senderid with permissions for this instanceId
          * @return true if the push registration was processed.
          */
         boolean onPushRegistration(String instanceId, String senderId);
@@ -582,7 +591,7 @@ public abstract class KitIntegration {
 
     public interface UserAttributeListener {
 
-        void onIncrementUserAttribute (String key, Number incrementedBy, String value, FilteredMParticleUser user);
+        void onIncrementUserAttribute(String key, Number incrementedBy, String value, FilteredMParticleUser user);
 
         void onRemoveUserAttribute(String key, FilteredMParticleUser user);
 

@@ -50,6 +50,7 @@ class LoggerTest {
             null,
             null,
             null,
+            null,
             null
         )
         Assert.assertNotNull(Logger.getLogHandler())

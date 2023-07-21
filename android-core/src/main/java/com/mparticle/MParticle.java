@@ -147,7 +147,7 @@ public class MParticle {
      */
     public void setUpdateInterval(int interval) {
         long intervalMillis = interval * 1000L;
-        if ( (intervalMillis >= 1 && mConfigManager.getUploadInterval() != intervalMillis)) {
+        if ((intervalMillis >= 1 && mConfigManager.getUploadInterval() != intervalMillis)) {
             upload();
             mConfigManager.setUploadInterval(interval);
         }
@@ -293,6 +293,7 @@ public class MParticle {
 
     /**
      * Returns the wrapper sdk version
+     *
      * @return
      */
     public WrapperSdkVersion getWrapperSdkVersion() {
@@ -302,6 +303,7 @@ public class MParticle {
     /**
      * Set wrapper sdk, by default NONE.
      * This can only be set once.
+     *
      * @param wrapperSdk diffent from {@link WrapperSdk.NONE}
      * @param version
      */
@@ -1508,7 +1510,7 @@ public class MParticle {
                     if (user != null) {
                         Identity().removeIdentityStateListener(this);
                         Logger.verbose("Sending previously deferred logPushRegistration Modify request.");
-                        sendPushTokenModifyRequest(user, newInstanceId, oldInstanceId); 
+                        sendPushTokenModifyRequest(user, newInstanceId, oldInstanceId);
                     }
                 }
             };

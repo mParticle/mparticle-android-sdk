@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Looper
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
+import com.mparticle.MParticleOptions
 import com.mparticle.internal.ConfigManager
 import com.mparticle.internal.KitManager.KitStatus
 import com.mparticle.mock.MockContext
@@ -36,7 +37,8 @@ class KitManagerTest {
         MParticle.setInstance(mockMp)
         manager = MockKitManagerImpl(MockContext(), null, MockCoreCallbacks())
         Assert.assertNotNull(manager.providers)
-        val mockKitFactory = MockKitIntegrationFactory()
+        val mockKitFactory =
+            MockKitIntegrationFactory(MParticleOptions.builder(MockContext()).build())
         manager.setKitFactory(mockKitFactory)
     }
 
@@ -54,6 +56,14 @@ class KitManagerTest {
         manager.updateKits(JSONArray())
         Assert.assertNotNull(manager.providers)
         val array = configJson.optJSONArray(ConfigManager.KEY_EMBEDDED_KITS)
+        manager.mKitIntegrationFactory.supportedKits.putAll(
+            hashMapOf<Int, Class<*>>(
+                Pair(37, KitIntegration::class.java),
+                Pair(56, KitIntegration::class.java),
+                Pair(64, KitIntegration::class.java),
+                Pair(68, KitIntegration::class.java)
+            )
+        )
         Assert.assertNotNull(array)
         manager.updateKits(array)
         val providers = manager.providers
@@ -136,6 +146,14 @@ class KitManagerTest {
         Mockito.`when`(Looper.getMainLooper()).thenReturn(looper)
         val configJson = JSONObject(TestConstants.SAMPLE_EK_CONFIG)
         val array = configJson.optJSONArray(ConfigManager.KEY_EMBEDDED_KITS)
+        manager.mKitIntegrationFactory.supportedKits.putAll(
+            hashMapOf<Int, Class<*>>(
+                Pair(37, KitIntegration::class.java),
+                Pair(56, KitIntegration::class.java),
+                Pair(64, KitIntegration::class.java),
+                Pair(68, KitIntegration::class.java)
+            )
+        )
         manager.updateKits(array)
         val kitStatus = manager.kitStatus
         val testIds = arrayOf("56", "64", "37", "68")
