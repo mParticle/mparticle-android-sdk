@@ -1,3 +1,15 @@
+## [5.52.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.51.6...v5.52.0) (2023-07-24)
+
+
+### Features
+
+* sideloading kits ([#401](https://github.com/mParticle/mparticle-android-sdk/issues/401)) ([80de8ea](https://github.com/mParticle/mparticle-android-sdk/commit/80de8ea51253f73b04947c388d887b3ec4a05f6d)), closes [#378](https://github.com/mParticle/mparticle-android-sdk/issues/378)
+
+
+### Updates & Maintenance
+
+* Update submodules ([7d555ce](https://github.com/mParticle/mparticle-android-sdk/commit/7d555ce6e032d00a17b7c45a088c901a0ccb5592))
+
 ## [5.51.6](https://github.com/mParticle/mparticle-android-sdk/compare/v5.51.5...v5.51.6) (2023-07-20)
 
 
