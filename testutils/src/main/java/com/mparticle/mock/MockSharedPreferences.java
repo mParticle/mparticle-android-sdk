@@ -29,35 +29,35 @@ public class MockSharedPreferences implements SharedPreferences, SharedPreferenc
 
     public boolean getBoolean(String key, boolean defValue) {
         if (mValues.containsKey(key)) {
-            return ((Boolean)mValues.get(key)).booleanValue();
+            return ((Boolean) mValues.get(key)).booleanValue();
         }
         return defValue;
     }
 
     public float getFloat(String key, float defValue) {
         if (mValues.containsKey(key)) {
-            return ((Float)mValues.get(key)).floatValue();
+            return ((Float) mValues.get(key)).floatValue();
         }
         return defValue;
     }
 
     public int getInt(String key, int defValue) {
         if (mValues.containsKey(key)) {
-            return ((Integer)mValues.get(key)).intValue();
+            return ((Integer) mValues.get(key)).intValue();
         }
         return defValue;
     }
 
     public long getLong(String key, long defValue) {
         if (mValues.containsKey(key)) {
-            return ((Long)mValues.get(key)).longValue();
+            return ((Long) mValues.get(key)).longValue();
         }
         return defValue;
     }
 
     public String getString(String key, String defValue) {
         if (mValues.containsKey(key))
-            return (String)mValues.get(key);
+            return (String) mValues.get(key);
         return defValue;
     }
 
@@ -121,7 +121,7 @@ public class MockSharedPreferences implements SharedPreferences, SharedPreferenc
 
     @SuppressWarnings("unchecked")
     public boolean commit() {
-        mValues = (HashMap<String, Object>)mTempValues.clone();
+        mValues = (HashMap<String, Object>) mTempValues.clone();
         return true;
     }
 

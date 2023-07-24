@@ -6,8 +6,6 @@ import android.os.Looper;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import static junit.framework.TestCase.fail;
-
 public class MPLatch extends CountDownLatch {
     int countDowned = 0;
     int count;

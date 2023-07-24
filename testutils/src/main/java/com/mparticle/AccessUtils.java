@@ -25,6 +25,7 @@ public class AccessUtils {
      * This method returns an ordered list of the pending Messages in the UploadHandler queue. This
      * gives us the ability to test the UploadHandler's true "state" when looking closely at how
      * our Upload loop is performing
+     *
      * @return
      */
     @RequiresApi(api = Build.VERSION_CODES.M)

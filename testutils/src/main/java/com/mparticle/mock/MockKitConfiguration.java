@@ -31,11 +31,11 @@ public class MockKitConfiguration extends KitConfiguration {
         return super.parseConfiguration(json);
     }
 
-    public static KitConfiguration createKitConfiguration(JSONObject json) throws JSONException{
+    public static KitConfiguration createKitConfiguration(JSONObject json) throws JSONException {
         return new MockKitConfiguration().parseConfiguration(json);
     }
 
-    public static KitConfiguration createKitConfiguration() throws JSONException{
+    public static KitConfiguration createKitConfiguration() throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("id", 42);
         return new MockKitConfiguration().parseConfiguration(jsonObject);
@@ -44,16 +44,17 @@ public class MockKitConfiguration extends KitConfiguration {
     @Override
     protected SparseBooleanArray convertToSparseArray(JSONObject json) {
         SparseBooleanArray map = new MockSparseBooleanArray();
-        for (Iterator<String> iterator = json.keys(); iterator.hasNext();) {
+        for (Iterator<String> iterator = json.keys(); iterator.hasNext(); ) {
             try {
                 String key = iterator.next();
                 map.put(Integer.parseInt(key), json.getInt(key) == 1);
-            }catch (JSONException jse){
+            } catch (JSONException jse) {
                 Logger.error("Issue while parsing kit configuration: " + jse.getMessage());
             }
         }
         return map;
     }
+
     class MockSparseBooleanArray extends SparseBooleanArray {
         @Override
         public boolean get(int key) {
@@ -65,12 +66,13 @@ public class MockKitConfiguration extends KitConfiguration {
             System.out.print("SparseArray getting: " + key);
             if (map.containsKey(key)) {
                 return map.get(key);
-            }else{
+            } else {
                 return valueIfKeyNotFound;
             }
         }
 
         Map<Integer, Boolean> map = new HashMap<Integer, Boolean>();
+
         @Override
         public void put(int key, boolean value) {
             map.put(key, value);

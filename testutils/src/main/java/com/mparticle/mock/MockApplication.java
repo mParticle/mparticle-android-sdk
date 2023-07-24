@@ -31,7 +31,7 @@ public class MockApplication extends Application {
         return this;
     }
 
-    public void setSharedPreferences(SharedPreferences prefs){
+    public void setSharedPreferences(SharedPreferences prefs) {
         mContext.setSharedPreferences(prefs);
     }
 
@@ -47,7 +47,7 @@ public class MockApplication extends Application {
 
     @Override
     public PackageManager getPackageManager() {
-       return mContext.getPackageManager();
+        return mContext.getPackageManager();
     }
 
     @Override

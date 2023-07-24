@@ -39,7 +39,10 @@ import org.jetbrains.uast.util.isConstructorCall
 import org.json.JSONArray
 import org.json.JSONObject
 
-internal fun UCallExpression.resolveExpression(instance: Expression, returnValue: Boolean): Expression {
+internal fun UCallExpression.resolveExpression(
+    instance: Expression,
+    returnValue: Boolean
+): Expression {
     val expression = if (isConstructorCall()) {
         Constructor(instance, methodName, this)
     } else {
@@ -212,7 +215,10 @@ internal fun PsiClass.getQualifiedName(reflectable: Boolean): String? {
     fun isParentTopLevel(child: PsiElement) {
         if (!child.isTopLevelKtOrJavaMember()) {
             val index = qualifiedName.indexOfLast { it == '.' }
-            qualifiedName = qualifiedName.substring(0, index) + "$" + qualifiedName.substring(index + 1, qualifiedName.length)
+            qualifiedName = qualifiedName.substring(0, index) + "$" + qualifiedName.substring(
+                index + 1,
+                qualifiedName.length
+            )
             isParentTopLevel(child.parent)
         }
     }
@@ -220,7 +226,10 @@ internal fun PsiClass.getQualifiedName(reflectable: Boolean): String? {
     return qualifiedName
 }
 
-internal fun UExpression.resolveChainedCalls(returnValue: Boolean, instance: Expression): Expression {
+internal fun UExpression.resolveChainedCalls(
+    returnValue: Boolean,
+    instance: Expression
+): Expression {
     val initialInstance = instance
     var calls = (getOutermostQualified() ?: this).getQualifiedChain().toMutableList()
     calls = calls.filter { it is UCallExpression }.toMutableList()
@@ -237,7 +246,9 @@ internal fun UExpression.resolveChainedCalls(returnValue: Boolean, instance: Exp
 
 internal fun Pair<*, *>.resolveToEnum(): Enum<*> {
     val className = when (first) {
-        is ClassId -> "${(first as ClassId).packageFqName}.${(first as ClassId).relativeClassName.asString().replace(".", "$")}"
+        is ClassId -> "${(first as ClassId).packageFqName}.${
+            (first as ClassId).relativeClassName.asString().replace(".", "$")
+        }"
         is String -> first as String
         else -> null
     }

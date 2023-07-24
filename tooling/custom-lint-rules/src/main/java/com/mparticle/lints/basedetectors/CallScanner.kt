@@ -25,7 +25,11 @@ import org.jetbrains.uast.util.isConstructorCall
  */
 abstract class CallScanner : BaseDetector(), Detector.UastScanner {
 
-    abstract fun onInstanceCollected(context: JavaContext, unresolvedExpression: Expression, reportingNode: UExpression)
+    abstract fun onInstanceCollected(
+        context: JavaContext,
+        unresolvedExpression: Expression,
+        reportingNode: UExpression
+    )
 
     abstract fun getApplicableClasses(): List<Class<*>>
 
@@ -40,7 +44,9 @@ abstract class CallScanner : BaseDetector(), Detector.UastScanner {
                         val method = node.getParentOfType<UMethod>(UMethod::class.java)
 
                         if (variable != null && method != null) {
-                            VariableCollector(variable, method, expression).getUnresolvedObject(false)
+                            VariableCollector(variable, method, expression).getUnresolvedObject(
+                                false
+                            )
                         }
                         if (expression != null) {
                             node.receiverClassName()?.let { receiverName ->

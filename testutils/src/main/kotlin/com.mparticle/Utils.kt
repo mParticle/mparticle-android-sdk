@@ -43,7 +43,10 @@ object Utils {
     }
 
     fun randomEventType(): MParticle.EventType {
-        return MParticle.EventType.values()[Random.Default.nextInt(0, MParticle.EventType.values().size - 1)]
+        return MParticle.EventType.values()[Random.Default.nextInt(
+            0,
+            MParticle.EventType.values().size - 1
+        )]
     }
 
     fun randomProductAction(): String {

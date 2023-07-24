@@ -32,10 +32,14 @@ data class Config(
             val config = Config()
             json.keys().forEach { key ->
                 if (key == "internal-config") {
-                    config.internalConfig = InternalConfig.fromJson(json.optJSONObject("internal-config"))
+                    config.internalConfig =
+                        InternalConfig.fromJson(json.optJSONObject("internal-config"))
                 } else {
                     Config::class.java.declaredMethods
-                        .firstOrNull { it.name.removePrefix("set").toLowerCase() == key?.toString()?.toLowerCase() }
+                        .firstOrNull {
+                            it.name.removePrefix("set").toLowerCase() == key?.toString()
+                                ?.toLowerCase()
+                        }
                         ?.invoke(config, json.opt(key.toString()))
                 }
             }

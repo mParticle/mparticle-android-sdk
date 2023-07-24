@@ -4,8 +4,14 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
-data class ValidationResult(val eventType: String? = null, val data: ValidationResultData? = null, val error: DataPlanError? = null, val arguments: List<String>) {
+data class ValidationResult(
+    val eventType: String? = null,
+    val data: ValidationResultData? = null,
+    val error: DataPlanError? = null,
+    val arguments: List<String>
+) {
     var originalString: String? = null
+
     companion object {
 
         fun from(json: String?, arguments: List<String>): List<ValidationResult>? {
@@ -16,6 +22,7 @@ data class ValidationResult(val eventType: String? = null, val data: ValidationR
                 listOf(ValidationResult(arguments = arguments).apply { originalString = json })
             }
         }
+
         fun from(json: JSONArray, arguments: List<String>): List<ValidationResult> {
             val validationResults = ArrayList<ValidationResult>()
             for (i in 0..json.length() - 1) {
@@ -38,20 +45,27 @@ data class ValidationResult(val eventType: String? = null, val data: ValidationR
                     "Data",
                     JSONObject()
                         .put("Match", data?.match)
-                        .put("ValidationErrors", data?.validationErrors?.foldRight(JSONArray()) { item, arr -> arr.put(item) })
+                        .put(
+                            "ValidationErrors",
+                            data?.validationErrors?.foldRight(JSONArray()) { item, arr ->
+                                arr.put(item)
+                            })
                 )
                 .put("Event Type", eventType)
             return """
         Arguments:
         ${
-            arguments.indexOfFirst { it.startsWith("--dataPlan") }.let {
-                arguments.toMutableList().apply {
-                    if (it >= 0) {
-                        val dataplan = removeAt(it + 1)
-                        add(it + 1, "${dataplan.substring(0, Math.min(dataplan.length, 20))}...")
+                arguments.indexOfFirst { it.startsWith("--dataPlan") }.let {
+                    arguments.toMutableList().apply {
+                        if (it >= 0) {
+                            val dataplan = removeAt(it + 1)
+                            add(
+                                it + 1,
+                                "${dataplan.substring(0, Math.min(dataplan.length, 20))}..."
+                            )
+                        }
                     }
-                }
-            }.joinToString(" ")
+                }.joinToString(" ")
             }
         
         Response:
@@ -64,10 +78,18 @@ data class ValidationResult(val eventType: String? = null, val data: ValidationR
     }
 }
 
-data class ValidationResultData(val match: ValidationResultMatch?, val validationErrors: List<ValidationResultErrors>) {
+data class ValidationResultData(
+    val match: ValidationResultMatch?,
+    val validationErrors: List<ValidationResultErrors>
+) {
     companion object {
         fun from(json: JSONObject?): ValidationResultData? {
-            return json?.let { ValidationResultData(ValidationResultMatch.from(it.optJSONObject("match")), ValidationResultErrors.from(it.optJSONArray("validation_errors"))) }
+            return json?.let {
+                ValidationResultData(
+                    ValidationResultMatch.from(it.optJSONObject("match")),
+                    ValidationResultErrors.from(it.optJSONArray("validation_errors"))
+                )
+            }
         }
     }
 }
@@ -84,7 +106,14 @@ data class ValidationResultMatch(val type: String, val criteria: Map<String, Str
     }
 }
 
-data class ValidationResultErrors(val validationErrorType: ValidationErrorType, val errorPointer: String?, val key: String?, val expected: String?, val actual: String?, val schemaKeyworkd: String?) {
+data class ValidationResultErrors(
+    val validationErrorType: ValidationErrorType,
+    val errorPointer: String?,
+    val key: String?,
+    val expected: String?,
+    val actual: String?,
+    val schemaKeyworkd: String?
+) {
     companion object {
         fun from(json: JSONArray): List<ValidationResultErrors> {
             val validationResultErrors = ArrayList<ValidationResultErrors>()
@@ -97,7 +126,16 @@ data class ValidationResultErrors(val validationErrorType: ValidationErrorType, 
                 val expected = jsonObject.optString("expected")
                 val actual = jsonObject.optString("actual")
                 val schemaKeyword = jsonObject.optString("schema_keyword")
-                validationResultErrors.add(ValidationResultErrors(validationErrorType, errorPointer, key, expected, actual, schemaKeyword))
+                validationResultErrors.add(
+                    ValidationResultErrors(
+                        validationErrorType,
+                        errorPointer,
+                        key,
+                        expected,
+                        actual,
+                        schemaKeyword
+                    )
+                )
             }
             return validationResultErrors
         }

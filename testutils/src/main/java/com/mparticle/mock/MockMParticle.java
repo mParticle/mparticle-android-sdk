@@ -2,7 +2,6 @@ package com.mparticle.mock;
 
 import com.mparticle.MParticle;
 import com.mparticle.identity.IdentityApi;
-import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.internal.MessageManager;
