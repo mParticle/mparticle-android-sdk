@@ -78,7 +78,7 @@ public class BaseEvent {
             return null;
         }
         Map<String, String> attributes = new HashMap<>();
-        for (Map.Entry<String, Object> entry: mCustomAttributes.entrySet()) {
+        for (Map.Entry<String, Object> entry : mCustomAttributes.entrySet()) {
             Object value = entry.getValue();
             attributes.put(entry.getKey(), value == null ? null : value.toString());
         }

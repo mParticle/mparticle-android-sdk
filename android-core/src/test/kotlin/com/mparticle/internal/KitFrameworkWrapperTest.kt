@@ -22,8 +22,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
 import java.lang.ref.WeakReference
 import java.util.Random
-import kotlin.collections.ArrayList
-import kotlin.collections.HashSet
 
 @RunWith(PowerMockRunner::class)
 class KitFrameworkWrapperTest {

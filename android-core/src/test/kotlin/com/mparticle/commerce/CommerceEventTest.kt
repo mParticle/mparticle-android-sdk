@@ -163,7 +163,8 @@ class CommerceEventTest {
         var event = builder.build()
         Assert.assertNull(event.customFlags)
 
-        val attributes = RandomUtils.getInstance().getRandomCustomFlags(RandomUtils.getInstance().randomInt(1, 10))
+        val attributes = RandomUtils.getInstance()
+            .getRandomCustomFlags(RandomUtils.getInstance().randomInt(1, 10))
         for (attribute in attributes.entries) {
             for (value in attribute.value) {
                 builder.addCustomFlag(attribute.key, value)

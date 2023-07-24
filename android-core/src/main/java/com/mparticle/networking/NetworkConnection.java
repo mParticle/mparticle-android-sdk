@@ -34,8 +34,8 @@ public class NetworkConnection extends BaseNetworkConnection {
      * Default throttle time - in the worst case scenario if the server is busy, the soonest
      * the SDK will attempt to contact the server again will be after this 2 hour window.
      */
-    static final long DEFAULT_THROTTLE_MILLIS = 1000*60*60*2;
-    static final long MAX_THROTTLE_MILLIS = 1000*60*60*24;
+    static final long DEFAULT_THROTTLE_MILLIS = 1000 * 60 * 60 * 2;
+    static final long MAX_THROTTLE_MILLIS = 1000 * 60 * 60 * 24;
 
     NetworkConnection(ConfigManager configManager, SharedPreferences sharedPreferences) {
         super(sharedPreferences);
@@ -74,8 +74,7 @@ public class NetworkConnection extends BaseNetworkConnection {
                     setNextAllowedRequestTime(connection, endpoint);
                 }
             }
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             throw ex;
         }
         return connection;
@@ -92,8 +91,8 @@ public class NetworkConnection extends BaseNetworkConnection {
     /**
      * Custom socket factory used for certificate pinning.
      */
-    protected SSLSocketFactory getSocketFactory(MParticleBaseClientImpl.Endpoint endpoint) throws Exception{
-        if (mSocketFactory == null){
+    protected SSLSocketFactory getSocketFactory(MParticleBaseClientImpl.Endpoint endpoint) throws Exception {
+        if (mSocketFactory == null) {
             String keyStoreType = KeyStore.getDefaultType();
             KeyStore keyStore = KeyStore.getInstance(keyStoreType);
             keyStore.load(null, null);
@@ -101,7 +100,7 @@ public class NetworkConnection extends BaseNetworkConnection {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             NetworkOptions networkOptions = mConfigManager.getNetworkOptions();
             DomainMapping domainMapping = networkOptions.getDomain(endpoint);
-            for (com.mparticle.networking.Certificate certificate: domainMapping != null ? domainMapping.getCertificates() : NetworkOptionsManager.getDefaultCertificates()) {
+            for (com.mparticle.networking.Certificate certificate : domainMapping != null ? domainMapping.getCertificates() : NetworkOptionsManager.getDefaultCertificates()) {
                 keyStore.setCertificateEntry(certificate.getAlias(), generateCertificate(cf, certificate.getCertificate()));
             }
             String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
@@ -119,10 +118,10 @@ public class NetworkConnection extends BaseNetworkConnection {
 
     private static Certificate generateCertificate(CertificateFactory certificateFactory, String encodedCertificate) throws IOException, CertificateException {
         Certificate certificate = null;
-        InputStream inputStream = new ByteArrayInputStream( encodedCertificate.getBytes() );
+        InputStream inputStream = new ByteArrayInputStream(encodedCertificate.getBytes());
         try {
             certificate = certificateFactory.generateCertificate(inputStream);
-        }finally {
+        } finally {
             inputStream.close();
         }
         return certificate;

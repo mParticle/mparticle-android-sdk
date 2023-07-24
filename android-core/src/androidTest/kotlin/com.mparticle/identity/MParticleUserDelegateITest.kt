@@ -34,7 +34,7 @@ class MParticleUserDelegateITest : BaseCleanStartedEachTest() {
         val attributes = HashMap<Long, Map<IdentityType, String>>()
         for (i in 0..4) {
             val mpid = ran.nextLong()
-            val pairs = HashMap<IdentityType, String> ()
+            val pairs = HashMap<IdentityType, String>()
             attributes[mpid] = pairs
             for (j in 0..2) {
                 val identityType =

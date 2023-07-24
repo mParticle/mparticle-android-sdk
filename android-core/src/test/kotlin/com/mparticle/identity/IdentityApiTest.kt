@@ -6,7 +6,6 @@ import com.mparticle.testutils.AndroidUtils
 import org.junit.Assert
 import org.junit.Test
 import java.util.Random
-import kotlin.collections.ArrayList
 
 class IdentityApiTest {
     private var ran = Random()

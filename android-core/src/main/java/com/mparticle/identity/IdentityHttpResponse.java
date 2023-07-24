@@ -19,16 +19,24 @@ public final class IdentityHttpResponse {
     private int httpCode;
     private boolean loggedIn;
 
-    @NonNull public static final String MPID = "mpid";
-    @NonNull public static final String CONTEXT = "context";
-    @NonNull public static final String ERRORS = "errors";
-    @NonNull public static final String LOGGED_IN = "is_logged_in";
-    @NonNull public static final String CODE = "code";
-    @NonNull public static final String MESSAGE = "message";
+    @NonNull
+    public static final String MPID = "mpid";
+    @NonNull
+    public static final String CONTEXT = "context";
+    @NonNull
+    public static final String ERRORS = "errors";
+    @NonNull
+    public static final String LOGGED_IN = "is_logged_in";
+    @NonNull
+    public static final String CODE = "code";
+    @NonNull
+    public static final String MESSAGE = "message";
 
-    @NonNull public static final String UNKNOWN = "UNKNOWN";
+    @NonNull
+    public static final String UNKNOWN = "UNKNOWN";
 
-    private IdentityHttpResponse() {}
+    private IdentityHttpResponse() {
+    }
 
     public IdentityHttpResponse(int code, long mpid, @Nullable String context, @Nullable ArrayList<Error> errors) {
         this.httpCode = code;
@@ -98,8 +106,10 @@ public final class IdentityHttpResponse {
     }
 
     public static class Error {
-        @NonNull public final String message;
-        @NonNull public final String code;
+        @NonNull
+        public final String message;
+        @NonNull
+        public final String code;
 
         public Error(@NonNull String errorCode, @NonNull String message) {
             this.code = errorCode;

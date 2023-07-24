@@ -34,7 +34,8 @@ class UpdateAdIdIdentityTest : BaseCleanInstallEachTest() {
 
         // force a modify request to ensure that the modify request from the CheckAdIdRunnable is completed
         val latch2 = MPLatch(1)
-        MParticle.getInstance()!!.Identity().modify(IdentityApiRequest.withEmptyUser().customerId("someId").build())
+        MParticle.getInstance()!!.Identity()
+            .modify(IdentityApiRequest.withEmptyUser().customerId("someId").build())
             .addSuccessListener { latch2.countDown() }
         latch2.await()
 
@@ -42,10 +43,10 @@ class UpdateAdIdIdentityTest : BaseCleanInstallEachTest() {
         mServer.Requests().modify.count { request ->
             request.asIdentityRequest().body.identity_changes.let {
                 it.size == 1 &&
-                    it[0].let { identityChange ->
-                        identityChange["new_value"] == "newAdId" &&
-                            identityChange["old_value"] == "oldAdId"
-                    }
+                        it[0].let { identityChange ->
+                            identityChange["new_value"] == "newAdId" &&
+                                    identityChange["old_value"] == "oldAdId"
+                        }
             }
         }.let {
             assertEquals(1, it)

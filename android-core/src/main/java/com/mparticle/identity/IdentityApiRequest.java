@@ -20,7 +20,6 @@ import java.util.Map;
  * @see IdentityApi#logout(IdentityApiRequest)
  * @see IdentityApi#identify(IdentityApiRequest)
  * @see IdentityApi#modify(IdentityApiRequest)
- *
  */
 public final class IdentityApiRequest {
     private UserAliasHandler userAliasHandler = null;
@@ -31,7 +30,7 @@ public final class IdentityApiRequest {
     Long mpid;
 
     private IdentityApiRequest(IdentityApiRequest.Builder builder) {
-        if (builder.userIdentities != null){
+        if (builder.userIdentities != null) {
             this.userIdentities = builder.userIdentities;
         }
         if (builder.userAliasHandler != null) {
@@ -49,8 +48,7 @@ public final class IdentityApiRequest {
     /**
      * Instantiate an IdentityApiRequest.Builder() with no existing state (no UserIdentities).
      *
-     *  @return an IdentityApiRequest.Builder
-     *
+     * @return an IdentityApiRequest.Builder
      * @see IdentityApiRequest.Builder
      */
     @NonNull
@@ -62,9 +60,7 @@ public final class IdentityApiRequest {
      * instantiate an IdentityApiRequest.Builder() with an existing user's UserIdentities.
      *
      * @param currentUser an MParticleUser
-     *
      * @return an IdentityApiRequest.Builder
-     *
      * @see IdentityApiRequest.Builder
      */
     @NonNull
@@ -117,7 +113,6 @@ public final class IdentityApiRequest {
          * Set the IdentityType MParticle.IdentityType.Email.
          *
          * @param email the email to be set
-         *
          * @return the instance of the builder, for chaining calls
          */
         @NonNull
@@ -129,7 +124,6 @@ public final class IdentityApiRequest {
          * Set the IdentityType MParticle.IdentityType.CustomerId.
          *
          * @param customerId the customerId to be set
-         *
          * @return the instance of the builder, for chaining calls
          */
         @NonNull
@@ -160,11 +154,9 @@ public final class IdentityApiRequest {
         /**
          * Set the value for the provided IdentityType key.
          *
-         * @param identityType the IdentityType to be set
+         * @param identityType  the IdentityType to be set
          * @param identityValue the value the IdentityType should be set to
-         *
          * @return the instance of the builder, for chaining calls
-         *
          * @see MParticle.IdentityType
          */
         @NonNull
@@ -180,14 +172,12 @@ public final class IdentityApiRequest {
          * Set IdentityTypes in bulk.
          *
          * @param userIdentities the IdentityTypes to be set
-         *
          * @return the instance of the builder, for chaining calls
-         *
          * @see MParticle.IdentityType
          */
         @NonNull
         public Builder userIdentities(@NonNull Map<MParticle.IdentityType, String> userIdentities) {
-            for (Map.Entry<MParticle.IdentityType, String> entry: userIdentities.entrySet()) {
+            for (Map.Entry<MParticle.IdentityType, String> entry : userIdentities.entrySet()) {
                 userIdentity(entry.getKey(), entry.getValue());
             }
             return this;
@@ -210,6 +200,7 @@ public final class IdentityApiRequest {
          * in you {@link UserAliasHandler}, using the {@link MParticleUser}s returned by
          * {@link IdentityApiResult#getUser()} and {@link IdentityApiResult#getPreviousUser()} in place
          * of "newUser" and "previousUser" respectively
+         *
          * @param userAliasHandler
          * @return
          */

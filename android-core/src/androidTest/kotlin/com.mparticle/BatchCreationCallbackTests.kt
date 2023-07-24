@@ -69,7 +69,9 @@ class BatchCreationCallbackTests : BaseCleanInstallEachTest() {
                 it.optJSONArray("msgs")
                     ?.toList()
                     ?.filterIsInstance<JSONObject>()
-                    ?.any { it.optString("n") == targetEventName && it.optString("mb").isNullOrEmpty() } ?: false
+                    ?.any {
+                        it.optString("n") == targetEventName && it.optString("mb").isNullOrEmpty()
+                    } ?: false
             }
         )
 
@@ -77,7 +79,8 @@ class BatchCreationCallbackTests : BaseCleanInstallEachTest() {
             it.bodyJson.optJSONArray("msgs")
                 ?.toList()
                 ?.filterIsInstance<JSONObject>()
-                ?.any { it.optString("n") == targetEventName && it.optString("mb").isNullOrEmpty() } ?: false
+                ?.any { it.optString("n") == targetEventName && it.optString("mb").isNullOrEmpty() }
+                ?: false
         }.let {
             assertTrue { it }
         }

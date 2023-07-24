@@ -66,14 +66,16 @@ class ConfigManagerInstrumentedTest : BaseAbstractTest() {
             MParticle.getInstance()
                 ?.Identity()?.currentUser?.id
         )
-        MParticle.getInstance()?.Identity()?.currentUser?.isLoggedIn?.let { TestCase.assertTrue(it) }
+        MParticle.getInstance()
+            ?.Identity()?.currentUser?.isLoggedIn?.let { TestCase.assertTrue(it) }
         configManager?.setMpid(mpid3, true)
         TestCase.assertEquals(
             mpid3,
             MParticle.getInstance()
                 ?.Identity()?.currentUser?.id
         )
-        MParticle.getInstance()?.Identity()?.currentUser?.isLoggedIn?.let { TestCase.assertTrue(it) }
+        MParticle.getInstance()
+            ?.Identity()?.currentUser?.isLoggedIn?.let { TestCase.assertTrue(it) }
     }
 
     @Test
@@ -111,8 +113,14 @@ class ConfigManagerInstrumentedTest : BaseAbstractTest() {
                 .configuration(AddConfigListener(configLoadedListener))
         )
         latch.await()
-        TestCase.assertEquals("", MParticle.getInstance()?.Internal()?.configManager?.workspaceToken)
-        TestCase.assertEquals(90, MParticle.getInstance()?.Internal()?.configManager?.aliasMaxWindow)
+        TestCase.assertEquals(
+            "",
+            MParticle.getInstance()?.Internal()?.configManager?.workspaceToken
+        )
+        TestCase.assertEquals(
+            90,
+            MParticle.getInstance()?.Internal()?.configManager?.aliasMaxWindow
+        )
     }
 
     @Test
@@ -208,6 +216,7 @@ class ConfigManagerInstrumentedTest : BaseAbstractTest() {
         override fun configures(): Class<ConfigManager> {
             return ConfigManager::class.java
         }
+
         override fun apply(configManager: ConfigManager?) {
             configManager?.addConfigUpdatedListener(configLoadedListener)
         }

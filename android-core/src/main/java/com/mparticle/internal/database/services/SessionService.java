@@ -1,5 +1,9 @@
 package com.mparticle.internal.database.services;
 
+import static com.mparticle.internal.database.tables.SessionTable.SessionTableColumns.APP_INFO;
+import static com.mparticle.internal.database.tables.SessionTable.SessionTableColumns.SESSION_ID;
+import static com.mparticle.internal.database.tables.SessionTable.SessionTableColumns.TABLE_NAME;
+
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.text.TextUtils;
@@ -20,27 +24,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.mparticle.internal.database.tables.SessionTable.SessionTableColumns.APP_INFO;
-import static com.mparticle.internal.database.tables.SessionTable.SessionTableColumns.SESSION_ID;
-import static com.mparticle.internal.database.tables.SessionTable.SessionTableColumns.TABLE_NAME;
-
 public class SessionService extends SessionTable {
     public static String[] readyMessages = new String[]{Integer.toString(Constants.Status.UPLOADED)};
 
-    public static int deleteSessions(MPDatabase database, String currentSessionId){
+    public static int deleteSessions(MPDatabase database, String currentSessionId) {
         String[] selectionArgs = new String[]{currentSessionId};
         return database.delete(TABLE_NAME, SessionTableColumns.SESSION_ID + "!=? ", selectionArgs);
     }
 
     /**
      * delete Session entries with session_id that are not a part of the Set
+     *
      * @param database
      * @param exceptSessionIds the session_id value for message that SHOULD NOT be deleted
      * @return the number of Session entries deleted
      */
     public static int deleteSessions(MPDatabase database, Set<String> exceptSessionIds) {
         List<String> idsWrapped = new ArrayList<String>();
-        for (String id: exceptSessionIds) {
+        for (String id : exceptSessionIds) {
             idsWrapped.add("'" + id + "'");
         }
         String idArgString = TextUtils.join(",", idsWrapped.toArray());
@@ -105,8 +106,7 @@ public class SessionService extends SessionTable {
                 sessionIds.add(selectCursor.getString(0));
             }
             return sessionIds;
-        }
-        finally {
+        } finally {
             if (selectCursor != null && !selectCursor.isClosed()) {
                 selectCursor.close();
             }
@@ -142,7 +142,7 @@ public class SessionService extends SessionTable {
                         String deviceInfo = sessionCursor.getString(sessionCursor.getColumnIndexOrThrow(SessionTableColumns.DEVICE_INFO));
                         JSONObject deviceInfoJson = new JSONObject(deviceInfo);
                         deviceInfos.add(deviceInfoJson);
-                        for (MessageBatch batch: batchList) {
+                        for (MessageBatch batch : batchList) {
                             batch.setAppInfo(appInfoJson);
                             batch.setDeviceInfo(deviceInfoJson);
                         }
@@ -152,9 +152,8 @@ public class SessionService extends SessionTable {
 
                 }
             }
-        }
-        finally {
-            if (sessionCursor != null && !sessionCursor.isClosed()){
+        } finally {
+            if (sessionCursor != null && !sessionCursor.isClosed()) {
                 sessionCursor.close();
             }
         }
@@ -163,14 +162,14 @@ public class SessionService extends SessionTable {
 
     public static void updateSessionInstallReferrer(MPDatabase db, JSONObject appInfo, String sessionId) {
         ContentValues contentValues = new ContentValues();
-                contentValues.put(APP_INFO, appInfo.toString());
-                String[] whereArgs = {sessionId};
-                db.update(TABLE_NAME, contentValues, SessionTableColumns.SESSION_ID + "=?", whereArgs);
+        contentValues.put(APP_INFO, appInfo.toString());
+        String[] whereArgs = {sessionId};
+        db.update(TABLE_NAME, contentValues, SessionTableColumns.SESSION_ID + "=?", whereArgs);
     }
 
     static Map<String, List<MessageBatch>> flattenBySessionId(Map<BatchId, MessageBatch> uploadMessagesByBatchId) {
         Map<String, List<MessageBatch>> uploadMessagesBySessionId = new HashMap<String, List<MessageBatch>>();
-        for (Map.Entry<BatchId, MessageBatch> batchEntry: uploadMessagesByBatchId.entrySet()) {
+        for (Map.Entry<BatchId, MessageBatch> batchEntry : uploadMessagesByBatchId.entrySet()) {
             String sessionId = batchEntry.getKey().getSessionId();
             List<MessageBatch> messageBatches = uploadMessagesBySessionId.get(sessionId);
             if (messageBatches == null) {

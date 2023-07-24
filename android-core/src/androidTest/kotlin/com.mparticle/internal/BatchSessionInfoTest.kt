@@ -41,7 +41,9 @@ class BatchSessionInfoTest : BaseCleanStartedEachTest() {
     @Test
     fun testProperSessionAttachedToBatch() {
         InstallReferrerHelper.setInstallReferrer(mContext, "111")
-        (0..150).forEach { MParticle.getInstance()?.logEvent(MPEvent.Builder(it.toString()).build()) }
+        (0..150).forEach {
+            MParticle.getInstance()?.logEvent(MPEvent.Builder(it.toString()).build())
+        }
 
         AccessUtils.awaitMessageHandler()
         MParticle.getInstance()?.Internal()?.apply {
@@ -56,7 +58,8 @@ class BatchSessionInfoTest : BaseCleanStartedEachTest() {
         MParticle.getInstance()?.upload()
         mServer.waitForVerify(
             Matcher(mServer.Endpoints().getEventsUrl()).bodyMatch {
-                val version = it.getJSONObject("ai").getString(Constants.MessageKey.INSTALL_REFERRER)
+                val version =
+                    it.getJSONObject("ai").getString(Constants.MessageKey.INSTALL_REFERRER)
                 if (it.has("msgs")) {
                     var messages = it.getJSONArray("msgs")
                     for (i in 0 until messages.length()) {
@@ -77,7 +80,8 @@ class BatchSessionInfoTest : BaseCleanStartedEachTest() {
         }
         mServer.waitForVerify(
             Matcher(mServer.Endpoints().getEventsUrl()).bodyMatch {
-                val version = it.getJSONObject("ai").getString(Constants.MessageKey.INSTALL_REFERRER)
+                val version =
+                    it.getJSONObject("ai").getString(Constants.MessageKey.INSTALL_REFERRER)
                 assertEquals("222", version)
                 true
             }

@@ -217,9 +217,9 @@ class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
             val oldUserIdentities = mRandomUtils.randomUserIdentities
             val newUserIdentities = mRandomUtils.randomUserIdentities
             (
-                MParticle.getInstance()
-                    ?.Identity()?.currentUser as MParticleUserImpl?
-                )?.userIdentities = oldUserIdentities
+                    MParticle.getInstance()
+                        ?.Identity()?.currentUser as MParticleUserImpl?
+                    )?.userIdentities = oldUserIdentities
             val latch: CountDownLatch = MPLatch(1)
             val checked = MutableBoolean(false)
             setApiClient(object : MockIdentityApiClient {
@@ -230,7 +230,7 @@ class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
                     mparticle: Boolean
                 ) {
                     if (connection.url.toString()
-                        .contains(MParticleIdentityClientImpl.MODIFY_PATH)
+                            .contains(MParticleIdentityClientImpl.MODIFY_PATH)
                     ) {
                         val jsonObject = payload?.let { JSONObject(it) }
                         val changedIdentities =

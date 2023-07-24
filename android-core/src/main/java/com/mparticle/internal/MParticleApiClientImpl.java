@@ -75,12 +75,12 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
      * Default throttle time - in the worst case scenario if the server is busy, the soonest
      * the SDK will attempt to contact the server again will be after this 2 hour window.
      */
-    static final long DEFAULT_THROTTLE_MILLIS = 1000*60*60*2;
-    static final long MAX_THROTTLE_MILLIS = 1000*60*60*24;
+    static final long DEFAULT_THROTTLE_MILLIS = 1000 * 60 * 60 * 2;
+    static final long MAX_THROTTLE_MILLIS = 1000 * 60 * 60 * 24;
     /**
      * Minimum time between passive Config requests, 10 minutes
      */
-    private static final int MIN_CONFIG_REQUEST_INTERVAL = 10*60*1000;
+    private static final int MIN_CONFIG_REQUEST_INTERVAL = 10 * 60 * 1000;
     private long mConfigLastFetched = -1;
     private boolean alreadyWarned;
 
@@ -117,8 +117,9 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
     /**
      * Fetches a remote configuration. Minimum time constraint based on MIN_CONFIG_REQUEST_INTERVAL
      * if not forced, configuration request will not take place if minimum time has not elapsed
+     *
      * @param force: if true, minimum elpsed time criteria will be ignored, and configuration
-     *             request will take place regardless of elapsed time
+     *               request will take place regardless of elapsed time
      */
     public void fetchConfig(boolean force) throws IOException, MPConfigException {
         if (!force) {
@@ -130,7 +131,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
             }
         }
         try {
-            if (mConfigUrl == null){
+            if (mConfigUrl == null) {
                 mConfigUrl = getUrl(Endpoint.CONFIG);
             }
             MPConnection connection = mConfigUrl.openConnection();
@@ -145,11 +146,11 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
 
             connection.setRequestProperty("User-Agent", mUserAgent);
             String etag = mConfigManager.getEtag();
-            if (etag != null){
+            if (etag != null) {
                 connection.setRequestProperty("If-None-Match", etag);
             }
             String modified = mConfigManager.getIfModified();
-            if (modified != null){
+            if (modified != null) {
                 connection.setRequestProperty("If-Modified-Since", modified);
             }
 
@@ -169,14 +170,14 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
             try {
                 response = MPUtility.getJsonResponse(connection);
                 InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.CONFIG, connection.getURL().toString(), response, responseCode);
+            } catch (Exception ex) {
             }
-            catch (Exception ex) {}
             if (responseCode >= 200 && responseCode < 300) {
                 parseCookies(response);
 
                 Logger.verbose("Config result: \n " +
                         connection.getResponseCode() + ": " +
-                        connection.getResponseMessage() +"\n" +
+                        connection.getResponseMessage() + "\n" +
                         "response:\n" + response.toString());
 
                 String newEtag = connection.getHeaderField("ETag");
@@ -202,7 +203,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         }
     }
 
-    public JSONObject fetchAudiences()  {
+    public JSONObject fetchAudiences() {
 
         JSONObject response = null;
         try {
@@ -214,13 +215,13 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
 
             addMessageSignature(connection, null);
             makeUrlRequest(Endpoint.AUDIENCE, connection, true);
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN){
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
                 Logger.error("Segment call forbidden: is Segmentation enabled for your account?");
             }
-            response =  MPUtility.getJsonResponse(connection);
+            response = MPUtility.getJsonResponse(connection);
             parseCookies(response);
 
-        }catch (Exception e){
+        } catch (Exception e) {
             Logger.error("Segment call failed: " + e.getMessage());
         }
         return response;
@@ -229,7 +230,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
     public int sendMessageBatch(String message) throws IOException, MPThrottleException, MPRampException {
         checkThrottleTime(Endpoint.EVENTS);
         checkRampValue();
-        if (mEventUrl == null){
+        if (mEventUrl == null) {
             mEventUrl = getUrl(Endpoint.EVENTS);
         }
         MPConnection connection = mEventUrl.openConnection();
@@ -256,7 +257,8 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
 
         try {
             InternalListenerManager.getListener().onNetworkRequestStarted(SdkListener.Endpoint.EVENTS, connection.getURL().toString(), new JSONObject(message), message);
-        } catch (Exception e) { }
+        } catch (Exception e) {
+        }
 
         makeUrlRequest(Endpoint.EVENTS, connection, message, true);
 
@@ -275,18 +277,19 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
 
             Logger.verbose("Upload result response: \n" +
                     connection.getResponseCode() + ": " +
-                        connection.getResponseMessage() + "\n" +
-                        "response:\n" + response.toString());
+                    connection.getResponseMessage() + "\n" +
+                    "response:\n" + response.toString());
             parseCookies(response);
         } else {
             Logger.error("Upload request failed- " + responseCode + ": " + connection.getResponseMessage());
             try {
                 InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.EVENTS, connection.getURL().getFile(), new JSONObject().put(SdkListener.ERROR_MESSAGE, connection.getResponseMessage()), responseCode);
-            } catch (Exception e) { }
+            } catch (Exception e) {
+            }
         }
         return connection.getResponseCode();
     }
-    
+
     @Override
     public AliasNetworkResponse sendAliasRequest(String message) throws IOException, MPThrottleException, MPRampException {
         checkThrottleTime(Endpoint.ALIAS);
@@ -309,7 +312,8 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         try {
             url = connection.getURL().toString();
             InternalListenerManager.getListener().onNetworkRequestStarted(SdkListener.Endpoint.EVENTS, url, new JSONObject(message), message);
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+        }
 
         connection = makeUrlRequest(Endpoint.ALIAS, connection, message, false);
         int responseCode = connection.getResponseCode();
@@ -360,7 +364,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
             Logger.error("Error signing message.");
         } catch (NoSuchAlgorithmException e) {
             Logger.error("Error signing message.");
-        } catch (UnsupportedEncodingException e){
+        } catch (UnsupportedEncodingException e) {
             Logger.error("Error signing message.");
         }
     }
@@ -371,7 +375,8 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
                 JSONObject consumerInfo = jsonResponse.getJSONObject(CONSUMER_INFO);
                 setCookies(consumerInfo.optJSONObject(Constants.MessageKey.COOKIES));
             }
-        } catch (JSONException ignored) {}
+        } catch (JSONException ignored) {
+        }
     }
 
     public final class MPThrottleException extends Exception {
@@ -393,29 +398,31 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
     }
 
     public static final class MPNoConfigException extends Exception {
-        MPNoConfigException() {super("No API key and/or API secret."); }
+        MPNoConfigException() {
+            super("No API key and/or API secret.");
+        }
     }
 
     void checkThrottleTime(Endpoint endpoint) throws MPThrottleException {
-        if (System.currentTimeMillis() < getNextRequestTime(endpoint)){
+        if (System.currentTimeMillis() < getNextRequestTime(endpoint)) {
             throw new MPThrottleException();
         }
     }
 
     private void checkRampValue() throws MPRampException {
-        if (mDeviceRampNumber == null){
+        if (mDeviceRampNumber == null) {
             mDeviceRampNumber = MPUtility.hashFnv1A(MPUtility.getRampUdid(mContext).getBytes())
                     .mod(BigInteger.valueOf(100))
                     .intValue();
         }
         int currentRamp = mConfigManager.getCurrentRampValue();
         if (currentRamp > 0 && currentRamp < 100 &&
-                mDeviceRampNumber > mConfigManager.getCurrentRampValue()){
+                mDeviceRampNumber > mConfigManager.getCurrentRampValue()) {
             throw new MPRampException();
         }
     }
 
-    private String getSupportedKitString(){
+    private String getSupportedKitString() {
         if (sSupportedKits == null) {
             MParticle instance = MParticle.getInstance();
             if (instance != null) {
@@ -457,8 +464,8 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         }
     }
 
-    public JSONObject getCookies()  {
-        if (mCurrentCookies == null){
+    public JSONObject getCookies() {
+        if (mCurrentCookies == null) {
             String currentCookies = mConfigManager.getUserStorage().getCookies();
             if (MPUtility.isEmpty(currentCookies)) {
                 mCurrentCookies = new JSONObject();
@@ -491,18 +498,18 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
 
                         }
                     }
-                }catch (JSONException jse){
+                } catch (JSONException jse) {
 
                 }
             }
-            for (String key : keysToRemove){
+            for (String key : keysToRemove) {
                 mCurrentCookies.remove(key);
             }
             if (keysToRemove.size() > 0) {
                 mConfigManager.getUserStorage().setCookies(mCurrentCookies.toString());
             }
             return mCurrentCookies;
-        }else{
+        } else {
             return mCurrentCookies;
         }
     }

@@ -1,6 +1,7 @@
 package com.mparticle.internal.messages;
 
 import android.location.Location;
+
 import androidx.annotation.Nullable;
 
 import com.mparticle.internal.Constants;
@@ -13,7 +14,8 @@ import org.json.JSONObject;
 public class BaseMPMessage extends JSONObject {
     private long mpId;
 
-    protected BaseMPMessage(){}
+    protected BaseMPMessage() {
+    }
 
     protected BaseMPMessage(BaseMPMessageBuilder builder, InternalSession session, @Nullable Location location, long mpId) throws JSONException {
         super(builder, builder.getKeys());
@@ -44,14 +46,14 @@ public class BaseMPMessage extends JSONObject {
         }
     }
 
-    public JSONObject getAttributes(){
+    public JSONObject getAttributes() {
         return optJSONObject(Constants.MessageKey.ATTRIBUTES);
     }
 
-    public long getTimestamp(){
+    public long getTimestamp() {
         try {
             return getLong(Constants.MessageKey.TIMESTAMP);
-        }catch (JSONException jse){
+        } catch (JSONException jse) {
 
         }
         return 0;

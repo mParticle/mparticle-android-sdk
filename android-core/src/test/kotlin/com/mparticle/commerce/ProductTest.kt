@@ -16,7 +16,8 @@ class ProductTest {
     fun testDefaultEqualityComparator() {
         Product.setEqualityComparator(null)
         val product1 = Product.Builder("name", "sku", 2.0).brand("cool brand!").build()
-        val product2 = Product.Builder("cool brand!", "sku", 2.0).brand("cool brand!adsflkjh").build()
+        val product2 =
+            Product.Builder("cool brand!", "sku", 2.0).brand("cool brand!adsflkjh").build()
         val product2Copy = Product.Builder(product2).build()
         product2Copy.mTimeAdded = product2.mTimeAdded
         Assert.assertNotEquals(product2, product1)
@@ -30,7 +31,8 @@ class ProductTest {
     fun testEqualityComparator() {
         Product.setEqualityComparator { product1, product2 -> product1?.name == product2?.brand }
         val product1 = Product.Builder("name", "sku", 2.0).brand("cool brand!").build()
-        val product2 = Product.Builder("cool brand!", "sku", 2.0).brand("cool brand!adsflkjh").build()
+        val product2 =
+            Product.Builder("cool brand!", "sku", 2.0).brand("cool brand!adsflkjh").build()
         Assert.assertEquals(product2, product1)
     }
 

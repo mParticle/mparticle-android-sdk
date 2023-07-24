@@ -1,8 +1,9 @@
 package com.mparticle.internal;
 
+import static com.mparticle.networking.NetworkConnection.HTTP_TOO_MANY_REQUESTS;
+
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
@@ -17,15 +18,12 @@ import com.mparticle.internal.messages.MPAliasMessage;
 import com.mparticle.segmentation.SegmentListener;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
 
 import javax.net.ssl.SSLHandshakeException;
-
-import static com.mparticle.networking.NetworkConnection.HTTP_TOO_MANY_REQUESTS;
 
 /**
  * Primary queue handler which is responsible for querying, packaging, and uploading data.
@@ -77,7 +75,6 @@ public class UploadHandler extends BaseHandler {
     volatile boolean isNetworkConnected = true;
 
     /**
-     *
      * Only used for unit testing.
      */
     UploadHandler(Context context, ConfigManager configManager, AppStateManager appStateManager, MessageManager messageManager, MParticleDBManager mparticleDBManager, @Nullable KitFrameworkWrapper kitFrameworkWrapper) {
@@ -139,7 +136,7 @@ public class UploadHandler extends BaseHandler {
                     long uploadInterval = mConfigManager.getUploadInterval();
                     if (isNetworkConnected) {
                         if (uploadInterval > 0 || msg.arg1 == 1) {
-                            while(mParticleDBManager.hasMessagesForUpload()) {
+                            while (mParticleDBManager.hasMessagesForUpload()) {
                                 prepareMessageUploads(false);
                             }
                             boolean needsHistory = upload(false);
@@ -162,7 +159,7 @@ public class UploadHandler extends BaseHandler {
             }
         } catch (MParticleApiClientImpl.MPConfigException e) {
             Logger.error("Bad API request - is the correct API key and secret configured?");
-        } catch (Exception e){
+        } catch (Exception e) {
             Logger.verbose("UploadHandler Exception while handling message: " + e.toString());
         } catch (VerifyError ve) {
             Logger.verbose("UploadHandler VerifyError while handling message" + ve.toString());
@@ -320,14 +317,14 @@ public class UploadHandler extends BaseHandler {
         mApiClient = apiClient;
     }
 
-    public void setConnected(boolean connected){
+    public void setConnected(boolean connected) {
 
         try {
             MParticle instance = MParticle.getInstance();
             if (instance != null && !isNetworkConnected && connected && mConfigManager.isPushEnabled()) {
                 instance.Messaging().enablePushNotifications(mConfigManager.getPushSenderId());
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
 
         }
         isNetworkConnected = connected;
