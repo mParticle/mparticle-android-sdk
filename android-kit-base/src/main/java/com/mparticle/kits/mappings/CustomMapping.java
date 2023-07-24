@@ -5,8 +5,8 @@ import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.Promotion;
-import com.mparticle.kits.CommerceEventUtils;
 import com.mparticle.internal.MPUtility;
+import com.mparticle.kits.CommerceEventUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;

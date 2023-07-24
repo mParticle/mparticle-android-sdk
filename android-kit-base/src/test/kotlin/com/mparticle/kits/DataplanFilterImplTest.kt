@@ -49,11 +49,21 @@ class DataplanFilterImplTest {
                 assertEquals(it, hashSetOf("foo number", "foo", "foo foo"))
             }
             dataPoints.getValue("$PRODUCT_ACTION_KEY.add_to_cart").also {
-                assertEquals(it, hashSetOf("attributeNumEnum", "attributeEmail", "attributeStringAlpha", "attributeBoolean", "attributeNumMinMax"))
+                assertEquals(
+                    it,
+                    hashSetOf(
+                        "attributeNumEnum",
+                        "attributeEmail",
+                        "attributeStringAlpha",
+                        "attributeBoolean",
+                        "attributeNumMinMax"
+                    )
+                )
             }
-            dataPoints.getValue("$PRODUCT_ACTION_KEY.add_to_cart.$PRODUCT_IMPRESSION_PRODUCTS").also {
-                assertNull(it)
-            }
+            dataPoints.getValue("$PRODUCT_ACTION_KEY.add_to_cart.$PRODUCT_IMPRESSION_PRODUCTS")
+                .also {
+                    assertNull(it)
+                }
             dataPoints.getValue("$PRODUCT_ACTION_KEY.add_to_cart.$PRODUCT_ACTION_PRODUCTS").also {
                 assertNull(it)
             }
@@ -67,7 +77,10 @@ class DataplanFilterImplTest {
                 assertEquals(it, hashSetOf<String>())
             }
             dataPoints.getValue(USER_ATTRIBUTES_KEY).also {
-                assertEquals(it, hashSetOf("a third attribute", "my attribute", "my other attribute"))
+                assertEquals(
+                    it,
+                    hashSetOf("a third attribute", "my attribute", "my other attribute")
+                )
             }
             dataPoints.getValue(USER_IDENTITIES_KEY).also {
                 assertNull(it)
@@ -116,9 +129,10 @@ class DataplanFilterImplTest {
             dataPoints.getValue("$PRODUCT_ACTION_KEY.add_to_cart.$PRODUCT_ACTION_PRODUCTS").also {
                 assertNull(it)
             }
-            dataPoints.getValue("$PRODUCT_ACTION_KEY.add_to_cart.$PRODUCT_IMPRESSION_PRODUCTS").also {
-                assertNull(it)
-            }
+            dataPoints.getValue("$PRODUCT_ACTION_KEY.add_to_cart.$PRODUCT_IMPRESSION_PRODUCTS")
+                .also {
+                    assertNull(it)
+                }
             dataPoints.getValue("$PROMOTION_ACTION_KEY.view").also {
                 assertEquals(hashSetOf("not required", "required"), it)
             }
@@ -135,7 +149,10 @@ class DataplanFilterImplTest {
                 assertNull(it)
             }
             dataPoints.getValue(USER_ATTRIBUTES_KEY).also {
-                assertEquals(hashSetOf("my attribute", "my other attribute", "a third attribute"), it)
+                assertEquals(
+                    hashSetOf("my attribute", "my other attribute", "a third attribute"),
+                    it
+                )
             }
             dataPoints.getValue(USER_IDENTITIES_KEY).also { assertNull(it) }
             dataPoints.getValue("$CUSTOM_EVENT_KEY.SocialEvent.social").also {
@@ -181,7 +198,8 @@ class DataplanFilterImplTest {
                 customAttributes = randomAttributes()
             }
 
-            val dataplanFilter = DataplanFilterImpl(dataplanPoints, true, Random.nextBoolean(), false, false)
+            val dataplanFilter =
+                DataplanFilterImpl(dataplanPoints, true, Random.nextBoolean(), false, false)
             assertNull(dataplanFilter.transformEventForEvent(event)?.toString())
             diversity.remove(datapoint.type)
         }
@@ -199,7 +217,8 @@ class DataplanFilterImplTest {
 
             dataplanPoints[datapoint.toString()] = null
 
-            val dataplanFilter = DataplanFilterImpl(dataplanPoints, true, Random.nextBoolean(), false, false)
+            val dataplanFilter =
+                DataplanFilterImpl(dataplanPoints, true, Random.nextBoolean(), false, false)
             assertEquals(event.toString(), dataplanFilter.transformEventForEvent(event)?.toString())
             diversity.remove(datapoint.type)
         }
@@ -216,7 +235,8 @@ class DataplanFilterImplTest {
                 customAttributes = randomAttributes()
             }
 
-            val dataplanFilter = DataplanFilterImpl(dataplanPoints, false, Random.nextBoolean(), false, false)
+            val dataplanFilter =
+                DataplanFilterImpl(dataplanPoints, false, Random.nextBoolean(), false, false)
             assertEquals(event.toString(), dataplanFilter.transformEventForEvent(event)?.toString())
             diversity.remove(datapoint.type)
         }
@@ -234,8 +254,12 @@ class DataplanFilterImplTest {
             }
 
             dataplanPoints[datapoint.toString()] = allowedAttributes.keys.toHashSet()
-            val dataplanFilter = DataplanFilterImpl(dataplanPoints, true, Random.nextBoolean(), false, false)
-            assertEquals(allowedAttributes, dataplanFilter.transformEventForEvent(event)?.customAttributeStrings)
+            val dataplanFilter =
+                DataplanFilterImpl(dataplanPoints, true, Random.nextBoolean(), false, false)
+            assertEquals(
+                allowedAttributes,
+                dataplanFilter.transformEventForEvent(event)?.customAttributeStrings
+            )
             diversity.remove(datapoint.type)
         }
     }
@@ -251,7 +275,8 @@ class DataplanFilterImplTest {
                 customAttributes = allowedAttributes
             }
 
-            val dataplanFilter = DataplanFilterImpl(dataplanPoints, false, Random.nextBoolean(), false, false)
+            val dataplanFilter =
+                DataplanFilterImpl(dataplanPoints, false, Random.nextBoolean(), false, false)
             assertEquals(event, dataplanFilter.transformEventForEvent(event))
             diversity.remove(datapoint.type)
         }
@@ -271,8 +296,12 @@ class DataplanFilterImplTest {
             }
 
             dataplanPoints[datapoint.toString()] = allowedAttributes.keys.toHashSet()
-            val dataplanFilter = DataplanFilterImpl(dataplanPoints, Random.Default.nextBoolean(), true, false, false)
-            assertEquals(allowedAttributes, dataplanFilter.transformEventForEvent(event)?.customAttributeStrings)
+            val dataplanFilter =
+                DataplanFilterImpl(dataplanPoints, Random.Default.nextBoolean(), true, false, false)
+            assertEquals(
+                allowedAttributes,
+                dataplanFilter.transformEventForEvent(event)?.customAttributeStrings
+            )
             diversity.remove(datapoint.type)
         }
     }
@@ -292,22 +321,44 @@ class DataplanFilterImplTest {
         }
     }
 
-    private val types = setOf(CUSTOM_EVENT_KEY, PRODUCT_ACTION_KEY, PROMOTION_ACTION_KEY, PRODUCT_IMPRESSION_KEY, SCREEN_EVENT_KEY)
+    private val types = setOf(
+        CUSTOM_EVENT_KEY,
+        PRODUCT_ACTION_KEY,
+        PROMOTION_ACTION_KEY,
+        PRODUCT_IMPRESSION_KEY,
+        SCREEN_EVENT_KEY
+    )
 
     fun getRandomEvent(datapoint: DataplanPoint): BaseEvent {
         return when (datapoint.type) {
-            CUSTOM_EVENT_KEY -> MPEvent.Builder(datapoint.name!!, MParticle.EventType.values().first { it.getEventsApiName() == datapoint.eventType }).build()
-            SCREEN_EVENT_KEY -> ScreenEventBuilder(datapoint.name!!).build().also { assertTrue(it.isScreenEvent) }
-            PRODUCT_ACTION_KEY -> CommerceEvent.Builder(datapoint.name!!, Product.Builder("a", "b", 1.0).build()).build()
+            CUSTOM_EVENT_KEY -> MPEvent.Builder(
+                datapoint.name!!,
+                MParticle.EventType.values().first { it.getEventsApiName() == datapoint.eventType })
+                .build()
+            SCREEN_EVENT_KEY -> ScreenEventBuilder(datapoint.name!!).build()
+                .also { assertTrue(it.isScreenEvent) }
+            PRODUCT_ACTION_KEY -> CommerceEvent.Builder(
+                datapoint.name!!,
+                Product.Builder("a", "b", 1.0).build()
+            ).build()
             PROMOTION_ACTION_KEY -> CommerceEvent.Builder(datapoint.name!!, Promotion()).build()
-            PRODUCT_IMPRESSION_KEY -> CommerceEvent.Builder(Impression("impressionname", Product.Builder("a", "b", 1.0).build())).build()
+            PRODUCT_IMPRESSION_KEY -> CommerceEvent.Builder(
+                Impression(
+                    "impressionname",
+                    Product.Builder("a", "b", 1.0).build()
+                )
+            ).build()
             else -> throw IllegalArgumentException(datapoint.type + ": messed this implementation up :/")
         }
     }
 
     fun getRandomDataplanEventKey(): DataplanPoint {
         return when (Random.Default.nextInt(0, 5)) {
-            0 -> DataplanPoint(CUSTOM_EVENT_KEY, randomString(5), randomEventType().getEventsApiName())
+            0 -> DataplanPoint(
+                CUSTOM_EVENT_KEY,
+                randomString(5),
+                randomEventType().getEventsApiName()
+            )
             1 -> DataplanPoint(SCREEN_EVENT_KEY, randomString(8))
             2 -> DataplanPoint(PRODUCT_ACTION_KEY, randomProductAction())
             3 -> DataplanPoint(PROMOTION_ACTION_KEY, randomPromotionAction())
@@ -339,7 +390,10 @@ class DataplanFilterImplTest {
     }
 
     fun randomEventType(): MParticle.EventType {
-        return MParticle.EventType.values()[Random.Default.nextInt(0, MParticle.EventType.values().size - 1)]
+        return MParticle.EventType.values()[Random.Default.nextInt(
+            0,
+            MParticle.EventType.values().size - 1
+        )]
     }
 
     fun randomProductAction(): String {
@@ -367,6 +421,7 @@ class DataplanFilterImplTest {
             isScreenEvent = true
         }
     }
+
     class ScreenEventBuilder(name: String) : MPEvent.Builder(name, MParticle.EventType.Other) {
         override fun build(): MPEvent {
             return ScreenEvent(super.build())
@@ -374,6 +429,7 @@ class DataplanFilterImplTest {
     }
 
     class DataplanPoint(val type: String, val name: String? = null, val eventType: String? = null) {
-        override fun toString() = "$type${if (name != null) ".$name" else ""}${if (eventType != null) ".$eventType" else ""}"
+        override fun toString() =
+            "$type${if (name != null) ".$name" else ""}${if (eventType != null) ".$eventType" else ""}"
     }
 }

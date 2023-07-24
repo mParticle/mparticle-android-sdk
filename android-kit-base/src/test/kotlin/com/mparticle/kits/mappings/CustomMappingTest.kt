@@ -98,14 +98,14 @@ class CustomMappingTest {
                 val attributes = action.getJSONArray("attribute_maps")
                 val sum =
                     (if (customMapping.mRequiredAttributeMapList == null) 0 else customMapping.mRequiredAttributeMapList.size) +
-                        if (customMapping.mStaticAttributeMapList == null) 0 else customMapping.mStaticAttributeMapList.size
+                            if (customMapping.mStaticAttributeMapList == null) 0 else customMapping.mStaticAttributeMapList.size
                 Assert.assertEquals(attributes.length().toLong(), sum.toLong())
                 for (k in 0 until attributes.length()) {
                     val attribute = attributes.getJSONObject(k)
                     val attProj = CustomMapping.AttributeMap(attribute)
                     Assert.assertEquals(attribute.optBoolean("is_required"), attProj.mIsRequired)
                     if (attribute.getString("match_type")
-                        .startsWith(CustomMapping.MATCH_TYPE_STATIC)
+                            .startsWith(CustomMapping.MATCH_TYPE_STATIC)
                     ) {
                         Assert.assertFalse(customMapping.mRequiredAttributeMapList.contains(attProj))
                         Assert.assertTrue(customMapping.mStaticAttributeMapList.contains(attProj))

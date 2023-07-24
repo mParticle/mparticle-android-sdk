@@ -27,13 +27,13 @@ internal class DataplanFilterImpl constructor(
 ) : DataplanFilter {
 
     constructor(dataplanOptions: MParticleOptions.DataplanOptions) :
-        this(
-            extractDataPoints(dataplanOptions.dataplan),
-            dataplanOptions.isBlockEvents,
-            dataplanOptions.isBlockEventAttributes,
-            dataplanOptions.isBlockUserAttributes,
-            dataplanOptions.isBlockUserIdentities
-        )
+            this(
+                extractDataPoints(dataplanOptions.dataplan),
+                dataplanOptions.isBlockEvents,
+                dataplanOptions.isBlockEventAttributes,
+                dataplanOptions.isBlockUserAttributes,
+                dataplanOptions.isBlockUserIdentities
+            )
 
     init {
         Logger.debug(
@@ -45,9 +45,9 @@ Data Plan parsed for Kit Filtering:
     blockUserAttributes=$blockUserAttributes
     blockUserIdentities=$blockUserIdentities
         ${
-            dataPoints.entries.joinToString("\n") { (key, value) ->
-                "$key\n\t${value?.joinToString("\n\t") { it }}"
-            }
+                dataPoints.entries.joinToString("\n") { (key, value) ->
+                    "$key\n\t${value?.joinToString("\n\t") { it }}"
+                }
             }
         """
         )
@@ -69,12 +69,22 @@ Data Plan parsed for Kit Filtering:
                 event is MPEvent ->
                     when {
                         event.isScreenEvent -> DataPoint(SCREEN_EVENT_KEY, event.eventName)
-                        else -> DataPoint(CUSTOM_EVENT_KEY, event.eventName, event.eventType.getEventsApiName())
+                        else -> DataPoint(
+                            CUSTOM_EVENT_KEY,
+                            event.eventName,
+                            event.eventType.getEventsApiName()
+                        )
                     }
                 event is CommerceEvent ->
                     when {
-                        !event.productAction.isNullOrBlank() -> DataPoint(PRODUCT_ACTION_KEY, event.productAction)
-                        !event.promotionAction.isNullOrBlank() -> DataPoint(PROMOTION_ACTION_KEY, event.promotionAction)
+                        !event.productAction.isNullOrBlank() -> DataPoint(
+                            PRODUCT_ACTION_KEY,
+                            event.productAction
+                        )
+                        !event.promotionAction.isNullOrBlank() -> DataPoint(
+                            PROMOTION_ACTION_KEY,
+                            event.promotionAction
+                        )
                         !event.impressions.isNullOrEmpty() -> DataPoint(PRODUCT_IMPRESSION_KEY)
                         else -> null
                     }
@@ -99,7 +109,8 @@ Data Plan parsed for Kit Filtering:
                     }
                 }
                 if (event is CommerceEvent) {
-                    val productActionDatapoint = dataPoints["$dataPointKey.$PRODUCT_ACTION_PRODUCTS"]
+                    val productActionDatapoint =
+                        dataPoints["$dataPointKey.$PRODUCT_ACTION_PRODUCTS"]
                     event.products?.iterator()?.forEach { product ->
                         product?.customAttributes?.toMutableMap()?.apply {
                             val filteredAttributes = filterKeys {
@@ -109,7 +120,8 @@ Data Plan parsed for Kit Filtering:
                             putAll(filteredAttributes)
                         }
                     }
-                    val productImpressionDatapoint = dataPoints["$dataPointKey.$PRODUCT_IMPRESSION_PRODUCTS"]
+                    val productImpressionDatapoint =
+                        dataPoints["$dataPointKey.$PRODUCT_IMPRESSION_PRODUCTS"]
                     if ((event.impressions?.size ?: 0) > 0) {
                         event.impressions?.iterator()?.forEach {
                             it.products.forEach { product ->
@@ -284,7 +296,8 @@ Data Plan parsed for Kit Filtering:
                         ?.optJSONObject("data") ?: return null
                     if (datapoint.productAttributeType == null) {
                         data.let {
-                            val customAttributes = it.getConstrainedPropertiesJSONObject("custom_attributes")
+                            val customAttributes =
+                                it.getConstrainedPropertiesJSONObject("custom_attributes")
                             if (customAttributes == null) {
                                 return null
                             } else {
@@ -296,15 +309,17 @@ Data Plan parsed for Kit Filtering:
                         data.let {
                             val products = when (datapoint.productAttributeType) {
                                 PRODUCT_ACTION_PRODUCTS -> {
-                                    val productBlock = it.getConstrainedPropertiesJSONObject("product_action")
-                                        ?.getConstrainedPropertiesJSONObject("products")
+                                    val productBlock =
+                                        it.getConstrainedPropertiesJSONObject("product_action")
+                                            ?.getConstrainedPropertiesJSONObject("products")
                                     if (productBlock == emptyJSONObject) {
                                         return hashSetOf()
                                     }
                                     productBlock
                                 }
                                 PRODUCT_IMPRESSION_PRODUCTS -> {
-                                    var productBlock = it.getConstrainedPropertiesJSONObject("product_impressions")
+                                    var productBlock =
+                                        it.getConstrainedPropertiesJSONObject("product_impressions")
                                     if (productBlock == emptyJSONObject) {
                                         return hashSetOf()
                                     }
@@ -416,7 +431,11 @@ Data Plan parsed for Kit Filtering:
     }
 
     class DataPoint(val type: String, val name: String? = null, val eventType: String? = null) {
-        constructor(datapoint: DataPoint) : this(datapoint.type, datapoint.name, datapoint.eventType)
+        constructor(datapoint: DataPoint) : this(
+            datapoint.type,
+            datapoint.name,
+            datapoint.eventType
+        )
 
         var productAttributeType: String? = null
             private set
@@ -430,12 +449,15 @@ Data Plan parsed for Kit Filtering:
                 else -> null
             }
 
-        override fun toString() = "$type${if (name != null) ".$name" else ""}${if (eventType != null) ".$eventType" else ""}${productAttributeType?.let { ".$it" } ?: ""}"
+        override fun toString() =
+            "$type${if (name != null) ".$name" else ""}${if (eventType != null) ".$eventType" else ""}${productAttributeType?.let { ".$it" } ?: ""}"
     }
 
     class EmptyDataplanFilter : DataplanFilter {
         override fun <T : BaseEvent> transformEventForEvent(event: T?) = event
-        override fun transformIdentities(identities: Map<MParticle.IdentityType, String?>?) = identities
+        override fun transformIdentities(identities: Map<MParticle.IdentityType, String?>?) =
+            identities
+
         override fun <T> transformUserAttributes(attributes: Map<String, T>?) = attributes
         override fun isUserAttributeBlocked(key: String?) = false
         override fun isUserIdentityBlocked(key: MParticle.IdentityType?) = false
