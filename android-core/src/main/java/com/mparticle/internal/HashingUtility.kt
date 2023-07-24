@@ -33,6 +33,14 @@ object HashingUtility {
         return MPUtility.mpHash(eventTypeStr + eventName + key)
     }
 
+    fun hashFilterEventAttributes(
+        eventType: Int,
+        eventName: String,
+        key: String
+    ): Int {
+        return MPUtility.mpHash(eventType.toString() + eventName + key)
+    }
+
     fun hashFilterCommerceEventAttribute(eventType: Int, customAttributeKey: String) =
         MPUtility.mpHash("$eventType$customAttributeKey")
 
@@ -45,6 +53,9 @@ object HashingUtility {
 
     fun hashProductField(eventType: Int, productKey: String) =
         MPUtility.mpHash("$eventType$productKey")
+
+    fun hashValue(hashPrefix : String, value : String) : Int =
+        MPUtility.mpHash("$hashPrefix$value")
 
 
 }

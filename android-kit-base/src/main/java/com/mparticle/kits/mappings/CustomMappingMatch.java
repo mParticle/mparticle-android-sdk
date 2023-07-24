@@ -4,8 +4,8 @@ import com.mparticle.MPEvent;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.Promotion;
+import com.mparticle.internal.HashingUtility;
 import com.mparticle.kits.CommerceEventUtils;
-import com.mparticle.kits.KitUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -178,7 +178,7 @@ final class CustomMappingMatch {
             CommerceEventUtils.extractPromotionAttributes(promotion, promotionFields);
             if (promotionFields != null) {
                 for (Map.Entry<String, String> entry : promotionFields.entrySet()) {
-                    int attributeHash = KitUtils.hashForFiltering(CommerceEventUtils.getEventType(event) + entry.getKey());
+                    int attributeHash = HashingUtility.INSTANCE.hashPromotionField(CommerceEventUtils.getEventType(event), entry.getKey());
                     if (attributeHash == hash) {
                         if (commerceMatchPropertyValues.contains(entry.getValue().toLowerCase(Locale.US))) {
                             matchedPromotions.add(promotion);
@@ -210,7 +210,7 @@ final class CustomMappingMatch {
             CommerceEventUtils.extractProductFields(product, productFields);
             if (productFields != null) {
                 for (Map.Entry<String, String> entry : productFields.entrySet()) {
-                    int attributeHash = KitUtils.hashForFiltering(type + entry.getKey());
+                    int attributeHash = HashingUtility.INSTANCE.hashProductField(type, entry.getKey());
                     if (attributeHash == hash) {
                         if (commerceMatchPropertyValues.contains(entry.getValue().toLowerCase(Locale.US))) {
                             matchedProducts.add(product);
@@ -239,7 +239,7 @@ final class CustomMappingMatch {
             Map<String, String> attributes = product.getCustomAttributes();
             if (attributes != null) {
                 for (Map.Entry<String, String> entry : attributes.entrySet()) {
-                    int attributeHash = KitUtils.hashForFiltering(CommerceEventUtils.getEventType(event) + entry.getKey());
+                    int attributeHash = HashingUtility.INSTANCE.hashProductField(CommerceEventUtils.getEventType(event), entry.getKey());
                     if (attributeHash == hash) {
                         if (commerceMatchPropertyValues.contains(entry.getValue().toLowerCase(Locale.US))) {
                             matchedProducts.add(product);
@@ -264,7 +264,7 @@ final class CustomMappingMatch {
         }
         int hash = Integer.parseInt(commerceMatchPropertyName);
         for (Map.Entry<String, String> entry : attributes.entrySet()) {
-            int attributeHash = KitUtils.hashForFiltering(CommerceEventUtils.getEventType(event) + entry.getKey());
+            int attributeHash = HashingUtility.INSTANCE.hashFilterCommerceEventAttribute(CommerceEventUtils.getEventType(event), entry.getKey());
             if (attributeHash == hash) {
                 return commerceMatchPropertyValues.contains(entry.getValue().toLowerCase(Locale.US));
             }
@@ -277,7 +277,7 @@ final class CustomMappingMatch {
         Map<String, String> fields = new HashMap<String, String>();
         CommerceEventUtils.extractActionAttributes(event, fields);
         for (Map.Entry<String, String> entry : fields.entrySet()) {
-            int fieldHash = KitUtils.hashForFiltering(CommerceEventUtils.getEventType(event) + entry.getKey());
+            int fieldHash = HashingUtility.INSTANCE.hashFilterCommerceEventAttribute(CommerceEventUtils.getEventType(event), entry.getKey());
             if (fieldHash == hash) {
                 return commerceMatchPropertyValues.contains(entry.getValue().toLowerCase(Locale.US));
             }

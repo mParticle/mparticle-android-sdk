@@ -61,9 +61,9 @@ public final class KitUtils {
      * @param input
      * @return return int hash
      */
-    public static int hashForFiltering(String input) {
-        return MPUtility.mpHash(input);
-    }
+//    public static int hashForFiltering(String input) {
+//        return MPUtility.mpHash(input);
+//    }
 
 
     /**
