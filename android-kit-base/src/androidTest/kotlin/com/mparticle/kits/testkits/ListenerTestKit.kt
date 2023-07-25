@@ -10,7 +10,8 @@ abstract class ListenerTestKit : BaseTestKit() {
     var onIdentityReceived: ((MParticle.IdentityType, String?) -> Unit)? = null
     var onAttributeReceived: ((String?, Any?) -> Unit)? = null
 
-    var onKitCreate: ((settings: Map<String, String>?, context: Context) -> List<ReportingMessage>)? = null
+    var onKitCreate: ((settings: Map<String, String>?, context: Context) -> List<ReportingMessage>)? =
+        null
     var setOptOut: ((optedOut: Boolean) -> List<ReportingMessage>)? = null
     var getName: (() -> String)? = null
 
@@ -18,6 +19,9 @@ abstract class ListenerTestKit : BaseTestKit() {
     override fun setOptOut(optedOut: Boolean) = setOptOut?.invoke(optedOut)
         ?: listOf()
 
-    override fun onKitCreate(settings: Map<String, String>?, context: Context): List<ReportingMessage> = onKitCreate?.invoke(settings, context)
+    override fun onKitCreate(
+        settings: Map<String, String>?,
+        context: Context
+    ): List<ReportingMessage> = onKitCreate?.invoke(settings, context)
         ?: listOf()
 }

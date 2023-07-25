@@ -9,7 +9,7 @@ import com.mparticle.internal.MPUtility;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public final class Certificate{
+public final class Certificate {
     private String alias;
     private String certificate;
 
@@ -60,8 +60,7 @@ public final class Certificate{
             return new JSONObject()
                     .put("alias", getAlias())
                     .put("certificate", getCertificate());
-        }
-        catch (JSONException jse) {
+        } catch (JSONException jse) {
             Logger.error(jse);
         }
         return jsonObject;

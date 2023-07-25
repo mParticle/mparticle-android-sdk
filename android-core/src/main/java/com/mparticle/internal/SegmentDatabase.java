@@ -44,9 +44,7 @@ import android.database.sqlite.SQLiteOpenHelper;
                     SegmentMembershipTable.SEGMENT_ID + " INTEGER NOT NULL, " +
                     SegmentMembershipTable.TIMESTAMP + " REAL NOT NULL, " +
                     SegmentMembershipTable.MEMBERSHIP_ACTION + " INTEGER NOT NULL, " +
-                    " FOREIGN KEY ("+ SegmentMembershipTable.SEGMENT_ID+") REFERENCES "+ SegmentTable.TABLE_NAME+" ("+ SegmentTable.SEGMENT_ID +"));";
-
-
+                    " FOREIGN KEY (" + SegmentMembershipTable.SEGMENT_ID + ") REFERENCES " + SegmentTable.TABLE_NAME + " (" + SegmentTable.SEGMENT_ID + "));";
 
 
     SegmentDatabase(Context context) {

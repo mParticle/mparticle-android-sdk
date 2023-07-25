@@ -2,7 +2,6 @@ package com.mparticle;
 
 import android.annotation.SuppressLint;
 import android.app.IntentService;
-
 import android.content.Intent;
 
 import androidx.annotation.NonNull;
@@ -23,7 +22,6 @@ public class MPService extends IntentService {
     public MPService() {
         super("com.mparticle.MPService");
     }
-
 
 
     /**

@@ -6,7 +6,8 @@ class Response {
     String responseBody = "";
     long delay;
 
-    Response() { }
+    Response() {
+    }
 
     Response(String responseBody) {
         this(200, responseBody);

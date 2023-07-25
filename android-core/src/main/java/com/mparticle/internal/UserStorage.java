@@ -1,5 +1,7 @@
 package com.mparticle.internal;
 
+import static com.mparticle.internal.ConfigManager.PREFERENCES_FILE;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.UrlQuerySanitizer;
@@ -14,8 +16,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
-
-import static com.mparticle.internal.ConfigManager.PREFERENCES_FILE;
 
 public class UserStorage {
     private static final String USER_CONFIG_COLLECTION = "mp::user_config_collection";
@@ -49,7 +49,7 @@ public class UserStorage {
     static List<UserStorage> getAllUsers(Context context) {
         Set<Long> userMpIds = getMpIdSet(context);
         List<UserStorage> userStorages = new ArrayList<UserStorage>();
-        for (Long mdId: userMpIds) {
+        for (Long mdId : userMpIds) {
             userStorages.add(new UserStorage(context, Long.valueOf(mdId)));
         }
         return userStorages;
@@ -88,7 +88,7 @@ public class UserStorage {
         return mpId;
     }
 
-    int getCurrentSessionCounter(){
+    int getCurrentSessionCounter() {
         return getCurrentSessionCounter(0);
     }
 
@@ -106,7 +106,7 @@ public class UserStorage {
 
     void incrementSessionCounter() {
         int nextCount = getCurrentSessionCounter() + 1;
-        if (nextCount >= (Integer.MAX_VALUE / 100)){
+        if (nextCount >= (Integer.MAX_VALUE / 100)) {
             nextCount = 0;
         }
         mPreferences.edit().putInt(SESSION_COUNTER, nextCount).apply();
@@ -130,7 +130,7 @@ public class UserStorage {
     }
 
     int getBreadcrumbLimit() {
-        if (mPreferences != null){
+        if (mPreferences != null) {
             return mPreferences.getInt(BREADCRUMB_LIMIT, DEFAULT_BREADCRUMB_LIMIT);
         }
         return DEFAULT_BREADCRUMB_LIMIT;
@@ -343,13 +343,14 @@ public class UserStorage {
         JSONArray userConfigs = new JSONArray();
         try {
             userConfigs = new JSONArray(getMParticleSharedPrefs(context).getString(USER_CONFIG_COLLECTION, new JSONArray().toString()));
-        } catch (JSONException ignore) {}
+        } catch (JSONException ignore) {
+        }
         Set<Long> mpIds = new TreeSet<Long>();
         for (int i = 0; i < userConfigs.length(); i++) {
             try {
                 mpIds.add(userConfigs.getLong(i));
+            } catch (JSONException ignore) {
             }
-            catch (JSONException ignore) {}
         }
         return mpIds;
     }
@@ -360,7 +361,7 @@ public class UserStorage {
 
     private static void setMpIds(Context context, Set<Long> mpIds) {
         JSONArray jsonArray = new JSONArray();
-        for (Long mpId: mpIds) {
+        for (Long mpId : mpIds) {
             jsonArray.put(mpId);
         }
         getMParticleSharedPrefs(context).edit().putString(USER_CONFIG_COLLECTION, jsonArray.toString()).apply();
@@ -428,7 +429,6 @@ public class UserStorage {
      * kept application-wide, to the current interface, which stores the values by MPID. The migration
      * process will associate all current values covered by UserStorage to the current MPID, which should
      * be passed into the parameter "currentMpId".
-     *
      **/
 
     private static class SharedPreferencesMigrator {
@@ -505,7 +505,7 @@ public class UserStorage {
                         String dasParseString = jsonCookies.getJSONObject("uid").getString("c");
                         UrlQuerySanitizer sanitizer = new UrlQuerySanitizer(dasParseString);
                         das = sanitizer.getValue("g");
-                    }catch (Exception e) {
+                    } catch (Exception e) {
 
                     }
                     userStorage.setCookies(cookies);
@@ -525,8 +525,7 @@ public class UserStorage {
                 if (userIdentities != null) {
                     userStorage.setUserIdentities(userIdentities);
                 }
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 //do nothing
             }
         }
@@ -534,6 +533,7 @@ public class UserStorage {
         /**
          * Check if we have need to migrate from the old SharedPreferences schema. We will only need
          * to trigger a migration, if the flag is explicitly set to true.
+         *
          * @param context
          * @return
          */

@@ -5,7 +5,6 @@ import android.telephony.TelephonyManager
 import com.mparticle.testutils.BaseCleanInstallEachTest
 import org.junit.Assert
 import org.junit.Test
-import java.lang.Exception
 import java.util.Hashtable
 import java.util.TreeMap
 

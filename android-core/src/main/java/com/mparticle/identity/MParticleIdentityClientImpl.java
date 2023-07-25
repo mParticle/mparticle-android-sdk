@@ -208,7 +208,7 @@ public class MParticleIdentityClientImpl extends MParticleBaseClientImpl impleme
         Set<MParticle.IdentityType> identityTypes = new HashSet<MParticle.IdentityType>(userIdentities.keySet());
         identityTypes.addAll(userIdentities.keySet());
 
-        for (MParticle.IdentityType identityType: identityTypes) {
+        for (MParticle.IdentityType identityType : identityTypes) {
             String idTypeString = getStringValue(identityType);
             if (!MPUtility.isEmpty(idTypeString)) {
                 JSONObject changeJson = new JSONObject();
@@ -222,7 +222,7 @@ public class MParticleIdentityClientImpl extends MParticleBaseClientImpl impleme
                 }
             }
         }
-        for (Map.Entry<String, String> otherIdentities: request.getOtherNewIdentities().entrySet()) {
+        for (Map.Entry<String, String> otherIdentities : request.getOtherNewIdentities().entrySet()) {
             String identityType = otherIdentities.getKey();
             String newValue = otherIdentities.getValue();
             String oldValue = request.getOtherOldIdentities().get(identityType);
@@ -284,7 +284,6 @@ public class MParticleIdentityClientImpl extends MParticleBaseClientImpl impleme
     private MPConnection getPostConnection(String endpoint, String message) throws IOException {
         return getPostConnection(null, endpoint, message);
     }
-
 
 
     MPUrl getUrl(long mpId, String endpoint) throws MalformedURLException {

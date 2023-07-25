@@ -7,4 +7,5 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.TYPE)
-public @interface ApiClass { }
+public @interface ApiClass {
+}

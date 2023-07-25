@@ -5,7 +5,7 @@ import androidx.annotation.NonNull;
 import java.util.ArrayList;
 
 /**
- This class is returned as response from a user segments call. It contains segment ids, expiration, and a flag indicating whether it is expired.
+ * This class is returned as response from a user segments call. It contains segment ids, expiration, and a flag indicating whether it is expired.
  */
 public class SegmentMembership {
     private ArrayList<Segment> segments;
@@ -17,7 +17,7 @@ public class SegmentMembership {
     }
 
     /**
-     The list of user segment IDs.
+     * The list of user segment IDs.
      */
     @NonNull
     public ArrayList<Segment> getSegments() {
@@ -25,16 +25,16 @@ public class SegmentMembership {
     }
 
     /**
-     Returns a String with a comma separated list of user segment IDs.
+     * Returns a String with a comma separated list of user segment IDs.
      */
     @Override
     @NonNull
-    public String toString(){
+    public String toString() {
         return getCommaSeparatedIds();
     }
 
     /**
-     Returns a String with a comma separated list of user segment IDs.
+     * Returns a String with a comma separated list of user segment IDs.
      */
     @NonNull
     public String getCommaSeparatedIds() {

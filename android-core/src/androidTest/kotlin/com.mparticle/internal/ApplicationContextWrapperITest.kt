@@ -19,7 +19,10 @@ class ApplicationContextWrapperITest {
     @OrchestratorOnly
     @Test
     fun testRegisterListenerBackgroundThread() {
-        val applicationContextWrapper = ApplicationContextWrapper(InstrumentationRegistry.getInstrumentation().getContext().applicationContext as Application)
+        val applicationContextWrapper = ApplicationContextWrapper(
+            InstrumentationRegistry.getInstrumentation()
+                .getContext().applicationContext as Application
+        )
         var exception: Exception? = null
         assertNull(Looper.myLooper())
         try {

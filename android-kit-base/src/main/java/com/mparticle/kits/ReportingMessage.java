@@ -91,11 +91,11 @@ public class ReportingMessage implements JsonReportingMessage {
     public static ReportingMessage fromEvent(KitIntegration provider, BaseEvent event) {
         ReportingMessage message = new ReportingMessage(provider, event.getType().getMessageType(), System.currentTimeMillis(), event.getCustomAttributeStrings());
         if (event instanceof MPEvent) {
-            MPEvent mpEvent = (MPEvent)event;
+            MPEvent mpEvent = (MPEvent) event;
             message.eventType = mpEvent.getEventType().name();
             message.eventName = mpEvent.getEventName();
         } else if (event instanceof CommerceEvent) {
-            CommerceEvent commerceEvent = (CommerceEvent)event;
+            CommerceEvent commerceEvent = (CommerceEvent) event;
             message.eventType = CommerceEventUtils.getEventTypeString(commerceEvent);
         }
         return message;
@@ -155,7 +155,8 @@ public class ReportingMessage implements JsonReportingMessage {
                     jsonObject.put("et", eventType);
                 }
             }
-        } catch (JSONException ignored) { }
+        } catch (JSONException ignored) {
+        }
         return jsonObject;
     }
 

@@ -2,6 +2,7 @@ package com.mparticle.identity;
 
 
 import android.content.Context;
+
 import androidx.annotation.NonNull;
 
 import com.mparticle.MParticle;
@@ -26,7 +27,8 @@ public class MParticleUserImpl implements MParticleUser {
     }
 
     //unit testing only
-    protected MParticleUserImpl() {}
+    protected MParticleUserImpl() {
+    }
 
     static MParticleUser getInstance(Context context, long mpId, MParticleUserDelegate userDelegate) {
         return new MParticleUserImpl(context, mpId, userDelegate);
@@ -46,7 +48,6 @@ public class MParticleUserImpl implements MParticleUser {
      * Query the attributes of the User asynchronously.
      *
      * @param listener a callback for querying User's attributes
-     *
      * @return
      */
     public Map<String, Object> getUserAttributes(final UserAttributeListenerType listener) {
@@ -59,7 +60,7 @@ public class MParticleUserImpl implements MParticleUser {
         if (userAttributes == null) {
             return false;
         }
-        for(Map.Entry<String, Object> entry: userAttributes.entrySet()) {
+        for (Map.Entry<String, Object> entry : userAttributes.entrySet()) {
             if (!setUserAttribute(entry.getKey(), entry.getValue())) {
                 success = false;
             }
@@ -76,7 +77,7 @@ public class MParticleUserImpl implements MParticleUser {
         if (userIdentities == null) {
             return;
         }
-        for(Map.Entry<MParticle.IdentityType, String> entry: userIdentities.entrySet()) {
+        for (Map.Entry<MParticle.IdentityType, String> entry : userIdentities.entrySet()) {
             mUserDelegate.setUserIdentity(entry.getValue(), entry.getKey(), getId());
         }
     }

@@ -12,8 +12,6 @@ import com.mparticle.testutils.MPLatch
 import org.junit.Assert
 import org.junit.Test
 import java.util.TreeMap
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 class MParticleDBManagerTest : BaseCleanInstallEachTest() {
     @Test

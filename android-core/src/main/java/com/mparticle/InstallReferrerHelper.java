@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Looper;
 import android.os.RemoteException;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -59,8 +60,7 @@ public class InstallReferrerHelper {
                                         } catch (RemoteException e) {
                                             Logger.warning("InstallReferrer Remote Exception, using InstallReferrer from intent.");
                                             callback.onFailed();
-                                        }
-                                        catch (Exception e) {
+                                        } catch (Exception e) {
                                             Logger.warning("InstallReferrer Exception: " + e.getMessage() + ", using InstallReferrer from intent");
                                             callback.onFailed();
                                         }
@@ -85,8 +85,7 @@ public class InstallReferrerHelper {
                             }
                         };
                         mReferrerClient.startConnection(listener);
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         Logger.error("Exception while fetching install referrer: " + e.getMessage());
                         callback.onFailed();
                     }
@@ -98,8 +97,7 @@ public class InstallReferrerHelper {
                 } else {
                     runnable.run();
                 }
-            }
-            catch (Exception ignored) {
+            } catch (Exception ignored) {
                 callback.onFailed();
             }
         } else {
@@ -109,6 +107,7 @@ public class InstallReferrerHelper {
 
     public interface InstallReferrerCallback {
         void onReceived(@Nullable String installReferrer);
+
         void onFailed();
     }
 

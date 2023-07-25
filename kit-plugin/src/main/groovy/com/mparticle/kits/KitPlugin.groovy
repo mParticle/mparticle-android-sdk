@@ -147,8 +147,8 @@ class KitPlugin implements Plugin<Project> {
         }
 
         //Publishing task aliases for simpler local development
-        target.task("publishLocal") { dependsOn "publishDebugPublicationToMavenLocal"}
-        target.task("publishReleaseLocal") { dependsOn "publishReleasePublicationToMavenLocal"}
+        target.task("publishLocal") { dependsOn "publishDebugPublicationToMavenLocal" }
+        target.task("publishReleaseLocal") { dependsOn "publishReleasePublicationToMavenLocal" }
     }
 }
 

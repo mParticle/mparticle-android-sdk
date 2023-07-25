@@ -3,7 +3,8 @@ package com.mparticle.lints.dtos
 import com.mparticle.lints.resolveToEnum
 import org.jetbrains.uast.UExpression
 
-data class Value(override var parent: Expression, val value: Any?, override val node: UExpression) : Expression {
+data class Value(override var parent: Expression, val value: Any?, override val node: UExpression) :
+    Expression {
 
     override fun toString(): String {
         return "$value"

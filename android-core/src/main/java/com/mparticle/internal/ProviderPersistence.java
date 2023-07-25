@@ -2,9 +2,6 @@ package com.mparticle.internal;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.text.TextUtils;
-
-import com.mparticle.internal.MPUtility;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,7 +18,7 @@ import java.util.regex.Pattern;
  * server side via mParticle. Rather than start from stratch, it's crucial that we can query data that
  * the given SDK had been storing client-side.
  */
-class ProviderPersistence extends JSONObject{
+class ProviderPersistence extends JSONObject {
 
     static final String KEY_PERSISTENCE = "cms";
     private static final String KEY_PERSISTENCE_ID = "id";
@@ -42,28 +39,28 @@ class ProviderPersistence extends JSONObject{
     private static final int PERSISTENCE_TYPE_LONG = 5;
 
 
-    ProviderPersistence(JSONObject config, Context context) throws JSONException{
+    ProviderPersistence(JSONObject config, Context context) throws JSONException {
         super();
         JSONArray configPersistence = config.getJSONArray(KEY_PERSISTENCE);
-        for (int i = 0; i < configPersistence.length(); i++){
+        for (int i = 0; i < configPersistence.length(); i++) {
 
             JSONObject values = new JSONObject();
-            if (configPersistence.getJSONObject(i).has(KEY_PERSISTENCE_ANDROID)){
+            if (configPersistence.getJSONObject(i).has(KEY_PERSISTENCE_ANDROID)) {
                 JSONArray files = configPersistence.getJSONObject(i).getJSONArray(KEY_PERSISTENCE_ANDROID);
 
-                for (int fileIndex = 0; fileIndex < files.length(); fileIndex++){
+                for (int fileIndex = 0; fileIndex < files.length(); fileIndex++) {
                     JSONObject fileObject = files.getJSONObject(fileIndex);
                     SharedPreferences preferences = context.getSharedPreferences(fileObject.getString(KEY_PERSISTENCE_FILE), fileObject.getInt(KEY_PERSISTENCE_MODE));
                     JSONArray fileObjects = fileObject.getJSONArray(KEY_PERSISTENCE_KEY_LIST);
                     SharedPreferences.Editor editor = preferences.edit();
-                    for (int keyIndex = 0; keyIndex < fileObjects.length(); keyIndex++){
+                    for (int keyIndex = 0; keyIndex < fileObjects.length(); keyIndex++) {
                         final int type = fileObjects.getJSONObject(keyIndex).getInt(KEY_PERSISTENCE_TYPE);
                         final String key = fileObjects.getJSONObject(keyIndex).getString(KEY_PERSISTENCE_KEY);
                         final String mpKey = fileObjects.getJSONObject(keyIndex).getString(KEY_PERSISTENCE_MPVAR);
                         final String mpPersistenceKey = MPPREFIX + mpKey;
-                        if (preferences.contains(mpPersistenceKey)){
+                        if (preferences.contains(mpPersistenceKey)) {
                             values.put(mpKey, preferences.getString(mpPersistenceKey, null));
-                        }else{
+                        } else {
                             String resolvedValue = null;
                             if (preferences.contains(key)) {
                                 switch (type) {
@@ -83,7 +80,7 @@ class ProviderPersistence extends JSONObject{
                                         resolvedValue = Long.toString(preferences.getLong(key, 0));
                                         break;
                                 }
-                            }else{
+                            } else {
                                 resolvedValue = applyMacro(fileObjects.getJSONObject(keyIndex).getString(KEY_PERSISTENCE_DEFAULT));
                             }
 
@@ -112,17 +109,17 @@ class ProviderPersistence extends JSONObject{
      * Macros are used so that the /config API call can come from a CDN (not user-specific).
      */
     private static String applyMacro(String defaultString) {
-        if (!MPUtility.isEmpty(defaultString) && defaultString.startsWith("%")){
+        if (!MPUtility.isEmpty(defaultString) && defaultString.startsWith("%")) {
             defaultString = defaultString.toLowerCase();
-            if (defaultString.equalsIgnoreCase(MACRO_GUID_NO_DASHES)){
+            if (defaultString.equalsIgnoreCase(MACRO_GUID_NO_DASHES)) {
                 return UUID.randomUUID().toString().replace("-", "");
-            }else if (defaultString.equals(MACRO_OMNITURE_AID)){
+            } else if (defaultString.equals(MACRO_OMNITURE_AID)) {
                 return generateAID();
-            }else if (defaultString.equals(MACRO_GUID)){
+            } else if (defaultString.equals(MACRO_GUID)) {
                 return UUID.randomUUID().toString();
-            }else if (defaultString.equals(MACRO_TIMESTAMP)){
+            } else if (defaultString.equals(MACRO_TIMESTAMP)) {
                 return Long.toString(System.currentTimeMillis());
-            }else if (defaultString.equals(MACRO_GUID_LEAST_SIG)){
+            } else if (defaultString.equals(MACRO_GUID_LEAST_SIG)) {
                 return Long.toString(UUID.randomUUID().getLeastSignificantBits());
             }
         }

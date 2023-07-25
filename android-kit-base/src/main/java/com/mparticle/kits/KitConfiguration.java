@@ -432,7 +432,7 @@ public class KitConfiguration {
         JSONObject obj = new JSONObject();
         for (Map.Entry<Integer, String> entry : map.entrySet()) {
             try {
-            obj.put(Integer.toString(entry.getKey()), entry.getValue());
+                obj.put(Integer.toString(entry.getKey()), entry.getValue());
             } catch (JSONException jse) {
                 Logger.error("Issue while parsing kit configuration: " + jse.getMessage());
             }
@@ -448,7 +448,7 @@ public class KitConfiguration {
         for (int i = 0; i < array.size(); i++) {
             int key = array.keyAt(i);
             try {
-            object.put(Integer.toString(key), array.get(key));
+                object.put(Integer.toString(key), array.get(key));
             } catch (JSONException jse) {
                 Logger.error("Issue while parsing kit configuration: " + jse.getMessage());
             }

@@ -12,7 +12,8 @@ class DataplanDetectorTest : LintDetectorTest() {
 
     @Test
     fun testCollection() {
-        val sdkHome = System.getenv("ANDROID_HOME") ?: "${System.getProperty("user.home")}/Library/Android/sdk"
+        val sdkHome = System.getenv("ANDROID_HOME")
+            ?: "${System.getProperty("user.home")}/Library/Android/sdk"
 
         @Language("KT")
         val source = """
@@ -36,5 +37,6 @@ class DataplanDetectorTest : LintDetectorTest() {
 
     override fun requireCompileSdk() = false
     override fun getDetector() = DataplanDetector()
-    override fun getIssues() = listOf(DataplanDetector.ISSUE, DataplanDetector.NODE_MISSING, DataplanDetector.NO_DATA_PLAN)
+    override fun getIssues() =
+        listOf(DataplanDetector.ISSUE, DataplanDetector.NODE_MISSING, DataplanDetector.NO_DATA_PLAN)
 }

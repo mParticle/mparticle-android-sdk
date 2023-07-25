@@ -1,13 +1,13 @@
 package com.mparticle.networking;
 
+import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint;
+
 import com.mparticle.BuildConfig;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPUtility;
 
 import java.util.LinkedList;
 import java.util.List;
-
-import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint;
 
 public class NetworkOptionsManager {
     public static String MP_CONFIG_URL = "config2.mparticle.com";
@@ -19,7 +19,7 @@ public class NetworkOptionsManager {
             return defaultNetworkOptions();
         }
         //Only take the endpoints we care about.
-        for (Endpoint endpoint: Endpoint.values()) {
+        for (Endpoint endpoint : Endpoint.values()) {
             DomainMapping domainMapping = networkOptions.domainMappings.get(endpoint);
             if (domainMapping == null) {
                 networkOptions.domainMappings.put(endpoint, DomainMapping.withEndpoint(endpoint)

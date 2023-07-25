@@ -81,8 +81,7 @@ public class CaptureLogcatOnFailingTest implements TestRule {
             }
         } catch (IOException e) {
             Logger.error(e);
-        }
-        finally {
+        } finally {
             if (reader != null) {
                 try {
                     reader.close();

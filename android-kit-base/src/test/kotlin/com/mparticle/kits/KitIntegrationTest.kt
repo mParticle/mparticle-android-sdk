@@ -208,7 +208,7 @@ class KitIntegrationTest {
             return null
         }
 
-        override fun setOptOut(optedOut: Boolean): List<ReportingMessage> ? {
+        override fun setOptOut(optedOut: Boolean): List<ReportingMessage>? {
             return null
         }
     }

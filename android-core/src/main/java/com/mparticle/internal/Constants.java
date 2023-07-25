@@ -10,6 +10,7 @@ import com.mparticle.BuildConfig;
 public class Constants {
 
     private static int MAX_MESSAGE_PER_BATCH = 100;
+
     public static int getMaxMessagePerBatch() {
         return MAX_MESSAGE_PER_BATCH;
     }
@@ -484,7 +485,6 @@ public class Constants {
         String EVENT_TYPE_STRING_REMOVE_FROM_WISHLIST = "ProductRemoveFromWishlist";
         String EVENT_TYPE_STRING_IMPRESSION = "ProductImpression";
         String EVENT_TYPE_STRING_UNKNOWN = "Unknown";
-
 
 
     }

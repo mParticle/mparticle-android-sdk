@@ -57,7 +57,11 @@ class UpgradeVersionTest : BaseTableTest() {
                     helper.onUpgrade(database, oldVersion, newVersion)
                 }
 
-                override fun onDowngrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+                override fun onDowngrade(
+                    database: SQLiteDatabase,
+                    oldVersion: Int,
+                    newVersion: Int
+                ) {
                     helper.onDowngrade(database, oldVersion, newVersion)
                 }
             },

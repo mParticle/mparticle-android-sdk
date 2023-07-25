@@ -22,24 +22,34 @@ import java.util.Map;
  * The Product class is built to be immutable - use the {@link com.mparticle.commerce.Product.Builder} class to create a Product.
  *
  * Product objects are designed to be used with {@link CommerceEvent}.
- *
  */
 public final class Product {
 
     @Retention(RetentionPolicy.CLASS)
     @StringDef({ADD_TO_CART, REMOVE_FROM_CART, ADD_TO_WISHLIST, REMOVE_FROM_WISHLIST, CHECKOUT, CLICK, DETAIL, PURCHASE, REFUND, CHECKOUT_OPTION})
-    @interface ProductConstant{}
+    @interface ProductConstant {
+    }
 
-    @NonNull public static final String ADD_TO_CART = "add_to_cart";
-    @NonNull public static final String REMOVE_FROM_CART = "remove_from_cart";
-    @NonNull public static final String ADD_TO_WISHLIST = "add_to_wishlist";
-    @NonNull public static final String REMOVE_FROM_WISHLIST = "remove_from_wishlist";
-    @NonNull public static final String CHECKOUT = "checkout";
-    @NonNull public static final String CLICK = "click";
-    @NonNull public static final String DETAIL = "view_detail";
-    @NonNull public static final String PURCHASE = "purchase";
-    @NonNull public static final String REFUND = "refund";
-    @NonNull public static final String CHECKOUT_OPTION = "checkout_option";
+    @NonNull
+    public static final String ADD_TO_CART = "add_to_cart";
+    @NonNull
+    public static final String REMOVE_FROM_CART = "remove_from_cart";
+    @NonNull
+    public static final String ADD_TO_WISHLIST = "add_to_wishlist";
+    @NonNull
+    public static final String REMOVE_FROM_WISHLIST = "remove_from_wishlist";
+    @NonNull
+    public static final String CHECKOUT = "checkout";
+    @NonNull
+    public static final String CLICK = "click";
+    @NonNull
+    public static final String DETAIL = "view_detail";
+    @NonNull
+    public static final String PURCHASE = "purchase";
+    @NonNull
+    public static final String REFUND = "refund";
+    @NonNull
+    public static final String CHECKOUT_OPTION = "checkout_option";
     private static EqualityComparator mComparator = new DefaultComparator();
     private Map<String, String> mCustomAttributes;
     private String mName = null;
@@ -54,11 +64,7 @@ public final class Product {
     private String mVariant;
 
     /**
-     *
-     *
      * @return Retrieve the Map of custom attributes set on this Product
-     *
-     *
      * @see com.mparticle.commerce.Product.Builder#customAttributes(Map)
      */
     @Nullable
@@ -125,7 +131,6 @@ public final class Product {
     }
 
     /**
-     *
      * @return the name description of the Product
      */
     @NonNull
@@ -134,7 +139,6 @@ public final class Product {
     }
 
     /**
-     *
      * @return the category description of the Product
      */
     @Nullable
@@ -143,8 +147,6 @@ public final class Product {
     }
 
     /**
-     *
-     *
      * @return the coupon code associated with the Product
      */
     @Nullable
@@ -153,7 +155,6 @@ public final class Product {
     }
 
     /**
-     *
      * @return the SKU/ID associated with the Product
      */
     @NonNull
@@ -162,7 +163,6 @@ public final class Product {
     }
 
     /**
-     *
      * @return the position of the product on the page/product impression list
      */
     @Nullable
@@ -171,7 +171,6 @@ public final class Product {
     }
 
     /**
-     *
      * @return the unit price of a single Product
      */
     public double getUnitPrice() {
@@ -179,7 +178,6 @@ public final class Product {
     }
 
     /**
-     *
      * @return the quantity of Products
      */
     public double getQuantity() {
@@ -209,7 +207,6 @@ public final class Product {
     }
 
     /**
-     *
      * @return the brand of the Product
      */
     @Nullable
@@ -218,8 +215,6 @@ public final class Product {
     }
 
     /**
-     *
-     *
      * @return the variant or version of the Product
      */
     @Nullable
@@ -343,7 +338,6 @@ public final class Product {
 
     /**
      * This class is designed to construct a Product object using the Builder pattern.
-     *
      */
     public static class Builder {
         private String mName = null;
@@ -365,8 +359,8 @@ public final class Product {
          * Create a Product.Builder. The parameters of this method are all
          * required for a valid product.
          *
-         * @param name a description/name for the Product
-         * @param sku a SKU or ID that uniquely identifies this Product
+         * @param name      a description/name for the Product
+         * @param sku       a SKU or ID that uniquely identifies this Product
          * @param unitPrice the cost of a single Product
          */
         public Builder(@NonNull String name, @NonNull String sku, double unitPrice) {
@@ -424,7 +418,6 @@ public final class Product {
         }
 
         /**
-         *
          * Sets the coupon code to associate with this Product.
          *
          * @param couponCode the Product's coupon code

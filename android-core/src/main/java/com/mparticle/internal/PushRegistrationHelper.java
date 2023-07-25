@@ -29,22 +29,22 @@ public class PushRegistrationHelper {
                         if (MPUtility.isFirebaseAvailablePreV21()) {
                             Class<?> clazz = Class.forName("com.google.firebase.iid.FirebaseInstanceId");
                             Object instance = clazz.getMethod("getInstance").invoke(null);
-                            String instanceId = (String)clazz.getMethod("getToken", String.class, String.class).invoke(instance, senderId, "FCM");
+                            String instanceId = (String) clazz.getMethod("getToken", String.class, String.class).invoke(instance, senderId, "FCM");
                             setPushRegistration(context, instanceId, senderId);
                         } else if (MPUtility.isFirebaseAvailablePostV21()) {
                             com.google.firebase.messaging.FirebaseMessaging.getInstance().getToken()
-                            .addOnSuccessListener(new OnSuccessListener<String>() {
-                                @Override
-                                public void onSuccess(String instanceId) {
-                                    setPushRegistration(context, instanceId, senderId);
-                                }
-                            })
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Logger.error("Error registering for FCM Instance ID: ", e.getMessage());
-                                }
-                            });
+                                    .addOnSuccessListener(new OnSuccessListener<String>() {
+                                        @Override
+                                        public void onSuccess(String instanceId) {
+                                            setPushRegistration(context, instanceId, senderId);
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Logger.error("Error registering for FCM Instance ID: ", e.getMessage());
+                                        }
+                                    });
                         } else {
                             Logger.error("Error registering FCM Instance ID: no Firebase library");
                         }
@@ -82,8 +82,10 @@ public class PushRegistrationHelper {
     }
 
     public static class PushRegistration {
-        @Nullable public String senderId;
-        @Nullable public String instanceId;
+        @Nullable
+        public String senderId;
+        @Nullable
+        public String instanceId;
 
         public PushRegistration(@Nullable String instanceId, @Nullable String senderId) {
             this.instanceId = instanceId;

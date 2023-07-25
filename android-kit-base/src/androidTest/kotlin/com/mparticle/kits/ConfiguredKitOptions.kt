@@ -9,7 +9,11 @@ class ConfiguredKitOptions : KitOptions() {
         return addKit(kitId, type, JSONObject().put("id", kitId))
     }
 
-    fun addKit(kitId: Int, type: Class<out KitIntegration>, config: JSONObject?): ConfiguredKitOptions {
+    fun addKit(
+        kitId: Int,
+        type: Class<out KitIntegration>,
+        config: JSONObject?
+    ): ConfiguredKitOptions {
         testingConfiguration[kitId] = config?.put("id", kitId)
         super.addKit(kitId, type)
         return this

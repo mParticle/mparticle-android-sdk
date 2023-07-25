@@ -21,7 +21,8 @@ import org.junit.Before;
  */
 public class BaseCleanStartedEachTest extends BaseAbstractTest {
 
-    public void beforeSetup() { }
+    public void beforeSetup() {
+    }
 
     @Before
     public final void beforeBase() throws InterruptedException {

@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * This class is responsible for maintaining the session state by listening to the Activity lifecycle.
  */
-public class  AppStateManager {
+public class AppStateManager {
 
     private ConfigManager mConfigManager;
     Context mContext;
@@ -81,7 +81,7 @@ public class  AppStateManager {
     private Uri mLaunchUri;
     private String mLaunchAction;
 
-    public AppStateManager(Context context, boolean unitTesting){
+    public AppStateManager(Context context, boolean unitTesting) {
         mUnitTesting = unitTesting;
         mContext = context.getApplicationContext();
         mLastStoppedTime = new AtomicLong(getTime());
@@ -114,18 +114,18 @@ public class  AppStateManager {
         return mLaunchUri;
     }
 
-    public void setConfigManager(ConfigManager manager){
+    public void setConfigManager(ConfigManager manager) {
         mConfigManager = manager;
     }
 
-    public void setMessageManager(MessageManager manager){
+    public void setMessageManager(MessageManager manager) {
         mMessageManager = manager;
     }
 
-    private long getTime(){
-        if (mUnitTesting){
+    private long getTime() {
+        if (mUnitTesting) {
             return System.currentTimeMillis();
-        }else {
+        } else {
             return SystemClock.elapsedRealtime();
         }
     }
@@ -146,7 +146,7 @@ public class  AppStateManager {
                 if (callingApplication != null) {
                     previousSessionPackage = callingApplication.getPackageName();
                 }
-                if(activity.getIntent() != null) {
+                if (activity.getIntent() != null) {
                     previousSessionUri = activity.getIntent().getDataString();
                     if (mLaunchUri == null) {
                         mLaunchUri = activity.getIntent().getData();
@@ -173,7 +173,7 @@ public class  AppStateManager {
                 initialize(mCurrentActivityName, previousSessionUri, previousSessionParameters, previousSessionPackage);
             } else if (isBackgrounded() && mLastStoppedTime.get() > 0) {
                 isBackToForeground = true;
-                MPUtility.AdIdInfo adIdInfo =  MPUtility.getAdIdInfo(mContext);
+                MPUtility.AdIdInfo adIdInfo = MPUtility.getAdIdInfo(mContext);
                 String currentGoogleAdId = (adIdInfo == null ? null : (adIdInfo.isLimitAdTrackingEnabled ? null : adIdInfo.id));
                 mMessageManager.postToMessageThread(new CheckAdIdRunnable(currentGoogleAdId, mConfigManager.getPreviousAdId()));
                 logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE,
@@ -205,7 +205,7 @@ public class  AppStateManager {
                 instance.Internal().getKitManager().onActivityResumed(activity);
             }
         } catch (Exception e) {
-                Logger.verbose("Failed while trying to track activity resume: " + e.getMessage());
+            Logger.verbose("Failed while trying to track activity resume: " + e.getMessage());
         }
     }
 
@@ -227,7 +227,7 @@ public class  AppStateManager {
                             logBackgrounded();
                             mConfigManager.setPreviousAdId();
                         }
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -244,7 +244,7 @@ public class  AppStateManager {
                 }
                 instance.Internal().getKitManager().onActivityPaused(activity);
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Logger.verbose("Failed while trying to track activity pause: " + e.getMessage());
         }
     }
@@ -257,7 +257,7 @@ public class  AppStateManager {
         session.mLastEventTime = System.currentTimeMillis();
         if (!session.isActive()) {
             newSession();
-        }else{
+        } else {
             mMessageManager.updateSessionEnd(getSession());
         }
     }
@@ -293,12 +293,12 @@ public class  AppStateManager {
         checkSessionTimeout();
     }
 
-    private void enableLocationTracking(){
-        if (mPreferences.contains(Constants.PrefKeys.LOCATION_PROVIDER)){
+    private void enableLocationTracking() {
+        if (mPreferences.contains(Constants.PrefKeys.LOCATION_PROVIDER)) {
             String provider = mPreferences.getString(Constants.PrefKeys.LOCATION_PROVIDER, null);
             long minTime = mPreferences.getLong(Constants.PrefKeys.LOCATION_MINTIME, 0);
             long minDistance = mPreferences.getLong(Constants.PrefKeys.LOCATION_MINDISTANCE, 0);
-            if (provider != null && minTime > 0 && minDistance > 0){
+            if (provider != null && minTime > 0 && minDistance > 0) {
                 MParticle instance = MParticle.getInstance();
                 if (instance != null) {
                     instance.enableLocationTracking(provider, minTime, minDistance);
@@ -317,7 +317,7 @@ public class  AppStateManager {
     }
 
     private void checkSessionTimeout() {
-        delayedBackgroundCheckHandler.postDelayed( new Runnable() {
+        delayedBackgroundCheckHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 if (shouldEndSession()) {
@@ -340,14 +340,14 @@ public class  AppStateManager {
                 0);
     }
 
-    public void onActivityCreated(Activity activity, Bundle savedInstanceState){
+    public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
         MParticle instance = MParticle.getInstance();
         if (instance != null) {
             instance.Internal().getKitManager().onActivityCreated(activity, savedInstanceState);
         }
     }
 
-    public void onActivityStarted(Activity activity){
+    public void onActivityStarted(Activity activity) {
         MParticle instance = MParticle.getInstance();
         if (instance != null) {
             instance.Internal().getKitManager().onActivityStarted(activity);
@@ -361,7 +361,7 @@ public class  AppStateManager {
         }
     }
 
-    private void logBackgrounded(){
+    private void logBackgrounded() {
         MParticle instance = MParticle.getInstance();
         if (instance != null) {
             logStateTransition(Constants.StateTransitionType.STATE_TRANS_BG, mCurrentActivityName);
@@ -483,6 +483,7 @@ public class  AppStateManager {
         Builder(MParticleUser user) {
             super(user);
         }
+
         Builder() {
             super();
         }

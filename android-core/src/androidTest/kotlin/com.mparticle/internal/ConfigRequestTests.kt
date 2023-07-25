@@ -101,6 +101,9 @@ class ConfigRequestTests : BaseCleanInstallEachTest() {
         }
         startMParticle()
         latch.await()
-        assertEquals(simpleConfigWithKits[ConfigManager.KEY_EMBEDDED_KITS].toString(), MParticle.getInstance()?.Internal()?.configManager?.latestKitConfiguration.toString())
+        assertEquals(
+            simpleConfigWithKits[ConfigManager.KEY_EMBEDDED_KITS].toString(),
+            MParticle.getInstance()?.Internal()?.configManager?.latestKitConfiguration.toString()
+        )
     }
 }

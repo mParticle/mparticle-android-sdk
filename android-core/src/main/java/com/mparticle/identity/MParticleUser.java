@@ -33,7 +33,6 @@ public interface MParticleUser {
      * query the attributes of the User asynchronously
      *
      * @param listener a callback for querying User's attributes
-     *
      * @return
      */
     @Nullable
@@ -43,7 +42,6 @@ public interface MParticleUser {
      * assign attributes to the User in bulk
      *
      * @param userAttributes the attributes to be set
-     *
      * @return whether the attributes were successfully set
      */
     boolean setUserAttributes(@NonNull Map<String, Object> userAttributes);
@@ -52,7 +50,6 @@ public interface MParticleUser {
      * query the Identities of the User
      *
      * @return the User's Identities
-     *
      */
     @NonNull
     Map<MParticle.IdentityType, String> getUserIdentities();
@@ -60,9 +57,8 @@ public interface MParticleUser {
     /**
      * set a single attribute for the user
      *
-     * @param key the key of the attribute
+     * @param key   the key of the attribute
      * @param value the value of the attribute
-     *
      * @return whether the attributes were successfully set
      */
     boolean setUserAttribute(@NonNull String key, @NonNull Object value);
@@ -70,9 +66,8 @@ public interface MParticleUser {
     /**
      * set a single attribute for the user whose value is an Object, not just a String
      *
-     * @param key the key of the attribute
+     * @param key   the key of the attribute
      * @param value the value of the attribute
-     *
      * @return whether the attributes were successfully set
      */
     boolean setUserAttributeList(@NonNull String key, @NonNull Object value);
@@ -80,9 +75,8 @@ public interface MParticleUser {
     /**
      * increment an attribute for the user
      *
-     * @param key the key of the attribute
+     * @param key   the key of the attribute
      * @param value the value of the attribute
-     *
      * @return whether the attributes were successfully set
      */
     boolean incrementUserAttribute(@NonNull String key, Number value);
@@ -91,7 +85,6 @@ public interface MParticleUser {
      * remove an attribute for the user
      *
      * @param key the key of the attribute which is to be removed
-     *
      * @return whether the attributes were successfully removed
      */
     boolean removeUserAttribute(@NonNull String key);
@@ -100,7 +93,6 @@ public interface MParticleUser {
      * set a tag for a User. A tag is represented by a key and a value of "null"
      *
      * @param tag the tag to be set for the user
-     *
      * @return whether the tag was successfully set
      */
     boolean setUserTag(@NonNull String tag);
@@ -125,12 +117,14 @@ public interface MParticleUser {
 
     /**
      * The timestamp representing the first time this user was observed on this device
+     *
      * @return
      */
     long getFirstSeenTime();
 
     /**
      * The timestamp representing the last time this user was the "currentUser" on this device
+     *
      * @return the time, in milliseconds
      */
     long getLastSeenTime();

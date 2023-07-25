@@ -11,7 +11,7 @@ public class KitContext extends ContextWrapper {
 
     public KitContext(Context base) {
         super(base);
-        applicationContextWrapper = new ApplicationContextWrapper((Application)base.getApplicationContext());
+        applicationContextWrapper = new ApplicationContextWrapper((Application) base.getApplicationContext());
     }
 
     @Override

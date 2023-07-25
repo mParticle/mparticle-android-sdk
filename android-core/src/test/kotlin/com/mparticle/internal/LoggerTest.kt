@@ -6,7 +6,6 @@ import com.mparticle.internal.Logger.DefaultLogHandler
 import com.mparticle.mock.MockContext
 import org.junit.Assert
 import org.junit.Test
-import java.lang.Exception
 
 /**
  * Created by wpassidomo on 3/1/17.
