@@ -1,9 +1,11 @@
 package com.mparticle.internal
 
 class KitsLoadedCallback {
-    @Volatile private var onKitsLoadedRunnable: OnKitManagerLoaded? = null
+    @Volatile
+    private var onKitsLoadedRunnable: OnKitManagerLoaded? = null
 
-    @Volatile private var loaded: Boolean = false
+    @Volatile
+    private var loaded: Boolean = false
 
     fun setKitsLoaded() {
         synchronized(this) {

@@ -6,8 +6,6 @@ import android.app.Application;
 import android.os.Build;
 import android.os.Bundle;
 
-import com.mparticle.internal.AppStateManager;
-
 /**
  * This class is used by the AppStateManager to determine when the app is visible or in the background.
  *
@@ -16,6 +14,7 @@ import com.mparticle.internal.AppStateManager;
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 class MPLifecycleCallbackDelegate implements Application.ActivityLifecycleCallbacks {
     private AppStateManager mStateManager;
+
     public MPLifecycleCallbackDelegate(AppStateManager stateManager) {
         mStateManager = stateManager;
     }

@@ -1,5 +1,7 @@
 package com.mparticle.mock;
 
+import static junit.framework.Assert.fail;
+
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -24,10 +26,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.telephony.TelephonyManager;
 import android.view.Display;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import org.mockito.Mockito;
 
@@ -38,8 +41,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static junit.framework.Assert.fail;
-
 public class MockContext extends Context {
 
 
@@ -47,13 +48,13 @@ public class MockContext extends Context {
     Resources resources = new MockResources();
     MockApplication application = null;
 
-    public void setSharedPreferences(SharedPreferences prefs){
+    public void setSharedPreferences(SharedPreferences prefs) {
         sharedPreferences = prefs;
     }
 
     @Override
     public Context getApplicationContext() {
-        if (application == null){
+        if (application == null) {
             application = new MockApplication(this);
         }
         return application;
@@ -78,7 +79,7 @@ public class MockContext extends Context {
 
     @Override
     public Object getSystemService(String name) {
-        if (name.equals(Context.TELEPHONY_SERVICE)){
+        if (name.equals(Context.TELEPHONY_SERVICE)) {
             return Mockito.mock(TelephonyManager.class);
         }
         return null;
@@ -98,7 +99,7 @@ public class MockContext extends Context {
 
             Mockito.when(manager.getApplicationInfo(Mockito.anyString(), Mockito.anyInt())).thenReturn(appInfo);
             Mockito.when(manager.getApplicationLabel(appInfo)).thenReturn("test label");
-        }catch (Exception e){
+        } catch (Exception e) {
             fail(e.toString());
         }
         return manager;

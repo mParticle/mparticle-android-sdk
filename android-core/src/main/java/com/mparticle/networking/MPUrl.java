@@ -34,13 +34,17 @@ public abstract class MPUrl {
     }
 
     public abstract MPConnection openConnection() throws IOException;
+
     public abstract String getFile();
+
     public abstract String getAuthority();
+
     public abstract String getPath();
 
     /**
      * returns an instance of the Default URL, if NetworkOptions is being used to override it. Otherwise,
      * a reference to itself will be returned
+     *
      * @return an MPUrl instance with the the default URL
      */
     @NonNull

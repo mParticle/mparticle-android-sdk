@@ -25,7 +25,9 @@ public class ApplicationContextWrapper extends Application {
     private boolean mRecord = true;
     private ActivityLifecycleCallbackRecorder mActivityLifecycleCallbackRecorder;
 
-    enum MethodType { ON_CREATED, ON_STARTED, ON_RESUMED, ON_PAUSED, ON_STOPPED, ON_SAVE_INSTANCE_STATE, ON_DESTROYED};
+    enum MethodType {ON_CREATED, ON_STARTED, ON_RESUMED, ON_PAUSED, ON_STOPPED, ON_SAVE_INSTANCE_STATE, ON_DESTROYED}
+
+    ;
 
     public ApplicationContextWrapper(Application application) {
         mBaseApplication = application;
@@ -42,7 +44,7 @@ public class ApplicationContextWrapper extends Application {
         return mReplay;
     }
 
-    public void setRecordActivityLifecycle(boolean record){
+    public void setRecordActivityLifecycle(boolean record) {
         if (this.mRecord = record) {
             startRecordLifecycles();
         } else {
@@ -257,7 +259,7 @@ public class ApplicationContextWrapper extends Application {
         @Override
         public boolean equals(Object o) {
             if (o instanceof LifeCycleEvent) {
-                LifeCycleEvent l = (LifeCycleEvent)o;
+                LifeCycleEvent l = (LifeCycleEvent) o;
                 boolean matchingActivityRef = false;
                 if (l.activityRef == null && activityRef == null) {
                     matchingActivityRef = true;

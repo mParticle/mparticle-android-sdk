@@ -10,6 +10,7 @@ class EventTestKit : ListenerTestKit(), KitIntegration.EventListener {
     override fun logEvent(baseEvent: MPEvent): MutableList<ReportingMessage>? {
         return onLogEvent(baseEvent)
     }
+
     override fun leaveBreadcrumb(breadcrumb: String?): MutableList<ReportingMessage> {
         TODO("Not yet implemented")
     }

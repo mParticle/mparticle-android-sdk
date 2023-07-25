@@ -43,7 +43,7 @@ class SegmentRetriever {
 
         String selection = null;
         String[] args = null;
-        if (endpointId != null && endpointId.length() > 0){
+        if (endpointId != null && endpointId.length() > 0) {
             selection = SegmentDatabase.SegmentTable.ENDPOINTS + " like ?";
             args = new String[1];
             args[0] = "%\"" + endpointId + "\"%";
@@ -59,8 +59,8 @@ class SegmentRetriever {
         SparseArray<Segment> audiences = new SparseArray<Segment>();
 
         StringBuilder keys = new StringBuilder("(");
-        if (audienceCursor.getCount() > 0){
-            while (audienceCursor.moveToNext()){
+        if (audienceCursor.getCount() > 0) {
+            while (audienceCursor.moveToNext()) {
                 int id = audienceCursor.getInt(audienceCursor.getColumnIndexOrThrow(SegmentDatabase.SegmentTable.SEGMENT_ID));
 
                 Segment segment = new Segment(id,
@@ -72,7 +72,7 @@ class SegmentRetriever {
             }
             audienceCursor.close();
 
-            keys.delete(keys.length()-2, keys.length());
+            keys.delete(keys.length() - 2, keys.length());
             keys.append(")");
 
             long currentTime = System.currentTimeMillis();
@@ -91,12 +91,12 @@ class SegmentRetriever {
 
             ArrayList<Segment> finalSegments = new ArrayList<Segment>();
             int currentId = -1;
-            while (membershipCursor.moveToNext()){
+            while (membershipCursor.moveToNext()) {
                 int id = membershipCursor.getInt(1);
                 if (id != currentId) {
                     currentId = id;
                     String action = membershipCursor.getString(2);
-                    if (action.equals(Constants.Audience.ACTION_ADD)){
+                    if (action.equals(Constants.Audience.ACTION_ADD)) {
                         finalSegments.add(audiences.get(currentId));
                     }
                 }
@@ -105,7 +105,7 @@ class SegmentRetriever {
 
             db.close();
             return new SegmentMembership(finalSegments);
-        }else{
+        } else {
             return new SegmentMembership(new ArrayList<Segment>());
         }
 
@@ -119,7 +119,7 @@ class SegmentRetriever {
                     SegmentDatabase.SegmentMembershipTable.SEGMENT_ID,
                     SegmentDatabase.SegmentMembershipTable.MEMBERSHIP_ACTION
             };
-    private final static String MEMBERSHIP_QUERY_SELECTION = SegmentDatabase.SegmentMembershipTable.SEGMENT_ID+ " in %s and " + SegmentDatabase.SegmentMembershipTable.TIMESTAMP + " < %d";
+    private final static String MEMBERSHIP_QUERY_SELECTION = SegmentDatabase.SegmentMembershipTable.SEGMENT_ID + " in %s and " + SegmentDatabase.SegmentMembershipTable.TIMESTAMP + " < %d";
 
     private void insertAudiences(JSONObject audiences) throws JSONException {
         SQLiteDatabase db = mAudienceDB.getWritableDatabase();
@@ -149,10 +149,10 @@ class SegmentRetriever {
                 }
             }
             success = true;
-        }catch (Exception e){
+        } catch (Exception e) {
             Logger.debug("Failed to insert audiences: " + e.getMessage());
-        }finally {
-            if (success){
+        } finally {
+            if (success) {
                 db.setTransactionSuccessful();
             }
             db.endTransaction();
@@ -160,23 +160,26 @@ class SegmentRetriever {
         }
 
     }
+
     class SegmentTask extends AsyncTask<Void, Void, SegmentMembership> {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         String endpointId;
         SegmentListener listener;
         long timeout;
-        SegmentTask(long timeout, String endpointId, SegmentListener listener){
+
+        SegmentTask(long timeout, String endpointId, SegmentListener listener) {
             this.timeout = timeout;
             this.endpointId = endpointId;
             this.listener = listener;
         }
+
         @Override
         protected SegmentMembership doInBackground(Void... params) {
             FutureTask<Boolean> futureTask1 = new FutureTask<Boolean>(new Callable<Boolean>() {
                 @Override
                 public Boolean call() throws Exception {
                     JSONObject audiences = mApiClient.fetchAudiences();
-                    if (audiences != null){
+                    if (audiences != null) {
                         insertAudiences(audiences);
                     }
                     return audiences != null;

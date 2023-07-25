@@ -1,5 +1,7 @@
 package com.mparticle.testutils;
 
+import static junit.framework.Assert.fail;
+
 import android.os.Handler;
 import android.os.Looper;
 
@@ -9,8 +11,6 @@ import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static junit.framework.Assert.fail;
 
 public class StreamAssert<T> {
     private List<Assert<T>> assertions;

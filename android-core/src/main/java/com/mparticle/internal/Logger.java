@@ -71,7 +71,7 @@ public class Logger {
 
     private static String getMessage(String... messages) {
         StringBuilder logMessage = new StringBuilder();
-        for (String m : messages){
+        for (String m : messages) {
             logMessage.append(m);
         }
         return logMessage.toString();
@@ -81,6 +81,7 @@ public class Logger {
     /**
      * Testing method. Use this method to intercept Logs, or customize what happens when something is logged.
      * For example, you can use this method to throw an exception every time an "error" log is called.
+     *
      * @param logListener
      */
     public static void setLogHandler(AbstractLogHandler logListener) {
@@ -98,7 +99,7 @@ public class Logger {
 
         public void log(LogLevel priority, Throwable error, String messages) {
             if (messages != null && isLoggable(priority.logLevel)) {
-                switch (priority){
+                switch (priority) {
                     case ERROR:
                         error(error, messages);
                         break;
@@ -124,11 +125,9 @@ public class Logger {
             //This block will catch the exception that is thrown during testing.
             try {
                 isADBLoggable = isADBLoggable(Constants.LOG_TAG, logLevel);
-            }
-            catch (UnsatisfiedLinkError ex) {
+            } catch (UnsatisfiedLinkError ex) {
                 return false;
-            }
-            catch (RuntimeException ignored) {
+            } catch (RuntimeException ignored) {
                 return false;
             }
             return isADBLoggable || (isAPILoggable && MPUtility.isDevEnv());
@@ -140,17 +139,21 @@ public class Logger {
         }
 
         public abstract void verbose(Throwable error, String message);
+
         public abstract void info(Throwable error, String message);
+
         public abstract void debug(Throwable error, String message);
+
         public abstract void warning(Throwable error, String message);
+
         public abstract void error(Throwable error, String message);
     }
-    
+
     public static class DefaultLogHandler extends AbstractLogHandler {
 
         @Override
         public void verbose(Throwable error, String messages) {
-            if (error != null){
+            if (error != null) {
                 Log.v(Constants.LOG_TAG, messages, error);
             } else {
                 Log.v(Constants.LOG_TAG, messages);
@@ -168,7 +171,7 @@ public class Logger {
 
         @Override
         public void debug(Throwable error, String messages) {
-            if (error != null){
+            if (error != null) {
                 Log.d(Constants.LOG_TAG, messages, error);
             } else {
                 Log.d(Constants.LOG_TAG, messages);
@@ -177,7 +180,7 @@ public class Logger {
 
         @Override
         public void warning(Throwable error, String messages) {
-            if (error != null){
+            if (error != null) {
                 Log.w(Constants.LOG_TAG, messages, error);
             } else {
                 Log.w(Constants.LOG_TAG, messages);
@@ -186,7 +189,7 @@ public class Logger {
 
         @Override
         public void error(Throwable error, String messages) {
-            if (error != null){
+            if (error != null) {
                 Log.e(Constants.LOG_TAG, messages, error);
             } else {
                 Log.e(Constants.LOG_TAG, messages);

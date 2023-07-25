@@ -50,9 +50,8 @@ public class AttributionResult {
     /**
      * Get the service provider or integration id associated with this result.
      *
-     * @see com.mparticle.MParticle.ServiceProviders
-     *
      * @return the id of the associated integration
+     * @see com.mparticle.MParticle.ServiceProviders
      */
     public int getServiceProviderId() {
         return serviceProviderId;

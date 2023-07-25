@@ -33,7 +33,6 @@ import java.util.Map;
  *
  * @see com.mparticle.commerce.CommerceEvent.Builder
  * @see MParticle#logEvent(BaseEvent)
- *
  */
 public final class CommerceEvent extends BaseEvent {
     private String mEventName;
@@ -110,7 +109,7 @@ public final class CommerceEvent extends BaseEvent {
                     && !mProductAction.equals(Product.REMOVE_FROM_WISHLIST)) {
                 Logger.error("CommerceEvent created with unrecognized Product action: " + mProductAction);
             }
-        } else if (mPromotionAction != null ) {
+        } else if (mPromotionAction != null) {
             if (productList != null && productList.size() > 0) {
                 Logger.error("Promotion CommerceEvent should not contain Products.");
             }
@@ -229,7 +228,7 @@ public final class CommerceEvent extends BaseEvent {
                     if (impression.getListName() != null) {
                         impressionJson.put("pil", impression.getListName());
                     }
-                    if (impression.getProducts() != null && impression.getProducts() .size() > 0) {
+                    if (impression.getProducts() != null && impression.getProducts().size() > 0) {
                         JSONArray productsJson = new JSONArray();
                         impressionJson.put("pl", productsJson);
                         for (Product product : impression.getProducts()) {
@@ -256,7 +255,6 @@ public final class CommerceEvent extends BaseEvent {
      * Retrieve the Screen where the event occurred.
      *
      * @return the String descriptor/name of the Screen where this event occurred, or null if this is not set.
-     *
      * @see com.mparticle.commerce.CommerceEvent.Builder#screen(String).
      */
     @Nullable
@@ -268,9 +266,7 @@ public final class CommerceEvent extends BaseEvent {
      * Retrieve the boolean indicating if the event was triggered by a user.
      *
      * @return a Boolean indicating if this event was triggered by a user, or null if not set.
-     *
      * @see com.mparticle.commerce.CommerceEvent.Builder#nonInteraction(boolean).
-     *
      */
     @Nullable
     public Boolean getNonInteraction() {
@@ -282,7 +278,6 @@ public final class CommerceEvent extends BaseEvent {
      * will be null in the case of Promotion and Impression CommerceEvents.
      *
      * @return a String indicating the Product action, or null if this is not a Product-based CommerceEvent.
-     *
      * @see <code><a href="CommerceEvent.Builder.html#CommerceEvent.Builder(java.lang.String,%20com.mparticle.commerce.Product)">Builder(java.lang.String, com.mparticle.commerce.Product)</a></code>.
      * @see Product
      */
@@ -315,7 +310,6 @@ public final class CommerceEvent extends BaseEvent {
      * Retrieve the Product List Name associated with the CommerceEvent. This value should be set for {@link Product#DETAIL} and {@link Product#CLICK} CommerceEvents.
      *
      * @return the product list name, or null if not set.
-     *
      * @see com.mparticle.commerce.CommerceEvent.Builder#productListName(String).
      */
     @Nullable
@@ -327,7 +321,6 @@ public final class CommerceEvent extends BaseEvent {
      * Retrieve the product list source associated with the CommerceEvent. This value should be set for {@link Product#DETAIL} and {@link Product#CLICK} CommerceEvents.
      *
      * @return the product list source, or null if not set.
-     *
      * @see com.mparticle.commerce.CommerceEvent.Builder#productListSource(String).
      */
     @Nullable
@@ -339,7 +332,6 @@ public final class CommerceEvent extends BaseEvent {
      * Retrieve the {@link TransactionAttributes} object associated with the CommerceEvent.
      *
      * @return the TransactionAttributes object, or null if not set.
-     *
      * @see com.mparticle.commerce.CommerceEvent.Builder#transactionAttributes(TransactionAttributes).
      */
     @Nullable
@@ -351,7 +343,6 @@ public final class CommerceEvent extends BaseEvent {
      * Retrieve the list of Products to which the CommerceEvent applies. This should only be set for Product-type CommerceEvents.
      *
      * @return the list of Products, or null if not set.
-     *
      * @see <code><a href="CommerceEvent.Builder.html#CommerceEvent.Builder(java.lang.String,%20com.mparticle.commerce.Product)">Builder(java.lang.String, com.mparticle.commerce.Product)</a></code>.
      * @see com.mparticle.commerce.CommerceEvent.Builder#addProduct(Product).
      * @see com.mparticle.commerce.CommerceEvent.Builder#products(List).
@@ -369,7 +360,6 @@ public final class CommerceEvent extends BaseEvent {
      * will be null in the case of Product and Impression CommerceEvents.
      *
      * @return a String indicating the Promotion action, or null if this is not a Promotion-based CommerceEvent.
-     *
      * @see <code><a href="CommerceEvent.Builder.html#CommerceEvent.Builder(java.lang.String,%20com.mparticle.commerce.Promotion)">Builder(java.lang.String, com.mparticle.commerce.Promotion)</a></code>
      * @see Promotion for supported product actions.
      */
@@ -382,7 +372,6 @@ public final class CommerceEvent extends BaseEvent {
      * Retrieve the {@link Promotion} list associated with the CommerceEvent.
      *
      * @return returns an unmodifiable List of Promotions, or null if this is a {@link Product} or {@link Impression} based {@link CommerceEvent}.
-     *
      * @see <code><a href="CommerceEvent.Builder.html#CommerceEvent.Builder(java.lang.String,%20com.mparticle.commerce.Promotion)">Builder(java.lang.String, com.mparticle.commerce.Promotion)</a></code>.
      * @see com.mparticle.commerce.CommerceEvent.Builder#addPromotion(Promotion).
      * @see com.mparticle.commerce.CommerceEvent.Builder#promotions(List).
@@ -409,7 +398,6 @@ public final class CommerceEvent extends BaseEvent {
      * Retrieve the {@link Impression} list associated with the CommerceEvent.
      *
      * @return returns an unmodifiable List of Impressions, or null if this is a {@link Product} or {@link Promotion} based {@link CommerceEvent}.
-     *
      * @see <code><a href="CommerceEvent.Builder.html#CommerceEvent.Builder(java.lang.String,%20com.mparticle.commerce.Impression)">Builder(java.lang.String, com.mparticle.commerce.Impression)</a></code>.
      * @see com.mparticle.commerce.CommerceEvent.Builder#addImpression(Impression).
      * @see com.mparticle.commerce.CommerceEvent.Builder#impressions(List).
@@ -525,9 +513,7 @@ public final class CommerceEvent extends BaseEvent {
          * Constructor for a {@link Product}-based CommerceEvent.
          *
          * @param productAction a String representing the action that the user performed. This must be one of the String constants defined by the {@link Product} class. Must not be null.
-         * @param product at {@link Product} object to associate with the given action. Must not be null.
-         *
-         *
+         * @param product       at {@link Product} object to associate with the given action. Must not be null.
          * @see Product#CLICK
          * @see Product#DETAIL
          * @see Product#CHECKOUT
@@ -538,7 +524,6 @@ public final class CommerceEvent extends BaseEvent {
          * @see Product#CHECKOUT
          * @see Product#CHECKOUT_OPTION
          * @see Product#PURCHASE
-         *
          */
         public Builder(@NonNull @Product.ProductConstant String productAction, Product product) {
             mProductAction = productAction;
@@ -550,8 +535,7 @@ public final class CommerceEvent extends BaseEvent {
          * Constructor for a {@link Promotion}-based CommerceEvent.
          *
          * @param promotionAction a String representing the action that use user performed. This must be on the String constants defined by the {@link Promotion} class. Must not be null.
-         * @param promotion at least 1 {@link Promotion} object to associate with the given action. Must not be null.
-         *
+         * @param promotion       at least 1 {@link Promotion} object to associate with the given action. Must not be null.
          * @see Promotion#CLICK
          * @see Promotion#VIEW
          */
@@ -698,7 +682,7 @@ public final class CommerceEvent extends BaseEvent {
          * Add a custom flag to this event. Flag keys can have multiple values - if the provided flag key already has an associated
          * value, the value will be appended.
          *
-         * @param key (required) a flag key, retrieve this from the mParticle docs or solution team for your intended services(s)
+         * @param key   (required) a flag key, retrieve this from the mParticle docs or solution team for your intended services(s)
          * @param value (required) a flag value to be send to the service indicated by the flag key
          * @return returns this builder for easy method chaining
          */
@@ -779,7 +763,6 @@ public final class CommerceEvent extends BaseEvent {
         /**
          * Set custom options to be associated with the event. Should be used with the {@link Product#CHECKOUT} and {@link Product#CHECKOUT_OPTION} actions.
          *
-         *
          * @param options a String describing this checkout step
          * @return returns this Builder for easy method chaining.
          */
@@ -796,7 +779,6 @@ public final class CommerceEvent extends BaseEvent {
          * {@link Product} objects with {@link Promotion} objects. When in {@link com.mparticle.MParticle.Environment#Production} mode, errors will be logged to the console.
          *
          * @return returns the resulting immutable CommerceEvent to be logged
-         *
          * @see <code><a href="../MParticle.html#logEvent(com.mparticle.commerce.CommerceEvent)">MParticle.logEvent(com.mparticle.commerce.CommerceEvent)</a></code>
          */
         @NonNull
@@ -866,7 +848,6 @@ public final class CommerceEvent extends BaseEvent {
 
         /**
          * Private API used internally by the SDK.
-         *
          */
         @NonNull
         public Builder internalEventName(@Nullable String eventName) {

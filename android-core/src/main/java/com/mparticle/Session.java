@@ -9,7 +9,6 @@ import java.util.Locale;
 
 /**
  * Public Session API exposing characteristics of a given session.
- *
  */
 public class Session {
 
@@ -20,6 +19,7 @@ public class Session {
         mUUID = null;
         mSessionStartTime = null;
     }
+
     Session(String uuid, Long sessionStartTime) {
         this.mUUID = uuid;
         this.mSessionStartTime = sessionStartTime;
@@ -72,7 +72,7 @@ public class Session {
         }
         String sessionId = getSessionUUID();
         Long sessionStartTime = getSessionStartTime();
-        Session comparisonSession = ((Session)obj);
+        Session comparisonSession = ((Session) obj);
         String comparisonSessionId = comparisonSession.getSessionUUID();
         Long comparisonSessionStartTime = comparisonSession.getSessionStartTime();
         if (sessionId == comparisonSessionId &&

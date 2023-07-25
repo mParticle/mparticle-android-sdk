@@ -216,12 +216,12 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
 
     @Test
     public void testSetUserAttribute() throws Exception {
-        final String key =  mRandomUtils.getAlphaNumericString(25);
-        final String value =  mRandomUtils.getAlphaNumericString(25);
+        final String key = mRandomUtils.getAlphaNumericString(25);
+        final String value = mRandomUtils.getAlphaNumericString(25);
         String testJavascript = String.format("mParticle.Identity.getCurrentUser().setUserAttribute(\"%s\", \"%s\");\n", key, value);
         final MutableBoolean called = new MutableBoolean(false);
         final CountDownLatch latch = new MPLatch(1);
-        runJavascriptTest(testJavascript, new MParticleJSInterface(){
+        runJavascriptTest(testJavascript, new MParticleJSInterface() {
             @Override
             @JavascriptInterface
             public void setUserAttribute(String json) {
@@ -232,8 +232,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                     assertEquals(value, jsonObject.getString("value"));
                     called.value = true;
                     latch.countDown();
-                }
-                catch (JSONException jse) {
+                } catch (JSONException jse) {
                     jse.printStackTrace();
                 }
 
@@ -249,7 +248,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
         String testJavascript = String.format("mParticle.Identity.getCurrentUser().removeUserAttribute(\"%s\");\n", key);
         final MutableBoolean called = new MutableBoolean(false);
         final CountDownLatch latch = new MPLatch(1);
-        runJavascriptTest(testJavascript, new MParticleJSInterface(){
+        runJavascriptTest(testJavascript, new MParticleJSInterface() {
             @Override
             @JavascriptInterface
             public void removeUserAttribute(String json) {
@@ -259,8 +258,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                     assertEquals(key, jsonObject.getString("key"));
                     called.value = true;
                     latch.countDown();
-                }
-                catch (JSONException jse) {
+                } catch (JSONException jse) {
                     jse.printStackTrace();
                 }
             }
@@ -276,7 +274,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
         final MutableBoolean called = new MutableBoolean(false);
         final CountDownLatch latch = new MPLatch(1);
         //This is acceptable if the JS SDK calls either setUserTag, or setUserAttribute with a null value
-        runJavascriptTest(testJavascript, new MParticleJSInterface(){
+        runJavascriptTest(testJavascript, new MParticleJSInterface() {
             @Override
             @JavascriptInterface
             public void setUserTag(String json) {
@@ -286,8 +284,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                     assertEquals(tag, jsonObject.getString("key"));
                     called.value = true;
                     latch.countDown();
-                }
-                catch (JSONException jse) {
+                } catch (JSONException jse) {
                     jse.printStackTrace();
                 }
             }
@@ -302,8 +299,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                     assertEquals(jsonObject.optString("value", "null"), "null");
                     called.value = true;
                     latch.countDown();
-                }
-                catch (JSONException jse) {
+                } catch (JSONException jse) {
                     jse.printStackTrace();
                 }
             }
@@ -314,7 +310,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
 
     @Test
     public void testLogEvent() throws Exception {
-        final JSONObject customAttributes = MPUtility.mapToJson( mRandomUtils.getRandomAttributes(10));
+        final JSONObject customAttributes = MPUtility.mapToJson(mRandomUtils.getRandomAttributes(10));
         final JSONObject customFlagsJSON = MPUtility.mapToJson(getCustomFlags());
         String testJavascript = String.format("mParticle.logEvent('Play Movie Tapped',\n" +
                 "                         mParticle.EventType.Navigation,\n" +
@@ -371,7 +367,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
 
     @Test
     public void testLogCommerceEvent() throws Exception {
-        final JSONObject customAttributes = MPUtility.mapToJson( mRandomUtils.getRandomAttributes(10));
+        final JSONObject customAttributes = MPUtility.mapToJson(mRandomUtils.getRandomAttributes(10));
         final JSONObject customFlags = MPUtility.mapToJson(getCustomFlags());
         String testJavascript = String.format("// 1. Create the product\n" +
                 "var product = mParticle.eCommerce.createProduct(\n" +
@@ -454,7 +450,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
 
     @Test
     public void testLogout() throws Exception {
-        final Map<MParticle.IdentityType, String> userIdentityMap =  mRandomUtils.getRandomUserIdentities();
+        final Map<MParticle.IdentityType, String> userIdentityMap = mRandomUtils.getRandomUserIdentities();
         JSONObject jsonObject = userIdentityMapToJson(userIdentityMap);
         String testJavascript = String.format("mParticle.Identity.logout(%s , null);", jsonObject.toString(4));
 
@@ -506,7 +502,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
 
     @Test
     public void testLogin() throws Exception {
-        final Map<MParticle.IdentityType, String> userIdentityMap =  mRandomUtils.getRandomUserIdentities();
+        final Map<MParticle.IdentityType, String> userIdentityMap = mRandomUtils.getRandomUserIdentities();
         JSONObject jsonObject = userIdentityMapToJson(userIdentityMap);
         String testJavascript = String.format("mParticle.Identity.login(%s , null);", jsonObject.toString(4));
 
@@ -558,7 +554,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
 
     @Test
     public void testModify() throws Exception {
-        final Map<MParticle.IdentityType, String> userIdentities =  mRandomUtils.getRandomUserIdentities();
+        final Map<MParticle.IdentityType, String> userIdentities = mRandomUtils.getRandomUserIdentities();
         JSONObject jsonObject = userIdentityMapToJson(userIdentities);
         String testJavascript = String.format("mParticle.Identity.modify(%s , null);", jsonObject.toString(4));
 

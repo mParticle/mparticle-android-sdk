@@ -5,7 +5,10 @@ import com.mparticle.kits.KitIntegration
 import com.mparticle.kits.ReportingMessage
 
 open class BaseTestKit : KitIntegration() {
-    open override fun onKitCreate(settings: Map<String, String>?, context: Context): List<ReportingMessage> {
+    open override fun onKitCreate(
+        settings: Map<String, String>?,
+        context: Context
+    ): List<ReportingMessage> {
         return listOf()
     }
 

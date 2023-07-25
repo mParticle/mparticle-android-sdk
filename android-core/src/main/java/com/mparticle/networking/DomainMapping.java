@@ -1,5 +1,7 @@
 package com.mparticle.networking;
 
+import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -13,8 +15,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-
-import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint;
 
 public class DomainMapping {
     private Endpoint mType;
@@ -39,7 +39,6 @@ public class DomainMapping {
      * Override the url of outbound Config requests
      *
      * @param newUrl the new domain portion of the url
-     *
      * @return the Builder instance
      */
     @NonNull
@@ -51,9 +50,8 @@ public class DomainMapping {
      * Override the url of outbound Config requests. The subdirectory of the url will also be
      * overridden if {@param overridesSubdirectory} is true
      *
-     * @param newUrl the new domain portion of the url
+     * @param newUrl                the new domain portion of the url
      * @param overridesSubdirectory indicate whether the new domain includes the subdirectory
-     *
      * @return the Builder instance
      */
     public static Builder configMapping(@Nullable String newUrl, boolean overridesSubdirectory) {
@@ -64,7 +62,6 @@ public class DomainMapping {
      * Override the url of outbound Events requests, including Alias events
      *
      * @param newUrl the new domain portion of the url
-     *
      * @return the Builder instance
      */
     @NonNull
@@ -76,9 +73,8 @@ public class DomainMapping {
      * Override the url of outbound Events requests, including Alias events. The subdirectory of the url will also be
      * overridden if {@param overridesSubdirectory} is true
      *
-     * @param newUrl the new domain portion of the url
+     * @param newUrl                the new domain portion of the url
      * @param overridesSubdirectory indicate whether the new domain includes the subdirectory
-     *
      * @return the Builder instance
      */
     public static Builder eventsMapping(@Nullable String newUrl, boolean overridesSubdirectory) {
@@ -90,10 +86,9 @@ public class DomainMapping {
      * overridden if {@param overridesSubdirectory} is true. {@param eventsOnly} with indicate if
      * this mapping should only be applied to Events requests, and specifically not Alias events
      *
-     * @param newUrl the new domain portion of the url
+     * @param newUrl                the new domain portion of the url
      * @param overridesSubdirectory indicate whether the new domain includes the subdirectory
-     * @param eventsOnly indicates whether this mapping should only apply to core, non-alias events
-     *
+     * @param eventsOnly            indicates whether this mapping should only apply to core, non-alias events
      * @return the Builder instance
      */
     public static Builder eventsMapping(@Nullable String newUrl, boolean overridesSubdirectory, boolean eventsOnly) {
@@ -105,7 +100,6 @@ public class DomainMapping {
      * Override the url of outbound Alias events requests.
      *
      * @param newUrl the new domain portion of the url
-     *
      * @return the Builder instance
      */
     public static Builder aliasMapping(@Nullable String newUrl) {
@@ -116,9 +110,8 @@ public class DomainMapping {
      * Override the url of outbound Alias events requests. The subdirectory of the url will also be
      * overridden if {@param overridesSubdirectory} is true
      *
-     * @param newUrl the new domain portion of the url
+     * @param newUrl                the new domain portion of the url
      * @param overridesSubdirectory indicate whether the new domain includes the subdirectory
-     *
      * @return the Builder instance
      */
     public static Builder aliasMapping(@Nullable String newUrl, boolean overridesSubdirectory) {
@@ -130,7 +123,6 @@ public class DomainMapping {
      * Override the url of outbound Identity requests
      *
      * @param newUrl the new domain portion of the url
-     *
      * @return the Builder instance
      */
     @NonNull
@@ -142,9 +134,8 @@ public class DomainMapping {
      * Override the url of outbound Identity requests. The subdirectory of the url will also be
      * overridden if {@param overridesSubdirectory} is true
      *
-     * @param newUrl the new domain portion of the url
+     * @param newUrl                the new domain portion of the url
      * @param overridesSubdirectory indicate whether the new domain includes the subdirectory
-     *
      * @return the Builder instance
      */
     public static Builder identityMapping(@Nullable String newUrl, boolean overridesSubdirectory) {
@@ -155,7 +146,6 @@ public class DomainMapping {
      * Override the url of outbound Audience requests
      *
      * @param newUrl the new domain portion of the url
-     *
      * @return the Builder instance
      */
     @NonNull
@@ -167,9 +157,8 @@ public class DomainMapping {
      * Override the url of outbound Audience requests. The subdirectory of the url will also be
      * overridden if {@param overridesSubdirectory} is true
      *
-     * @param newUrl the new domain portion of the url
+     * @param newUrl                the new domain portion of the url
      * @param overridesSubdirectory indicate whether the new domain includes the subdirectory
-     *
      * @return the Builder instance
      */
     public static Builder audienceMapping(@Nullable String newUrl, boolean overridesSubdirectory) {
@@ -238,8 +227,7 @@ public class DomainMapping {
                     .put("mType", mType.value)
                     .put("url", mUrl)
                     .put("mCertificates", certificatesJson);
-        }
-        catch (JSONException jse) {
+        } catch (JSONException jse) {
             Logger.error(jse);
         }
         return jsonObject;
@@ -314,7 +302,7 @@ public class DomainMapping {
         @NonNull
         public Builder setCertificates(@Nullable List<Certificate> certificates) {
             this.certificates = new ArrayList<Certificate>();
-            for (Certificate certificate: certificates) {
+            for (Certificate certificate : certificates) {
                 if (certificate != null) {
                     addCertificate(certificate);
                 }
@@ -343,8 +331,7 @@ public class DomainMapping {
                     builder.addCertificate(Certificate.withCertificate(certificatesJsonArray.getJSONObject(i)));
                 }
                 return builder;
-            }
-            catch (JSONException jse) {
+            } catch (JSONException jse) {
                 Logger.error(jse);
             }
             return null;

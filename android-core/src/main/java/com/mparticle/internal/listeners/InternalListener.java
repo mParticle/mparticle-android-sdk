@@ -3,6 +3,7 @@ package com.mparticle.internal.listeners;
 import android.content.ContentValues;
 import android.os.Build;
 import android.os.Message;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -28,8 +29,9 @@ public interface InternalListener {
      * To be called when a Kit's API method is invoked. This overloaded variant should be used when
      * the name of the method containing this method's invocation (in KitManagerImpl) matches the name of the
      * Kit's method being invoked
-     * @param kitId the Id of the kit
-     * @param used whether the Kit's method returned ReportingMessages, or null if return type is void
+     *
+     * @param kitId   the Id of the kit
+     * @param used    whether the Kit's method returned ReportingMessages, or null if return type is void
      * @param objects the arguments supplied to the Kit
      */
     void onKitApiCalled(int kitId, Boolean used, Object... objects);
@@ -37,17 +39,19 @@ public interface InternalListener {
     /**
      * to be called when a Kit's API method is invoked, and the name of the Kit's method is different
      * then the method containing this method's invocation
+     *
      * @param methodName the name of the Kit's method being called
-     * @param kitId the Id of the kit
-     * @param used whether the Kit's method returned ReportingMessages, or null if return type is void
-     * @param objects the arguments supplied to the Kit
+     * @param kitId      the Id of the kit
+     * @param used       whether the Kit's method returned ReportingMessages, or null if return type is void
+     * @param objects    the arguments supplied to the Kit
      */
     void onKitApiCalled(String methodName, int kitId, Boolean used, Object... objects);
 
     /**
      * establishes a child-parent relationship between two objects. It is not necessary to call this
      * method for objects headed to the MessageHandler from the public API, or objects headed to kits
-     * @param child the child object
+     *
+     * @param child  the child object
      * @param parent the parent object
      */
     void onCompositeObjects(@Nullable Object child, @Nullable Object parent);
@@ -58,14 +62,15 @@ public interface InternalListener {
      * and once as soon as it lands on the new Thread
      *
      * @param handlerName the Name of the Handler class, for example "com.mparticle.internal.MessageHandler"
-     * @param msg the Message object
+     * @param msg         the Message object
      */
     void onThreadMessage(@NonNull String handlerName, @NonNull Message msg, boolean onNewThread);
 
     /**
      * indicates that an entry has been stored in the Database
-     * @param rowId the rowId denoted by the "_id" column value
-     * @param tableName the name of the database table
+     *
+     * @param rowId         the rowId denoted by the "_id" column value
+     * @param tableName     the name of the database table
      * @param contentValues the ContentValues object to be inserted
      */
     @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
@@ -73,17 +78,19 @@ public interface InternalListener {
 
     /**
      * indicates that a Network Request has been started
-     * @param type the type of Request, should either be "CONFIG", "EVENTS" or "Identity.Login/Logout/Identify/Modify"
-     * @param url the request url
-     * @param body the request body
+     *
+     * @param type    the type of Request, should either be "CONFIG", "EVENTS" or "Identity.Login/Logout/Identify/Modify"
+     * @param url     the request url
+     * @param body    the request body
      * @param objects any underlying objects that the request body is derived from, for example, an IdentityApiRequest instance
      */
     void onNetworkRequestStarted(SdkListener.Endpoint type, String url, JSONObject body, Object... objects);
 
     /**
      * indicates that a NetworkRequest has been finished
-     * @param url the request url
-     * @param response the response body
+     *
+     * @param url          the request url
+     * @param response     the response body
      * @param responseCode the response code
      */
     void onNetworkRequestFinished(SdkListener.Endpoint type, String url, JSONObject response, int responseCode);
@@ -91,18 +98,21 @@ public interface InternalListener {
     /**
      * this should be called when the current Session changes, for example, it starts, stops or the
      * event count changes
+     *
      * @param internalSession
      */
     void onSessionUpdated(InternalSession internalSession);
 
     /**
      * indicates that a Kit dependency is present
+     *
      * @param kitId
      */
     void onKitDetected(int kitId);
 
     /**
      * indicates that we have received a configuration for a Kit
+     *
      * @param kitId
      * @param configuration
      */
@@ -112,6 +122,7 @@ public interface InternalListener {
      * indicates that a Kit was present, and a configuration was received for it, but it was not started,
      * or it was stopped. This could be because it crashed, or because a User's logged in status required
      * that we shut it down
+     *
      * @param kitId
      * @param reason
      */
@@ -119,6 +130,7 @@ public interface InternalListener {
 
     /**
      * indicates that a Kit successfully executed it's onKitCreate() method
+     *
      * @param kitId
      */
     void onKitStarted(int kitId);
@@ -127,19 +139,31 @@ public interface InternalListener {
 
     InternalListener EMPTY = new InternalListener() {
         public void onApiCalled(Object... objects) { /* stub */}
+
         public void onKitApiCalled(int kitId, Boolean used, Object... objects) { /* stub */}
+
         public void onKitApiCalled(String methodName, int kitId, Boolean used, Object... objects) { /* stub */}
+
         public void onEntityStored(Long rowId, String tableName, ContentValues contentValues) { /* stub */}
+
         public void onNetworkRequestStarted(SdkListener.Endpoint type, String url, JSONObject body, Object... objects) { /* stub */}
+
         public void onNetworkRequestFinished(SdkListener.Endpoint type, String url, JSONObject response, int responseCode) { /* stub */}
+
         public void onSessionUpdated(InternalSession internalSession) { /* stub */}
+
         public void onKitDetected(int kitId) { /* stub */}
+
         public void onKitConfigReceived(int kitId, String configuration) { /* stub */}
+
         public void onKitExcluded(int kitId, String reason) { /* stub */}
+
         public void onKitStarted(int kitId) { /* stub */}
+
         public void onAliasRequestFinished(AliasResponse aliasResponse) { /* stub */}
 
         public void onCompositeObjects(Object child, Object parent) { /* stub */}
+
         public void onThreadMessage(String handlerName, Message msg, boolean onNewThread) { /* stub */ }
     };
 }

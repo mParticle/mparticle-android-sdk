@@ -4,7 +4,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
-
 import com.mparticle.internal.listeners.InternalListenerManager;
 
 import java.util.Set;
@@ -20,7 +19,8 @@ public class BaseHandler extends Handler {
         return messageQueue.keySet();
     }
 
-    public BaseHandler() {}
+    public BaseHandler() {
+    }
 
     public BaseHandler(Looper looper) {
         super(looper);
@@ -29,9 +29,9 @@ public class BaseHandler extends Handler {
     public void disable(boolean disable) {
         this.disabled = disable;
         removeCallbacksAndMessages(null);
-        while (handling) {}
+        while (handling) {
+        }
     }
-
 
 
     public boolean isDisabled() {
@@ -54,7 +54,7 @@ public class BaseHandler extends Handler {
                 messageQueue.remove(msg);
             }
             if (msg != null && msg.what == -1 && msg.obj instanceof CountDownLatch) {
-                ((CountDownLatch)msg.obj).countDown();
+                ((CountDownLatch) msg.obj).countDown();
             } else {
                 if (InternalListenerManager.isEnabled()) {
                     InternalListenerManager.getListener().onThreadMessage(getClass().getName(), msg, true);
@@ -65,8 +65,7 @@ public class BaseHandler extends Handler {
                     Logger.error("Out of memory");
                 }
             }
-        }
-        finally {
+        } finally {
             handling = false;
         }
     }
@@ -87,7 +86,7 @@ public class BaseHandler extends Handler {
 
     public void removeMessage(int what) {
         Set<Message> messages = messageQueue.keySet();
-        for (Message message: messages) {
+        for (Message message : messages) {
             if (message.what == what) {
                 messageQueue.remove(message);
             }
@@ -96,5 +95,6 @@ public class BaseHandler extends Handler {
     }
 
     //Override this in order to handle messages
-    public void handleMessageImpl(Message msg) {}
+    public void handleMessageImpl(Message msg) {
+    }
 }

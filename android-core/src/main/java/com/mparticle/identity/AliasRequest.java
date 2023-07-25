@@ -47,6 +47,7 @@ public class AliasRequest {
 
     /**
      * Create an empty {@link AliasRequest.Builder} instance
+     *
      * @return
      */
     public static Builder builder() {
@@ -63,7 +64,7 @@ public class AliasRequest {
      * after applying this adjustment it will be impossible to create an aliasRequest passes the aliasUsers()
      * validation that the startTime must be less than the endTime
      *
-     * @param sourceUser the user which is to be "copied" over
+     * @param sourceUser      the user which is to be "copied" over
      * @param destinationUser the user which the sourceUser will be "copied" onto
      */
     public static Builder builder(@NonNull MParticleUser sourceUser, @NonNull MParticleUser destinationUser) {
@@ -78,7 +79,7 @@ public class AliasRequest {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof AliasRequest) {
-            AliasRequest request = ((AliasRequest)obj);
+            AliasRequest request = ((AliasRequest) obj);
             return request.getEndTime() == getEndTime() &&
                     request.getStartTime() == getStartTime() &&
                     request.getSourceMpid() == getSourceMpid() &&
@@ -103,6 +104,7 @@ public class AliasRequest {
 
         /**
          * set the user which the sourceUser will be "copied" onto
+         *
          * @param mpid the destination user's mpid
          * @return
          */
@@ -113,6 +115,7 @@ public class AliasRequest {
 
         /**
          * set the mpid of the user which is to be "copied" over
+         *
          * @return the source user's mpid
          */
         public Builder sourceMpid(long mpid) {
@@ -122,6 +125,7 @@ public class AliasRequest {
 
         /**
          * set a time indicating the beginning of the window of activity which should be aliased
+         *
          * @param startTime the time, in milliseconds
          * @return
          */
@@ -133,6 +137,7 @@ public class AliasRequest {
 
         /**
          * set a time indicating the end of the window of activity which should be aliased
+         *
          * @param endTime the time, in milliseconds
          */
         public Builder endTime(long endTime) {
@@ -147,6 +152,7 @@ public class AliasRequest {
 
         /**
          * build the {@link AliasRequest.Builder} into an immutable {@link AliasRequest}
+         *
          * @return
          */
         public AliasRequest build() {

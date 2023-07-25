@@ -15,10 +15,6 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.identity.BaseIdentityTask;
-import com.mparticle.identity.IdentityApiResult;
-import com.mparticle.identity.IdentityHttpResponse;
-import com.mparticle.identity.TaskFailureListener;
-import com.mparticle.identity.TaskSuccessListener;
 import com.mparticle.internal.AccessUtils;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
@@ -135,7 +131,7 @@ public abstract class BaseAbstractTest {
         com.mparticle.AccessUtils.reset(mContext, false);
         MPDatabase database = new MParticleDBManager(mContext).getDatabase();
         List<String> tableNames = getAllTables(database);
-        for (String tableName: tableNames) {
+        for (String tableName : tableNames) {
             database.delete(tableName, "1 = 1", null);
         }
     }
@@ -154,7 +150,7 @@ public abstract class BaseAbstractTest {
 
     protected JSONObject getDatabaseContents(MPDatabase database, List<String> tableNames) throws JSONException {
         JSONObject databaseJson = new JSONObject();
-        for (String tableName: tableNames) {
+        for (String tableName : tableNames) {
             JSONArray data = getData(database.query(tableName, null, null, null, null, null, null));
             databaseJson.put(tableName, data);
         }
@@ -163,10 +159,10 @@ public abstract class BaseAbstractTest {
 
     protected JSONObject getDatabaseSchema(SQLiteDatabase database) throws JSONException {
         JSONObject databaseJson = new JSONObject();
-        for (String tableName: getAllTables(new MPDatabaseImpl(database))) {
+        for (String tableName : getAllTables(new MPDatabaseImpl(database))) {
             Cursor cursor = database.query(tableName, null, null, null, null, null, null);
             JSONObject columnNames = new JSONObject();
-            for (String columnName: cursor.getColumnNames()) {
+            for (String columnName : cursor.getColumnNames()) {
                 columnNames.put(columnName, true);
             }
             databaseJson.put(tableName, columnNames);
@@ -190,8 +186,7 @@ public abstract class BaseAbstractTest {
                 }
                 cursor.moveToNext();
             }
-        }
-        finally {
+        } finally {
             if (cursor != null && !cursor.isClosed()) {
                 cursor.close();
             }
@@ -221,8 +216,7 @@ public abstract class BaseAbstractTest {
                 jsonArray.put(jsonObject);
                 cursor.moveToNext();
             }
-        }
-        finally {
+        } finally {
             if (cursor != null && !cursor.isClosed()) {
                 cursor.close();
             }

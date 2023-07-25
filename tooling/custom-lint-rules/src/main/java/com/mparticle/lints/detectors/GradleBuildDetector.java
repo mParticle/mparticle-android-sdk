@@ -1,6 +1,7 @@
 package com.mparticle.lints.detectors;
 
 import com.android.annotations.NonNull;
+import com.android.annotations.Nullable;
 import com.android.tools.lint.detector.api.Category;
 import com.android.tools.lint.detector.api.Context;
 import com.android.tools.lint.detector.api.DefaultPosition;
@@ -12,7 +13,6 @@ import com.android.tools.lint.detector.api.Location;
 import com.android.tools.lint.detector.api.Scope;
 import com.android.tools.lint.detector.api.Severity;
 import com.android.utils.Pair;
-import com.android.annotations.Nullable;
 import com.mparticle.lints.basedetectors.BaseDetector;
 
 import org.codehaus.groovy.ast.ASTNode;
@@ -36,7 +36,7 @@ public class GradleBuildDetector extends BaseDetector implements GradleScanner {
             "api"
     };
 
-    private String[] includedArtifacts = new String[] {
+    private String[] includedArtifacts = new String[]{
             "android-core",
             "-kit",
     };
@@ -60,7 +60,7 @@ public class GradleBuildDetector extends BaseDetector implements GradleScanner {
     public void afterCheckRootProject(Context context) {
         // Check for inconsistent versions across MParticle dependencies (Core, Kits, etc)
         String currentVersion = null;
-        for (MPDependency mpDependency: mMPDependencies) {
+        for (MPDependency mpDependency : mMPDependencies) {
             if (currentVersion == null) {
                 currentVersion = mpDependency.version;
             } else {
@@ -81,7 +81,7 @@ public class GradleBuildDetector extends BaseDetector implements GradleScanner {
                 String artifact = dependencySplit[1];
                 if (MPARTICLE_PACKAGE.equalsIgnoreCase(pkg) && artifact != null) {
                     boolean isIncludedArtifact = false;
-                    for (String includedArtifact: includedArtifacts) {
+                    for (String includedArtifact : includedArtifacts) {
                         if (artifact.contains(includedArtifact)) {
                             isIncludedArtifact = true;
                         }
@@ -118,7 +118,7 @@ public class GradleBuildDetector extends BaseDetector implements GradleScanner {
         message
                 .append(MESSAGE_INCONSISTENCY_IN_VERSIONS_DETECTED)
                 .append("\n\n");
-        for(MPDependency mpDependency: mMPDependencies) {
+        for (MPDependency mpDependency : mMPDependencies) {
             if (commonContext == null) {
                 commonContext = mpDependency.context;
                 hasCommonContext = true;
@@ -130,12 +130,12 @@ public class GradleBuildDetector extends BaseDetector implements GradleScanner {
             }
             if (maxLineNumber == null) {
                 maxLineNumber = mpDependency;
-            } else if (maxLineNumber.expression.getLastLineNumber() < mpDependency.expression.getLastLineNumber()){
+            } else if (maxLineNumber.expression.getLastLineNumber() < mpDependency.expression.getLastLineNumber()) {
                 maxLineNumber = mpDependency;
             }
             if (minLineNumber == null) {
                 minLineNumber = mpDependency;
-            } else if (minLineNumber.expression.getLineNumber() > mpDependency.expression.getLineNumber()){
+            } else if (minLineNumber.expression.getLineNumber() > mpDependency.expression.getLineNumber()) {
                 minLineNumber = mpDependency;
             }
 

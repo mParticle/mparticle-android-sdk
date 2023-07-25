@@ -3,7 +3,6 @@ package com.mparticle.internal.database.services;
 import android.content.ContentValues;
 import android.database.Cursor;
 
-import com.mparticle.MParticle;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.tables.UserAttributesTable;
@@ -33,15 +32,15 @@ public class UserAttributesService extends UserAttributesTable {
         TreeMap<String, String> attributes = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
         Cursor cursor = null;
         try {
-            String[] args =  {"1", String.valueOf(mpId)};
+            String[] args = {"1", String.valueOf(mpId)};
 
-            cursor = db.query(UserAttributesTableColumns.TABLE_NAME, null, UserAttributesTableColumns.IS_LIST + " != ? and " + UserAttributesTableColumns.MP_ID + " = ?", args, null, null, UserAttributesTableColumns.ATTRIBUTE_KEY + ", "+ UserAttributesTableColumns.CREATED_AT +" desc");
+            cursor = db.query(UserAttributesTableColumns.TABLE_NAME, null, UserAttributesTableColumns.IS_LIST + " != ? and " + UserAttributesTableColumns.MP_ID + " = ?", args, null, null, UserAttributesTableColumns.ATTRIBUTE_KEY + ", " + UserAttributesTableColumns.CREATED_AT + " desc");
             int keyIndex = cursor.getColumnIndexOrThrow(UserAttributesTableColumns.ATTRIBUTE_KEY);
             int valueIndex = cursor.getColumnIndexOrThrow(UserAttributesTableColumns.ATTRIBUTE_VALUE);
             while (cursor.moveToNext()) {
                 attributes.put(cursor.getString(keyIndex), cursor.getString(valueIndex));
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Logger.error(e, "Error while querying user attributes: ", e.toString());
         } finally {
             if (cursor != null && !cursor.isClosed()) {
@@ -55,22 +54,22 @@ public class UserAttributesService extends UserAttributesTable {
         TreeMap<String, List<String>> attributes = new TreeMap<String, List<String>>(String.CASE_INSENSITIVE_ORDER);
         Cursor cursor = null;
         try {
-            String[] args =  {"1", String.valueOf(mpId)};
-            cursor = db.query(UserAttributesTableColumns.TABLE_NAME, null, UserAttributesTableColumns.IS_LIST + " = ? and " + UserAttributesTableColumns.MP_ID + " = ?", args, null, null, UserAttributesTableColumns.ATTRIBUTE_KEY + ", "+ UserAttributesTableColumns.CREATED_AT +" desc");
+            String[] args = {"1", String.valueOf(mpId)};
+            cursor = db.query(UserAttributesTableColumns.TABLE_NAME, null, UserAttributesTableColumns.IS_LIST + " = ? and " + UserAttributesTableColumns.MP_ID + " = ?", args, null, null, UserAttributesTableColumns.ATTRIBUTE_KEY + ", " + UserAttributesTableColumns.CREATED_AT + " desc");
             int keyIndex = cursor.getColumnIndexOrThrow(UserAttributesTableColumns.ATTRIBUTE_KEY);
             int valueIndex = cursor.getColumnIndexOrThrow(UserAttributesTableColumns.ATTRIBUTE_VALUE);
             String previousKey = null;
             List<String> currentList = null;
             while (cursor.moveToNext()) {
                 String currentKey = cursor.getString(keyIndex);
-                if (!currentKey.equals(previousKey)){
+                if (!currentKey.equals(previousKey)) {
                     previousKey = currentKey;
                     currentList = new ArrayList<String>();
                     attributes.put(currentKey, currentList);
                 }
                 attributes.get(currentKey).add(cursor.getString(valueIndex));
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Logger.error(e, "Error while querying user attribute lists: ", e.toString());
         } finally {
             if (cursor != null && !cursor.isClosed()) {

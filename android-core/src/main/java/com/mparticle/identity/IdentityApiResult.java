@@ -17,6 +17,7 @@ public final class IdentityApiResult {
 
     /**
      * Query the User which was returned by the IdentityApi request
+     *
      * @return the User
      */
     @NonNull
@@ -27,6 +28,7 @@ public final class IdentityApiResult {
     /**
      * The User which is being replaced, if the IdentityApi call this instance is describing, resulted
      * in a new {@link IdentityApi#getCurrentUser()}, otherwise 'null'
+     *
      * @return
      */
     @Nullable

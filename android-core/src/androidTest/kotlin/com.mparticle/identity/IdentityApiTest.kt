@@ -15,7 +15,6 @@ import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import java.lang.Exception
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
 

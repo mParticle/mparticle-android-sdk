@@ -26,7 +26,7 @@ public class RandomUtils {
         int identityTypeLength = MParticle.IdentityType.values().length;
         int numIdentities = randomInt(1, (max != null && max < identityTypeLength) ? max : identityTypeLength);
         Set<Integer> identityIndices = randomIntSet(0, identityTypeLength, numIdentities);
-        for (Integer identityIndex: identityIndices) {
+        for (Integer identityIndex : identityIndices) {
             randomIdentities.put(MParticle.IdentityType.values()[identityIndex], getAlphaNumericString(randomInt(1, 55)));
         }
         randomIdentities.remove(MParticle.IdentityType.Alias);
@@ -59,7 +59,7 @@ public class RandomUtils {
 
     public Map<String, Object> getRandomUserAttributes(int count) {
         Map<String, Object> attributes = new HashMap<>();
-        for (Map.Entry<String, String> entry: getRandomAttributes(count).entrySet()) {
+        for (Map.Entry<String, String> entry : getRandomAttributes(count).entrySet()) {
             attributes.put(entry.getKey(), entry.getValue());
         }
         return attributes;
@@ -76,7 +76,7 @@ public class RandomUtils {
 
     private String getRandomString(int length, String characters) {
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < length; i++){
+        for (int i = 0; i < length; i++) {
             builder.append(characters.charAt(randomInt(0, characters.length() - 1)));
         }
         return builder.toString();

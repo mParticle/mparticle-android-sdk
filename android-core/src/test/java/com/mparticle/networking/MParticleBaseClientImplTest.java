@@ -1,5 +1,8 @@
 package com.mparticle.networking;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import androidx.annotation.NonNull;
 
 import com.mparticle.internal.ConfigManager;
@@ -13,9 +16,6 @@ import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
 
 import javax.net.ssl.SSLSocketFactory;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 
 public class MParticleBaseClientImplTest {
@@ -63,7 +63,7 @@ public class MParticleBaseClientImplTest {
 
         MPConnection mockConnection = Mockito.mock(MPConnection.class);
         Mockito.when(mockConnection.isHttps()).thenReturn(true);
-        client.makeUrlRequest(null, mockConnection, "message" , true);
+        client.makeUrlRequest(null, mockConnection, "message", true);
         assertTrue(getSocketFactoryCalled[0]);
         assertTrue(writeCalled[0]);
     }

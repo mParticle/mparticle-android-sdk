@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
-import android.util.Log;
 
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
@@ -29,9 +28,9 @@ import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.IdentityStateListener;
 import com.mparticle.identity.MParticleUser;
-import com.mparticle.internal.KitsLoadedCallback;
 import com.mparticle.internal.CoreCallbacks;
 import com.mparticle.internal.KitManager;
+import com.mparticle.internal.KitsLoadedCallback;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.ReportingManager;

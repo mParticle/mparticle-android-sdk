@@ -52,7 +52,6 @@ import java.util.Set;
 /**
  * This class is primarily responsible for generating BaseMPMessage objects, and then adding them to a
  * queue which is then processed in a background thread for further processing and database storage.
- *
  */
 public class MessageManager implements MessageManagerCallbacks, ReportingManager {
     private static Context sContext = null;
@@ -79,6 +78,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
      */
     MessageHandler mMessageHandler;
     public UploadHandler mUploadHandler;
+
     /**
      * Ideally these threads would not be started in a static initializer
      * block. but this is cleaner than checking if they have been started in
@@ -96,6 +96,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         sMessageHandlerThread.start();
         sUploadHandlerThread.start();
     }
+
     /**
      * Used to communicate the current location at the time of message generation. Can be set
      * manually by the customer, or automatically via our our location listener, if enabled.
@@ -285,7 +286,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 } catch (JSONException e) {
                     Logger.warning("Failed to create First Run Message.");
                 }
-            }else{
+            } else {
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.END_ORPHAN_SESSIONS, mConfigManager.getMpid()));
             }
 
@@ -623,7 +624,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     }
 
     public void logNotification(ProviderCloudMessage cloudMessage, String appState) {
-        try{
+        try {
             BaseMPMessage message = new BaseMPMessage.Builder(MessageType.PUSH_RECEIVED)
                     .timestamp(System.currentTimeMillis())
                     .name("gcm")
@@ -639,7 +640,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             message.put(MessageKey.APP_STATE, appState);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
 
-        }catch (JSONException e) {
+        } catch (JSONException e) {
 
         }
     }
@@ -728,7 +729,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             } else if (newValue instanceof List) {
                 JSONArray newValueArray = new JSONArray();
                 for (int i = 0; i < ((List) newValue).size(); i++) {
-                    String value = (String)((List) newValue).get(i);
+                    String value = (String) ((List) newValue).get(i);
                     newValueArray.put(value);
                 }
                 newValue = newValueArray;
@@ -740,7 +741,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             } else if (oldValue instanceof List) {
                 JSONArray oldValueArray = new JSONArray();
                 for (int i = 0; i < ((List) oldValue).size(); i++) {
-                    String value = (String)((List) oldValue).get(i);
+                    String value = (String) ((List) oldValue).get(i);
                     oldValueArray.put(value);
                 }
                 oldValue = oldValueArray;
@@ -807,7 +808,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                     }
                 });
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             //this can sometimes fail due to wonky-device reasons.
         }
     }
@@ -820,7 +821,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     @Override
     public void checkForTrigger(BaseMPMessage message) {
-        if (mConfigManager.shouldTrigger(message)){
+        if (mConfigManager.shouldTrigger(message)) {
             mUploadHandler.removeMessages(UploadHandler.UPLOAD_TRIGGER_MESSAGES, mConfigManager.getMpid());
             mUploadHandler.sendMessageDelayed(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_TRIGGER_MESSAGES, 1, 0, mConfigManager.getMpid()), Constants.TRIGGER_MESSAGE_DELAY);
         }
@@ -898,7 +899,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         if (value instanceof List) {
             container.attributeLists = new HashMap<>();
             container.attributeLists.put(key, (List<String>) value);
-        }else {
+        } else {
             container.attributeSingles = new HashMap<>();
             container.attributeSingles.put(key, value);
         }
@@ -924,7 +925,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         return mConfigManager.getUserIdentities(mpId);
     }
 
-    public JSONArray getUserIdentityJson(long mpId){
+    public JSONArray getUserIdentityJson(long mpId) {
         return mConfigManager.getUserIdentityJson(mpId);
     }
 
@@ -944,7 +945,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             return null;
         }
         Map<String, List<String>> listMap = new HashMap<String, List<String>>();
-        for (Map.Entry<String, String> entry: map.entrySet()) {
+        for (Map.Entry<String, String> entry : map.entrySet()) {
             listMap.put(entry.getKey(), Collections.singletonList(entry.getValue()));
         }
         return listMap;
@@ -993,7 +994,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                     int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
                     sBatteryLevel = level / (double) scale;
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 //sometimes we're given a null intent,
                 //or even if we have permissions to ACCESS_NETWORK_STATE, the call may fail.
             }
@@ -1030,6 +1031,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             mUploadHandler.disable(true);
         }
     }
+
     public static void destroy() {
         if (sMessageHandlerThread != null) {
             sMessageHandlerThread.quit();

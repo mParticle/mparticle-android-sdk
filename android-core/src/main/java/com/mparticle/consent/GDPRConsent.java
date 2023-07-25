@@ -13,7 +13,8 @@ import org.json.JSONObject;
  */
 public final class GDPRConsent extends ConsentInstance {
 
-    private GDPRConsent() {}
+    private GDPRConsent() {
+    }
 
     private GDPRConsent(GDPRConsent.Builder builder) {
         if (builder.mTimestamp == null) {

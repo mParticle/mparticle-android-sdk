@@ -1,6 +1,9 @@
 package com.mparticle;
 
 import android.Manifest;
+import android.content.Context;
+
+import androidx.test.rule.GrantPermissionRule;
 
 import com.mparticle.internal.Logger;
 
@@ -8,10 +11,6 @@ import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
-
-import android.content.Context;
-import androidx.test.rule.GrantPermissionRule;
-
 
 import java.lang.reflect.Method;
 
@@ -41,8 +40,8 @@ public class LegacyStartupTest extends BaseStartupTest {
     public void after() {
         try {
             Logger.debug("Startup times = " + readFile());
+        } catch (Exception ex) {
         }
-        catch (Exception ex) {}
     }
 
     @Override
@@ -52,6 +51,6 @@ public class LegacyStartupTest extends BaseStartupTest {
 
     @Override
     protected void startup() throws Exception {
-        mParticleStart.invoke(null,mContext, "key", "secret");
+        mParticleStart.invoke(null, mContext, "key", "secret");
     }
 }

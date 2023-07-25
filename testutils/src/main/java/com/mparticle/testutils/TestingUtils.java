@@ -1,7 +1,7 @@
 package com.mparticle.testutils;
 
-import android.content.Context;
-import android.database.Cursor;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.mparticle.MPEvent;
@@ -9,22 +9,15 @@ import com.mparticle.MParticle;
 import com.mparticle.identity.AliasRequest;
 import com.mparticle.internal.JsonReportingMessage;
 import com.mparticle.internal.Logger;
-import com.mparticle.internal.database.MPDatabase;
-import com.mparticle.internal.database.services.MParticleDBManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 public class TestingUtils {
     private RandomUtils randomUtils = new RandomUtils();
@@ -52,7 +45,7 @@ public class TestingUtils {
                 public void log(MParticle.LogLevel logLevel, Throwable error, String messages) {
                     super.log(logLevel, error, messages);
                     if (logLevel.ordinal() <= logLevelLimit.ordinal()) {
-                        for (String exclude: exclusions) {
+                        for (String exclude : exclusions) {
                             if (messages.equals(exclude)) {
                                 return;
                             }
@@ -78,7 +71,7 @@ public class TestingUtils {
 
 
     private MPEvent.Builder getRandomMPEventBuilder() {
-        return new MPEvent.Builder(randomUtils.getAlphaNumericString(randomUtils.randomInt(1,5)), MParticle.EventType.values()[randomUtils.randomInt(0, MParticle.EventType.values().length - 1)]);
+        return new MPEvent.Builder(randomUtils.getAlphaNumericString(randomUtils.randomInt(1, 5)), MParticle.EventType.values()[randomUtils.randomInt(0, MParticle.EventType.values().length - 1)]);
     }
 
     public MPEvent getRandomMPEventSimple() {
@@ -230,14 +223,12 @@ public class TestingUtils {
             Object object2 = jsonArray2.opt(i);
             try {
                 jsonObject1.put(object1 == null ? null : object1.toString(), object1);
-            }
-            catch (JSONException jse) {
+            } catch (JSONException jse) {
                 fail(jse.getMessage());
             }
             try {
                 jsonObject2.put(object2 == null ? null : object2.toString(), object2);
-            }
-            catch (JSONException jse) {
+            } catch (JSONException jse) {
                 fail(jse.getMessage());
             }
         }

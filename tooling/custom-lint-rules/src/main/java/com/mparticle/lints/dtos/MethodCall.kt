@@ -3,13 +3,19 @@ package com.mparticle.lints.dtos
 import com.mparticle.lints.resolve
 import org.jetbrains.uast.UCallExpression
 
-data class MethodCall(override val parent: Expression, val methodName: String?, override val node: UCallExpression, var returnValue: Boolean) : ParameterizedExpression {
+data class MethodCall(
+    override val parent: Expression,
+    val methodName: String?,
+    override val node: UCallExpression,
+    var returnValue: Boolean
+) : ParameterizedExpression {
 
     override var arguments: List<Value> = listOf()
 
     init {
         arguments.forEach { it.parent = this }
     }
+
     override fun resolve(): Any? {
         val instance = parent.resolve()
         if (instance == null) {

@@ -7,5 +7,6 @@ import androidx.annotation.NonNull;
  */
 public interface AttributionListener {
     void onResult(@NonNull AttributionResult result);
+
     void onError(@NonNull AttributionError error);
 }

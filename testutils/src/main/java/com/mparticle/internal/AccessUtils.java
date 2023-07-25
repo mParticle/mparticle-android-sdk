@@ -2,6 +2,7 @@ package com.mparticle.internal;
 
 import android.content.Context;
 import android.os.Handler;
+
 import androidx.annotation.NonNull;
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -84,6 +85,7 @@ public class AccessUtils {
      *
      * the fact that these messages are tied into an MPID is an artifact from a defunct implementation
      * of the UploadHandler, but it is really useful for this use case.
+     *
      * @throws InterruptedException
      */
     public static void awaitUploadHandler() throws InterruptedException {
@@ -150,7 +152,7 @@ public class AccessUtils {
     public static void setKitManager(final KitManager kitManager) throws InterruptedException {
         final KitFrameworkWrapper kitFrameworkWrapper = MParticle.getInstance().Internal().getKitManager();
         kitFrameworkWrapper.loadKitLibrary();
-        MParticle.getInstance().Identity().removeIdentityStateListener((IdentityStateListener)kitFrameworkWrapper.mKitManager);
+        MParticle.getInstance().Identity().removeIdentityStateListener((IdentityStateListener) kitFrameworkWrapper.mKitManager);
         final CountDownLatch kitManagerLoadedLatch = new MPLatch(1);
         //Need to do this since the KitManager instance in KitFrameworkWrapper is not threadsafe. If
         //it is in mid-loadKitLibrary, then the instance you set could be overwritten.

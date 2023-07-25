@@ -23,7 +23,6 @@ import java.util.Map;
  */
 public final class KitUtils {
     /**
-     *
      * mParticle attribute keys defined by the `MParticle.UserAttributes` interface are
      * preceded by a dollar-sign ie `"$FirstName"`. This method just removes the dollar-sign if present.
      *
@@ -47,7 +46,7 @@ public final class KitUtils {
      * send server-to-server, or via a Kit.
      *
      * @param bytes
-     * @return  returns the hashed bytes
+     * @return returns the hashed bytes
      */
     public static BigInteger hashFnv1a(byte[] bytes) {
         return MPUtility.hashFnv1A(bytes);
@@ -64,6 +63,7 @@ public final class KitUtils {
     public static boolean isEmpty(CharSequence str) {
         return MPUtility.isEmpty(str);
     }
+
     /**
      * Combine the given list into a single string separated by a comma.
      *
@@ -122,8 +122,8 @@ public final class KitUtils {
      * will return "True" and "False" (rather than "true") which trips up Boolean.valueOf
      * so this provides a consistent way for kits to handle such settings.
      *
-     * @param settings the Map of settings given to a kit.
-     * @param key the key of the setting to parse
+     * @param settings     the Map of settings given to a kit.
+     * @param key          the key of the setting to parse
      * @param defaultValue the default value if the setting is not found
      * @return the parsed boolean value of the setting.
      */
@@ -143,11 +143,11 @@ public final class KitUtils {
      * so this provides a consistent way for kits to handle such settings.
      *
      * @param settings the Map of settings given to a kit.
-     * @param key the key of the setting to parse
+     * @param key      the key of the setting to parse
      * @return the parsed boolean value of the setting, or false if the setting is not found.
      */
     public static boolean parseBooleanSetting(Map<String, String> settings, String key) {
-       return parseBooleanSetting(settings, key, false);
+        return parseBooleanSetting(settings, key, false);
     }
 
     @TargetApi(Build.VERSION_CODES.CUPCAKE)

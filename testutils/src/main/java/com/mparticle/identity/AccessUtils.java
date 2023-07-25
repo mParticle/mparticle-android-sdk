@@ -1,6 +1,7 @@
 package com.mparticle.identity;
 
 import android.content.Context;
+
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.mparticle.MParticle;
@@ -20,7 +21,7 @@ public class AccessUtils {
     public static String IDENTIFY_PATH = MParticleIdentityClientImpl.IDENTIFY_PATH;
     public static String LOGIN_PATH = MParticleIdentityClientImpl.LOGIN_PATH;
     public static String LOGOUT_PATH = MParticleIdentityClientImpl.LOGOUT_PATH;
-    public static  String MODIFY_PATH = MParticleIdentityClientImpl.MODIFY_PATH;
+    public static String MODIFY_PATH = MParticleIdentityClientImpl.MODIFY_PATH;
 
     public static MPUrl getUrl(String endpoint) {
         MParticleIdentityClientImpl identityClient = getIdentityApiClient();
@@ -56,7 +57,7 @@ public class AccessUtils {
             }
             return getIdentityClient(context, configManager);
         }
-        return (MParticleIdentityClientImpl)identityClient;
+        return (MParticleIdentityClientImpl) identityClient;
     }
 
     private static MParticleIdentityClientImpl getIdentityClient(Context context, ConfigManager configManager) {
@@ -76,24 +77,41 @@ public class AccessUtils {
     }
 
     public static void setUserIdentities(Map<MParticle.IdentityType, String> userIdentities, long mpid) {
-        for (Map.Entry<MParticle.IdentityType, String> entry: userIdentities.entrySet()) {
+        for (Map.Entry<MParticle.IdentityType, String> entry : userIdentities.entrySet()) {
             MParticle.getInstance().Identity().mUserDelegate.setUserIdentity(entry.getValue(), entry.getKey(), mpid);
         }
     }
 
     public static class IdentityApiClient implements MParticleIdentityClient {
 
-        @Override public IdentityHttpResponse login(IdentityApiRequest request) throws Exception { return null; }
+        @Override
+        public IdentityHttpResponse login(IdentityApiRequest request) throws Exception {
+            return null;
+        }
 
-        @Override public IdentityHttpResponse logout(IdentityApiRequest request) throws Exception { return null; }
+        @Override
+        public IdentityHttpResponse logout(IdentityApiRequest request) throws Exception {
+            return null;
+        }
 
-        @Override public IdentityHttpResponse identify(IdentityApiRequest request) throws Exception { return null;}
+        @Override
+        public IdentityHttpResponse identify(IdentityApiRequest request) throws Exception {
+            return null;
+        }
 
-        @Override public IdentityHttpResponse modify(IdentityApiRequest request) throws Exception { return null;}
+        @Override
+        public IdentityHttpResponse modify(IdentityApiRequest request) throws Exception {
+            return null;
+        }
 
-        @Override public BaseNetworkConnection getRequestHandler() { return null; }
+        @Override
+        public BaseNetworkConnection getRequestHandler() {
+            return null;
+        }
 
-        @Override public void setRequestHandler(BaseNetworkConnection handler) {}
+        @Override
+        public void setRequestHandler(BaseNetworkConnection handler) {
+        }
     }
 
     public static void clearUserIdentities(MParticleUserImpl user) {

@@ -13,7 +13,8 @@ import org.json.JSONObject;
  */
 public class CCPAConsent extends ConsentInstance {
 
-    private CCPAConsent() { }
+    private CCPAConsent() {
+    }
 
     private CCPAConsent(Builder builder) {
         if (builder.mTimestamp == null) {

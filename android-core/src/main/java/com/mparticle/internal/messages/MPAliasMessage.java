@@ -1,14 +1,5 @@
 package com.mparticle.internal.messages;
 
-import com.mparticle.MParticle;
-import com.mparticle.identity.AliasRequest;
-import com.mparticle.internal.ConfigManager;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.UUID;
-
 import static com.mparticle.internal.Constants.MessageKey.ALIAS_REQUEST_TYPE;
 import static com.mparticle.internal.Constants.MessageKey.API_KEY;
 import static com.mparticle.internal.Constants.MessageKey.DATA;
@@ -20,6 +11,15 @@ import static com.mparticle.internal.Constants.MessageKey.REQUEST_ID;
 import static com.mparticle.internal.Constants.MessageKey.REQUEST_TYPE;
 import static com.mparticle.internal.Constants.MessageKey.SOURCE_MPID;
 import static com.mparticle.internal.Constants.MessageKey.START_TIME;
+
+import com.mparticle.MParticle;
+import com.mparticle.identity.AliasRequest;
+import com.mparticle.internal.ConfigManager;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.UUID;
 
 public class MPAliasMessage extends JSONObject {
 

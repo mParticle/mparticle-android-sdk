@@ -1,9 +1,14 @@
 package com.mparticle;
 
+import static org.junit.Assert.fail;
+
 import android.Manifest;
 import android.content.Context;
 import android.os.Environment;
 import android.os.Looper;
+
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.rule.GrantPermissionRule;
 
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
@@ -24,11 +29,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import androidx.test.platform.app.InstrumentationRegistry;
-import androidx.test.rule.GrantPermissionRule;
-
-import static org.junit.Assert.fail;
 
 @OrchestratorOnly
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -130,27 +130,29 @@ public abstract class BaseStartupTest {
         List<Long> legacyResults = new ArrayList<>();
         List<Long> currentResults = new ArrayList<>();
 
-        for (String resultString: legacyFile.split(":")) {
+        for (String resultString : legacyFile.split(":")) {
             try {
                 legacyResults.add(Long.parseLong(resultString));
-            } catch (NumberFormatException ex) { }
+            } catch (NumberFormatException ex) {
+            }
         }
 
-        for (String resultString: currentFile.split(":")) {
+        for (String resultString : currentFile.split(":")) {
             try {
                 currentResults.add(Long.parseLong(resultString));
-            } catch (NumberFormatException ex) { }
+            } catch (NumberFormatException ex) {
+            }
         }
         Assume.assumeTrue(legacyResults.size() == currentResults.size());
         Assume.assumeTrue(legacyResults.size() == 10);
 
         Long legacySum = 0L;
-        for (Long result: currentResults) {
+        for (Long result : currentResults) {
             legacySum += result;
         }
 
         Long currentSum = 0L;
-        for (Long result: currentResults) {
+        for (Long result : currentResults) {
             currentSum += result;
         }
 
@@ -182,8 +184,7 @@ public abstract class BaseStartupTest {
             byte[] bytes = new byte[inputStream.read()];
             inputStream.read(bytes);
             return new String(bytes);
-        }
-        catch (FileNotFoundException ex) {
+        } catch (FileNotFoundException ex) {
             return "";
         }
     }

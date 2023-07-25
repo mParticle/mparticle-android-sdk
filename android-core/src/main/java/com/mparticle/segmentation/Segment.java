@@ -22,10 +22,10 @@ public class Segment {
         try {
             JSONArray endpointJson = new JSONArray(endpointBlob);
             endpoints = new String[endpointJson.length()];
-            for (int i = 0; i < endpointJson.length(); i++){
+            for (int i = 0; i < endpointJson.length(); i++) {
                 endpoints[i] = endpointJson.getString(i);
             }
-        }catch (JSONException jse){
+        } catch (JSONException jse) {
 
         }
 
@@ -36,7 +36,7 @@ public class Segment {
      *
      * @return an integer ID
      */
-    public int getId(){
+    public int getId() {
         return id;
     }
 
@@ -46,7 +46,7 @@ public class Segment {
      * @return
      */
     @Nullable
-    public String getName(){
+    public String getName() {
         return name;
     }
 
@@ -56,10 +56,10 @@ public class Segment {
      * @return an array of IDs
      */
     @NonNull
-    public String[] getEndpoints(){
+    public String[] getEndpoints() {
         if (endpoints != null) {
             return endpoints;
-        }else{
+        } else {
             return new String[]{};
         }
     }
@@ -73,7 +73,7 @@ public class Segment {
     @NonNull
     public String toString() {
         return "Segment ID:  " + id + ", " +
-               "Name: " + name + ", " +
-               "Endpoints: " + ((endpoints != null && endpoints.length > 0) ? Arrays.toString(endpoints) : "None specified.");
+                "Name: " + name + ", " +
+                "Endpoints: " + ((endpoints != null && endpoints.length > 0) ? Arrays.toString(endpoints) : "None specified.");
     }
 }

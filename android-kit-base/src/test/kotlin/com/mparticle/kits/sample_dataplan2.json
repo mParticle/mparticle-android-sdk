@@ -1,722 +1,696 @@
 {
-  "version_document":{
-    "data_points":[
+  "version_document": {
+    "data_points": [
       {
-        "description":"a search event with a basic name",
-        "match":{
-          "type":"custom_event",
-          "criteria":{
-            "event_name":"Search Event",
-            "custom_event_type":"search"
+        "description": "a search event with a basic name",
+        "match": {
+          "type": "custom_event",
+          "criteria": {
+            "event_name": "Search Event",
+            "custom_event_type": "search"
           }
         },
-        "validator":{
-          "type":"json_schema",
-          "definition":{
-            "properties":{
-              "data":{
-                "additionalProperties":true,
-                "properties":{
-                  "custom_event_type":{
-                    "description":"",
-                    "type":"string"
+        "validator": {
+          "type": "json_schema",
+          "definition": {
+            "properties": {
+              "data": {
+                "additionalProperties": true,
+                "properties": {
+                  "custom_event_type": {
+                    "description": "",
+                    "type": "string"
                   },
-                  "event_name":{
-                    "description":"",
-                    "type":"string"
+                  "event_name": {
+                    "description": "",
+                    "type": "string"
                   },
-                  "custom_attributes":{
-                    "additionalProperties":true,
-                    "description":"",
-                    "properties":{
-                      "hello":{
-                        "description":"",
-                        "type":"string"
+                  "custom_attributes": {
+                    "additionalProperties": true,
+                    "description": "",
+                    "properties": {
+                      "hello": {
+                        "description": "",
+                        "type": "string"
                       }
                     },
-                    "required":[
-
+                    "required": [
                     ],
-                    "type":"object"
+                    "type": "object"
                   }
                 },
-                "required":[
+                "required": [
                   "custom_event_type",
                   "event_name"
                 ],
-                "type":"object"
+                "type": "object"
               }
             }
           }
         }
       },
       {
-        "description":"no description for this location event",
-        "match":{
-          "type":"custom_event",
-          "criteria":{
-            "event_name":"locationEvent",
-            "custom_event_type":"location"
+        "description": "no description for this location event",
+        "match": {
+          "type": "custom_event",
+          "criteria": {
+            "event_name": "locationEvent",
+            "custom_event_type": "location"
           }
         },
-        "validator":{
-          "type":"json_schema",
-          "definition":{
-            "properties":{
-              "data":{
-                "additionalProperties":true,
-                "properties":{
-                  "custom_event_type":{
-                    "description":"",
-                    "type":"string"
+        "validator": {
+          "type": "json_schema",
+          "definition": {
+            "properties": {
+              "data": {
+                "additionalProperties": true,
+                "properties": {
+                  "custom_event_type": {
+                    "description": "",
+                    "type": "string"
                   },
-                  "event_name":{
-                    "description":"",
-                    "type":"string"
+                  "event_name": {
+                    "description": "",
+                    "type": "string"
                   },
-                  "custom_attributes":{
-                    "additionalProperties":false,
-                    "description":"",
-                    "properties":{
-                      "foo":{
-                        "description":"",
-                        "enum":[
+                  "custom_attributes": {
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "foo": {
+                        "description": "",
+                        "enum": [
                           "bar",
                           "barr",
                           "bar bar"
                         ],
-                        "type":"string"
+                        "type": "string"
                       },
-                      "foo foo":{
-                        "description":"",
-                        "maximum":5,
-                        "minimum":0,
-                        "type":"number"
+                      "foo foo": {
+                        "description": "",
+                        "maximum": 5,
+                        "minimum": 0,
+                        "type": "number"
                       },
-                      "foo number":{
-                        "description":"",
-                        "enum":[
+                      "foo number": {
+                        "description": "",
+                        "enum": [
                           "10",
                           "20",
                           "30"
                         ],
-                        "type":"number"
+                        "type": "number"
                       }
                     },
-                    "required":[
-
+                    "required": [
                     ],
-                    "type":"object"
+                    "type": "object"
                   }
                 },
-                "required":[
+                "required": [
                   "custom_event_type",
                   "event_name"
                 ],
-                "type":"object"
+                "type": "object"
               }
             }
           }
         }
       },
       {
-        "description":"this commerce event has product attributes and allow additional attributes for event custom attributes and product custom attributes",
-        "match":{
-          "type":"product_action",
-          "criteria":{
-            "action":"add_to_cart"
+        "description": "this commerce event has product attributes and allow additional attributes for event custom attributes and product custom attributes",
+        "match": {
+          "type": "product_action",
+          "criteria": {
+            "action": "add_to_cart"
           }
         },
-        "validator":{
-          "type":"json_schema",
-          "definition":{
-            "properties":{
-              "data":{
-                "additionalProperties":true,
-                "properties":{
-                  "currency_code":{
-                    "description":"",
-                    "enum":[
+        "validator": {
+          "type": "json_schema",
+          "definition": {
+            "properties": {
+              "data": {
+                "additionalProperties": true,
+                "properties": {
+                  "currency_code": {
+                    "description": "",
+                    "enum": [
                       "USD",
                       "CAD",
                       "AUS"
                     ],
-                    "type":"string"
+                    "type": "string"
                   },
-                  "custom_attributes":{
-                    "additionalProperties":false,
-                    "description":"",
-                    "properties":{
-                      "attributeNumMinMax":{
-                        "description":"",
-                        "maximum":17,
-                        "minimum":9,
-                        "type":"number"
+                  "custom_attributes": {
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "attributeNumMinMax": {
+                        "description": "",
+                        "maximum": 17,
+                        "minimum": 9,
+                        "type": "number"
                       },
-                      "attributeEmail":{
-                        "description":"",
-                        "format":"email",
-                        "type":"string"
+                      "attributeEmail": {
+                        "description": "",
+                        "format": "email",
+                        "type": "string"
                       },
-                      "attributeNumEnum":{
-                        "description":"",
-                        "enum":[
+                      "attributeNumEnum": {
+                        "description": "",
+                        "enum": [
                           "2",
                           "7",
                           "9"
                         ],
-                        "type":"number"
+                        "type": "number"
                       },
-                      "attributeStringAlpha":{
-                        "description":"",
-                        "pattern":"[AZ]",
-                        "type":"string"
+                      "attributeStringAlpha": {
+                        "description": "",
+                        "pattern": "[AZ]",
+                        "type": "string"
                       },
-                      "attributeBoolean":{
-                        "description":"",
-                        "type":"boolean"
+                      "attributeBoolean": {
+                        "description": "",
+                        "type": "boolean"
                       }
                     },
-                    "required":[
-
+                    "required": [
                     ],
-                    "type":"object"
+                    "type": "object"
                   },
-                  "product_action":{
-                    "additionalProperties":false,
-                    "description":"",
-                    "properties":{
-                      "products":{
-                        "description":"",
-                        "items":{
-                          "additionalProperties":true,
-                          "description":"",
-                          "properties":{
-                            "custom_attributes":{
-                              "additionalProperties":true,
-                              "description":"",
-                              "properties":{
-                                "plannedAttr2":{
-                                  "description":"",
-                                  "type":"string"
+                  "product_action": {
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "products": {
+                        "description": "",
+                        "items": {
+                          "additionalProperties": true,
+                          "description": "",
+                          "properties": {
+                            "custom_attributes": {
+                              "additionalProperties": true,
+                              "description": "",
+                              "properties": {
+                                "plannedAttr2": {
+                                  "description": "",
+                                  "type": "string"
                                 },
-                                "plannedAttr1":{
-                                  "description":"",
-                                  "type":"string"
+                                "plannedAttr1": {
+                                  "description": "",
+                                  "type": "string"
                                 }
                               },
-                              "required":[
-
+                              "required": [
                               ],
-                              "type":"object"
+                              "type": "object"
                             }
                           },
-                          "required":[
-
+                          "required": [
                           ],
-                          "type":"object"
+                          "type": "object"
                         },
-                        "type":"array"
+                        "type": "array"
                       }
                     },
-                    "required":[
-
+                    "required": [
                     ],
-                    "type":"object"
+                    "type": "object"
                   }
                 },
-                "required":[
-
+                "required": [
                 ],
-                "type":"object"
+                "type": "object"
               }
             }
           }
         }
       },
       {
-        "description":"view.a product",
-        "match":{
-          "type":"promotion_action",
-          "criteria":{
-            "action":"view"
+        "description": "view.a product",
+        "match": {
+          "type": "promotion_action",
+          "criteria": {
+            "action": "view"
           }
         },
-        "validator":{
-          "type":"json_schema",
-          "definition":{
-            "properties":{
-              "data":{
-                "additionalProperties":true,
-                "properties":{
-                  "custom_attributes":{
-                    "additionalProperties":false,
-                    "description":"",
-                    "properties":{
-                      "not required":{
-                        "description":"",
-                        "type":"string"
+        "validator": {
+          "type": "json_schema",
+          "definition": {
+            "properties": {
+              "data": {
+                "additionalProperties": true,
+                "properties": {
+                  "custom_attributes": {
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "not required": {
+                        "description": "",
+                        "type": "string"
                       },
-                      "required":{
-                        "description":"",
-                        "type":"string"
+                      "required": {
+                        "description": "",
+                        "type": "string"
                       }
                     },
-                    "required":[
+                    "required": [
                       "required"
                     ],
-                    "type":"object"
+                    "type": "object"
                   }
                 },
-                "required":[
+                "required": [
                   "custom_attributes"
                 ],
-                "type":"object"
+                "type": "object"
               }
             }
           }
         }
       },
       {
-        "description":"",
-        "match":{
-          "type":"custom_event",
-          "criteria":{
-            "event_name":"TestEvent",
-            "custom_event_type":"navigation"
+        "description": "",
+        "match": {
+          "type": "custom_event",
+          "criteria": {
+            "event_name": "TestEvent",
+            "custom_event_type": "navigation"
           }
         },
-        "validator":{
-          "type":"json_schema",
-          "definition":{
-            "properties":{
-              "data":{
-                "additionalProperties":true,
-                "properties":{
-                  "canonical_name":{
-                    "description":"",
-                    "enum":[
+        "validator": {
+          "type": "json_schema",
+          "definition": {
+            "properties": {
+              "data": {
+                "additionalProperties": true,
+                "properties": {
+                  "canonical_name": {
+                    "description": "",
+                    "enum": [
                       "This",
                       "That"
                     ],
-                    "type":"string"
+                    "type": "string"
                   }
                 },
-                "required":[
-
+                "required": [
                 ],
-                "type":"object"
+                "type": "object"
               }
             }
           }
         }
       },
       {
-        "description":"",
-        "match":{
-          "type":"product_impression",
-          "criteria":{
-
+        "description": "",
+        "match": {
+          "type": "product_impression",
+          "criteria": {
           }
         },
-        "validator":{
-          "type":"json_schema",
-          "definition":{
-            "properties":{
-              "data":{
-                "additionalProperties":true,
-                "properties":{
-                  "custom_flags":{
-                    "additionalProperties":false,
-                    "description":"",
-                    "properties":{
-                      "NotSoCustomFlag":{
-                        "description":"",
-                        "type":"boolean"
+        "validator": {
+          "type": "json_schema",
+          "definition": {
+            "properties": {
+              "data": {
+                "additionalProperties": true,
+                "properties": {
+                  "custom_flags": {
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "NotSoCustomFlag": {
+                        "description": "",
+                        "type": "boolean"
                       }
                     },
-                    "required":[
-
+                    "required": [
                     ],
-                    "type":"object"
+                    "type": "object"
                   },
-                  "custom_attributes":{
-                    "additionalProperties":false,
-                    "description":"",
-                    "properties":{
-                      "thing1":{
-                        "description":"",
-                        "type":"string"
+                  "custom_attributes": {
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "thing1": {
+                        "description": "",
+                        "type": "string"
                       }
                     },
-                    "required":[
+                    "required": [
                       "thing1"
                     ],
-                    "type":"object"
+                    "type": "object"
                   }
                 },
-                "required":[
+                "required": [
                   "custom_attributes"
                 ],
-                "type":"object"
+                "type": "object"
               }
             }
           }
         }
       },
       {
-        "description":"",
-        "match":{
-          "type":"screen_view",
-          "criteria":{
-            "screen_name":"A New ScreenViewEvent"
+        "description": "",
+        "match": {
+          "type": "screen_view",
+          "criteria": {
+            "screen_name": "A New ScreenViewEvent"
           }
         },
-        "validator":{
-          "type":"json_schema",
-          "definition":{
-            "properties":{
-              "data":{
-                "additionalProperties":true,
-                "properties":{
-                  "activity_type":{
-                    "description":"",
-                    "pattern":"[a-z]",
-                    "type":"string"
+        "validator": {
+          "type": "json_schema",
+          "definition": {
+            "properties": {
+              "data": {
+                "additionalProperties": true,
+                "properties": {
+                  "activity_type": {
+                    "description": "",
+                    "pattern": "[a-z]",
+                    "type": "string"
                   }
                 },
-                "required":[
-
+                "required": [
                 ],
-                "type":"object"
+                "type": "object"
               }
             }
           }
         }
       },
       {
-        "description":"",
-        "match":{
-          "type":"screen_view",
-          "criteria":{
-            "screen_name":"my screeeen"
+        "description": "",
+        "match": {
+          "type": "screen_view",
+          "criteria": {
+            "screen_name": "my screeeen"
           }
         },
-        "validator":{
-          "type":"json_schema",
-          "definition":{
-            "properties":{
-              "data":{
-                "additionalProperties":true,
-                "properties":{
-                  "custom_attributes":{
-                    "additionalProperties":false,
-                    "description":"",
-                    "properties":{
-                      "test2key":{
-                        "description":"",
-                        "type":"string"
+        "validator": {
+          "type": "json_schema",
+          "definition": {
+            "properties": {
+              "data": {
+                "additionalProperties": true,
+                "properties": {
+                  "custom_attributes": {
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "test2key": {
+                        "description": "",
+                        "type": "string"
                       },
-                      "test1key":{
-                        "description":"",
-                        "type":"string"
+                      "test1key": {
+                        "description": "",
+                        "type": "string"
                       }
                     },
-                    "required":[
-
+                    "required": [
                     ],
-                    "type":"object"
+                    "type": "object"
                   }
                 },
-                "required":[
-
+                "required": [
                 ],
-                "type":"object"
+                "type": "object"
               }
             }
           }
         }
       },
       {
-        "description":"",
-        "match":{
-          "type":"custom_event",
-          "criteria":{
-            "event_name":"something something something",
-            "custom_event_type":"navigation"
+        "description": "",
+        "match": {
+          "type": "custom_event",
+          "criteria": {
+            "event_name": "something something something",
+            "custom_event_type": "navigation"
           }
         },
-        "validator":{
-          "type":"json_schema",
-          "definition":{
-            "properties":{
-              "data":{
-                "additionalProperties":true,
-                "properties":{
-                  "custom_attributes":{
-                    "additionalProperties":true,
-                    "description":"",
-                    "type":"object"
+        "validator": {
+          "type": "json_schema",
+          "definition": {
+            "properties": {
+              "data": {
+                "additionalProperties": true,
+                "properties": {
+                  "custom_attributes": {
+                    "additionalProperties": true,
+                    "description": "",
+                    "type": "object"
                   }
                 },
-                "required":[
-
+                "required": [
                 ],
-                "type":"object"
+                "type": "object"
               }
             }
           }
         }
       },
       {
-        "description":"User Attributes",
-        "match":{
-          "type":"user_attributes",
-          "criteria":{
-
+        "description": "User Attributes",
+        "match": {
+          "type": "user_attributes",
+          "criteria": {
           }
         },
-        "validator":{
-          "type":"json_schema",
-          "definition":{
-            "additionalProperties":false,
-            "properties":{
-              "my attribute":{
-                "description":"",
-                "type":"string"
+        "validator": {
+          "type": "json_schema",
+          "definition": {
+            "additionalProperties": false,
+            "properties": {
+              "my attribute": {
+                "description": "",
+                "type": "string"
               },
-              "my other attribute":{
-                "description":"",
-                "type":"string"
+              "my other attribute": {
+                "description": "",
+                "type": "string"
               },
-              "a third attribute":{
-                "description":"",
-                "type":"string"
+              "a third attribute": {
+                "description": "",
+                "type": "string"
               }
             },
-            "required":[
+            "required": [
               "my other attribute"
             ]
           }
         },
-        "active_transformation_ids":[
-
+        "active_transformation_ids": [
         ]
       },
       {
-        "description":"User Identities",
-        "match":{
-          "type":"user_identities",
-          "criteria":{
-
+        "description": "User Identities",
+        "match": {
+          "type": "user_identities",
+          "criteria": {
           }
         },
-        "validator":{
-          "type":"json_schema",
-          "definition":{
-            "additionalProperties":true,
-            "properties":{
-              "customerid":{
-                "description":"",
-                "type":"string"
+        "validator": {
+          "type": "json_schema",
+          "definition": {
+            "additionalProperties": true,
+            "properties": {
+              "customerid": {
+                "description": "",
+                "type": "string"
               },
-              "amp_id":{
-                "description":"",
-                "type":"string"
+              "amp_id": {
+                "description": "",
+                "type": "string"
               },
-              "email":{
-                "description":"",
-                "type":"string"
+              "email": {
+                "description": "",
+                "type": "string"
               }
             },
-            "required":[
+            "required": [
               "email"
             ],
-            "type":"object"
+            "type": "object"
           }
         }
       },
       {
-        "description":"",
-        "match":{
-          "type":"custom_event",
-          "criteria":{
-            "event_name":"SocialEvent",
-            "custom_event_type":"social"
+        "description": "",
+        "match": {
+          "type": "custom_event",
+          "criteria": {
+            "event_name": "SocialEvent",
+            "custom_event_type": "social"
           }
         },
-        "validator":{
-          "type":"json_schema",
-          "definition":{
-            "properties":{
-              "data":{
-                "additionalProperties":true,
-                "properties":{
-                  "custom_attributes":{
-                    "additionalProperties":false,
-                    "description":"",
-                    "type":"object"
+        "validator": {
+          "type": "json_schema",
+          "definition": {
+            "properties": {
+              "data": {
+                "additionalProperties": true,
+                "properties": {
+                  "custom_attributes": {
+                    "additionalProperties": false,
+                    "description": "",
+                    "type": "object"
                   }
                 },
-                "required":[
-
+                "required": [
                 ],
-                "type":"object"
+                "type": "object"
               }
             }
           }
         }
       },
       {
-        "description":"this commerce event has product attributes and not allowing additional product attributes for event custom attributes and product custom attributes",
-        "match":{
-          "type":"product_action",
-          "criteria":{
-            "action":"purchase"
+        "description": "this commerce event has product attributes and not allowing additional product attributes for event custom attributes and product custom attributes",
+        "match": {
+          "type": "product_action",
+          "criteria": {
+            "action": "purchase"
           }
         },
-        "validator":{
-          "type":"json_schema",
-          "definition":{
-            "properties":{
-              "data":{
-                "additionalProperties":true,
-                "properties":{
-                  "product_action":{
-                    "additionalProperties":false,
-                    "description":"",
-                    "properties":{
-                      "products":{
-                        "description":"",
-                        "items":{
-                          "additionalProperties":false,
-                          "description":"",
-                          "properties":{
-                            "custom_attributes":{
-                              "additionalProperties":false,
-                              "description":"",
-                              "properties":{
-                                "plannedAttr1":{
-                                  "description":"",
-                                  "type":"string"
+        "validator": {
+          "type": "json_schema",
+          "definition": {
+            "properties": {
+              "data": {
+                "additionalProperties": true,
+                "properties": {
+                  "product_action": {
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "products": {
+                        "description": "",
+                        "items": {
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "custom_attributes": {
+                              "additionalProperties": false,
+                              "description": "",
+                              "properties": {
+                                "plannedAttr1": {
+                                  "description": "",
+                                  "type": "string"
                                 },
-                                "plannedAttr2":{
-                                  "description":"",
-                                  "type":"string"
+                                "plannedAttr2": {
+                                  "description": "",
+                                  "type": "string"
                                 }
                               },
-                              "required":[
-
+                              "required": [
                               ],
-                              "type":"object"
+                              "type": "object"
                             },
-                            "position":{
-                              "description":"",
-                              "type":"number"
+                            "position": {
+                              "description": "",
+                              "type": "number"
                             },
-                            "name":{
-                              "description":"",
-                              "type":"string"
+                            "name": {
+                              "description": "",
+                              "type": "string"
                             }
                           },
-                          "required":[
-
+                          "required": [
                           ],
-                          "type":"object"
+                          "type": "object"
                         },
-                        "type":"array"
+                        "type": "array"
                       }
                     },
-                    "required":[
-
+                    "required": [
                     ],
-                    "type":"object"
+                    "type": "object"
                   },
-                  "custom_attributes":{
-                    "additionalProperties":false,
-                    "description":"",
-                    "properties":{
-                      "eventAttribute2":{
-                        "description":"",
-                        "type":"string"
+                  "custom_attributes": {
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "eventAttribute2": {
+                        "description": "",
+                        "type": "string"
                       },
-                      "eventAttribute1":{
-                        "description":"",
-                        "type":"string"
+                      "eventAttribute1": {
+                        "description": "",
+                        "type": "string"
                       }
                     },
-                    "required":[
-
+                    "required": [
                     ],
-                    "type":"object"
+                    "type": "object"
                   }
                 },
-                "required":[
-
+                "required": [
                 ],
-                "type":"object"
+                "type": "object"
               }
             }
           }
         }
       },
       {
-        "description":"",
-        "match":{
-          "type":"promotion_action",
-          "criteria":{
-            "action":"click"
+        "description": "",
+        "match": {
+          "type": "promotion_action",
+          "criteria": {
+            "action": "click"
           }
         },
-        "validator":{
-          "type":"json_schema",
-          "definition":{
-            "properties":{
-              "data":{
-                "additionalProperties":true,
-                "properties":{
-                  "product_action":{
-                    "additionalProperties":true,
-                    "description":"",
-                    "properties":{
-                      "products":{
-                        "description":"",
-                        "items":{
-                          "additionalProperties":false,
-                          "description":"",
-                          "type":"object"
+        "validator": {
+          "type": "json_schema",
+          "definition": {
+            "properties": {
+              "data": {
+                "additionalProperties": true,
+                "properties": {
+                  "product_action": {
+                    "additionalProperties": true,
+                    "description": "",
+                    "properties": {
+                      "products": {
+                        "description": "",
+                        "items": {
+                          "additionalProperties": false,
+                          "description": "",
+                          "type": "object"
                         },
-                        "type":"array"
+                        "type": "array"
                       }
                     },
-                    "required":[
-
+                    "required": [
                     ],
-                    "type":"object"
+                    "type": "object"
                   },
-                  "custom_attributes":{
-                    "additionalProperties":false,
-                    "description":"",
-                    "properties":{
-                      "eventAttribute2":{
-                        "description":"",
-                        "type":"string"
+                  "custom_attributes": {
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "eventAttribute2": {
+                        "description": "",
+                        "type": "string"
                       },
-                      "eventAttribute1":{
-                        "description":"",
-                        "type":"string"
+                      "eventAttribute1": {
+                        "description": "",
+                        "type": "string"
                       }
                     },
-                    "required":[
-
+                    "required": [
                     ],
-                    "type":"object"
+                    "type": "object"
                   }
                 },
-                "required":[
-
+                "required": [
                 ],
-                "type":"object"
+                "type": "object"
               }
             }
           }

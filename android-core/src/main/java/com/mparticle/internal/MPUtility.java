@@ -97,8 +97,8 @@ public class MPUtility {
 
     public static long getRemainingHeapInBytes() {
         final Runtime runtime = Runtime.getRuntime();
-        final long usedMemBytes=(runtime.totalMemory() - runtime.freeMemory());
-        final long maxHeapSizeInBytes=runtime.maxMemory();
+        final long usedMemBytes = (runtime.totalMemory() - runtime.freeMemory());
+        final long maxHeapSizeInBytes = runtime.maxMemory();
         return maxHeapSizeInBytes - usedMemBytes;
     }
 
@@ -310,7 +310,7 @@ public class MPUtility {
         return null;
     }
 
-    public static long getDiskSpace(Context context, File path){
+    public static long getDiskSpace(Context context, File path) {
         if (MPUtility.isInstantApp(context)) {
             return 0L;
         }
@@ -319,7 +319,7 @@ public class MPUtility {
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR1) {
             availableSpace = JellybeanHelper.getAvailableMemory(stat);
         }
-        if (availableSpace == 0){
+        if (availableSpace == 0) {
             availableSpace = (long) stat.getAvailableBlocks() * (long) stat.getBlockSize();
         }
         return availableSpace;
@@ -339,13 +339,12 @@ public class MPUtility {
             }
             in.close();
             return responseBuilder.toString();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return e.getMessage();
         }
     }
 
-    public static long millitime(){
+    public static long millitime() {
         return TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS);
     }
 
@@ -363,9 +362,9 @@ public class MPUtility {
         try {
             //Some Android 8 devices crash here for no clear reason.
             return TimeZone.getDefault().getDisplayName(false, 0);
+        } catch (Exception ignored) {
+        } catch (AssertionError e) {
         }
-        catch (Exception ignored){ }
-        catch (AssertionError e){ }
         return null;
     }
 
@@ -462,7 +461,7 @@ public class MPUtility {
         }
         try {
             return UUID.nameUUIDFromBytes(versionCode.getBytes()).toString();
-        }catch (AssertionError e) {
+        } catch (AssertionError e) {
             //Some devices do not have MD5 and will throw a NoSuchAlgorithmException.
             return DeviceAttributes.UNKNOWN;
         }
@@ -535,7 +534,8 @@ public class MPUtility {
                 try {
                     //noinspection MissingPermission
                     return mBluetoothAdapter.isEnabled();
-                } catch (SecurityException se) { }
+                } catch (SecurityException se) {
+                }
             }
         }
         return false;
@@ -550,7 +550,8 @@ public class MPUtility {
         try {
             Class.forName("com.google.android.gms.ads.identifier.AdvertisingIdClient");
             return true;
-        } catch (ClassNotFoundException ignored) { }
+        } catch (ClassNotFoundException ignored) {
+        }
         return false;
     }
 
@@ -558,7 +559,8 @@ public class MPUtility {
         try {
             Class.forName("android.support.v4.app.FragmentActivity");
             return true;
-        } catch (ClassNotFoundException ignored) { }
+        } catch (ClassNotFoundException ignored) {
+        }
         return false;
     }
 
@@ -574,8 +576,8 @@ public class MPUtility {
         try {
             Class.forName("com.google.firebase.messaging.FirebaseMessaging");
             return true;
+        } catch (ClassNotFoundException ignored) {
         }
-        catch (ClassNotFoundException ignored) { }
         return false;
     }
 
@@ -583,8 +585,8 @@ public class MPUtility {
         try {
             Class.forName("com.google.firebase.iid.FirebaseInstanceId");
             return true;
+        } catch (ClassNotFoundException ignored) {
         }
-        catch (ClassNotFoundException ignored) { }
         return false;
     }
 
@@ -592,7 +594,8 @@ public class MPUtility {
         try {
             Class.forName("com.android.installreferrer.api.InstallReferrerStateListener");
             return true;
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return false;
     }
 
@@ -643,7 +646,7 @@ public class MPUtility {
                 }
             }
             return parameters;
-        }else{
+        } else {
             return null;
         }
     }
@@ -659,7 +662,7 @@ public class MPUtility {
                 String key = entry.getKey();
                 if (value instanceof List) {
                     JSONArray array = new JSONArray();
-                    for (Object v: (List)value) {
+                    for (Object v : (List) value) {
                         array.put(v);
                     }
                     attrs.put(key, array);
@@ -668,16 +671,15 @@ public class MPUtility {
                 } else {
                     attrs.put(key, value);
                 }
-            }
-            catch (JSONException ignore) {
+            } catch (JSONException ignore) {
 
             }
         }
         return attrs;
     }
 
-    public static boolean isAppDebuggable(Context context){
-        return ( 0 != ( context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE ) );
+    public static boolean isAppDebuggable(Context context) {
+        return (0 != (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
     }
 
     public static boolean isDevEnv() {
@@ -704,6 +706,7 @@ public class MPUtility {
         }
         return checkedAttributes;
     }
+
     public static Boolean setCheckedAttribute(JSONObject attributes, String key, Object value, boolean increment, boolean userAttribute) {
         return setCheckedAttribute(attributes, key, value, false, increment, userAttribute);
     }
@@ -718,37 +721,37 @@ public class MPUtility {
             }
 
             if (Constants.LIMIT_ATTR_COUNT == attributes.length() && !attributes.has(key)) {
-                Logger.error( "Attribute count exceeds limit. Discarding attribute: " + key);
+                Logger.error("Attribute count exceeds limit. Discarding attribute: " + key);
                 return false;
             }
             if (value != null) {
                 String stringValue = value.toString();
-                if (stringValue.length() > Constants.LIMIT_ATTR_VALUE){
-                    Logger.error( "Attribute value length exceeds limit. Discarding attribute: " + key);
+                if (stringValue.length() > Constants.LIMIT_ATTR_VALUE) {
+                    Logger.error("Attribute value length exceeds limit. Discarding attribute: " + key);
                     return false;
                 }
             }
             if (key.length() > Constants.LIMIT_ATTR_KEY) {
-                Logger.error( "Attribute name length exceeds limit. Discarding attribute: " + key);
+                Logger.error("Attribute name length exceeds limit. Discarding attribute: " + key);
                 return false;
             }
             if (value == null) {
                 value = JSONObject.NULL;
             }
-            if (increment){
+            if (increment) {
                 String oldValue = attributes.optString(key, "0");
                 int oldInt = Integer.parseInt(oldValue);
-                value = Integer.toString((Integer)value + oldInt);
+                value = Integer.toString((Integer) value + oldInt);
             }
             attributes.put(key, value);
         } catch (JSONException e) {
-            Logger.error( "JSON error processing attributes. Discarding attribute: " + key);
+            Logger.error("JSON error processing attributes. Discarding attribute: " + key);
             return false;
-        } catch (NumberFormatException nfe){
-            Logger.error( "Attempted to increment a key that could not be parsed as an integer: " + key);
+        } catch (NumberFormatException nfe) {
+            Logger.error("Attempted to increment a key that could not be parsed as an integer: " + key);
             return false;
-        } catch (Exception e){
-            Logger.error( "Failed to add attribute: " + e.getMessage());
+        } catch (Exception e) {
+            Logger.error("Failed to add attribute: " + e.getMessage());
             return false;
         }
         return true;
@@ -777,13 +780,11 @@ public class MPUtility {
                     return InstantApps.isInstantApp(context);
                 }
             }.run();
-        }
-        catch (ClassNotFoundException ignored) {
+        } catch (ClassNotFoundException ignored) {
             try {
                 Class.forName("com.google.android.instantapps.supervisor.InstantAppsRuntime");
                 return true;
-            }
-            catch (ClassNotFoundException a) {
+            } catch (ClassNotFoundException a) {
                 return false;
             }
         }
@@ -824,11 +825,11 @@ public class MPUtility {
     }
 
     public static Number addNumbers(Number number1, Number number2) {
-        if(number1 instanceof Double || number2 instanceof Double) {
+        if (number1 instanceof Double || number2 instanceof Double) {
             return number1.doubleValue() + number2.doubleValue();
-        } else if(number1 instanceof Float || number2 instanceof Float) {
+        } else if (number1 instanceof Float || number2 instanceof Float) {
             return number1.floatValue() + number2.floatValue();
-        } else if(number1 instanceof Long || number2 instanceof Long) {
+        } else if (number1 instanceof Long || number2 instanceof Long) {
             return number1.longValue() + number2.longValue();
         } else {
             return number1.intValue() + number2.intValue();
@@ -839,14 +840,15 @@ public class MPUtility {
         if (stringValue == null) {
             return stringValue;
         }
-        for(Character c: stringValue.toCharArray()) {
+        for (Character c : stringValue.toCharArray()) {
             if (!Character.isDigit(c) && c != '.' && c != '-') {
                 return stringValue;
             }
         }
         try {
             return NumberFormat.getInstance().parse(stringValue);
-        } catch (ParseException e) { }
+        } catch (ParseException e) {
+        }
         return stringValue;
     }
 

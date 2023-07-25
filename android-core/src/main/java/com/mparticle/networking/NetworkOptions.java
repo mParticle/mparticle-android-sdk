@@ -1,5 +1,11 @@
 package com.mparticle.networking;
 
+import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint;
+import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.ALIAS;
+import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.CONFIG;
+import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.EVENTS;
+import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.IDENTITY;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -15,18 +21,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint;
-import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.ALIAS;
-import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.CONFIG;
-import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.EVENTS;
-import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.IDENTITY;
-
 public class NetworkOptions {
 
     Map<Endpoint, DomainMapping> domainMappings = new HashMap<Endpoint, DomainMapping>();
     boolean pinningDisabledInDevelopment = false;
 
-    private NetworkOptions() {}
+    private NetworkOptions() {
+    }
 
     private NetworkOptions(Builder builder) {
         if (builder.domainMappings != null) {
@@ -109,11 +110,10 @@ public class NetworkOptions {
             JSONArray domainMappingsJson = new JSONArray();
             networkOptions.put("disableDevPinning", pinningDisabledInDevelopment);
             networkOptions.put("domainMappings", domainMappingsJson);
-            for (DomainMapping domainMapping: domainMappings.values()) {
+            for (DomainMapping domainMapping : domainMappings.values()) {
                 domainMappingsJson.put(domainMapping.toString());
             }
-        }
-        catch (JSONException jse) {
+        } catch (JSONException jse) {
             Logger.error(jse);
         }
         return networkOptions;
@@ -151,7 +151,7 @@ public class NetworkOptions {
                 domainMappings = new HashMap<Endpoint, DomainMapping>();
                 return this;
             }
-            for (DomainMapping domainMapping: domainMappingsList) {
+            for (DomainMapping domainMapping : domainMappingsList) {
                 addDomainMapping(domainMapping);
             }
             return this;

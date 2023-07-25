@@ -3,7 +3,6 @@ package com.mparticle.messaging;
 import android.content.Context;
 import android.content.Intent;
 
-import com.mparticle.MPService;
 import com.mparticle.MPServiceUtil;
 
 public class MPMessagingRouter {

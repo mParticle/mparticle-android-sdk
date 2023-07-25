@@ -17,10 +17,7 @@ import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.MParticleUser;
-import com.mparticle.internal.SideloadedKit;
 
-import org.jetbrains.annotations.NotNull;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
@@ -81,7 +78,7 @@ public abstract class KitIntegration {
     }
 
     public JSONObject getJsonConfig() {
-        if(mKitConfiguration!=null){
+        if (mKitConfiguration != null) {
             return mKitConfiguration.convertToJsonObject();
         }
         return null;
@@ -413,7 +410,7 @@ public abstract class KitIntegration {
 
         /**
          * Indicate to the mParticle Kit framework if this AttributeListener supports attribute-values as lists.
-         * 
+         *
          * If an AttributeListener returns false, the setUserAttributeList method will never be called. Instead, setUserAttribute
          * will be called with the attribute-value lists combined as a csv.
          *

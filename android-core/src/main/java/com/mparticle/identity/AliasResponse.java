@@ -27,6 +27,7 @@ public class AliasResponse {
 
     /**
      * The HTTP response code for the Alias network request
+     *
      * @return
      */
     public int getResponseCode() {
@@ -35,6 +36,7 @@ public class AliasResponse {
 
     /**
      * The internal ID for the Alias request. Each {@link AliasRequest} has a unique, consistent request id
+     *
      * @return
      */
     @NonNull
@@ -45,6 +47,7 @@ public class AliasResponse {
     /**
      * A copy of the {@link AliasRequest} object passed into {@link IdentityApi#aliasUsers(AliasRequest)}
      * that this {@link AliasResponse} is describing
+     *
      * @return
      */
     @NonNull
@@ -54,6 +57,7 @@ public class AliasResponse {
 
     /**
      * Whether or not the request was successful
+     *
      * @return
      */
     public boolean isSuccessful() {
@@ -65,6 +69,7 @@ public class AliasResponse {
      * indicate that any action needs to be taken. Requests that result in recoverable errors, such as
      * rate limiting server error will be retried, while authentication errors, malformed requests and
      * others will not be retried
+     *
      * @return
      */
     public boolean willRetry() {
@@ -73,6 +78,7 @@ public class AliasResponse {
 
     /**
      * The error response message returned by the server, if there was one
+     *
      * @return
      */
     @Nullable

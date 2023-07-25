@@ -57,7 +57,18 @@ class DeviceAttributesTest {
     fun testAppInfoLaunchCount() {
         val context: Context = MockContext()
         // Clear out the stored data for the current user, so we don't get any launches from previous tests.
-        ConfigManager(context, null, null, null, null, null, null, null, null, null).deleteUserStorage(
+        ConfigManager(
+            context,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        ).deleteUserStorage(
             context,
             ConfigManager.getMpid(context)
         )

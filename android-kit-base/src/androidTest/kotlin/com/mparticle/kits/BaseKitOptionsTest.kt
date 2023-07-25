@@ -68,11 +68,12 @@ open class BaseKitOptionsTest : BaseCleanInstallEachTest() {
     protected fun waitForKitToStart(kitId: Int) {
         val latch = MPLatch(1)
         // wait for kit to start/reload
-        com.mparticle.internal.AccessUtils.getKitManager().addKitsLoadedListener { kits, previousKits, kitConfigs ->
-            if (kits.containsKey(kitId)) {
-                latch.countDown()
+        com.mparticle.internal.AccessUtils.getKitManager()
+            .addKitsLoadedListener { kits, previousKits, kitConfigs ->
+                if (kits.containsKey(kitId)) {
+                    latch.countDown()
+                }
             }
-        }
         // check if the kit has already been started and short-circut if it has
         if (MParticle.getInstance()?.isKitActive(kitId) == true) {
             latch.countDown()

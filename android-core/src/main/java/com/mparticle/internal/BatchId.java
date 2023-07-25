@@ -47,7 +47,7 @@ public class BatchId {
         if (!(obj instanceof BatchId)) {
             return false;
         }
-        BatchId batchId = (BatchId)obj;
+        BatchId batchId = (BatchId) obj;
         for (int i = 0; i < fields().length; i++) {
             if (!MPUtility.isEqual(fields()[i], batchId.fields()[i])) {
                 return false;

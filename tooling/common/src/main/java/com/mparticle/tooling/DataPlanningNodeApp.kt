@@ -22,28 +22,63 @@ class DataPlanningNodeApp(val config: Config) {
         }
     }
 
-    fun validate(dataplan: String, message: String, version: String?): NodeAppResult<List<ValidationResult>> {
+    fun validate(
+        dataplan: String,
+        message: String,
+        version: String?
+    ): NodeAppResult<List<ValidationResult>> {
         try {
             val mpCommand = config.internalConfig.mpPath ?: "mp"
             val args = if (version == null) {
-                mutableListOf(mpCommand, "planning:events:validate", "--dataPlanVersion", dataplan, "--translateEvents", "--event", message)
+                mutableListOf(
+                    mpCommand,
+                    "planning:events:validate",
+                    "--dataPlanVersion",
+                    dataplan,
+                    "--translateEvents",
+                    "--event",
+                    message
+                )
             } else {
-                mutableListOf(mpCommand, "planning:events:validate", "--dataPlan", dataplan, "--translateEvents", "--event", message, "--versionNumber", version)
+                mutableListOf(
+                    mpCommand,
+                    "planning:events:validate",
+                    "--dataPlan",
+                    dataplan,
+                    "--translateEvents",
+                    "--event",
+                    message,
+                    "--versionNumber",
+                    version
+                )
             }
-            val results = args.toTypedArray().executeCLI(path, workingDirectory = config.credentialsFilePath ?: ".")
+            val results = args.toTypedArray()
+                .executeCLI(path, workingDirectory = config.credentialsFilePath ?: ".")
             val error = DataPlanError.values().firstOrNull { results.contains(it.message) }
             if (error != null) {
                 return NodeAppResult(listOf(ValidationResult(error = error, arguments = args)))
             }
             return NodeAppResult(response = ValidationResult.from(results, arguments = args))
         } catch (ioe: Exception) {
-            return NodeAppResult(ValidationResult.from("", listOf("${ioe.message}\n${ioe.stackTrace.joinToString("\n")}")))
+            return NodeAppResult(
+                ValidationResult.from(
+                    "",
+                    listOf("${ioe.message}\n${ioe.stackTrace.joinToString("\n")}")
+                )
+            )
         }
     }
 
     fun fetchDataPlan(accountId: String, planId: String, version: String?): NodeAppResult<String?> {
         try {
-            val arguments = mutableListOf("mp", "data-plan:fetch", "--accountId", accountId, "--dataPlanId", planId)
+            val arguments = mutableListOf(
+                "mp",
+                "data-plan:fetch",
+                "--accountId",
+                accountId,
+                "--dataPlanId",
+                planId
+            )
             if (version != null) {
                 arguments.add("--version")
                 arguments.add(version)
