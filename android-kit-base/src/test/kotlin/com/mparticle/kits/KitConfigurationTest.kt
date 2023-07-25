@@ -11,6 +11,7 @@ import com.mparticle.consent.ConsentState
 import com.mparticle.consent.GDPRConsent
 import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.Constants
+import com.mparticle.internal.HashingUtility
 import com.mparticle.mock.MockKitConfiguration
 import org.json.JSONArray
 import org.json.JSONException
@@ -441,7 +442,7 @@ class KitConfigurationTest {
         consentForwardingRule.put("v", ruleArray)
         val rule1 = JSONObject()
         ruleArray.put(rule1)
-        rule1.put("h", KitUtils.hashForFiltering("1" + "foo purpose"))
+        rule1.put("h", HashingUtility.hashGDPRContentPurposeKey("1" + "foo purpose"))
         rule1.put("c", false)
         val configuration = MockKitConfiguration.createKitConfiguration(
             JSONObject("{\"id\":56,\"crvf\":{\"i\": true, \"v\":[{\"c\":true, \"h\":123}, {\"c\":false, \"h\":456}]}}")
@@ -460,15 +461,15 @@ class KitConfigurationTest {
         consentForwardingRule.put("v", ruleArray)
         val rule1 = JSONObject()
         ruleArray.put(rule1)
-        rule1.put("h", KitUtils.hashForFiltering("1" + "foo purpose 1"))
+        rule1.put("h", HashingUtility.hashGDPRContentPurposeKey("1" + "foo purpose 1"))
         rule1.put("c", false)
         val rule2 = JSONObject()
         ruleArray.put(rule2)
-        rule2.put("h", KitUtils.hashForFiltering("1" + "foo purpose 2"))
+        rule2.put("h", HashingUtility.hashGDPRContentPurposeKey("1" + "foo purpose 2"))
         rule2.put("c", false)
         val rule3 = JSONObject()
         ruleArray.put(rule3)
-        rule3.put("h", KitUtils.hashForFiltering("1" + "foo purpose 3"))
+        rule3.put("h", HashingUtility.hashGDPRContentPurposeKey("1" + "foo purpose 3"))
         rule3.put("c", false)
         val configuration = MockKitConfiguration.createKitConfiguration(jsonConfiguration)
         Assert.assertTrue(
@@ -562,7 +563,7 @@ class KitConfigurationTest {
         consentForwardingRule.put("v", ruleArray)
         val rule1 = JSONObject()
         ruleArray.put(rule1)
-        rule1.put("h", KitUtils.hashForFiltering("1" + "foo purpose"))
+        rule1.put("h", HashingUtility.hashGDPRContentPurposeKey("1" + "foo purpose"))
         rule1.put("c", false)
         val configuration = MockKitConfiguration.createKitConfiguration(jsonConfiguration)
         Assert.assertTrue(
@@ -620,7 +621,7 @@ class KitConfigurationTest {
         consentForwardingRule.put("v", ruleArray)
         val rule1 = JSONObject()
         ruleArray.put(rule1)
-        rule1.put("h", KitUtils.hashForFiltering("2" + Constants.MessageKey.CCPA_CONSENT_KEY))
+        rule1.put("h", HashingUtility.hashCCPAContentPurposeKey())
         rule1.put("c", false)
         val configuration = MockKitConfiguration.createKitConfiguration(jsonConfiguration)
         Assert.assertTrue(
