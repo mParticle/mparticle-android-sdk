@@ -116,13 +116,13 @@ class DataplanDetector : CallScanner() {
         val dp = dataplan
         if (dp == null) {
             val message = "Data Plan missing" +
-                    if (config?.dataPlanVersionFile != null) {
-                        config?.dataPlanVersionFile?.let {
-                            ", $it not found"
-                        }
-                    } else {
-                        ""
+                if (config?.dataPlanVersionFile != null) {
+                    config?.dataPlanVersionFile?.let {
+                        ", $it not found"
                     }
+                } else {
+                    ""
+                }
             context.report(
                 NO_DATA_PLAN,
                 reportingNode,
@@ -202,8 +202,10 @@ class DataplanDetector : CallScanner() {
                 }
             }
             if (config?.resultsFile?.isEmpty() == false) {
-                File(config!!.resultsFile!!).appendText(result?.response?.joinToString { it.toString() }
-                    ?: "")
+                File(config!!.resultsFile!!).appendText(
+                    result?.response?.joinToString { it.toString() }
+                        ?: ""
+                )
             }
         }
     }

@@ -333,7 +333,8 @@ class DataplanFilterImplTest {
         return when (datapoint.type) {
             CUSTOM_EVENT_KEY -> MPEvent.Builder(
                 datapoint.name!!,
-                MParticle.EventType.values().first { it.getEventsApiName() == datapoint.eventType })
+                MParticle.EventType.values().first { it.getEventsApiName() == datapoint.eventType }
+            )
                 .build()
             SCREEN_EVENT_KEY -> ScreenEventBuilder(datapoint.name!!).build()
                 .also { assertTrue(it.isScreenEvent) }
@@ -390,10 +391,12 @@ class DataplanFilterImplTest {
     }
 
     fun randomEventType(): MParticle.EventType {
-        return MParticle.EventType.values()[Random.Default.nextInt(
-            0,
-            MParticle.EventType.values().size - 1
-        )]
+        return MParticle.EventType.values()[
+            Random.Default.nextInt(
+                0,
+                MParticle.EventType.values().size - 1
+            )
+        ]
     }
 
     fun randomProductAction(): String {

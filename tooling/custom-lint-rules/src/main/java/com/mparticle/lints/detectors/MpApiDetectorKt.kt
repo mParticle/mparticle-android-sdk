@@ -203,7 +203,7 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
                                 }
                                 val index = text.indexOf(name ?: "")
                                 if (index > 0 && " ${
-                                        text.substring(
+                                    text.substring(
                                             0,
                                             index
                                         )
@@ -332,22 +332,22 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
                     return true
                 }
                 return compareTo.file.getAbsolutePath() == location.file.getAbsolutePath() &&
-                        compareLocation(compareTo.start, location.start) &&
-                        compareLocation(compareTo.end, location.end)
+                    compareLocation(compareTo.start, location.start) &&
+                    compareLocation(compareTo.end, location.end)
             }
             return false
         }
 
         fun compareLocation(l1: Position?, l2: Position?): Boolean {
             return l1?.column == l2?.column &&
-                    l1?.line == l2?.line &&
-                    l1?.offset == l2?.offset
+                l1?.line == l2?.line &&
+                l1?.offset == l2?.offset
         }
 
         override fun toString(): String {
             return location.file.getAbsolutePath() + "\n" +
-                    location.start?.offset + " " + location.start?.line + " " + location.start?.column +
-                    location.end?.offset + " " + location.end?.line + " " + location.end?.column
+                location.start?.offset + " " + location.start?.line + " " + location.start?.column +
+                location.end?.offset + " " + location.end?.line + " " + location.end?.column
         }
 
         override fun compareTo(other: LocationWrapper): Int {

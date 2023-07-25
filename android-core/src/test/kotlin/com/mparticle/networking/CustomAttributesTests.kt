@@ -76,7 +76,8 @@ class CustomAttributesTests {
             "list" to mapOf(
                 "foo" to "bar",
                 "this" to "that"
-            ).let { JSONObject(it.toMap()) })
+            ).let { JSONObject(it.toMap()) }
+        )
         val serialized = "{\"foo\":\"bar\",\"this\":\"that\"}"
         MPEvent.Builder("Test Event")
             .customAttributes(customAttributesMap)

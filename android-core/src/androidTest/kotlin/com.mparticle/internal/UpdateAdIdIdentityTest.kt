@@ -43,10 +43,10 @@ class UpdateAdIdIdentityTest : BaseCleanInstallEachTest() {
         mServer.Requests().modify.count { request ->
             request.asIdentityRequest().body.identity_changes.let {
                 it.size == 1 &&
-                        it[0].let { identityChange ->
-                            identityChange["new_value"] == "newAdId" &&
-                                    identityChange["old_value"] == "oldAdId"
-                        }
+                    it[0].let { identityChange ->
+                        identityChange["new_value"] == "newAdId" &&
+                            identityChange["old_value"] == "oldAdId"
+                    }
             }
         }.let {
             assertEquals(1, it)

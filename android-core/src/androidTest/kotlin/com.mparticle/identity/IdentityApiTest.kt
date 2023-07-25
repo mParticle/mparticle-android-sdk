@@ -40,7 +40,7 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
      * - IdentityStateListener
      * - MParticleTask<IdentityApiResult>
      * - MParticle.getInstance().Identity().getCurrentUser()
-    </IdentityApiResult> */
+     </IdentityApiResult> */
     @Test
     @Throws(JSONException::class, InterruptedException::class)
     fun testUserChangeCallbackAccuracy() {

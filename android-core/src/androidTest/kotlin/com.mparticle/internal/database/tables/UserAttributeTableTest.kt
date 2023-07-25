@@ -22,11 +22,11 @@ class UserAttributeTableTest : BaseTableTest() {
     companion object {
         const val old_CREATE_USER_ATTRIBUTES_DDL =
             "CREATE TABLE IF NOT EXISTS " + UserAttributesTable.UserAttributesTableColumns.TABLE_NAME + " (" + BaseColumns._ID +
-                    " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    UserAttributesTable.UserAttributesTableColumns.ATTRIBUTE_KEY + " COLLATE NOCASE NOT NULL, " +
-                    UserAttributesTable.UserAttributesTableColumns.ATTRIBUTE_VALUE + " TEXT, " +
-                    UserAttributesTable.UserAttributesTableColumns.IS_LIST + " INTEGER NOT NULL, " +
-                    UserAttributesTable.UserAttributesTableColumns.CREATED_AT + " INTEGER NOT NULL " +
-                    ");"
+                " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                UserAttributesTable.UserAttributesTableColumns.ATTRIBUTE_KEY + " COLLATE NOCASE NOT NULL, " +
+                UserAttributesTable.UserAttributesTableColumns.ATTRIBUTE_VALUE + " TEXT, " +
+                UserAttributesTable.UserAttributesTableColumns.IS_LIST + " INTEGER NOT NULL, " +
+                UserAttributesTable.UserAttributesTableColumns.CREATED_AT + " INTEGER NOT NULL " +
+                ");"
     }
 }

@@ -27,13 +27,13 @@ internal class DataplanFilterImpl constructor(
 ) : DataplanFilter {
 
     constructor(dataplanOptions: MParticleOptions.DataplanOptions) :
-            this(
-                extractDataPoints(dataplanOptions.dataplan),
-                dataplanOptions.isBlockEvents,
-                dataplanOptions.isBlockEventAttributes,
-                dataplanOptions.isBlockUserAttributes,
-                dataplanOptions.isBlockUserIdentities
-            )
+        this(
+            extractDataPoints(dataplanOptions.dataplan),
+            dataplanOptions.isBlockEvents,
+            dataplanOptions.isBlockEventAttributes,
+            dataplanOptions.isBlockUserAttributes,
+            dataplanOptions.isBlockUserIdentities
+        )
 
     init {
         Logger.debug(
@@ -45,9 +45,9 @@ Data Plan parsed for Kit Filtering:
     blockUserAttributes=$blockUserAttributes
     blockUserIdentities=$blockUserIdentities
         ${
-                dataPoints.entries.joinToString("\n") { (key, value) ->
-                    "$key\n\t${value?.joinToString("\n\t") { it }}"
-                }
+            dataPoints.entries.joinToString("\n") { (key, value) ->
+                "$key\n\t${value?.joinToString("\n\t") { it }}"
+            }
             }
         """
         )

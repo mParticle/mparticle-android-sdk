@@ -191,14 +191,14 @@ class UpgradeVersionTest : BaseTableTest() {
     companion object {
         const val CREATE_GCM_MSG_DDL =
             "CREATE TABLE IF NOT EXISTS " + FcmMessageTableColumns.TABLE_NAME + " (" + FcmMessageTableColumns.CONTENT_ID +
-                    " INTEGER PRIMARY KEY, " +
-                    FcmMessageTableColumns.PAYLOAD + " TEXT NOT NULL, " +
-                    FcmMessageTableColumns.APPSTATE + " TEXT NOT NULL, " +
-                    FcmMessageTableColumns.CREATED_AT + " INTEGER NOT NULL, " +
-                    FcmMessageTableColumns.EXPIRATION + " INTEGER NOT NULL, " +
-                    FcmMessageTableColumns.BEHAVIOR + " INTEGER NOT NULL," +
-                    FcmMessageTableColumns.CAMPAIGN_ID + " TEXT NOT NULL, " +
-                    FcmMessageTableColumns.DISPLAYED_AT + " INTEGER NOT NULL " +
-                    ");"
+                " INTEGER PRIMARY KEY, " +
+                FcmMessageTableColumns.PAYLOAD + " TEXT NOT NULL, " +
+                FcmMessageTableColumns.APPSTATE + " TEXT NOT NULL, " +
+                FcmMessageTableColumns.CREATED_AT + " INTEGER NOT NULL, " +
+                FcmMessageTableColumns.EXPIRATION + " INTEGER NOT NULL, " +
+                FcmMessageTableColumns.BEHAVIOR + " INTEGER NOT NULL," +
+                FcmMessageTableColumns.CAMPAIGN_ID + " TEXT NOT NULL, " +
+                FcmMessageTableColumns.DISPLAYED_AT + " INTEGER NOT NULL " +
+                ");"
     }
 }

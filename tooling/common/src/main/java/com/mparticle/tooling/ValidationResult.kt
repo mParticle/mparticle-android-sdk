@@ -49,23 +49,24 @@ data class ValidationResult(
                             "ValidationErrors",
                             data?.validationErrors?.foldRight(JSONArray()) { item, arr ->
                                 arr.put(item)
-                            })
+                            }
+                        )
                 )
                 .put("Event Type", eventType)
             return """
         Arguments:
         ${
-                arguments.indexOfFirst { it.startsWith("--dataPlan") }.let {
-                    arguments.toMutableList().apply {
-                        if (it >= 0) {
-                            val dataplan = removeAt(it + 1)
-                            add(
-                                it + 1,
-                                "${dataplan.substring(0, Math.min(dataplan.length, 20))}..."
-                            )
-                        }
+            arguments.indexOfFirst { it.startsWith("--dataPlan") }.let {
+                arguments.toMutableList().apply {
+                    if (it >= 0) {
+                        val dataplan = removeAt(it + 1)
+                        add(
+                            it + 1,
+                            "${dataplan.substring(0, Math.min(dataplan.length, 20))}..."
+                        )
                     }
-                }.joinToString(" ")
+                }
+            }.joinToString(" ")
             }
         
         Response:

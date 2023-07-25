@@ -22,12 +22,12 @@ class BreadcrumbTableTest : BaseTableTest() {
     companion object {
         const val old_CREATE_BREADCRUMBS_DDL =
             "CREATE TABLE IF NOT EXISTS " + BreadcrumbTable.BreadcrumbTableColumns.TABLE_NAME + " (" + BaseColumns._ID +
-                    " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    BreadcrumbTable.BreadcrumbTableColumns.SESSION_ID + " STRING NOT NULL, " +
-                    BreadcrumbTable.BreadcrumbTableColumns.API_KEY + " STRING NOT NULL, " +
-                    BreadcrumbTable.BreadcrumbTableColumns.MESSAGE + " TEXT, " +
-                    BreadcrumbTable.BreadcrumbTableColumns.CREATED_AT + " INTEGER NOT NULL, " +
-                    BreadcrumbTable.BreadcrumbTableColumns.CF_UUID + " TEXT" +
-                    ");"
+                " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                BreadcrumbTable.BreadcrumbTableColumns.SESSION_ID + " STRING NOT NULL, " +
+                BreadcrumbTable.BreadcrumbTableColumns.API_KEY + " STRING NOT NULL, " +
+                BreadcrumbTable.BreadcrumbTableColumns.MESSAGE + " TEXT, " +
+                BreadcrumbTable.BreadcrumbTableColumns.CREATED_AT + " INTEGER NOT NULL, " +
+                BreadcrumbTable.BreadcrumbTableColumns.CF_UUID + " TEXT" +
+                ");"
     }
 }

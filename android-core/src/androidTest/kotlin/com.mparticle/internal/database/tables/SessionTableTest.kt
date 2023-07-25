@@ -22,16 +22,16 @@ class SessionTableTest : BaseTableTest() {
     companion object {
         const val old_CREATE_SESSION_DDL =
             "CREATE TABLE IF NOT EXISTS " + SessionTable.SessionTableColumns.TABLE_NAME + " (" + BaseColumns._ID +
-                    " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    SessionTable.SessionTableColumns.SESSION_ID + " STRING NOT NULL, " +
-                    SessionTable.SessionTableColumns.API_KEY + " STRING NOT NULL, " +
-                    SessionTable.SessionTableColumns.START_TIME + " INTEGER NOT NULL," +
-                    SessionTable.SessionTableColumns.END_TIME + " INTEGER NOT NULL," +
-                    SessionTable.SessionTableColumns.SESSION_FOREGROUND_LENGTH + " INTEGER NOT NULL," +
-                    SessionTable.SessionTableColumns.ATTRIBUTES + " TEXT, " +
-                    SessionTable.SessionTableColumns.STATUS + " TEXT," +
-                    SessionTable.SessionTableColumns.APP_INFO + " TEXT, " +
-                    SessionTable.SessionTableColumns.DEVICE_INFO + " TEXT" +
-                    ");"
+                " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                SessionTable.SessionTableColumns.SESSION_ID + " STRING NOT NULL, " +
+                SessionTable.SessionTableColumns.API_KEY + " STRING NOT NULL, " +
+                SessionTable.SessionTableColumns.START_TIME + " INTEGER NOT NULL," +
+                SessionTable.SessionTableColumns.END_TIME + " INTEGER NOT NULL," +
+                SessionTable.SessionTableColumns.SESSION_FOREGROUND_LENGTH + " INTEGER NOT NULL," +
+                SessionTable.SessionTableColumns.ATTRIBUTES + " TEXT, " +
+                SessionTable.SessionTableColumns.STATUS + " TEXT," +
+                SessionTable.SessionTableColumns.APP_INFO + " TEXT, " +
+                SessionTable.SessionTableColumns.DEVICE_INFO + " TEXT" +
+                ");"
     }
 }
