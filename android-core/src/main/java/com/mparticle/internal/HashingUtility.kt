@@ -4,6 +4,13 @@ import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.internal.messages.BaseMPMessage
 
+/**
+ * Simple bit-shifting hash for use with filtering. mParticle's backend uses this same hash
+ * to compute hashes of events and their attributes, and will include those hashes with
+ * configuration settings for kits.
+ *
+ * @return return int hash
+ */
 object HashingUtility {
 
     fun hashEvent(event: MPEvent): Int =
@@ -54,8 +61,6 @@ object HashingUtility {
     fun hashProductField(eventType: Int, productKey: String) =
         MPUtility.mpHash("$eventType$productKey")
 
-    fun hashValue(hashPrefix : String, value : String) : Int =
+    fun hashValue(hashPrefix: String, value: String): Int =
         MPUtility.mpHash("$hashPrefix$value")
-
-
 }

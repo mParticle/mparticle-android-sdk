@@ -9,7 +9,6 @@ import com.mparticle.commerce.Promotion
 import com.mparticle.commerce.TransactionAttributes
 import com.mparticle.internal.HashingUtility
 import com.mparticle.kits.CommerceEventUtils
-import com.mparticle.kits.KitUtils
 import com.mparticle.kits.mappings.EventWrapper.CommerceEventWrapper
 import com.mparticle.kits.mappings.EventWrapper.MPEventWrapper
 import com.mparticle.mock.MockKitConfiguration
@@ -313,7 +312,7 @@ class CustomMappingTest {
         // make sure the attribute hashes work as intended
         val hashes = wrapper.getAttributeHashes()
         val key =
-            hashes[HashingUtility.hashFilterEventAttributes(event.eventType.ordinal , event.eventName , "key 1")]
+            hashes[HashingUtility.hashFilterEventAttributes(event.eventType.ordinal, event.eventName, "key 1")]
         Assert.assertEquals(info[key], "value 1")
 
         // make sure event hash is generated correctly
@@ -340,12 +339,12 @@ class CustomMappingTest {
         // make sure the attribute hashes work as intended
         val hashes = wrapper.getAttributeHashes()
         // event type be 0 for screen views
-        val key = hashes[HashingUtility.hashFilterScreenName(0.toString() + event.eventName + "key 1")]
+        val key = hashes[HashingUtility.hashFilterScreenName(event.eventName + "key 1")]
         Assert.assertEquals(info[key], "value 1")
 
         // make sure event hash is generated correctly
         Assert.assertEquals(
-            HashingUtility.hashFilterScreenName(0.toString() + event.eventName).toLong(),
+            HashingUtility.hashFilterScreenName(event.eventName).toLong(),
             wrapper.eventHash.toLong()
         )
         Assert.assertEquals(3, wrapper.messageType.toLong())
@@ -596,7 +595,7 @@ class CustomMappingTest {
             .transactionAttributes(TransactionAttributes().setId("id")).build()
         config.getJSONArray("matches").getJSONObject(0).put(
             "event",
-            "" + HashingUtility.hashFilterTypeCommerceEvent( CommerceEventUtils.getEventType(event))
+            "" + HashingUtility.hashFilterTypeCommerceEvent(CommerceEventUtils.getEventType(event))
         )
         var customMapping = CustomMapping(config)
         Assert.assertTrue(customMapping.isMatch(CommerceEventWrapper(event)))
@@ -604,7 +603,7 @@ class CustomMappingTest {
             .transactionAttributes(TransactionAttributes().setId("id")).build()
         config.getJSONArray("matches").getJSONObject(0).put(
             "event",
-            "" + HashingUtility.hashFilterTypeCommerceEvent( CommerceEventUtils.getEventType(event))
+            "" + HashingUtility.hashFilterTypeCommerceEvent(CommerceEventUtils.getEventType(event))
         )
         customMapping = CustomMapping(config)
         Assert.assertTrue(customMapping.isMatch(CommerceEventWrapper(event)))
@@ -612,7 +611,7 @@ class CustomMappingTest {
             .transactionAttributes(TransactionAttributes().setId("id")).build()
         config.getJSONArray("matches").getJSONObject(0).put(
             "event",
-            "" + HashingUtility.hashFilterTypeCommerceEvent( CommerceEventUtils.getEventType(event))
+            "" + HashingUtility.hashFilterTypeCommerceEvent(CommerceEventUtils.getEventType(event))
         )
         customMapping = CustomMapping(config)
         Assert.assertTrue(customMapping.isMatch(CommerceEventWrapper(event)))
@@ -620,7 +619,7 @@ class CustomMappingTest {
             .transactionAttributes(TransactionAttributes().setId("id")).build()
         config.getJSONArray("matches").getJSONObject(0).put(
             "event",
-            "" + HashingUtility.hashFilterTypeCommerceEvent( CommerceEventUtils.getEventType(event))
+            "" + HashingUtility.hashFilterTypeCommerceEvent(CommerceEventUtils.getEventType(event))
         )
         customMapping = CustomMapping(config)
         Assert.assertTrue(customMapping.isMatch(CommerceEventWrapper(event)))
@@ -628,7 +627,7 @@ class CustomMappingTest {
             .transactionAttributes(TransactionAttributes().setId("id")).build()
         config.getJSONArray("matches").getJSONObject(0).put(
             "event",
-            "" + HashingUtility.hashFilterTypeCommerceEvent( CommerceEventUtils.getEventType(event))
+            "" + HashingUtility.hashFilterTypeCommerceEvent(CommerceEventUtils.getEventType(event))
         )
         customMapping = CustomMapping(config)
         Assert.assertTrue(customMapping.isMatch(CommerceEventWrapper(event)))
@@ -652,7 +651,7 @@ class CustomMappingTest {
             .transactionAttributes(TransactionAttributes().setId("id")).build()
         config.getJSONArray("matches").getJSONObject(0).put(
             "event",
-            "" + HashingUtility.hashFilterTypeCommerceEvent( CommerceEventUtils.getEventType(event))
+            "" + HashingUtility.hashFilterTypeCommerceEvent(CommerceEventUtils.getEventType(event))
         )
         customMapping = CustomMapping(config)
         Assert.assertTrue(customMapping.isMatch(CommerceEventWrapper(event)))
@@ -660,7 +659,7 @@ class CustomMappingTest {
             .transactionAttributes(TransactionAttributes().setId("id")).build()
         config.getJSONArray("matches").getJSONObject(0).put(
             "event",
-            "" + HashingUtility.hashFilterTypeCommerceEvent( CommerceEventUtils.getEventType(event))
+            "" + HashingUtility.hashFilterTypeCommerceEvent(CommerceEventUtils.getEventType(event))
         )
         customMapping = CustomMapping(config)
         Assert.assertTrue(customMapping.isMatch(CommerceEventWrapper(event)))
@@ -676,7 +675,7 @@ class CustomMappingTest {
             .transactionAttributes(TransactionAttributes().setId("id")).build()
         config.getJSONArray("matches").getJSONObject(0).put(
             "event",
-            "" + HashingUtility.hashFilterTypeCommerceEvent( CommerceEventUtils.getEventType(event))
+            "" + HashingUtility.hashFilterTypeCommerceEvent(CommerceEventUtils.getEventType(event))
         )
         customMapping = CustomMapping(config)
         Assert.assertTrue(customMapping.isMatch(CommerceEventWrapper(event)))

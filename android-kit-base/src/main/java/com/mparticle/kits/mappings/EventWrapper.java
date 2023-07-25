@@ -28,10 +28,10 @@ abstract class EventWrapper {
 
     public abstract int getEventHash();
 
-    protected static Map<Integer, String> getHashes(String hashPrefix, Map<String, String> map) {
+    protected static Map<Integer, String> getHashes(int hashPrefix, Map<String, String> map) {
         Map<Integer, String> hashedMap = new HashMap<Integer, String>();
         for (Map.Entry<String, String> entry : map.entrySet()) {
-            int hash = HashingUtility.INSTANCE.hashValue(hashPrefix, entry.getValue());
+            int hash = HashingUtility.INSTANCE.hashFilterCommerceEventAttribute(hashPrefix, entry.getKey());
             hashedMap.put(hash, entry.getKey());
         }
         return hashedMap;
@@ -100,7 +100,7 @@ abstract class EventWrapper {
                         CommerceEventUtils.extractActionAttributes(getEvent(), eventFieldAttributes);
                         CommerceEventUtils.extractTransactionAttributes(getEvent(), eventFieldAttributes);
                     }
-                    eventFieldHashes = getHashes(getEventTypeOrdinal() + "", eventFieldAttributes);
+                    eventFieldHashes = getHashes(getEventTypeOrdinal(), eventFieldAttributes);
                 }
                 String key = eventFieldHashes.get(hash);
                 if (key != null) {
@@ -112,7 +112,7 @@ abstract class EventWrapper {
                 }
                 Map<String, String> attributes = new HashMap<String, String>();
                 CommerceEventUtils.extractProductAttributes(product, attributes);
-                Map<Integer, String> hashes = getHashes(getEventTypeOrdinal() + "", attributes);
+                Map<Integer, String> hashes = getHashes(getEventTypeOrdinal(), attributes);
                 String key = hashes.get(hash);
                 if (key != null) {
                     return new AbstractMap.SimpleEntry<String, String>(key, attributes.get(key));
@@ -123,7 +123,7 @@ abstract class EventWrapper {
                 }
                 Map<String, String> attributes = new HashMap<String, String>();
                 CommerceEventUtils.extractProductFields(product, attributes);
-                Map<Integer, String> hashes = getHashes(getEventTypeOrdinal() + "", attributes);
+                Map<Integer, String> hashes = getHashes(getEventTypeOrdinal(), attributes);
                 String key = hashes.get(hash);
                 if (key != null) {
                     return new AbstractMap.SimpleEntry<String, String>(key, attributes.get(key));
@@ -134,7 +134,7 @@ abstract class EventWrapper {
                 }
                 Map<String, String> attributes = new HashMap<String, String>();
                 CommerceEventUtils.extractPromotionAttributes(promotion, attributes);
-                Map<Integer, String> hashes = getHashes(getEventTypeOrdinal() + "", attributes);
+                Map<Integer, String> hashes = getHashes(getEventTypeOrdinal(), attributes);
                 String key = hashes.get(hash);
                 if (key != null) {
                     return new AbstractMap.SimpleEntry<String, String>(key, attributes.get(key));
