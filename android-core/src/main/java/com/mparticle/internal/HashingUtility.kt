@@ -2,6 +2,7 @@ package com.mparticle.internal
 
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
+import com.mparticle.MParticle.EventType
 import com.mparticle.internal.messages.BaseMPMessage
 
 /**
@@ -13,8 +14,10 @@ import com.mparticle.internal.messages.BaseMPMessage
  */
 object HashingUtility {
 
-    fun hashEvent(event: MPEvent): Int =
-        MPUtility.mpHash("${event.eventType.ordinal}${event.eventName}")
+    fun hashEvent(event: MPEvent): Int = hashEvent(event.eventType, event.eventName)
+
+    fun hashEvent(eventType: EventType, eventName: String) =
+        MPUtility.mpHash("${eventType.ordinal}${eventName}")
 
     fun hashMpMessageTypeName(mpMessage: BaseMPMessage): Int =
         MPUtility.mpHash("${mpMessage.messageType}${mpMessage.name}")
@@ -28,6 +31,10 @@ object HashingUtility {
     fun hashCCPAContentPurposeKey() = MPUtility.mpHash("2${Constants.MessageKey.CCPA_CONSENT_KEY}")
 
     fun hashFilterTypeCommerceEvent(eventType: Int) = MPUtility.mpHash("$eventType")
+
+    fun hashFilterTypeCommerceEvent(eventType: EventType) = MPUtility.mpHash("${eventType.ordinal}")
+
+    fun hashUserAttributes(key: String) = MPUtility.mpHash(key)
 
     fun hashFilterCommerceEntityAttributeKey(key: String) = MPUtility.mpHash(key)
 

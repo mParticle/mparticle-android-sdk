@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.SparseBooleanArray
 import com.mparticle.MParticle
 import com.mparticle.MParticle.IdentityType
+import com.mparticle.internal.HashingUtility
 import com.mparticle.internal.MPUtility
 import com.mparticle.kits.KitIntegration.AttributeListener
 import com.mparticle.mock.MockMParticle
@@ -104,8 +105,8 @@ class KitIntegrationTest {
             KitConfiguration::class.java
         )
         val mockArray = MockSparseBooleanArray()
-        mockArray.put(MPUtility.mpHash("key 4"), false)
-        mockArray.put(MPUtility.mpHash("key 3"), false)
+        mockArray.put(HashingUtility.hashUserAttributes("key 4"), false)
+        mockArray.put(HashingUtility.hashUserAttributes("key 3"), false)
         Mockito.`when`(configuration.userAttributeFilters).thenReturn(mockArray)
         integration.configuration = configuration
         val attributes: MutableMap<String, Any> = HashMap()
@@ -155,8 +156,8 @@ class KitIntegrationTest {
             KitConfiguration::class.java
         )
         val mockArray = MockSparseBooleanArray()
-        mockArray.put(MPUtility.mpHash("key 4"), false)
-        mockArray.put(MPUtility.mpHash("key 3"), false)
+        mockArray.put(HashingUtility.hashUserAttributes("key 4"), false)
+        mockArray.put(HashingUtility.hashUserAttributes("key 3"), false)
         Mockito.`when`(configuration.userAttributeFilters).thenReturn(mockArray)
         integration.configuration = configuration
         val attributes: MutableMap<String, Any> = HashMap()

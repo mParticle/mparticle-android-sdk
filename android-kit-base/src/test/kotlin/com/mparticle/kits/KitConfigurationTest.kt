@@ -396,8 +396,17 @@ class KitConfigurationTest {
     fun testScreenAttributeFiltering() {
         val configuration =
             MockKitConfiguration.createKitConfiguration(JSONObject(" {\"id\":56, \"as\":{\"secretKey\":\"testappkey\", \"eventList\":\"[\\\"test1\\\",\\\"test2\\\",\\\"test3\\\"]\", \"sendTransactionData\":\"True\", \"eventAttributeList\":null }, \"hs\":{\"svea\":{\"1689004688\":0, \"1198002448\":1 } }, }"))
-        val testAttributes = mapOf("screen attribute should not forward" to "testVal", "screen attribute should forward" to "testVal", "screen attribute should also forward" to "testVal")
-        val filterdScreenAttributes = KitConfiguration.filterEventAttributes(null, "testScreenView", configuration.screenAttributeFilters, testAttributes)
+        val testAttributes = mapOf(
+            "screen attribute should not forward" to "testVal",
+            "screen attribute should forward" to "testVal",
+            "screen attribute should also forward" to "testVal"
+        )
+        val filterdScreenAttributes = KitConfiguration.filterEventAttributes(
+            null,
+            "testScreenView",
+            configuration.screenAttributeFilters,
+            testAttributes
+        )
         Assert.assertFalse(
             filterdScreenAttributes.containsKey("screen attribute should not forward")
         )
@@ -408,6 +417,7 @@ class KitConfigurationTest {
             filterdScreenAttributes.containsKey("screen attribute should also forward")
         )
     }
+
 
     @Test
     @Throws(Exception::class)
