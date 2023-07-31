@@ -17,7 +17,7 @@ object HashingUtility {
     fun hashEvent(event: MPEvent): Int = hashEvent(event.eventType, event.eventName)
 
     fun hashEvent(eventType: EventType, eventName: String) =
-        MPUtility.mpHash("${eventType.ordinal}${eventName}")
+        MPUtility.mpHash("${eventType.ordinal}$eventName")
 
     fun hashMpMessageTypeName(mpMessage: BaseMPMessage): Int =
         MPUtility.mpHash("${mpMessage.messageType}${mpMessage.name}")

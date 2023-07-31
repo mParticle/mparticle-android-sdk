@@ -418,7 +418,6 @@ class KitConfigurationTest {
         )
     }
 
-
     @Test
     @Throws(Exception::class)
     fun testConsentForwardingRules() {
@@ -438,6 +437,134 @@ class KitConfigurationTest {
         Assert.assertEquals(true, configuration.mConsentForwardingRules[456])
         configuration.parseConfiguration(JSONObject("{\"id\":\"1\"}"))
         Assert.assertEquals(0, configuration.mConsentForwardingRules.size.toLong())
+    }
+
+    @Test
+    fun testSideloadedFiltersJsonObject() {
+        val json = getSideloadedFiltersJSONConfig()
+        val sideloadedCreatedJSONObject = getSideloadedFilters().toJSONObject()
+        val sideloadedCreatedJSONObjectFilters =
+            sideloadedCreatedJSONObject.getJSONObject(KitConfiguration.KEY_FILTERS)
+
+        val parsedJsonObject = json.getJSONArray("eks").getJSONObject(0)
+        val parsedJsonObjectFilters = parsedJsonObject.getJSONObject(KitConfiguration.KEY_FILTERS)
+        Assert.assertTrue(parsedJsonObject.optString("id").toInt() >= 1000000)
+
+        jsonObjectEquals(
+            sideloadedCreatedJSONObjectFilters,
+            parsedJsonObjectFilters,
+            KitConfiguration.KEY_EVENT_TYPES_FILTER,
+            2
+        )
+        jsonObjectEquals(
+            sideloadedCreatedJSONObjectFilters,
+            parsedJsonObjectFilters,
+            KitConfiguration.KEY_EVENT_NAMES_FILTER,
+            3
+        )
+        jsonObjectEquals(
+            sideloadedCreatedJSONObjectFilters,
+            parsedJsonObjectFilters,
+            KitConfiguration.KEY_SCREEN_NAME_FILTER,
+            2
+        )
+        jsonObjectEquals(
+            sideloadedCreatedJSONObjectFilters,
+            parsedJsonObjectFilters,
+            KitConfiguration.KEY_EVENT_ATTRIBUTES_FILTER,
+            2
+        )
+        jsonObjectEquals(
+            sideloadedCreatedJSONObjectFilters,
+            parsedJsonObjectFilters,
+            KitConfiguration.KEY_SCREEN_ATTRIBUTES_FILTER,
+            3
+        )
+        jsonObjectEquals(
+            sideloadedCreatedJSONObjectFilters,
+            parsedJsonObjectFilters,
+            KitConfiguration.KEY_USER_IDENTITY_FILTER,
+            2
+        )
+        jsonObjectEquals(
+            sideloadedCreatedJSONObjectFilters,
+            parsedJsonObjectFilters,
+            KitConfiguration.KEY_USER_ATTRIBUTE_FILTER,
+            2
+        )
+        jsonObjectEquals(
+            sideloadedCreatedJSONObjectFilters,
+            parsedJsonObjectFilters,
+            KitConfiguration.KEY_COMMERCE_ATTRIBUTE_FILTER,
+            2
+        )
+
+        jsonObjectEquals(
+            sideloadedCreatedJSONObjectFilters,
+            parsedJsonObjectFilters,
+            KitConfiguration.KEY_COMMERCE_ENTITY_FILTERS,
+            1
+        )
+        jsonObjectEquals(
+            sideloadedCreatedJSONObjectFilters,
+            parsedJsonObjectFilters,
+            KitConfiguration.KEY_COMMERCE_ENTITY_ATTRIBUTE_FILTERS,
+            2
+        )
+        jsonObjectEquals(
+            sideloadedCreatedJSONObject,
+            parsedJsonObject,
+            KitConfiguration.KEY_ATTRIBUTE_VALUE_FILTERING,
+            null // bypassing
+        )
+    }
+
+    private fun getSideloadedFiltersJSONConfig(): JSONObject {
+        return JSONObject(
+            "{\"eks\":[{\"id\":10000001,\"avf\":{\"i\":true,\"a\":-910367228,\"v\":-285805487},\"hs\":{\"mt\":{\"ss\":0},\"et\":{\"52\":0,\"57\":0},\"ec\":{\"1589730\":0,\"1738684\":0,\"-1771765932\":0},\"cea\":{\"1524609902\":0,\"1725013959\":0},\"ent\":{\"50\":0},\"afa\":{\"2990805\":0,\"92715034\":0},\"ea\":{\"522773194\":0,\"-537751262\":0},\"svec\":{\"1484019680\":0,\"1484019681\":0},\"svea\":{\"1414348368\":0,\"-1112296720\":0,\"-1112296719\":0},\"uid\":{\"7\":0,\"9\":0},\"ua\":{\"115493\":0,\"3580362\":0}}}]}"
+        )
+    }
+
+    private fun getSideloadedFilters(): MPSideloadedFilters {
+        return MPSideloadedFilters()
+            .addEventTypeFilter(MParticle.EventType.Media)
+            .addEventTypeFilter(MParticle.EventType.Transaction)
+            .addEventNameFilter(MParticle.EventType.Social, "testName")
+            .addEventNameFilter(MParticle.EventType.Social, "ec1")
+            .addEventNameFilter(MParticle.EventType.Location, "ec2")
+            .addScreenNameFilter("svec1")
+            .addScreenNameFilter("svec2")
+            .addEventAttributeFilter(MParticle.EventType.Media, "ea1", "ea1attr")
+            .addEventAttributeFilter(MParticle.EventType.Navigation, "ea2", "ea2attr")
+            .addScreenAttributeFilter("svea1", "svea1attr1")
+            .addScreenAttributeFilter("svea1", "svea1attr2")
+            .addScreenAttributeFilter("svea2", "svea2attr1")
+            .addUserIdentityFilter(MParticle.IdentityType.Email)
+            .addUserIdentityFilter(MParticle.IdentityType.FacebookCustomAudienceId)
+            .addUserAttributeFilter("ua1")
+            .addUserAttributeFilter("ua20")
+            .addCommerceEventAttributeFilter(MParticle.EventType.Media, "attr1")
+            .addCommerceEventAttributeFilter(MParticle.EventType.Location, "attr1")
+            .addCommerceEventEntityTypeFilter(MPSideloadedFilters.CommerceEventKind.PROMOTION)
+            .addCommerceEventAppFamilyAttributeFilter("afa1")
+            .addCommerceEventAppFamilyAttributeFilter("afa20")
+            .addEventAttributeConditionalForwardingFilter("purpose1", "value1", true)
+    }
+
+    private fun jsonObjectEquals(
+        buildJsonObject: JSONObject,
+        parsedJSONObject: JSONObject,
+        key: String,
+        size: Int?
+    ) {
+        val buildHashedValues =
+            buildJsonObject.getJSONObject(key).keys().asSequence().toList()
+        val parsedHashedValues =
+            parsedJSONObject.getJSONObject(key).keys().asSequence().toList()
+        Assert.assertEquals(buildHashedValues, parsedHashedValues)
+        size?.let {
+            Assert.assertEquals(size, buildJsonObject.getJSONObject(key).length())
+        }
     }
 
     @Test

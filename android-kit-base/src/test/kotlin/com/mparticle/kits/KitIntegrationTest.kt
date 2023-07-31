@@ -5,7 +5,6 @@ import android.util.SparseBooleanArray
 import com.mparticle.MParticle
 import com.mparticle.MParticle.IdentityType
 import com.mparticle.internal.HashingUtility
-import com.mparticle.internal.MPUtility
 import com.mparticle.kits.KitIntegration.AttributeListener
 import com.mparticle.mock.MockMParticle
 import org.junit.Assert

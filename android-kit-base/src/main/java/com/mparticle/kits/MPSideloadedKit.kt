@@ -37,5 +37,4 @@ abstract class MPSideloadedKit(val kitId: Int) : KitIntegration(), SideloadedKit
     }
 
     override fun getJsonConfig(): JSONObject? = super.getJsonConfig()
-
 }

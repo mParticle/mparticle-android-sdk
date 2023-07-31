@@ -35,10 +35,11 @@ class MPSideloadedFilters {
      * @param eventType
      * @return MPSideloadedFilters instance
      */
-    //Internally use et as the key
+    // Internally use et as the key
     fun addEventTypeFilter(eventType: MParticle.EventType): MPSideloadedFilters {
         applyToFiltersNode(
-            KEY_EVENT_TYPES_FILTER, Pair(
+            KEY_EVENT_TYPES_FILTER,
+            Pair(
                 HashingUtility.hashFilterTypeCommerceEvent(eventType).toString(),
                 EXCLUDING_FILTER_VALUE
             )
@@ -53,11 +54,13 @@ class MPSideloadedFilters {
      * @param eventName
      * @return MPSideloadedFilters instance
      */
-    //Internally use ec as the key
+    // Internally use ec as the key
     fun addEventNameFilter(eventType: MParticle.EventType, eventName: String): MPSideloadedFilters {
         applyToFiltersNode(
-            KEY_EVENT_NAMES_FILTER, Pair(
-                HashingUtility.hashEvent(eventType, eventName).toString(), EXCLUDING_FILTER_VALUE
+            KEY_EVENT_NAMES_FILTER,
+            Pair(
+                HashingUtility.hashEvent(eventType, eventName).toString(),
+                EXCLUDING_FILTER_VALUE
             )
         )
         return this
@@ -71,8 +74,10 @@ class MPSideloadedFilters {
      */
     fun addScreenNameFilter(screenName: String): MPSideloadedFilters {
         applyToFiltersNode(
-            KEY_SCREEN_NAME_FILTER, Pair(
-                HashingUtility.hashFilterScreenName(screenName).toString(), EXCLUDING_FILTER_VALUE
+            KEY_SCREEN_NAME_FILTER,
+            Pair(
+                HashingUtility.hashFilterScreenName(screenName).toString(),
+                EXCLUDING_FILTER_VALUE
             )
         )
         return this
@@ -86,16 +91,18 @@ class MPSideloadedFilters {
      * @param customAttributeKey
      * @return MPSideloadedFilters instance
      */
-    //Internally use ea as the key
+    // Internally use ea as the key
     fun addEventAttributeFilter(
         eventType: MParticle.EventType,
         eventName: String,
         customAttributeKey: String
     ): MPSideloadedFilters {
         applyToFiltersNode(
-            KEY_EVENT_ATTRIBUTES_FILTER, Pair(
+            KEY_EVENT_ATTRIBUTES_FILTER,
+            Pair(
                 HashingUtility.hashFilterEventAttributes(eventType, eventName, customAttributeKey)
-                    .toString(), EXCLUDING_FILTER_VALUE
+                    .toString(),
+                EXCLUDING_FILTER_VALUE
             )
         )
         return this
@@ -108,13 +115,14 @@ class MPSideloadedFilters {
      * @param customAttributeKey
      * @return MPSideloadedFilters instance
      */
-    //Internally use svea as the key
+    // Internally use svea as the key
     fun addScreenAttributeFilter(
         screenName: String,
         customAttributeKey: String
     ): MPSideloadedFilters {
         applyToFiltersNode(
-            KEY_SCREEN_ATTRIBUTES_FILTER, Pair(
+            KEY_SCREEN_ATTRIBUTES_FILTER,
+            Pair(
                 HashingUtility.hashFilterScreenName("$screenName$customAttributeKey").toString(),
                 EXCLUDING_FILTER_VALUE
             )
@@ -128,10 +136,11 @@ class MPSideloadedFilters {
      * @param userIdentityType
      * @return MPSideloadedFilters instance
      */
-    //Internally use uid as the key
+    // Internally use uid as the key
     fun addUserIdentityFilter(userIdentityType: MParticle.IdentityType): MPSideloadedFilters {
         applyToFiltersNode(
-            KEY_USER_IDENTITY_FILTER, Pair(
+            KEY_USER_IDENTITY_FILTER,
+            Pair(
                 userIdentityType.value.toString(),
                 EXCLUDING_FILTER_VALUE
             )
@@ -145,10 +154,11 @@ class MPSideloadedFilters {
      * @param userAttributeKey
      * @return MPSideloadedFilters instance
      */
-    //Internally use ua as the key
+    // Internally use ua as the key
     fun addUserAttributeFilter(userAttributeKey: String): MPSideloadedFilters {
         applyToFiltersNode(
-            KEY_USER_ATTRIBUTE_FILTER, Pair(
+            KEY_USER_ATTRIBUTE_FILTER,
+            Pair(
                 HashingUtility.hashUserAttributes(userAttributeKey).toString(),
                 EXCLUDING_FILTER_VALUE
             )
@@ -163,13 +173,14 @@ class MPSideloadedFilters {
      * @param eventAttributeKey
      * @return MPSideloadedFilters
      */
-    //Internally use cea as the key
+    // Internally use cea as the key
     fun addCommerceEventAttributeFilter(
         eventType: EventType,
         eventAttributeKey: String
     ): MPSideloadedFilters {
         applyToFiltersNode(
-            KEY_COMMERCE_ATTRIBUTE_FILTER, Pair(
+            KEY_COMMERCE_ATTRIBUTE_FILTER,
+            Pair(
                 HashingUtility.hashFilterCommerceEventAttribute(
                     eventType.ordinal,
                     eventAttributeKey
@@ -188,11 +199,12 @@ class MPSideloadedFilters {
      * Adding type [CommerceEventKind.UNKNOWN] would prevent adding the filter
      * @return MPSideloadedFilters instance
      */
-    //Internally use ent as the key
+    // Internally use ent as the key
     fun addCommerceEventEntityTypeFilter(commerceEventType: CommerceEventKind): MPSideloadedFilters {
         if (commerceEventType != CommerceEventKind.UNKNOWN) {
             applyToFiltersNode(
-                KEY_COMMERCE_ENTITY_FILTERS, Pair(
+                KEY_COMMERCE_ENTITY_FILTERS,
+                Pair(
                     HashingUtility.hashFilterCommerceEntityAttributeKey(commerceEventType.eventType.toString())
                         .toString(),
                     EXCLUDING_FILTER_VALUE
@@ -208,10 +220,11 @@ class MPSideloadedFilters {
      * @param attributeKey
      * @return MPSideloadedFilters instance
      */
-    //Internally use afa as the key
+    // Internally use afa as the key
     fun addCommerceEventAppFamilyAttributeFilter(attributeKey: String): MPSideloadedFilters {
         applyToFiltersNode(
-            KEY_COMMERCE_ENTITY_ATTRIBUTE_FILTERS, Pair(
+            KEY_COMMERCE_ENTITY_ATTRIBUTE_FILTERS,
+            Pair(
                 HashingUtility.hashFilterCommerceEntityAttributeKey(attributeKey).toString(),
                 EXCLUDING_FILTER_VALUE
             )
@@ -230,7 +243,7 @@ class MPSideloadedFilters {
      *
      * @return MPSideloadedFilters instance
      */
-    //Internally use avf as the key
+    // Internally use avf as the key
     fun addEventAttributeConditionalForwardingFilter(
         attributeName: String,
         attributeValue: String,
@@ -281,5 +294,4 @@ class MPSideloadedFilters {
     enum class CommerceEventKind(internal val eventType: Int) {
         PRODUCT(1), PROMOTION(2), IMPRESSION(3), UNKNOWN(0);
     }
-
 }
