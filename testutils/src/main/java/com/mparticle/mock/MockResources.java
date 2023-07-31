@@ -16,9 +16,9 @@ public class MockResources extends Resources {
 
     @Override
     public int getIdentifier(String name, String defType, String defPackage) {
-        if (name.equals("mp_key")){
+        if (name.equals("mp_key")) {
             return 1;
-        }else if (name.equals("mp_secret")){
+        } else if (name.equals("mp_secret")) {
             return 2;
         }
 
@@ -27,7 +27,7 @@ public class MockResources extends Resources {
 
     @Override
     public String getString(int id) throws NotFoundException {
-        switch (id){
+        switch (id) {
             case 1:
                 return TEST_APP_KEY;
             case 2:

@@ -15,10 +15,15 @@ import java.io.IOException;
  */
 public interface MParticleApiClient extends MParticleBaseClient {
     void fetchConfig() throws IOException, MParticleApiClientImpl.MPConfigException;
+
     void fetchConfig(boolean force) throws IOException, MParticleApiClientImpl.MPConfigException;
+
     int sendMessageBatch(String message) throws IOException, MParticleApiClientImpl.MPThrottleException, MParticleApiClientImpl.MPRampException;
+
     JSONObject fetchAudiences();
+
     JSONObject getCookies();
+
     @NonNull
     AliasNetworkResponse sendAliasRequest(@NonNull String message) throws JSONException, IOException, MParticleApiClientImpl.MPThrottleException, MParticleApiClientImpl.MPRampException;
 

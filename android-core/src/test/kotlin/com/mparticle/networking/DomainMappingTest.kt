@@ -4,8 +4,6 @@ import com.mparticle.testutils.RandomUtils
 import org.junit.Assert
 import org.junit.Test
 import java.util.Random
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 class DomainMappingTest {
     private var random = Random()

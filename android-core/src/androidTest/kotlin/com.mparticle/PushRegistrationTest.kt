@@ -117,7 +117,8 @@ class PushRegistrationTest : BaseCleanStartedEachTest() {
     var setPushes = arrayOf(
         object : SetPush {
             override fun setPushRegistration(pushRegistration: PushRegistration) {
-                MParticle.getInstance()?.logPushRegistration(pushRegistration.instanceId, pushRegistration.senderId)
+                MParticle.getInstance()
+                    ?.logPushRegistration(pushRegistration.instanceId, pushRegistration.senderId)
             }
 
             override val name: String
@@ -134,8 +135,10 @@ class PushRegistrationTest : BaseCleanStartedEachTest() {
         },
         object : SetPush {
             override fun setPushRegistration(pushRegistration: PushRegistration) {
-                MParticle.getInstance()?.mInternal?.configManager?.pushSenderId = pushRegistration.senderId
-                MParticle.getInstance()?.mInternal?.configManager?.pushInstanceId = pushRegistration.instanceId
+                MParticle.getInstance()?.mInternal?.configManager?.pushSenderId =
+                    pushRegistration.senderId
+                MParticle.getInstance()?.mInternal?.configManager?.pushInstanceId =
+                    pushRegistration.instanceId
             }
 
             override val name: String

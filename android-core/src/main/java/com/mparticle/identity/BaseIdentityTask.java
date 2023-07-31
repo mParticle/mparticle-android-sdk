@@ -2,6 +2,7 @@ package com.mparticle.identity;
 
 import android.os.Handler;
 import android.os.Looper;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -23,7 +24,7 @@ public final class BaseIdentityTask extends MParticleTask<IdentityApiResult> {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
-                for(TaskFailureListener listener: failureListeners) {
+                for (TaskFailureListener listener : failureListeners) {
                     listener.onFailure(errorResponse);
                 }
             }
@@ -38,7 +39,7 @@ public final class BaseIdentityTask extends MParticleTask<IdentityApiResult> {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
-                for (TaskSuccessListener listener: successListeners) {
+                for (TaskSuccessListener listener : successListeners) {
                     listener.onSuccess(result);
                 }
             }

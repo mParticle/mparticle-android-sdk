@@ -36,9 +36,9 @@ public class MessageBatch extends JSONObject {
         uploadMessage.put(Constants.MessageKey.TIMESTAMP, System.currentTimeMillis());
         uploadMessage.put(Constants.MessageKey.MPARTICLE_VERSION, Constants.MPARTICLE_VERSION);
         uploadMessage.put(Constants.MessageKey.OPT_OUT_HEADER, configManager.getOptedOut());
-        uploadMessage.put(Constants.MessageKey.CONFIG_UPLOAD_INTERVAL, configManager.getUploadInterval()/1000);
+        uploadMessage.put(Constants.MessageKey.CONFIG_UPLOAD_INTERVAL, configManager.getUploadInterval() / 1000);
         uploadMessage.put(Constants.MessageKey.MPARTICLE_CONFIG_VERSION, configManager.getEtag());
-        uploadMessage.put(Constants.MessageKey.CONFIG_SESSION_TIMEOUT, configManager.getSessionTimeout()/1000);
+        uploadMessage.put(Constants.MessageKey.CONFIG_SESSION_TIMEOUT, configManager.getSessionTimeout() / 1000);
         uploadMessage.put(Constants.MessageKey.MPID, String.valueOf(batchId.getMpid()));
         uploadMessage.put(Constants.MessageKey.SANDBOX, configManager.getEnvironment().equals(MParticle.Environment.Development));
         uploadMessage.put(Constants.MessageKey.DEVICE_APPLICATION_STAMP, configManager.getDeviceApplicationStamp());
@@ -83,7 +83,8 @@ public class MessageBatch extends JSONObject {
                     state.put(Constants.MessageKey.CONSENT_STATE_CCPA, ccpa);
                     addConsentStateJSON(ccpa, Constants.MessageKey.CCPA_CONSENT_KEY, ccpaConsent);
                 }
-            } catch (JSONException ignored) { }
+            } catch (JSONException ignored) {
+            }
         }
     }
 
@@ -105,7 +106,8 @@ public class MessageBatch extends JSONObject {
                 put(Constants.MessageKey.HISTORY, new JSONArray());
             }
             getJSONArray(Constants.MessageKey.HISTORY).put(message);
-        } catch (JSONException ignored) { }
+        } catch (JSONException ignored) {
+        }
     }
 
     public void addMessage(JSONObject message) {
@@ -114,7 +116,8 @@ public class MessageBatch extends JSONObject {
                 put(Constants.MessageKey.MESSAGES, new JSONArray());
             }
             getJSONArray(Constants.MessageKey.MESSAGES).put(message);
-        } catch (JSONException ignored) { }
+        } catch (JSONException ignored) {
+        }
     }
 
     public void addReportingMessage(JSONObject reportingMessage) {
@@ -123,19 +126,22 @@ public class MessageBatch extends JSONObject {
                 put(Constants.MessageKey.REPORTING, new JSONArray());
             }
             getJSONArray(Constants.MessageKey.REPORTING).put(reportingMessage);
-        } catch (JSONException ignored) { }
+        } catch (JSONException ignored) {
+        }
     }
 
     public void setAppInfo(JSONObject appInfo) {
         try {
             put(Constants.MessageKey.APP_INFO, appInfo);
-        } catch (JSONException ignored) { }
+        } catch (JSONException ignored) {
+        }
     }
 
     public void setDeviceInfo(JSONObject deviceInfo) {
         try {
             put(Constants.MessageKey.DEVICE_INFO, deviceInfo);
-        } catch (JSONException ignored) { }
+        } catch (JSONException ignored) {
+        }
     }
 
     public JSONObject getAppInfo() {
@@ -173,13 +179,15 @@ public class MessageBatch extends JSONObject {
     public void setIdentities(JSONArray identities) {
         try {
             put(Constants.MessageKey.USER_IDENTITIES, identities);
-        } catch (JSONException ignored) { }
+        } catch (JSONException ignored) {
+        }
     }
 
     public void setUserAttributes(JSONObject userAttributes) {
         try {
             put(Constants.MessageKey.USER_ATTRIBUTES, userAttributes);
-        } catch (JSONException ignored) { }
+        } catch (JSONException ignored) {
+        }
     }
 
     public long getMessageLengthBytes() {

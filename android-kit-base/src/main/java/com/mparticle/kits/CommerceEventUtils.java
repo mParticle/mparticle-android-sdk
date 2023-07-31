@@ -417,8 +417,11 @@ public final class CommerceEventUtils {
 
     public interface OnAttributeExtracted {
         void onAttributeExtracted(String key, String value);
+
         void onAttributeExtracted(String key, double value);
+
         void onAttributeExtracted(String key, int value);
+
         void onAttributeExtracted(Map<String, String> attributes);
     }
 }

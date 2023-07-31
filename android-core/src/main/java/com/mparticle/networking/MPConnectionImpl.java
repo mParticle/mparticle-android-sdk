@@ -103,11 +103,11 @@ class MPConnectionImpl implements MPConnection {
 
     @Override
     public void setSSLSocketFactory(SSLSocketFactory factory) {
-        ((HttpsURLConnection)httpURLConnection).setSSLSocketFactory(factory);
+        ((HttpsURLConnection) httpURLConnection).setSSLSocketFactory(factory);
     }
 
     @Override
     public SSLSocketFactory getSSLSocketFactory() {
-        return ((HttpsURLConnection)httpURLConnection).getSSLSocketFactory();
+        return ((HttpsURLConnection) httpURLConnection).getSSLSocketFactory();
     }
 }

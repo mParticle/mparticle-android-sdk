@@ -1,6 +1,7 @@
 package com.mparticle.internal.messages;
 
 import android.location.Location;
+
 import androidx.annotation.Nullable;
 
 import com.mparticle.commerce.CommerceEvent;

@@ -20,7 +20,7 @@ import java.util.Set;
 public class MessageService extends MessageTable {
 
     private final static String[] prepareSelection = new String[]{"_id", MessageTableColumns.MESSAGE, MessageTableColumns.CREATED_AT, MessageTableColumns.STATUS, MessageTableColumns.SESSION_ID, MessageTableColumns.MP_ID, MessageTableColumns.DATAPLAN_ID, MessageTableColumns.DATAPLAN_VERSION};
-    private final static String prepareOrderBy =  MessageTableColumns._ID + " asc";
+    private final static String prepareOrderBy = MessageTableColumns._ID + " asc";
 
     private static String getSessionHistorySelection(boolean includesMpid) {
         return String.format(
@@ -39,12 +39,11 @@ public class MessageService extends MessageTable {
         Cursor cursor = null;
         try {
             cursor = database.rawQuery("SELECT DISTINCT " + MessageTableColumns.SESSION_ID + " FROM " + MessageTableColumns.TABLE_NAME);  // mobsf-ignore: sqlite_injection
-            while(cursor.moveToNext()) {
+            while (cursor.moveToNext()) {
                 sessionIds.add(cursor.getString(0));
             }
             return sessionIds;
-        }
-        finally {
+        } finally {
             if (cursor != null && !cursor.isClosed()) {
                 cursor.close();
             }
@@ -55,7 +54,7 @@ public class MessageService extends MessageTable {
         return getSessionHistory(database, currentSessionId, false, Constants.TEMPORARY_MPID);
     }
 
-    static List<ReadyMessage> getSessionHistory(MPDatabase database, String currentSessionId, boolean includes, long mpid){
+    static List<ReadyMessage> getSessionHistory(MPDatabase database, String currentSessionId, boolean includes, long mpid) {
         String[] selectionArgs = new String[]{currentSessionId, String.valueOf(mpid)};
         Cursor readyMessagesCursor = null;
         List<ReadyMessage> readyMessages = new ArrayList<ReadyMessage>();
@@ -88,8 +87,7 @@ public class MessageService extends MessageTable {
                 InternalListenerManager.getListener().onCompositeObjects(readyMessagesCursor, readyMessage);
                 readyMessages.add(readyMessage);
             }
-        }
-        finally {
+        } finally {
             if (readyMessagesCursor != null && !readyMessagesCursor.isClosed()) {
                 readyMessagesCursor.close();
             }
@@ -97,7 +95,7 @@ public class MessageService extends MessageTable {
         return readyMessages;
     }
 
-    public static int deleteOldMessages(MPDatabase database, String currentSessionId){
+    public static int deleteOldMessages(MPDatabase database, String currentSessionId) {
         String[] selectionArgs = new String[]{currentSessionId, String.valueOf(Constants.TEMPORARY_MPID)};
         return database.delete(
                 MessageTableColumns.TABLE_NAME,
@@ -116,8 +114,7 @@ public class MessageService extends MessageTable {
                     null,
                     prepareOrderBy);
             return messageIds.getCount() > 0;
-        }
-        finally {
+        } finally {
             if (messageIds != null && !messageIds.isClosed()) {
                 messageIds.close();
             }
@@ -132,7 +129,7 @@ public class MessageService extends MessageTable {
         return getMessagesForUpload(database, false, Constants.TEMPORARY_MPID);
     }
 
-    static List<ReadyMessage> getMessagesForUpload(MPDatabase database, boolean includes, long mpid){
+    static List<ReadyMessage> getMessagesForUpload(MPDatabase database, boolean includes, long mpid) {
         Cursor readyMessagesCursor = null;
         List<ReadyMessage> readyMessages = new ArrayList<ReadyMessage>();
         try {
@@ -164,8 +161,7 @@ public class MessageService extends MessageTable {
                 InternalListenerManager.getListener().onCompositeObjects(readyMessagesCursor, readyMessage);
                 readyMessages.add(readyMessage);
             }
-        }
-        finally {
+        } finally {
             if (readyMessagesCursor != null && !readyMessagesCursor.isClosed()) {
                 readyMessagesCursor.close();
             }

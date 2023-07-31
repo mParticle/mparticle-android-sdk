@@ -4,13 +4,13 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.mparticle.MParticle;
 import com.mparticle.MParticleTask;
 import com.mparticle.SdkListener;
-import com.mparticle.internal.listeners.ApiClass;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.BaseHandler;
 import com.mparticle.internal.ConfigManager;
@@ -19,6 +19,7 @@ import com.mparticle.internal.KitManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MessageManager;
+import com.mparticle.internal.listeners.ApiClass;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,7 +53,8 @@ public class IdentityApi {
     Set<IdentityStateListener> identityStateListeners = new HashSet<IdentityStateListener>();
     private static Object lock = new Object();
 
-    protected IdentityApi() {}
+    protected IdentityApi() {
+    }
 
     @SuppressLint("UnknownNullness")
     public IdentityApi(Context context, AppStateManager appStateManager, MessageManager messageManager, ConfigManager configManager, KitManager kitManager, MParticle.OperatingSystem operatingSystem) {
@@ -91,9 +93,9 @@ public class IdentityApi {
      */
     @Nullable
     public MParticleUser getUser(@NonNull Long mpid) {
-            if (!Constants.TEMPORARY_MPID.equals(mpid) && mConfigManager.mpidExists(mpid)) {
-                return MParticleUserImpl.getInstance(mContext, mpid, mUserDelegate);
-            } else {
+        if (!Constants.TEMPORARY_MPID.equals(mpid) && mConfigManager.mpidExists(mpid)) {
+            return MParticleUserImpl.getInstance(mContext, mpid, mUserDelegate);
+        } else {
             return null;
         }
     }
@@ -101,6 +103,7 @@ public class IdentityApi {
     /**
      * returns a list of {@link MParticleUser}s that have been seen by this device. The collection
      * is ordered by {@link MParticleUser#getLastSeenTime()}, from most to least recent
+     *
      * @return a collection of {@link MParticleUser} ordered by descending {@link MParticleUser#getLastSeenTime()}
      */
     @NonNull
@@ -108,7 +111,7 @@ public class IdentityApi {
         List<MParticleUser> users = new ArrayList<MParticleUser>();
         Set<Long> mpids = mConfigManager.getMpids();
         mpids.remove(Constants.TEMPORARY_MPID);
-        for (Long mpid: mpids) {
+        for (Long mpid : mpids) {
             users.add(MParticleUserImpl.getInstance(mContext, mpid, mUserDelegate));
         }
         sortUsers(users);
@@ -122,8 +125,8 @@ public class IdentityApi {
 
     /**
      * Adds a global listener which will be invoked when the MPID or "logged in" status changes for the current user.
-     * @param listener callback for Identity State changes
      *
+     * @param listener callback for Identity State changes
      * @see IdentityStateListener
      */
     public void addIdentityStateListener(@NonNull IdentityStateListener listener) {
@@ -132,8 +135,8 @@ public class IdentityApi {
 
     /**
      * Removes an instance of a global listener by reference.
-     * @param listener callback for Identity State changes
      *
+     * @param listener callback for Identity State changes
      * @see IdentityStateListener
      */
     public void removeIdentityStateListener(@NonNull IdentityStateListener listener) {
@@ -144,7 +147,6 @@ public class IdentityApi {
      * Calls the Identity Logout endpoint with an empty IdentityApiRequest.
      *
      * @return an MParticleTask<IdentityApiResult> to handle the Asynchronous results
-     *
      * @see MParticleTask and
      * @see IdentityApiResult
      */
@@ -154,12 +156,10 @@ public class IdentityApi {
     }
 
     /**
+     * @return an MParticleTask<IdentityApiResult> to handle the Asynchronous results
      * @see IdentityApiRequest
      *
      * calls the Identity Logout endpoint
-     *
-     * @return an MParticleTask<IdentityApiResult> to handle the Asynchronous results
-     *
      * @see MParticleTask and
      * @see IdentityApiResult
      */
@@ -182,7 +182,6 @@ public class IdentityApi {
      * Calls the Identity Login endpoint with an empty IdentityApiRequest.
      *
      * @return an MParticleTask<IdentityApiResult> to handle the Asynchronous results
-     *
      * @see MParticleTask and
      * @see IdentityApiResult
      */
@@ -193,11 +192,9 @@ public class IdentityApi {
 
     /**
      * Calls the Identity Login endpoint.
-     * @see IdentityApiRequest
-     *
      *
      * @return an MParticleTask<IdentityApiResult> to handle the Asynchronous results
-     *
+     * @see IdentityApiRequest
      * @see MParticleTask and
      * @see IdentityApiResult
      */
@@ -218,11 +215,9 @@ public class IdentityApi {
 
     /**
      * Calls the Identity Identify endpoint.
-     * @see IdentityApiRequest
-     *
      *
      * @return an MParticleTask<IdentityApiResult> to handle the Asynchronous results
-     *
+     * @see IdentityApiRequest
      * @see MParticleTask and
      * @see IdentityApiResult
      */
@@ -244,12 +239,9 @@ public class IdentityApi {
     /**
      * Calls the Identity Modify endpoint. This should be used in place of the pre-version-5
      * MParticle.setUserAttribute() and MParticle.setUserIdentity() methods.
-     * 
-     * @see IdentityApiRequest
-     *
      *
      * @return an MParticleTask<IdentityApiResult> to handle the Asynchronous results
-     *
+     * @see IdentityApiRequest
      * @see BaseIdentityTask
      */
     @NonNull
@@ -299,6 +291,7 @@ public class IdentityApi {
      * Initiate an Alias request. Retries are handled internally, so one an {@link AliasRequest} is submitted,
      * it will be retried unless there are unrecoverable errors. To listen for updates submit an
      * implementation of {@link com.mparticle.SdkListener} to {@link com.mparticle.MParticle#addListener(Context, SdkListener)}
+     *
      * @param aliasRequest
      * @return
      */
@@ -416,6 +409,7 @@ public class IdentityApi {
 
     interface IdentityNetworkRequestRunnable {
         IdentityHttpResponse request(IdentityApiRequest request) throws Exception;
+
         void onPostExecute(IdentityApiResult result);
     }
 

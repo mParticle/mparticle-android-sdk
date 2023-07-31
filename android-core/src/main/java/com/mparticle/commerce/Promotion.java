@@ -36,18 +36,19 @@ public class Promotion {
 
     @Retention(RetentionPolicy.CLASS)
     @StringDef({CLICK, VIEW})
-    @interface PromotionConstant {}
+    @interface PromotionConstant {
+    }
 
     /**
      * The Promotion action constant used to track when a user taps or clicks on a Promotion.
-     *
      */
-    @NonNull public static final String CLICK = "click";
+    @NonNull
+    public static final String CLICK = "click";
     /**
      * The Promotion action constant used to track when a user views a Promotion.
-     *
      */
-    @NonNull public static final String VIEW = "view";
+    @NonNull
+    public static final String VIEW = "view";
 
     private String mCreative = null;
     private String mId = null;

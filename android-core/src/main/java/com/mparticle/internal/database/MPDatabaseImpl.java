@@ -3,7 +3,6 @@ package com.mparticle.internal.database;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Build;
 import android.provider.BaseColumns;
 
 import com.mparticle.internal.listeners.InternalListenerManager;
@@ -13,9 +12,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MPDatabaseImpl implements MPDatabase {
-   SQLiteDatabase sqLiteDatabase;
+    SQLiteDatabase sqLiteDatabase;
 
-    public  MPDatabaseImpl(SQLiteDatabase database) {
+    public MPDatabaseImpl(SQLiteDatabase database) {
         this.sqLiteDatabase = database;
     }
 
@@ -37,8 +36,8 @@ public class MPDatabaseImpl implements MPDatabase {
 
     @Override
     public Cursor query(String table, String[] columns, String selection,
-                 String[] selectionArgs, String groupBy, String having,
-                 String orderBy, String limit) {
+                        String[] selectionArgs, String groupBy, String having,
+                        String orderBy, String limit) {
         if (InternalListenerManager.isEnabled()) {
             columns = getColumnsWithId(columns);
         }
@@ -87,7 +86,7 @@ public class MPDatabaseImpl implements MPDatabase {
             return columns;
         }
         boolean found = false;
-        for (String column: columns) {
+        for (String column : columns) {
             if (column.equals(BaseColumns._ID)) {
                 found = true;
             }

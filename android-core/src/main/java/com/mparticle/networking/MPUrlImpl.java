@@ -18,7 +18,7 @@ class MPUrlImpl extends MPUrl {
 
     @Override
     public MPConnection openConnection() throws IOException {
-        return new MPConnectionImpl((HttpURLConnection)url.openConnection(), this);
+        return new MPConnectionImpl((HttpURLConnection) url.openConnection(), this);
     }
 
     @Override
@@ -44,7 +44,7 @@ class MPUrlImpl extends MPUrl {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof MPUrlImpl) {
-            return url.equals(((MPUrlImpl)obj).url);
+            return url.equals(((MPUrlImpl) obj).url);
         }
         return url.equals(obj);
     }

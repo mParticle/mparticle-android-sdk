@@ -7,7 +7,6 @@ import java.util.List;
 
 /**
  * Class representing an impression of one of more {@link Product} objects.
- *
  */
 public class Impression {
     private String mListName = null;
@@ -17,7 +16,7 @@ public class Impression {
      * Create an Impression object.
      *
      * @param listName a string name given to the list where the given Products displayed
-     * @param product a Product to associate with the Impression
+     * @param product  a Product to associate with the Impression
      */
     public Impression(@NonNull String listName, @NonNull Product product) {
         super();

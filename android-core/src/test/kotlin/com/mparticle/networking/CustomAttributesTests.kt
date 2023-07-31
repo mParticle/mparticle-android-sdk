@@ -11,7 +11,8 @@ class CustomAttributesTests {
 
     @Test
     fun testListSerialization() {
-        val customAttributesList = mutableMapOf<String, Any>("list" to listOf("foo", "bar", "this", "that"))
+        val customAttributesList =
+            mutableMapOf<String, Any>("list" to listOf("foo", "bar", "this", "that"))
         val serialized = "[foo, bar, this, that]"
         MPEvent.Builder("Test Event")
             .customAttributes(customAttributesList)
@@ -21,7 +22,8 @@ class CustomAttributesTests {
                 assertEquals(serialized, stringifiedCustomAttributes!!["list"])
             }
 
-        val customAttributesArrayList = mutableMapOf<String, Any>("list" to arrayListOf("foo", "bar", "this", "that"))
+        val customAttributesArrayList =
+            mutableMapOf<String, Any>("list" to arrayListOf("foo", "bar", "this", "that"))
 
         MPEvent.Builder("Test Event")
             .customAttributes(customAttributesArrayList)
@@ -47,7 +49,9 @@ class CustomAttributesTests {
                     assertEquals("{,}", it)
                 }
         }
-        val customAttributesMap = mutableMapOf<String, Any>("list" to mapOf("foo" to "bar", "this" to "that"))
+
+        val customAttributesMap =
+            mutableMapOf<String, Any>("list" to mapOf("foo" to "bar", "this" to "that"))
         MPEvent.Builder("Test Event")
             .customAttributes(customAttributesMap)
             .build()
@@ -55,7 +59,8 @@ class CustomAttributesTests {
                 test(it.customAttributeStrings)
             }
 
-        val customAttributesHashMap = mutableMapOf<String, Any>("list" to hashMapOf("foo" to "bar", "this" to "that"))
+        val customAttributesHashMap =
+            mutableMapOf<String, Any>("list" to hashMapOf("foo" to "bar", "this" to "that"))
 
         MPEvent.Builder("Test Event")
             .customAttributes(customAttributesHashMap)
@@ -67,7 +72,12 @@ class CustomAttributesTests {
 
     @Test
     fun testJSONSerialization() {
-        val customAttributesMap = mutableMapOf<String, Any>("list" to mapOf("foo" to "bar", "this" to "that").let { JSONObject(it.toMap()) })
+        val customAttributesMap = mutableMapOf<String, Any>(
+            "list" to mapOf(
+                "foo" to "bar",
+                "this" to "that"
+            ).let { JSONObject(it.toMap()) }
+        )
         val serialized = "{\"foo\":\"bar\",\"this\":\"that\"}"
         MPEvent.Builder("Test Event")
             .customAttributes(customAttributesMap)

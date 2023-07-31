@@ -1,6 +1,7 @@
 package com.mparticle;
 
 public interface Configuration<T> {
-        Class<T> configures();
-        void apply(T t);
+    Class<T> configures();
+
+    void apply(T t);
 }

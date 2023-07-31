@@ -1,5 +1,7 @@
 package com.mparticle.mock.utils;
 
+import static org.junit.Assert.assertTrue;
+
 import com.mparticle.MParticle;
 
 import org.junit.Test;
@@ -12,8 +14,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static org.junit.Assert.assertTrue;
-
 /**
  * Utilities for generating tests with Randomness.
  */
@@ -25,7 +25,7 @@ public class RandomUtils {
     private static RandomUtils instance;
 
     public static RandomUtils getInstance() {
-        if  (instance == null) {
+        if (instance == null) {
             instance = new RandomUtils();
         }
         return instance;
@@ -37,7 +37,7 @@ public class RandomUtils {
         int identityTypeLength = MParticle.IdentityType.values().length;
         int numIdentities = randomInt(1, identityTypeLength);
         Set<Integer> identityIndices = randomIntSet(0, identityTypeLength, numIdentities);
-        for (Integer identityIndex: identityIndices) {
+        for (Integer identityIndex : identityIndices) {
             randomIdentities.put(MParticle.IdentityType.values()[identityIndex], getAlphaNumericString(randomInt(1, 55)));
         }
         randomIdentities.remove(MParticle.IdentityType.Alias);
@@ -46,7 +46,7 @@ public class RandomUtils {
 
     public Map<String, List<String>> getRandomCustomFlags(int count) {
         Map<String, List<String>> customFlags = new HashMap<>();
-        for (Map.Entry<String, String> entry: getRandomAttributes(count).entrySet()) {
+        for (Map.Entry<String, String> entry : getRandomAttributes(count).entrySet()) {
             List<String> flags = new ArrayList<>();
             if (entry.getValue() != null) {
                 flags.add(entry.getValue());
@@ -89,7 +89,7 @@ public class RandomUtils {
     public String getAlphaNumericString(int length) {
         String characters = getAlphNumeric();
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < length; i++){
+        for (int i = 0; i < length; i++) {
             builder.append(characters.charAt(randomInt(0, characters.length() - 1)));
         }
         return builder.toString();

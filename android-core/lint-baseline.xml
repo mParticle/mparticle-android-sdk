@@ -2,20 +2,20 @@
 <lint>
     <issue id="UnknownNullness">
         <ignore path="src/main/java/com/mparticle/internal" />
-        <ignore path="src/main/java/com/mparticle/networking/BaseNetworkConnection"/>
-        <ignore path="src/main/java/com/mparticle/ExceptionHandler.java"/>
-        <ignore path="src/main/java/com/mparticle/messaging/InstanceIdService"/>
-        <ignore path="src/main/java/com/mparticle/networking/MPConnection"/>
-        <ignore path="src/main/java/com/mparticle/networking/MPUrl"/>
-        <ignore path="src/main/java/com/mparticle/messaging/MPMessagingRouter"/>
-        <ignore path="src/main/java/com/mparticle/MPServiceUtil"/>
-        <ignore path="src/main/java/com/mparticle/networking/MParticleBaseClientImpl"/>
-        <ignore path="src/main/java/com/mparticle/networking/MParticleBaseClient"/>
-        <ignore path="src/main/java/com/mparticle/networking/NetworkConnection"/>
-        <ignore path="src/main/java/com/mparticle/networking/NetworkOptionsManager"/>
-        <ignore path="src/main/java/com/mparticle/identity/MParticleUserImpl"/>
-        <ignore path="src/main/java/com/mparticle/identity/MParticleIdentityClient"/>
-        <ignore path="src/main/java/com/mparticle/messaging/ProviderCloudMessage"/>
-        <ignore path="src/main/java/com/mparticle/messaging/PushAnalyticsReceiver"/>
+        <ignore path="src/main/java/com/mparticle/networking/BaseNetworkConnection" />
+        <ignore path="src/main/java/com/mparticle/ExceptionHandler.java" />
+        <ignore path="src/main/java/com/mparticle/messaging/InstanceIdService" />
+        <ignore path="src/main/java/com/mparticle/networking/MPConnection" />
+        <ignore path="src/main/java/com/mparticle/networking/MPUrl" />
+        <ignore path="src/main/java/com/mparticle/messaging/MPMessagingRouter" />
+        <ignore path="src/main/java/com/mparticle/MPServiceUtil" />
+        <ignore path="src/main/java/com/mparticle/networking/MParticleBaseClientImpl" />
+        <ignore path="src/main/java/com/mparticle/networking/MParticleBaseClient" />
+        <ignore path="src/main/java/com/mparticle/networking/NetworkConnection" />
+        <ignore path="src/main/java/com/mparticle/networking/NetworkOptionsManager" />
+        <ignore path="src/main/java/com/mparticle/identity/MParticleUserImpl" />
+        <ignore path="src/main/java/com/mparticle/identity/MParticleIdentityClient" />
+        <ignore path="src/main/java/com/mparticle/messaging/ProviderCloudMessage" />
+        <ignore path="src/main/java/com/mparticle/messaging/PushAnalyticsReceiver" />
     </issue>
 </lint>

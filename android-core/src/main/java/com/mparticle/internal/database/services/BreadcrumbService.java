@@ -7,7 +7,6 @@ import android.database.Cursor;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
-import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.tables.BreadcrumbTable;
 import com.mparticle.internal.messages.BaseMPMessage;
@@ -69,8 +68,7 @@ public class BreadcrumbService extends BreadcrumbTable {
                     null,
                     null);
             return rawIds.getCount();
-        }
-        finally {
+        } finally {
             if (rawIds != null && !rawIds.isClosed()) {
                 rawIds.close();
             }

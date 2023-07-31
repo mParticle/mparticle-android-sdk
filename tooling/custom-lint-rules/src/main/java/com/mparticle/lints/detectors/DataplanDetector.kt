@@ -59,7 +59,8 @@ class DataplanDetector : CallScanner() {
         )
     }
 
-    override fun getApplicableClasses() = listOf(MPEvent.Builder::class.java, CommerceEvent.Builder::class.java)
+    override fun getApplicableClasses() =
+        listOf(MPEvent.Builder::class.java, CommerceEvent.Builder::class.java)
 
     override fun beforeCheckRootProject(context: Context) {
         super.beforeCheckRootProject(context)
@@ -71,7 +72,9 @@ class DataplanDetector : CallScanner() {
 
         if (config != null) {
             dataplanningNode = DataPlanningNodeApp(config!!)
-            dataplan = try { Utils.getLocalDataplan() } catch (e: Exception) {
+            dataplan = try {
+                Utils.getLocalDataplan()
+            } catch (e: Exception) {
                 disabled = true
                 return
             }
@@ -88,8 +91,15 @@ class DataplanDetector : CallScanner() {
         }
     }
 
-    override fun onInstanceCollected(context: JavaContext, unresolvedObject: Expression, reportingNode: UExpression) {
-        val instance = try { unresolvedObject.resolve() } catch (e: Exception) { }
+    override fun onInstanceCollected(
+        context: JavaContext,
+        unresolvedObject: Expression,
+        reportingNode: UExpression
+    ) {
+        val instance = try {
+            unresolvedObject.resolve()
+        } catch (e: Exception) {
+        }
         // this will make MParticle not break incase Logger happens to be called
         val message = when (instance) {
             is MPEvent.Builder -> instance.build().message
@@ -128,7 +138,8 @@ class DataplanDetector : CallScanner() {
             )
         } else {
             val messageString = message.attributesToNumbers().toString()
-            val result: DataPlanningNodeApp.NodeAppResult<List<ValidationResult>>? = dataplanningNode?.validate(dp, messageString, config?.dataPlanVersion)
+            val result: DataPlanningNodeApp.NodeAppResult<List<ValidationResult>>? =
+                dataplanningNode?.validate(dp, messageString, config?.dataPlanVersion)
             if (config?.debugReportServerMessage === true) {
                 val response = result?.response?.getOrNull(0)
                 context.report(
@@ -144,7 +155,10 @@ class DataplanDetector : CallScanner() {
                     validationResult.data?.validationErrors?.forEach { error ->
                         var errorMessage =
                             when (error.errorPointer) {
-                                "#/data/custom_attributes", "#/data/custom_attributes/${error.key}" -> getErrorMessageBySchemaKeyword(ViolationSchemaKeywordType.get(error.schemaKeyworkd), error.expected)
+                                "#/data/custom_attributes", "#/data/custom_attributes/${error.key}" -> getErrorMessageBySchemaKeyword(
+                                    ViolationSchemaKeywordType.get(error.schemaKeyworkd),
+                                    error.expected
+                                )
                                 "#" -> when (validationResult.data?.match?.type) {
                                     "commerce_event" -> "Unplanned Commerce Event"
                                     "custom_event" -> "Unplanned Custom Event (MPEvent)"
@@ -155,17 +169,19 @@ class DataplanDetector : CallScanner() {
                         val matchingValues = ArrayList<UElement>()
                         unresolvedObject.forEachExpression { expression ->
                             val value = expression.resolve()
-                            val targetValue = if (error.actual.isNullOrEmpty()) error.key else error.actual
+                            val targetValue =
+                                if (error.actual.isNullOrEmpty()) error.key else error.actual
                             if (value.toString() == targetValue) {
                                 expression.node.let { matchingValues.add(it) }
                             }
                         }
                         val match = validationResult.data?.match
-                        errorMessage = errorMessage ?: validationResult.data?.match?.criteria?.entries?.firstOrNull {
-                            it.value == error.key
-                        }?.let { entry ->
-                            "For ${match?.type}, unexpected ${entry.key} value of \"${entry.value}\". exprected ${error.expected}"
-                        }
+                        errorMessage = errorMessage
+                            ?: validationResult.data?.match?.criteria?.entries?.firstOrNull {
+                                it.value == error.key
+                            }?.let { entry ->
+                                "For ${match?.type}, unexpected ${entry.key} value of \"${entry.value}\". exprected ${error.expected}"
+                            }
                         if (matchingValues.size == 1) {
                             context.report(
                                 ISSUE,
@@ -186,12 +202,18 @@ class DataplanDetector : CallScanner() {
                 }
             }
             if (config?.resultsFile?.isEmpty() == false) {
-                File(config!!.resultsFile!!).appendText(result?.response?.joinToString { it.toString() } ?: "")
+                File(config!!.resultsFile!!).appendText(
+                    result?.response?.joinToString { it.toString() }
+                        ?: ""
+                )
             }
         }
     }
 
-    fun getErrorMessageBySchemaKeyword(schemaKeyword: ViolationSchemaKeywordType, expectedValue: String? = null): String {
+    fun getErrorMessageBySchemaKeyword(
+        schemaKeyword: ViolationSchemaKeywordType,
+        expectedValue: String? = null
+    ): String {
         val expectedValueMessage = expectedValue?.let { ": $it" } ?: ""
         return when (schemaKeyword) {
             ViolationSchemaKeywordType.Const ->
@@ -243,7 +265,8 @@ class DataplanDetector : CallScanner() {
 
         companion object {
             fun get(value: String?): ViolationSchemaKeywordType {
-                return values().firstOrNull { it.toString().toLowerCase() == value?.toLowerCase() } ?: Unknown
+                return values().firstOrNull { it.toString().toLowerCase() == value?.toLowerCase() }
+                    ?: Unknown
             }
         }
     }

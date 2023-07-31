@@ -5,15 +5,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
-import android.os.Message;
 
 import androidx.annotation.VisibleForTesting;
 
-import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
-import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.database.services.SQLiteOpenHelperWrapper;
 
 import org.json.JSONException;
@@ -25,6 +22,7 @@ public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
     private final Context mContext;
     public static final int DB_VERSION = 9;
     private static String DB_NAME = "mparticle.db";
+
     public static String getDbName() {
         return DB_NAME;
     }
@@ -114,7 +112,7 @@ public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
                 BreadcrumbTable.BreadcrumbTableColumns.TABLE_NAME,
                 MessageTable.MessageTableColumns.TABLE_NAME
         };
-        for (String tableName: tableNames) {
+        for (String tableName : tableNames) {
             SQLiteStatement statement = db.compileStatement(String.format(updateStatement, tableName, MpIdDependentTable.MP_ID, currentMpId));
             statement.execute();
         }
@@ -156,8 +154,7 @@ public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
     private void removeGcmTable(SQLiteDatabase db) {
         try {
             db.execSQL("DROP TABLE IF EXISTS gcm_messages");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

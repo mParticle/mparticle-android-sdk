@@ -3,6 +3,7 @@ package com.mparticle.internal.listeners;
 import android.content.ContentValues;
 import android.content.Context;
 import android.os.Message;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 

@@ -21,14 +21,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.NumberFormat;
-import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** package-private **/class MParticleUserDelegate {
+/**
+ * package-private
+ **/
+class MParticleUserDelegate {
     private AppStateManager mAppStateManager;
     private ConfigManager mConfigManager;
     private MessageManager mMessageManager;
@@ -49,7 +49,7 @@ import java.util.Map;
         return mMessageManager.getUserAttributes(new UserAttributeListenerWrapper(listener), mpId);
     }
 
-    public Map<MParticle.IdentityType, String> getUserIdentities(long mpId){
+    public Map<MParticle.IdentityType, String> getUserIdentities(long mpId) {
         return mMessageManager.getUserIdentities(mpId);
     }
 
@@ -139,7 +139,6 @@ import java.util.Map;
      * setUserAttributes is an asynchronous method, and should normally be run as such. In certain
      * cases, like when an IdentityApiRequest has copyUserAttributes set to true, we need to set the
      * user attributes on the new user synchronously, and only then should we use this flag
-     *
      */
     boolean setUserAttribute(String key, Object value, long userMpId, boolean synchronously) {
         if (mConfigManager.isEnabled()) {
@@ -162,7 +161,7 @@ import java.util.Map;
                     for (int i = 0; i < values.size(); i++) {
                         totalLength += values.get(i).toString().length();
                         if (totalLength > Constants.LIMIT_ATTR_VALUE) {
-                            Logger.warning("Error while setting user attribute - attribute lists cannot contain values of combined length greater than " + Constants.LIMIT_ATTR_VALUE + " characters. Attribute not set." );
+                            Logger.warning("Error while setting user attribute - attribute lists cannot contain values of combined length greater than " + Constants.LIMIT_ATTR_VALUE + " characters. Attribute not set.");
                             return false;
                         } else {
                             clonedList.add(values.get(i).toString());
@@ -270,7 +269,7 @@ import java.util.Map;
                         MParticleUserImpl.getInstance(context, previousMpid, this),
                         MParticleUserImpl.getInstance(context, newMpid, this)
                 );
-            }catch (Exception e) {
+            } catch (Exception e) {
                 Logger.error("Error while executing UserAliasHandler: " + e.toString());
             }
         }

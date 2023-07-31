@@ -124,17 +124,30 @@ class ConfigMigrationTest : BaseCleanInstallEachTest() {
     }
 
     private fun setOldConfigState(config: JSONObject) {
-        ConfigManager.getInstance(mContext).getKitConfigPreferences().edit().remove(ConfigManager.KIT_CONFIG_KEY)
-        ConfigManager.getPreferences(mContext).edit().putString(oldConfigSharedprefsKey, config.toString()).apply()
+        ConfigManager.getInstance(mContext).getKitConfigPreferences().edit()
+            .remove(ConfigManager.KIT_CONFIG_KEY)
+        ConfigManager.getPreferences(mContext).edit()
+            .putString(oldConfigSharedprefsKey, config.toString()).apply()
     }
 
     private fun assertOldConfigState(config: JSONObject) {
-        assertEquals(config.toString(), ConfigManager.getPreferences(mContext).getString(oldConfigSharedprefsKey, JSONArray().toString()))
+        assertEquals(
+            config.toString(),
+            ConfigManager.getPreferences(mContext)
+                .getString(oldConfigSharedprefsKey, JSONArray().toString())
+        )
     }
 
     private fun assertNewConfigState(config: JSONObject) {
-        val configString = ConfigManager.getPreferences(mContext).getString(ConfigManager.CONFIG_JSON, JSONArray().toString())
+        val configString = ConfigManager.getPreferences(mContext)
+            .getString(ConfigManager.CONFIG_JSON, JSONArray().toString())
         assertNull(JSONObject(configString).optJSONArray(ConfigManager.KEY_EMBEDDED_KITS))
-        assertEquals(config.optString(ConfigManager.KEY_EMBEDDED_KITS, JSONArray().toString()), ConfigManager.getInstance(mContext).kitConfigPreferences.getString(ConfigManager.KIT_CONFIG_KEY, JSONArray().toString()))
+        assertEquals(
+            config.optString(ConfigManager.KEY_EMBEDDED_KITS, JSONArray().toString()),
+            ConfigManager.getInstance(mContext).kitConfigPreferences.getString(
+                ConfigManager.KIT_CONFIG_KEY,
+                JSONArray().toString()
+            )
+        )
     }
 }

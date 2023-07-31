@@ -16,7 +16,8 @@ object Utils {
 
     fun Array<String>.executeCLI(path: String? = null, workingDirectory: String = "."): String {
         Logger.verbose(
-            "command line operation: ${joinToString(" ") {
+            "command line operation: ${
+            joinToString(" ") {
                 if (it.contains(" ")) {
                     "\"$it\""
                 } else {

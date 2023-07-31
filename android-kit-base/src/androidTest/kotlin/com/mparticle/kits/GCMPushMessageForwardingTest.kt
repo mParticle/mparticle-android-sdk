@@ -30,9 +30,10 @@ class GCMPushMessageForwardingTest : BaseKitOptionsTest() {
                 data = Uri.EMPTY
                 putExtras(Bundle())
             }
-        (MParticle.getInstance()?.getKitInstance(1) as PushListenerTestKit).onPushMessageReceived = { context, intent ->
-            receivedIntent = intent
-        }
+        (MParticle.getInstance()?.getKitInstance(1) as PushListenerTestKit).onPushMessageReceived =
+            { context, intent ->
+                receivedIntent = intent
+            }
         MPServiceUtil(mContext).onHandleIntent(intent)
 
         assertNotNull(receivedIntent)

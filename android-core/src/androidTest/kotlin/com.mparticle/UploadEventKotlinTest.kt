@@ -121,7 +121,9 @@ class UploadEventKotlinTest : BaseCleanStartedEachTest() {
                 it.optJSONArray("msgs")?.let { messagesArray ->
                     (0 until messagesArray.length())
                         .any {
-                            val eventProductName = messagesArray.getJSONObject(it).optJSONObject("pd")?.optJSONArray("pl")?.optJSONObject(0)?.optString("nm")
+                            val eventProductName =
+                                messagesArray.getJSONObject(it).optJSONObject("pd")
+                                    ?.optJSONArray("pl")?.optJSONObject(0)?.optString("nm")
                             assertNotEquals("Should Not Upload", eventProductName)
                             if (eventProductName == "Should Upload 1" || eventProductName == "Should Upload 2") {
                                 numUploadedEvents++

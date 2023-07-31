@@ -65,8 +65,7 @@ public class MPServiceUtil {
         intent.setClass(context, MPService.class);
         try {
             context.startService(intent);
-        }
-        catch (IllegalStateException ignore) {
+        } catch (IllegalStateException ignore) {
             new MPServiceUtil(context).onHandleIntent(intent);
         }
     }
@@ -92,8 +91,7 @@ public class MPServiceUtil {
                 final ProviderCloudMessage message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
                 showNotification(message);
             }
-        }
-        finally {
+        } finally {
             synchronized (LOCK) {
                 if (sWakeLock != null && sWakeLock.isHeld()) {
                     sWakeLock.release();

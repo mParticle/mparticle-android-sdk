@@ -3,6 +3,7 @@ package com.mparticle.networking;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
+
 import androidx.annotation.Nullable;
 
 import com.mparticle.BuildConfig;

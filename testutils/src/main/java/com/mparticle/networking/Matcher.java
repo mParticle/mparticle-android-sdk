@@ -1,11 +1,11 @@
 package com.mparticle.networking;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Matcher {
 
-    public Matcher() {}
+    public Matcher() {
+    }
 
     public Matcher(MPUrl url) {
         this.url = url.getFile();
@@ -53,7 +53,7 @@ public class Matcher {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Matcher) {
-            Matcher matcher = (Matcher)obj;
+            Matcher matcher = (Matcher) obj;
 
             if (matcher.bodyMatch == bodyMatch &&
                     matcher.url == url &&

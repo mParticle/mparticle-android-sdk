@@ -18,7 +18,8 @@ open class BaseTableTest : BaseCleanInstallEachTest() {
         var openHelper = helper?.let { TestSQLiteOpenHelper(it, DB_NAME, oldVersion) }
         openHelper?.writableDatabase
         openHelper?.onCreateLatch?.await()
-        openHelper = helper?.let { TestSQLiteOpenHelper(it, DB_NAME, MParticleDatabaseHelper.DB_VERSION) }
+        openHelper =
+            helper?.let { TestSQLiteOpenHelper(it, DB_NAME, MParticleDatabaseHelper.DB_VERSION) }
         openHelper?.writableDatabase
         if (oldVersion < MParticleDatabaseHelper.DB_VERSION) {
             openHelper?.onUpgradeLatch?.await()

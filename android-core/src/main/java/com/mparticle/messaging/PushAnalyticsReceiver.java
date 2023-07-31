@@ -22,7 +22,6 @@ import android.content.Intent;
  *
  * @see #onNotificationReceived(ProviderCloudMessage)
  * @see #onNotificationTapped(ProviderCloudMessage)
- *
  */
 public class PushAnalyticsReceiver extends BroadcastReceiver implements PushAnalyticsReceiverCallback {
 

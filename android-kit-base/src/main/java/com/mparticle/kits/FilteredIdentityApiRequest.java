@@ -9,11 +9,11 @@ import java.util.Map;
 public class FilteredIdentityApiRequest {
     KitIntegration provider;
     Map<MParticle.IdentityType, String> userIdentities = new HashMap<>();
-    
+
     FilteredIdentityApiRequest(IdentityApiRequest identityApiRequest, KitIntegration provider) {
         if (identityApiRequest != null) {
             userIdentities = new HashMap<>(identityApiRequest.getUserIdentities());
-            if (provider.getKitManager()!= null) {
+            if (provider.getKitManager() != null) {
                 userIdentities = provider.getKitManager().getDataplanFilter().transformIdentities(userIdentities);
             }
         }

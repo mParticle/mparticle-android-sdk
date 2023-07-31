@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 
 import com.mparticle.internal.Constants;
-import com.mparticle.internal.MessageBatch;
 import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.tables.UploadTable;
 import com.mparticle.internal.listeners.InternalListenerManager;
@@ -50,8 +49,7 @@ public class UploadService extends UploadTable {
                 readyUploads.add(readyUpload);
                 InternalListenerManager.getListener().onCompositeObjects(readyUploadsCursor, readyUpload);
             }
-        }
-        finally {
+        } finally {
             if (readyUploadsCursor != null && !readyUploadsCursor.isClosed()) {
                 readyUploadsCursor.close();
             }

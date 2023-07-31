@@ -1,5 +1,11 @@
 package com.mparticle.networking;
 
+import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.ALIAS;
+import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.AUDIENCE;
+import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.CONFIG;
+import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.EVENTS;
+import static org.junit.Assert.fail;
+
 import android.content.Context;
 
 import com.mparticle.MParticle;
@@ -23,12 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
-
-import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.ALIAS;
-import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.AUDIENCE;
-import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.CONFIG;
-import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint.EVENTS;
-import static org.junit.Assert.fail;
 
 public class MockServer {
 
@@ -61,7 +61,8 @@ public class MockServer {
         return instance;
     }
 
-    private MockServer() {}
+    private MockServer() {
+    }
 
     private MockServer(Context context) {
         this.context = context;
@@ -105,52 +106,52 @@ public class MockServer {
     void onRequestMade(MPConnectionTestImpl mockConnection) {
         try {
             Thread.sleep(50);
-        requests.add(mockConnection);
+            requests.add(mockConnection);
 
-        List<Map.Entry<Matcher, Object>> logicList = new ArrayList<>(serverLogic.entrySet());
-        //try to get a match FILO style
-        reverseAndUpdateKey(logicList);
-        long delay = 0;
-        boolean found = false;
-        for (Map.Entry<Matcher, Object> entry: logicList) {
-            if (entry.getKey().isMatch(mockConnection)) {
-                if (entry.getValue() instanceof Response) {
-                    Response response = (Response) entry.getValue();
-                    response.setRequest(mockConnection);
-                    mockConnection.response = response.responseBody;
-                    mockConnection.responseCode = response.responseCode;
-                    if (!entry.getKey().keepAfterMatch) {
-                        serverLogic.remove(entry.getKey());
+            List<Map.Entry<Matcher, Object>> logicList = new ArrayList<>(serverLogic.entrySet());
+            //try to get a match FILO style
+            reverseAndUpdateKey(logicList);
+            long delay = 0;
+            boolean found = false;
+            for (Map.Entry<Matcher, Object> entry : logicList) {
+                if (entry.getKey().isMatch(mockConnection)) {
+                    if (entry.getValue() instanceof Response) {
+                        Response response = (Response) entry.getValue();
+                        response.setRequest(mockConnection);
+                        mockConnection.response = response.responseBody;
+                        mockConnection.responseCode = response.responseCode;
+                        if (!entry.getKey().keepAfterMatch) {
+                            serverLogic.remove(entry.getKey());
+                        }
+                        delay = response.delay;
+                        found = true;
+                        break;
                     }
-                    delay = response.delay;
-                    found = true;
-                    break;
-                }
-                if (entry.getValue() instanceof CallbackResponse) {
-                    CallbackResponse callbackResponse = (CallbackResponse) entry.getValue();
-                    callbackResponse.invokeCallback(mockConnection);
-                    if (!entry.getKey().keepAfterMatch) {
-                        serverLogic.remove(entry.getKey());
+                    if (entry.getValue() instanceof CallbackResponse) {
+                        CallbackResponse callbackResponse = (CallbackResponse) entry.getValue();
+                        callbackResponse.invokeCallback(mockConnection);
+                        if (!entry.getKey().keepAfterMatch) {
+                            serverLogic.remove(entry.getKey());
+                        }
                     }
                 }
             }
-        }
-        if (!found) {
-           Logger.error("response not found for request: " + mockConnection.url.toString());
-        }
+            if (!found) {
+                Logger.error("response not found for request: " + mockConnection.url.toString());
+            }
 
-        for (Map.Entry<Matcher, CountDownLatch> entry: new HashSet<>(blockers.entrySet())) {
-            if (entry.getKey().isMatch(mockConnection)) {
-                blockers.remove(entry.getKey()).countDown();
+            for (Map.Entry<Matcher, CountDownLatch> entry : new HashSet<>(blockers.entrySet())) {
+                if (entry.getKey().isMatch(mockConnection)) {
+                    blockers.remove(entry.getKey()).countDown();
+                }
             }
-        }
-        if (delay > 0) {
-            try {
-                Thread.sleep(delay);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            if (delay > 0) {
+                try {
+                    Thread.sleep(delay);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-        }
         } catch (InterruptedException e) {
             fail(e.getMessage());
             Thread.currentThread().interrupt();
@@ -163,7 +164,7 @@ public class MockServer {
         void onRequest(Response response, MPConnectionTestImpl connection);
     }
 
-    
+
     public MockServer setUpHappyConfig() {
         Matcher match = new Matcher().urlMatcher(new UrlMatcher() {
             @Override
@@ -179,12 +180,12 @@ public class MockServer {
         return this;
     }
 
-    
+
     public MockServer setupConfigResponse(String responseString) {
         return setupConfigResponse(responseString, 0);
     }
 
-    
+
     public MockServer setupConfigResponse(String responseString, int delay) {
         Matcher match = new Matcher(getUrl(CONFIG));
         match.keepAfterMatch = true;
@@ -205,7 +206,7 @@ public class MockServer {
         serverLogic.put(match, response);
         return this;
     }
-    
+
     public MockServer setupHappyEvents() {
         Matcher match = new Matcher(getUrl(EVENTS));
         match.keepAfterMatch = true;
@@ -216,7 +217,7 @@ public class MockServer {
         return this;
     }
 
-    
+
     private MockServer setupHappyIdentify() {
         Matcher match = new Matcher(getUrl(IDENTIFY));
         match.keepAfterMatch = true;
@@ -226,12 +227,12 @@ public class MockServer {
         return this;
     }
 
-    
+
     public MockServer setupHappyIdentify(long mpid) {
         return setupHappyIdentify(mpid, 0);
     }
 
-    
+
     public MockServer setupHappyIdentify(long mpid, int delay) {
         Matcher match = new Matcher(getUrl(IDENTIFY));
         Response response = new Response(getIdentityResponse(mpid, ran.nextBoolean()));
@@ -249,7 +250,7 @@ public class MockServer {
         return this;
     }
 
-    
+
     public MockServer setupHappyLogin(long mpid) {
         Matcher match = new Matcher(getUrl(LOGIN));
         Response response = new Response(getIdentityResponse(mpid, ran.nextBoolean()));
@@ -266,7 +267,7 @@ public class MockServer {
         return this;
     }
 
-    
+
     public MockServer setupHappyLogout(long mpid) {
         Matcher match = new Matcher(getUrl(LOGOUT));
         Response response = new Response(getIdentityResponse(mpid, ran.nextBoolean()));
@@ -274,7 +275,7 @@ public class MockServer {
         return this;
     }
 
-    
+
     public MockServer setupHappyModify() {
         return setupHappyModify(0);
     }
@@ -323,7 +324,7 @@ public class MockServer {
         serverLogic.put(matcher, response);
         return this;
     }
-    
+
     public MockServer addConditionalIdentityResponse(long ifMpid, long thenMpid) {
         return addConditionalIdentityResponse(ifMpid, thenMpid, ran.nextBoolean(), 0);
     }
@@ -331,7 +332,7 @@ public class MockServer {
     public MockServer addConditionalIdentityResponse(long ifMpid, long thenMpid, boolean isLoggedIn) {
         return addConditionalIdentityResponse(ifMpid, thenMpid, isLoggedIn, 0);
     }
-    
+
     public MockServer addConditionalIdentityResponse(long ifMpid, long thenMpid, boolean isLoggedIn, int delay) {
         Matcher match = new Matcher(getUrl(IDENTIFY));
         match.bodyMatch = getIdentityMpidMatch(ifMpid);
@@ -344,12 +345,12 @@ public class MockServer {
     public MockServer addConditionalLoginResponse(long ifMpid, long thenMpid) {
         return addConditionalLoginResponse(ifMpid, thenMpid, ran.nextBoolean(), 0);
     }
-    
+
     public MockServer addConditionalLoginResponse(long ifMpid, long thenMpid, boolean isLoggedIn) {
         return addConditionalLoginResponse(ifMpid, thenMpid, isLoggedIn, 0);
     }
 
-    
+
     public MockServer addConditionalLoginResponse(long ifMpid, long thenMpid, boolean isLoggedIn, int delay) {
         Matcher match = new Matcher(getUrl(LOGIN));
         match.bodyMatch = getIdentityMpidMatch(ifMpid);
@@ -359,15 +360,15 @@ public class MockServer {
         return this;
     }
 
-    
+
     public MockServer addConditionalLogoutResponse(long ifMpid, long thenMpid) {
-        return addConditionalLogoutResponse(ifMpid, thenMpid, ran.nextBoolean(),0);
+        return addConditionalLogoutResponse(ifMpid, thenMpid, ran.nextBoolean(), 0);
     }
 
     public MockServer addConditionalLogoutResponse(long ifMpid, long thenMpid, boolean isLoggedIn) {
         return addConditionalLogoutResponse(ifMpid, thenMpid, isLoggedIn, 0);
     }
-    
+
     public MockServer addConditionalLogoutResponse(long ifMpid, long thenMpid, boolean isLoggedIn, int delay) {
         Matcher match = new Matcher(getUrl(LOGOUT));
         match.bodyMatch = getIdentityMpidMatch(ifMpid);
@@ -444,14 +445,13 @@ public class MockServer {
 
     private OnRequestCallback getHappyIdentityRequestCallback() {
         return new OnRequestCallback() {
-            
+
             public void onRequest(Response response, MPConnectionTestImpl connection) {
                 try {
                     IdentityRequest.IdentityRequestBody request = new IdentityRequest(connection).getBody();
                     response.responseCode = 200;
                     response.responseBody = getIdentityResponse(request.previousMpid != null && request.previousMpid != 0 ? request.previousMpid : ran.nextLong(), ran.nextBoolean());
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
             }
@@ -511,8 +511,7 @@ public class MockServer {
                     }
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -561,7 +560,7 @@ public class MockServer {
 
         public List<Request> getModify() {
             List<Request> matchingRequests = new ArrayList<>();
-            for (MPConnectionTestImpl request: requests) {
+            for (MPConnectionTestImpl request : requests) {
                 String url = request.getURL().getFile();
                 if (url.endsWith(MODIFY)) {
                     matchingRequests.add(new IdentityRequest(request));
@@ -592,7 +591,7 @@ public class MockServer {
 
         private List<Request> get(MParticleBaseClientImpl.Endpoint endpoint, MPUrl url) {
             List<Request> matchingRequests = new ArrayList<>();
-            for (MPConnectionTestImpl request: requests) {
+            for (MPConnectionTestImpl request : requests) {
                 if (request.getURL().getFile().equals(url.getFile())) {
                     switch (endpoint) {
                         case IDENTITY:
@@ -616,7 +615,8 @@ public class MockServer {
 
     public class Endpoints {
 
-        private Endpoints() {}
+        private Endpoints() {
+        }
 
         public MPUrl getIdentifyUrl() {
             return getUrl(IDENTIFY);
