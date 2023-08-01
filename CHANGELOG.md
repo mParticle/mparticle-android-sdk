@@ -1,3 +1,15 @@
+## [5.53.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.52.1...v5.53.0) (2023-08-01)
+
+
+### Features
+
+* SQDSDKS-5543 formatting, clean-up and reorganizing imports ([#406](https://github.com/mParticle/mparticle-android-sdk/issues/406)) ([341118c](https://github.com/mParticle/mparticle-android-sdk/commit/341118ca1817d389e05a08e5c79e3c076267e112))
+
+
+### Updates & Maintenance
+
+* Update submodules ([13594c5](https://github.com/mParticle/mparticle-android-sdk/commit/13594c56cf77f62785302cfa17632ace3732e683))
+
 ## [5.52.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.52.0...v5.52.1) (2023-07-24)
 
 
