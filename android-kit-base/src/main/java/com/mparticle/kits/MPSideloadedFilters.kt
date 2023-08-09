@@ -123,7 +123,8 @@ class MPSideloadedFilters {
         applyToFiltersNode(
             KEY_SCREEN_ATTRIBUTES_FILTER,
             Pair(
-                HashingUtility.hashFilterScreenName("$screenName$customAttributeKey").toString(),
+                HashingUtility.hashFilterScreenNameAttribute(screenName, customAttributeKey)
+                    .toString(),
                 EXCLUDING_FILTER_VALUE
             )
         )
@@ -141,7 +142,7 @@ class MPSideloadedFilters {
         applyToFiltersNode(
             KEY_USER_IDENTITY_FILTER,
             Pair(
-                userIdentityType.value.toString(),
+                HashingUtility.hashFilterIdentityType(userIdentityType),
                 EXCLUDING_FILTER_VALUE
             )
         )

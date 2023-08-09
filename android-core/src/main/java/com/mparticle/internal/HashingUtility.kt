@@ -3,6 +3,7 @@ package com.mparticle.internal
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.MParticle.EventType
+import com.mparticle.MParticle.IdentityType
 import com.mparticle.internal.messages.BaseMPMessage
 
 /**
@@ -38,6 +39,8 @@ object HashingUtility {
 
     fun hashFilterCommerceEntityAttributeKey(key: String) = MPUtility.mpHash(key)
 
+    fun hashFilterIdentityType(identityType: IdentityType) = identityType.value.toString()
+
     fun hashFilterEventAttributes(
         eventType: MParticle.EventType?,
         eventName: String,
@@ -59,6 +62,8 @@ object HashingUtility {
         MPUtility.mpHash("$eventType$customAttributeKey")
 
     fun hashFilterScreenName(screenName: String) = MPUtility.mpHash("0$screenName")
+
+    fun hashFilterScreenNameAttribute(screenName: String, attribute : String) = MPUtility.mpHash("0$screenName$attribute")
 
     fun hashEventType(mpEvent: MPEvent) = MPUtility.mpHash("${mpEvent.eventType.ordinal}")
 
