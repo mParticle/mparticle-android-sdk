@@ -450,7 +450,7 @@ class KitConfigurationTest {
         consentForwardingRule.put("v", ruleArray)
         val rule1 = JSONObject()
         ruleArray.put(rule1)
-        rule1.put("h", HashingUtility.hashGDPRContentPurposeKey("1" + "foo purpose"))
+        rule1.put("h", HashingUtility.hashGDPRContentPurposeKey("foo purpose"))
         rule1.put("c", false)
         val configuration = MockKitConfiguration.createKitConfiguration(
             JSONObject("{\"id\":56,\"crvf\":{\"i\": true, \"v\":[{\"c\":true, \"h\":123}, {\"c\":false, \"h\":456}]}}")
