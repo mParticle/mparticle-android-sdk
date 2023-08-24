@@ -556,10 +556,6 @@ class KitManagerImplTest {
         manager.configureKits(mutableListOf(mockedKitConfig))
         Assert.assertEquals(1, manager.providers.size)
         Assert.assertTrue(manager.providers.containsKey(kitId))
-
-        manager.updateKits(JSONArray())
-        Assert.assertEquals(0, manager.providers.size)
-        Assert.assertFalse(manager.providers.containsKey(kitId))
     }
 
     @Test

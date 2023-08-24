@@ -70,7 +70,7 @@ public class KitIntegrationFactory {
         KitIntegration kit;
         if (configuration.getKitId() >= MPSideloadedKit.MIN_SIDELOADED_KIT) {
             kit = sideloadedKitMap.get(configuration.getKitId());
-            if (kit != null && kit.getKitManager() == null) {
+            if (kit != null) {
                 kit.setKitManager(manager);
             }
         } else {

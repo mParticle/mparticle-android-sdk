@@ -60,7 +60,7 @@ class KitManagerImplTests : BaseKitOptionsTest() {
         MParticleOptions.builder(mContext)
             .configuration(
                 ConfiguredKitOptions {
-                    addKit(-1, AttributeListenerTestKit::class.java, JSONObject().put("eau", true))
+                    addKit(-10, AttributeListenerTestKit::class.java, JSONObject().put("eau", true))
                     addKit(-2, IdentityListenerTestKit::class.java)
                     addKit(-3, UserAttributeListenerTestKit::class.java)
                     addKit(-4, AttributeListenerTestKit::class.java, JSONObject().put("eau", true))
@@ -84,7 +84,7 @@ class KitManagerImplTests : BaseKitOptionsTest() {
             return
         }
         assertEquals(6, kitStatus.size)
-        assertEquals(kitStatus[-1], KitManager.KitStatus.STOPPED)
+        assertEquals(kitStatus[-10], KitManager.KitStatus.STOPPED)
         assertEquals(kitStatus[-2], KitManager.KitStatus.NOT_CONFIGURED)
         assertEquals(kitStatus[-3], KitManager.KitStatus.ACTIVE)
         assertEquals(kitStatus[-4], KitManager.KitStatus.STOPPED)
@@ -92,8 +92,8 @@ class KitManagerImplTests : BaseKitOptionsTest() {
         assertEquals(kitStatus[-6], KitManager.KitStatus.ACTIVE)
 
         // double check that ConfigManager is generating the right string
-        val expectedActiveKits = "-6,-4,-3,-1"
-        val expectedBundledKits = "-6,-5,-4,-3,-2.-1"
+        val expectedActiveKits = "-10,-6,-4,-3"
+        val expectedBundledKits = "-6,-5,-4,-3,-2.-10"
         assertEquals(
             expectedActiveKits,
             MParticle.getInstance()?.Internal()?.configManager?.activeModuleIds

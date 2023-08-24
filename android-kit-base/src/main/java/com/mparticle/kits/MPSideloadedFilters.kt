@@ -36,11 +36,11 @@ class MPSideloadedFilters {
      * @return MPSideloadedFilters instance
      */
     // Internally use et as the key
-    fun addEventTypeFilter(eventType: MParticle.EventType): MPSideloadedFilters {
+    fun addEventTypeFilter(eventType: EventType): MPSideloadedFilters {
         applyToFiltersNode(
             KEY_EVENT_TYPES_FILTER,
             Pair(
-                HashingUtility.hashFilterTypeCommerceEvent(eventType).toString(),
+                HashingUtility.hashFilterTypeEvent(eventType).toString(),
                 EXCLUDING_FILTER_VALUE
             )
         )
@@ -176,14 +176,14 @@ class MPSideloadedFilters {
      */
     // Internally use cea as the key
     fun addCommerceEventAttributeFilter(
-        eventType: EventType,
+        eventType: CommerceEventType,
         eventAttributeKey: String
     ): MPSideloadedFilters {
         applyToFiltersNode(
             KEY_COMMERCE_ATTRIBUTE_FILTER,
             Pair(
                 HashingUtility.hashFilterCommerceEventAttribute(
-                    eventType.ordinal,
+                    eventType.type,
                     eventAttributeKey
                 ).toString(),
                 EXCLUDING_FILTER_VALUE
@@ -294,5 +294,21 @@ class MPSideloadedFilters {
 
     enum class CommerceEventKind(internal val eventType: Int) {
         PRODUCT(1), PROMOTION(2), IMPRESSION(3), UNKNOWN(0);
+    }
+
+    enum class CommerceEventType(internal val kind: CommerceEventKind, val type: Int) {
+        PRODUCT_EVENT_TYPE_ADD_TO_CART(CommerceEventKind.PRODUCT, 10),
+        PRODUCT_EVENT_TYPE_REMOVE_FROM_CART(CommerceEventKind.PRODUCT, 11),
+        PRODUCT_EVENT_TYPE_CHECKOUT(CommerceEventKind.PRODUCT, 12),
+        PRODUCT_EVENT_TYPE_CHECKOUT_OPTION(CommerceEventKind.PRODUCT, 13),
+        PRODUCT_EVENT_TYPE_CLICK(CommerceEventKind.PRODUCT, 14),
+        PRODUCT_EVENT_TYPE_VIEW_DETAIL(CommerceEventKind.PRODUCT, 15),
+        PRODUCT_EVENT_TYPE_PURCHASE(CommerceEventKind.PRODUCT, 16),
+        PRODUCT_EVENT_TYPE_REFUND(CommerceEventKind.PRODUCT, 17),
+        PRODUCT_EVENT_TYPE_ADD_TO_WISHLIST(CommerceEventKind.PRODUCT, 20),
+        PRODUCT_EVENT_TYPE_REMOVE_FROM_WISHLIST(CommerceEventKind.PRODUCT, 21),
+        PROMOTION_EVENT_TYPE_VIEW(CommerceEventKind.PROMOTION, 18),
+        PROMOTION_EVENT_TYPE_CLICK(CommerceEventKind.PROMOTION, 19),
+        IMPRESSION_EVENT_TYPE(CommerceEventKind.IMPRESSION, 22)
     }
 }

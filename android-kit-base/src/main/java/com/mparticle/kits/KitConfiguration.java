@@ -293,7 +293,11 @@ public class KitConfiguration {
         for (int i = 0; i < array.size(); i++) {
             int key = array.keyAt(i);
             try {
-                object.put(Integer.toString(key), array.get(key));
+                int value = 0;
+                if(array.get(key)){
+                    value = 1;
+                }
+                object.put(Integer.toString(key), value);
             } catch (JSONException jse) {
                 Logger.error("Issue while parsing kit configuration: " + jse.getMessage());
             }

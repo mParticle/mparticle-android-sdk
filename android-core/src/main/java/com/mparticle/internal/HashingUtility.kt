@@ -33,7 +33,7 @@ object HashingUtility {
 
     fun hashFilterTypeCommerceEvent(eventType: Int) = MPUtility.mpHash("$eventType")
 
-    fun hashFilterTypeCommerceEvent(eventType: EventType) = MPUtility.mpHash("${eventType.ordinal}")
+    fun hashFilterTypeEvent(eventType: EventType) = MPUtility.mpHash("${eventType.ordinal}")
 
     fun hashUserAttributes(key: String) = MPUtility.mpHash(key)
 
@@ -63,7 +63,7 @@ object HashingUtility {
 
     fun hashFilterScreenName(screenName: String) = MPUtility.mpHash("0$screenName")
 
-    fun hashFilterScreenNameAttribute(screenName: String, attribute : String) = MPUtility.mpHash("0$screenName$attribute")
+    fun hashFilterScreenNameAttribute(screenName: String, attribute: String) = MPUtility.mpHash("0$screenName$attribute")
 
     fun hashEventType(mpEvent: MPEvent) = MPUtility.mpHash("${mpEvent.eventType.ordinal}")
 

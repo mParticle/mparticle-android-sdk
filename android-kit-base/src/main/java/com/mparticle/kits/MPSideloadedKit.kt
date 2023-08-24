@@ -31,8 +31,9 @@ abstract class MPSideloadedKit(val kitId: Int) : KitIntegration(), SideloadedKit
     override fun setOptOut(optedOut: Boolean): MutableList<ReportingMessage> = mutableListOf()
 
     fun addFilters(filter: MPSideloadedFilters): MPSideloadedKit {
-        configuration = configuration?.parseConfiguration(filter.toJSONObject())
-        this.onSettingsUpdated(configuration.settings)
+        configuration = configuration?.parseConfiguration(
+            filter.toJSONObject().put(KitConfiguration.KEY_ID, kitId)
+        )
         return this
     }
 

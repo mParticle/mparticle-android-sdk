@@ -521,7 +521,7 @@ class KitConfigurationTest {
 
     private fun getSideloadedFiltersJSONConfig(): JSONObject {
         return JSONObject(
-            "{\"eks\":[{\"id\":10000001,\"avf\":{\"i\":true,\"a\":-910367228,\"v\":-285805487},\"hs\":{\"mt\":{\"ss\":0},\"et\":{\"52\":0,\"57\":0},\"ec\":{\"1589730\":0,\"1738684\":0,\"-1771765932\":0},\"cea\":{\"1524609902\":0,\"1725013959\":0},\"ent\":{\"50\":0},\"afa\":{\"2990805\":0,\"92715034\":0},\"ea\":{\"522773194\":0,\"-537751262\":0},\"svec\":{\"1484019680\":0,\"1484019681\":0},\"svea\":{\"1414348368\":0,\"-1112296720\":0,\"-1112296719\":0},\"uid\":{\"7\":0,\"9\":0},\"ua\":{\"115493\":0,\"3580362\":0}}}]}"
+            "{\"eks\":[{\"id\":10000001,\"avf\":{\"i\":true,\"a\":-910367228,\"v\":-285805487},\"hs\":{\"mt\":{\"ss\":0},\"et\":{\"52\":0,\"57\":0},\"ec\":{\"1589730\":0,\"1738684\":0,\"-1771765932\":0},\"cea\":{\"-2117833381\":0,\"2005359009\":0},\"ent\":{\"50\":0},\"afa\":{\"2990805\":0,\"92715034\":0},\"ea\":{\"522773194\":0,\"-537751262\":0},\"svec\":{\"1484019680\":0,\"1484019681\":0},\"svea\":{\"1414348368\":0,\"-1112296720\":0,\"-1112296719\":0},\"uid\":{\"7\":0,\"9\":0},\"ua\":{\"115493\":0,\"3580362\":0}}}]}"
         )
     }
 
@@ -543,8 +543,8 @@ class KitConfigurationTest {
             .addUserIdentityFilter(MParticle.IdentityType.FacebookCustomAudienceId)
             .addUserAttributeFilter("ua1")
             .addUserAttributeFilter("ua20")
-            .addCommerceEventAttributeFilter(MParticle.EventType.Media, "attr1")
-            .addCommerceEventAttributeFilter(MParticle.EventType.Location, "attr1")
+            .addCommerceEventAttributeFilter(MPSideloadedFilters.CommerceEventType.PRODUCT_EVENT_TYPE_ADD_TO_CART, "attr1")
+            .addCommerceEventAttributeFilter(MPSideloadedFilters.CommerceEventType.PRODUCT_EVENT_TYPE_PURCHASE, "attr1")
             .addCommerceEventEntityTypeFilter(MPSideloadedFilters.CommerceEventKind.PROMOTION)
             .addCommerceEventAppFamilyAttributeFilter("afa1")
             .addCommerceEventAppFamilyAttributeFilter("afa20")
