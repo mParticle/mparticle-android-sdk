@@ -65,6 +65,18 @@ public final class KitUtils {
     }
 
     /**
+     * Simple bit-shifting hash for use with filtering. mParticle's backend uses this same hash
+     * to compute hashes of events and their attributes, and will include those hashes with
+     * configuration settings for kits.
+     *
+     * @param input
+     * @return return int hash
+     */
+    public static int hashForFiltering(String input) {
+        return MPUtility.mpHash(input);
+    }
+
+    /**
      * Combine the given list into a single string separated by a comma.
      *
      * @param list
