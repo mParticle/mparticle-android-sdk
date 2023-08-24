@@ -745,7 +745,7 @@ public class KitConfiguration {
     }
 
     public boolean shouldLogScreen(String screenName) {
-        int nameHash = HashingUtility.INSTANCE.hashFilterScreenName("0" + screenName);
+        int nameHash = HashingUtility.INSTANCE.hashFilterScreenName(screenName);
         if (mScreenNameFilters.size() > 0 && !mScreenNameFilters.get(nameHash, true)) {
             return false;
         }
