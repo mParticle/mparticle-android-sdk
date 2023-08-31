@@ -204,6 +204,12 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         HashSet<Integer> activeIds = new HashSet<Integer>();
         HashMap<Integer, KitIntegration> previousKits = new HashMap<>(providers);
 
+        for (Map.Entry<Integer, KitIntegration> entry : previousKits.entrySet()) {
+            if (entry.getKey() >= MPSideloadedKit.MIN_SIDELOADED_KIT && !kitConfigurations.contains(entry.getValue())) {
+                kitConfigurations.add(entry.getValue().getConfiguration());
+            }
+        }
+
         if (kitConfigurations != null) {
             for (KitConfiguration configuration : kitConfigurations) {
                 try {
@@ -227,6 +233,10 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                         }
                         if (!activeKitInstanceCreated && configuration.getKitId() >= MPSideloadedKit.MIN_SIDELOADED_KIT) {
                             Logger.verbose("De-initializing sideloaded kit with id: " + configuration.getKitId());
+                            KitIntegration integration = providers.get(configuration.getKitId());
+                            clearIntegrationAttributes(integration);
+                            integration.onKitDestroy();
+                            integration.onKitCleanup();
                             continue;
                         }
                         if (!activeKitInstanceCreated || activeKit.isDisabled() || !configuration.shouldIncludeFromConsentRules(user)) {
@@ -257,8 +267,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             Integer id = ids.next();
             if (!activeIds.contains(id)) {
                 KitIntegration integration = providers.get(id);
-                if (integration != null) {
-                    Logger.debug("De-initializing kit: " + integration.getName());
+                if (integration != null){
                     clearIntegrationAttributes(integration);
                     integration.onKitDestroy();
                     integration.onKitCleanup();

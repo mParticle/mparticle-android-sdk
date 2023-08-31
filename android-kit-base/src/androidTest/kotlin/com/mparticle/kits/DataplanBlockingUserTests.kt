@@ -35,19 +35,19 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         MParticleOptions.builder(mContext)
             .configuration(
                 KitOptions {
-                    addKit(-1, AttributeListenerTestKit::class.java)
-                    addKit(-2, IdentityListenerTestKit::class.java)
-                    addKit(-3, UserAttributeListenerTestKit::class.java)
+                    addKit(-100, AttributeListenerTestKit::class.java)
+                    addKit(-200, IdentityListenerTestKit::class.java)
+                    addKit(-300, UserAttributeListenerTestKit::class.java)
                 }
             ).let {
                 startMParticle(it)
             }
         attributeListenerKitKit =
-            MParticle.getInstance()?.getKitInstance(-1) as AttributeListenerTestKit
+            MParticle.getInstance()?.getKitInstance(-100) as AttributeListenerTestKit
         identityListenerKitKit =
-            MParticle.getInstance()?.getKitInstance(-2) as IdentityListenerTestKit
+            MParticle.getInstance()?.getKitInstance(-200) as IdentityListenerTestKit
         userAttributeListenerKitKit =
-            MParticle.getInstance()?.getKitInstance(-3) as UserAttributeListenerTestKit
+            MParticle.getInstance()?.getKitInstance(-300) as UserAttributeListenerTestKit
         kitIntegrationTestKits =
             listOf(attributeListenerKitKit, identityListenerKitKit, userAttributeListenerKitKit)
         assertTrue(randomAttributes().isNotEmpty())

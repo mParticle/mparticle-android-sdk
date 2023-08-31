@@ -124,6 +124,7 @@
 
 
 -keep class com.mparticle.internal.SideloadedKit { *; }
+-keep class com.mparticle.internal.HashingUtility { *; }
 
 -keep class com.mparticle.internal.KitManager { *; }
 -keep class com.mparticle.internal.KitManager$* { *; }

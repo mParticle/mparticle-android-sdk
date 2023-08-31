@@ -123,10 +123,10 @@ public class UploadHandler extends BaseHandler {
             switch (msg.what) {
                 case UPDATE_CONFIG:
                     MParticle instance = MParticle.getInstance();
+                    mApiClient.fetchConfig(true);
                     if (instance != null) {
                         instance.Internal().getKitManager().loadKitLibrary();
                     }
-                    mApiClient.fetchConfig(true);
                     break;
                 case INIT_CONFIG:
                     mConfigManager.delayedStart();

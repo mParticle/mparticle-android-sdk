@@ -31,13 +31,11 @@ abstract class MPSideloadedKit(val kitId: Int) : KitIntegration(), SideloadedKit
     override fun setOptOut(optedOut: Boolean): MutableList<ReportingMessage> = mutableListOf()
 
     fun addFilters(filter: MPSideloadedFilters): MPSideloadedKit {
-        configuration = configuration.applyFilters(filter)
+        configuration = configuration?.parseConfiguration(
+            filter.toJSONObject().put(KitConfiguration.KEY_ID, kitId)
+        )
         return this
     }
 
     override fun getJsonConfig(): JSONObject? = super.getJsonConfig()
-
-    private fun KitConfiguration.applyFilters(filters: MPSideloadedFilters): KitConfiguration? {
-        return configuration?.applySideloadedKits(filters)
-    }
 }

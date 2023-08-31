@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.mparticle.internal.Constants;
+import com.mparticle.internal.HashingUtility;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.listeners.InternalListenerManager;
@@ -185,8 +186,8 @@ public class MPEvent extends BaseEvent {
     }
 
     public int getEventHash() {
-        if (eventHash == 0) {
-            eventHash = MPUtility.mpHash(eventType.ordinal() + eventName);
+        if (eventHash == 0){
+            eventHash = HashingUtility.INSTANCE.hashEvent(eventType, eventName);
         }
         return eventHash;
     }

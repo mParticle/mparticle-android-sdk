@@ -4,6 +4,7 @@ import com.mparticle.MPEvent;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.Promotion;
+import com.mparticle.internal.HashingUtility;
 import com.mparticle.kits.CommerceEventUtils;
 import com.mparticle.kits.KitUtils;
 
@@ -27,10 +28,10 @@ abstract class EventWrapper {
 
     public abstract int getEventHash();
 
-    protected static Map<Integer, String> getHashes(String hashPrefix, Map<String, String> map) {
+    protected static Map<Integer, String> getHashes(int hashPrefix, Map<String, String> map) {
         Map<Integer, String> hashedMap = new HashMap<Integer, String>();
         for (Map.Entry<String, String> entry : map.entrySet()) {
-            int hash = KitUtils.hashForFiltering(hashPrefix + entry.getKey());
+            int hash = HashingUtility.INSTANCE.hashFilterCommerceEventAttribute(hashPrefix, entry.getKey());
             hashedMap.put(hash, entry.getKey());
         }
         return hashedMap;
@@ -55,7 +56,7 @@ abstract class EventWrapper {
                 attributeHashes = new HashMap<Integer, String>();
                 if (mCommerceEvent.getCustomAttributeStrings() != null) {
                     for (Map.Entry<String, String> entry : mCommerceEvent.getCustomAttributeStrings().entrySet()) {
-                        int hash = KitUtils.hashForFiltering(getEventTypeOrdinal() + entry.getKey());
+                        int hash = HashingUtility.INSTANCE.hashFilterCommerceEventAttribute(getEventTypeOrdinal(), entry.getKey());
                         attributeHashes.put(hash, entry.getKey());
                     }
                 }
@@ -80,7 +81,7 @@ abstract class EventWrapper {
         }
 
         public int getEventHash() {
-            return KitUtils.hashForFiltering("" + getEventTypeOrdinal());
+            return HashingUtility.INSTANCE.hashFilterTypeCommerceEvent(getEventTypeOrdinal());
         }
 
         public Map.Entry<String, String> findAttribute(String propertyType, int hash, Product product, Promotion promotion) {
@@ -99,7 +100,7 @@ abstract class EventWrapper {
                         CommerceEventUtils.extractActionAttributes(getEvent(), eventFieldAttributes);
                         CommerceEventUtils.extractTransactionAttributes(getEvent(), eventFieldAttributes);
                     }
-                    eventFieldHashes = getHashes(getEventTypeOrdinal() + "", eventFieldAttributes);
+                    eventFieldHashes = getHashes(getEventTypeOrdinal(), eventFieldAttributes);
                 }
                 String key = eventFieldHashes.get(hash);
                 if (key != null) {
@@ -111,7 +112,7 @@ abstract class EventWrapper {
                 }
                 Map<String, String> attributes = new HashMap<String, String>();
                 CommerceEventUtils.extractProductAttributes(product, attributes);
-                Map<Integer, String> hashes = getHashes(getEventTypeOrdinal() + "", attributes);
+                Map<Integer, String> hashes = getHashes(getEventTypeOrdinal(), attributes);
                 String key = hashes.get(hash);
                 if (key != null) {
                     return new AbstractMap.SimpleEntry<String, String>(key, attributes.get(key));
@@ -122,7 +123,7 @@ abstract class EventWrapper {
                 }
                 Map<String, String> attributes = new HashMap<String, String>();
                 CommerceEventUtils.extractProductFields(product, attributes);
-                Map<Integer, String> hashes = getHashes(getEventTypeOrdinal() + "", attributes);
+                Map<Integer, String> hashes = getHashes(getEventTypeOrdinal(), attributes);
                 String key = hashes.get(hash);
                 if (key != null) {
                     return new AbstractMap.SimpleEntry<String, String>(key, attributes.get(key));
@@ -133,7 +134,7 @@ abstract class EventWrapper {
                 }
                 Map<String, String> attributes = new HashMap<String, String>();
                 CommerceEventUtils.extractPromotionAttributes(promotion, attributes);
-                Map<Integer, String> hashes = getHashes(getEventTypeOrdinal() + "", attributes);
+                Map<Integer, String> hashes = getHashes(getEventTypeOrdinal(), attributes);
                 String key = hashes.get(hash);
                 if (key != null) {
                     return new AbstractMap.SimpleEntry<String, String>(key, attributes.get(key));
@@ -212,7 +213,7 @@ abstract class EventWrapper {
                 attributeHashes = new HashMap<Integer, String>();
                 if (mEvent.getCustomAttributeStrings() != null) {
                     for (Map.Entry<String, String> entry : mEvent.getCustomAttributeStrings().entrySet()) {
-                        int hash = KitUtils.hashForFiltering(getEventTypeOrdinal() + mEvent.getEventName() + entry.getKey());
+                        int hash = HashingUtility.INSTANCE.hashFilterEventAttributes(getEventTypeOrdinal(), mEvent.getEventName(), entry.getKey());
                         attributeHashes.put(hash, entry.getKey());
                     }
                 }
@@ -235,7 +236,7 @@ abstract class EventWrapper {
 
         public int getEventHash() {
             if (mScreenEvent) {
-                return KitUtils.hashForFiltering(getEventTypeOrdinal() + mEvent.getEventName());
+                return HashingUtility.INSTANCE.hashFilterCommerceEventAttribute(getEventTypeOrdinal() , mEvent.getEventName());
             } else {
                 return mEvent.getEventHash();
             }
