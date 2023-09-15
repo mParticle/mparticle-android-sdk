@@ -1,43 +1,43 @@
-//keep things alphabetical like readme
-
-include (
-        ':kits:adjust-kit',
-        ':kits:adobe-kit',
-        ':kits:adobemedia-kit',
-        ':kits:appboy-kit',
-        ':kits:appsflyer-kit',
-        ':kits:apptentive-kit',
-        ':kits:apptimize-kit',
-        ':kits:apteligent-kit',
-        //blueshift hosts kit
-        ':kits:branch-kit',
-        ':kits:button-kit',
-        ':kits:clevertap-kit',
-        ':kits:comscore-kit',
-        ':kits:flurry-kit',
-        ':kits:foresee-kit',
-        ':kits:googleanalyticsfirebase-kit',
-        ':kits:googleanalyticsfirebasega4-kit',
-        ':kits:iterable-kit',
-        ':kits:kochava-kit',
-        ':kits:leanplum-kit',
-        ':kits:localytics-kit',
-        //Neura hosts kit
-        ':kits:onetrust-kit',
-        ':kits:optimizely-kit',
-        ':kits:pilgrim-kit',
-        ':kits:radar-kit',
-        ':kits:responsys-kit',
-        ':kits:revealmobile-kit',
-        ':kits:singular-kit',
-        ':kits:skyhook-kit',
-        //Swrve hosts kit
-        ':kits:taplytics-kit',
-        ':kits:tune-kit',
-        ':kits:urbanairship-kit',
-        ':kits:wootric-kit',
-        ':kits:example-kit'
-)
-project(':kits').getChildren().each {
-    proj -> proj.name = 'android-' + proj.name
-}
+////keep things alphabetical like readme
+//
+//include (
+//        ':kits:adjust-kit',
+//        ':kits:adobe-kit',
+//        ':kits:adobemedia-kit',
+//        ':kits:appboy-kit',
+//        ':kits:appsflyer-kit',
+//        ':kits:apptentive-kit',
+//        ':kits:apptimize-kit',
+//        ':kits:apteligent-kit',
+//        //blueshift hosts kit
+//        ':kits:branch-kit',
+//        ':kits:button-kit',
+//        ':kits:clevertap-kit',
+//        ':kits:comscore-kit',
+//        ':kits:flurry-kit',
+//        ':kits:foresee-kit',
+//        ':kits:googleanalyticsfirebase-kit',
+//        ':kits:googleanalyticsfirebasega4-kit',
+//        ':kits:iterable-kit',
+//        ':kits:kochava-kit',
+//        ':kits:leanplum-kit',
+//        ':kits:localytics-kit',
+//        //Neura hosts kit
+//        ':kits:onetrust-kit',
+//        ':kits:optimizely-kit',
+//        ':kits:pilgrim-kit',
+//        ':kits:radar-kit',
+//        ':kits:responsys-kit',
+//        ':kits:revealmobile-kit',
+//        ':kits:singular-kit',
+//        ':kits:skyhook-kit',
+//        //Swrve hosts kit
+//        ':kits:taplytics-kit',
+//        ':kits:tune-kit',
+//        ':kits:urbanairship-kit',
+//        ':kits:wootric-kit',
+//        ':kits:example-kit'
+//)
+//project(':kits').getChildren().each {
+//    proj -> proj.name = 'android-' + proj.name
+//}

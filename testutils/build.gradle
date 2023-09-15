@@ -49,7 +49,6 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     compileOnly project(':android-core')
-    compileOnly project(':android-kit-base')
     compileOnly 'org.mockito:mockito-android:4.9.0'
 
     api 'androidx.annotation:annotation:1.5.0'
