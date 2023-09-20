@@ -46,7 +46,6 @@ class KitFrameworkWrapperTest {
         Assert.assertFalse(wrapper.frameworkLoadAttempted)
         wrapper.loadKitLibrary()
         Assert.assertTrue(wrapper.frameworkLoadAttempted)
-        Assert.assertTrue(wrapper.kitsLoaded)
     }
 
     @Test

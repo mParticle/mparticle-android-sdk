@@ -42,7 +42,7 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew :android-core:cAT :android-kit-base:cAT --stacktrace
+          script: ./gradlew :android-core:cAT --stacktrace
       - name: "Archive Instrumented Tests Results"
         uses: actions/upload-artifact@v3
         if: always()
@@ -190,8 +190,6 @@ jobs:
           run: git submodule foreach "git rebase main"
         - name: "Generate Core Release Build"
           run: ./gradlew -PisRelease=true publishLocal
-        - name: "Run Kit-Base Release Tests and Build"
-          run: ./gradlew -PisRelease=true :android-kit-base:testRelease
         - name: "Run Kit Release Tests and Build"
           run: ./gradlew -PisRelease=true -p kits testRelease -c ../settings-kits.gradle
 

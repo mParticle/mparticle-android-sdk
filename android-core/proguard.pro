@@ -22,6 +22,9 @@
 -keep public class com.google.vending.licensing.ILicensingService
 -keep public class com.android.vending.licensing.ILicensingService
 
+-keep class com.mparticle.kits.MPSideloadedKit { *; }
+-keep class com.mparticle.kits.MPSideloadedFilters { *; }
+
 # For native methods, see http://proguard.sourceforge.net/manual/examples.html#native
 -keepclasseswithmembernames class * {
     native <methods>;

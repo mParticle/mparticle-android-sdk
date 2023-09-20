@@ -1,6 +1,5 @@
 include ':android-core',
         ':testutils',
-        ':android-kit-base',
         ':kit-plugin',
         ':tooling:custom-lint-rules',
         ':tooling:android-plugin',
