@@ -1286,9 +1286,23 @@ public class ConfigManager {
 
     public NetworkOptions getNetworkOptions() {
         if (sNetworkOptions == null) {
-            sNetworkOptions = NetworkOptionsManager.validateAndResolve(null);
+            sNetworkOptions = NetworkOptionsManager.validateAndResolve(null, getPodPrefix(), podRedirectionEnabled());
         }
         return sNetworkOptions;
+    }
+
+    public boolean podRedirectionEnabled() {
+        return true;
+    }
+
+    public String getPodPrefix() {
+        String prefix = "us1";
+        try {
+            prefix = getApiKey().split("-")[0];
+        } catch (Exception e) {
+            prefix = "us1";
+        }
+        return prefix;
     }
 
     public synchronized void setNetworkOptions(NetworkOptions networkOptions) {

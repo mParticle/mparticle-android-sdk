@@ -165,8 +165,8 @@ public class DomainMapping {
         return new Builder(Endpoint.AUDIENCE, newUrl, overridesSubdirectory);
     }
 
-    static Builder withEndpoint(Endpoint endpoint) {
-        return new Builder(endpoint);
+    static Builder withEndpoint(Endpoint endpoint, String podPrefix, boolean podRedirectionEnabled) {
+        return new Builder(endpoint, podRedirectionEnabled, podPrefix);
     }
 
     static Builder withDomainMapping(String jsonObject) {
@@ -240,9 +240,9 @@ public class DomainMapping {
         boolean overridesSubdirectory = false;
         boolean eventsOnly;
 
-        private Builder(Endpoint type) {
+        private Builder(Endpoint type, boolean enablePodRedirection, String podPrefix) {
             this.type = type;
-            this.newUrl = NetworkOptionsManager.getDefaultUrl(type);
+            this.newUrl = NetworkOptionsManager.getDefaultUrl(type, podPrefix, enablePodRedirection);
         }
 
         private Builder(Endpoint type, String newUrl) {

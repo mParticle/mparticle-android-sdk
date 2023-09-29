@@ -141,13 +141,14 @@ public class MParticleOptions {
         if (builder.operatingSystem != null) {
             this.mOperatingSystem = builder.operatingSystem;
         }
-        this.mNetworkOptions = NetworkOptionsManager.validateAndResolve(builder.networkOptions);
+        this.mNetworkOptions = NetworkOptionsManager.validateAndResolve(builder.networkOptions, "us1", false);
         this.mDataplanId = builder.dataplanId;
         this.mDataplanVersion = builder.dataplanVersion;
         this.mDataplanOptions = builder.dataplanOptions;
         this.mConfigurations = builder.configurations;
         this.sideloadedKits = builder.sideloadedKits;
     }
+
 
     /**
      * @param context
