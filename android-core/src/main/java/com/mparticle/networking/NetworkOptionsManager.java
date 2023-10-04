@@ -11,8 +11,8 @@ import java.util.List;
 
 public class NetworkOptionsManager {
     public static String MP_CONFIG_URL = "config2.mparticle.com";
-    public static String MP_IDENTITY_URL = "identity";
-    public static String MP_URL = "nativesdks";
+    public static String MP_IDENTITY_URL_PREFIX = "identity";
+    public static String MP_URL_PREFIX = "nativesdks";
 
     public static NetworkOptions validateAndResolve(NetworkOptions networkOptions, String podPrefix, boolean podRedirectionEnabled) {
         if (networkOptions == null) {
@@ -73,12 +73,12 @@ public class NetworkOptionsManager {
             case CONFIG:
                 return MPUtility.isEmpty(BuildConfig.MP_CONFIG_URL) ? MP_CONFIG_URL : BuildConfig.MP_CONFIG_URL;
             case IDENTITY:
-                String url = MPUtility.isEmpty(BuildConfig.MP_IDENTITY_URL) ? MP_IDENTITY_URL : BuildConfig.MP_IDENTITY_URL;
+                String url = MPUtility.isEmpty(BuildConfig.MP_IDENTITY_URL) ? MP_IDENTITY_URL_PREFIX : BuildConfig.MP_IDENTITY_URL;
                 return NetworkUtils.INSTANCE.getUrlWithPrefix(url, podPrefix, enablePodRedirection);
             case EVENTS:
             case ALIAS:
             case AUDIENCE:
-                url = MPUtility.isEmpty(BuildConfig.MP_URL) ? MP_URL : BuildConfig.MP_URL;
+                url = MPUtility.isEmpty(BuildConfig.MP_URL) ? MP_URL_PREFIX : BuildConfig.MP_URL;
                 return NetworkUtils.INSTANCE.getUrlWithPrefix(url, podPrefix, enablePodRedirection);
             default:
                 throw new IllegalArgumentException("Missing a Url for type " + type.name());
