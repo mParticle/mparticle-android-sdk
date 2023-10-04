@@ -28,6 +28,8 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
     private BaseNetworkConnection mRequestHandler;
     private SharedPreferences mPreferences;
     String mApiKey;
+    private String podPrefix;
+    private boolean enablePodRedirection;
 
     private static final String SERVICE_VERSION_1 = "/v1";
     private static final String SERVICE_VERSION_2 = "/v2";
@@ -41,6 +43,8 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
         mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mRequestHandler = new NetworkConnection(configManager, mPreferences);
         mApiKey = configManager.getApiKey();
+        podPrefix = configManager.getPodPrefix();
+        enablePodRedirection = configManager.podRedirectionEnabled();
     }
 
     public BaseNetworkConnection getRequestHandler() {
@@ -102,7 +106,7 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
     protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath, boolean forceDefaultUrl) throws MalformedURLException {
         NetworkOptions networkOptions = mConfigManager.getNetworkOptions();
         DomainMapping domainMapping = networkOptions.getDomain(endpoint);
-        String url = NetworkOptionsManager.getDefaultUrl(endpoint);
+        String url = NetworkOptionsManager.getDefaultUrl(endpoint, mConfigManager.getPodPrefix(), mConfigManager.podRedirectionEnabled());
         boolean isDefaultUrl = true;
         if (domainMapping != null && !MPUtility.isEmpty(domainMapping.getUrl()) && !forceDefaultUrl) {
             String domainMappingUrl = domainMapping.getUrl();

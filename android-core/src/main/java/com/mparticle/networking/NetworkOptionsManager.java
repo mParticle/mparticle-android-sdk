@@ -11,23 +11,23 @@ import java.util.List;
 
 public class NetworkOptionsManager {
     public static String MP_CONFIG_URL = "config2.mparticle.com";
-    public static String MP_IDENTITY_URL = "identity.mparticle.com";
-    public static String MP_URL = "nativesdks.mparticle.com";
+    public static String MP_IDENTITY_URL_PREFIX = "identity";
+    public static String MP_URL_PREFIX = "nativesdks";
 
-    public static NetworkOptions validateAndResolve(NetworkOptions networkOptions) {
+    public static NetworkOptions validateAndResolve(NetworkOptions networkOptions, String podPrefix, boolean podRedirectionEnabled) {
         if (networkOptions == null) {
-            return defaultNetworkOptions();
+            return defaultNetworkOptions(podPrefix, podRedirectionEnabled);
         }
         //Only take the endpoints we care about.
         for (Endpoint endpoint : Endpoint.values()) {
             DomainMapping domainMapping = networkOptions.domainMappings.get(endpoint);
             if (domainMapping == null) {
-                networkOptions.domainMappings.put(endpoint, DomainMapping.withEndpoint(endpoint)
+                networkOptions.domainMappings.put(endpoint, DomainMapping.withEndpoint(endpoint, podPrefix, podRedirectionEnabled)
                         .setCertificates(defaultCertificates)
                         .build());
             } else {
                 if (MPUtility.isEmpty(domainMapping.getUrl())) {
-                    domainMapping.setUrl(getDefaultUrl(domainMapping.getType()));
+                    domainMapping.setUrl(getDefaultUrl(domainMapping.getType(), podPrefix, podRedirectionEnabled));
                 }
                 //if there are no certificates, give the default ones
                 if (MPUtility.isEmpty(domainMapping.getCertificates())) {
@@ -39,18 +39,18 @@ public class NetworkOptionsManager {
     }
 
 
-    static NetworkOptions defaultNetworkOptions() {
+    static NetworkOptions defaultNetworkOptions(String podPrefix, boolean enablePodRedirection) {
         return NetworkOptions.builder()
-                .addDomainMapping(DomainMapping.identityMapping(getDefaultUrl(Endpoint.IDENTITY))
+                .addDomainMapping(DomainMapping.identityMapping(getDefaultUrl(Endpoint.IDENTITY, podPrefix, enablePodRedirection))
                         .setCertificates(defaultCertificates)
                         .build())
-                .addDomainMapping(DomainMapping.configMapping(getDefaultUrl(Endpoint.CONFIG))
+                .addDomainMapping(DomainMapping.configMapping(getDefaultUrl(Endpoint.CONFIG, podPrefix, enablePodRedirection))
                         .setCertificates(defaultCertificates)
                         .build())
-                .addDomainMapping(DomainMapping.eventsMapping(getDefaultUrl(Endpoint.EVENTS))
+                .addDomainMapping(DomainMapping.eventsMapping(getDefaultUrl(Endpoint.EVENTS, podPrefix, enablePodRedirection))
                         .setCertificates(defaultCertificates)
                         .build())
-                .addDomainMapping(DomainMapping.audienceMapping(getDefaultUrl(Endpoint.AUDIENCE))
+                .addDomainMapping(DomainMapping.audienceMapping(getDefaultUrl(Endpoint.AUDIENCE, podPrefix, enablePodRedirection))
                         .setCertificates(defaultCertificates)
                         .build())
                 .build();
@@ -68,16 +68,18 @@ public class NetworkOptionsManager {
         }
     };
 
-    static String getDefaultUrl(Endpoint type) {
+    static String getDefaultUrl(Endpoint type, String podPrefix, boolean enablePodRedirection) {
         switch (type) {
             case CONFIG:
                 return MPUtility.isEmpty(BuildConfig.MP_CONFIG_URL) ? MP_CONFIG_URL : BuildConfig.MP_CONFIG_URL;
             case IDENTITY:
-                return MPUtility.isEmpty(BuildConfig.MP_IDENTITY_URL) ? MP_IDENTITY_URL : BuildConfig.MP_IDENTITY_URL;
+                String url = MPUtility.isEmpty(BuildConfig.MP_IDENTITY_URL) ? MP_IDENTITY_URL_PREFIX : BuildConfig.MP_IDENTITY_URL;
+                return NetworkUtils.INSTANCE.getUrlWithPrefix(url, podPrefix, enablePodRedirection);
             case EVENTS:
             case ALIAS:
             case AUDIENCE:
-                return MPUtility.isEmpty(BuildConfig.MP_URL) ? MP_URL : BuildConfig.MP_URL;
+                url = MPUtility.isEmpty(BuildConfig.MP_URL) ? MP_URL_PREFIX : BuildConfig.MP_URL;
+                return NetworkUtils.INSTANCE.getUrlWithPrefix(url, podPrefix, enablePodRedirection);
             default:
                 throw new IllegalArgumentException("Missing a Url for type " + type.name());
         }
