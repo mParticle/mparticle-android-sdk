@@ -2,6 +2,7 @@ package com.mparticle.networking
 
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
+import com.mparticle.NetworkUtilities
 import com.mparticle.internal.AccessUtils
 import com.mparticle.testutils.BaseCleanInstallEachTest
 import org.junit.Assert
@@ -27,14 +28,14 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
     @Test
     fun testUrlPrefixWithPodRedirection() {
         val prefix = "eu1"
-        val url = NetworkUtils.getUrlWithPrefix(NetworkOptionsManager.MP_URL_PREFIX, prefix, true)
+        val url = NetworkUtilities.getUrlWithPrefix(NetworkOptionsManager.MP_URL_PREFIX, prefix, true)
         Assert.assertEquals("${NetworkOptionsManager.MP_URL_PREFIX}.$prefix.mparticle.com", url)
     }
 
     @Test
     fun testUrlPrefixWithoutPodRedirection() {
         val prefix = "eu1"
-        val url = NetworkUtils.getUrlWithPrefix(NetworkOptionsManager.MP_URL_PREFIX, prefix, false)
+        val url = NetworkUtilities.getUrlWithPrefix(NetworkOptionsManager.MP_URL_PREFIX, prefix, false)
         Assert.assertEquals("${NetworkOptionsManager.MP_URL_PREFIX}.mparticle.com", url)
     }
 

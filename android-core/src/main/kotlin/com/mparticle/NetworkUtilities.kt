@@ -1,6 +1,6 @@
-package com.mparticle.networking
+package com.mparticle
 
-object NetworkUtils {
+object NetworkUtilities {
 
     fun getUrlWithPrefix(
         url: String?,
