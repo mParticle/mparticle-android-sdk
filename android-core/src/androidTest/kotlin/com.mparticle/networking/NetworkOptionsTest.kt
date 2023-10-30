@@ -60,7 +60,7 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
             mpClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY, randIdentityPath).path
         )
         Assert.assertEquals(
-            NetworkOptionsManager.MP_URL_PREFIX,
+            NetworkOptionsManager.MP_URL,
             identityClient.getUrl(MParticleBaseClientImpl.Endpoint.AUDIENCE).authority
         )
         Assert.assertEquals(
@@ -68,11 +68,11 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
             identityClient.getUrl(MParticleBaseClientImpl.Endpoint.CONFIG).authority
         )
         Assert.assertEquals(
-            NetworkOptionsManager.MP_URL_PREFIX,
+            NetworkOptionsManager.MP_URL,
             identityClient.getUrl(MParticleBaseClientImpl.Endpoint.EVENTS).authority
         )
         Assert.assertEquals(
-            NetworkOptionsManager.MP_IDENTITY_URL_PREFIX,
+            NetworkOptionsManager.MP_IDENTITY_URL_PREFIX.addSuffix(),
             identityClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY).authority
         )
         randIdentityPath = mRandomUtils.getAlphaString(10)
@@ -85,12 +85,14 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
         )
     }
 
+    private fun String.addSuffix(suffix: String = ".mparticle.com") = "$this$suffix"
+
     @Test
     @Throws(MalformedURLException::class)
     fun testRandomEndpoint() {
         val identityUrl = mRandomUtils.getAlphaString(20)
         val configUrl = mRandomUtils.getAlphaString(20)
-        val audienceUrl = mRandomUtils.getAlphaString(20)
+        val audienceUrl = "${mRandomUtils.getAlphaString(20)}"
         val eventsUrl = mRandomUtils.getAlphaString(20)
         val options = MParticleOptions.builder(mContext)
             .credentials(apiKey, "secret")
@@ -115,7 +117,7 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
         MParticle.start(options)
         setClients()
         Assert.assertEquals(
-            audienceUrl,
+            audienceUrl.addSuffix(),
             mpClient.getUrl(MParticleBaseClientImpl.Endpoint.AUDIENCE).authority
         )
         Assert.assertEquals(
@@ -123,11 +125,11 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
             mpClient.getUrl(MParticleBaseClientImpl.Endpoint.CONFIG).authority
         )
         Assert.assertEquals(
-            eventsUrl,
+            eventsUrl.addSuffix(),
             mpClient.getUrl(MParticleBaseClientImpl.Endpoint.EVENTS).authority
         )
         Assert.assertEquals(
-            identityUrl,
+            identityUrl.addSuffix(),
             mpClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY).authority
         )
         var randIdentityPath = mRandomUtils.getAlphaString(10)
@@ -136,7 +138,7 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
             mpClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY, randIdentityPath).path
         )
         Assert.assertEquals(
-            audienceUrl,
+            audienceUrl.addSuffix(),
             identityClient.getUrl(MParticleBaseClientImpl.Endpoint.AUDIENCE).authority
         )
         Assert.assertEquals(
@@ -144,11 +146,11 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
             identityClient.getUrl(MParticleBaseClientImpl.Endpoint.CONFIG).authority
         )
         Assert.assertEquals(
-            eventsUrl,
+            eventsUrl.addSuffix(),
             identityClient.getUrl(MParticleBaseClientImpl.Endpoint.EVENTS).authority
         )
         Assert.assertEquals(
-            identityUrl,
+            identityUrl.addSuffix(),
             identityClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY).authority
         )
         randIdentityPath = mRandomUtils.getAlphaString(10)
@@ -212,7 +214,7 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
         MParticle.start(options)
         setClients()
         Assert.assertEquals(
-            audienceUrl,
+            audienceUrl.addSuffix(),
             mpClient.getUrl(MParticleBaseClientImpl.Endpoint.AUDIENCE).authority
         )
         Assert.assertEquals(
@@ -220,11 +222,11 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
             mpClient.getUrl(MParticleBaseClientImpl.Endpoint.CONFIG).authority
         )
         Assert.assertEquals(
-            eventsUrl,
+            eventsUrl.addSuffix(),
             mpClient.getUrl(MParticleBaseClientImpl.Endpoint.EVENTS).authority
         )
         Assert.assertEquals(
-            identityUrl,
+            identityUrl.addSuffix(),
             mpClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY).authority
         )
         val randIdentityPath = mRandomUtils.getAlphaString(10)
@@ -286,11 +288,11 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
         MParticle.start(options)
         setClients()
         Assert.assertEquals(
-            eventsUrl,
+            eventsUrl.addSuffix(),
             mpClient.getUrl(MParticleBaseClientImpl.Endpoint.EVENTS).authority
         )
         Assert.assertEquals(
-            eventsUrl,
+            eventsUrl.addSuffix(),
             mpClient.getUrl(MParticleBaseClientImpl.Endpoint.ALIAS).authority
         )
     }
@@ -312,11 +314,11 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
         MParticle.start(options)
         setClients()
         Assert.assertEquals(
-            eventsUrl,
+            eventsUrl.addSuffix(),
             mpClient.getUrl(MParticleBaseClientImpl.Endpoint.EVENTS).authority
         )
         Assert.assertEquals(
-            aliasUrl,
+            aliasUrl.addSuffix(),
             mpClient.getUrl(MParticleBaseClientImpl.Endpoint.ALIAS).authority
         )
     }
@@ -336,11 +338,11 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
         MParticle.start(options)
         setClients()
         Assert.assertEquals(
-            eventsUrl,
+            eventsUrl.addSuffix(),
             mpClient.getUrl(MParticleBaseClientImpl.Endpoint.EVENTS).authority
         )
         Assert.assertEquals(
-            NetworkOptionsManager.MP_URL_PREFIX,
+            NetworkOptionsManager.MP_URL,
             mpClient.getUrl(MParticleBaseClientImpl.Endpoint.ALIAS).authority
         )
     }

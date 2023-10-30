@@ -4,12 +4,9 @@ object AccessUtils {
 
     private var defaultNetworkOptions: NetworkOptions? = null
 
-    fun getDefaultNetworkOptions(
-        podPrefix: String = "us1",
-        enablePodRedirections: Boolean = true
-    ): NetworkOptions {
+    fun getDefaultNetworkOptions(): NetworkOptions {
         defaultNetworkOptions =
-            NetworkOptionsManager.defaultNetworkOptions(podPrefix, enablePodRedirections)
+            NetworkOptionsManager.defaultNetworkOptions()
         return defaultNetworkOptions!!
     }
 

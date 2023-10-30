@@ -1291,7 +1291,7 @@ public class ConfigManager {
 
     public NetworkOptions getNetworkOptions() {
         if (sNetworkOptions == null) {
-            sNetworkOptions = NetworkOptionsManager.validateAndResolve(null, getPodPrefix(), podRedirectionEnabled());
+            sNetworkOptions = NetworkOptionsManager.validateAndResolve(null);
         }
         return sNetworkOptions;
     }

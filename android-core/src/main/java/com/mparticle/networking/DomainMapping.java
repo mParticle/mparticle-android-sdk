@@ -5,6 +5,7 @@ import static com.mparticle.networking.MParticleBaseClientImpl.Endpoint;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.mparticle.NetworkUtilities;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 
@@ -165,8 +166,8 @@ public class DomainMapping {
         return new Builder(Endpoint.AUDIENCE, newUrl, overridesSubdirectory);
     }
 
-    static Builder withEndpoint(Endpoint endpoint, String podPrefix, boolean podRedirectionEnabled) {
-        return new Builder(endpoint, podRedirectionEnabled, podPrefix);
+    static Builder withEndpoint(Endpoint endpoint) {
+        return new Builder(endpoint);
     }
 
     static Builder withDomainMapping(String jsonObject) {
@@ -240,9 +241,9 @@ public class DomainMapping {
         boolean overridesSubdirectory = false;
         boolean eventsOnly;
 
-        private Builder(Endpoint type, boolean enablePodRedirection, String podPrefix) {
+        private Builder(Endpoint type) {
             this.type = type;
-            this.newUrl = NetworkOptionsManager.getDefaultUrl(type, podPrefix, enablePodRedirection);
+            this.newUrl = NetworkOptionsManager.getDefaultUrl(type);
         }
 
         private Builder(Endpoint type, String newUrl) {

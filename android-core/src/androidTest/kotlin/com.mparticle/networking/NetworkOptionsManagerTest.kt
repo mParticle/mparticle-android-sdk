@@ -9,20 +9,20 @@ class NetworkOptionsManagerTest {
     @Test
     fun testEmptyNetworkOptions() {
         val networkOptions = NetworkOptions.builder().build()
-        var refinedNetworkOptions = NetworkOptionsManager.validateAndResolve(networkOptions, "us1", true)
+        var refinedNetworkOptions = NetworkOptionsManager.validateAndResolve(networkOptions)
         val toString = refinedNetworkOptions.toString()
         Logger.error(toString)
         Assert.assertTrue(
             AccessUtils.equals(
                 refinedNetworkOptions,
-                NetworkOptionsManager.defaultNetworkOptions("us1", true)
+                NetworkOptionsManager.defaultNetworkOptions()
             )
         )
-        refinedNetworkOptions = NetworkOptionsManager.validateAndResolve(null, "us1", true)
+        refinedNetworkOptions = NetworkOptionsManager.validateAndResolve(null)
         Assert.assertTrue(
             AccessUtils.equals(
                 refinedNetworkOptions,
-                NetworkOptionsManager.defaultNetworkOptions("us1", true)
+                NetworkOptionsManager.defaultNetworkOptions()
             )
         )
         for (
