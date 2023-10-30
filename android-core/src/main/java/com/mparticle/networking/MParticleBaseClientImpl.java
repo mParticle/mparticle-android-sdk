@@ -7,6 +7,7 @@ import android.net.Uri;
 import androidx.annotation.Nullable;
 
 import com.mparticle.BuildConfig;
+import com.mparticle.NetworkUtilities;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
@@ -28,8 +29,6 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
     private BaseNetworkConnection mRequestHandler;
     private SharedPreferences mPreferences;
     String mApiKey;
-    private String podPrefix;
-    private boolean enablePodRedirection;
 
     private static final String SERVICE_VERSION_1 = "/v1";
     private static final String SERVICE_VERSION_2 = "/v2";
@@ -43,8 +42,6 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
         mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mRequestHandler = new NetworkConnection(configManager, mPreferences);
         mApiKey = configManager.getApiKey();
-        podPrefix = configManager.getPodPrefix();
-        enablePodRedirection = configManager.podRedirectionEnabled();
     }
 
     public BaseNetworkConnection getRequestHandler() {
@@ -106,7 +103,7 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
     protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath, boolean forceDefaultUrl) throws MalformedURLException {
         NetworkOptions networkOptions = mConfigManager.getNetworkOptions();
         DomainMapping domainMapping = networkOptions.getDomain(endpoint);
-        String url = NetworkOptionsManager.getDefaultUrl(endpoint, mConfigManager.getPodPrefix(), mConfigManager.podRedirectionEnabled());
+        String url = NetworkOptionsManager.getDefaultUrl(endpoint);
         boolean isDefaultUrl = true;
         if (domainMapping != null && !MPUtility.isEmpty(domainMapping.getUrl()) && !forceDefaultUrl) {
             String domainMappingUrl = domainMapping.getUrl();
@@ -114,6 +111,8 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
             url = domainMappingUrl;
         }
         Uri uri;
+        if(endpoint!=Endpoint.CONFIG){
+        url = NetworkUtilities.INSTANCE.getUrlWithPrefix(url, mConfigManager.getPodPrefix(), mConfigManager.podRedirectionEnabled());}
         MPUrl defaultUrl = !isDefaultUrl ? getUrl(endpoint, identityPath, true) : null;
         String subdirectory;
         boolean overridesSubdirectory = domainMapping.isOverridesSubdirectory() && !forceDefaultUrl;
@@ -137,8 +136,7 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
                         }
                     }
                 }
-                uri = builder.build();
-                return MPUrl.getUrl(uri.toString(), defaultUrl);
+                return MPUrl.getUrl(builder.build().toString(), defaultUrl);
             case EVENTS:
                 subdirectory = overridesSubdirectory ? "" : SERVICE_VERSION_2 + "/";
                 uri = new Uri.Builder()

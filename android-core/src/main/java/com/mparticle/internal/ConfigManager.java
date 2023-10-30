@@ -51,6 +51,7 @@ public class ConfigManager {
     static final String KEY_OPT_OUT = "oo";
     public static final String KEY_UNHANDLED_EXCEPTIONS = "cue";
     public static final String KEY_PUSH_MESSAGES = "pmk";
+    public static final String DIRECT_URL_ROUTING = "dur";
     public static final String KEY_EMBEDDED_KITS = "eks";
     static final String KEY_UPLOAD_INTERVAL = "uitl";
     static final String KEY_SESSION_TIMEOUT = "stl";
@@ -83,6 +84,7 @@ public class ConfigManager {
     static SharedPreferences sPreferences;
 
     private static JSONArray sPushKeys;
+    private boolean directUrlRouting = false;
     private UserStorage mUserStorage;
     private String mLogUnhandledExceptions = VALUE_APP_DEFINED;
 
@@ -405,6 +407,9 @@ public class ConfigManager {
             sPushKeys = responseJSON.getJSONArray(KEY_PUSH_MESSAGES);
             editor.putString(KEY_PUSH_MESSAGES, sPushKeys.toString());
         }
+
+        directUrlRouting = responseJSON.optBoolean(DIRECT_URL_ROUTING, false);
+        editor.putBoolean(DIRECT_URL_ROUTING, directUrlRouting);
 
         mRampValue = responseJSON.optInt(KEY_RAMP, -1);
 
@@ -1286,13 +1291,13 @@ public class ConfigManager {
 
     public NetworkOptions getNetworkOptions() {
         if (sNetworkOptions == null) {
-            sNetworkOptions = NetworkOptionsManager.validateAndResolve(null, getPodPrefix(), podRedirectionEnabled());
+            sNetworkOptions = NetworkOptionsManager.validateAndResolve(null);
         }
         return sNetworkOptions;
     }
 
     public boolean podRedirectionEnabled() {
-        return true;
+        return directUrlRouting;
     }
 
     public String getPodPrefix() {
