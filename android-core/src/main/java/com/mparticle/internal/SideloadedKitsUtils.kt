@@ -17,7 +17,8 @@ object SideloadedKitsUtils {
                 }
             }
         }
-        kits.forEach { kit ->
+        for (i in kits.indices) {
+            val kit = kits.get(i)
             if (!addedIds.contains(kit.kitId())) {
                 kit.getJsonConfig()?.let {
                     results.put(it)
