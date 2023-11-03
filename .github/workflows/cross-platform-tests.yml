@@ -22,7 +22,7 @@ jobs:
           distribution: "zulu"
           java-version: "11"
       - name: "Run Crossplatform Tests"
-        uses: reactivecircus/android-emulator-runner@v2.26.0
+        uses: reactivecircus/android-emulator-runner@b35b1c6e6921ebfd3f980c2236ac298f019df53a #v2.28.0
         with:
           api-level: 29
           script: ./gradlew runAndroid

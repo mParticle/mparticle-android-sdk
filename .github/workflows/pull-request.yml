@@ -17,7 +17,7 @@ jobs:
           distribution: "zulu"
           java-version: "11"
       - name: Gradle cache
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@842c587ad8aa4c68eeba24c396e15af4c2e9f30a #v2.9.0
       - name: AVD cache
         uses: actions/cache@v3
         id: avd-cache
@@ -28,7 +28,7 @@ jobs:
           key: avd-29
       - name: create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
-        uses: reactivecircus/android-emulator-runner@v2
+        uses: reactivecircus/android-emulator-runner@d94c3fbe4fe6a29e4a5ba47c12fb47677c73656b #v2.28.0
         with:
           api-level: 29
           force-avd-creation: false
@@ -36,7 +36,7 @@ jobs:
           disable-animations: false
           script: echo "Generated AVD snapshot for caching."
       - name: "Run Instrumented Tests"
-        uses: reactivecircus/android-emulator-runner@v2.26.0
+        uses: reactivecircus/android-emulator-runner@d94c3fbe4fe6a29e4a5ba47c12fb47677c73656b #v2.28.0
         with:
           api-level: 29
           force-avd-creation: false
@@ -63,7 +63,7 @@ jobs:
           distribution: "zulu"
           java-version: "11"
       - name: Gradle cache
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@842c587ad8aa4c68eeba24c396e15af4c2e9f30a #v2.9.0
       - name: AVD cache
         uses: actions/cache@v3
         id: avd-cache
@@ -74,7 +74,7 @@ jobs:
           key: avd-29
       - name: create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
-        uses: reactivecircus/android-emulator-runner@v2
+        uses: reactivecircus/android-emulator-runner@d94c3fbe4fe6a29e4a5ba47c12fb47677c73656b #v2.28.0
         with:
           api-level: 29
           force-avd-creation: false
@@ -82,7 +82,7 @@ jobs:
           disable-animations: false
           script: echo "Generated AVD snapshot for caching."
       - name: "Run Instrumented Orchestrator Tests"
-        uses: reactivecircus/android-emulator-runner@v2.26.0
+        uses: reactivecircus/android-emulator-runner@d94c3fbe4fe6a29e4a5ba47c12fb47677c73656b #v2.28.0
         with:
           api-level: 29
           force-avd-creation: false
@@ -110,7 +110,7 @@ jobs:
       - name: "Run Unit Tests"
         run: ./gradlew test
       - name: "Print Android Unit Tests Report"
-        uses: asadmansr/android-test-report-action@v1.2.0
+        uses: asadmansr/android-test-report-action@384cd31388782f4106dc4a1b37eea2ff02e0aad7 #v1.2.0
         if: always()
       - name: "Archive Unit Test Results"
         uses: actions/upload-artifact@v3

@@ -30,7 +30,7 @@ jobs:
     steps:
       - name: "Cancel workflow"
         if: ${{ github.repository != 'mParticle/mparticle-android-sdk' }}
-        uses: andymckay/cancel-action@0.2
+        uses: andymckay/cancel-action@435124153eb37d6a62a29d053a7e449652f89d51
 
   create-regression-branch:
     name: "Create Regression Branch"
@@ -50,7 +50,7 @@ jobs:
           ref: ${{ inputs.branch_name }}
           submodules: recursive
       - name: "Import GPG Key"
-        uses: crazy-max/ghaction-import-gpg@v5
+        uses: crazy-max/ghaction-import-gpg@82a020f1f7f605c65dd2449b392a52c3fcfef7ef #v6.0
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
@@ -86,7 +86,7 @@ jobs:
           java-version: "11"
           cache: "gradle"
       - name: "Run Instrumented Tests"
-        uses: reactivecircus/android-emulator-runner@v2.26.0
+        uses: reactivecircus/android-emulator-runner@d94c3fbe4fe6a29e4a5ba47c12fb47677c73656b #v2.28.0
         with:
           api-level: 29
           script: ./gradlew :android-core:cAT :android-kit-base:cAT --stacktrace
@@ -115,7 +115,7 @@ jobs:
           java-version: "11"
           cache: "gradle"
       - name: "Run Instrumented Orchestrator Tests"
-        uses: reactivecircus/android-emulator-runner@v2.26.0
+        uses: reactivecircus/android-emulator-runner@d94c3fbe4fe6a29e4a5ba47c12fb47677c73656b #v2.28.0
         with:
           api-level: 29
           script: ./gradlew -Porchestrator=true :android-core:cAT --stacktrace
@@ -146,7 +146,7 @@ jobs:
       - name: "Run Unit Tests"
         run: ./gradlew test
       - name: "Print Android Unit Tests Report"
-        uses: asadmansr/android-test-report-action@v1.2.0
+        uses: asadmansr/android-test-report-action@384cd31388782f4106dc4a1b37eea2ff02e0aad7 #v1.2.0
         if: always()
       - name: "Archive Unit Test Results"
         uses: actions/upload-artifact@v3
