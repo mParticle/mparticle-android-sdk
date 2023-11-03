@@ -283,8 +283,7 @@ jobs:
 
   delete-regression-branch:
     name: "Delete regression branch"
-    if: ${{ always() }}
-    needs: [semantic-release-dryrun, create-regression-branch]
+    needs: semantic-release-dryrun
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
