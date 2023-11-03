@@ -1,10 +1,6 @@
 name: "Daily Cron"
 
 on:
-  # Run daily at midnight
-  schedule:
-    - cron: "0 0 * * *"
-
   # Allow workflow to be manually run from the GitHub UI
   workflow_dispatch:
 
@@ -287,7 +283,8 @@ jobs:
 
   delete-regression-branch:
     name: "Delete regression branch"
-    needs: semantic-release-dryrun
+    if: ${{ always() }}
+    needs: [semantic-release-dryrun, create-regression-branch]
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
