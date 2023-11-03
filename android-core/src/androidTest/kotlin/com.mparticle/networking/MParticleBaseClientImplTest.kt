@@ -2,6 +2,7 @@ package com.mparticle.networking
 
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
+import com.mparticle.NetworkUtilities
 import com.mparticle.internal.AccessUtils
 import com.mparticle.testutils.BaseCleanInstallEachTest
 import junit.framework.TestCase
@@ -20,9 +21,23 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
         startMParticle(MParticleOptions.builder(mContext).credentials(apiKey, "secret"))
         val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
         for (endpoint in MParticleBaseClientImpl.Endpoint.values()) {
-            defaultUrls[endpoint] = baseClientImpl.getUrl(endpoint, endpoint.name)
+            defaultUrls[endpoint] = baseClientImpl.getUrl(endpoint, endpoint.name, false)
         }
         MParticle.setInstance(null)
+    }
+
+    @Test
+    fun testUrlPrefixWithPodRedirection() {
+        val prefix = "eu1"
+        val url = NetworkUtilities.getUrlWithPrefix(NetworkOptionsManager.MP_URL_PREFIX, prefix, true)
+        Assert.assertEquals("${NetworkOptionsManager.MP_URL_PREFIX}.$prefix.mparticle.com", url)
+    }
+
+    @Test
+    fun testUrlPrefixWithoutPodRedirection() {
+        val prefix = "eu1"
+        val url = NetworkUtilities.getUrlWithPrefix(NetworkOptionsManager.MP_URL_PREFIX, prefix, false)
+        Assert.assertEquals("${NetworkOptionsManager.MP_URL_PREFIX}.mparticle.com", url)
     }
 
     @Test
