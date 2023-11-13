@@ -45,11 +45,6 @@ jobs:
         with:
           distribution: "zulu"
           java-version: "11"
-      - name: "Setup NPM"
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-      - run: npm install @actions/core
       - name: "Run Crossplatform Tests"
         uses: reactivecircus/android-emulator-runner@d94c3fbe4fe6a29e4a5ba47c12fb47677c73656b #v2.28.0
         with:
