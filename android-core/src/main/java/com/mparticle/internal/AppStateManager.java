@@ -14,6 +14,7 @@ import android.os.SystemClock;
 
 import androidx.annotation.Nullable;
 
+import com.mparticle.JobSchedulerUtilsKt;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.identity.IdentityApi;
@@ -26,6 +27,8 @@ import org.json.JSONObject;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+
+import kotlin.Unit;
 
 
 /**
@@ -368,7 +371,18 @@ public class AppStateManager {
             instance.Internal().getKitManager().onApplicationBackground();
             mCurrentActivityName = null;
             Logger.debug("App backgrounded.");
+            scheduleBackgroundJob();
             mInterruptionCount.incrementAndGet();
+        }
+    }
+
+    private void scheduleBackgroundJob() {
+        if (mConfigManager.isBackgroundEventBatchingEnabled()) {
+            JobSchedulerUtilsKt.scheduleBatchUploading(this.mContext, delay -> {
+                mMessageManager.mUploadHandler.sendMessageDelayed(mMessageManager.mUploadHandler.obtainMessage(UploadHandler.UPLOAD_TRIGGER_MESSAGES, 1, 0, mConfigManager.getMpid()), delay);
+                Logger.debug("Legacy action with delay: " + delay);
+                return Unit.INSTANCE;
+            });
         }
     }
 

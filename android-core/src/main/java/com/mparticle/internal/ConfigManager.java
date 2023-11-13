@@ -58,6 +58,7 @@ public class ConfigManager {
     public static final String VALUE_CUE_CATCH = "forcecatch";
     public static final String PREFERENCES_FILE = "mp_preferences";
     public static final String KEY_INCLUDE_SESSION_HISTORY = "inhd";
+    public static final String ENABLE_BACKGROUND_BATCHING = "ebb";
     private static final String KEY_DEVICE_PERFORMANCE_METRICS_DISABLED = "dpmd";
     public static final String WORKSPACE_TOKEN = "wst";
     static final String ALIAS_MAX_WINDOW = "alias_max_window";
@@ -90,6 +91,7 @@ public class ConfigManager {
     private JSONObject mProviderPersistence;
     private int mRampValue = -1;
     private int mUserBucket = -1;
+    private boolean isBackgroundEventBatchingEnabled = false;
 
     private int mSessionTimeoutInterval = -1;
     private int mUploadInterval = -1;
@@ -227,6 +229,10 @@ public class ConfigManager {
 
     public void deleteUserStorage(long mpId) {
         deleteUserStorage(mContext, mpId);
+    }
+
+    public boolean isBackgroundEventBatchingEnabled() {
+        return isBackgroundEventBatchingEnabled;
     }
 
     static void deleteConfigManager(Context context) {
@@ -407,6 +413,7 @@ public class ConfigManager {
         }
 
         mRampValue = responseJSON.optInt(KEY_RAMP, -1);
+        isBackgroundEventBatchingEnabled = responseJSON.optBoolean(ENABLE_BACKGROUND_BATCHING, false);
 
         if (responseJSON.has(KEY_OPT_OUT)) {
             mSendOoEvents = responseJSON.getBoolean(KEY_OPT_OUT);
@@ -922,9 +929,11 @@ public class ConfigManager {
             isBackgroundAst = (message.getMessageType().equals(Constants.MessageType.APP_STATE_TRANSITION) && message.get(Constants.MessageKey.STATE_TRANSITION_TYPE).equals(Constants.StateTransitionType.STATE_TRANS_BG));
         } catch (JSONException ex) {
         }
+        if(isBackgroundEventBatchingEnabled && isBackgroundAst){
+            return false;
+        }
         boolean shouldTrigger = message.getMessageType().equals(Constants.MessageType.PUSH_RECEIVED)
-                || message.getMessageType().equals(Constants.MessageType.COMMERCE_EVENT)
-                || isBackgroundAst;
+                || message.getMessageType().equals(Constants.MessageType.COMMERCE_EVENT) || isBackgroundAst;
 
         if (!shouldTrigger && messageMatches != null && messageMatches.length() > 0) {
             shouldTrigger = true;

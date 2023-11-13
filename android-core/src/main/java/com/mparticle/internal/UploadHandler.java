@@ -145,8 +145,11 @@ public class UploadHandler extends BaseHandler {
                             }
                         }
                     }
-                    if (mAppStateManager.getSession().isActive() && uploadInterval > 0 && msg.arg1 == 0) {
-                        this.sendEmptyDelayed(UPLOAD_MESSAGES, uploadInterval);
+
+                    if (!mConfigManager.isBackgroundEventBatchingEnabled()) {
+                        if (mAppStateManager.getSession().isActive() && uploadInterval > 0 && msg.arg1 == 0) {
+                            this.sendEmptyDelayed(UPLOAD_MESSAGES, uploadInterval);
+                        }
                     }
                     break;
                 case UPLOAD_HISTORY:
