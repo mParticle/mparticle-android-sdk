@@ -815,10 +815,8 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     @Override
     public void endUploadLoop() {
-        if (!mConfigManager.isBackgroundEventBatchingEnabled()) {
-            mUploadHandler.removeMessages(UploadHandler.UPLOAD_MESSAGES);
-            MParticle.getInstance().upload();
-        }
+        mUploadHandler.removeMessages(UploadHandler.UPLOAD_MESSAGES);
+        MParticle.getInstance().upload();
     }
 
     @Override

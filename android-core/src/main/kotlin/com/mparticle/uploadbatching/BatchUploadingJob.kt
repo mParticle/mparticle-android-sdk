@@ -20,7 +20,7 @@ class BatchUploadingJob : JobService() {
         } ?: run {
             Logger.debug("MParticle instance null while trying to call uploadBatching:upload")
         }
-        return false
+        return true
     }
 
     override fun onStopJob(params: JobParameters?): Boolean = false

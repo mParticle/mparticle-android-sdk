@@ -11,33 +11,67 @@ import com.mparticle.uploadbatching.BatchUploadingJob
 
 const val UPLOAD_BATCH_JOB = 123
 
-private fun Int.minutesToMillis(): Long = this * 60000L
+enum class SchedulingBatchingType { PERIODIC, ONE_SHOT; }
 
-fun scheduleBatchUploading(context: Context, legacyAction: (delay: Long) -> Unit) {
-    val delay = 15.minutesToMillis()
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        val job =
-            JobInfo.Builder(
-                UPLOAD_BATCH_JOB,
-                ComponentName(context, BatchUploadingJob::class.java.name)
-            )
-                .setMinimumLatency(delay)
-                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
-                .build()
-        context.scheduleJob(job)
-    } else {
-        legacyAction.invoke(delay)
+fun cancelScheduledUploadBatchJob(context: Context) {
+    try {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            val jobScheduler = context.getJobScheduler()
+            val jobRunning = context.getScheduledJob(UPLOAD_BATCH_JOB)
+            jobRunning?.let { jobScheduler?.cancel(UPLOAD_BATCH_JOB) }
+        }
+    } catch (e: Exception) {
     }
 }
 
+fun scheduleBatchUploading(
+    context: Context,
+    delayInMillis: Long,
+    type: SchedulingBatchingType,
+    cancelPrevious: Boolean = true,
+    legacyAction: (delay: Long) -> Unit
+) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        try {
+            if (cancelPrevious) {
+                context.getJobScheduler()?.cancel(UPLOAD_BATCH_JOB)
+            }
+            val builder = JobInfo.Builder(
+                UPLOAD_BATCH_JOB,
+                ComponentName(context, BatchUploadingJob::class.java.name)
+            )
+            if (type == SchedulingBatchingType.PERIODIC) {
+                builder.setPeriodic(delayInMillis)
+            } else if (type == SchedulingBatchingType.ONE_SHOT) {
+                builder.setMinimumLatency(delayInMillis)
+            }
+            builder.apply {
+                setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+            }
+            context.scheduleJob(builder.build())
+        } catch (e: Exception) {
+            Logger.warning("Service ${BatchUploadingJob::class.java.name} should be added to the manifest")
+            legacyAction.invoke(delayInMillis)
+        }
+    } else {
+        legacyAction.invoke(delayInMillis)
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+private fun Context.getJobScheduler(): JobScheduler? =
+    this.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler?
+
+@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+private fun Context.getScheduledJob(jobId: Int): JobInfo? =
+    this.getJobScheduler()?.allPendingJobs?.firstOrNull { it.id == jobId }
 
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 private fun Context.scheduleJob(job: JobInfo) {
-    val jobScheduler = this.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler?
-    val jobRunning = jobScheduler?.allPendingJobs?.firstOrNull { it.id == job.id } != null
+    val jobRunning = this.getScheduledJob(job.id) != null
     if (!jobRunning) {
         //Schedule / Re-schedule the job if its not running/scheduled to run at the system service
-        jobScheduler?.schedule(job)
+        this.getJobScheduler()?.schedule(job)
     } else {
         Logger.debug("Trying to schedule job in uploadBatch service. Service ALREADY RUNNING")
     }

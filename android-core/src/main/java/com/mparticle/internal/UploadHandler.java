@@ -9,7 +9,9 @@ import android.os.Message;
 
 import androidx.annotation.Nullable;
 
+import com.mparticle.JobSchedulerUtilsKt;
 import com.mparticle.MParticle;
+import com.mparticle.SchedulingBatchingType;
 import com.mparticle.identity.AliasRequest;
 import com.mparticle.identity.AliasResponse;
 import com.mparticle.internal.database.services.MParticleDBManager;
@@ -24,6 +26,8 @@ import java.net.MalformedURLException;
 import java.util.List;
 
 import javax.net.ssl.SSLHandshakeException;
+
+import kotlin.Unit;
 
 /**
  * Primary queue handler which is responsible for querying, packaging, and uploading data.
@@ -133,10 +137,12 @@ public class UploadHandler extends BaseHandler {
                     break;
                 case UPLOAD_MESSAGES:
                 case UPLOAD_TRIGGER_MESSAGES:
+                    boolean anythingToUpload = false;
                     long uploadInterval = mConfigManager.getUploadInterval();
                     if (isNetworkConnected) {
                         if (uploadInterval > 0 || msg.arg1 == 1) {
                             while (mParticleDBManager.hasMessagesForUpload()) {
+                                anythingToUpload = true;
                                 prepareMessageUploads(false);
                             }
                             boolean needsHistory = upload(false);
@@ -145,11 +151,19 @@ public class UploadHandler extends BaseHandler {
                             }
                         }
                     }
-
-                    if (!mConfigManager.isBackgroundEventBatchingEnabled()) {
-                        if (mAppStateManager.getSession().isActive() && uploadInterval > 0 && msg.arg1 == 0) {
-                            this.sendEmptyDelayed(UPLOAD_MESSAGES, uploadInterval);
-                        }
+                    if (!anythingToUpload && (!mAppStateManager.getSession().isActive() || mAppStateManager.isBackgrounded())) {
+                        //If there isn't anything to upload and is in background or inactive, cancel schedule job until a new message is stored
+                        JobSchedulerUtilsKt.cancelScheduledUploadBatchJob(mContext);
+                    }
+                    if (mAppStateManager.getSession().isActive() && uploadInterval > 0 && msg.arg1 == 0) {
+                        JobSchedulerUtilsKt.scheduleBatchUploading(mContext,
+                                uploadInterval,
+                                SchedulingBatchingType.PERIODIC,
+                                true,
+                                delay -> {
+                                    sendEmptyDelayed(UPLOAD_MESSAGES, uploadInterval);
+                                    return Unit.INSTANCE;
+                                });
                     }
                     break;
                 case UPLOAD_HISTORY:

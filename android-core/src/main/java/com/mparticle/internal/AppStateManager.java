@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import com.mparticle.JobSchedulerUtilsKt;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
+import com.mparticle.SchedulingBatchingType;
 import com.mparticle.identity.IdentityApi;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
@@ -377,13 +378,11 @@ public class AppStateManager {
     }
 
     private void scheduleBackgroundJob() {
-        if (mConfigManager.isBackgroundEventBatchingEnabled()) {
-            JobSchedulerUtilsKt.scheduleBatchUploading(this.mContext, delay -> {
-                mMessageManager.mUploadHandler.sendMessageDelayed(mMessageManager.mUploadHandler.obtainMessage(UploadHandler.UPLOAD_TRIGGER_MESSAGES, 1, 0, mConfigManager.getMpid()), delay);
-                Logger.debug("Legacy action with delay: " + delay);
-                return Unit.INSTANCE;
-            });
-        }
+        JobSchedulerUtilsKt.scheduleBatchUploading(this.mContext, mConfigManager.getUploadInterval(), SchedulingBatchingType.ONE_SHOT, true, delay -> {
+            mMessageManager.mUploadHandler.sendMessageDelayed(mMessageManager.mUploadHandler.obtainMessage(UploadHandler.UPLOAD_TRIGGER_MESSAGES, 1, 0, mConfigManager.getMpid()), delay);
+            Logger.debug("Legacy action with delay: " + delay);
+            return Unit.INSTANCE;
+        });
     }
 
     @TargetApi(14)
