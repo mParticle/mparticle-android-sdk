@@ -31,6 +31,7 @@ public class MParticleIdentityClientImpl extends MParticleBaseClientImpl impleme
     private Context mContext;
     private ConfigManager mConfigManager;
 
+    static final long IDENTITY_TIMEOUT = 24 * 60 * 60 * 1000L;
     static final String LOGIN_PATH = "login";
     static final String LOGOUT_PATH = "logout";
     static final String IDENTIFY_PATH = "identify";

@@ -1,5 +1,7 @@
 package com.mparticle.identity;
 
+import static com.mparticle.identity.MParticleIdentityClientImpl.IDENTITY_TIMEOUT;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
@@ -24,8 +26,10 @@ import com.mparticle.internal.listeners.ApiClass;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -175,7 +179,7 @@ public class IdentityApi {
             public void onPostExecute(IdentityApiResult result) {
                 mKitManager.onLogoutCompleted(result.getUser(), logoutRequest);
             }
-        });
+        }, false);
     }
 
     /**
@@ -210,7 +214,7 @@ public class IdentityApi {
             public void onPostExecute(IdentityApiResult result) {
                 mKitManager.onLoginCompleted(result.getUser(), loginRequest);
             }
-        });
+        }, true);
     }
 
     /**
@@ -233,7 +237,7 @@ public class IdentityApi {
             public void onPostExecute(IdentityApiResult result) {
                 mKitManager.onIdentifyCompleted(result.getUser(), identifyRequest);
             }
-        });
+        }, true);
     }
 
     /**
@@ -348,13 +352,52 @@ public class IdentityApi {
         }
     }
 
-    private BaseIdentityTask makeIdentityRequest(IdentityApiRequest request, final IdentityNetworkRequestRunnable networkRequest) {
+    private boolean shouldMakeRequest(IdentityApiRequest identityRequest, boolean acceptCachedResponse) {
+        if (!acceptCachedResponse) {
+            return true;
+        }
+        long lastIdentityCall = 0l;// TODO get from prefs
+        boolean hasTimedOut = lastIdentityCall < System.currentTimeMillis() - IDENTITY_TIMEOUT; //TODO Check if the timeout should be dynamic based on server header
+        MParticleUser user = getUser(identityRequest.mpid);
+        if (hasTimedOut || isRequestDifferent(user, identityRequest)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean isRequestDifferent(MParticleUser user, IdentityApiRequest identityRequest) {
+        return areIdentitiesDifferent(user, identityRequest) || mpIdNotKnown(user);
+    }
+
+    private boolean mpIdNotKnown(MParticleUser user) {
+        return user != null && !mConfigManager.getMpids().contains(user.getId());
+    }
+
+    private boolean areIdentitiesDifferent(MParticleUser user, IdentityApiRequest identityApiRequest) {
+        //TODO params such as device id, android id, and google id should be persisted in user or userIdentity to be compared.
+        if (user != null) {
+            Map<MParticle.IdentityType, String> userIdentities = user.getUserIdentities() != null ? user.getUserIdentities() : new HashMap<>();
+            Map<MParticle.IdentityType, String> requestUserIdentities = identityApiRequest.getUserIdentities() != null ? identityApiRequest.getUserIdentities() : new HashMap<>();
+            return !userIdentities.equals(requestUserIdentities);
+        } else {
+            return true;
+        }
+    }
+
+    private BaseIdentityTask makeIdentityRequest(IdentityApiRequest request, final IdentityNetworkRequestRunnable networkRequest, boolean acceptCachedResponse) {
         if (request == null) {
             request = IdentityApiRequest.withEmptyUser().build();
         }
         final BaseIdentityTask task = new BaseIdentityTask();
-        ConfigManager.setIdentityRequestInProgress(true);
         final IdentityApiRequest identityApiRequest = request;
+        if (!shouldMakeRequest(identityApiRequest, acceptCachedResponse)) {
+            //Set both current and prev user as the current one, no request was done.
+            task.setSuccessful(new IdentityApiResult(getUser(identityApiRequest.mpid), getCurrentUser()));
+            Logger.debug("Identity -Returning current user from cache");
+            return task;
+        }
+        ConfigManager.setIdentityRequestInProgress(true);
         mBackgroundHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -362,6 +405,7 @@ public class IdentityApi {
                     if (mBackgroundHandler.isDisabled()) {
                         return;
                     }
+                    Logger.debug("Identity - Making identity call for request");
                     try {
                         long startingMpid = mConfigManager.getMpid();
                         final IdentityHttpResponse result = networkRequest.request(identityApiRequest);
