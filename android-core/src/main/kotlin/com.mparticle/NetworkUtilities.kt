@@ -15,4 +15,12 @@ object NetworkUtilities {
             "$newUrl.mparticle.com"
         }
     }
+
+    fun getPodPrefix(apiKey: String): String? {
+        return try {
+            apiKey.split("-".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray().get(0)
+        } catch (e: Exception) {
+            "us1"
+        }
+    }
 }

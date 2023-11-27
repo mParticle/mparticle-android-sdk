@@ -10,6 +10,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import java.net.MalformedURLException
+import kotlin.test.assertEquals
 
 class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
     var defaultUrls = HashMap<MParticleBaseClientImpl.Endpoint, MPUrl>()
@@ -29,15 +30,62 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
     @Test
     fun testUrlPrefixWithPodRedirection() {
         val prefix = "eu1"
-        val url = NetworkUtilities.getUrlWithPrefix(NetworkOptionsManager.MP_URL_PREFIX, prefix, true)
+        val url =
+            NetworkUtilities.getUrlWithPrefix(NetworkOptionsManager.MP_URL_PREFIX, prefix, true)
         Assert.assertEquals("${NetworkOptionsManager.MP_URL_PREFIX}.$prefix.mparticle.com", url)
     }
 
     @Test
     fun testUrlPrefixWithoutPodRedirection() {
         val prefix = "eu1"
-        val url = NetworkUtilities.getUrlWithPrefix(NetworkOptionsManager.MP_URL_PREFIX, prefix, false)
+        val url =
+            NetworkUtilities.getUrlWithPrefix(NetworkOptionsManager.MP_URL_PREFIX, prefix, false)
         Assert.assertEquals("${NetworkOptionsManager.MP_URL_PREFIX}.mparticle.com", url)
+    }
+
+    @Test
+    fun testAllPrefixes() {
+        val map = mapOf<String, String>(
+            Pair("us1-1vc4gbp24cdtx6e31s58icnymzy83f1uf", "us1"),
+            Pair("us2-v2p8lr3w2g90vtpaumbq21zy05cl50qm3", "us2"),
+            Pair("eu1-bkabfno0b8zpv5bwi2zm2mfa1kfml19al", "eu1"),
+            Pair("au1-iermuj83dbeoshm0n32f10feotclq6i4a", "au1"),
+            Pair("st1-k77ivhkbbqf4ce0s3y12zpcthyn1ixfyu", "st1"),
+            Pair("us3-w1y2y8yj8q58d5bx9u2dvtxzl4cpa7cuf", "us3")
+        )
+        map.forEach { key, value ->
+            val prefix = NetworkUtilities.getPodPrefix(key) ?: ""
+            assertEquals(value, prefix)
+            assertEquals(
+                "${NetworkOptionsManager.MP_URL_PREFIX}.$prefix.mparticle.com",
+                NetworkUtilities.getUrlWithPrefix(NetworkOptionsManager.MP_URL_PREFIX, prefix, true)
+            )
+            assertEquals(
+                "${NetworkOptionsManager.MP_IDENTITY_URL_PREFIX}.$prefix.mparticle.com",
+                NetworkUtilities.getUrlWithPrefix(
+                    NetworkOptionsManager.MP_IDENTITY_URL_PREFIX,
+                    prefix,
+                    true
+                )
+            )
+
+            assertEquals(
+                "${NetworkOptionsManager.MP_URL_PREFIX}.mparticle.com",
+                NetworkUtilities.getUrlWithPrefix(
+                    NetworkOptionsManager.MP_URL_PREFIX,
+                    prefix,
+                    false
+                )
+            )
+            assertEquals(
+                "${NetworkOptionsManager.MP_IDENTITY_URL_PREFIX}.mparticle.com",
+                NetworkUtilities.getUrlWithPrefix(
+                    NetworkOptionsManager.MP_IDENTITY_URL_PREFIX,
+                    prefix,
+                    false
+                )
+            )
+        }
     }
 
     @Test
