@@ -13,12 +13,16 @@ class BatchUploadingJob : JobService() {
     // Whenever the contraints are satisfied this will get fired.
     override fun onStartJob(params: JobParameters?): Boolean {
         Logger.debug("uploadBatching onStart service ")
-        MParticle.getInstance()?.let {
-            //Do if there is a non-null mParticle instance, force upload messages
-            it.upload()
-            Logger.debug("Triggering event upload on uploadBatching service")
-        } ?: run {
-            Logger.debug("MParticle instance null while trying to call uploadBatching:upload")
+        try {
+            MParticle.getInstance()?.let {
+                //Do if there is a non-null mParticle instance, force upload messages
+                it.upload()
+                Logger.debug("Triggering event upload on uploadBatching service")
+            } ?: run {
+                Logger.debug("MParticle instance null while trying to call uploadBatching:upload")
+            }
+        } catch (e: Exception) {
+            Logger.error("Error while uploading batches with BatchUploadingJob service")
         }
         return true
     }

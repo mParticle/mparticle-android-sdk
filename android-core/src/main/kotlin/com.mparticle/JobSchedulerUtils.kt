@@ -28,32 +28,37 @@ fun scheduleBatchUploading(
     context: Context,
     delayInMillis: Long,
     type: SchedulingBatchingType,
-    cancelPrevious: Boolean = true,
     legacyAction: (delay: Long) -> Unit
 ) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
         try {
-            if (cancelPrevious) {
-                context.getJobScheduler()?.cancel(UPLOAD_BATCH_JOB)
+            val jobId = UPLOAD_BATCH_JOB
+            val jobRunning = context.getScheduledJob(jobId) != null
+
+            if (!jobRunning) {
+                val builder = JobInfo.Builder(
+                    jobId,
+                    ComponentName(context, BatchUploadingJob::class.java.name)
+                )
+                if (type == SchedulingBatchingType.PERIODIC) {
+                    builder.setPeriodic(delayInMillis)
+                } else if (type == SchedulingBatchingType.ONE_SHOT) {
+                    builder.setMinimumLatency(delayInMillis)
+                }
+                builder.apply {
+                    setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                }
+                context.scheduleJob(builder.build())
+                Logger.debug("Scheduling batch upload with interval ${delayInMillis/1000} sec")
+            } else {
+                Logger.debug("Trying to schedule job in uploadBatch service. Service ALREADY RUNNING")
             }
-            val builder = JobInfo.Builder(
-                UPLOAD_BATCH_JOB,
-                ComponentName(context, BatchUploadingJob::class.java.name)
-            )
-            if (type == SchedulingBatchingType.PERIODIC) {
-                builder.setPeriodic(delayInMillis)
-            } else if (type == SchedulingBatchingType.ONE_SHOT) {
-                builder.setMinimumLatency(delayInMillis)
-            }
-            builder.apply {
-                setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
-            }
-            context.scheduleJob(builder.build())
         } catch (e: Exception) {
             Logger.warning("Service ${BatchUploadingJob::class.java.name} should be added to the manifest")
             legacyAction.invoke(delayInMillis)
         }
     } else {
+        Logger.debug("Sending post delayed message for batch uploading")
         legacyAction.invoke(delayInMillis)
     }
 }
@@ -68,13 +73,8 @@ private fun Context.getScheduledJob(jobId: Int): JobInfo? =
 
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 private fun Context.scheduleJob(job: JobInfo) {
-    val jobRunning = this.getScheduledJob(job.id) != null
-    if (!jobRunning) {
-        //Schedule / Re-schedule the job if its not running/scheduled to run at the system service
-        this.getJobScheduler()?.schedule(job)
-    } else {
-        Logger.debug("Trying to schedule job in uploadBatch service. Service ALREADY RUNNING")
-    }
+    //Schedule / Re-schedule the job if its not running/scheduled to run at the system service
+    this.getJobScheduler()?.schedule(job)
 }
 
 

@@ -136,6 +136,7 @@ public class AppStateManager {
 
     public void onActivityResumed(Activity activity) {
         try {
+            scheduleBackgroundJob();
             mCurrentActivityName = AppStateManager.getActivityName(activity);
 
             int interruptions = mInterruptionCount.get();
@@ -372,13 +373,12 @@ public class AppStateManager {
             instance.Internal().getKitManager().onApplicationBackground();
             mCurrentActivityName = null;
             Logger.debug("App backgrounded.");
-            scheduleBackgroundJob();
             mInterruptionCount.incrementAndGet();
         }
     }
 
     private void scheduleBackgroundJob() {
-        JobSchedulerUtilsKt.scheduleBatchUploading(this.mContext, mConfigManager.getUploadInterval(), SchedulingBatchingType.ONE_SHOT, true, delay -> {
+        JobSchedulerUtilsKt.scheduleBatchUploading(this.mContext, mConfigManager.getUploadInterval(), SchedulingBatchingType.ONE_SHOT, delay -> {
             mMessageManager.mUploadHandler.sendMessageDelayed(mMessageManager.mUploadHandler.obtainMessage(UploadHandler.UPLOAD_TRIGGER_MESSAGES, 1, 0, mConfigManager.getMpid()), delay);
             Logger.debug("Legacy action with delay: " + delay);
             return Unit.INSTANCE;

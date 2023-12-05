@@ -11,7 +11,6 @@ import androidx.annotation.Nullable;
 
 import com.mparticle.JobSchedulerUtilsKt;
 import com.mparticle.MParticle;
-import com.mparticle.SchedulingBatchingType;
 import com.mparticle.identity.AliasRequest;
 import com.mparticle.identity.AliasResponse;
 import com.mparticle.internal.database.services.MParticleDBManager;
@@ -26,8 +25,6 @@ import java.net.MalformedURLException;
 import java.util.List;
 
 import javax.net.ssl.SSLHandshakeException;
-
-import kotlin.Unit;
 
 /**
  * Primary queue handler which is responsible for querying, packaging, and uploading data.
@@ -137,12 +134,10 @@ public class UploadHandler extends BaseHandler {
                     break;
                 case UPLOAD_MESSAGES:
                 case UPLOAD_TRIGGER_MESSAGES:
-                    boolean anythingToUpload = false;
                     long uploadInterval = mConfigManager.getUploadInterval();
                     if (isNetworkConnected) {
                         if (uploadInterval > 0 || msg.arg1 == 1) {
                             while (mParticleDBManager.hasMessagesForUpload()) {
-                                anythingToUpload = true;
                                 prepareMessageUploads(false);
                             }
                             boolean needsHistory = upload(false);
@@ -150,20 +145,6 @@ public class UploadHandler extends BaseHandler {
                                 this.sendEmpty(UPLOAD_HISTORY);
                             }
                         }
-                    }
-                    if (!anythingToUpload && (!mAppStateManager.getSession().isActive() || mAppStateManager.isBackgrounded())) {
-                        //If there isn't anything to upload and is in background or inactive, cancel schedule job until a new message is stored
-                        JobSchedulerUtilsKt.cancelScheduledUploadBatchJob(mContext);
-                    }
-                    if (mAppStateManager.getSession().isActive() && uploadInterval > 0 && msg.arg1 == 0) {
-                        JobSchedulerUtilsKt.scheduleBatchUploading(mContext,
-                                uploadInterval,
-                                SchedulingBatchingType.PERIODIC,
-                                true,
-                                delay -> {
-                                    sendEmptyDelayed(UPLOAD_MESSAGES, uploadInterval);
-                                    return Unit.INSTANCE;
-                                });
                     }
                     break;
                 case UPLOAD_HISTORY:
@@ -227,6 +208,7 @@ public class UploadHandler extends BaseHandler {
      */
     protected boolean upload(boolean history) {
         mParticleDBManager.cleanupUploadMessages();
+        boolean uploadFailed = false;
         boolean processingSessionEnd = false;
         try {
             List<MParticleDBManager.ReadyUpload> readyUploads = mParticleDBManager.getReadyUploads();
@@ -256,12 +238,21 @@ public class UploadHandler extends BaseHandler {
                 }
             }
         } catch (MParticleApiClientImpl.MPThrottleException e) {
+            uploadFailed = true;
         } catch (SSLHandshakeException ssle) {
             Logger.debug("SSL handshake failed while preparing uploads - possible MITM attack detected.");
+            uploadFailed = true;
         } catch (MParticleApiClientImpl.MPConfigException e) {
             Logger.error("Bad API request - is the correct API key and secret configured?");
+            uploadFailed = true;
         } catch (Exception e) {
             Logger.error(e, "Error processing batch uploads in mParticle DB.");
+            uploadFailed = true;
+        }
+        if (!uploadFailed && !mParticleDBManager.hasMessagesForUpload() && mAppStateManager.isBackgrounded()) {
+            //Cancel job scheduler for batch upload if there are no messages stored to create batches and all uploads were successful and the app is backgrounded.
+            Logger.debug("Cancel batch uploading job");
+            JobSchedulerUtilsKt.cancelScheduledUploadBatchJob(mContext);
         }
         return processingSessionEnd;
     }
