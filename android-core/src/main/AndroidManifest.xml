@@ -3,9 +3,13 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application>
-        <service
-            android:name="com.mparticle.uploadbatching.BatchUploadingJob"
-            android:exported="true"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <receiver
+            android:name="com.mparticle.UploadBatchReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="ACTION_UPLOAD_BATCH"/>
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

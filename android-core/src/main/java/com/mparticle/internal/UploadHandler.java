@@ -9,7 +9,6 @@ import android.os.Message;
 
 import androidx.annotation.Nullable;
 
-import com.mparticle.JobSchedulerUtilsKt;
 import com.mparticle.MParticle;
 import com.mparticle.identity.AliasRequest;
 import com.mparticle.identity.AliasResponse;
@@ -208,8 +207,8 @@ public class UploadHandler extends BaseHandler {
      */
     protected boolean upload(boolean history) {
         mParticleDBManager.cleanupUploadMessages();
-        boolean uploadFailed = false;
         boolean processingSessionEnd = false;
+        boolean uploadFailed = false;
         try {
             List<MParticleDBManager.ReadyUpload> readyUploads = mParticleDBManager.getReadyUploads();
             if (readyUploads.size() > 0) {
@@ -249,10 +248,13 @@ public class UploadHandler extends BaseHandler {
             Logger.error(e, "Error processing batch uploads in mParticle DB.");
             uploadFailed = true;
         }
-        if (!uploadFailed && !mParticleDBManager.hasMessagesForUpload() && mAppStateManager.isBackgrounded()) {
-            //Cancel job scheduler for batch upload if there are no messages stored to create batches and all uploads were successful and the app is backgrounded.
-            Logger.debug("Cancel batch uploading job");
-            JobSchedulerUtilsKt.cancelScheduledUploadBatchJob(mContext);
+        boolean activeNotBackgrounded = !mAppStateManager.isBackgrounded() && mAppStateManager.getSession().isActive();
+        boolean backgroundedWithPendingMessages = mAppStateManager.isBackgrounded() && (uploadFailed || mParticleDBManager.hasMessagesForUpload());
+        if (mConfigManager.getUploadInterval() > 0 && (activeNotBackgrounded || backgroundedWithPendingMessages)) {
+            Logger.debug("Upload scheduled with message in interval due to activeNotBackgrounded: " + activeNotBackgrounded + " and/or backgroundedWithPendingMessages: " + backgroundedWithPendingMessages);
+            this.sendEmptyDelayed(UPLOAD_MESSAGES, mConfigManager.getUploadInterval());
+        } else {
+            Logger.debug("No uploads are being schedules do to activeNotBackgrounded: " + activeNotBackgrounded + " and/or backgroundedWithPendingMessages: " + backgroundedWithPendingMessages);
         }
         return processingSessionEnd;
     }
