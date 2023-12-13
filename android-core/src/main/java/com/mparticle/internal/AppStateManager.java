@@ -173,9 +173,7 @@ public class AppStateManager {
                 initialize(mCurrentActivityName, previousSessionUri, previousSessionParameters, previousSessionPackage);
             } else if (isBackgrounded() && mLastStoppedTime.get() > 0) {
                 isBackToForeground = true;
-                MPUtility.AdIdInfo adIdInfo = MPUtility.getAdIdInfo(mContext);
-                String currentGoogleAdId = (adIdInfo == null ? null : (adIdInfo.isLimitAdTrackingEnabled ? null : adIdInfo.id));
-                mMessageManager.postToMessageThread(new CheckAdIdRunnable(currentGoogleAdId, mConfigManager.getPreviousAdId()));
+                mMessageManager.postToMessageThread(new CheckAdIdRunnable(mConfigManager));
                 logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE,
                         mCurrentActivityName,
                         mLastStoppedTime.get() - mLastForegroundTime,
@@ -446,16 +444,17 @@ public class AppStateManager {
     }
 
     static class CheckAdIdRunnable implements Runnable {
-        String currentAdId;
-        String previousAdId;
+        ConfigManager configManager;
 
-        CheckAdIdRunnable(@Nullable String currentAdId, @Nullable String previousAdId) {
-            this.currentAdId = currentAdId;
-            this.previousAdId = previousAdId;
+        CheckAdIdRunnable(@Nullable ConfigManager configManager) {
+            this.configManager = configManager;
         }
 
         @Override
         public void run() {
+            MPUtility.AdIdInfo adIdInfo = MPUtility.getAdIdInfo(MParticle.getInstance().Internal().getAppStateManager().mContext);
+            String currentAdId = (adIdInfo == null ? null : (adIdInfo.isLimitAdTrackingEnabled ? null : adIdInfo.id));
+            String previousAdId = configManager.getPreviousAdId();
             if (currentAdId != null && !currentAdId.equals(previousAdId)) {
                 MParticle instance = MParticle.getInstance();
                 if (instance != null) {
