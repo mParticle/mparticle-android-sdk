@@ -1,3 +1,15 @@
+## [5.55.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.54.0...v5.55.0) (2023-12-13)
+
+
+### Features
+
+* SQDSDKS-5723 - Remove custom attributes limit to MPEvents. ([#456](https://github.com/mParticle/mparticle-android-sdk/issues/456)) ([32c788e](https://github.com/mParticle/mparticle-android-sdk/commit/32c788ee15d532c2e93a9b50ab996b240341a1f8))
+
+
+### Bug Fixes
+
+* only delete branch if all succeeds ([f239ba8](https://github.com/mParticle/mparticle-android-sdk/commit/f239ba87fe32fb8fb86d2454b2495fb3890d0653))
+
 ## [5.54.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.53.2...v5.54.0) (2023-11-03)
 
 
