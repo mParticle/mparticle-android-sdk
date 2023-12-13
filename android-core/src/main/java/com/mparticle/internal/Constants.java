@@ -36,7 +36,6 @@ public class Constants {
     // preferences persistence
     public static final String PREFS_FILE = "mParticlePrefs";
 
-    public static final int LIMIT_ATTR_COUNT = 100;
     public static final int LIMIT_ATTR_KEY = 256;
     public static final int LIMIT_ATTR_VALUE = 4096;
     public static final int LIMIT_MAX_MESSAGE_SIZE = 100 * 1024;
