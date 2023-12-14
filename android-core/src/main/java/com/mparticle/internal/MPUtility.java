@@ -720,11 +720,6 @@ public class MPUtility {
             if (caseInsensitive) {
                 key = findCaseInsensitiveKey(attributes, key);
             }
-
-            if (Constants.LIMIT_ATTR_COUNT == attributes.length() && !attributes.has(key)) {
-                Logger.error("Attribute count exceeds limit. Discarding attribute: " + key);
-                return false;
-            }
             if (value != null) {
                 String stringValue = value.toString();
                 if (stringValue.length() > Constants.LIMIT_ATTR_VALUE) {
