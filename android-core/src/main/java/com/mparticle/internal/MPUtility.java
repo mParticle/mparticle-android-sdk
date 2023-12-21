@@ -20,7 +20,6 @@ import android.os.Environment;
 import android.os.StatFs;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
