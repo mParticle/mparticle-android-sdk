@@ -108,6 +108,7 @@ public class ConfigManager {
     public static final int DEFAULT_UPLOAD_INTERVAL = 600;
     private List<ConfigLoadedListener> configUpdatedListeners = new ArrayList<>();
     private List<SideloadedKit> sideloadedKits = new ArrayList<>();
+    private boolean enableBackgroundBatchingUpload = false;
 
     private ConfigManager() {
         super();
@@ -401,6 +402,11 @@ public class ConfigManager {
         if (responseJSON.has(KEY_UNHANDLED_EXCEPTIONS)) {
             mLogUnhandledExceptions = responseJSON.getString(KEY_UNHANDLED_EXCEPTIONS);
         }
+
+        if (responseJSON.has(ENABLE_BACKGROUND_BATCHING)) {
+            enableBackgroundBatchingUpload = responseJSON.getBoolean(ENABLE_BACKGROUND_BATCHING);
+        }
+        editor.putBoolean(ENABLE_BACKGROUND_BATCHING, enableBackgroundBatchingUpload);
 
         if (responseJSON.has(KEY_PUSH_MESSAGES) && newConfig) {
             sPushKeys = responseJSON.getJSONArray(KEY_PUSH_MESSAGES);
@@ -913,6 +919,10 @@ public class ConfigManager {
         return mTriggerMessageHashes;
     }
 
+    public boolean isBackgroundBatchUploadingEnabled() {
+        return enableBackgroundBatchingUpload;
+    }
+
     public boolean shouldTrigger(BaseMPMessage message) {
         JSONArray messageMatches = getTriggerMessageMatches();
         JSONArray triggerHashes = getTriggerMessageHashes();
@@ -922,11 +932,11 @@ public class ConfigManager {
             isBackgroundAst = (message.getMessageType().equals(Constants.MessageType.APP_STATE_TRANSITION) && message.get(Constants.MessageKey.STATE_TRANSITION_TYPE).equals(Constants.StateTransitionType.STATE_TRANS_BG));
         } catch (JSONException ex) {
         }
-        if (isBackgroundAst) {
+        if (enableBackgroundBatchingUpload && isBackgroundAst) {
             return false;
         }
         boolean shouldTrigger = message.getMessageType().equals(Constants.MessageType.PUSH_RECEIVED)
-                || message.getMessageType().equals(Constants.MessageType.COMMERCE_EVENT);
+                || message.getMessageType().equals(Constants.MessageType.COMMERCE_EVENT) || isBackgroundAst;
 
         if (!shouldTrigger && messageMatches != null && messageMatches.length() > 0) {
             shouldTrigger = true;

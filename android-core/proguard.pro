@@ -94,7 +94,7 @@
 -keep class com.mparticle.MParticle$UserAttributes { *; }
 -keep class com.mparticle.MParticle$ResetListener { *; }
 -keep class com.mparticle.MParticle$OperatingSystem { *; }
--keep class com.mparticle.UploadBatchReceiver
+-keep class com.mparticle.uploadbatching.UploadBatchReceiver
 
 
 -keep class com.mparticle.Session { *; }

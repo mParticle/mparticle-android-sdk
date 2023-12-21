@@ -145,6 +145,10 @@ public class UploadHandler extends BaseHandler {
                             }
                         }
                     }
+                    if ((mAppStateManager.getSession().isActive() && uploadInterval > 0 && msg.arg1 == 0) ||
+                            (mParticleDBManager.hasMessagesForUpload() && mAppStateManager.isBackgrounded())) {
+                        this.sendEmptyDelayed(UPLOAD_MESSAGES, uploadInterval);
+                    }
                     break;
                 case UPLOAD_HISTORY:
                     removeMessage(UPLOAD_HISTORY);
@@ -208,7 +212,6 @@ public class UploadHandler extends BaseHandler {
     protected boolean upload(boolean history) {
         mParticleDBManager.cleanupUploadMessages();
         boolean processingSessionEnd = false;
-        boolean uploadFailed = false;
         try {
             List<MParticleDBManager.ReadyUpload> readyUploads = mParticleDBManager.getReadyUploads();
             if (readyUploads.size() > 0) {
@@ -237,24 +240,12 @@ public class UploadHandler extends BaseHandler {
                 }
             }
         } catch (MParticleApiClientImpl.MPThrottleException e) {
-            uploadFailed = true;
         } catch (SSLHandshakeException ssle) {
             Logger.debug("SSL handshake failed while preparing uploads - possible MITM attack detected.");
-            uploadFailed = true;
         } catch (MParticleApiClientImpl.MPConfigException e) {
             Logger.error("Bad API request - is the correct API key and secret configured?");
-            uploadFailed = true;
         } catch (Exception e) {
             Logger.error(e, "Error processing batch uploads in mParticle DB.");
-            uploadFailed = true;
-        }
-        boolean activeNotBackgrounded = !mAppStateManager.isBackgrounded() && mAppStateManager.getSession().isActive();
-        boolean backgroundedWithPendingMessages = mAppStateManager.isBackgrounded() && (uploadFailed || mParticleDBManager.hasMessagesForUpload());
-        if (mConfigManager.getUploadInterval() > 0 && (activeNotBackgrounded || backgroundedWithPendingMessages)) {
-            Logger.debug("Upload scheduled with message in interval due to activeNotBackgrounded: " + activeNotBackgrounded + " and/or backgroundedWithPendingMessages: " + backgroundedWithPendingMessages);
-            this.sendEmptyDelayed(UPLOAD_MESSAGES, mConfigManager.getUploadInterval());
-        } else {
-            Logger.debug("No uploads are being schedules do to activeNotBackgrounded: " + activeNotBackgrounded + " and/or backgroundedWithPendingMessages: " + backgroundedWithPendingMessages);
         }
         return processingSessionEnd;
     }

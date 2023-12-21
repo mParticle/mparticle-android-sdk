@@ -1,9 +1,10 @@
-package com.mparticle
+package com.mparticle.uploadbatching
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import com.mparticle.MParticle
 import com.mparticle.internal.Logger
 
 internal class UploadBatchReceiver : BroadcastReceiver() {
@@ -24,11 +25,8 @@ internal class UploadBatchReceiver : BroadcastReceiver() {
                         //Do if there is a non-null mParticle instance, force upload messages
                         it.upload()
                         Logger.debug("Uploading events in upload batch receiver")
-                    } ?: run {
-                        Logger.debug("Batches cant be uploaded in receiver because MParticle instance is null")
                     }
                 } catch (e: Exception) {
-                    Logger.error("Error while uploading batches in upload batch reveiver")
                 }
             }
         }

@@ -1,4 +1,4 @@
-package com.mparticle
+package com.mparticle.uploadbatching
 
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -6,14 +6,19 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import com.mparticle.internal.Logger
+import com.mparticle.millisToLoggingDate
 
 fun scheduleUploadBatchAlarm(context: Context, delay: Long) {
     val intent = Intent(context, UploadBatchReceiver::class.java).apply {
         action = UploadBatchReceiver.ACTION_UPLOAD_BATCH
     }
     val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
-
-    val time = System.currentTimeMillis() + delay
+    var alarmDelay = delay
+    //Setting alarm delay to 2min MINIMUM to prevent collision with end session message triggers
+    if (delay < 120000) {
+        alarmDelay = 120000L
+    }
+    val time = System.currentTimeMillis() + alarmDelay
     val alarmType = AlarmManager.RTC_WAKEUP
     (context.getSystemService(Context.ALARM_SERVICE) as AlarmManager?)?.let { manager ->
 

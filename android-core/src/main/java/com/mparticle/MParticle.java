@@ -52,6 +52,7 @@ import com.mparticle.media.MediaCallbacks;
 import com.mparticle.messaging.MPMessagingAPI;
 import com.mparticle.messaging.ProviderCloudMessage;
 import com.mparticle.segmentation.SegmentListener;
+import com.mparticle.uploadbatching.UploadBatchReceiver;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;

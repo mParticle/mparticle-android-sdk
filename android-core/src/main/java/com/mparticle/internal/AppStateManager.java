@@ -14,13 +14,13 @@ import android.os.SystemClock;
 
 import androidx.annotation.Nullable;
 
-import com.mparticle.AlarmSchedulingUtilsKt;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.identity.IdentityApi;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.listeners.InternalListenerManager;
+import com.mparticle.uploadbatching.AlarmSchedulingUtilsKt;
 
 import org.json.JSONObject;
 
@@ -365,7 +365,9 @@ public class AppStateManager {
     private void logBackgrounded() {
         MParticle instance = MParticle.getInstance();
         if (instance != null) {
-            AlarmSchedulingUtilsKt.scheduleUploadBatchAlarm(mContext, mConfigManager.getUploadInterval());
+            if (mConfigManager.isBackgroundBatchUploadingEnabled()) {
+                AlarmSchedulingUtilsKt.scheduleUploadBatchAlarm(mContext, mConfigManager.getUploadInterval());
+            }
             logStateTransition(Constants.StateTransitionType.STATE_TRANS_BG, mCurrentActivityName);
             instance.Internal().getKitManager().onApplicationBackground();
             mCurrentActivityName = null;
