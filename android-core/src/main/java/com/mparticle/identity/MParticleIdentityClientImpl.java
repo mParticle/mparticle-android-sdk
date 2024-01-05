@@ -52,6 +52,7 @@ public class MParticleIdentityClientImpl extends MParticleBaseClientImpl impleme
     static final String DEVICE_APPLICATION_STAMP = "device_application_stamp";
     static final String KNOWN_IDENTITIES = "known_identities";
     static final String PREVIOUS_MPID = "previous_mpid";
+    static final String IDENTITY_HEADER_TIMEOUT = "X-MP-Max-Age";
 
     static final String NEW_VALUE = "new_value";
     static final String OLD_VALUE = "old_value";
@@ -81,10 +82,11 @@ public class MParticleIdentityClientImpl extends MParticleBaseClientImpl impleme
         String url = connection.getURL().toString();
         InternalListenerManager.getListener().onNetworkRequestStarted(SdkListener.Endpoint.IDENTITY_LOGIN, url, jsonObject, request);
         connection = makeUrlRequest(Endpoint.IDENTITY, connection, jsonObject.toString(), false);
+        String headerField = connection.getHeaderField(IDENTITY_HEADER_TIMEOUT);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
         InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.IDENTITY_LOGIN, url, response, responseCode);
-        return parseIdentityResponse(responseCode, response);
+        return parseIdentityResponse(responseCode, response, headerField);
     }
 
     public IdentityHttpResponse logout(IdentityApiRequest request) throws JSONException, IOException {
@@ -97,7 +99,7 @@ public class MParticleIdentityClientImpl extends MParticleBaseClientImpl impleme
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
         InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.IDENTITY_LOGOUT, url, response, responseCode);
-        return parseIdentityResponse(responseCode, response);
+        return parseIdentityResponse(responseCode, response, "0");
     }
 
     public IdentityHttpResponse identify(IdentityApiRequest request) throws JSONException, IOException {
@@ -107,10 +109,11 @@ public class MParticleIdentityClientImpl extends MParticleBaseClientImpl impleme
         String url = connection.getURL().toString();
         InternalListenerManager.getListener().onNetworkRequestStarted(SdkListener.Endpoint.IDENTITY_IDENTIFY, url, jsonObject, request);
         connection = makeUrlRequest(Endpoint.IDENTITY, connection, jsonObject.toString(), false);
+        String headerField = connection.getHeaderField(IDENTITY_HEADER_TIMEOUT);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
         InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.IDENTITY_IDENTIFY, url, response, responseCode);
-        return parseIdentityResponse(responseCode, response);
+        return parseIdentityResponse(responseCode, response, headerField);
     }
 
     public IdentityHttpResponse modify(IdentityApiRequest request) throws JSONException, IOException {
@@ -125,9 +128,10 @@ public class MParticleIdentityClientImpl extends MParticleBaseClientImpl impleme
         InternalListenerManager.getListener().onNetworkRequestStarted(SdkListener.Endpoint.IDENTITY_MODIFY, url, jsonObject, request);
         connection = makeUrlRequest(Endpoint.IDENTITY, connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
+        String headerField = connection.getHeaderField(IDENTITY_HEADER_TIMEOUT);
         JSONObject response = MPUtility.getJsonResponse(connection);
         InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.IDENTITY_MODIFY, url, response, responseCode);
-        return parseIdentityResponse(responseCode, response);
+        return parseIdentityResponse(responseCode, response, headerField);
     }
 
     private JSONObject getBaseJson() throws JSONException {
@@ -239,13 +243,18 @@ public class MParticleIdentityClientImpl extends MParticleBaseClientImpl impleme
         return jsonObject;
     }
 
-    private IdentityHttpResponse parseIdentityResponse(int httpCode, JSONObject jsonObject) {
+    private IdentityHttpResponse parseIdentityResponse(int httpCode, JSONObject jsonObject, String identityTimeoutHeader) {
+        long timeoutHeader = 0L;
         try {
             Logger.verbose("Identity response code: " + httpCode);
             if (jsonObject != null) {
                 Logger.verbose("Identity result: " + jsonObject.toString());
             }
-            IdentityHttpResponse httpResponse = new IdentityHttpResponse(httpCode, jsonObject);
+            try {
+                timeoutHeader = Long.parseLong(identityTimeoutHeader);
+            } catch (Exception e) {
+            }
+            IdentityHttpResponse httpResponse = new IdentityHttpResponse(httpCode, jsonObject, timeoutHeader);
             if (!MPUtility.isEmpty(httpResponse.getContext())) {
                 mConfigManager.setIdentityApiContext(httpResponse.getContext());
             }

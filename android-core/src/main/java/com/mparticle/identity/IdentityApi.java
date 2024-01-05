@@ -1,7 +1,5 @@
 package com.mparticle.identity;
 
-import static com.mparticle.identity.MParticleIdentityClientImpl.IDENTITY_TIMEOUT;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
@@ -50,12 +48,17 @@ public class IdentityApi {
     MessageManager mMessageManager;
     KitManager mKitManager;
     private Internal mInternal = new Internal();
+    private long timeoutSeconds = 0L;
 
     MParticleUserDelegate mUserDelegate;
     private MParticleIdentityClient mApiClient;
 
     Set<IdentityStateListener> identityStateListeners = new HashSet<IdentityStateListener>();
     private static Object lock = new Object();
+
+    public static final String LOGIN_CALL = "login";
+    public static final String IDENTIFY_CALL = "identify";
+    public static final String LOGOUT_CALL = "logout";
 
     protected IdentityApi() {
     }
@@ -169,6 +172,7 @@ public class IdentityApi {
      */
     @NonNull
     public MParticleTask<IdentityApiResult> logout(@Nullable final IdentityApiRequest logoutRequest) {
+        resetCache();
         return makeIdentityRequest(logoutRequest, new IdentityNetworkRequestRunnable() {
             @Override
             public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
@@ -179,7 +183,7 @@ public class IdentityApi {
             public void onPostExecute(IdentityApiResult result) {
                 mKitManager.onLogoutCompleted(result.getUser(), logoutRequest);
             }
-        }, false);
+        }, false, LOGOUT_CALL);
     }
 
     /**
@@ -207,14 +211,17 @@ public class IdentityApi {
         return makeIdentityRequest(loginRequest, new IdentityNetworkRequestRunnable() {
             @Override
             public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
-                return getApiClient().login(request);
+                IdentityHttpResponse response = getApiClient().login(request);
+                timeoutSeconds = response.getTimeout();
+                Logger.debug("TIMEOUT - IDENTITY TIMEOUT SET (SEC): "+ timeoutSeconds);
+                return response;
             }
 
             @Override
             public void onPostExecute(IdentityApiResult result) {
                 mKitManager.onLoginCompleted(result.getUser(), loginRequest);
             }
-        }, true);
+        }, true, LOGIN_CALL);
     }
 
     /**
@@ -230,14 +237,17 @@ public class IdentityApi {
         return makeIdentityRequest(identifyRequest, new IdentityNetworkRequestRunnable() {
             @Override
             public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
-                return getApiClient().identify(request);
+                IdentityHttpResponse response = getApiClient().identify(request);
+                timeoutSeconds = response.getTimeout();
+                Logger.debug("TIMEOUT - IDENTITY TIMEOUT SET (SEC): "+ timeoutSeconds);
+                return response;
             }
 
             @Override
             public void onPostExecute(IdentityApiResult result) {
                 mKitManager.onIdentifyCompleted(result.getUser(), identifyRequest);
             }
-        }, true);
+        }, true, IDENTIFY_CALL);
     }
 
     /**
@@ -256,6 +266,7 @@ public class IdentityApi {
         if (updateRequest.mpid == null) {
             updateRequest.mpid = mConfigManager.getMpid();
         }
+
         if (Constants.TEMPORARY_MPID.equals(updateRequest.mpid)) {
             String message = "modify() requires a non-zero MPID, please make sure a MParticleUser is present before making a modify request.";
             if (devMode) {
@@ -270,10 +281,12 @@ public class IdentityApi {
             @Override
             public void run() {
                 try {
+                    resetCache();
                     final IdentityHttpResponse result = getApiClient().modify(updateRequest);
                     if (!result.isSuccessful()) {
                         task.setFailed(result);
                     } else {
+                        timeoutSeconds = result.getTimeout();
                         MParticleUserDelegate.setUserIdentities(mUserDelegate, updateRequest.getUserIdentities(), updateRequest.mpid);
                         task.setSuccessful(new IdentityApiResult(MParticleUserImpl.getInstance(mContext, updateRequest.mpid, mUserDelegate), null));
                         new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -352,17 +365,25 @@ public class IdentityApi {
         }
     }
 
-    private boolean shouldMakeRequest(IdentityApiRequest identityRequest, boolean acceptCachedResponse) {
+    private boolean shouldMakeRequest(IdentityApiRequest identityRequest, boolean acceptCachedResponse, long lastIdentityCall) {
         if (!acceptCachedResponse) {
+            Logger.debug("TIMEOUT - SHOULD MAKE REQUEST: TRUE");
             return true;
         }
-        long lastIdentityCall = 0l;// TODO get from prefs
-        boolean hasTimedOut = lastIdentityCall < System.currentTimeMillis() - IDENTITY_TIMEOUT; //TODO Check if the timeout should be dynamic based on server header
-        MParticleUser user = getUser(identityRequest.mpid);
-        if (hasTimedOut || isRequestDifferent(user, identityRequest)) {
-            return true;
+        boolean hasTimedOut = lastIdentityCall==-1L || (lastIdentityCall + (timeoutSeconds * 1000) > System.currentTimeMillis()) ;
+        Logger.debug("TIMEOUT - REQUEST TIMED OUT: " + hasTimedOut);
+        if (identityRequest != null && identityRequest.mpid != null) {
+            MParticleUser user = getUser(identityRequest.mpid);
+            if (hasTimedOut || isRequestDifferent(user, identityRequest)) {
+                Logger.debug("TIMEOUT - SHOULD MAKE REQUEST: TRUE");
+                return true;
+            } else {
+                Logger.debug("TIMEOUT - SHOULD MAKE REQUEST: FALSE");
+                return false;
+            }
         } else {
-            return false;
+            Logger.debug("TIMEOUT - SHOULD MAKE REQUEST: TRUE");
+            return true;
         }
     }
 
@@ -379,19 +400,27 @@ public class IdentityApi {
         if (user != null) {
             Map<MParticle.IdentityType, String> userIdentities = user.getUserIdentities() != null ? user.getUserIdentities() : new HashMap<>();
             Map<MParticle.IdentityType, String> requestUserIdentities = identityApiRequest.getUserIdentities() != null ? identityApiRequest.getUserIdentities() : new HashMap<>();
+            Logger.debug("TIMEOUT - USER IDENTITIES: " +userIdentities);
+            Logger.debug("TIMEOUT - REQUEST USER IDENTITIES: " +requestUserIdentities);
+            Logger.debug("TIMEOUT - RESULT DIFFERENT: " + !userIdentities.equals(requestUserIdentities));
             return !userIdentities.equals(requestUserIdentities);
         } else {
             return true;
         }
     }
 
-    private BaseIdentityTask makeIdentityRequest(IdentityApiRequest request, final IdentityNetworkRequestRunnable networkRequest, boolean acceptCachedResponse) {
+    private void resetCache() {
+        mConfigManager.resetIdentityTypeCall();
+    }
+
+    private BaseIdentityTask makeIdentityRequest(IdentityApiRequest request, final IdentityNetworkRequestRunnable networkRequest, boolean acceptCachedResponse, String call) {
+        long lastIdentityCallTime = mConfigManager.getLastIdentityTypeCall(call);
         if (request == null) {
             request = IdentityApiRequest.withEmptyUser().build();
         }
         final BaseIdentityTask task = new BaseIdentityTask();
         final IdentityApiRequest identityApiRequest = request;
-        if (!shouldMakeRequest(identityApiRequest, acceptCachedResponse)) {
+        if (!shouldMakeRequest(identityApiRequest, acceptCachedResponse, lastIdentityCallTime)) {
             //Set both current and prev user as the current one, no request was done.
             task.setSuccessful(new IdentityApiResult(getUser(identityApiRequest.mpid), getCurrentUser()));
             Logger.debug("Identity -Returning current user from cache");
@@ -419,6 +448,9 @@ public class IdentityApi {
                             ConfigManager.setIdentityRequestInProgress(false);
                             mUserDelegate.setUser(mContext, startingMpid, newMpid, identityApiRequest.getUserIdentities(), identityApiRequest.getUserAliasHandler(), isLoggedIn);
                             final MParticleUser previousUser = startingMpid != newMpid ? getUser(startingMpid) : null;
+                            if (acceptCachedResponse) {
+                                mConfigManager.setLastIdentityTypeCall(call);
+                            }
                             task.setSuccessful(new IdentityApiResult(MParticleUserImpl.getInstance(mContext, newMpid, mUserDelegate), previousUser));
                             new Handler(Looper.getMainLooper()).post(new Runnable() {
                                 @Override

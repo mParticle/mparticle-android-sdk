@@ -1251,6 +1251,22 @@ public class ConfigManager {
         return sPreferences.getInt(Constants.PrefKeys.IDENTITY_CONNECTION_TIMEOUT, DEFAULT_CONNECTION_TIMEOUT_SECONDS) * 1000;
     }
 
+    public long getLastIdentityTypeCall(String call) {
+        return sPreferences.getLong(call, 0L);
+    }
+
+    public void resetIdentityTypeCall() {
+        SharedPreferences.Editor editor = sPreferences.edit();
+        editor.putLong(IdentityApi.LOGIN_CALL, -1);
+        editor.putLong(IdentityApi.IDENTIFY_CALL, -1);
+        editor.apply();
+    }
+
+    public void setLastIdentityTypeCall(String call) {
+        Logger.debug("TIMEOUT - SET LAST IDENTITY TIME CALL FOR " + call + " : " + System.currentTimeMillis());
+        sPreferences.edit().putLong(call, System.currentTimeMillis()).apply();
+    }
+
     public int getConnectionTimeout() {
         return DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000;
     }

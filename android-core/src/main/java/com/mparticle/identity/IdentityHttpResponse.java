@@ -18,6 +18,7 @@ public final class IdentityHttpResponse {
     private String context;
     private int httpCode;
     private boolean loggedIn;
+    private long timeout = 0L;
 
     @NonNull
     public static final String MPID = "mpid";
@@ -50,8 +51,9 @@ public final class IdentityHttpResponse {
         this.errors.add(new Error(UNKNOWN, errorString));
     }
 
-    public IdentityHttpResponse(int httpCode, @Nullable JSONObject jsonObject) throws JSONException {
+    public IdentityHttpResponse(int httpCode, @Nullable JSONObject jsonObject, long identityTimeout) throws JSONException {
         this.httpCode = httpCode;
+        this.timeout = identityTimeout;
         if (!MPUtility.isEmpty(jsonObject)) {
             if (jsonObject.has(MPID)) {
                 this.mpId = Long.valueOf(jsonObject.getString(MPID));
@@ -90,6 +92,10 @@ public final class IdentityHttpResponse {
 
     public long getMpId() {
         return mpId;
+    }
+
+    public long getTimeout() {
+        return 30L;
     }
 
     @Nullable
