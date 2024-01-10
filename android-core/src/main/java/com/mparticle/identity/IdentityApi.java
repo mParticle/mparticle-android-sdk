@@ -213,7 +213,6 @@ public class IdentityApi {
             public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
                 IdentityHttpResponse response = getApiClient().login(request);
                 timeoutSeconds = response.getTimeout();
-                Logger.debug("TIMEOUT - IDENTITY TIMEOUT SET (SEC): "+ timeoutSeconds);
                 return response;
             }
 
@@ -239,7 +238,6 @@ public class IdentityApi {
             public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
                 IdentityHttpResponse response = getApiClient().identify(request);
                 timeoutSeconds = response.getTimeout();
-                Logger.debug("TIMEOUT - IDENTITY TIMEOUT SET (SEC): "+ timeoutSeconds);
                 return response;
             }
 
@@ -367,22 +365,17 @@ public class IdentityApi {
 
     private boolean shouldMakeRequest(IdentityApiRequest identityRequest, boolean acceptCachedResponse, long lastIdentityCall) {
         if (!acceptCachedResponse) {
-            Logger.debug("TIMEOUT - SHOULD MAKE REQUEST: TRUE");
             return true;
         }
-        boolean hasTimedOut = lastIdentityCall==-1L || (lastIdentityCall + (timeoutSeconds * 1000) > System.currentTimeMillis()) ;
-        Logger.debug("TIMEOUT - REQUEST TIMED OUT: " + hasTimedOut);
+        boolean hasTimedOut = lastIdentityCall == -1L || (lastIdentityCall + (timeoutSeconds * 1000) > System.currentTimeMillis());
         if (identityRequest != null && identityRequest.mpid != null) {
             MParticleUser user = getUser(identityRequest.mpid);
             if (hasTimedOut || isRequestDifferent(user, identityRequest)) {
-                Logger.debug("TIMEOUT - SHOULD MAKE REQUEST: TRUE");
                 return true;
             } else {
-                Logger.debug("TIMEOUT - SHOULD MAKE REQUEST: FALSE");
                 return false;
             }
         } else {
-            Logger.debug("TIMEOUT - SHOULD MAKE REQUEST: TRUE");
             return true;
         }
     }
@@ -396,13 +389,9 @@ public class IdentityApi {
     }
 
     private boolean areIdentitiesDifferent(MParticleUser user, IdentityApiRequest identityApiRequest) {
-        //TODO params such as device id, android id, and google id should be persisted in user or userIdentity to be compared.
         if (user != null) {
             Map<MParticle.IdentityType, String> userIdentities = user.getUserIdentities() != null ? user.getUserIdentities() : new HashMap<>();
             Map<MParticle.IdentityType, String> requestUserIdentities = identityApiRequest.getUserIdentities() != null ? identityApiRequest.getUserIdentities() : new HashMap<>();
-            Logger.debug("TIMEOUT - USER IDENTITIES: " +userIdentities);
-            Logger.debug("TIMEOUT - REQUEST USER IDENTITIES: " +requestUserIdentities);
-            Logger.debug("TIMEOUT - RESULT DIFFERENT: " + !userIdentities.equals(requestUserIdentities));
             return !userIdentities.equals(requestUserIdentities);
         } else {
             return true;
@@ -423,7 +412,7 @@ public class IdentityApi {
         if (!shouldMakeRequest(identityApiRequest, acceptCachedResponse, lastIdentityCallTime)) {
             //Set both current and prev user as the current one, no request was done.
             task.setSuccessful(new IdentityApiResult(getUser(identityApiRequest.mpid), getCurrentUser()));
-            Logger.debug("Identity -Returning current user from cache");
+            Logger.debug("Identity - Returning current user from cache");
             return task;
         }
         ConfigManager.setIdentityRequestInProgress(true);

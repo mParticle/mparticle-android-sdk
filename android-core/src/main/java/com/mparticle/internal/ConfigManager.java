@@ -1256,7 +1256,6 @@ public class ConfigManager {
     }
 
     public void setLastIdentityTypeCall(String call) {
-        Logger.debug("TIMEOUT - SET LAST IDENTITY TIME CALL FOR " + call + " : " + System.currentTimeMillis());
         sPreferences.edit().putLong(call, System.currentTimeMillis()).apply();
     }
 
