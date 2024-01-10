@@ -1,3 +1,33 @@
+## [5.55.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.54.0...v5.55.0) (2023-12-13)
+
+
+### Features
+
+* SQDSDKS-5723 - Remove custom attributes limit to MPEvents. ([#456](https://github.com/mParticle/mparticle-android-sdk/issues/456)) ([32c788e](https://github.com/mParticle/mparticle-android-sdk/commit/32c788ee15d532c2e93a9b50ab996b240341a1f8))
+
+
+### Bug Fixes
+
+* only delete branch if all succeeds ([f239ba8](https://github.com/mParticle/mparticle-android-sdk/commit/f239ba87fe32fb8fb86d2454b2495fb3890d0653))
+
+## [5.54.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.53.2...v5.54.0) (2023-11-03)
+
+
+### Features
+
+* update CI in kits ([5b12dbc](https://github.com/mParticle/mparticle-android-sdk/commit/5b12dbc9b3bf1f72651d1d96882bab104fa434b1))
+
+
+### Bug Fixes
+
+* kit syntax for lint ([fc63aa1](https://github.com/mParticle/mparticle-android-sdk/commit/fc63aa11683bd8b95fb8300fadcb9a9753fe0eec))
+* remove daily cron and fix branch deletion ([57fda36](https://github.com/mParticle/mparticle-android-sdk/commit/57fda36576e5967e5fc2b0cbb7a3f1f1f4c7c902))
+
+
+### Updates & Maintenance
+
+* pin all third party github actions ([74bcca8](https://github.com/mParticle/mparticle-android-sdk/commit/74bcca86215539a7d452588feb481f1c39554262))
+
 ## [5.53.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.53.1...v5.53.2) (2023-10-16)
 
 
