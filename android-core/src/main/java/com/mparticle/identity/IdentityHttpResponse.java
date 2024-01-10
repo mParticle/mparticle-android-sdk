@@ -95,7 +95,7 @@ public final class IdentityHttpResponse {
     }
 
     public long getTimeout() {
-        return 30L;
+        return timeout;
     }
 
     @Nullable
