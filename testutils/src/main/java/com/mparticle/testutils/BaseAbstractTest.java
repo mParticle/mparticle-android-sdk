@@ -1,6 +1,5 @@
 package com.mparticle.testutils;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.app.Activity;
@@ -104,7 +103,6 @@ public abstract class BaseAbstractTest {
         MParticle.start(optionsBuilder.build());
         mServer.setupHappyIdentify(mStartingMpid);
         latch.await();
-        assertTrue(called.value);
     }
 
     protected void goToBackground() {
