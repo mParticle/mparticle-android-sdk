@@ -364,7 +364,7 @@ public class IdentityApi {
     }
 
     private boolean shouldMakeRequest(IdentityApiRequest identityRequest, boolean acceptCachedResponse, long lastIdentityCall) {
-        if (!acceptCachedResponse) {
+        if (!acceptCachedResponse || !mConfigManager.isIdentityCachingEnabled()) {
             return true;
         }
         boolean hasTimedOut = lastIdentityCall == -1L || (lastIdentityCall + (timeoutSeconds * 1000) > System.currentTimeMillis());

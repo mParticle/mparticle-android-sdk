@@ -63,12 +63,18 @@ class IdentityApiStartTest : BaseCleanInstallEachTest() {
     @Test
     @Throws(Exception::class)
     fun testNoInitialIdentity() {
+        val currentMpid = ran.nextLong()
+        val identities = mRandomUtils.randomUserIdentities
         startMParticle()
-        TestCase.assertEquals(mServer.Requests().identify.size, 1)
+        MParticle.getInstance()?.Internal()?.configManager?.setMpid(currentMpid, ran.nextBoolean())
+        for ((key, value) in identities) {
+            AccessUtils.setUserIdentity(value, key, currentMpid)
+        }
+        com.mparticle.internal.AccessUtils.awaitMessageHandler()
         mServer = MockServer.getNewInstance(mContext)
         startMParticle()
-        // Due to caching
-        TestCase.assertEquals(mServer.Requests().identify.size, 0)
+        TestCase.assertEquals(mServer.Requests().identify.size, 1)
+        assertIdentitiesMatch(mServer.Requests().identify[0], identities, false)
     }
 
     /**
