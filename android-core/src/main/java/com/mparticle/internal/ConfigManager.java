@@ -407,7 +407,7 @@ public class ConfigManager {
             sPushKeys = responseJSON.getJSONArray(KEY_PUSH_MESSAGES);
             editor.putString(KEY_PUSH_MESSAGES, sPushKeys.toString());
         }
-        directUrlRouting = responseJSON.optBoolean(DIRECT_URL_ROUTING, false);
+        //TODO Read the pod redirection flag
         editor.putBoolean(DIRECT_URL_ROUTING, directUrlRouting);
 
         mRampValue = responseJSON.optInt(KEY_RAMP, -1);
