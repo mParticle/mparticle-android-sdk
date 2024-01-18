@@ -403,9 +403,7 @@ public class ConfigManager {
             mLogUnhandledExceptions = responseJSON.getString(KEY_UNHANDLED_EXCEPTIONS);
         }
 
-        if (responseJSON.has(ENABLE_BACKGROUND_BATCHING)) {
-            enableBackgroundBatchingUpload = responseJSON.getBoolean(ENABLE_BACKGROUND_BATCHING);
-        }
+        //TODO Read from backgroundEventBatching feature flag
         editor.putBoolean(ENABLE_BACKGROUND_BATCHING, enableBackgroundBatchingUpload);
 
         if (responseJSON.has(KEY_PUSH_MESSAGES) && newConfig) {
