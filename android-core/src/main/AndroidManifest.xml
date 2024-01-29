@@ -1,4 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <application>
+        <receiver
+            android:name="com.mparticle.uploadbatching.UploadBatchReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="ACTION_UPLOAD_BATCH"/>
+            </intent-filter>
+        </receiver>
+    </application>
 </manifest>

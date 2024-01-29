@@ -145,7 +145,8 @@ public class UploadHandler extends BaseHandler {
                             }
                         }
                     }
-                    if (mAppStateManager.getSession().isActive() && uploadInterval > 0 && msg.arg1 == 0) {
+                    if ((mAppStateManager.getSession().isActive() && uploadInterval > 0 && msg.arg1 == 0) ||
+                            (mParticleDBManager.hasMessagesForUpload() && mAppStateManager.isBackgrounded())) {
                         this.sendEmptyDelayed(UPLOAD_MESSAGES, uploadInterval);
                     }
                     break;

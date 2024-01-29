@@ -58,6 +58,7 @@ public class ConfigManager {
     public static final String VALUE_CUE_CATCH = "forcecatch";
     public static final String PREFERENCES_FILE = "mp_preferences";
     public static final String KEY_INCLUDE_SESSION_HISTORY = "inhd";
+    public static final String ENABLE_BACKGROUND_BATCHING = "ebb";
     private static final String KEY_DEVICE_PERFORMANCE_METRICS_DISABLED = "dpmd";
     public static final String WORKSPACE_TOKEN = "wst";
     static final String ALIAS_MAX_WINDOW = "alias_max_window";
@@ -107,6 +108,7 @@ public class ConfigManager {
     public static final int DEFAULT_UPLOAD_INTERVAL = 600;
     private List<ConfigLoadedListener> configUpdatedListeners = new ArrayList<>();
     private List<SideloadedKit> sideloadedKits = new ArrayList<>();
+    private boolean enableBackgroundBatchingUpload = false;
 
     private ConfigManager() {
         super();
@@ -401,13 +403,15 @@ public class ConfigManager {
             mLogUnhandledExceptions = responseJSON.getString(KEY_UNHANDLED_EXCEPTIONS);
         }
 
+        //TODO Read from backgroundEventBatching feature flag
+        editor.putBoolean(ENABLE_BACKGROUND_BATCHING, enableBackgroundBatchingUpload);
+
         if (responseJSON.has(KEY_PUSH_MESSAGES) && newConfig) {
             sPushKeys = responseJSON.getJSONArray(KEY_PUSH_MESSAGES);
             editor.putString(KEY_PUSH_MESSAGES, sPushKeys.toString());
         }
 
         mRampValue = responseJSON.optInt(KEY_RAMP, -1);
-
         if (responseJSON.has(KEY_OPT_OUT)) {
             mSendOoEvents = responseJSON.getBoolean(KEY_OPT_OUT);
         } else {
@@ -913,6 +917,10 @@ public class ConfigManager {
         return mTriggerMessageHashes;
     }
 
+    public boolean isBackgroundBatchUploadingEnabled() {
+        return enableBackgroundBatchingUpload;
+    }
+
     public boolean shouldTrigger(BaseMPMessage message) {
         JSONArray messageMatches = getTriggerMessageMatches();
         JSONArray triggerHashes = getTriggerMessageHashes();
@@ -922,9 +930,11 @@ public class ConfigManager {
             isBackgroundAst = (message.getMessageType().equals(Constants.MessageType.APP_STATE_TRANSITION) && message.get(Constants.MessageKey.STATE_TRANSITION_TYPE).equals(Constants.StateTransitionType.STATE_TRANS_BG));
         } catch (JSONException ex) {
         }
+        if (enableBackgroundBatchingUpload && isBackgroundAst) {
+            return false;
+        }
         boolean shouldTrigger = message.getMessageType().equals(Constants.MessageType.PUSH_RECEIVED)
-                || message.getMessageType().equals(Constants.MessageType.COMMERCE_EVENT)
-                || isBackgroundAst;
+                || message.getMessageType().equals(Constants.MessageType.COMMERCE_EVENT) || isBackgroundAst;
 
         if (!shouldTrigger && messageMatches != null && messageMatches.length() > 0) {
             shouldTrigger = true;
