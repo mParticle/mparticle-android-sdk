@@ -1,8 +1,13 @@
 package com.mparticle.networking
 
 object AccessUtils {
-    val defaultNetworkOptions: NetworkOptions
-        get() = NetworkOptionsManager.defaultNetworkOptions()
+    private var defaultNetworkOptions: NetworkOptions? = null
+
+    fun getDefaultNetworkOptions(): NetworkOptions {
+        defaultNetworkOptions =
+            NetworkOptionsManager.defaultNetworkOptions()
+        return defaultNetworkOptions!!
+    }
 
     fun equals(networkOptions1: NetworkOptions, networkOptions2: NetworkOptions): Boolean {
         if (networkOptions1 === networkOptions2) {

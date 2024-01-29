@@ -532,7 +532,7 @@ class MParticleOptionsTest : BaseAbstractTest() {
         Assert.assertTrue(
             com.mparticle.networking.AccessUtils.equals(
                 options.networkOptions,
-                com.mparticle.networking.AccessUtils.defaultNetworkOptions
+                com.mparticle.networking.AccessUtils.getDefaultNetworkOptions()
             )
         )
     }

@@ -7,6 +7,7 @@ import android.net.Uri;
 import androidx.annotation.Nullable;
 
 import com.mparticle.BuildConfig;
+import com.mparticle.NetworkUtilities;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
@@ -110,6 +111,8 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
             url = domainMappingUrl;
         }
         Uri uri;
+        if(endpoint!=Endpoint.CONFIG){
+            url = NetworkUtilities.INSTANCE.getUrlWithPrefix(url, mConfigManager.getPodPrefix(), mConfigManager.podRedirectionEnabled());}
         MPUrl defaultUrl = !isDefaultUrl ? getUrl(endpoint, identityPath, true) : null;
         String subdirectory;
         boolean overridesSubdirectory = domainMapping.isOverridesSubdirectory() && !forceDefaultUrl;
@@ -133,8 +136,7 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
                         }
                     }
                 }
-                uri = builder.build();
-                return MPUrl.getUrl(uri.toString(), defaultUrl);
+                return MPUrl.getUrl(builder.build().toString(), defaultUrl);
             case EVENTS:
                 subdirectory = overridesSubdirectory ? "" : SERVICE_VERSION_2 + "/";
                 uri = new Uri.Builder()
