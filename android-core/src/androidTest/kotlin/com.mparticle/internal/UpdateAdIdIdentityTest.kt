@@ -25,7 +25,8 @@ class UpdateAdIdIdentityTest : BaseCleanInstallEachTest() {
         )
 
         // execute CheckAdIdRunnable without a current user
-        AppStateManager.CheckAdIdRunnable("newAdId", "oldAdId").run()
+        MParticle.getInstance()!!.Internal().configManager
+        AppStateManager.CheckAdIdRunnable(MParticle.getInstance()!!.Internal().configManager).run()
         assertNull(MParticle.getInstance()!!.Identity().currentUser)
 
         // set a current user
@@ -44,8 +45,7 @@ class UpdateAdIdIdentityTest : BaseCleanInstallEachTest() {
             request.asIdentityRequest().body.identity_changes.let {
                 it.size == 1 &&
                     it[0].let { identityChange ->
-                        identityChange["new_value"] == "newAdId" &&
-                            identityChange["old_value"] == "oldAdId"
+                        identityChange["new_value"] == "someId"
                     }
             }
         }.let {
