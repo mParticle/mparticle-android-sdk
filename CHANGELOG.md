@@ -1,3 +1,15 @@
+## [5.55.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.55.0...v5.55.1) (2024-02-06)
+
+
+### Bug Fixes
+
+* SQDSDK-5597 - Get ad id in background thread ([#463](https://github.com/mParticle/mparticle-android-sdk/issues/463)) ([679d987](https://github.com/mParticle/mparticle-android-sdk/commit/679d9875ba56d421e5d6f2d1d9dbb5cc2189f533))
+
+
+### Updates & Maintenance
+
+* Update submodules ([d4f2512](https://github.com/mParticle/mparticle-android-sdk/commit/d4f2512daaacf1c5d33545f13aae9e369fb9f02c))
+
 ## [5.55.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.54.0...v5.55.0) (2023-12-13)
 
 
