@@ -833,7 +833,7 @@ public class MPUtility {
 
     public static Object toNumberOrString(String stringValue) {
         if (stringValue == null) {
-            return stringValue;
+            return null;
         }
         for (Character c : stringValue.toCharArray()) {
             if (!Character.isDigit(c) && c != '.' && c != '-') {
@@ -841,9 +841,12 @@ public class MPUtility {
             }
         }
         try {
-            return NumberFormat.getInstance().parse(stringValue);
-        } catch (ParseException e) {
-        }
+            return Integer.parseInt(stringValue);
+        } catch (NumberFormatException ignored){}
+        try {
+           return Double.parseDouble(stringValue);
+        } catch (NumberFormatException ignored){}
+
         return stringValue;
     }
 
