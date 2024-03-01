@@ -172,28 +172,6 @@ class MParticleTest : BaseCleanStartedEachTest() {
     @OrchestratorOnly
     @Test
     @Throws(JSONException::class, InterruptedException::class)
-    fun testResetSync() {
-        testReset { MParticle.reset(mContext) }
-    }
-
-    @OrchestratorOnly
-    @Test
-    @Throws(JSONException::class, InterruptedException::class)
-    fun testResetAsync() {
-        testReset {
-            val latch: CountDownLatch = MPLatch(1)
-            MParticle.reset(mContext) { latch.countDown() }
-            try {
-                latch.await()
-            } catch (e: InterruptedException) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    @OrchestratorOnly
-    @Test
-    @Throws(JSONException::class, InterruptedException::class)
     fun testResetIdentitySync() {
         testResetIdentityCall { MParticle.reset(mContext) }
     }

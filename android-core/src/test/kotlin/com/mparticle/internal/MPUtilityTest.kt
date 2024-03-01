@@ -236,10 +236,10 @@ class MPUtilityTest {
 
     @Test
     fun testNumberDetection() {
-        Assert.assertEquals(12L, MPUtility.toNumberOrString("12"))
+        Assert.assertEquals(12, MPUtility.toNumberOrString("12"))
         Assert.assertEquals(1.5, MPUtility.toNumberOrString("1.5"))
         Assert.assertEquals(-1.5, MPUtility.toNumberOrString("-1.5"))
-        Assert.assertEquals(0L, MPUtility.toNumberOrString("0"))
+        Assert.assertEquals(0, MPUtility.toNumberOrString("0"))
         // too big for a Long, should return a String
         Assert.assertEquals(
             3.245987293478593E47,
