@@ -1,3 +1,15 @@
+## [5.55.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.55.1...v5.55.2) (2024-03-02)
+
+
+### Bug Fixes
+
+* make number parsing more strict ([a831780](https://github.com/mParticle/mparticle-android-sdk/commit/a8317807e60a6239181b44496b5707104421a96f))
+
+
+### Updates & Maintenance
+
+* Update submodules ([d8a2903](https://github.com/mParticle/mparticle-android-sdk/commit/d8a2903e249cfa8070687a482d3317fd67a295f2))
+
 ## [5.55.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.55.0...v5.55.1) (2024-02-06)
 
 
