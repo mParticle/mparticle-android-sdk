@@ -152,12 +152,12 @@ public class FilteredMParticleUser implements MParticleUser {
 
     @Override
     public ConsentState getConsentState() {
-        return null;
+        return mpUser.getConsentState();
     }
 
     @Override
     public void setConsentState(ConsentState state) {
-
+        mpUser.setConsentState(state);
     }
 
     @Override
