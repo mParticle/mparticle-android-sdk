@@ -27,6 +27,7 @@ public class InstallReferrerHelper {
 
 
     public static void setInstallReferrer(@NonNull Context context, @Nullable String referrer) {
+        Logger.info("Mansi setInstallReferrer ->context"+context+" referrer-> "+referrer);
         if (context != null) {
             SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
             preferences.edit().putString(Constants.PrefKeys.INSTALL_REFERRER, referrer).apply();
@@ -38,6 +39,9 @@ public class InstallReferrerHelper {
     }
 
     public static void fetchInstallReferrer(@NonNull final Context context, @NonNull final InstallReferrerCallback callback) {
+        if (InstallReferrerHelper.getInstallReferrer(context) != null) {
+            return;
+        }
         if (MPUtility.isInstallRefApiAvailable()) {
             Runnable runnable = new Runnable() {
                 @Override
