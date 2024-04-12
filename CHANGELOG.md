@@ -1,3 +1,15 @@
+## [5.55.3](https://github.com/mParticle/mparticle-android-sdk/compare/v5.55.2...v5.55.3) (2024-04-12)
+
+
+### Bug Fixes
+
+* ANRs in android app due to multiple installReferrer API calls ([#479](https://github.com/mParticle/mparticle-android-sdk/issues/479)) ([353eac7](https://github.com/mParticle/mparticle-android-sdk/commit/353eac72ea53f78d620e2e0be3e3883675ec8df0))
+
+
+### Updates & Maintenance
+
+* Update submodules ([2e75a6d](https://github.com/mParticle/mparticle-android-sdk/commit/2e75a6db592a31db47c8599753a3e290483c4a5e))
+
 ## [5.55.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.55.1...v5.55.2) (2024-03-02)
 
 
