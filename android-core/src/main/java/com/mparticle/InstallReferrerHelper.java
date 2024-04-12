@@ -38,6 +38,9 @@ public class InstallReferrerHelper {
     }
 
     public static void fetchInstallReferrer(@NonNull final Context context, @NonNull final InstallReferrerCallback callback) {
+        if (InstallReferrerHelper.getInstallReferrer(context) != null) {
+            return;
+        }
         if (MPUtility.isInstallRefApiAvailable()) {
             Runnable runnable = new Runnable() {
                 @Override
