@@ -115,8 +115,9 @@ public class AccessUtils {
             return 0;
         }
 
+
         @Override
-        public JSONObject fetchAudiences() {
+        public JSONObject fetchUserAudience() {
             return null;
         }
 

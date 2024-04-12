@@ -14,11 +14,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
@@ -27,6 +33,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -203,28 +211,30 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         }
     }
 
-    public JSONObject fetchAudiences() {
-
-        JSONObject response = null;
+    public JSONObject fetchUserAudience(){
+        JSONObject jsonResponse = null;
         try {
-            Logger.debug("Starting Segment Network request");
             MPConnection connection = getUrl(Endpoint.AUDIENCE).openConnection();
-            connection.setConnectTimeout(mConfigManager.getConnectionTimeout());
-            connection.setReadTimeout(mConfigManager.getConnectionTimeout());
             connection.setRequestProperty("User-Agent", mUserAgent);
-
             addMessageSignature(connection, null);
+            connection.setRequestProperty("x-mp-key", mApiKey);
             makeUrlRequest(Endpoint.AUDIENCE, connection, true);
             if (connection.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
                 Logger.error("Segment call forbidden: is Segmentation enabled for your account?");
             }
-            response = MPUtility.getJsonResponse(connection);
-            parseCookies(response);
 
+            jsonResponse = MPUtility.getJsonResponse(connection);
+            BufferedReader r = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            StringBuilder total = new StringBuilder();
+            for (String line; (line = r.readLine()) != null; ) {
+                total.append(line).append('\n');
+            }
+            Logger.error("response " + jsonResponse);
+            parseCookies(jsonResponse);
         } catch (Exception e) {
-            Logger.error("Segment call failed: " + e.getMessage());
+            Logger.error("UserAudience Failed: e " + e);
         }
-        return response;
+        return jsonResponse;
     }
 
     public int sendMessageBatch(String message) throws IOException, MPThrottleException, MPRampException {

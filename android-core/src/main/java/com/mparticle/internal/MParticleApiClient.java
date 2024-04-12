@@ -20,7 +20,7 @@ public interface MParticleApiClient extends MParticleBaseClient {
 
     int sendMessageBatch(String message) throws IOException, MParticleApiClientImpl.MPThrottleException, MParticleApiClientImpl.MPRampException;
 
-    JSONObject fetchAudiences();
+    JSONObject fetchUserAudience();
 
     JSONObject getCookies();
 

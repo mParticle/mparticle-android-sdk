@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Build;
 
 import com.mparticle.MParticle;
+import com.mparticle.MParticleTask;
 import com.mparticle.UserAttributeListenerType;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.internal.AppStateManager;
@@ -225,11 +226,6 @@ class MParticleUserDelegate {
         return true;
     }
 
-    public void getSegments(long timeout, String endpointId, SegmentListener listener) {
-        if (mMessageManager != null && mMessageManager.mUploadHandler != null) {
-            mMessageManager.mUploadHandler.fetchSegments(timeout, endpointId, listener);
-        }
-    }
 
     static void setUserIdentities(MParticleUserDelegate userDelegate, Map<MParticle.IdentityType, String> identities, long mpid) {
         if (identities != null) {
@@ -302,5 +298,12 @@ class MParticleUserDelegate {
         } else {
             return mConfigManager.getUserStorage(mpid).getLastSeenTime();
         }
+    }
+
+    public MParticleTask<AudienceApiResult> getUserAudiences() {
+        if (mMessageManager != null && mMessageManager.mUploadHandler != null) {
+            mMessageManager.mUploadHandler.fetchUserAudiences();
+        }
+        return null;
     }
 }

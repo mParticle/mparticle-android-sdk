@@ -34,9 +34,6 @@ class SegmentRetriever {
         mApiClient = apiClient;
     }
 
-    void fetchSegments(long timeout, final String endpointId, final SegmentListener listener) {
-        new SegmentTask(timeout, endpointId, listener).execute();
-    }
 
     SegmentMembership queryAudiences(String endpointId) {
         SQLiteDatabase db = mAudienceDB.getReadableDatabase();
@@ -121,88 +118,6 @@ class SegmentRetriever {
             };
     private final static String MEMBERSHIP_QUERY_SELECTION = SegmentDatabase.SegmentMembershipTable.SEGMENT_ID + " in %s and " + SegmentDatabase.SegmentMembershipTable.TIMESTAMP + " < %d";
 
-    private void insertAudiences(JSONObject audiences) throws JSONException {
-        SQLiteDatabase db = mAudienceDB.getWritableDatabase();
-        JSONArray audienceList = audiences.getJSONArray(Constants.Audience.API_AUDIENCE_LIST);
-        db.beginTransaction();
-        boolean success = false;
-        try {
-            db.delete(SegmentDatabase.SegmentMembershipTable.TABLE_NAME, null, null);
-            db.delete(SegmentDatabase.SegmentTable.TABLE_NAME, null, null);
-            for (int i = 0; i < audienceList.length(); i++) {
-                ContentValues audienceRow = new ContentValues();
-                JSONObject audience = audienceList.getJSONObject(i);
-                int id = audience.getInt(Constants.Audience.API_AUDIENCE_ID);
-                String name = audience.getString(Constants.Audience.API_AUDIENCE_NAME);
-                String endPointIds = audience.getJSONArray(Constants.Audience.API_AUDIENCE_ENDPOINTS).toString();
-                audienceRow.put(SegmentDatabase.SegmentTable.SEGMENT_ID, id);
-                audienceRow.put(SegmentDatabase.SegmentTable.NAME, name);
-                audienceRow.put(SegmentDatabase.SegmentTable.ENDPOINTS, endPointIds);
-                db.insert(SegmentDatabase.SegmentTable.TABLE_NAME, null, audienceRow);
-                JSONArray memberships = audience.getJSONArray(Constants.Audience.API_AUDIENCE_MEMBERSHIPS);
-                for (int j = 0; j < memberships.length(); j++) {
-                    ContentValues membershipRow = new ContentValues();
-                    membershipRow.put(SegmentDatabase.SegmentMembershipTable.SEGMENT_ID, id);
-                    membershipRow.put(SegmentDatabase.SegmentMembershipTable.MEMBERSHIP_ACTION, memberships.getJSONObject(j).getString(Constants.Audience.API_AUDIENCE_ACTION));
-                    membershipRow.put(SegmentDatabase.SegmentMembershipTable.TIMESTAMP, memberships.getJSONObject(j).optLong(Constants.Audience.API_AUDIENCE_MEMBERSHIP_TIMESTAMP, 0));
-                    db.insert(SegmentDatabase.SegmentMembershipTable.TABLE_NAME, null, membershipRow);
-                }
-            }
-            success = true;
-        } catch (Exception e) {
-            Logger.debug("Failed to insert audiences: " + e.getMessage());
-        } finally {
-            if (success) {
-                db.setTransactionSuccessful();
-            }
-            db.endTransaction();
-            db.close();
-        }
 
-    }
 
-    class SegmentTask extends AsyncTask<Void, Void, SegmentMembership> {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        String endpointId;
-        SegmentListener listener;
-        long timeout;
-
-        SegmentTask(long timeout, String endpointId, SegmentListener listener) {
-            this.timeout = timeout;
-            this.endpointId = endpointId;
-            this.listener = listener;
-        }
-
-        @Override
-        protected SegmentMembership doInBackground(Void... params) {
-            FutureTask<Boolean> futureTask1 = new FutureTask<Boolean>(new Callable<Boolean>() {
-                @Override
-                public Boolean call() throws Exception {
-                    JSONObject audiences = mApiClient.fetchAudiences();
-                    if (audiences != null) {
-                        insertAudiences(audiences);
-                    }
-                    return audiences != null;
-                }
-            });
-
-            executor.execute(futureTask1);
-            try {
-                futureTask1.get(timeout, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            } catch (TimeoutException e) {
-                e.printStackTrace();
-            }
-            executor.shutdown();
-            return queryAudiences(endpointId);
-        }
-
-        @Override
-        protected void onPostExecute(SegmentMembership segmentMembership) {
-            listener.onSegmentsRetrieved(segmentMembership);
-        }
-    }
 }

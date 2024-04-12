@@ -15,6 +15,7 @@ import com.mparticle.internal.MPUtility;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URLDecoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
@@ -163,7 +164,8 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
                 uri = new Uri.Builder()
                         .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
-                        .path(SERVICE_VERSION_2 + "/" + mApiKey + "/audience?mpID=" + mConfigManager.getMpid())
+                        .path(SERVICE_VERSION_1 + "/" + mApiKey + "/audience")
+                        .appendQueryParameter("mpid",String.valueOf(mConfigManager.getMpid()))
                         .build();
                 return MPUrl.getUrl(uri.toString(), defaultUrl);
             default:

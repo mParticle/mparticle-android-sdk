@@ -330,8 +330,9 @@ public class UploadHandler extends BaseHandler {
         isNetworkConnected = connected;
     }
 
-    public void fetchSegments(long timeout, String endpointId, SegmentListener listener) {
-        new SegmentRetriever(audienceDB, mApiClient).fetchSegments(timeout, endpointId, listener);
+
+    public void fetchUserAudiences() {
+        new UserAudiencesRetriever(mApiClient).fetchAudience();
     }
 
     //added so unit tests can subclass

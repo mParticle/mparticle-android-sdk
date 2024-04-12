@@ -6,6 +6,7 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 
 import com.mparticle.MParticle;
+import com.mparticle.MParticleTask;
 import com.mparticle.UserAttributeListenerType;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.internal.listeners.ApiClass;
@@ -111,9 +112,6 @@ public class MParticleUserImpl implements MParticleUser {
         return setUserAttribute(tag, null);
     }
 
-    public void getSegments(long timeout, String endpointId, SegmentListener listener) {
-        mUserDelegate.getSegments(timeout, endpointId, listener);
-    }
 
     MParticleUser setUserDelegate(MParticleUserDelegate mParticleUserDelegate) {
         mUserDelegate = mParticleUserDelegate;
@@ -143,6 +141,11 @@ public class MParticleUserImpl implements MParticleUser {
     @Override
     public long getLastSeenTime() {
         return mUserDelegate.getLastSeenTime(getId());
+    }
+
+    @Override
+    public MParticleTask<AudienceApiResult> getUserAudiences() {
+        return mUserDelegate.getUserAudiences();
     }
 
 }

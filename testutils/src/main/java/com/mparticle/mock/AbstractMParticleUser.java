@@ -4,8 +4,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.mparticle.MParticle;
+import com.mparticle.MParticleTask;
 import com.mparticle.UserAttributeListenerType;
 import com.mparticle.consent.ConsentState;
+import com.mparticle.identity.AudienceApiResult;
 import com.mparticle.identity.MParticleUser;
 
 import java.util.Map;
@@ -86,5 +88,11 @@ public class AbstractMParticleUser implements MParticleUser {
     @Override
     public long getLastSeenTime() {
         return 0;
+    }
+
+    @Override
+    public MParticleTask<AudienceApiResult> getUserAudiences() {
+
+        return null;
     }
 }

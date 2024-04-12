@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 
 import com.mparticle.MParticle;
+import com.mparticle.MParticleTask;
 import com.mparticle.UserAttributeListenerType;
 import com.mparticle.consent.ConsentState;
 
@@ -129,4 +130,5 @@ public interface MParticleUser {
      */
     long getLastSeenTime();
 
+     MParticleTask<AudienceApiResult> getUserAudiences();
 }
