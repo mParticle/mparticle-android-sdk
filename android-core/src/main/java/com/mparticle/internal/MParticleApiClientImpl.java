@@ -5,6 +5,9 @@ import android.content.SharedPreferences;
 
 import com.mparticle.MParticle;
 import com.mparticle.SdkListener;
+import com.mparticle.identity.audience.AudienceResponse;
+import com.mparticle.identity.audience.BaseAudienceTask;
+import com.mparticle.identity.IdentityApi;
 import com.mparticle.internal.listeners.InternalListenerManager;
 import com.mparticle.networking.MPConnection;
 import com.mparticle.networking.MPUrl;
@@ -14,17 +17,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URLDecoder;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
@@ -33,8 +30,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -211,7 +206,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         }
     }
 
-    public JSONObject fetchUserAudience(){
+    public void fetchUserAudience(BaseAudienceTask task){
         JSONObject jsonResponse = null;
         try {
             MPConnection connection = getUrl(Endpoint.AUDIENCE).openConnection();
@@ -222,19 +217,16 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
             if (connection.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
                 Logger.error("Segment call forbidden: is Segmentation enabled for your account?");
             }
-
             jsonResponse = MPUtility.getJsonResponse(connection);
-            BufferedReader r = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            StringBuilder total = new StringBuilder();
-            for (String line; (line = r.readLine()) != null; ) {
-                total.append(line).append('\n');
+            if (jsonResponse != null && connection.getResponseCode() == 200) {
+                task.setSuccessful(new AudienceResponse(connection.getResponseCode(), jsonResponse));
+            } else {
+                task.setFailed(new AudienceResponse(connection.getResponseCode(), "mParticle UserAudience request failed."));
             }
-            Logger.error("response " + jsonResponse);
-            parseCookies(jsonResponse);
         } catch (Exception e) {
-            Logger.error("UserAudience Failed: e " + e);
+            Logger.error("UserAudience request Failed: e " + e);
+            task.setFailed(new AudienceResponse(IdentityApi.UNKNOWN_ERROR, e.toString()));
         }
-        return jsonResponse;
     }
 
     public int sendMessageBatch(String message) throws IOException, MPThrottleException, MPRampException {

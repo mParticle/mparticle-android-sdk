@@ -5,9 +5,10 @@ import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 
 import com.mparticle.MParticle;
-import com.mparticle.MParticleTask;
 import com.mparticle.UserAttributeListenerType;
 import com.mparticle.consent.ConsentState;
+import com.mparticle.identity.audience.AudienceResponse;
+import com.mparticle.identity.audience.AudienceTask;
 
 import java.util.Map;
 
@@ -130,5 +131,10 @@ public interface MParticleUser {
      */
     long getLastSeenTime();
 
-     MParticleTask<AudienceApiResult> getUserAudiences();
+    /**
+     * query the user audience
+     *
+     *  @return an AudienceTask<AudienceResponse> to handle the Asynchronous results
+     */
+     AudienceTask<AudienceResponse> getUserAudiences();
 }

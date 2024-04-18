@@ -6,11 +6,11 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 
 import com.mparticle.MParticle;
-import com.mparticle.MParticleTask;
 import com.mparticle.UserAttributeListenerType;
 import com.mparticle.consent.ConsentState;
+import com.mparticle.identity.audience.AudienceResponse;
+import com.mparticle.identity.audience.AudienceTask;
 import com.mparticle.internal.listeners.ApiClass;
-import com.mparticle.segmentation.SegmentListener;
 
 import java.util.Map;
 
@@ -144,7 +144,7 @@ public class MParticleUserImpl implements MParticleUser {
     }
 
     @Override
-    public MParticleTask<AudienceApiResult> getUserAudiences() {
+    public AudienceTask<AudienceResponse> getUserAudiences() {
         return mUserDelegate.getUserAudiences();
     }
 

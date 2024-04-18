@@ -165,7 +165,7 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
                         .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
                         .path(SERVICE_VERSION_1 + "/" + mApiKey + "/audience")
-                        .appendQueryParameter("mpid",String.valueOf(mConfigManager.getMpid()))
+                        .appendQueryParameter("mpid", String.valueOf(mConfigManager.getMpid()))
                         .build();
                 return MPUrl.getUrl(uri.toString(), defaultUrl);
             default:

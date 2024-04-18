@@ -4,9 +4,10 @@ import android.content.Context;
 import android.os.Build;
 
 import com.mparticle.MParticle;
-import com.mparticle.MParticleTask;
 import com.mparticle.UserAttributeListenerType;
 import com.mparticle.consent.ConsentState;
+import com.mparticle.identity.audience.AudienceResponse;
+import com.mparticle.identity.audience.AudienceTask;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
@@ -16,7 +17,6 @@ import com.mparticle.internal.KitManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MessageManager;
-import com.mparticle.segmentation.SegmentListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -300,9 +300,9 @@ class MParticleUserDelegate {
         }
     }
 
-    public MParticleTask<AudienceApiResult> getUserAudiences() {
+    public AudienceTask<AudienceResponse> getUserAudiences() {
         if (mMessageManager != null && mMessageManager.mUploadHandler != null) {
-            mMessageManager.mUploadHandler.fetchUserAudiences();
+          return   mMessageManager.mUploadHandler.fetchUserAudiences();
         }
         return null;
     }
