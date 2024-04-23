@@ -1,9 +1,5 @@
 package com.mparticle.audience
 
-import com.mparticle.audience.AudienceResponse
-import com.mparticle.audience.AudienceTaskFailureListener
-import com.mparticle.audience.AudienceTaskSuccessListener
-import com.mparticle.audience.BaseAudienceTask
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
