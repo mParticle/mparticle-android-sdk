@@ -7,8 +7,8 @@ import androidx.annotation.WorkerThread;
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListenerType;
 import com.mparticle.consent.ConsentState;
-import com.mparticle.identity.audience.AudienceResponse;
-import com.mparticle.identity.audience.AudienceTask;
+import com.mparticle.audience.AudienceResponse;
+import com.mparticle.audience.AudienceTask;
 
 import java.util.Map;
 
@@ -132,9 +132,9 @@ public interface MParticleUser {
     long getLastSeenTime();
 
     /**
-     * query the user audience
+     * Get a list of the audiences that this given MPID is currently within.
      *
-     *  @return an AudienceTask<AudienceResponse> to handle the Asynchronous results
+     *  @return an AudienceTask<AudienceResponse> which provides an asynchronous result
      */
      AudienceTask<AudienceResponse> getUserAudiences();
 }

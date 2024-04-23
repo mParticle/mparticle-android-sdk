@@ -8,8 +8,8 @@ import androidx.annotation.NonNull;
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListenerType;
 import com.mparticle.consent.ConsentState;
-import com.mparticle.identity.audience.AudienceResponse;
-import com.mparticle.identity.audience.AudienceTask;
+import com.mparticle.audience.AudienceResponse;
+import com.mparticle.audience.AudienceTask;
 import com.mparticle.internal.listeners.ApiClass;
 
 import java.util.Map;
@@ -145,7 +145,7 @@ public class MParticleUserImpl implements MParticleUser {
 
     @Override
     public AudienceTask<AudienceResponse> getUserAudiences() {
-        return mUserDelegate.getUserAudiences();
+        return mUserDelegate.getUserAudiences(getId());
     }
 
 }

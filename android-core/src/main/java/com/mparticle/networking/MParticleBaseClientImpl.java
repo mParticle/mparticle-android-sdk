@@ -28,6 +28,8 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
     private ConfigManager mConfigManager;
     private BaseNetworkConnection mRequestHandler;
     private SharedPreferences mPreferences;
+
+    private Long currentMPId;
     String mApiKey;
 
     private static final String SERVICE_VERSION_1 = "/v1";
@@ -96,6 +98,11 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
         return getUrl(endpoint, null);
     }
 
+    protected MPUrl getUrl(Endpoint endpoint, @Nullable long mpId) throws MalformedURLException {
+        currentMPId = mpId;
+        return getUrl(endpoint, null);
+    }
+
     protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath) throws MalformedURLException {
         return getUrl(endpoint, identityPath, false);
     }
@@ -161,11 +168,12 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
                         .build();
                 return MPUrl.getUrl(uri.toString(), defaultUrl);
             case AUDIENCE:
+                String mpidQueryParam = (currentMPId != null) ? currentMPId.toString() : null;
                 uri = new Uri.Builder()
                         .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
                         .path(SERVICE_VERSION_1 + "/" + mApiKey + "/audience")
-                        .appendQueryParameter("mpid", String.valueOf(mConfigManager.getMpid()))
+                        .appendQueryParameter("mpid", mpidQueryParam)
                         .build();
                 return MPUrl.getUrl(uri.toString(), defaultUrl);
             default:

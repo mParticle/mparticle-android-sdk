@@ -12,8 +12,8 @@ import androidx.annotation.Nullable;
 import com.mparticle.MParticle;
 import com.mparticle.identity.AliasRequest;
 import com.mparticle.identity.AliasResponse;
-import com.mparticle.identity.audience.AudienceResponse;
-import com.mparticle.identity.audience.AudienceTask;
+import com.mparticle.audience.AudienceResponse;
+import com.mparticle.audience.AudienceTask;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.listeners.InternalListenerManager;
 import com.mparticle.internal.messages.MPAliasMessage;
@@ -331,8 +331,8 @@ public class UploadHandler extends BaseHandler {
         isNetworkConnected = connected;
     }
 
-    public AudienceTask<AudienceResponse> fetchUserAudiences() {
-        return new UserAudiencesRetriever(mApiClient).fetchAudience();
+    public AudienceTask<AudienceResponse> fetchUserAudiences(long mpId) {
+        return new UserAudiencesRetriever(mApiClient).fetchAudience(mpId);
     }
 
     //added so unit tests can subclass

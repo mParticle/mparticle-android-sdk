@@ -1,4 +1,4 @@
-package com.mparticle.identity.audience
+package com.mparticle.audience
 
 import com.mparticle.internal.Logger
 import org.json.JSONObject

@@ -1,5 +1,6 @@
-package com.mparticle.identity.audience
+package com.mparticle.audience
 
+import com.mparticle.audience.AudienceResponse
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before

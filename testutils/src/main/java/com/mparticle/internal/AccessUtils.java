@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.mparticle.MParticle;
-import com.mparticle.identity.audience.BaseAudienceTask;
+import com.mparticle.audience.BaseAudienceTask;
 import com.mparticle.identity.IdentityStateListener;
 import com.mparticle.internal.database.tables.MParticleDatabaseHelper;
 import com.mparticle.kits.KitManagerImpl;
@@ -118,7 +118,7 @@ public class AccessUtils {
 
 
         @Override
-        public void fetchUserAudience(BaseAudienceTask Task) {
+        public void fetchUserAudience(BaseAudienceTask Task, long mpId) {
         }
 
         @Override

@@ -1,3 +1,3 @@
-package com.mparticle.identity.audience
+package com.mparticle.audience
 
 data class Audience(val audienceID:String)

@@ -1,4 +1,4 @@
-package com.mparticle.identity.audience
+package com.mparticle.audience
 
 
 abstract class AudienceTask<AudienceTaskResult> {

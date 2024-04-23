@@ -9,8 +9,8 @@ import com.mparticle.TypedUserAttributeListener;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.UserAttributeListenerType;
 import com.mparticle.consent.ConsentState;
-import com.mparticle.identity.audience.AudienceResponse;
-import com.mparticle.identity.audience.AudienceTask;
+import com.mparticle.audience.AudienceResponse;
+import com.mparticle.audience.AudienceTask;
 import com.mparticle.identity.MParticleUser;
 
 import java.util.HashMap;

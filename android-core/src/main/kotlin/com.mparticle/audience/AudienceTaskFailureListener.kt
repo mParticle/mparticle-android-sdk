@@ -1,4 +1,4 @@
-package com.mparticle.identity.audience
+package com.mparticle.audience
 
 fun interface AudienceTaskFailureListener {
     fun onFailure(result: AudienceResponse?)

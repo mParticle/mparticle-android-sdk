@@ -6,8 +6,8 @@ import android.os.Build;
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListenerType;
 import com.mparticle.consent.ConsentState;
-import com.mparticle.identity.audience.AudienceResponse;
-import com.mparticle.identity.audience.AudienceTask;
+import com.mparticle.audience.AudienceResponse;
+import com.mparticle.audience.AudienceTask;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
@@ -300,9 +300,9 @@ class MParticleUserDelegate {
         }
     }
 
-    public AudienceTask<AudienceResponse> getUserAudiences() {
+    public AudienceTask<AudienceResponse> getUserAudiences(long mpId) {
         if (mMessageManager != null && mMessageManager.mUploadHandler != null) {
-          return   mMessageManager.mUploadHandler.fetchUserAudiences();
+          return   mMessageManager.mUploadHandler.fetchUserAudiences(mpId);
         }
         return null;
     }

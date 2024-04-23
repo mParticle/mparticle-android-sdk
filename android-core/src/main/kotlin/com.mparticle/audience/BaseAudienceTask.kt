@@ -1,5 +1,6 @@
-package com.mparticle.identity.audience
+package com.mparticle.audience
 
+import com.mparticle.internal.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -15,21 +16,29 @@ class BaseAudienceTask : AudienceTask<AudienceResponse>() {
     fun setFailed(errorResponse: AudienceResponse) {
         isCompleted = true
         isSuccessful = false
-        CoroutineScope(Dispatchers.Main).launch {
-            for (listener in failureListeners) {
-                listener.onFailure(errorResponse)
+        try {
+            CoroutineScope(Dispatchers.Main).launch {
+                for (listener in failureListeners) {
+                    listener.onFailure(errorResponse)
+                }
             }
+        } catch (e: Exception) {
+            Logger.error("mParticle Audience API $e")
         }
     }
 
     fun setSuccessful(successResponse: AudienceResponse) {
         isCompleted = true
         isSuccessful = true
-        CoroutineScope(Dispatchers.Main).launch {
-            for (listener in successListeners) {
-                listener.onSuccess(successResponse)
+        try {
+            CoroutineScope(Dispatchers.Main).launch {
+                for (listener in successListeners) {
+                    listener.onSuccess(successResponse)
+                }
+                println(successListeners.size)
             }
-            println(successListeners.size)
+        } catch (e: Exception) {
+            Logger.error("mParticle Audience API $e")
         }
     }
 

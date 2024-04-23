@@ -1,4 +1,4 @@
-package com.mparticle.identity.audience
+package com.mparticle.audience
 
 fun interface AudienceTaskSuccessListener {
     fun onSuccess(result: AudienceResponse)
