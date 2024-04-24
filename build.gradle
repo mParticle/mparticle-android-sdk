@@ -35,7 +35,7 @@ subprojects {
 
 allprojects {
     group = 'com.mparticle'
-    version = '5.55.5-SNAPSHOT'
+    version = '5.55.6-SNAPSHOT'
     if (project.hasProperty('isRelease') && project.isRelease) {
         version = version.toString().replace("-SNAPSHOT", "")
     }
