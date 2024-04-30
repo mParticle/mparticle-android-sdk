@@ -1,5 +1,6 @@
 package com.mparticle.internal;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
@@ -8,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
-import android.view.WindowManager;
 
 import com.mparticle.MParticle;
 import com.mparticle.internal.Constants.MessageKey;
@@ -196,9 +196,9 @@ public class DeviceAttributes {
             attributes.put(MessageKey.OS_VERSION_INT, Build.VERSION.SDK_INT);
             attributes.put(MessageKey.MODEL, android.os.Build.MODEL);
             attributes.put(MessageKey.RELEASE_VERSION, Build.VERSION.RELEASE);
-
+            Application application = (Application) appContext;
             // device ID
-            addAndroidId(attributes, appContext);
+            addAndroidId(attributes, application);
 
             attributes.put(MessageKey.DEVICE_BLUETOOTH_ENABLED, MPUtility.isBluetoothEnabled(appContext));
             attributes.put(MessageKey.DEVICE_BLUETOOTH_VERSION, MPUtility.getBluetoothVersion(appContext));
@@ -210,12 +210,11 @@ public class DeviceAttributes {
             attributes.put(MessageKey.DEVICE_ROOTED, rootedObject);
 
             // screen height/width
-            WindowManager windowManager = (WindowManager) appContext.getSystemService(Context.WINDOW_SERVICE);
-            DisplayMetrics metrics = new DisplayMetrics();
-            windowManager.getDefaultDisplay().getMetrics(metrics);
-            attributes.put(MessageKey.SCREEN_HEIGHT, metrics.heightPixels);
-            attributes.put(MessageKey.SCREEN_WIDTH, metrics.widthPixels);
-            attributes.put(MessageKey.SCREEN_DPI, metrics.densityDpi);
+            DisplayMetrics displayMetrics = appContext.getResources().getDisplayMetrics();
+
+            attributes.put(MessageKey.SCREEN_HEIGHT, displayMetrics.heightPixels);
+            attributes.put(MessageKey.SCREEN_WIDTH, displayMetrics.widthPixels);
+            attributes.put(MessageKey.SCREEN_DPI, displayMetrics.densityDpi);
 
             // locales
             Locale locale = Locale.getDefault();
