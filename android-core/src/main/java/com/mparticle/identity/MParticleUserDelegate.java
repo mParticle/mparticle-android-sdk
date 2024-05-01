@@ -5,9 +5,9 @@ import android.os.Build;
 
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListenerType;
-import com.mparticle.consent.ConsentState;
 import com.mparticle.audience.AudienceResponse;
 import com.mparticle.audience.AudienceTask;
+import com.mparticle.consent.ConsentState;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;

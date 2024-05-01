@@ -6,9 +6,9 @@ import androidx.annotation.WorkerThread;
 
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListenerType;
-import com.mparticle.consent.ConsentState;
 import com.mparticle.audience.AudienceResponse;
 import com.mparticle.audience.AudienceTask;
+import com.mparticle.consent.ConsentState;
 
 import java.util.Map;
 

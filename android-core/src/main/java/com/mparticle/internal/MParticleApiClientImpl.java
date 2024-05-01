@@ -207,7 +207,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         }
     }
 
-    public void fetchUserAudience(BaseAudienceTask task,long mpId) {
+    public void fetchUserAudience(BaseAudienceTask task, long mpId) {
         JSONObject jsonResponse = null;
         try {
             MPConnection connection = getUrl(Endpoint.AUDIENCE,mpId).openConnection();
