@@ -20,8 +20,7 @@ import android.os.Environment;
 import android.os.StatFs;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
-import android.view.Display;
-import android.view.WindowManager;
+import android.util.DisplayMetrics;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
@@ -369,14 +368,12 @@ public class MPUtility {
     }
 
     public static int getOrientation(Context context) {
-        WindowManager windowManager = (WindowManager) context
-                .getSystemService(Context.WINDOW_SERVICE);
-        Display getOrient = windowManager.getDefaultDisplay();
+        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
         int orientation = Configuration.ORIENTATION_UNDEFINED;
-        if (getOrient.getWidth() == getOrient.getHeight()) {
+        if (displayMetrics.widthPixels == displayMetrics.heightPixels) {
             orientation = Configuration.ORIENTATION_SQUARE;
         } else {
-            if (getOrient.getWidth() < getOrient.getHeight()) {
+            if (displayMetrics.widthPixels < displayMetrics.heightPixels) {
                 orientation = Configuration.ORIENTATION_PORTRAIT;
             } else {
                 orientation = Configuration.ORIENTATION_LANDSCAPE;
