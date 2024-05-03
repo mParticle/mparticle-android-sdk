@@ -78,6 +78,13 @@ android {
         }
     }
     testOptions {
+        unitTests.all {
+            jvmArgs += ['--add-opens', 'java.base/java.lang=ALL-UNNAMED']
+            jvmArgs += ['--add-opens', 'java.base/java.util=ALL-UNNAMED']
+            jvmArgs += ['--add-opens', 'java.base/java.text=ALL-UNNAMED']
+            jvmArgs += ['--add-opens', 'java.base/java.math=ALL-UNNAMED']
+            jvmArgs += ['--add-opens', 'java.base/java.lang.ref=ALL-UNNAMED']
+        }
         if (useOrchestrator()) {
             execution 'ANDROIDX_TEST_ORCHESTRATOR'
             reportDir buildDir.absolutePath + '/orchestrator/reports'

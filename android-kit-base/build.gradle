@@ -41,6 +41,12 @@ android {
     }
 }
 
+tasks.withType(Test).configureEach {
+    jvmArgs('--add-opens=java.base/java.lang=ALL-UNNAMED')
+    jvmArgs("--add-opens=java.base/java.util=ALL-UNNAMED")
+    jvmArgs('--add-opens=java.base/java.util.concurrent=ALL-UNNAMED')
+}
+
 task kitSdkJavadocs(type: Javadoc) {
     include {
         String filePath = it.toString()
