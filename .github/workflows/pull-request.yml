@@ -101,7 +101,9 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew -Porchestrator=true :android-core:cAT --stacktrace
+          script:
+              # Disable benchmark tests as they do not work on emulators
+              ./gradlew -Porchestrator=true :android-core:cAT -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=none
       - name: "Archive Instrumented Orchestrator Tests Results"
         uses: actions/upload-artifact@v3
         if: always()
