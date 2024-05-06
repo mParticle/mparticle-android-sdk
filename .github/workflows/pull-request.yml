@@ -7,7 +7,7 @@ jobs:
   instrumented-tests:
     name: "Instrumented Tests"
     timeout-minutes: 30
-    runs-on: macOS-12
+    runs-on: ubuntu-latest
     steps:
       - name: "Checkout Branch"
         uses: actions/checkout@v3
@@ -53,7 +53,7 @@ jobs:
   instrumented-orchestrator-tests:
     name: "Instrumented Orchestrator Tests"
     timeout-minutes: 30
-    runs-on: macOS-12
+    runs-on: ubuntu-latest
     steps:
       - name: "Checkout Branch"
         uses: actions/checkout@v3
