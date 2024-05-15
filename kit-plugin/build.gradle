@@ -22,6 +22,10 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
 }
 
+tasks.withType(Test) {
+    jvmArgs('--add-opens=java.base/java.lang=ALL-UNNAMED')
+}
+
 task generateJavadocsJar(type: Jar, dependsOn: groovydoc) {
     archiveClassifier.set("javadoc")
     from groovydoc.destinationDir
