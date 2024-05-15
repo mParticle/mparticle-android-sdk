@@ -36,7 +36,12 @@ class KitPlugin implements Plugin<Project> {
         androidLib.buildTypes.release.minifyEnabled false
         androidLib.buildTypes.release.consumerProguardFiles 'consumer-proguard.pro'
         androidLib.lintOptions.abortOnError true
-        androidLib.testOptions.unitTests.all {  jvmArgs += ['--add-opens', 'java.base/java.lang=ALL-UNNAMED'] }
+        androidLib.testOptions.unitTests.all {  jvmArgs += ['--add-opens', 'java.base/java.lang=ALL-UNNAMED']
+            jvmArgs += ['--add-opens', 'java.base/java.lang.reflect=ALL-UNNAMED']
+            jvmArgs += ['--add-opens', 'java.base/java.util=ALL-UNNAMED']
+            jvmArgs += ['--add-opens', 'java.base/java.text=ALL-UNNAMED']
+            jvmArgs += ['--add-opens', 'java.desktop/java.awt.font=ALL-UNNAMED']
+            jvmArgs += ['--add-opens', 'java.base/java.util.concurrent=ALL-UNNAMED'] }
 
 
         //formerly in maven.gradle
