@@ -36,6 +36,8 @@ class KitPlugin implements Plugin<Project> {
         androidLib.buildTypes.release.minifyEnabled false
         androidLib.buildTypes.release.consumerProguardFiles 'consumer-proguard.pro'
         androidLib.lintOptions.abortOnError true
+        androidLib.testOptions.unitTests.all {  jvmArgs += ['--add-opens', 'java.base/java.lang=ALL-UNNAMED'] }
+
 
         //formerly in maven.gradle
         target.apply(plugin: 'maven-publish')
