@@ -2,7 +2,10 @@ package com.mparticle.internal
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
+import android.content.res.Configuration
+import android.content.res.Resources
 import android.telephony.TelephonyManager
+import android.util.DisplayMetrics
 import com.mparticle.mock.MockContext
 import com.mparticle.mock.utils.RandomUtils
 import org.json.JSONArray
@@ -11,6 +14,7 @@ import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Test
 import org.mockito.Mockito
+import org.mockito.Mockito.`when`
 import java.util.Collections
 import java.util.UUID
 
@@ -252,5 +256,69 @@ class MPUtilityTest {
         Assert.assertEquals("asdvasd", MPUtility.toNumberOrString("asdvasd"))
         Assert.assertEquals("234sdvsda", MPUtility.toNumberOrString("234sdvsda"))
         Assert.assertNull(MPUtility.toNumberOrString(null))
+    }
+
+    @Test
+    fun testGetOrientation() {
+        val mockResources = Mockito.mock(
+            Resources::class.java
+        )
+        val context = Mockito.mock(
+            Context::class.java
+        )
+        val displayMetrics = Mockito.mock(
+            DisplayMetrics::class.java
+        )
+        `when`(context.getResources()).thenReturn(mockResources)
+        `when`(mockResources.getDisplayMetrics()).thenReturn(displayMetrics)
+        displayMetrics.widthPixels = 1080
+        displayMetrics.heightPixels = 1920
+        val orientation: Int = MPUtility.getOrientation(context)
+        Assert.assertEquals(Configuration.ORIENTATION_PORTRAIT, orientation)
+    }
+
+    @Test
+    fun testGetOrientation_When_ORIENTATION_LANDSCAPE() {
+        val mockResources = Mockito.mock(
+            Resources::class.java
+        )
+        val context = Mockito.mock(
+            Context::class.java
+        )
+        val displayMetrics = Mockito.mock(
+            DisplayMetrics::class.java
+        )
+        `when`(context.getResources()).thenReturn(mockResources)
+        `when`(mockResources.getDisplayMetrics()).thenReturn(displayMetrics)
+        displayMetrics.widthPixels = 1953
+        displayMetrics.heightPixels = 1920
+        val orientation: Int = MPUtility.getOrientation(context)
+        Assert.assertEquals(Configuration.ORIENTATION_LANDSCAPE, orientation)
+    }
+
+    @Test
+    fun testGetOrientation_When_ORIENTATION_SQUARE() {
+        val mockResources = Mockito.mock(
+            Resources::class.java
+        )
+        val context = Mockito.mock(
+            Context::class.java
+        )
+        val displayMetrics = Mockito.mock(
+            DisplayMetrics::class.java
+        )
+        `when`(context.getResources()).thenReturn(mockResources)
+        `when`(mockResources.getDisplayMetrics()).thenReturn(displayMetrics)
+        displayMetrics.widthPixels = 850
+        displayMetrics.heightPixels = 850
+        val orientation: Int = MPUtility.getOrientation(context)
+        Assert.assertEquals(Configuration.ORIENTATION_SQUARE, orientation)
+    }
+
+    @Test
+    fun testGetOrientation_When_Context_IS_NULL() {
+        val context: Context? = null
+        val orientation: Int = MPUtility.getOrientation(context)
+        Assert.assertEquals(Configuration.ORIENTATION_UNDEFINED, orientation)
     }
 }
