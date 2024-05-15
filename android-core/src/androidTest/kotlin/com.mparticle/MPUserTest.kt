@@ -28,10 +28,10 @@ class MPUserTest : BaseCleanStartedEachTest() {
             assertTrue { getUserAttributes().isEmpty() }
             setUserAttribute("foo", "bar")
             setUserAttribute("fooInt", 123)
-            setUserAttribute("fooLong", 12345L)
+            setUserAttribute("fooLong", 12345)
             setUserAttribute("fooDouble", 10.15)
-            setUserAttribute("fooNegInt", -10L)
-            setUserAttribute("fooNegLong", -1010L)
+            setUserAttribute("fooNegInt", -10)
+            setUserAttribute("fooNegLong", -1010)
             this.userAttributes.put("fooNull", null)
             android_test_hack()
 
