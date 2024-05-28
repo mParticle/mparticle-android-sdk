@@ -96,7 +96,7 @@ jobs:
           -p @semantic-release/changelog@5 \
           -p @semantic-release/git@9 \
           -p @semantic-release/exec@5 \
-          -p conventional-changelog-conventionalcommits \
+          -p conventional-changelog-conventionalcommits@7 \
           semantic-release --dry-run
       - name: "Semantic Release"
         if: ${{ github.event.inputs.dryRun == 'false' }}
@@ -107,7 +107,7 @@ jobs:
           -p @semantic-release/changelog@5 \
           -p @semantic-release/git@9 \
           -p @semantic-release/exec@5 \
-          -p conventional-changelog-conventionalcommits \
+          -p conventional-changelog-conventionalcommits@7 \
           semantic-release
       - name: "Push automated release commits to release branch"
         if: ${{ github.event.inputs.dryRun == 'false' }}
@@ -130,11 +130,11 @@ jobs:
           repository: mparticle/mparticle-android-sdk
           ref: release/${{ github.run_number }}
           submodules: recursive
-      - name: "Install JDK 11"
+      - name: "Install JDK 17"
         uses: actions/setup-java@v3
         with:
           distribution: "zulu"
-          java-version: "11"
+          java-version: "17"
       - name: "Publish Core, KitManager, KitPlugin"
         if: ${{ github.event.inputs.dryRun == 'false'}}
         run: |
