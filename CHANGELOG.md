@@ -1,3 +1,16 @@
+## [5.55.7](https://github.com/mParticle/mparticle-android-sdk/compare/v5.55.6...v5.55.7) (2024-05-29)
+
+
+### Bug Fixes
+
+* Update Java version, pin conventional commits ([#490](https://github.com/mParticle/mparticle-android-sdk/issues/490)) ([a4f1979](https://github.com/mParticle/mparticle-android-sdk/commit/a4f19790b2123d17a25692b00e0c638793d64672))
+* Update mac version and JDK version into yml file ([#482](https://github.com/mParticle/mparticle-android-sdk/issues/482)) ([b67c108](https://github.com/mParticle/mparticle-android-sdk/commit/b67c108367e6e86f8a9c431f2e59afdea4ef5768))
+
+
+### Updates & Maintenance
+
+* Update submodules ([f4ce2a4](https://github.com/mParticle/mparticle-android-sdk/commit/f4ce2a4284f3ac7e32c34d7ee2858dba75daf8bc))
+
 ## [5.55.6](https://github.com/mParticle/mparticle-android-sdk/compare/v5.55.5...v5.55.6) (2024-04-24)
 
 
