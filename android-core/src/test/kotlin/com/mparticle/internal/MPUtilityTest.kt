@@ -5,8 +5,8 @@ import android.content.pm.ApplicationInfo
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.telephony.TelephonyManager
-import com.mparticle.internal.MPUtility.AdIdInfo
 import android.util.DisplayMetrics
+import com.mparticle.internal.MPUtility.AdIdInfo
 import com.mparticle.mock.MockContext
 import com.mparticle.mock.utils.RandomUtils
 import junit.framework.TestCase
@@ -18,10 +18,10 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import java.lang.reflect.Field
 import java.lang.reflect.Method
-import org.mockito.Mockito.`when`
 import java.util.Collections
 import java.util.UUID
 import kotlin.test.assertNotNull
@@ -323,7 +323,7 @@ class MPUtilityTest {
         val result = method.invoke(instance, mockContext)
         assertNull(result)
     }
-    
+
     @Test
     fun testGetOrientation() {
         val mockResources = Mockito.mock(
