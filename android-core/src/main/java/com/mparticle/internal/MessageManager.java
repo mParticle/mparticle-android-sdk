@@ -62,6 +62,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     private ConfigManager mConfigManager = null;
     private MParticleDBManager mMParticleDBManager;
     private MParticle.OperatingSystem mOperatingSystem;
+    private MParticle.UploadCallback uploadCallback;
 
 
     /**
@@ -525,7 +526,10 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         mUploadHandler.sendMessageDelayed(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_MESSAGES, mConfigManager.getMpid()), Constants.INITIAL_UPLOAD_DELAY);
     }
 
-    public void doUpload() {
+    public void doUpload(MParticle.UploadCallback... callbacks) {
+        if (callbacks.length > 0) {
+            uploadCallback = callbacks[0];
+        }
         mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.CLEAR_MESSAGES_FOR_UPLOAD));
     }
 
@@ -977,6 +981,14 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 .putBoolean(Constants.PrefKeys.FIRSTRUN_AST + mConfigManager.getApiKey(), firstRun)
                 .remove(Constants.PrefKeys.FIRSTRUN_OBSELETE + mConfigManager.getApiKey())
                 .apply();
+    }
+
+    public MParticle.UploadCallback getUploadCallback() {
+        return uploadCallback;
+    }
+
+    public void setUploadCallback(MParticle.UploadCallback uploadCallback) {
+        this.uploadCallback = uploadCallback;
     }
 
     @SuppressLint("MissingPermission")

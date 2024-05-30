@@ -18,8 +18,8 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import org.junit.Assert
+import org.junit.Assert.assertNotNull
 import org.junit.Before
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Answers
 import org.mockito.Mockito
@@ -30,8 +30,11 @@ import java.io.PrintWriter
 import java.io.StringWriter
 import java.util.Random
 import java.util.concurrent.atomic.AtomicLong
+import kotlin.test.Test
+import kotlin.test.assertNull
 
 @RunWith(PowerMockRunner::class)
+@PrepareForTest(MessageManager::class)
 class MessageManagerTest {
     private lateinit var context: MockContext
     private lateinit var configManager: ConfigManager
@@ -543,6 +546,32 @@ class MessageManagerTest {
                 Message::class.java
             )
         )
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testDoUpload_With_callback() {
+        val mockCallback = Mockito.mock(MParticle.UploadCallback::class.java)
+        manager.doUpload(mockCallback)
+        Mockito.verify(messageHandler, Mockito.times(1)).sendMessage(
+            Mockito.any(
+                Message::class.java
+            )
+        )
+        assertNotNull(manager.uploadCallback)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testDoUpload_With_set_NUll_callback() {
+        manager.uploadCallback = null
+        manager.doUpload()
+        Mockito.verify(messageHandler, Mockito.times(1)).sendMessage(
+            Mockito.any(
+                Message::class.java
+            )
+        )
+        assertNull(manager.uploadCallback)
     }
 
     @Test

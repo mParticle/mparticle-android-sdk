@@ -30,8 +30,11 @@ import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
 import java.io.IOException
+import java.lang.reflect.Field
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 @RunWith(PowerMockRunner::class)
 class UploadHandlerTest {
@@ -178,6 +181,54 @@ class UploadHandlerTest {
         Mockito.`when`(mockCursor.moveToNext()).thenReturn(true, false)
         handler.upload(true)
         Mockito.verify(mockApiClient).sendMessageBatch(Mockito.eq("a message batch"))
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testUploadWithCallBack_OnComplete() {
+        handler.handleMessage(Message())
+        val mockMessageManager = Mockito.mock(MessageManager::class.java)
+        val mockCallback = Mockito.mock(MParticle.UploadCallback::class.java)
+        Mockito.`when`(mockMessageManager.uploadCallback).thenReturn(mockCallback)
+        val field: Field = UploadHandler::class.java.getDeclaredField("mMessageManager")
+        field.apply {
+            isAccessible = true
+        }
+        field.set(handler, mockMessageManager)
+
+        Mockito.`when`(mConfigManager.includeSessionHistory).thenReturn(false)
+        val mockCursor = Mockito.mock(
+            Cursor::class.java
+        )
+        Mockito.`when`(mockCursor.moveToNext()).thenReturn(true, false)
+        Mockito.`when`(mockCursor.getInt(Mockito.anyInt())).thenReturn(123)
+        Mockito.`when`(mockCursor.getString(Mockito.anyInt())).thenReturn("cool message batch!")
+        handler.upload(true)
+        assertNotNull(field.get(handler))
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testUpload_When_MessageManager_IS_NULL() {
+        handler.handleMessage(Message())
+        val mockMessageManager = Mockito.mock(MessageManager::class.java)
+        val mockCallback = Mockito.mock(MParticle.UploadCallback::class.java)
+        Mockito.`when`(mockMessageManager.uploadCallback).thenReturn(mockCallback)
+        val field: Field = UploadHandler::class.java.getDeclaredField("mMessageManager")
+        field.apply {
+            isAccessible = true
+        }
+        field.set(handler, null)
+
+        Mockito.`when`(mConfigManager.includeSessionHistory).thenReturn(false)
+        val mockCursor = Mockito.mock(
+            Cursor::class.java
+        )
+        Mockito.`when`(mockCursor.moveToNext()).thenReturn(true, false)
+        Mockito.`when`(mockCursor.getInt(Mockito.anyInt())).thenReturn(123)
+        Mockito.`when`(mockCursor.getString(Mockito.anyInt())).thenReturn("cool message batch!")
+        handler.upload(true)
+        assertNull(field.get(handler))
     }
 
     @Test
