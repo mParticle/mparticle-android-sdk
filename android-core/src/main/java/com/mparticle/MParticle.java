@@ -1687,6 +1687,11 @@ public class MParticle {
         void onReset();
     }
 
+    public interface UploadCallback {
+        void onSuccess();
+
+        void onFailed();
+    }
 
     /**
      * @hidden
