@@ -21,8 +21,6 @@ import android.os.StatFs;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
-import android.view.Display;
-import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
@@ -149,15 +147,15 @@ public class MPUtility {
 
     private static AdIdInfo getGoogleAdIdInfo(Context context) {
         if (googleAdIdInfo != null) {
-            fetchGoogleAdInInfo(context, false);
+            fetchGoogleAdInfo(context, false);
             return googleAdIdInfo;
         } else {
-            fetchGoogleAdInInfo(context, true);
+            fetchGoogleAdInfo(context, true);
         }
         return null;
     }
 
-    private static void fetchGoogleAdInInfo(Context context, Boolean wait) {
+    private static void fetchGoogleAdInfo(Context context, Boolean wait) {
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         Future<?> future = executorService.submit(() -> {
             try {
