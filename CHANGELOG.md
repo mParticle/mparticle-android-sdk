@@ -1,3 +1,15 @@
+## [5.55.8](https://github.com/mParticle/mparticle-android-sdk/compare/v5.55.7...v5.55.8) (2024-05-31)
+
+
+### Bug Fixes
+
+* Use DisplayMetrics instead of WindowManager for StrictMode Error ([#483](https://github.com/mParticle/mparticle-android-sdk/issues/483)) ([648c079](https://github.com/mParticle/mparticle-android-sdk/commit/648c079d26608314f117d3e96433d289b522228d))
+
+
+### Updates & Maintenance
+
+* Update submodules ([fa40e06](https://github.com/mParticle/mparticle-android-sdk/commit/fa40e06f8acd64d33f1f81e3ddbe0da8a01203da))
+
 ## [5.55.7](https://github.com/mParticle/mparticle-android-sdk/compare/v5.55.6...v5.55.7) (2024-05-29)
 
 
