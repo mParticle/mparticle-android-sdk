@@ -526,10 +526,14 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         mUploadHandler.sendMessageDelayed(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_MESSAGES, mConfigManager.getMpid()), Constants.INITIAL_UPLOAD_DELAY);
     }
 
-    public void doUpload(MParticle.UploadCallback... callbacks) {
-        if (callbacks.length > 0) {
-            uploadCallback = callbacks[0];
+    public void doUpload(MParticle.UploadCallback callback) {
+        if (callback != null) {
+            uploadCallback = callback;
         }
+        doUpload();
+    }
+
+    public void doUpload() {
         mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.CLEAR_MESSAGES_FOR_UPLOAD));
     }
 
