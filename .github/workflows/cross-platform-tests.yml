@@ -7,12 +7,12 @@ jobs:
     runs-on: macOS-12
     steps:
       - name: "Checkout Cross Platform Tests Repo"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: mParticle/crossplatform-sdk-tests
           
       - name: "Checkout Android SDK Branch"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ${{github.event.pull_request.head.repo.full_name}}
           ref: ${{github.head_ref}}
@@ -40,11 +40,11 @@ jobs:
           disable-animations: false
           script: echo "Generated AVD snapshot for caching."
           
-      - name: "Install JDK 11"
-        uses: actions/setup-java@v3
+      - name: "Install JDK 17"
+        uses: actions/setup-java@v4
         with:
           distribution: "zulu"
-          java-version: "11"
+          java-version: "17"
       - name: "Run Crossplatform Tests"
         uses: reactivecircus/android-emulator-runner@d94c3fbe4fe6a29e4a5ba47c12fb47677c73656b #v2.28.0
         with:
@@ -53,9 +53,10 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: ./gradlew runAndroid
-      - name: "Archive Test Results"
+      - name: "Archive CPT Test Results"
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: "test-results"
+          name: "cpt-test-results"
           path: Tests/build/reports/androidTests/connected/**
+          overwrite: true
