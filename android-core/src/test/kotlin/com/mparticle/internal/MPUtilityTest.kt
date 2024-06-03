@@ -6,19 +6,40 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.telephony.TelephonyManager
 import android.util.DisplayMetrics
+import com.mparticle.internal.MPUtility.AdIdInfo
 import com.mparticle.mock.MockContext
 import com.mparticle.mock.utils.RandomUtils
+import junit.framework.TestCase
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
+import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
+import org.mockito.MockitoAnnotations
+import java.lang.reflect.Field
+import java.lang.reflect.Method
 import java.util.Collections
 import java.util.UUID
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class MPUtilityTest {
+
+    @Mock
+    private lateinit var mockContext: Context
+
+    private lateinit var instance: MPUtility
+
+    @Before
+    fun setUp() {
+        MockitoAnnotations.initMocks(this)
+        instance = MPUtility()
+    }
+
     @Test
     @Throws(Exception::class)
     fun testSetCheckedAttribute() {
@@ -84,6 +105,12 @@ class MPUtilityTest {
     @Test
     @Throws(Exception::class)
     fun googleAdIdInfoWithoutPlayServicesAvailable() {
+        val adIDInfo: AdIdInfo? = null
+        val field: Field = MPUtility::class.java.getDeclaredField("googleAdIdInfo")
+        field.apply {
+            isAccessible = true
+        }
+        field.set(instance, adIDInfo)
         Assert.assertNull(MPUtility.getAdIdInfo(MockContext()))
     }
 
@@ -256,6 +283,45 @@ class MPUtilityTest {
         Assert.assertEquals("asdvasd", MPUtility.toNumberOrString("asdvasd"))
         Assert.assertEquals("234sdvsda", MPUtility.toNumberOrString("234sdvsda"))
         Assert.assertNull(MPUtility.toNumberOrString(null))
+    }
+
+    @Test
+    fun testGetGoogleAdIdInfo() {
+        val adIDInfo = AdIdInfo("12345", true, AdIdInfo.Advertiser.GOOGLE)
+        val field: Field = MPUtility::class.java.getDeclaredField("googleAdIdInfo")
+        field.apply {
+            isAccessible = true
+        }
+        field.set(instance, adIDInfo)
+
+        val method: Method = MPUtility::class.java.getDeclaredMethod(
+            "getGoogleAdIdInfo",
+            Context::class.java
+        )
+        method.isAccessible = true
+        val result = method.invoke(instance, mockContext)
+        val mpUtilityResult: AdIdInfo = result as AdIdInfo
+        assertNotNull(result)
+        TestCase.assertEquals("12345", mpUtilityResult.id)
+        TestCase.assertEquals(true, mpUtilityResult.isLimitAdTrackingEnabled)
+        TestCase.assertEquals(AdIdInfo.Advertiser.GOOGLE, mpUtilityResult.advertiser)
+    }
+
+    @Test
+    fun testGetGoogleAdIdInfo_WHEN_adIDInfo_IS_NULL() {
+        val adIDInfo: AdIdInfo? = null
+        val field: Field = MPUtility::class.java.getDeclaredField("googleAdIdInfo")
+        field.apply {
+            isAccessible = true
+        }
+        field.set(instance, adIDInfo)
+        val method: Method = MPUtility::class.java.getDeclaredMethod(
+            "getGoogleAdIdInfo",
+            Context::class.java
+        )
+        method.isAccessible = true
+        val result = method.invoke(instance, mockContext)
+        assertNull(result)
     }
 
     @Test
