@@ -1272,7 +1272,7 @@ public class ConfigManager {
     }
 
     //keep this flag value `false` until actual implementation done
-    public boolean isFeatureFlagEnable(){
+    public boolean isFeatureFlagEnabled() {
         return false;
     }
 

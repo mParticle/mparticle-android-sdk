@@ -17,7 +17,6 @@ import com.mparticle.identity.AliasResponse;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.listeners.InternalListenerManager;
 import com.mparticle.internal.messages.MPAliasMessage;
-import com.mparticle.segmentation.SegmentListener;
 
 import org.json.JSONException;
 
@@ -334,7 +333,7 @@ public class UploadHandler extends BaseHandler {
 
 
     public AudienceTask<AudienceResponse> fetchUserAudiences(long mpId) {
-        return new UserAudiencesRetriever(mApiClient).fetchAudiences(mpId,mConfigManager.isFeatureFlagEnable());
+        return new UserAudiencesRetriever(mApiClient).fetchAudiences(mpId,mConfigManager.isFeatureFlagEnabled());
     }
 
     //added so unit tests can subclass

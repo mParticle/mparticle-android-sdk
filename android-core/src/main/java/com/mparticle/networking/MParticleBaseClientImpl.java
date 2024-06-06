@@ -20,7 +20,9 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 public class MParticleBaseClientImpl implements MParticleBaseClient {
 
@@ -28,8 +30,6 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
     private ConfigManager mConfigManager;
     private BaseNetworkConnection mRequestHandler;
     private SharedPreferences mPreferences;
-
-    private Long currentMPId;
     String mApiKey;
 
     private static final String SERVICE_VERSION_1 = "/v1";
@@ -95,19 +95,20 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
     }
 
     protected MPUrl getUrl(Endpoint endpoint) throws MalformedURLException {
-        return getUrl(endpoint, null);
+        return getUrl(endpoint, null,null);
     }
 
     protected MPUrl getUrl(Endpoint endpoint, @Nullable long mpId) throws MalformedURLException {
-        currentMPId = mpId;
-        return getUrl(endpoint, null);
+        HashMap<String, String> queryParams = new HashMap<>();
+        queryParams.put("mpid", String.valueOf(mpId));
+        return getUrl(endpoint, null, queryParams);
     }
 
-    protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath) throws MalformedURLException {
-        return getUrl(endpoint, identityPath, false);
+    protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath, HashMap<String, String> queryParams) throws MalformedURLException {
+        return getUrl(endpoint, identityPath, false,null);
     }
 
-    protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath, boolean forceDefaultUrl) throws MalformedURLException {
+    protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath, boolean forceDefaultUrl, HashMap<String, String> queryParams) throws MalformedURLException {
         NetworkOptions networkOptions = mConfigManager.getNetworkOptions();
         DomainMapping domainMapping = networkOptions.getDomain(endpoint);
         String url = NetworkOptionsManager.getDefaultUrl(endpoint);
@@ -117,8 +118,8 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
             isDefaultUrl = url.equals(domainMappingUrl);
             url = domainMappingUrl;
         }
-        Uri uri;
-        MPUrl defaultUrl = !isDefaultUrl ? getUrl(endpoint, identityPath, true) : null;
+        Uri.Builder uri;
+        MPUrl defaultUrl = !isDefaultUrl ? getUrl(endpoint, identityPath, true, null) : null;
         String subdirectory;
         boolean overridesSubdirectory = domainMapping.isOverridesSubdirectory() && !forceDefaultUrl;
         switch (endpoint) {
@@ -141,40 +142,44 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
                         }
                     }
                 }
-                uri = builder.build();
+                uri = builder;
+                uri.build();
                 return MPUrl.getUrl(uri.toString(), defaultUrl);
             case EVENTS:
                 subdirectory = overridesSubdirectory ? "" : SERVICE_VERSION_2 + "/";
                 uri = new Uri.Builder()
                         .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
-                        .path(subdirectory + mApiKey + "/events")
-                        .build();
+                        .path(subdirectory + mApiKey + "/events");
+                uri.build();
                 return MPUrl.getUrl(uri.toString(), defaultUrl);
             case ALIAS:
                 subdirectory = overridesSubdirectory ? "" : SERVICE_VERSION_1 + "/identity/";
                 uri = new Uri.Builder()
                         .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
-                        .path(subdirectory + mApiKey + "/alias")
-                        .build();
+                        .path(subdirectory + mApiKey + "/alias");
+                uri.build();
                 return MPUrl.getUrl(uri.toString(), defaultUrl);
             case IDENTITY:
                 subdirectory = overridesSubdirectory ? "" : SERVICE_VERSION_1 + "/";
                 uri = new Uri.Builder()
                         .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
-                        .path(subdirectory + identityPath)
-                        .build();
+                        .path(subdirectory + identityPath);
+                uri.build();
                 return MPUrl.getUrl(uri.toString(), defaultUrl);
             case AUDIENCE:
-                String mpidQueryParam = (currentMPId != null) ? currentMPId.toString() : null;
                 uri = new Uri.Builder()
                         .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
-                        .path(SERVICE_VERSION_1 + "/" + mApiKey + "/audience")
-                        .appendQueryParameter("mpid", mpidQueryParam)
-                        .build();
+                        .path(SERVICE_VERSION_1 + "/" + mApiKey + "/audience");
+                if (queryParams != null && !queryParams.isEmpty()) {
+                    for (Map.Entry<String, String> entry : queryParams.entrySet()) {
+                        uri.appendQueryParameter(entry.getKey(), entry.getValue());
+                    }
+                }
+                uri.build();
                 return MPUrl.getUrl(uri.toString(), defaultUrl);
             default:
                 return null;

@@ -7,6 +7,7 @@ import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListenerType;
 import com.mparticle.audience.AudienceResponse;
 import com.mparticle.audience.AudienceTask;
+import com.mparticle.audience.BaseAudienceTask;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
@@ -302,8 +303,12 @@ class MParticleUserDelegate {
 
     public AudienceTask<AudienceResponse> getUserAudiences(long mpId) {
         if (mMessageManager != null && mMessageManager.mUploadHandler != null) {
-          return   mMessageManager.mUploadHandler.fetchUserAudiences(mpId);
+            return mMessageManager.mUploadHandler.fetchUserAudiences(mpId);
+        } else {
+            BaseAudienceTask task = new BaseAudienceTask();
+            task.setFailed(new AudienceResponse(IdentityApi.UNKNOWN_ERROR,
+                    "Error while executing UserAudiences"));
+            return task;
         }
-        return null;
     }
 }

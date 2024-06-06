@@ -16,29 +16,29 @@ class BaseAudienceTask : AudienceTask<AudienceResponse>() {
     fun setFailed(errorResponse: AudienceResponse) {
         isCompleted = true
         isSuccessful = false
-        try {
-            CoroutineScope(Dispatchers.Main).launch {
-                for (listener in failureListeners) {
+        CoroutineScope(Dispatchers.Main).launch {
+            for (listener in failureListeners) {
+                try {
                     listener.onFailure(errorResponse)
+                } catch (e: Exception) {
+                    Logger.error("Exception thrown while invoking failure listener: $e\"")
                 }
             }
-        } catch (e: Exception) {
-            Logger.error("mParticle Audience API $e")
         }
     }
 
     fun setSuccessful(successResponse: AudienceResponse) {
         isCompleted = true
         isSuccessful = true
-        try {
-            CoroutineScope(Dispatchers.Main).launch {
-                for (listener in successListeners) {
+
+        CoroutineScope(Dispatchers.Main).launch {
+            for (listener in successListeners) {
+                try {
                     listener.onSuccess(successResponse)
+                } catch (e: Exception) {
+                    Logger.error("Exception thrown while invoking success listener: $e\"")
                 }
-                println(successListeners.size)
             }
-        } catch (e: Exception) {
-            Logger.error("mParticle Audience API $e")
         }
     }
 

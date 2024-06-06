@@ -220,7 +220,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
                 Logger.error("Audience API call forbidden: is the Audience API enabled for your account?");
             }
             jsonResponse = MPUtility.getJsonResponse(connection);
-            Logger.verbose("Audience API response: \n" +connection.getResponseCode()+ "  "+ jsonResponse);
+            Logger.verbose("Audience API response: \n Status code: " +connection.getResponseCode()+ "  JSON response: "+ jsonResponse);
             if (jsonResponse != null && connection.getResponseCode() == 200) {
                 task.setSuccessful(new AudienceResponse(connection.getResponseCode(), jsonResponse));
             } else {
