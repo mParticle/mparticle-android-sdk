@@ -99,16 +99,16 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
     }
 
     protected MPUrl getUrl(Endpoint endpoint, @Nullable long mpId) throws MalformedURLException {
-        HashMap<String, String> queryParams = new HashMap<>();
-        queryParams.put("mpid", String.valueOf(mpId));
-        return getUrl(endpoint, null, queryParams);
+        HashMap<String, String> audienceQueryParams = new HashMap<>();
+        audienceQueryParams.put("mpid", String.valueOf(mpId));
+        return getUrl(endpoint, null, audienceQueryParams);
     }
 
-    protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath, HashMap<String, String> queryParams) throws MalformedURLException {
-        return getUrl(endpoint, identityPath, false,null);
+    protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath, HashMap<String, String> audienceQueryParams) throws MalformedURLException {
+        return getUrl(endpoint, identityPath, false,audienceQueryParams);
     }
 
-    protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath, boolean forceDefaultUrl, HashMap<String, String> queryParams) throws MalformedURLException {
+    protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath, boolean forceDefaultUrl, HashMap<String, String> audienceQueryParams) throws MalformedURLException {
         NetworkOptions networkOptions = mConfigManager.getNetworkOptions();
         DomainMapping domainMapping = networkOptions.getDomain(endpoint);
         String url = NetworkOptionsManager.getDefaultUrl(endpoint);
@@ -143,44 +143,40 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
                     }
                 }
                 uri = builder;
-                uri.build();
-                return MPUrl.getUrl(uri.toString(), defaultUrl);
+                return MPUrl.getUrl(uri.build().toString(), defaultUrl);
             case EVENTS:
                 subdirectory = overridesSubdirectory ? "" : SERVICE_VERSION_2 + "/";
                 uri = new Uri.Builder()
                         .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
                         .path(subdirectory + mApiKey + "/events");
-                uri.build();
-                return MPUrl.getUrl(uri.toString(), defaultUrl);
+                return MPUrl.getUrl(uri.build().toString(), defaultUrl);
             case ALIAS:
                 subdirectory = overridesSubdirectory ? "" : SERVICE_VERSION_1 + "/identity/";
                 uri = new Uri.Builder()
                         .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
                         .path(subdirectory + mApiKey + "/alias");
-                uri.build();
-                return MPUrl.getUrl(uri.toString(), defaultUrl);
+                return MPUrl.getUrl(uri.build().toString(), defaultUrl);
             case IDENTITY:
                 subdirectory = overridesSubdirectory ? "" : SERVICE_VERSION_1 + "/";
                 uri = new Uri.Builder()
                         .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
                         .path(subdirectory + identityPath);
-                uri.build();
-                return MPUrl.getUrl(uri.toString(), defaultUrl);
+                return MPUrl.getUrl(uri.build().toString(), defaultUrl);
             case AUDIENCE:
                 uri = new Uri.Builder()
                         .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
                         .path(SERVICE_VERSION_1 + "/" + mApiKey + "/audience");
-                if (queryParams != null && !queryParams.isEmpty()) {
-                    for (Map.Entry<String, String> entry : queryParams.entrySet()) {
+                if (audienceQueryParams != null && !audienceQueryParams.isEmpty()) {
+                    for (Map.Entry<String, String> entry : audienceQueryParams.entrySet()) {
                         uri.appendQueryParameter(entry.getKey(), entry.getValue());
                     }
                 }
-                uri.build();
-                return MPUrl.getUrl(uri.toString(), defaultUrl);
+
+                return MPUrl.getUrl(uri.build().toString(), defaultUrl);
             default:
                 return null;
         }

@@ -307,7 +307,7 @@ class MParticleUserDelegate {
         } else {
             BaseAudienceTask task = new BaseAudienceTask();
             task.setFailed(new AudienceResponse(IdentityApi.UNKNOWN_ERROR,
-                    "Error while executing UserAudiences"));
+                    "Error while fetching user audiences"));
             return task;
         }
     }
