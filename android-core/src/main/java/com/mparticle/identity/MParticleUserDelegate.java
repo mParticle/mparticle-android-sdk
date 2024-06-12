@@ -5,6 +5,9 @@ import android.os.Build;
 
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListenerType;
+import com.mparticle.audience.AudienceResponse;
+import com.mparticle.audience.AudienceTask;
+import com.mparticle.audience.BaseAudienceTask;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
@@ -15,7 +18,6 @@ import com.mparticle.internal.KitManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MessageManager;
-import com.mparticle.segmentation.SegmentListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -225,11 +227,6 @@ class MParticleUserDelegate {
         return true;
     }
 
-    public void getSegments(long timeout, String endpointId, SegmentListener listener) {
-        if (mMessageManager != null && mMessageManager.mUploadHandler != null) {
-            mMessageManager.mUploadHandler.fetchSegments(timeout, endpointId, listener);
-        }
-    }
 
     static void setUserIdentities(MParticleUserDelegate userDelegate, Map<MParticle.IdentityType, String> identities, long mpid) {
         if (identities != null) {
@@ -301,6 +298,17 @@ class MParticleUserDelegate {
             return System.currentTimeMillis();
         } else {
             return mConfigManager.getUserStorage(mpid).getLastSeenTime();
+        }
+    }
+
+    public AudienceTask<AudienceResponse> getUserAudiences(long mpId) {
+        if (mMessageManager != null && mMessageManager.mUploadHandler != null) {
+            return mMessageManager.mUploadHandler.fetchUserAudiences(mpId);
+        } else {
+            BaseAudienceTask task = new BaseAudienceTask();
+            task.setFailed(new AudienceResponse(IdentityApi.UNKNOWN_ERROR,
+                    "Error while fetching user audiences"));
+            return task;
         }
     }
 }

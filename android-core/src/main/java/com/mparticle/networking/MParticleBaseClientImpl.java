@@ -19,6 +19,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 
 public class MParticleBaseClientImpl implements MParticleBaseClient {
@@ -92,14 +93,24 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
     }
 
     protected MPUrl getUrl(Endpoint endpoint) throws MalformedURLException {
-        return getUrl(endpoint, null);
+        return getUrl(endpoint, null, null);
+    }
+
+    protected MPUrl getUrl(Endpoint endpoint, @Nullable long mpId) throws MalformedURLException {
+        HashMap<String, String> audienceQueryParams = new HashMap<>();
+        audienceQueryParams.put("mpid", String.valueOf(mpId));
+        return getUrl(endpoint, null, audienceQueryParams);
     }
 
     protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath) throws MalformedURLException {
-        return getUrl(endpoint, identityPath, false);
+        return getUrl(endpoint, identityPath, false,null);
     }
 
-    protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath, boolean forceDefaultUrl) throws MalformedURLException {
+    protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath, HashMap<String, String> audienceQueryParams) throws MalformedURLException {
+        return getUrl(endpoint, identityPath, false, audienceQueryParams);
+    }
+
+    protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath, boolean forceDefaultUrl, HashMap<String, String> audienceQueryParams) throws MalformedURLException {
         NetworkOptions networkOptions = mConfigManager.getNetworkOptions();
         DomainMapping domainMapping = networkOptions.getDomain(endpoint);
         String url = NetworkOptionsManager.getDefaultUrl(endpoint);

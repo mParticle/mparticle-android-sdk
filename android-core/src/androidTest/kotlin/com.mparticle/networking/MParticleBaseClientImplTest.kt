@@ -7,6 +7,7 @@ import com.mparticle.MParticleOptions
 import com.mparticle.internal.AccessUtils
 import com.mparticle.internal.ConfigManager
 import com.mparticle.testutils.BaseCleanInstallEachTest
+import junit.framework.TestCase
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -23,7 +24,7 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
         startMParticle(MParticleOptions.builder(mContext).credentials(apiKey, "secret"))
         val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
         for (endpoint in MParticleBaseClientImpl.Endpoint.values()) {
-            defaultUrls[endpoint] = baseClientImpl.getUrl(endpoint, endpoint.name, false)
+            defaultUrls[endpoint] = baseClientImpl.getUrl(endpoint, endpoint.name, null)
         }
         MParticle.setInstance(null)
     }
@@ -217,11 +218,11 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
         MParticle.start(options)
         val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
         for (endpoint in MParticleBaseClientImpl.Endpoint.values()) {
-            val generatedUrl = baseClientImpl.getUrl(endpoint, endpoint.name, true)
+            val generatedUrl = baseClientImpl.getUrl(endpoint, endpoint.name, true, null)
             assertEquals(defaultUrls[endpoint].toString(), generatedUrl.defaultUrl.toString())
         }
         for (endpoint in MParticleBaseClientImpl.Endpoint.values()) {
-            val generatedUrl = baseClientImpl.getUrl(endpoint, endpoint.name, false)
+            val generatedUrl = baseClientImpl.getUrl(endpoint, endpoint.name, false, null)
             Assert.assertNotEquals(defaultUrls[endpoint].toString(), generatedUrl.toString())
             Assert.assertFalse(generatedUrl === generatedUrl.defaultUrl)
             assertEquals(
