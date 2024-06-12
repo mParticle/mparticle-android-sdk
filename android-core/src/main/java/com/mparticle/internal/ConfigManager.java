@@ -1271,6 +1271,11 @@ public class ConfigManager {
         }
     }
 
+    //keep this flag value `false` until actual implementation done
+    public boolean isFeatureFlagEnabled() {
+        return false;
+    }
+
     public ConsentState getConsentState(long mpid) {
         String serializedConsent = getUserStorage(mpid).getSerializedConsentState();
         return ConsentState.withConsentState(serializedConsent).build();
