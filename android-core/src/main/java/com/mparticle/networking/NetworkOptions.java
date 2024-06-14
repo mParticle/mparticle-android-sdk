@@ -43,6 +43,10 @@ public class NetworkOptions {
         return new Builder();
     }
 
+    public static Builder builder(String podPrefix, boolean enable) {
+        return new Builder(podPrefix, enable);
+    }
+
     @Nullable
     public static NetworkOptions withNetworkOptions(@Nullable String jsonString) {
         if (MPUtility.isEmpty(jsonString)) {
@@ -122,8 +126,15 @@ public class NetworkOptions {
     public static class Builder {
         private Map<Endpoint, DomainMapping> domainMappings = new HashMap<Endpoint, DomainMapping>();
         private Boolean pinningDisabledInDevelopment;
+        private String podPrefix = "us1";
+        private boolean enablePodRedirection = true;
 
         private Builder() {
+        }
+
+        private Builder(String podPrefix, boolean enable){
+            this.podPrefix = podPrefix;
+            this.enablePodRedirection = enable;
         }
 
         @NonNull
