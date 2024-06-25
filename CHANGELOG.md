@@ -1,3 +1,10 @@
+## [5.56.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.55.9...v5.56.0) (2024-06-25)
+
+
+### Features
+
+* Add option to disable certificate pinning ([#495](https://github.com/mParticle/mparticle-android-sdk/issues/495)) ([7c53bad](https://github.com/mParticle/mparticle-android-sdk/commit/7c53badb8e7dcffb0210c63de5af6c9323814c7f))
+
 ## [5.55.9](https://github.com/mParticle/mparticle-android-sdk/compare/v5.55.8...v5.55.9) (2024-06-25)
 
 
