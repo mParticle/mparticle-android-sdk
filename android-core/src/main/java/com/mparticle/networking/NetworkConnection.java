@@ -129,7 +129,7 @@ public class NetworkConnection extends BaseNetworkConnection {
 
     private boolean shouldDisablePinning() {
         NetworkOptions networkOptions = mConfigManager.getNetworkOptions();
-        return ConfigManager.getEnvironment() == MParticle.Environment.Development && networkOptions.pinningDisabledInDevelopment;
+        return networkOptions.pinningDisabled || (ConfigManager.getEnvironment() == MParticle.Environment.Development && networkOptions.pinningDisabledInDevelopment);
     }
 
 

@@ -25,6 +25,7 @@ public class NetworkOptions {
 
     Map<Endpoint, DomainMapping> domainMappings = new HashMap<Endpoint, DomainMapping>();
     boolean pinningDisabledInDevelopment = false;
+    boolean pinningDisabled = false;
 
     private NetworkOptions() {
     }
@@ -35,6 +36,10 @@ public class NetworkOptions {
         }
         if (builder.pinningDisabledInDevelopment != null) {
             pinningDisabledInDevelopment = builder.pinningDisabledInDevelopment;
+        }
+
+        if (builder.pinningDisabled != null) {
+            pinningDisabled = builder.pinningDisabled;
         }
     }
 
@@ -52,6 +57,7 @@ public class NetworkOptions {
         try {
             JSONObject jsonObject = new JSONObject(jsonString);
             builder.setPinningDisabledInDevelopment(jsonObject.optBoolean("disableDevPinning", false));
+            builder.setPinningDisabled(jsonObject.optBoolean("disablePinning", false));
             JSONArray domainMappingsJson = jsonObject.getJSONArray("domainMappings");
             for (int i = 0; i < domainMappingsJson.length(); i++) {
                 builder.addDomainMapping(DomainMapping
@@ -93,6 +99,10 @@ public class NetworkOptions {
         return pinningDisabledInDevelopment;
     }
 
+    public boolean isPinningDisabled() {
+        return pinningDisabled;
+    }
+
     DomainMapping getDomain(Endpoint endpoint) {
         return domainMappings.get(endpoint);
     }
@@ -109,6 +119,7 @@ public class NetworkOptions {
         try {
             JSONArray domainMappingsJson = new JSONArray();
             networkOptions.put("disableDevPinning", pinningDisabledInDevelopment);
+            networkOptions.put("disablePinning", pinningDisabled);
             networkOptions.put("domainMappings", domainMappingsJson);
             for (DomainMapping domainMapping : domainMappings.values()) {
                 domainMappingsJson.put(domainMapping.toString());
@@ -122,6 +133,7 @@ public class NetworkOptions {
     public static class Builder {
         private Map<Endpoint, DomainMapping> domainMappings = new HashMap<Endpoint, DomainMapping>();
         private Boolean pinningDisabledInDevelopment;
+        private Boolean pinningDisabled;
 
         private Builder() {
         }
@@ -160,6 +172,12 @@ public class NetworkOptions {
         @NonNull
         public Builder setPinningDisabledInDevelopment(boolean disabledInDevelopment) {
             this.pinningDisabledInDevelopment = disabledInDevelopment;
+            return this;
+        }
+
+        @NonNull
+        public Builder setPinningDisabled(boolean disabled) {
+            this.pinningDisabled = disabled;
             return this;
         }
 
