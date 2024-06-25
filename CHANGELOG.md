@@ -1,3 +1,15 @@
+## [5.55.9](https://github.com/mParticle/mparticle-android-sdk/compare/v5.55.8...v5.55.9) (2024-06-25)
+
+
+### Bug Fixes
+
+* Refactor code for accessing Google Ad info ([#491](https://github.com/mParticle/mparticle-android-sdk/issues/491)) ([ee1525c](https://github.com/mParticle/mparticle-android-sdk/commit/ee1525c5eae2ca88277a1f2ac6115b028b981a4f))
+
+
+### Updates & Maintenance
+
+* Update submodules ([d6a2ba5](https://github.com/mParticle/mparticle-android-sdk/commit/d6a2ba59462668cbf4b4dda5bb8c7b82696e5214))
+
 ## [5.55.8](https://github.com/mParticle/mparticle-android-sdk/compare/v5.55.7...v5.55.8) (2024-05-31)
 
 
