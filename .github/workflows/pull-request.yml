@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Install JDK 17"
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: "zulu"
           java-version: "17"
@@ -52,12 +52,13 @@ jobs:
             # Disable benchmark tests as they do not work on emulators
             adb uninstall com.mparticle.kits.test; ./gradlew connectedCheck --stacktrace
             ./gradlew :android-core:cAT :android-kit-base:cAT  -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=none
-      - name: "Archive Instrumented Tests Results"
-        uses: actions/upload-artifact@v3
+      - name: "Archive PR Instrumented Tests Results"
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: "instrumented-tests-results"
+          name: "pr-instrumented-tests-results"
           path: android-core/build/reports/androidTests/connected/**
+          overwrite: true
 
   instrumented-orchestrator-tests:
     name: "Instrumented Orchestrator Tests"
@@ -65,9 +66,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Install JDK 17"
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: "zulu"
           java-version: "17"
@@ -99,21 +100,23 @@ jobs:
               # Disable benchmark tests as they do not work on emulators
               adb uninstall com.mparticle.test; ./gradlew connectedCheck --stacktrace
               ./gradlew -Porchestrator=true :android-core:cAT -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=none
-      - name: "Archive Instrumented Orchestrator Tests Results"
-        uses: actions/upload-artifact@v3
+      - name: "Archive PR Instrumented Orchestrator Tests Results"
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: "instrumented-orchestrator-tests-results"
+          name: "pr-instrumented-orchestrator-tests-results"
           path: android-core/build/orchestrator/**
+          overwrite: true
+
   unit-tests:
     name: "Unit Tests"
     timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Install JDK 17"
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: "zulu"
           java-version: "17"
@@ -122,12 +125,13 @@ jobs:
       - name: "Print Android Unit Tests Report"
         uses: asadmansr/android-test-report-action@384cd31388782f4106dc4a1b37eea2ff02e0aad7 #v1.2.0
         if: always()
-      - name: "Archive Unit Test Results"
-        uses: actions/upload-artifact@v3
+      - name: "Archive PR Unit Test Results"
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: "unit-tests-results"
+          name: "pr-unit-tests-results"
           path: ./**/build/reports/**
+          overwrite: true
 
   lint-checks:
     name: "Lint Checks"
@@ -135,22 +139,23 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: "Install JDK 17"
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: "zulu"
           java-version: "17"
       - name: "Run Android Core SDK Lint"
         run: ./gradlew lint
-      - name: "Archive Lint Test Results"
-        uses: actions/upload-artifact@v3
+      - name: "Archive PR Lint Test Results"
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: "lint-results"
+          name: "pr-lint-results"
           path: ./**/build/reports/**
+          overwrite: true
 
   kotlin-lint-checks:
     name: "Kotlin Lint Checks"
@@ -158,22 +163,23 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: "Install JDK 17"
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: "zulu"
           java-version: "17"
       - name: "Run Android Core SDK Kotlin Lint"
         run: ./gradlew ktlintCheck
-      - name: "Archive Kotlin Lint Test Results"
-        uses: actions/upload-artifact@v3
+      - name: "Archive PR Kotlin Lint Test Results"
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: "kotlin-lint-results"
+          name: "pr-kotlin-lint-results"
           path: ./**/build/reports/**
+          overwrite: true
 
   security-checks:
     name: "Security Lint Checks"
@@ -187,12 +193,12 @@ jobs:
       if: github.event_name == 'pull_request'
       steps:
         - name: "Checkout Branch"
-          uses: actions/checkout@v3
+          uses: actions/checkout@v4
           with:
             submodules: recursive
             fetch-depth: 0
         - name: "Install JDK 17"
-          uses: actions/setup-java@v3
+          uses: actions/setup-java@v4
           with:
             distribution: "zulu"
             java-version: "17"
