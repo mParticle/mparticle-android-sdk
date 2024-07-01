@@ -36,6 +36,7 @@ public class MPMediaAPI {
      *
      * @param playing Is your app currently playing music for the user.
      */
+    @Deprecated
     public void setAudioPlaying(boolean playing) {
         mAudioPlaying.set(playing);
         if (playing) {
@@ -45,6 +46,7 @@ public class MPMediaAPI {
         }
     }
 
+    @Deprecated
     public boolean getAudioPlaying() {
         return mAudioPlaying.get();
     }

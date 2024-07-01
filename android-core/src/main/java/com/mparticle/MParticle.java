@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
@@ -51,6 +52,7 @@ import com.mparticle.media.MediaCallbacks;
 import com.mparticle.messaging.MPMessagingAPI;
 import com.mparticle.messaging.ProviderCloudMessage;
 import com.mparticle.segmentation.SegmentListener;
+import com.mparticle.uploadbatching.UploadBatchReceiver;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
@@ -136,6 +138,13 @@ public class MParticle {
         mMessageManager = new MessageManager(configManager, appStateManager, mKitManager, sDevicePerformanceMetricsDisabled, mDatabaseManager, options);
         mConfigManager.setNetworkOptions(options.getNetworkOptions());
         mPreferences = options.getContext().getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+        UploadBatchReceiver receiver = new UploadBatchReceiver();
+        IntentFilter intentFilter = UploadBatchReceiver.Companion.getIntentFilter();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            mAppContext.registerReceiver(receiver, intentFilter, Context.RECEIVER_EXPORTED);
+        } else {
+            mAppContext.registerReceiver(receiver, intentFilter);
+        }
     }
 
     /**
