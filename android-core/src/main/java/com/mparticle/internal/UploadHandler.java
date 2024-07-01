@@ -238,13 +238,28 @@ public class UploadHandler extends BaseHandler {
                     }
                 }
             }
+            if (mMessageManager != null && mMessageManager.getUploadCallback() != null) {
+                mMessageManager.getUploadCallback().onSuccess();
+            }
         } catch (MParticleApiClientImpl.MPThrottleException e) {
+            if (mMessageManager != null && mMessageManager.getUploadCallback() != null) {
+                mMessageManager.getUploadCallback().onFailed();
+            }
         } catch (SSLHandshakeException ssle) {
             Logger.debug("SSL handshake failed while preparing uploads - possible MITM attack detected.");
+            if (mMessageManager != null && mMessageManager.getUploadCallback() != null) {
+                mMessageManager.getUploadCallback().onFailed();
+            }
         } catch (MParticleApiClientImpl.MPConfigException e) {
             Logger.error("Bad API request - is the correct API key and secret configured?");
+            if (mMessageManager != null && mMessageManager.getUploadCallback() != null) {
+                mMessageManager.getUploadCallback().onFailed();
+            }
         } catch (Exception e) {
             Logger.error(e, "Error processing batch uploads in mParticle DB.");
+            if (mMessageManager != null && mMessageManager.getUploadCallback() != null) {
+                mMessageManager.getUploadCallback().onFailed();
+            }
         }
         return processingSessionEnd;
     }
