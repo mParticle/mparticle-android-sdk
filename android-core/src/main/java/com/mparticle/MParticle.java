@@ -1269,7 +1269,17 @@ public class MParticle {
      * @see #logEvent(BaseEvent)
      */
     public enum EventType {
-        Unknown, Navigation, Location, Search, Transaction, UserContent, UserPreference, Social, Other, Media;
+        Unknown(0), Navigation(1), Location(2), Search(3), Transaction(4), UserContent(5), UserPreference(6), Social(7), Other(8), Media(9);
+
+        private final int value;
+
+        EventType(final int newValue) {
+            value = newValue;
+        }
+
+        public int getValue() {
+            return value;
+        }
 
         @NonNull
         public String toString() {
