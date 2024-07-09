@@ -1,3 +1,10 @@
+## [5.56.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.56.0...v5.56.1) (2024-07-09)
+
+
+### Bug Fixes
+
+* Add enum value for event types ([#496](https://github.com/mParticle/mparticle-android-sdk/issues/496)) ([b6ecb8a](https://github.com/mParticle/mparticle-android-sdk/commit/b6ecb8ad1436cd703574e94c236c12882ab9908b))
+
 ## [5.56.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.55.9...v5.56.0) (2024-06-25)
 
 
