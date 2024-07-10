@@ -56,7 +56,42 @@ public final class CommerceEventUtils {
         List<Product> products = event.getProducts();
         if (products != null) {
             for (int i = 0; i < products.size(); i++) {
-                MPEvent.Builder itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.Transaction);
+                MPEvent.Builder itemEvent;
+                switch (productAction) {
+                    case Product.ADD_TO_CART:
+                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.AddToCart);
+                        break;
+                    case Product.CLICK:
+                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.Click);
+                        break;
+                    case Product.ADD_TO_WISHLIST:
+                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.AddToWishlist);
+                        break;
+                    case Product.CHECKOUT:
+                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.Checkout);
+                        break;
+                    case Product.CHECKOUT_OPTION:
+                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.CheckoutOption);
+                        break;
+                    case Product.DETAIL:
+                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.ViewDetail);
+                        break;
+                    case Product.PURCHASE:
+                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.Purchase);
+                        break;
+                    case Product.REFUND:
+                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.Refund);
+                        break;
+                    case Product.REMOVE_FROM_CART:
+                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.RemoveFromCart);
+                        break;
+                    case Product.REMOVE_FROM_WISHLIST:
+                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.RemoveFromWishlist);
+                        break;
+                    default:
+                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.Transaction);
+                }
+
                 Map<String, String> attributes = new HashMap<String, String>();
                 OnAttributeExtracted attributeExtracted = new StringAttributeExtractor(attributes);
                 extractProductFields(products.get(i), attributeExtracted);
@@ -184,7 +219,41 @@ public final class CommerceEventUtils {
         List<Promotion> promotions = event.getPromotions();
         if (promotions != null) {
             for (int i = 0; i < promotions.size(); i++) {
-                MPEvent.Builder itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.Transaction);
+                MPEvent.Builder itemEvent;
+                switch (promotionAction) {
+                    case Product.ADD_TO_CART:
+                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.AddToCart);
+                        break;
+                    case Product.CLICK:
+                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.Click);
+                        break;
+                    case Product.ADD_TO_WISHLIST:
+                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.AddToWishlist);
+                        break;
+                    case Product.CHECKOUT:
+                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.Checkout);
+                        break;
+                    case Product.CHECKOUT_OPTION:
+                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.CheckoutOption);
+                        break;
+                    case Product.DETAIL:
+                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.ViewDetail);
+                        break;
+                    case Product.PURCHASE:
+                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.Purchase);
+                        break;
+                    case Product.REFUND:
+                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.Refund);
+                        break;
+                    case Product.REMOVE_FROM_CART:
+                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.RemoveFromCart);
+                        break;
+                    case Product.REMOVE_FROM_WISHLIST:
+                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.RemoveFromWishlist);
+                        break;
+                    default:
+                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.Transaction);
+                }
                 Map<String, String> attributes = new HashMap<String, String>();
                 if (event.getCustomAttributeStrings() != null) {
                     attributes.putAll(event.getCustomAttributeStrings());
