@@ -84,7 +84,7 @@ public class ConfigManager {
     static SharedPreferences sPreferences;
 
     private static JSONArray sPushKeys;
-    private boolean directUrlRouting = true;
+    private boolean directUrlRouting = false;
     private UserStorage mUserStorage;
     private String mLogUnhandledExceptions = VALUE_APP_DEFINED;
 
@@ -409,7 +409,7 @@ public class ConfigManager {
         }
 
         if (responseJSON.has(KEY_DIRECT_URL_ROUTING)) {
-        //   directUrlRouting = responseJSON.optBoolean(KEY_DIRECT_URL_ROUTING, false);
+           directUrlRouting = responseJSON.optBoolean(KEY_DIRECT_URL_ROUTING, false);
             editor.putBoolean(KEY_DIRECT_URL_ROUTING, directUrlRouting);
         }
 
@@ -1289,8 +1289,8 @@ public class ConfigManager {
 
     public String getPodPrefix() {
         String prefix = "us1";
-        String[] prefixFromApi = getApiKey().split("-");
         try {
+            String[] prefixFromApi = getApiKey().split("-");
             if (prefixFromApi.length > 1) {
                 prefix = getApiKey().split("-")[0];
             }
