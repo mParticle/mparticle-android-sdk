@@ -111,10 +111,8 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
             url = domainMappingUrl;
         }
         Uri uri;
-        Logger.debug("before Mansi -->"+url);
         if (endpoint != Endpoint.CONFIG) {
             url = NetworkUtilities.INSTANCE.getUrlWithPrefix(url, mConfigManager.getPodPrefix(), mConfigManager.isDirectUrlRoutingEnabled());
-            Logger.debug("Mansi -->"+url);
         }
         MPUrl defaultUrl = !isDefaultUrl ? getUrl(endpoint, identityPath, true) : null;
         String subdirectory;
