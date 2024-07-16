@@ -1287,15 +1287,20 @@ public class ConfigManager {
         return directUrlRouting;
     }
 
+    /* When Direct URL Routing is true, we create a new set of baseUrls that include the silo in the urls. mParticle API keys are prefixed with the
+     silo and a hyphen (ex. "us1-", "us2-", "eu1-").  us1 was the first silo,and before other silos existed, there were no prefixes and all apiKeys
+     were us1. As such, if we split on a '-' and the resulting array length is 1, then it is an older APIkey that should route to us1.
+     When splitKey.length is greater than 1, then splitKey[0] will be us1, us2, eu1, au1, or st1, etc as new silos are added*/
     public String getPodPrefix() {
         String prefix = "us1";
         try {
             String[] prefixFromApi = getApiKey().split("-");
             if (prefixFromApi.length > 1) {
-                prefix = getApiKey().split("-")[0];
+                prefix = prefixFromApi[0];
             }
         } catch (Exception e) {
             prefix = "us1";
+            Logger.error("Error while setting direct URL routing : " + e);
         }
         return prefix;
     }
