@@ -2,7 +2,6 @@ package com.mparticle.networking
 
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
-import com.mparticle.NetworkUtilities
 import com.mparticle.internal.AccessUtils
 import com.mparticle.testutils.BaseCleanInstallEachTest
 import org.junit.After
@@ -37,9 +36,11 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
     @Throws(MalformedURLException::class, InterruptedException::class)
     fun testDefaultEndpoints() {
         MParticle.start(MParticleOptions.builder(mContext).credentials(apiKey, "s").build())
+        val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
+
         setClients()
         Assert.assertEquals(
-            NetworkUtilities.getUrlWithPrefix(url = NetworkOptionsManager.MP_URL_PREFIX, "", false),
+            baseClientImpl.getPodUrl(NetworkOptionsManager.MP_URL_PREFIX, "", false),
             mpClient.getUrl(MParticleBaseClientImpl.Endpoint.AUDIENCE).authority
         )
         Assert.assertEquals(
@@ -47,11 +48,15 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
             mpClient.getUrl(MParticleBaseClientImpl.Endpoint.CONFIG).authority
         )
         Assert.assertEquals(
-            NetworkUtilities.getUrlWithPrefix(url = NetworkOptionsManager.MP_URL_PREFIX, "", false),
+            baseClientImpl.getPodUrl(NetworkOptionsManager.MP_URL_PREFIX, "", false),
             mpClient.getUrl(MParticleBaseClientImpl.Endpoint.EVENTS).authority
         )
         Assert.assertEquals(
-            NetworkUtilities.getUrlWithPrefix(url = NetworkOptionsManager.MP_IDENTITY_URL_PREFIX, "", false),
+            baseClientImpl.getPodUrl(
+                NetworkOptionsManager.MP_IDENTITY_URL_PREFIX,
+                "",
+                false
+            ),
             mpClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY).authority
         )
         var randIdentityPath = mRandomUtils.getAlphaString(10)
@@ -90,7 +95,7 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
     @Test
     @Throws(MalformedURLException::class)
     fun testRandomEndpoint() {
-        val identityUrl = "${mRandomUtils.getAlphaString(20)}"
+        val identityUrl = mRandomUtils.getAlphaString(20)
         val configUrl = mRandomUtils.getAlphaString(20)
         val audienceUrl = mRandomUtils.getAlphaString(20)
         val eventsUrl = mRandomUtils.getAlphaString(20)

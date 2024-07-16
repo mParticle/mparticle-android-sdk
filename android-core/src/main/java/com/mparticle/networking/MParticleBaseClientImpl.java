@@ -7,7 +7,6 @@ import android.net.Uri;
 import androidx.annotation.Nullable;
 
 import com.mparticle.BuildConfig;
-import com.mparticle.NetworkUtilities;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
@@ -112,7 +111,7 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
         }
         Uri uri;
         if (endpoint != Endpoint.CONFIG) {
-            url = NetworkUtilities.INSTANCE.getUrlWithPrefix(url, mConfigManager.getPodPrefix(), mConfigManager.isDirectUrlRoutingEnabled());
+            url = getPodUrl(url, mConfigManager.getPodPrefix(), mConfigManager.isDirectUrlRoutingEnabled());
         }
         MPUrl defaultUrl = !isDefaultUrl ? getUrl(endpoint, identityPath, true) : null;
         String subdirectory;
@@ -172,6 +171,18 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
             default:
                 return null;
         }
+    }
+
+    String getPodUrl(
+            String URLPrefix,
+            String pod,
+            boolean enablePodRedirection
+    ) {
+        if (URLPrefix != null) {
+            String newUrl = enablePodRedirection ? URLPrefix + "." + pod : URLPrefix;
+            return newUrl + ".mparticle.com";
+        }
+        return null;
     }
 
     public enum Endpoint {
