@@ -2,7 +2,6 @@ package com.mparticle.networking
 
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
-import com.mparticle.NetworkUtilities
 import com.mparticle.internal.AccessUtils
 import com.mparticle.testutils.BaseCleanInstallEachTest
 import junit.framework.TestCase
@@ -30,16 +29,68 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
     @Test
     fun testUrlPrefixWithPodRedirection() {
         val prefix = "eu1"
+        val identityUrl = mRandomUtils.getAlphaString(20)
+        val configUrl = mRandomUtils.getAlphaString(20)
+        val audienceUrl = mRandomUtils.getAlphaString(20)
+        val eventsUrl = mRandomUtils.getAlphaString(20)
+        val options = MParticleOptions.builder(mContext)
+            .credentials(apiKey, "secret")
+            .networkOptions(
+                NetworkOptions.builder()
+                    .addDomainMapping(
+                        DomainMapping.audienceMapping(audienceUrl)
+                            .build()
+                    )
+                    .addDomainMapping(
+                        DomainMapping.configMapping(configUrl)
+                            .build()
+                    )
+                    .addDomainMapping(
+                        DomainMapping.identityMapping(identityUrl)
+                            .build()
+                    )
+                    .addDomainMapping(DomainMapping.eventsMapping(eventsUrl).build())
+                    .build()
+            )
+            .build()
+        MParticle.start(options)
+        val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
         val url =
-            NetworkUtilities.getUrlWithPrefix(NetworkOptionsManager.MP_URL_PREFIX, prefix, true)
+            baseClientImpl.getPodUrl(NetworkOptionsManager.MP_URL_PREFIX, prefix, true)
         assertEquals("${NetworkOptionsManager.MP_URL_PREFIX}.$prefix.mparticle.com", url)
     }
 
     @Test
     fun testUrlPrefixWithoutPodRedirection() {
         val prefix = "eu1"
+        val identityUrl = mRandomUtils.getAlphaString(20)
+        val configUrl = mRandomUtils.getAlphaString(20)
+        val audienceUrl = mRandomUtils.getAlphaString(20)
+        val eventsUrl = mRandomUtils.getAlphaString(20)
+        val options = MParticleOptions.builder(mContext)
+            .credentials(apiKey, "secret")
+            .networkOptions(
+                NetworkOptions.builder()
+                    .addDomainMapping(
+                        DomainMapping.audienceMapping(audienceUrl)
+                            .build()
+                    )
+                    .addDomainMapping(
+                        DomainMapping.configMapping(configUrl)
+                            .build()
+                    )
+                    .addDomainMapping(
+                        DomainMapping.identityMapping(identityUrl)
+                            .build()
+                    )
+                    .addDomainMapping(DomainMapping.eventsMapping(eventsUrl).build())
+                    .build()
+            )
+            .build()
+        MParticle.start(options)
+        val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
         val url =
-            NetworkUtilities.getUrlWithPrefix(NetworkOptionsManager.MP_URL_PREFIX, prefix, false)
+            baseClientImpl.getPodUrl(NetworkOptionsManager.MP_URL_PREFIX, prefix, false)
         assertEquals("${NetworkOptionsManager.MP_URL_PREFIX}.mparticle.com", url)
     }
 
@@ -53,16 +104,42 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
             Pair("st1-k77ivhkbbqf4ce0s3y12zpcthyn1ixfyu", "st1"),
             Pair("us3-w1y2y8yj8q58d5bx9u2dvtxzl4cpa7cuf", "us3")
         )
+        val identityUrl = mRandomUtils.getAlphaString(20)
+        val configUrl = mRandomUtils.getAlphaString(20)
+        val audienceUrl = mRandomUtils.getAlphaString(20)
+        val eventsUrl = mRandomUtils.getAlphaString(20)
+        val options = MParticleOptions.builder(mContext)
+            .credentials(apiKey, "secret")
+            .networkOptions(
+                NetworkOptions.builder()
+                    .addDomainMapping(
+                        DomainMapping.audienceMapping(audienceUrl)
+                            .build()
+                    )
+                    .addDomainMapping(
+                        DomainMapping.configMapping(configUrl)
+                            .build()
+                    )
+                    .addDomainMapping(
+                        DomainMapping.identityMapping(identityUrl)
+                            .build()
+                    )
+                    .addDomainMapping(DomainMapping.eventsMapping(eventsUrl).build())
+                    .build()
+            )
+            .build()
+        MParticle.start(options)
+        val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
         map.forEach { key, value ->
-            val prefix = NetworkUtilities.getPodPrefix(key) ?: ""
+            val prefix = getPodPrefix(key) ?: ""
             assertEquals(value, prefix)
             assertEquals(
                 "${NetworkOptionsManager.MP_URL_PREFIX}.$prefix.mparticle.com",
-                NetworkUtilities.getUrlWithPrefix(NetworkOptionsManager.MP_URL_PREFIX, prefix, true)
+                baseClientImpl.getPodUrl(NetworkOptionsManager.MP_URL_PREFIX, prefix, true)
             )
             assertEquals(
                 "${NetworkOptionsManager.MP_IDENTITY_URL_PREFIX}.$prefix.mparticle.com",
-                NetworkUtilities.getUrlWithPrefix(
+                baseClientImpl.getPodUrl(
                     NetworkOptionsManager.MP_IDENTITY_URL_PREFIX,
                     prefix,
                     true
@@ -71,7 +148,7 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
 
             assertEquals(
                 "${NetworkOptionsManager.MP_URL_PREFIX}.mparticle.com",
-                NetworkUtilities.getUrlWithPrefix(
+                baseClientImpl.getPodUrl(
                     NetworkOptionsManager.MP_URL_PREFIX,
                     prefix,
                     false
@@ -79,7 +156,7 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
             )
             assertEquals(
                 "${NetworkOptionsManager.MP_IDENTITY_URL_PREFIX}.mparticle.com",
-                NetworkUtilities.getUrlWithPrefix(
+                baseClientImpl.getPodUrl(
                     NetworkOptionsManager.MP_IDENTITY_URL_PREFIX,
                     prefix,
                     false
@@ -130,6 +207,14 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
                 defaultUrls[endpoint].toString(),
                 generatedUrl.defaultUrl.toString()
             )
+        }
+    }
+
+    private fun getPodPrefix(apiKey: String): String? {
+        return try {
+            apiKey.split("-".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray().get(0)
+        } catch (e: Exception) {
+            "us1"
         }
     }
 }
