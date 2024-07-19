@@ -1269,18 +1269,18 @@ public class MParticle {
      * @see #logEvent(BaseEvent)
      */
     public enum EventType {
+        Unknown(0), Navigation(1), Location(2), Search(3), Transaction(4), UserContent(5), UserPreference(6), Social(7), Other(8), Media(9);
 
-        Unknown(0), Navigation(1), Location(2), Search(3), Transaction(4), UserContent(5), UserPreference(6),
-        Social(7), Other(8), Media(9), AddToCart(10), RemoveFromCart(11), Checkout(12), CheckoutOption(13),
-        Click(14), ViewDetail(15), Purchase(16), Refund(17), PromotionView(18), PromotionClick(19), AddToWishlist(20),
-        RemoveFromWishlist(21), Impression(22);
         private final int value;
 
         EventType(final int newValue) {
             value = newValue;
         }
 
-        public int getValue() { return value; }
+        public int getValue() {
+            return value;
+        }
+
         @NonNull
         public String toString() {
             return name();

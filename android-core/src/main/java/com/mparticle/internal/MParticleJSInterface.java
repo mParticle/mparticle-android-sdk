@@ -479,32 +479,6 @@ public class MParticleJSInterface {
                 return EventType.Social;
             case 9:
                 return EventType.Media;
-            case 10:
-                return EventType.AddToCart;
-            case 11:
-                return EventType.RemoveFromCart;
-            case 12:
-                return EventType.Checkout;
-            case 13:
-                return EventType.CheckoutOption;
-            case 14:
-                return EventType.Click;
-            case 15:
-                return EventType.ViewDetail;
-            case 16:
-                return EventType.Purchase;
-            case 17:
-                return EventType.Refund;
-            case 18:
-                return EventType.PromotionView;
-            case 19:
-                return EventType.PromotionClick;
-            case 20:
-                return EventType.AddToWishlist;
-            case 21:
-                return EventType.RemoveFromWishlist;
-            case 22:
-                return EventType.Impression;
             default:
                 return EventType.Other;
         }

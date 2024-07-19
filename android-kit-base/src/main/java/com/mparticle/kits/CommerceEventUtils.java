@@ -9,7 +9,11 @@ import com.mparticle.commerce.Impression;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.Promotion;
 import com.mparticle.commerce.TransactionAttributes;
+import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -56,42 +60,7 @@ public final class CommerceEventUtils {
         List<Product> products = event.getProducts();
         if (products != null) {
             for (int i = 0; i < products.size(); i++) {
-                MPEvent.Builder itemEvent;
-                switch (productAction) {
-                    case Product.ADD_TO_CART:
-                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.AddToCart);
-                        break;
-                    case Product.CLICK:
-                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.Click);
-                        break;
-                    case Product.ADD_TO_WISHLIST:
-                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.AddToWishlist);
-                        break;
-                    case Product.CHECKOUT:
-                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.Checkout);
-                        break;
-                    case Product.CHECKOUT_OPTION:
-                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.CheckoutOption);
-                        break;
-                    case Product.DETAIL:
-                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.ViewDetail);
-                        break;
-                    case Product.PURCHASE:
-                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.Purchase);
-                        break;
-                    case Product.REFUND:
-                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.Refund);
-                        break;
-                    case Product.REMOVE_FROM_CART:
-                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.RemoveFromCart);
-                        break;
-                    case Product.REMOVE_FROM_WISHLIST:
-                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.RemoveFromWishlist);
-                        break;
-                    default:
-                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.Transaction);
-                }
-
+                MPEvent.Builder itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.Transaction);
                 Map<String, String> attributes = new HashMap<String, String>();
                 OnAttributeExtracted attributeExtracted = new StringAttributeExtractor(attributes);
                 extractProductFields(products.get(i), attributeExtracted);
@@ -219,41 +188,7 @@ public final class CommerceEventUtils {
         List<Promotion> promotions = event.getPromotions();
         if (promotions != null) {
             for (int i = 0; i < promotions.size(); i++) {
-                MPEvent.Builder itemEvent;
-                switch (promotionAction) {
-                    case Product.ADD_TO_CART:
-                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.AddToCart);
-                        break;
-                    case Product.CLICK:
-                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.Click);
-                        break;
-                    case Product.ADD_TO_WISHLIST:
-                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.AddToWishlist);
-                        break;
-                    case Product.CHECKOUT:
-                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.Checkout);
-                        break;
-                    case Product.CHECKOUT_OPTION:
-                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.CheckoutOption);
-                        break;
-                    case Product.DETAIL:
-                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.ViewDetail);
-                        break;
-                    case Product.PURCHASE:
-                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.Purchase);
-                        break;
-                    case Product.REFUND:
-                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.Refund);
-                        break;
-                    case Product.REMOVE_FROM_CART:
-                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.RemoveFromCart);
-                        break;
-                    case Product.REMOVE_FROM_WISHLIST:
-                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.RemoveFromWishlist);
-                        break;
-                    default:
-                        itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.Transaction);
-                }
+                MPEvent.Builder itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.Transaction);
                 Map<String, String> attributes = new HashMap<String, String>();
                 if (event.getCustomAttributeStrings() != null) {
                     attributes.putAll(event.getCustomAttributeStrings());
@@ -388,6 +323,119 @@ public final class CommerceEventUtils {
             }
         }
         return Constants.EVENT_TYPE_IMPRESSION;
+    }
+
+    public static Map<String, String> convertCommerceEventToMap(CommerceEvent event) {
+
+        Map<String, String> map = new HashMap<>();
+
+        if (event.getProducts()!=null && event.getProducts().size() > 0) {
+            for (Product product : event.getProducts()) {
+                if (product.getName() != null) {
+                    map.put(Constants.ATT_PRODUCT_NAME, product.getName());
+                }
+                if (product.getBrand() != null) {
+                    map.put(Constants.ATT_PRODUCT_BRAND, product.getBrand());
+                }
+                if (product.getCategory() != null) {
+                    map.put(Constants.ATT_PRODUCT_CATEGORY, product.getCategory());
+                }
+                if (product.getVariant() != null) {
+                    map.put(Constants.ATT_PRODUCT_VARIANT, product.getVariant());
+                }
+                if (product.getPosition() != null) {
+                    map.put(Constants.ATT_PRODUCT_POSITION, product.getPosition().toString());
+                }
+                if (product.getUnitPrice() > 0.0) {
+                    map.put(Constants.ATT_PRODUCT_PRICE, Double.toString(product.getUnitPrice()));
+                }
+                if (product.getQuantity() > 0.0) {
+                    map.put(Constants.ATT_PRODUCT_QUANTITY, Double.toString(product.getQuantity()));
+                }
+                if (product.getCouponCode() != null) {
+                    map.put(Constants.ATT_PRODUCT_COUPON_CODE, product.getCouponCode());
+                }
+                if (product.getTotalAmount() > 0.0) {
+                    map.put(Constants.ATT_TOTAL, Double.toString(product.getTotalAmount()));
+                }
+                if (product.getCustomAttributes() != null) {
+                    map.putAll(product.getCustomAttributes());
+                }
+            }
+        }
+        if (event.getCheckoutStep() != null) {
+            map.put(Constants.ATT_ACTION_CHECKOUT_STEP, event.getCheckoutStep().toString());
+        }
+        if (event.getCheckoutOptions() != null) {
+            map.put(Constants.ATT_ACTION_CHECKOUT_OPTIONS, event.getCheckoutOptions());
+        }
+        if (event.getCurrency() != null) {
+            map.put(Constants.ATT_ACTION_CURRENCY_CODE, event.getCurrency());
+        }
+        if (event.getProductListName() != null) {
+            map.put(Constants.ATT_ACTION_PRODUCT_ACTION_LIST, event.getProductListName());
+        }
+        if (event.getProductListSource() != null) {
+            map.put(Constants.ATT_ACTION_PRODUCT_LIST_SOURCE, event.getProductListSource());
+        }
+        TransactionAttributes attributes = event.getTransactionAttributes();
+        if (attributes != null) {
+            if (attributes.getId() != null) {
+                map.put(Constants.ATT_TRANSACTION_ID, attributes.getId());
+            }
+            if (attributes.getAffiliation() != null) {
+                map.put(Constants.ATT_AFFILIATION, attributes.getAffiliation());
+            }
+            if (attributes.getRevenue() != null) {
+                map.put(Constants.ATT_TOTAL, attributes.getRevenue().toString());
+            }
+            if (attributes.getTax() != null) {
+                map.put(Constants.ATT_TAX, attributes.getTax().toString());
+            }
+            if (attributes.getShipping() != null) {
+                map.put(Constants.ATT_SHIPPING, attributes.getShipping().toString());
+            }
+            if (attributes.getCouponCode() != null) {
+                map.put(Constants.ATT_TRANSACTION_COUPON_CODE, attributes.getCouponCode());
+            }
+        }
+        if (event.getPromotions()!=null && event.getPromotions().size() > 0) {
+            for (Promotion promotion : event.getPromotions()) {
+                if (promotion.getId() != null) {
+                    map.put(Constants.ATT_PROMOTION_ID, promotion.getId());
+                }
+                if (promotion.getName() != null) {
+                    map.put(Constants.ATT_PROMOTION_NAME, promotion.getName());
+                }
+                if (promotion.getCreative() != null) {
+                    map.put(Constants.ATT_PROMOTION_CREATIVE, promotion.getCreative());
+                }
+                if (promotion.getPosition() != null) {
+                    map.put(Constants.ATT_PROMOTION_POSITION, promotion.getPosition());
+                }
+            }
+        }
+        if (event.getImpressions()!=null && event.getImpressions().size() > 0) {
+            for (Impression impression : event.getImpressions()) {
+                if (impression.getListName() != null) {
+                    map.put(com.mparticle.internal.Constants.Commerce.IMPRESSION_LOCATION, impression.getListName());
+                }
+                if (impression.getProducts().size() > 0) {
+                    JSONArray productsJson = new JSONArray();
+                    try {
+                        for (Product product : impression.getProducts()) {
+                            productsJson.put(new JSONObject(product.toString()));
+                        }
+                    } catch (Exception e) {
+                        Logger.error("Error while parsing event impression data");
+                    }
+                    if (productsJson.length() > 0) {
+                        map.put(com.mparticle.internal.Constants.Commerce.IMPRESSION_PRODUCT_LIST, productsJson.toString());
+                    }
+                }
+            }
+        }
+        return map;
     }
 
     public interface Constants {
