@@ -110,7 +110,7 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
             url = domainMappingUrl;
         }
         Uri uri;
-        if (endpoint != Endpoint.CONFIG) {
+        if (endpoint != Endpoint.CONFIG & isDefaultUrl) {
             url = getPodUrl(url, mConfigManager.getPodPrefix(), mConfigManager.isDirectUrlRoutingEnabled());
         }
         MPUrl defaultUrl = !isDefaultUrl ? getUrl(endpoint, identityPath, true) : null;
