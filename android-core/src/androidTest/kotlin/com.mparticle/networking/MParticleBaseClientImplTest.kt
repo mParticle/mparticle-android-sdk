@@ -3,6 +3,7 @@ package com.mparticle.networking
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.internal.AccessUtils
+import com.mparticle.internal.ConfigManager
 import com.mparticle.testutils.BaseCleanInstallEachTest
 import junit.framework.TestCase
 import org.junit.Assert
@@ -96,7 +97,20 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
 
     @Test
     fun testAllPrefixes() {
-        //Following are the fake APIs for testing purposes.
+        val mConfigManager = ConfigManager(
+            mContext,
+            MParticle.Environment.Production,
+            "some api key",
+            "some api secret",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        )
+
+        // Following are the fake APIs for testing purposes.
         val map = mapOf<String, String>(
             Pair("us1-1vc4gbp24cdtx6e31s58icnymzy83f1uf", "us1"),
             Pair("us2-v2p8lr3w2g90vtpaumbq21zy05cl50qm3", "us2"),
@@ -133,7 +147,8 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
         MParticle.start(options)
         val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
         map.forEach { key, value ->
-            val prefix = getPodPrefix(key) ?: ""
+            mConfigManager?.setCredentials(key, value)
+            val prefix = mConfigManager?.podPrefix
             assertEquals(value, prefix)
             assertEquals(
                 "${NetworkOptionsManager.MP_URL_PREFIX}.$prefix.mparticle.com",
@@ -209,20 +224,6 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
                 defaultUrls[endpoint].toString(),
                 generatedUrl.defaultUrl.toString()
             )
-        }
-    }
-
-    private fun getPodPrefix(apiKey: String): String? {
-        return try {
-            val apiKeyParts =
-                apiKey.split("-".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-            if (apiKeyParts.size > 1) {
-                apiKeyParts.firstOrNull()
-            } else {
-                "us1"
-            }
-        } catch (e: Exception) {
-            "us1"
         }
     }
 }
