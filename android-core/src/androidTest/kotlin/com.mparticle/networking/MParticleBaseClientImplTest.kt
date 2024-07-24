@@ -96,13 +96,15 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
 
     @Test
     fun testAllPrefixes() {
+        //Following are the fake APIs for testing purposes.
         val map = mapOf<String, String>(
             Pair("us1-1vc4gbp24cdtx6e31s58icnymzy83f1uf", "us1"),
             Pair("us2-v2p8lr3w2g90vtpaumbq21zy05cl50qm3", "us2"),
             Pair("eu1-bkabfno0b8zpv5bwi2zm2mfa1kfml19al", "eu1"),
             Pair("au1-iermuj83dbeoshm0n32f10feotclq6i4a", "au1"),
             Pair("st1-k77ivhkbbqf4ce0s3y12zpcthyn1ixfyu", "st1"),
-            Pair("us3-w1y2y8yj8q58d5bx9u2dvtxzl4cpa7cuf", "us3")
+            Pair("us3-w1y2y8yj8q58d5bx9u2dvtxzl4cpa7cuf", "us3"),
+            Pair("kajsdhasdiuyaiudiashhadjhdasjk", "us1")
         )
         val identityUrl = mRandomUtils.getAlphaString(20)
         val configUrl = mRandomUtils.getAlphaString(20)
@@ -212,7 +214,13 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
 
     private fun getPodPrefix(apiKey: String): String? {
         return try {
-            apiKey.split("-".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray().get(0)
+            val apiKeyParts =
+                apiKey.split("-".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+            if (apiKeyParts.size > 1) {
+                apiKeyParts.firstOrNull()
+            } else {
+                "us1"
+            }
         } catch (e: Exception) {
             "us1"
         }
