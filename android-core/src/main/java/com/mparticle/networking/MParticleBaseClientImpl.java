@@ -142,7 +142,7 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
                         }
                     }
                 }
-                return MPUrl.getUrl(builder.build().toString(), !isDefaultUrl ? generateDefaultURL(builder.build(), defaultDomain) : null);
+                return MPUrl.getUrl(builder.build().toString(), !isDefaultUrl ? generateDefaultURL(builder.build(), defaultDomain,(SERVICE_VERSION_4 + "/"+ mApiKey + "/config")) : null);
             case EVENTS:
                 subdirectory = overridesSubdirectory ? "" : SERVICE_VERSION_2 + "/";
                 uri = new Uri.Builder()
@@ -151,7 +151,7 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
                         .path(subdirectory + mApiKey + "/events")
                         .build();
 
-                return MPUrl.getUrl(uri.toString(), !isDefaultUrl ? generateDefaultURL(uri, defaultDomain) : null);
+                return MPUrl.getUrl(uri.toString(), !isDefaultUrl ? generateDefaultURL(uri, defaultDomain,(SERVICE_VERSION_2 + "/"+ mApiKey + "/events")) : null);
             case ALIAS:
                 subdirectory = overridesSubdirectory ? "" : SERVICE_VERSION_1 + "/identity/";
                 uri = new Uri.Builder()
@@ -159,7 +159,7 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
                         .encodedAuthority(url)
                         .path(subdirectory + mApiKey + "/alias")
                         .build();
-                return MPUrl.getUrl(uri.toString(), !isDefaultUrl ? generateDefaultURL(uri, defaultDomain) : null);
+                return MPUrl.getUrl(uri.toString(), !isDefaultUrl ? generateDefaultURL(uri, defaultDomain,(SERVICE_VERSION_1 + "/identity/" +mApiKey + "/alias")) : null);
             case IDENTITY:
                 subdirectory = overridesSubdirectory ? "" : SERVICE_VERSION_1 + "/";
                 uri = new Uri.Builder()
@@ -167,14 +167,14 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
                         .encodedAuthority(url)
                         .path(subdirectory + identityPath)
                         .build();
-                return MPUrl.getUrl(uri.toString(), !isDefaultUrl ? generateDefaultURL(uri, defaultDomain) : null);
+                return MPUrl.getUrl(uri.toString(), !isDefaultUrl ? generateDefaultURL(uri, defaultDomain,(SERVICE_VERSION_1 + "/"+ identityPath)) : null);
             case AUDIENCE:
                 uri = new Uri.Builder()
                         .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
                         .path(SERVICE_VERSION_2 + "/" + mApiKey + "/audience?mpID=" + mConfigManager.getMpid())
                         .build();
-                return MPUrl.getUrl(uri.toString(), !isDefaultUrl ? generateDefaultURL(uri, defaultDomain) : null);
+                return MPUrl.getUrl(uri.toString(), !isDefaultUrl ? generateDefaultURL(uri, defaultDomain,(SERVICE_VERSION_2 + "/" + mApiKey + "/audience?mpID=" + mConfigManager.getMpid())) : null);
             default:
                 return null;
         }
@@ -185,15 +185,20 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
     *  This method creates a new URI based on the existing URI, but replaces the domain with the default domain.
     *
     *  @param uri The existing URI which includes the domain mapping.
-    *  @param defaultDomain The default domain to be used in the new URI.
+    *  @param defaultDomain The default domain name to be used in the new URI.
+    *  @param path path to be used in the new URI.
     *  @return A new URI with the same path and scheme as the original URI, but with the default domain.
     * */
-    protected MPUrl generateDefaultURL(Uri uri, String defaultDomain) throws MalformedURLException {
+    protected MPUrl generateDefaultURL(Uri uri, String defaultDomain, String path) throws MalformedURLException {
         if (uri != null) {
+          Uri.Builder uriBuilder=Uri.parse(uri.toString()).buildUpon();
             if(defaultDomain!=null && !defaultDomain.isEmpty() ) {
-                uri = Uri.parse(uri.toString()).buildUpon().encodedAuthority(defaultDomain).build();
+                uriBuilder.encodedAuthority(defaultDomain);
             }
-            return MPUrl.getUrl(uri.toString(), null);
+            if(path!=null && !path.isEmpty() ) {
+                uriBuilder.path(path);
+            }
+            return MPUrl.getUrl(uriBuilder.build().toString(), null);
         }
         return null;
     }

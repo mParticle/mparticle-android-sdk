@@ -241,8 +241,8 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
             .encodedAuthority("nativesdks.us1.mparticle.com")
             .path("$subdirectory fooApis/events")
             .build()
-        val result = baseClientImpl.generateDefaultURL(uri, "nativesdks.mparticle.com")
-        assertEquals("https://nativesdks.mparticle.com/v2/%20fooApis/events", result.toString())
+        val result = baseClientImpl.generateDefaultURL(uri, "nativesdks.mparticle.com","v2/us1-bee5781b649a7a40a592c2000bc892d0/events")
+        assertEquals("https://nativesdks.mparticle.com/v2/us1-bee5781b649a7a40a592c2000bc892d0/events", result.toString())
     }
 
     @Test
@@ -259,8 +259,8 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
             .encodedAuthority("nativesdks.us1.mparticle.com")
             .path("$subdirectory fooApis/events")
             .build()
-        val result = baseClientImpl.generateDefaultURL(uri, "")
-        assertEquals("https://nativesdks.us1.mparticle.com/v2/%20fooApis/events", result.toString())
+        val result = baseClientImpl.generateDefaultURL(uri, "","v2/us1-bee5781b649a7a40a592c2000bc892d0/events")
+        assertEquals("https://nativesdks.us1.mparticle.com/v2/us1-bee5781b649a7a40a592c2000bc892d0/events", result.toString())
     }
 
     @Test
@@ -277,8 +277,8 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
             .encodedAuthority("nativesdks.us1.mparticle.com")
             .path("$subdirectory fooApis/events")
             .build()
-        val result = baseClientImpl.generateDefaultURL(uri, null)
-        assertEquals("https://nativesdks.us1.mparticle.com/v2/%20fooApis/events", result.toString())
+        val result = baseClientImpl.generateDefaultURL(uri, null,"v2/us1-bee5781b649a7a40a592c2000bc892d0/events")
+        assertEquals("https://nativesdks.us1.mparticle.com/v2/us1-bee5781b649a7a40a592c2000bc892d0/events", result.toString())
     }
 
     @Test
@@ -289,19 +289,38 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
             .build()
         MParticle.start(options)
         val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
-        val result = baseClientImpl.generateDefaultURL(null, "nativesdks.mparticle.com")
+        val result = baseClientImpl.generateDefaultURL(null, "nativesdks.mparticle.com","v2/us1-bee5781b649a7a40a592c2000bc892d0/events")
         assertEquals(null, result)
     }
 
     @Test
     @Throws(MalformedURLException::class)
-    fun testGenerateDefaultURL_When_defaultDomain_AND_URL_ARE_NULL() {
+    fun testGenerateDefaultURL_When_PATH_IS_NULL() {
         val options = MParticleOptions.builder(mContext)
             .credentials(apiKey, "secret")
             .build()
         MParticle.start(options)
         val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
-        val result = baseClientImpl.generateDefaultURL(null, null)
+        val subdirectory = "/v2/"
+        val uri = Uri.Builder()
+            .scheme(BuildConfig.SCHEME)
+            .encodedAuthority("nativesdks.us1.mparticle.com")
+            .path("$subdirectory fooApis/events")
+            .build()
+        val result = baseClientImpl.generateDefaultURL(uri, "nativesdks.mparticle.com",null)
+        assertEquals("https://nativesdks.mparticle.com/v2/%20fooApis/events", result.toString())
+    }
+
+
+    @Test
+    @Throws(MalformedURLException::class)
+    fun testGenerateDefaultURL_When_defaultDomain_AND_URL_AND_PATH_ARE_NULL() {
+        val options = MParticleOptions.builder(mContext)
+            .credentials(apiKey, "secret")
+            .build()
+        MParticle.start(options)
+        val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
+        val result = baseClientImpl.generateDefaultURL(null, null,null)
         assertEquals(null, result)
     }
 }
