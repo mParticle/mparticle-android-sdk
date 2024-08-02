@@ -1,11 +1,12 @@
 package com.mparticle.networking
 
+import android.net.Uri
+import com.mparticle.BuildConfig
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.internal.AccessUtils
 import com.mparticle.internal.ConfigManager
 import com.mparticle.testutils.BaseCleanInstallEachTest
-import junit.framework.TestCase
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -213,8 +214,7 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
         val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
         for (endpoint in MParticleBaseClientImpl.Endpoint.values()) {
             val generatedUrl = baseClientImpl.getUrl(endpoint, endpoint.name, true)
-            assertEquals(defaultUrls[endpoint].toString(), generatedUrl.toString())
-            TestCase.assertTrue(generatedUrl === generatedUrl.defaultUrl)
+            assertEquals(defaultUrls[endpoint].toString(), generatedUrl.defaultUrl.toString())
         }
         for (endpoint in MParticleBaseClientImpl.Endpoint.values()) {
             val generatedUrl = baseClientImpl.getUrl(endpoint, endpoint.name, false)
@@ -225,5 +225,83 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
                 generatedUrl.defaultUrl.toString()
             )
         }
+    }
+
+    @Test
+    @Throws(MalformedURLException::class)
+    fun testGenerateDefaultURL() {
+        val options = MParticleOptions.builder(mContext)
+            .credentials(apiKey, "secret")
+            .build()
+        MParticle.start(options)
+        val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
+        val subdirectory = "/v2/"
+        val uri = Uri.Builder()
+            .scheme(BuildConfig.SCHEME)
+            .encodedAuthority("nativesdks.us1.mparticle.com")
+            .path("$subdirectory fooApis/events")
+            .build()
+        val result = baseClientImpl.generateDefaultURL(uri, "nativesdks.mparticle.com")
+        assertEquals("https://nativesdks.mparticle.com/v2/%20fooApis/events", result.toString())
+    }
+
+    @Test
+    @Throws(MalformedURLException::class)
+    fun testGenerateDefaultURL_When_defaultDomain_IS_Empty() {
+        val options = MParticleOptions.builder(mContext)
+            .credentials(apiKey, "secret")
+            .build()
+        MParticle.start(options)
+        val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
+        val subdirectory = "/v2/"
+        val uri = Uri.Builder()
+            .scheme(BuildConfig.SCHEME)
+            .encodedAuthority("nativesdks.us1.mparticle.com")
+            .path("$subdirectory fooApis/events")
+            .build()
+        val result = baseClientImpl.generateDefaultURL(uri, "")
+        assertEquals("https://nativesdks.us1.mparticle.com/v2/%20fooApis/events", result.toString())
+    }
+
+    @Test
+    @Throws(MalformedURLException::class)
+    fun testGenerateDefaultURL_When_defaultDomain_IS_NULL() {
+        val options = MParticleOptions.builder(mContext)
+            .credentials(apiKey, "secret")
+            .build()
+        MParticle.start(options)
+        val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
+        val subdirectory = "/v2/"
+        val uri = Uri.Builder()
+            .scheme(BuildConfig.SCHEME)
+            .encodedAuthority("nativesdks.us1.mparticle.com")
+            .path("$subdirectory fooApis/events")
+            .build()
+        val result = baseClientImpl.generateDefaultURL(uri, null)
+        assertEquals("https://nativesdks.us1.mparticle.com/v2/%20fooApis/events", result.toString())
+    }
+
+    @Test
+    @Throws(MalformedURLException::class)
+    fun testGenerateDefaultURL_When_URL_IS_NULL() {
+        val options = MParticleOptions.builder(mContext)
+            .credentials(apiKey, "secret")
+            .build()
+        MParticle.start(options)
+        val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
+        val result = baseClientImpl.generateDefaultURL(null, "nativesdks.mparticle.com")
+        assertEquals(null, result)
+    }
+
+    @Test
+    @Throws(MalformedURLException::class)
+    fun testGenerateDefaultURL_When_defaultDomain_AND_URL_ARE_NULL() {
+        val options = MParticleOptions.builder(mContext)
+            .credentials(apiKey, "secret")
+            .build()
+        MParticle.start(options)
+        val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
+        val result = baseClientImpl.generateDefaultURL(null, null)
+        assertEquals(null, result)
     }
 }
