@@ -113,11 +113,13 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
         }
         Uri uri;
         //  If domain mapping is not specified, need to set the prefix when it is enabled in the configuration. If EndPoint is config, there's no need to set the prefix.
-        if (endpoint != Endpoint.CONFIG && isDefaultUrl) {
-            url = getPodUrl(url, mConfigManager.getPodPrefix(), mConfigManager.isDirectUrlRoutingEnabled());
-        } else {
-            // When domain mapping is specified, generate the default domain. Whether podRedirection is enabled or not, always use the original URL.
-            defaultDomain = getPodUrl(defaultDomain, null, false);
+        if (endpoint != Endpoint.CONFIG) {
+            if (isDefaultUrl) {
+                url = getPodUrl(url, mConfigManager.getPodPrefix(), mConfigManager.isDirectUrlRoutingEnabled());
+            } else {
+                // When domain mapping is specified, generate the default domain. Whether podRedirection is enabled or not, always use the original URL.
+                defaultDomain = getPodUrl(defaultDomain, null, false);
+            }
         }
         String subdirectory;
         String pathPostfix;
