@@ -55,9 +55,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import javax.crypto.Mac;
@@ -73,7 +70,6 @@ public class MPUtility {
     private static String sOpenUDID;
     private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
     private static final String TAG = MPUtility.class.toString();
-    private static AdIdInfo googleAdIdInfo;
 
     public static long getAvailableMemory(Context context) {
         ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
@@ -146,49 +142,23 @@ public class MPUtility {
     }
 
     private static AdIdInfo getGoogleAdIdInfo(Context context) {
-        if (googleAdIdInfo != null) {
-            fetchGoogleAdInfo(context, false);
-            return googleAdIdInfo;
-        } else {
-            fetchGoogleAdInfo(context, true);
-        }
-        return null;
-    }
-
-    private static void fetchGoogleAdInfo(Context context, Boolean wait) {
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        Future<?> future = executorService.submit(() -> {
-            try {
-                Class AdvertisingIdClient = Class
-                        .forName("com.google.android.gms.ads.identifier.AdvertisingIdClient");
-                Method getAdvertisingInfo = AdvertisingIdClient.getMethod("getAdvertisingIdInfo",
-                        Context.class);
-                Object advertisingInfo = getAdvertisingInfo.invoke(null, context);
-                Method isLimitAdTrackingEnabled = advertisingInfo.getClass().getMethod(
-                        "isLimitAdTrackingEnabled");
-                Boolean limitAdTrackingEnabled = (Boolean) isLimitAdTrackingEnabled
-                        .invoke(advertisingInfo);
-
-                Method getId = advertisingInfo.getClass().getMethod("getId");
-                String advertisingId = (String) getId.invoke(advertisingInfo);
-                googleAdIdInfo = new AdIdInfo(advertisingId, Boolean.TRUE.equals(limitAdTrackingEnabled), AdIdInfo.Advertiser.GOOGLE);
-            } catch (Exception e) {
-                Logger.info(TAG, "Could not locate Google Play Ads Identifier library");
-            }
-        });
         try {
-            if (Boolean.TRUE.equals(wait)) {
-                future.get();
-            }
-        } catch (InterruptedException ie) {
-            Logger.info(TAG, "Interrupted while waiting for Google Play Ads Identifier library" + ie);
-            Thread.currentThread().interrupt();
+            Class AdvertisingIdClient = Class
+                    .forName("com.google.android.gms.ads.identifier.AdvertisingIdClient");
+            Method getAdvertisingInfo = AdvertisingIdClient.getMethod("getAdvertisingIdInfo",
+                    Context.class);
+            Object advertisingInfo = getAdvertisingInfo.invoke(null, context);
+            Method isLimitAdTrackingEnabled = advertisingInfo.getClass().getMethod(
+                    "isLimitAdTrackingEnabled");
+            Boolean limitAdTrackingEnabled = (Boolean) isLimitAdTrackingEnabled
+                    .invoke(advertisingInfo);
+            Method getId = advertisingInfo.getClass().getMethod("getId");
+            String advertisingId = (String) getId.invoke(advertisingInfo);
+            return new AdIdInfo(advertisingId, limitAdTrackingEnabled, AdIdInfo.Advertiser.GOOGLE);
         } catch (Exception e) {
             Logger.info(TAG, "Could not locate Google Play Ads Identifier library");
-        } finally {
-            // Shutdown the executor service to release its resources
-            executorService.shutdown();
         }
+        return null;
     }
 
     private static AdIdInfo getAmazonAdIdInfo(Context context) {
