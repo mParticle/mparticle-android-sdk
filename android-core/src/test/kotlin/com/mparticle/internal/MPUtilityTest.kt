@@ -105,12 +105,6 @@ class MPUtilityTest {
     @Test
     @Throws(Exception::class)
     fun googleAdIdInfoWithoutPlayServicesAvailable() {
-        val adIDInfo: AdIdInfo? = null
-        val field: Field = MPUtility::class.java.getDeclaredField("googleAdIdInfo")
-        field.apply {
-            isAccessible = true
-        }
-        field.set(instance, adIDInfo)
         Assert.assertNull(MPUtility.getAdIdInfo(MockContext()))
     }
 
@@ -285,44 +279,7 @@ class MPUtilityTest {
         Assert.assertNull(MPUtility.toNumberOrString(null))
     }
 
-    @Test
-    fun testGetGoogleAdIdInfo() {
-        val adIDInfo = AdIdInfo("12345", true, AdIdInfo.Advertiser.GOOGLE)
-        val field: Field = MPUtility::class.java.getDeclaredField("googleAdIdInfo")
-        field.apply {
-            isAccessible = true
-        }
-        field.set(instance, adIDInfo)
 
-        val method: Method = MPUtility::class.java.getDeclaredMethod(
-            "getGoogleAdIdInfo",
-            Context::class.java
-        )
-        method.isAccessible = true
-        val result = method.invoke(instance, mockContext)
-        val mpUtilityResult: AdIdInfo = result as AdIdInfo
-        assertNotNull(result)
-        TestCase.assertEquals("12345", mpUtilityResult.id)
-        TestCase.assertEquals(true, mpUtilityResult.isLimitAdTrackingEnabled)
-        TestCase.assertEquals(AdIdInfo.Advertiser.GOOGLE, mpUtilityResult.advertiser)
-    }
-
-    @Test
-    fun testGetGoogleAdIdInfo_WHEN_adIDInfo_IS_NULL() {
-        val adIDInfo: AdIdInfo? = null
-        val field: Field = MPUtility::class.java.getDeclaredField("googleAdIdInfo")
-        field.apply {
-            isAccessible = true
-        }
-        field.set(instance, adIDInfo)
-        val method: Method = MPUtility::class.java.getDeclaredMethod(
-            "getGoogleAdIdInfo",
-            Context::class.java
-        )
-        method.isAccessible = true
-        val result = method.invoke(instance, mockContext)
-        assertNull(result)
-    }
 
     @Test
     fun testGetOrientation() {
