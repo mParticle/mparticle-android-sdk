@@ -104,21 +104,20 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
         DomainMapping domainMapping = networkOptions.getDomain(endpoint);
         String url = NetworkOptionsManager.getDefaultUrl(endpoint);
         // Default domain to use for URL generation when domain mapping is specified
-        String defaultDomain = url ;
+        String defaultDomain = url;
         boolean isDefaultUrl = true;
-        if (domainMapping != null && !MPUtility.isEmpty(domainMapping.getUrl())) {
-            String domainMappingUrl = domainMapping.getUrl();
+        String domainMappingUrl = domainMapping != null ? domainMapping.getUrl() : null;
+        if (!MPUtility.isEmpty(domainMappingUrl)) {
             isDefaultUrl = url.equals(domainMappingUrl);
             url = domainMappingUrl;
         }
         Uri uri;
-        if (endpoint != Endpoint.CONFIG) {
-            if (isDefaultUrl) {
-                url = getPodUrl(url, mConfigManager.getPodPrefix(), mConfigManager.isDirectUrlRoutingEnabled());
-            } else {
-                // When domain mapping is specified, generate the default domain. Whether podRedirection is enabled or not, always use the original URL.
-                defaultDomain = getPodUrl(defaultDomain, null, false);
-            }
+        //  If domain mapping is not specified, need to set the prefix when it is enabled in the configuration. If EndPoint is config, there's no need to set the prefix.
+        if (endpoint != Endpoint.CONFIG && isDefaultUrl) {
+            url = getPodUrl(url, mConfigManager.getPodPrefix(), mConfigManager.isDirectUrlRoutingEnabled());
+        } else {
+            // When domain mapping is specified, generate the default domain. Whether podRedirection is enabled or not, always use the original URL.
+            defaultDomain = getPodUrl(defaultDomain, null, false);
         }
         String subdirectory;
         String pathPostfix;
