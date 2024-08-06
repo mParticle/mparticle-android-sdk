@@ -23,10 +23,10 @@ import java.util.Locale;
 
 public class MParticleBaseClientImpl implements MParticleBaseClient {
 
-    private Context mContext;
-    private ConfigManager mConfigManager;
+    private final Context mContext;
+    private final ConfigManager mConfigManager;
     private BaseNetworkConnection mRequestHandler;
-    private SharedPreferences mPreferences;
+    private final SharedPreferences mPreferences;
     String mApiKey;
 
     private static final String SERVICE_VERSION_1 = "/v1";
@@ -122,11 +122,13 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
             }
         }
         String subdirectory;
+        String pathPrefix;
         String pathPostfix;
         boolean overridesSubdirectory = domainMapping.isOverridesSubdirectory();
         switch (endpoint) {
             case CONFIG:
-                subdirectory = overridesSubdirectory ? "" : SERVICE_VERSION_4 + "/";
+                pathPrefix = SERVICE_VERSION_4 + "/";
+                subdirectory = overridesSubdirectory ? "" : pathPrefix;
                 pathPostfix = mApiKey + "/config";
                 Uri.Builder builder = new Uri.Builder()
                         .scheme(BuildConfig.SCHEME)
@@ -145,9 +147,10 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
                         }
                     }
                 }
-                return MPUrl.getUrl(builder.build().toString(), !isDefaultUrl ? generateDefaultURL(builder.build(), defaultDomain, (SERVICE_VERSION_4 + "/" + pathPostfix)) : null);
+                return MPUrl.getUrl(builder.build().toString(), !isDefaultUrl ? generateDefaultURL(builder.build(), defaultDomain, (pathPrefix + pathPostfix)) : null);
             case EVENTS:
-                subdirectory = overridesSubdirectory ? "" : SERVICE_VERSION_2 + "/";
+                pathPrefix = SERVICE_VERSION_2 + "/";
+                subdirectory = overridesSubdirectory ? "" : pathPrefix;
                 pathPostfix = mApiKey + "/events";
                 uri = new Uri.Builder()
                         .scheme(BuildConfig.SCHEME)
@@ -155,25 +158,27 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
                         .path(subdirectory + pathPostfix)
                         .build();
 
-                return MPUrl.getUrl(uri.toString(), !isDefaultUrl ? generateDefaultURL(uri, defaultDomain, (SERVICE_VERSION_2 + "/" + pathPostfix)) : null);
+                return MPUrl.getUrl(uri.toString(), !isDefaultUrl ? generateDefaultURL(uri, defaultDomain, (pathPrefix + pathPostfix)) : null);
             case ALIAS:
-                subdirectory = overridesSubdirectory ? "" : SERVICE_VERSION_1 + "/identity/";
+                pathPrefix = SERVICE_VERSION_1 + "/identity/";
+                subdirectory = overridesSubdirectory ? "" : pathPrefix;
                 pathPostfix = mApiKey + "/alias";
                 uri = new Uri.Builder()
                         .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
                         .path(subdirectory + pathPostfix)
                         .build();
-                return MPUrl.getUrl(uri.toString(), !isDefaultUrl ? generateDefaultURL(uri, defaultDomain, (SERVICE_VERSION_1 + "/identity/" + pathPostfix)) : null);
+                return MPUrl.getUrl(uri.toString(), !isDefaultUrl ? generateDefaultURL(uri, defaultDomain, (pathPrefix + pathPostfix)) : null);
             case IDENTITY:
+                pathPrefix = SERVICE_VERSION_1 + "/";
                 subdirectory = overridesSubdirectory ? "" : SERVICE_VERSION_1 + "/";
                 pathPostfix = identityPath;
                 uri = new Uri.Builder()
                         .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
-                        .path(subdirectory + identityPath)
+                        .path(subdirectory + pathPostfix)
                         .build();
-                return MPUrl.getUrl(uri.toString(), !isDefaultUrl ? generateDefaultURL(uri, defaultDomain, (SERVICE_VERSION_1 + "/" + pathPostfix)) : null);
+                return MPUrl.getUrl(uri.toString(), !isDefaultUrl ? generateDefaultURL(uri, defaultDomain, (pathPrefix + pathPostfix)) : null);
             case AUDIENCE:
                 pathPostfix = SERVICE_VERSION_2 + "/" + mApiKey + "/audience?mpID=" + mConfigManager.getMpid();
                 uri = new Uri.Builder()
