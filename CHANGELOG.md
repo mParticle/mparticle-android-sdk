@@ -1,3 +1,10 @@
+## [5.56.5](https://github.com/mParticle/mparticle-android-sdk/compare/v5.56.4...v5.56.5) (2024-08-06)
+
+
+### Bug Fixes
+
+* Remove Code for Handling Google AdId on a Separate Thread ([#502](https://github.com/mParticle/mparticle-android-sdk/issues/502)) ([17928b9](https://github.com/mParticle/mparticle-android-sdk/commit/17928b99fc1ba69b8aba33a8f497095e8bbab1b3))
+
 ## [5.56.4](https://github.com/mParticle/mparticle-android-sdk/compare/v5.56.3...v5.56.4) (2024-07-31)
 
 
