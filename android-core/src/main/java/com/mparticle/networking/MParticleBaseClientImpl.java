@@ -23,10 +23,10 @@ import java.util.Locale;
 
 public class MParticleBaseClientImpl implements MParticleBaseClient {
 
-    private final Context mContext;
-    private final ConfigManager mConfigManager;
+    private Context mContext;
+    private ConfigManager mConfigManager;
     private BaseNetworkConnection mRequestHandler;
-    private final SharedPreferences mPreferences;
+    private SharedPreferences mPreferences;
     String mApiKey;
 
     private static final String SERVICE_VERSION_1 = "/v1";
