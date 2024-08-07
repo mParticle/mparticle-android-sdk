@@ -311,8 +311,6 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
         )
     }
 
-
-
     @Test
     @Throws(MalformedURLException::class)
     fun testOverrideSubdirectory() {
