@@ -153,7 +153,11 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
             assertEquals(value, prefix)
             assertEquals(
                 "${NetworkOptionsManager.MP_URL_PREFIX}.$prefix.mparticle.com",
-                baseClientImpl.getPodUrl(NetworkOptionsManager.MP_URL_PREFIX, prefix, true)
+                baseClientImpl.getPodUrl(
+                    NetworkOptionsManager.MP_URL_PREFIX,
+                    prefix,
+                    true
+                )
             )
             assertEquals(
                 "${NetworkOptionsManager.MP_IDENTITY_URL_PREFIX}.$prefix.mparticle.com",

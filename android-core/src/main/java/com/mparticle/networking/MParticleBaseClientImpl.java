@@ -215,11 +215,7 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
         return null;
     }
 
-    String getPodUrl(
-            String URLPrefix,
-            String pod,
-            boolean enablePodRedirection
-    ) {
+    String getPodUrl(String URLPrefix, String pod, boolean enablePodRedirection) {
         if (URLPrefix != null) {
             String newUrl = enablePodRedirection ? URLPrefix + "." + pod : URLPrefix;
             return newUrl + ".mparticle.com";
