@@ -311,37 +311,7 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
         )
     }
 
-    /*
-    /*This test case only runs when ConfigManager's 'directUrlRouting' is set to true.
-       Couldn't simulate the config response, so  disabling the following test case.
-       */
-    @Test
-    @Throws(MalformedURLException::class)
-    fun testRandomEndpoint_when_No_Domain_Mapping_And_DirectURL_Routing_true() {
-        val silo="us1"
-        val options = MParticleOptions.builder(mContext)
-            .credentials("$silo-14a65s4d65a4ds", "jasjgasgauysdkabmnx")
-            .build()
-        MParticle.start(options)
-        setClients()
-        Assert.assertEquals(
-            NetworkOptionsManager.MP_URL_PREFIX+".$silo".addSuffix(),
-            mpClient.getUrl(MParticleBaseClientImpl.Endpoint.AUDIENCE).authority
-        )
-        Assert.assertEquals(
-            NetworkOptionsManager.MP_CONFIG_URL,
-            mpClient.getUrl(MParticleBaseClientImpl.Endpoint.CONFIG).authority
-        )
-        Assert.assertEquals(
-            NetworkOptionsManager.MP_URL_PREFIX+".$silo".addSuffix(),
-            mpClient.getUrl(MParticleBaseClientImpl.Endpoint.EVENTS).authority
-        )
-        Assert.assertEquals(
-            NetworkOptionsManager.MP_IDENTITY_URL_PREFIX+".$silo".addSuffix(),
-            mpClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY).authority
-        )
 
-    }*/
 
     @Test
     @Throws(MalformedURLException::class)
