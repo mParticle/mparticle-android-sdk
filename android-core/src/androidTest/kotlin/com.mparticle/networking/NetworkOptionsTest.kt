@@ -188,6 +188,8 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
         )
     }
 
+
+    // For more details, refer to Jira ticket: https://mparticle-eng.atlassian.net/browse/SQDSDKS-6550
     @Test
     @Throws(MalformedURLException::class)
     fun testRandomEndpoint_With_DomainMapping_And_DirectURL_Routing_true() {
