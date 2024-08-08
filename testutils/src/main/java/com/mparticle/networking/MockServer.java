@@ -503,7 +503,7 @@ public class MockServer {
                         entry.getKey().url = getUrl(MParticleBaseClientImpl.Endpoint.CONFIG).getFile();
                         Logger.error("New Url: " + url + " -> " + entry.getKey().url);
                     }
-                    if (url.contains(NetworkOptionsManager.MP_URL) && !url.contains(apiKey)) {
+                    if (url.contains(NetworkOptionsManager.MP_URL_PREFIX) && !url.contains(apiKey)) {
                         entry.getKey().url = getUrl(MParticleBaseClientImpl.Endpoint.EVENTS).getFile();
                     }
                     if (url.contains("/alias") && !url.contains(apiKey)) {
