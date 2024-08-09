@@ -754,7 +754,8 @@ class KitConfigurationTest {
         val jsn = """   
         {
             "name": "John",
-             "age": "30"
+             "age": "30",
+             "18683141": 0
         }
         """.trimIndent()
         val jsonConfiguration = JSONObject(jsn)
@@ -765,7 +766,7 @@ class KitConfigurationTest {
         method.isAccessible = true
 
         val result = method.invoke(kitConfiguration, jsonConfiguration) as SparseBooleanArray
-        Assert.assertEquals(0, result.size())
+        Assert.assertEquals(1, result.size())
     }
 
     @Test
