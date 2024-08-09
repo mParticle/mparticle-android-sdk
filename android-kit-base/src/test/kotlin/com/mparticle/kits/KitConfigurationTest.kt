@@ -1,5 +1,6 @@
 package com.mparticle.kits
 
+import android.util.SparseBooleanArray
 import com.mparticle.MParticle
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.commerce.Impression
@@ -19,6 +20,7 @@ import org.junit.Assert
 import org.junit.BeforeClass
 import org.junit.Test
 import org.mockito.Mockito
+import java.lang.reflect.Method
 
 class KitConfigurationTest {
     private val json =
@@ -674,6 +676,96 @@ class KitConfigurationTest {
                     .build()
             )
         )
+    }
+
+    @Test
+    fun testConvertToSparseArray() {
+        val kitConfiguration = MockKitConfiguration()
+        val jsonData = """   
+        {
+           "7456529": 0,
+          "10887805": 0,
+          "13992010": 0,
+          "15360852": 0,
+          "17455322": 0,
+          "18683141": 0,
+          "23029959": 0,
+          "41851400": 0,
+          "47355425": 0,
+          "54925556": 0,
+          "56409892": 0,
+          "66701264": 0
+         }
+        """.trimIndent()
+        val jsonConfiguration = JSONObject(jsonData)
+        val method: Method = MockKitConfiguration::class.java.getDeclaredMethod("convertToSparseArray", JSONObject::class.java)
+        method.isAccessible = true
+        val result = method.invoke(kitConfiguration, jsonConfiguration) as SparseBooleanArray
+        Assert.assertEquals(12, result.size())
+    }
+
+    @Test
+    fun testConvertToSparseArray_When_JSON_OBJECT_IS_NULL() {
+        val kitConfiguration = MockKitConfiguration()
+        val jsonData = """   
+        {
+          "ec": {
+         }
+         }
+        """
+        val method: Method = MockKitConfiguration::class.java.getDeclaredMethod("convertToSparseArray", JSONObject::class.java)
+        method.isAccessible = true
+        val jsonObject = JSONObject(jsonData)
+        val ecData = jsonObject.get("ec") as JSONObject
+        val result = method.invoke(kitConfiguration, ecData) as SparseBooleanArray
+        Assert.assertEquals(0, result.size())
+    }
+
+    @Test
+    fun testConvertToSparseArray_When_JSON_Data_IS_INVALID() {
+        val kitConfiguration = MockKitConfiguration()
+        val jsn = """   
+        {
+           "7456529": 0,
+          "10887805": 0,
+          "-36!037962": 0,
+          "15360852": 0,
+          "17455322": 0,
+          "18683141": 0,
+          "23029959": 0,
+          "41851400": 0,
+          "47355425": 0,
+          "54925556": 0,
+          "56409892": 0,
+          "66701264": 0
+         }
+        """.trimIndent()
+        val jsonConfiguration = JSONObject(jsn)
+        val method: Method = MockKitConfiguration::class.java.getDeclaredMethod("convertToSparseArray", JSONObject::class.java)
+        method.isAccessible = true
+
+        val result = method.invoke(kitConfiguration, jsonConfiguration) as SparseBooleanArray
+        Assert.assertEquals(11, result.size())
+    }
+
+    @Test
+    fun testConvertToSparseArray_When_JSON_OBJECT_IS_INVALID() {
+        val kitConfiguration = MockKitConfiguration()
+        val jsn = """   
+        {
+            "name": "John",
+             "age": "30"
+        }
+        """.trimIndent()
+        val jsonConfiguration = JSONObject(jsn)
+        val method: Method = MockKitConfiguration::class.java.getDeclaredMethod(
+            "convertToSparseArray",
+            JSONObject::class.java
+        )
+        method.isAccessible = true
+
+        val result = method.invoke(kitConfiguration, jsonConfiguration) as SparseBooleanArray
+        Assert.assertEquals(0, result.size())
     }
 
     @Test
