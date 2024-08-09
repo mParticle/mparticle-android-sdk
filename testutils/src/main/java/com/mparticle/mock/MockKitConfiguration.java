@@ -44,12 +44,17 @@ public class MockKitConfiguration extends KitConfiguration {
     @Override
     protected SparseBooleanArray convertToSparseArray(JSONObject json) {
         SparseBooleanArray map = new MockSparseBooleanArray();
+        if (json == null) {
+            return map;
+        }
         for (Iterator<String> iterator = json.keys(); iterator.hasNext(); ) {
             try {
                 String key = iterator.next();
                 map.put(Integer.parseInt(key), json.getInt(key) == 1);
             } catch (JSONException jse) {
                 Logger.error("Issue while parsing kit configuration: " + jse.getMessage());
+            } catch (Exception e) {
+                Logger.error("Exception while parsing kit configuration: " + e.getMessage());
             }
         }
         return map;
