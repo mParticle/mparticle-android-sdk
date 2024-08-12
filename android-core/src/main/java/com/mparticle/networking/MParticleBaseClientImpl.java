@@ -108,7 +108,7 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
         String defaultDomain = url;
         boolean isDefaultDomain = true;
 
-        //Check if domain mapping is specified and update the URL based on domain mapping
+        // Check if domain mapping is specified and update the URL based on domain mapping
         String domainMappingUrl = domainMapping != null ? domainMapping.getUrl() : null;
         if (!MPUtility.isEmpty(domainMappingUrl)) {
             isDefaultDomain = url.equals(domainMappingUrl);

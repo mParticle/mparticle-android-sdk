@@ -188,7 +188,7 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
         )
     }
 
-    //  https://go.mparticle.com/work/SQDSDKS-6550
+    // https://go.mparticle.com/work/SQDSDKS-6613
     @Test
     @Throws(MalformedURLException::class)
     fun testRandomEndpoint_With_DomainMapping_And_DirectURL_Routing_true() {

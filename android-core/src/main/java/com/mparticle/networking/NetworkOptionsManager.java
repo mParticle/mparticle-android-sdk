@@ -69,6 +69,7 @@ public class NetworkOptionsManager {
         }
     };
 
+    // https://go.mparticle.com/work/SQDSDKS-6621
     static String getDefaultUrl(Endpoint type) {
         switch (type) {
             case CONFIG:
