@@ -1,3 +1,15 @@
+## [5.57.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.56.5...v5.57.0) (2024-08-13)
+
+
+### Features
+
+* Support direct URL routing ([#499](https://github.com/mParticle/mparticle-android-sdk/issues/499)) ([d7aa30c](https://github.com/mParticle/mparticle-android-sdk/commit/d7aa30c8c5ed53b72ac4d9914ef07915f4c374e4))
+
+
+### Bug Fixes
+
+* Crash in KitConfiguration due to NumberFormatException ([#503](https://github.com/mParticle/mparticle-android-sdk/issues/503)) ([e1a23e7](https://github.com/mParticle/mparticle-android-sdk/commit/e1a23e786f22068da004084e363986cd2e377981))
+
 ## [5.56.5](https://github.com/mParticle/mparticle-android-sdk/compare/v5.56.4...v5.56.5) (2024-08-06)
 
 
