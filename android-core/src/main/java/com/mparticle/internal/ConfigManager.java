@@ -51,6 +51,7 @@ public class ConfigManager {
     static final String KEY_OPT_OUT = "oo";
     public static final String KEY_UNHANDLED_EXCEPTIONS = "cue";
     public static final String KEY_PUSH_MESSAGES = "pmk";
+    public static final String KEY_DIRECT_URL_ROUTING = "dur";
     public static final String KEY_EMBEDDED_KITS = "eks";
     static final String KEY_UPLOAD_INTERVAL = "uitl";
     static final String KEY_SESSION_TIMEOUT = "stl";
@@ -83,6 +84,7 @@ public class ConfigManager {
     static SharedPreferences sPreferences;
 
     private static JSONArray sPushKeys;
+    private boolean directUrlRouting = false;
     private UserStorage mUserStorage;
     private String mLogUnhandledExceptions = VALUE_APP_DEFINED;
 
@@ -404,6 +406,11 @@ public class ConfigManager {
         if (responseJSON.has(KEY_PUSH_MESSAGES) && newConfig) {
             sPushKeys = responseJSON.getJSONArray(KEY_PUSH_MESSAGES);
             editor.putString(KEY_PUSH_MESSAGES, sPushKeys.toString());
+        }
+
+        if (responseJSON.has(KEY_DIRECT_URL_ROUTING)) {
+            directUrlRouting = responseJSON.optBoolean(KEY_DIRECT_URL_ROUTING);
+            editor.putBoolean(KEY_DIRECT_URL_ROUTING, directUrlRouting);
         }
 
         mRampValue = responseJSON.optInt(KEY_RAMP, -1);
@@ -1274,6 +1281,29 @@ public class ConfigManager {
     public ConsentState getConsentState(long mpid) {
         String serializedConsent = getUserStorage(mpid).getSerializedConsentState();
         return ConsentState.withConsentState(serializedConsent).build();
+    }
+
+    public boolean isDirectUrlRoutingEnabled() {
+        return directUrlRouting;
+    }
+
+
+    /* This function is called to get the specific pod/silo prefix when the `directUrlRouting` is `true`. mParticle API keys are prefixed with the
+     silo and a hyphen (ex. "us1-", "us2-", "eu1-").  us1 was the first silo,and before other silos existed, there were no prefixes and all apiKeys
+     were us1. As such, if we split on a '-' and the resulting array length is 1, then it is an older APIkey that should route to us1.
+     When splitKey.length is greater than 1, then splitKey[0] will be us1, us2, eu1, au1, or st1, etc as new silos are added */
+    public String getPodPrefix() {
+        String prefix = "us1";
+        try {
+            String[] prefixFromApi = getApiKey().split("-");
+            if (prefixFromApi.length > 1) {
+                prefix = prefixFromApi[0];
+            }
+        } catch (Exception e) {
+            prefix = "us1";
+            Logger.error("Error while getting pod prefix for direct URL routing : " + e);
+        }
+        return prefix;
     }
 
     public void setConsentState(ConsentState state, long mpid) {

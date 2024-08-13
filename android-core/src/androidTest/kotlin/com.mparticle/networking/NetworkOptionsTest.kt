@@ -36,9 +36,10 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
     @Throws(MalformedURLException::class, InterruptedException::class)
     fun testDefaultEndpoints() {
         MParticle.start(MParticleOptions.builder(mContext).credentials(apiKey, "s").build())
+        val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
         setClients()
         Assert.assertEquals(
-            NetworkOptionsManager.MP_URL,
+            baseClientImpl.getPodUrl(NetworkOptionsManager.MP_URL_PREFIX, "", false),
             mpClient.getUrl(MParticleBaseClientImpl.Endpoint.AUDIENCE).authority
         )
         Assert.assertEquals(
@@ -46,11 +47,15 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
             mpClient.getUrl(MParticleBaseClientImpl.Endpoint.CONFIG).authority
         )
         Assert.assertEquals(
-            NetworkOptionsManager.MP_URL,
+            baseClientImpl.getPodUrl(NetworkOptionsManager.MP_URL_PREFIX, "", false),
             mpClient.getUrl(MParticleBaseClientImpl.Endpoint.EVENTS).authority
         )
         Assert.assertEquals(
-            NetworkOptionsManager.MP_IDENTITY_URL,
+            baseClientImpl.getPodUrl(
+                NetworkOptionsManager.MP_IDENTITY_URL_PREFIX,
+                "",
+                false
+            ),
             mpClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY).authority
         )
         var randIdentityPath = mRandomUtils.getAlphaString(10)
@@ -71,7 +76,7 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
             identityClient.getUrl(MParticleBaseClientImpl.Endpoint.EVENTS).authority
         )
         Assert.assertEquals(
-            NetworkOptionsManager.MP_IDENTITY_URL,
+            NetworkOptionsManager.MP_IDENTITY_URL_PREFIX.addSuffix(),
             identityClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY).authority
         )
         randIdentityPath = mRandomUtils.getAlphaString(10)
@@ -83,6 +88,8 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
             ).path
         )
     }
+
+    private fun String.addSuffix(suffix: String = ".mparticle.com") = "$this$suffix"
 
     @Test
     @Throws(MalformedURLException::class)
@@ -178,6 +185,130 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
                 MParticleBaseClientImpl.Endpoint.IDENTITY,
                 MParticleBaseClientImpl.Endpoint.IDENTITY.name
             ).path
+        )
+    }
+
+    // https://go.mparticle.com/work/SQDSDKS-6613
+    @Test
+    @Throws(MalformedURLException::class)
+    fun testRandomEndpoint_With_DomainMapping_And_DirectURL_Routing_true() {
+        val identityUrl = mRandomUtils.getAlphaString(20)
+        val configUrl = mRandomUtils.getAlphaString(20)
+        val audienceUrl = mRandomUtils.getAlphaString(20)
+        val eventsUrl = mRandomUtils.getAlphaString(20)
+        val options = MParticleOptions.builder(mContext)
+            .credentials(apiKey, "secret")
+            .networkOptions(
+                NetworkOptions.builder()
+                    .addDomainMapping(
+                        DomainMapping.audienceMapping(audienceUrl)
+                            .build()
+                    )
+                    .addDomainMapping(
+                        DomainMapping.configMapping(configUrl)
+                            .build()
+                    )
+                    .addDomainMapping(
+                        DomainMapping.identityMapping(identityUrl)
+                            .build()
+                    )
+                    .addDomainMapping(DomainMapping.eventsMapping(eventsUrl).build())
+                    .build()
+            )
+            .build()
+        MParticle.start(options)
+        setClients()
+        Assert.assertEquals(
+            audienceUrl,
+            mpClient.getUrl(MParticleBaseClientImpl.Endpoint.AUDIENCE).authority
+        )
+        Assert.assertEquals(
+            configUrl,
+            mpClient.getUrl(MParticleBaseClientImpl.Endpoint.CONFIG).authority
+        )
+        Assert.assertEquals(
+            eventsUrl,
+            mpClient.getUrl(MParticleBaseClientImpl.Endpoint.EVENTS).authority
+        )
+        Assert.assertEquals(
+            identityUrl,
+            mpClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY).authority
+        )
+        var randIdentityPath = mRandomUtils.getAlphaString(10)
+        Assert.assertEquals(
+            "/v1/$randIdentityPath",
+            mpClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY, randIdentityPath).path
+        )
+        Assert.assertEquals(
+            audienceUrl,
+            identityClient.getUrl(MParticleBaseClientImpl.Endpoint.AUDIENCE).authority
+        )
+        Assert.assertEquals(
+            configUrl,
+            identityClient.getUrl(MParticleBaseClientImpl.Endpoint.CONFIG).authority
+        )
+        Assert.assertEquals(
+            eventsUrl,
+            identityClient.getUrl(MParticleBaseClientImpl.Endpoint.EVENTS).authority
+        )
+        Assert.assertEquals(
+            identityUrl,
+            identityClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY).authority
+        )
+        randIdentityPath = mRandomUtils.getAlphaString(10)
+        Assert.assertEquals(
+            "/v1/$randIdentityPath",
+            identityClient.getUrl(
+                MParticleBaseClientImpl.Endpoint.IDENTITY,
+                randIdentityPath
+            ).path
+        )
+
+        // test the that the Path is still the default one (make sure the overrideSubdirectory is not kicking in when it shouldn't)
+        Assert.assertEquals(
+            defaultUrls[MParticleBaseClientImpl.Endpoint.AUDIENCE]?.path,
+            mpClient.getUrl(MParticleBaseClientImpl.Endpoint.AUDIENCE).path
+        )
+        Assert.assertEquals(
+            defaultUrls[MParticleBaseClientImpl.Endpoint.CONFIG]?.path,
+            mpClient.getUrl(MParticleBaseClientImpl.Endpoint.CONFIG).path
+        )
+        Assert.assertEquals(
+            defaultUrls[MParticleBaseClientImpl.Endpoint.EVENTS]?.path,
+            mpClient.getUrl(MParticleBaseClientImpl.Endpoint.EVENTS).path
+        )
+        Assert.assertEquals(
+            defaultUrls[MParticleBaseClientImpl.Endpoint.IDENTITY]?.path,
+            mpClient.getUrl(
+                MParticleBaseClientImpl.Endpoint.IDENTITY,
+                MParticleBaseClientImpl.Endpoint.IDENTITY.name
+            ).path
+        )
+    }
+
+    @Test
+    @Throws(MalformedURLException::class)
+    fun testRandomEndpoint_when_No_Domain_Mapping_And_DirectURL_Routing_false() {
+        val options = MParticleOptions.builder(mContext)
+            .credentials("us1-14a65s4d65a4ds", "jasjgasgauysdkabmnx")
+            .build()
+        MParticle.start(options)
+        setClients()
+        Assert.assertEquals(
+            NetworkOptionsManager.MP_URL_PREFIX.addSuffix(),
+            mpClient.getUrl(MParticleBaseClientImpl.Endpoint.AUDIENCE).authority
+        )
+        Assert.assertEquals(
+            NetworkOptionsManager.MP_CONFIG_URL,
+            mpClient.getUrl(MParticleBaseClientImpl.Endpoint.CONFIG).authority
+        )
+        Assert.assertEquals(
+            NetworkOptionsManager.MP_URL_PREFIX.addSuffix(),
+            mpClient.getUrl(MParticleBaseClientImpl.Endpoint.EVENTS).authority
+        )
+        Assert.assertEquals(
+            NetworkOptionsManager.MP_IDENTITY_URL_PREFIX.addSuffix(),
+            mpClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY).authority
         )
     }
 
