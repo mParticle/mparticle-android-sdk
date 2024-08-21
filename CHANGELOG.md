@@ -1,3 +1,15 @@
+## [5.58.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.57.0...v5.58.0) (2024-08-21)
+
+
+### Features
+
+* Certificate pinning update ([#504](https://github.com/mParticle/mparticle-android-sdk/issues/504)) ([85b38cd](https://github.com/mParticle/mparticle-android-sdk/commit/85b38cd4703a92fc5ea692eab6660361f793dfed))
+
+
+### Updates & Maintenance
+
+* Update submodules ([2c359eb](https://github.com/mParticle/mparticle-android-sdk/commit/2c359eb7bcf5ed53a6cc3db0a6e39e9a2a0330c5))
+
 ## [5.57.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.56.5...v5.57.0) (2024-08-13)
 
 
