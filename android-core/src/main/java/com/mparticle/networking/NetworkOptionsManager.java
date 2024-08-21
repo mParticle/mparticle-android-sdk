@@ -6,6 +6,7 @@ import com.mparticle.BuildConfig;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPUtility;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -61,13 +62,15 @@ public class NetworkOptionsManager {
         return defaultCertificates;
     }
 
-    private static List<Certificate> defaultCertificates = new LinkedList<Certificate>() {
+    private static final List<Certificate> defaultCertificates = Collections.unmodifiableList(new LinkedList<Certificate>() {
         {
-            add(Certificate.with("intca", Constants.GODADDY_INTERMEDIATE_CRT));
-            add(Certificate.with("rootca", Constants.GODADDY_ROOT_CRT));
-            add(Certificate.with("fiddlerroot", Constants.FIDDLER_ROOT_CRT));
+            add(Certificate.with("godaddy_root_g2", Constants.GODADDY_ROOT_G2_CRT));
+            add(Certificate.with("godaddy_root_class2", Constants.GODADDY_CLASS_2_ROOT_CRT));
+            add(Certificate.with("lets_encrypt_root_x1", Constants.LETS_ENCRYPTS_ROOT_X1_CRT));
+            add(Certificate.with("lets_encrypt_root_x2_self", Constants.LETS_ENCRYPTS_ROOT_X2_SELF_SIGN_CRT));
+            add(Certificate.with("lets_encrypt_root_x2_cross", Constants.LETS_ENCRYPTS_ROOT_X2_CROSS_SIGN_CRT));
         }
-    };
+    });
 
     // https://go.mparticle.com/work/SQDSDKS-6621
     static String getDefaultUrl(Endpoint type) {

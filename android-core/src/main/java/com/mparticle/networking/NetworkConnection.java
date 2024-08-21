@@ -17,6 +17,9 @@ import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
 import javax.net.ssl.SSLContext;
@@ -49,9 +52,9 @@ public class NetworkConnection extends BaseNetworkConnection {
             //Gingerbread seems to dislike pinning w/ godaddy. Being that GB is near-dead anyway, just disable pinning for it.
             if (isPostGingerBread() && connection.isHttps() && !shouldDisablePinning()) {
                 try {
-                    connection.setSSLSocketFactory(getSocketFactory(endpoint));
+                    connection.setSSLSocketFactory(getSocketFactory());
                 } catch (Exception e) {
-
+                    Logger.error("Error occurred while setting SSL socket : " + e);
                 }
             }
 
@@ -91,7 +94,7 @@ public class NetworkConnection extends BaseNetworkConnection {
     /**
      * Custom socket factory used for certificate pinning.
      */
-    protected SSLSocketFactory getSocketFactory(MParticleBaseClientImpl.Endpoint endpoint) throws Exception {
+    protected SSLSocketFactory getSocketFactory() throws Exception {
         if (mSocketFactory == null) {
             String keyStoreType = KeyStore.getDefaultType();
             KeyStore keyStore = KeyStore.getInstance(keyStoreType);
@@ -99,8 +102,12 @@ public class NetworkConnection extends BaseNetworkConnection {
 
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             NetworkOptions networkOptions = mConfigManager.getNetworkOptions();
-            DomainMapping domainMapping = networkOptions.getDomain(endpoint);
-            for (com.mparticle.networking.Certificate certificate : domainMapping != null ? domainMapping.getCertificates() : NetworkOptionsManager.getDefaultCertificates()) {
+            List<DomainMapping> domainMappingList = networkOptions.getDomainMappings();
+            Set<com.mparticle.networking.Certificate> domainMappingSet = new HashSet<>(NetworkOptionsManager.getDefaultCertificates());
+            for (DomainMapping domainMapping : domainMappingList) {
+                domainMappingSet.addAll(domainMapping.getCertificates());
+            }
+            for (com.mparticle.networking.Certificate certificate : domainMappingSet) {
                 keyStore.setCertificateEntry(certificate.getAlias(), generateCertificate(cf, certificate.getCertificate()));
             }
             String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
@@ -121,6 +128,10 @@ public class NetworkConnection extends BaseNetworkConnection {
         InputStream inputStream = new ByteArrayInputStream(encodedCertificate.getBytes());
         try {
             certificate = certificateFactory.generateCertificate(inputStream);
+        } catch (CertificateException e) {
+            Logger.error("There is an issue with the SSL certificate: " + e.getMessage());
+        } catch (Exception e) {
+            Logger.error("An error occurred while processing the SSL certificate: " + e.getMessage());
         } finally {
             inputStream.close();
         }

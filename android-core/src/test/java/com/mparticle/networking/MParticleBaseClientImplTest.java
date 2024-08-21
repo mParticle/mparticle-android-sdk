@@ -32,7 +32,7 @@ public class MParticleBaseClientImplTest {
         final boolean[] getSocketFactoryCalled = {false};
         final BaseNetworkConnection client = new NetworkConnection(mockConfigManager, new MockSharedPreferences()) {
             @Override
-            protected SSLSocketFactory getSocketFactory(MParticleBaseClientImpl.Endpoint endpoint) throws Exception {
+            protected SSLSocketFactory getSocketFactory() throws Exception {
                 getSocketFactoryCalled[0] = true;
                 assertFalse(writeCalled[0]);
                 return Mockito.mock(SSLSocketFactory.class);
