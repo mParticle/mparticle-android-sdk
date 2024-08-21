@@ -29,12 +29,16 @@ class NetworkOptionsManagerTest {
         certificate in refinedNetworkOptions.domainMappings[MParticleBaseClientImpl.Endpoint.IDENTITY]!!
             .certificates
         ) {
-            if (certificate.alias == "intca") {
-                Assert.assertEquals(certificate.certificate, Constants.GODADDY_INTERMEDIATE_CRT)
-            } else if (certificate.alias == "rootca") {
-                Assert.assertEquals(certificate.certificate, Constants.GODADDY_ROOT_CRT)
-            } else if (certificate.alias == "fiddlerroot") {
-                Assert.assertEquals(certificate.certificate, Constants.FIDDLER_ROOT_CRT)
+            if (certificate.alias == "godaddy_root_g2") {
+                Assert.assertEquals(certificate.certificate, Constants.GODADDY_ROOT_G2_CRT)
+            } else if (certificate.alias == "godaddy_root_class2") {
+                Assert.assertEquals(certificate.certificate, Constants.GODADDY_CLASS_2_ROOT_CRT)
+            } else if (certificate.alias == "lets_encrypt_root_x1") {
+                Assert.assertEquals(certificate.certificate, Constants.LETS_ENCRYPTS_ROOT_X1_CRT)
+            } else if (certificate.alias == "lets_encrypt_root_x2_self") {
+                Assert.assertEquals(certificate.certificate, Constants.LETS_ENCRYPTS_ROOT_X2_SELF_SIGN_CRT)
+            } else if (certificate.alias == "lets_encrypt_root_x2_cross") {
+                Assert.assertEquals(certificate.certificate, Constants.LETS_ENCRYPTS_ROOT_X2_CROSS_SIGN_CRT)
             } else {
                 Assert.fail("unknown certificate")
             }
