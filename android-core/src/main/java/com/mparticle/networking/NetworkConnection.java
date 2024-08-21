@@ -129,9 +129,9 @@ public class NetworkConnection extends BaseNetworkConnection {
         try {
             certificate = certificateFactory.generateCertificate(inputStream);
         } catch (CertificateException e) {
-            Logger.error("There is an issue with the security certificate: " + e.getMessage());
+            Logger.error("There is an issue with the SSL certificate: " + e.getMessage());
         } catch (Exception e) {
-            Logger.error("An error occurred while processing the security certificate: " + e.getMessage());
+            Logger.error("An error occurred while processing the SSL certificate: " + e.getMessage());
         } finally {
             inputStream.close();
         }
