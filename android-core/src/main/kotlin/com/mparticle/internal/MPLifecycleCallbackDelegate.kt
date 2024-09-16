@@ -9,7 +9,7 @@ import android.os.Bundle
 /**
  * This class is used by the AppStateManager to determine when the app is visible or in the background.
  *
- * Separated into it's own class to avoid annoying logcat messages on pre-ICS devices.
+ * Separated into its own class to avoid annoying logcat messages on pre-ICS devices.
  */
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 internal class MPLifecycleCallbackDelegate(private val mStateManager: AppStateManager) :
