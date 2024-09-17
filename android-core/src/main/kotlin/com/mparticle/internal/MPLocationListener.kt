@@ -5,9 +5,9 @@ import android.location.LocationListener
 import android.os.Bundle
 import com.mparticle.MParticle
 
-class MPLocationListener(private val mParticle: MParticle?) : LocationListener {
+class MPLocationListener(private val mParticle: MParticle) : LocationListener {
     override fun onLocationChanged(location: Location) {
-        mParticle?.setLocation(location)
+        mParticle.setLocation(location)
     }
 
     override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
