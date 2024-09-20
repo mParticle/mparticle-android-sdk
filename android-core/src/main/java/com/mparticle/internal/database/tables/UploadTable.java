@@ -18,6 +18,7 @@ public class UploadTable {
          */
         String REQUEST_TYPE = "cfuuid";
         String SESSION_ID = "session_id";
+        String UPLOAD_SETTINGS = "upload_settings";
     }
 
 
@@ -30,4 +31,7 @@ public class UploadTable {
                     UploadTableColumns.REQUEST_TYPE + " TEXT, " +
                     UploadTableColumns.SESSION_ID + " TEXT" +
                     ");";
+
+    static final String UPLOAD_ADD_UPLOAD_SETTINGS_COLUMN = "ALTER TABLE " + UploadTableColumns.TABLE_NAME +
+            " ADD COLUMN " + UploadTableColumns.UPLOAD_SETTINGS + " TEXT";
 }

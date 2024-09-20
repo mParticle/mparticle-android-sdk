@@ -10,6 +10,7 @@ import android.os.Message;
 import androidx.annotation.Nullable;
 
 import com.mparticle.MParticle;
+import com.mparticle.database.UploadSettings;
 import com.mparticle.identity.AliasRequest;
 import com.mparticle.identity.AliasResponse;
 import com.mparticle.internal.database.services.MParticleDBManager;
@@ -131,7 +132,7 @@ public class UploadHandler extends BaseHandler {
                     if (isNetworkConnected) {
                         if (uploadInterval > 0 || msg.arg1 == 1) {
                             while (mParticleDBManager.hasMessagesForUpload()) {
-                                prepareMessageUploads();
+                                prepareMessageUploads(mConfigManager.getUploadSettings());
                             }
                             upload();
                         }
@@ -159,7 +160,7 @@ public class UploadHandler extends BaseHandler {
      * - persist all of the resulting upload batch objects
      * - mark the messages as having been uploaded.
      */
-    protected void prepareMessageUploads() throws Exception {
+    protected void prepareMessageUploads(UploadSettings uploadSettings) throws Exception {
         String currentSessionId = mAppStateManager.getSession().mSessionID;
         long remainingHeap = MPUtility.getRemainingHeapInBytes();
         if (remainingHeap < Constants.LIMIT_MAX_UPLOAD_SIZE) {
