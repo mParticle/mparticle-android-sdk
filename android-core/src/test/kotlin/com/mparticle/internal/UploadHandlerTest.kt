@@ -1,7 +1,6 @@
 package com.mparticle.internal
 
 import android.content.Context
-import android.database.Cursor
 import android.os.Message
 import com.mparticle.MParticle
 import com.mparticle.MockMParticle
@@ -12,7 +11,6 @@ import com.mparticle.internal.MParticleApiClientImpl.MPRampException
 import com.mparticle.internal.MParticleApiClientImpl.MPThrottleException
 import com.mparticle.internal.database.MPDatabase
 import com.mparticle.internal.database.services.MParticleDBManager
-import com.mparticle.internal.database.services.MParticleDBManager.ReadyUpload
 import com.mparticle.internal.messages.MPAliasMessage
 import com.mparticle.mock.MockContext
 import com.mparticle.testutils.AndroidUtils
