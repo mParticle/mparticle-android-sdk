@@ -275,6 +275,7 @@ public class MParticleDBManager {
                 }
 
                 UploadService.insertUpload(db, batch, configManager.getApiKey());
+                cleanSessions(currentSessionId);
             }
         }
     }
