@@ -338,7 +338,6 @@ public class Constants {
         String ERROR_SESSION_COUNT = "sn";
         // uploading
         String MESSAGES = "msgs";
-        String HISTORY = "sh";
         String REPORTING = "fsr";
         String URL = "u";
         String METHOD = "m";

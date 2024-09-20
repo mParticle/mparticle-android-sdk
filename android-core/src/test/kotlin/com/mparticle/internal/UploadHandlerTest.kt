@@ -144,43 +144,6 @@ class UploadHandlerTest {
     }
 
     @Test
-    @Throws(Exception::class)
-    fun testDontUploadSessionHistory() {
-        handler.handleMessage(Message())
-        Mockito.`when`(mConfigManager.includeSessionHistory).thenReturn(false)
-        val mockCursor = Mockito.mock(
-            Cursor::class.java
-        )
-        Mockito.`when`(mockCursor.moveToNext()).thenReturn(true, false)
-        Mockito.`when`(mockCursor.getInt(Mockito.anyInt())).thenReturn(123)
-        Mockito.`when`(mockCursor.getString(Mockito.anyInt())).thenReturn("cool message batch!")
-        handler.upload(true)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testUploadSessionHistory() {
-        handler.handleMessage(Message())
-        val mockCursor = Mockito.mock(
-            Cursor::class.java
-        )
-        Mockito.`when`(handler.mParticleDBManager.readyUploads)
-            .thenReturn(object : ArrayList<ReadyUpload?>() {
-                init {
-                    add(ReadyUpload(123, false, "a message batch"))
-                }
-            })
-        val mockApiClient = Mockito.mock(
-            MParticleApiClient::class.java
-        )
-        handler.setApiClient(mockApiClient)
-        Mockito.`when`(mConfigManager.includeSessionHistory).thenReturn(true)
-        Mockito.`when`(mockCursor.moveToNext()).thenReturn(true, false)
-        handler.upload(true)
-        Mockito.verify(mockApiClient).sendMessageBatch(Mockito.eq("a message batch"))
-    }
-
-    @Test
     @Throws(
         IOException::class,
         MPThrottleException::class,
@@ -443,13 +406,12 @@ class UploadHandlerTest {
         var messageDelay: Long? = null
         var uploadCalledCount = 0
         var prepareMessageUploadsCalledCount = 0
-        override fun upload(history: Boolean): Boolean {
+        override fun upload() {
             uploadCalledCount++
-            return false
         }
 
         @Throws(Exception::class)
-        override fun prepareMessageUploads(history: Boolean) {
+        override fun prepareMessageUploads() {
             prepareMessageUploadsCalledCount++
         }
 

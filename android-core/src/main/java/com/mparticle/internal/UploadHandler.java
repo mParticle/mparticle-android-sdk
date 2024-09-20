@@ -40,12 +40,6 @@ public class UploadHandler extends BaseHandler {
      */
     public static final int UPLOAD_MESSAGES = 1;
     /**
-     * Message that triggers much of the same logic as above, but is specifically for session-history. Typically, the SDK will upload all messages
-     * in a given batch that are ready for upload. But, some service-providers such as Flurry need to be sent all of the session information at once
-     * With *history*, the SDK will package all of the messages that occur in a particular session.
-     */
-    public static final int UPLOAD_HISTORY = 3;
-    /**
      * Trigger a configuration update out of band from a typical upload.
      */
     public static final int UPDATE_CONFIG = 4;
@@ -137,23 +131,13 @@ public class UploadHandler extends BaseHandler {
                     if (isNetworkConnected) {
                         if (uploadInterval > 0 || msg.arg1 == 1) {
                             while (mParticleDBManager.hasMessagesForUpload()) {
-                                prepareMessageUploads(false);
+                                prepareMessageUploads();
                             }
-                            boolean needsHistory = upload(false);
-                            if (needsHistory) {
-                                this.sendEmpty(UPLOAD_HISTORY);
-                            }
+                            upload();
                         }
                     }
                     if (mAppStateManager.getSession().isActive() && uploadInterval > 0 && msg.arg1 == 0) {
                         this.sendEmptyDelayed(UPLOAD_MESSAGES, uploadInterval);
-                    }
-                    break;
-                case UPLOAD_HISTORY:
-                    removeMessage(UPLOAD_HISTORY);
-                    prepareMessageUploads(true);
-                    if (isNetworkConnected) {
-                        upload(true);
                     }
                     break;
             }
@@ -175,7 +159,7 @@ public class UploadHandler extends BaseHandler {
      * - persist all of the resulting upload batch objects
      * - mark the messages as having been uploaded.
      */
-    protected void prepareMessageUploads(boolean history) throws Exception {
+    protected void prepareMessageUploads() throws Exception {
         String currentSessionId = mAppStateManager.getSession().mSessionID;
         long remainingHeap = MPUtility.getRemainingHeapInBytes();
         if (remainingHeap < Constants.LIMIT_MAX_UPLOAD_SIZE) {
@@ -186,18 +170,9 @@ public class UploadHandler extends BaseHandler {
         if (instance == null) {
             return;
         }
-        final boolean sessionHistoryEnabled = instance.Internal().getConfigManager().getIncludeSessionHistory();
         try {
             mParticleDBManager.cleanupMessages();
-            if (history && !sessionHistoryEnabled) {
-                mParticleDBManager.deleteMessagesAndSessions(currentSessionId);
-                return;
-            }
-            if (history) {
-                mParticleDBManager.createSessionHistoryUploadMessage(mConfigManager, mMessageManager.getDeviceAttributes(), currentSessionId);
-            } else {
-                mParticleDBManager.createMessagesForUploadMessage(mConfigManager, mMessageManager.getDeviceAttributes(), currentSessionId, sessionHistoryEnabled);
-            }
+            mParticleDBManager.createMessagesForUploadMessage(mConfigManager, mMessageManager.getDeviceAttributes(), currentSessionId);
         } catch (Exception e) {
             Logger.verbose("Error preparing batch upload in mParticle DB: " + e.getMessage());
         }
@@ -208,34 +183,20 @@ public class UploadHandler extends BaseHandler {
     /**
      * This method is responsible for looking for batches that are ready to be uploaded, and uploading them.
      */
-    protected boolean upload(boolean history) {
+    protected void upload() {
         mParticleDBManager.cleanupUploadMessages();
-        boolean processingSessionEnd = false;
         try {
             List<MParticleDBManager.ReadyUpload> readyUploads = mParticleDBManager.getReadyUploads();
             if (readyUploads.size() > 0) {
                 mApiClient.fetchConfig();
             }
-            final boolean includeSessionHistory = mConfigManager.getIncludeSessionHistory();
             for (MParticleDBManager.ReadyUpload readyUpload : readyUploads) {
-                //This case actually shouldn't be needed anymore except for upgrade scenarios.
-                //As of version 4.9.0, upload batches for session history shouldn't even be created.
-                if (history && !includeSessionHistory) {
-                    mParticleDBManager.deleteUpload(readyUpload.getId());
+                String message = readyUpload.getMessage();
+                InternalListenerManager.getListener().onCompositeObjects(readyUpload, message);
+                if (readyUpload.isAliasRequest()) {
+                    uploadAliasRequest(readyUpload.getId(), message);
                 } else {
-                    if (!history) {
-                        // If message is the MessageType.SESSION_END, then remember so the session history can be triggered.
-                        if (!processingSessionEnd && readyUpload.getMessage().contains(containsClause)) {
-                            processingSessionEnd = true;
-                        }
-                    }
-                    String message = readyUpload.getMessage();
-                    InternalListenerManager.getListener().onCompositeObjects(readyUpload, message);
-                    if (readyUpload.isAliasRequest()) {
-                        uploadAliasRequest(readyUpload.getId(), message);
-                    } else {
-                        uploadMessage(readyUpload.getId(), message);
-                    }
+                    uploadMessage(readyUpload.getId(), message);
                 }
             }
         } catch (MParticleApiClientImpl.MPThrottleException e) {
@@ -246,7 +207,6 @@ public class UploadHandler extends BaseHandler {
         } catch (Exception e) {
             Logger.error(e, "Error processing batch uploads in mParticle DB.");
         }
-        return processingSessionEnd;
     }
 
     void uploadMessage(int id, String message) throws IOException, MParticleApiClientImpl.MPThrottleException {
