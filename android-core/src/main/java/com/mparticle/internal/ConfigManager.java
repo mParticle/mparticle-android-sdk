@@ -72,6 +72,7 @@ public class ConfigManager {
     static final String DATAPLAN_BLOCK_USER_IDENTITIES = "id";
     public static final String KIT_CONFIG_KEY = "kit_config";
     static final String MIGRATED_TO_KIT_SHARED_PREFS = "is_mig_kit_sp";
+    private static final String IDENTITY_CACHING_ENABLED = "identityCachingEnabled";
 
     private static final int DEVMODE_UPLOAD_INTERVAL_MILLISECONDS = 10 * 1000;
     private static final int DEFAULT_MAX_ALIAS_WINDOW_DAYS = 90;
@@ -91,6 +92,7 @@ public class ConfigManager {
     private JSONObject mProviderPersistence;
     private int mRampValue = -1;
     private int mUserBucket = -1;
+    private boolean identityCachingEnabled = false;
 
     private int mSessionTimeoutInterval = -1;
     private int mUploadInterval = -1;
@@ -419,6 +421,9 @@ public class ConfigManager {
             mSendOoEvents = false;
         }
 
+        //TODO Read from identityCachingEnabled feature flag
+        editor.putBoolean(IDENTITY_CACHING_ENABLED, identityCachingEnabled);
+
         if (responseJSON.has(ProviderPersistence.KEY_PERSISTENCE)) {
             setProviderPersistence(new ProviderPersistence(responseJSON, mContext));
         } else {
@@ -518,6 +523,10 @@ public class ConfigManager {
 
     public long getInfluenceOpenTimeoutMillis() {
         return mInfluenceOpenTimeout;
+    }
+
+    public boolean isIdentityCachingEnabled() {
+        return identityCachingEnabled;
     }
 
     private void applyConfig() {
@@ -1242,6 +1251,21 @@ public class ConfigManager {
 
     public int getIdentityConnectionTimeout() {
         return sPreferences.getInt(Constants.PrefKeys.IDENTITY_CONNECTION_TIMEOUT, DEFAULT_CONNECTION_TIMEOUT_SECONDS) * 1000;
+    }
+
+    public long getLastIdentityTypeCall(String call) {
+        return sPreferences.getLong(call, 0L);
+    }
+
+    public void resetIdentityTypeCall() {
+        SharedPreferences.Editor editor = sPreferences.edit();
+        editor.putLong(IdentityApi.LOGIN_CALL, -1);
+        editor.putLong(IdentityApi.IDENTIFY_CALL, -1);
+        editor.apply();
+    }
+
+    public void setLastIdentityTypeCall(String call) {
+        sPreferences.edit().putLong(call, System.currentTimeMillis()).apply();
     }
 
     public int getConnectionTimeout() {
