@@ -19,16 +19,6 @@ class BatchSessionInfoTest : BaseCleanStartedEachTest() {
         return builder.logLevel(MParticle.LogLevel.INFO)
     }
 
-    override fun beforeSetup() {
-        // the condition described in the test only happened when `sessionHistory` is false,
-        // so set config to return `sessionHistory` == false
-        mServer.setupConfigResponse(
-            JSONObject()
-                .put(ConfigManager.KEY_INCLUDE_SESSION_HISTORY, false)
-                .toString()
-        )
-    }
-
     /**
      * This test is in response to a bug where, when many messages (> 1 batch worth)
      * are uploaded with for a Session other than the current Session, batches after the first
