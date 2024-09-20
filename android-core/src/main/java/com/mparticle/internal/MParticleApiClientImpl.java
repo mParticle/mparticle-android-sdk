@@ -343,12 +343,6 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
                 for (int i = 0; i < messages.length(); i++) {
                     Logger.verbose("Message type: " + ((JSONObject) messages.get(i)).getString(Constants.MessageKey.TYPE));
                 }
-            } else if (messageJson.has(Constants.MessageKey.HISTORY)) {
-                JSONArray messages = messageJson.getJSONArray(Constants.MessageKey.HISTORY);
-                Logger.verbose("Uploading session history batch...");
-                for (int i = 0; i < messages.length(); i++) {
-                    Logger.verbose("Message type: " + ((JSONObject) messages.get(i)).getString(Constants.MessageKey.TYPE) + " SID: " + ((JSONObject) messages.get(i)).optString(Constants.MessageKey.SESSION_ID));
-                }
             }
         } catch (JSONException jse) {
 

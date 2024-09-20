@@ -136,35 +136,12 @@ public class MParticleDBManager {
      * Prepare Messages for Upload.
      */
 
-    public void createSessionHistoryUploadMessage(ConfigManager configManager, DeviceAttributes deviceAttributes, String currentSessionId) throws JSONException {
-        MPDatabase db = getDatabase();
-        db.beginTransaction();
-        try {
-            List<MessageService.ReadyMessage> readyMessages = MessageService.getSessionHistory(db, currentSessionId);
-            if (readyMessages.size() <= 0) {
-                db.setTransactionSuccessful();
-                return;
-            }
-
-            HashMap<BatchId, MessageBatch> uploadMessagesByBatchId = getUploadMessageByBatchIdMap(readyMessages, db, configManager, true);
-
-            List<JSONObject> deviceInfos = SessionService.processSessions(db, uploadMessagesByBatchId);
-            for (JSONObject deviceInfo : deviceInfos) {
-                deviceAttributes.updateDeviceInfo(mContext, deviceInfo);
-            }
-            createUploads(uploadMessagesByBatchId, db, deviceAttributes, configManager, currentSessionId, true);
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-        }
-    }
-
     public boolean hasMessagesForUpload() {
         MPDatabase db = getDatabase();
         return MessageService.hasMessagesForUpload(db);
     }
 
-    public void createMessagesForUploadMessage(ConfigManager configManager, DeviceAttributes deviceAttributes, String currentSessionId, boolean sessionHistoryEnabled) throws JSONException {
+    public void createMessagesForUploadMessage(ConfigManager configManager, DeviceAttributes deviceAttributes, String currentSessionId) throws JSONException {
         MPDatabase db = getDatabase();
         db.beginTransaction();
         try {
@@ -173,7 +150,7 @@ public class MParticleDBManager {
                 db.setTransactionSuccessful();
                 return;
             }
-            HashMap<BatchId, MessageBatch> uploadMessagesByBatchId = getUploadMessageByBatchIdMap(readyMessages, db, configManager, false, sessionHistoryEnabled);
+            HashMap<BatchId, MessageBatch> uploadMessagesByBatchId = getUploadMessageByBatchIdMap(readyMessages, db, configManager, false);
 
             List<ReportingService.ReportingMessage> reportingMessages = ReportingService.getReportingMessagesForUpload(db);
             for (ReportingService.ReportingMessage reportingMessage : reportingMessages) {
@@ -209,7 +186,7 @@ public class MParticleDBManager {
             for (JSONObject deviceInfo : deviceInfos) {
                 deviceAttributes.updateDeviceInfo(mContext, deviceInfo);
             }
-            createUploads(uploadMessagesByBatchId, db, deviceAttributes, configManager, currentSessionId, false, sessionHistoryEnabled);
+            createUploads(uploadMessagesByBatchId, db, deviceAttributes, configManager, currentSessionId);
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
@@ -228,11 +205,11 @@ public class MParticleDBManager {
         }
     }
 
-    private HashMap<BatchId, MessageBatch> getUploadMessageByBatchIdMap(List<MessageService.ReadyMessage> readyMessages, MPDatabase db, ConfigManager configManager, boolean isHistory) throws JSONException {
-        return getUploadMessageByBatchIdMap(readyMessages, db, configManager, isHistory, false);
+    private HashMap<BatchId, MessageBatch> getUploadMessageByBatchIdMap(List<MessageService.ReadyMessage> readyMessages, MPDatabase db, ConfigManager configManager) throws JSONException {
+        return getUploadMessageByBatchIdMap(readyMessages, db, configManager, false);
     }
 
-    private HashMap<BatchId, MessageBatch> getUploadMessageByBatchIdMap(List<MessageService.ReadyMessage> readyMessages, MPDatabase db, ConfigManager configManager, boolean isHistory, boolean markAsUpload) throws JSONException {
+    private HashMap<BatchId, MessageBatch> getUploadMessageByBatchIdMap(List<MessageService.ReadyMessage> readyMessages, MPDatabase db, ConfigManager configManager, boolean markAsUpload) throws JSONException {
         HashMap<BatchId, MessageBatch> uploadMessagesByBatchId = new HashMap<BatchId, MessageBatch>();
         int highestUploadedMessageId = -1;
         for (MessageService.ReadyMessage readyMessage : readyMessages) {
@@ -247,11 +224,7 @@ public class MParticleDBManager {
             if (messageLength + uploadMessage.getMessageLengthBytes() > Constants.LIMIT_MAX_UPLOAD_SIZE) {
                 break;
             }
-            if (isHistory) {
-                uploadMessage.addSessionHistoryMessage(msgObject);
-            } else {
-                uploadMessage.addMessage(msgObject);
-            }
+            uploadMessage.addMessage(msgObject);
             InternalListenerManager.getListener().onCompositeObjects(readyMessage, uploadMessage);
             uploadMessage.incrementMessageLengthBytes(messageLength);
             highestUploadedMessageId = readyMessage.getMessageId();
@@ -266,11 +239,7 @@ public class MParticleDBManager {
         return uploadMessagesByBatchId;
     }
 
-    private void createUploads(Map<BatchId, MessageBatch> uploadMessagesByBatchId, MPDatabase db, DeviceAttributes deviceAttributes, ConfigManager configManager, String currentSessionId, boolean historyMessages) {
-        createUploads(uploadMessagesByBatchId, db, deviceAttributes, configManager, currentSessionId, historyMessages, false);
-    }
-
-    private void createUploads(Map<BatchId, MessageBatch> uploadMessagesByBatchId, MPDatabase db, DeviceAttributes deviceAttributes, ConfigManager configManager, String currentSessionId, boolean historyMessages, boolean sessionHistoryEnabled) {
+    private void createUploads(Map<BatchId, MessageBatch> uploadMessagesByBatchId, MPDatabase db, DeviceAttributes deviceAttributes, ConfigManager configManager, String currentSessionId) {
         for (Map.Entry<BatchId, MessageBatch> messageBatchEntry : uploadMessagesByBatchId.entrySet()) {
             BatchId batchId = messageBatchEntry.getKey();
             MessageBatch uploadMessage = messageBatchEntry.getValue();
@@ -284,12 +253,7 @@ public class MParticleDBManager {
                 if (uploadMessage.getDeviceInfo() == null || sessionId.equals(currentSessionId)) {
                     uploadMessage.setDeviceInfo(deviceAttributes.getDeviceInfo(mContext));
                 }
-                JSONArray messages;
-                if (historyMessages) {
-                    messages = uploadMessage.getSessionHistoryMessages();
-                } else {
-                    messages = uploadMessage.getMessages();
-                }
+                JSONArray messages = uploadMessage.getMessages();
                 JSONArray identities = findIdentityState(configManager, messages, batchId.getMpid());
                 uploadMessage.setIdentities(identities);
                 JSONObject userAttributes = findUserAttributeState(messages, batchId.getMpid());
@@ -311,12 +275,7 @@ public class MParticleDBManager {
                 }
 
                 UploadService.insertUpload(db, batch, configManager.getApiKey());
-                //if this was to process session history, or
-                //if we're never going to process history AND
-                //this batch contains a previous session, then delete the session.
-                if (!historyMessages && !sessionHistoryEnabled) {
-                    cleanSessions(currentSessionId);
-                }
+                cleanSessions(currentSessionId);
             }
         }
     }
