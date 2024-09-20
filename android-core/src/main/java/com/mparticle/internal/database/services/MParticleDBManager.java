@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
+import com.mparticle.database.UploadSettings;
 import com.mparticle.identity.UserAttributeListenerWrapper;
 import com.mparticle.internal.BatchId;
 import com.mparticle.internal.ConfigManager;
@@ -24,6 +25,7 @@ import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MessageBatch;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.MessageManagerCallbacks;
+import com.mparticle.internal.UploadHandler;
 import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.MPDatabaseImpl;
 import com.mparticle.internal.listeners.InternalListenerManager;
@@ -141,7 +143,7 @@ public class MParticleDBManager {
         return MessageService.hasMessagesForUpload(db);
     }
 
-    public void createMessagesForUploadMessage(ConfigManager configManager, DeviceAttributes deviceAttributes, String currentSessionId) throws JSONException {
+    public void createMessagesForUploadMessage(ConfigManager configManager, DeviceAttributes deviceAttributes, String currentSessionId, UploadSettings uploadSettings) throws JSONException {
         MPDatabase db = getDatabase();
         db.beginTransaction();
         try {
@@ -186,7 +188,7 @@ public class MParticleDBManager {
             for (JSONObject deviceInfo : deviceInfos) {
                 deviceAttributes.updateDeviceInfo(mContext, deviceInfo);
             }
-            createUploads(uploadMessagesByBatchId, db, deviceAttributes, configManager, currentSessionId);
+            createUploads(uploadMessagesByBatchId, db, deviceAttributes, configManager, currentSessionId, uploadSettings);
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
@@ -239,7 +241,7 @@ public class MParticleDBManager {
         return uploadMessagesByBatchId;
     }
 
-    private void createUploads(Map<BatchId, MessageBatch> uploadMessagesByBatchId, MPDatabase db, DeviceAttributes deviceAttributes, ConfigManager configManager, String currentSessionId) {
+    private void createUploads(Map<BatchId, MessageBatch> uploadMessagesByBatchId, MPDatabase db, DeviceAttributes deviceAttributes, ConfigManager configManager, String currentSessionId, UploadSettings uploadSettings) {
         for (Map.Entry<BatchId, MessageBatch> messageBatchEntry : uploadMessagesByBatchId.entrySet()) {
             BatchId batchId = messageBatchEntry.getKey();
             MessageBatch uploadMessage = messageBatchEntry.getValue();
@@ -274,7 +276,7 @@ public class MParticleDBManager {
                     }
                 }
 
-                UploadService.insertUpload(db, batch, configManager.getApiKey());
+                UploadService.insertUpload(db, batch, uploadSettings);
                 cleanSessions(currentSessionId);
             }
         }

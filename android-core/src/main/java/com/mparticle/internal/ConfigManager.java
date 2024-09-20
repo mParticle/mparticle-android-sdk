@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.Network;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
@@ -15,6 +16,7 @@ import com.mparticle.ExceptionHandler;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.consent.ConsentState;
+import com.mparticle.database.UploadSettings;
 import com.mparticle.identity.IdentityApi;
 import com.mparticle.internal.messages.BaseMPMessage;
 import com.mparticle.networking.NetworkOptions;
@@ -564,6 +566,13 @@ public class ConfigManager {
 
     public void setLogUnhandledExceptions(boolean log) {
         sPreferences.edit().putBoolean(Constants.PrefKeys.REPORT_UNCAUGHT_EXCEPTIONS, log).apply();
+    }
+
+    public UploadSettings getUploadSettings() {
+//        NetworkOptions networkOptions = getNetworkOptions();
+//        networkOptions.
+        // TODO: BEN - finish this
+        return new UploadSettings(getApiKey(), getApiSecret(),"", false, "", false, false, new int[]{});
     }
 
     public String getApiKey() {
