@@ -3,6 +3,7 @@ package com.mparticle.internal.database.services;
 import android.content.ContentValues;
 import android.database.Cursor;
 
+import com.mparticle.database.UploadSettings;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.tables.UploadTable;
@@ -25,12 +26,13 @@ public class UploadService extends UploadTable {
      *
      * @param message
      */
-    public static void insertUpload(MPDatabase database, JSONObject message, String apiKey) {
+    public static void insertUpload(MPDatabase database, JSONObject message, UploadSettings uploadSettings) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(UploadTableColumns.API_KEY, apiKey);
+        contentValues.put(UploadTableColumns.API_KEY, uploadSettings.getApiKey());
         contentValues.put(UploadTableColumns.CREATED_AT, message.optLong(Constants.MessageKey.TIMESTAMP, System.currentTimeMillis()));
         contentValues.put(UploadTableColumns.MESSAGE, message.toString());
         contentValues.put(UploadTableColumns.REQUEST_TYPE, UploadTable.UPLOAD_REQUEST);
+        contentValues.put(UploadTableColumns.UPLOAD_SETTINGS, uploadSettings.serialize());
         InternalListenerManager.getListener().onCompositeObjects(message, contentValues);
         database.insert(UploadTableColumns.TABLE_NAME, null, contentValues);
     }

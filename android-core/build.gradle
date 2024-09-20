@@ -1,3 +1,11 @@
+//plugins {
+////    id 'org.jetbrains.kotlin.plugin.serialization' version '2.0.20'
+////    id 'org.jetbrains.kotlin.plugin.serialization' version '1.8.0'
+//    id 'com.android.library'
+//    id 'kotlin-android'
+//}
+//apply from: '../scripts/maven.gradle'
+
 ext {
     kitDescription = 'Core mParticle SDK supporting only server-side integrations.'
 }
@@ -137,6 +145,9 @@ task generateSourcesJar(type: Jar) {
 }
 
 dependencies {
+//    compileOnly 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1'
+//    compileOnly 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0'
+
     //noinspection GradleCompatible
     compileOnly 'com.google.firebase:firebase-messaging:[10.2.1, )'
     compileOnly 'com.android.installreferrer:installreferrer:[1.0, )'
