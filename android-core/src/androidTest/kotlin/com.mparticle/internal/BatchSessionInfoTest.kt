@@ -6,7 +6,6 @@ import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.networking.Matcher
 import com.mparticle.testutils.BaseCleanStartedEachTest
-import org.json.JSONObject
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
