@@ -58,7 +58,6 @@ public class ConfigManager {
     public static final String VALUE_APP_DEFINED = "appdefined";
     public static final String VALUE_CUE_CATCH = "forcecatch";
     public static final String PREFERENCES_FILE = "mp_preferences";
-    public static final String KEY_INCLUDE_SESSION_HISTORY = "inhd";
     private static final String KEY_DEVICE_PERFORMANCE_METRICS_DISABLED = "dpmd";
     public static final String WORKSPACE_TOKEN = "wst";
     static final String ALIAS_MAX_WINDOW = "alias_max_window";
@@ -98,7 +97,6 @@ public class ConfigManager {
     private long mInfluenceOpenTimeout = 3600 * 1000;
     private JSONArray mTriggerMessageMatches, mTriggerMessageHashes = null;
     private ExceptionHandler mExHandler;
-    private boolean mIncludeSessionHistory = false;
     private JSONObject mCurrentCookies;
     private String mDataplanId;
     private Integer mDataplanVersion;
@@ -453,7 +451,6 @@ public class ConfigManager {
             mInfluenceOpenTimeout = 30 * 60 * 1000;
         }
 
-        mIncludeSessionHistory = responseJSON.optBoolean(KEY_INCLUDE_SESSION_HISTORY, true);
         if (responseJSON.has(KEY_DEVICE_PERFORMANCE_METRICS_DISABLED)) {
             MessageManager.devicePerformanceMetricsDisabled = responseJSON.optBoolean(KEY_DEVICE_PERFORMANCE_METRICS_DISABLED, false);
         }
@@ -502,10 +499,6 @@ public class ConfigManager {
             builder.deleteCharAt(builder.length() - 1);
             return builder.toString();
         }
-    }
-
-    public boolean getIncludeSessionHistory() {
-        return mIncludeSessionHistory;
     }
 
     /**

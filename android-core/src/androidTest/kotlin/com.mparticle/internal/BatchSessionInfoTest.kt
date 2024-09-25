@@ -6,7 +6,6 @@ import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.networking.Matcher
 import com.mparticle.testutils.BaseCleanStartedEachTest
-import org.json.JSONObject
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -17,16 +16,6 @@ class BatchSessionInfoTest : BaseCleanStartedEachTest() {
 
     override fun transformMParticleOptions(builder: MParticleOptions.Builder): MParticleOptions.Builder {
         return builder.logLevel(MParticle.LogLevel.INFO)
-    }
-
-    override fun beforeSetup() {
-        // the condition described in the test only happened when `sessionHistory` is false,
-        // so set config to return `sessionHistory` == false
-        mServer.setupConfigResponse(
-            JSONObject()
-                .put(ConfigManager.KEY_INCLUDE_SESSION_HISTORY, false)
-                .toString()
-        )
     }
 
     /**

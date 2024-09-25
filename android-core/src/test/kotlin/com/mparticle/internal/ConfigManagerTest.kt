@@ -461,28 +461,6 @@ class ConfigManagerTest {
 
     @Test
     @Throws(Exception::class)
-    fun testDefaultIncludeSessionHistory() {
-        Assert.assertTrue(manager.includeSessionHistory)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testIncludeSessionHistoryUpdateFromServer() {
-        Assert.assertTrue(manager.includeSessionHistory)
-        val config = JSONObject()
-        config.put("inhd", false)
-        manager.updateConfig(config)
-        Assert.assertFalse(manager.includeSessionHistory)
-        config.put("inhd", true)
-        manager.updateConfig(config)
-        Assert.assertTrue(manager.includeSessionHistory)
-        config.put("inhd", "false")
-        manager.updateConfig(config)
-        Assert.assertFalse(manager.includeSessionHistory)
-    }
-
-    @Test
-    @Throws(Exception::class)
     fun testSaveUserIdentityJson() {
         manager.saveUserIdentityJson(JSONArray())
         Assert.assertEquals(0, manager.userIdentityJson.length().toLong())

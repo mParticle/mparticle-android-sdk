@@ -100,16 +100,6 @@ public class MessageBatch extends JSONObject {
         }
     }
 
-    public void addSessionHistoryMessage(JSONObject message) {
-        try {
-            if (!has(Constants.MessageKey.HISTORY)) {
-                put(Constants.MessageKey.HISTORY, new JSONArray());
-            }
-            getJSONArray(Constants.MessageKey.HISTORY).put(message);
-        } catch (JSONException ignored) {
-        }
-    }
-
     public void addMessage(JSONObject message) {
         try {
             if (!has(Constants.MessageKey.MESSAGES)) {
@@ -155,14 +145,6 @@ public class MessageBatch extends JSONObject {
     public JSONObject getDeviceInfo() {
         try {
             return getJSONObject(Constants.MessageKey.DEVICE_INFO);
-        } catch (JSONException e) {
-            return null;
-        }
-    }
-
-    public JSONArray getSessionHistoryMessages() {
-        try {
-            return getJSONArray(Constants.MessageKey.HISTORY);
         } catch (JSONException e) {
             return null;
         }
