@@ -12,6 +12,7 @@ import com.mparticle.internal.BatchId;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MessageBatch;
 import com.mparticle.internal.database.MPDatabase;
+import com.mparticle.internal.database.tables.BreadcrumbTable;
 import com.mparticle.internal.database.tables.SessionTable;
 import com.mparticle.internal.messages.BaseMPMessage;
 
@@ -179,5 +180,9 @@ public class SessionService extends SessionTable {
             messageBatches.add(batchEntry.getValue());
         }
         return uploadMessagesBySessionId;
+    }
+
+    public static void deleteAll(MPDatabase db) {
+        db.delete(SessionTableColumns.TABLE_NAME, null, null);
     }
 }

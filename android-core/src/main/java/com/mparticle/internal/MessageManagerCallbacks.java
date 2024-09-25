@@ -1,9 +1,12 @@
 package com.mparticle.internal;
 
+import com.mparticle.internal.database.UploadSettings;
 import com.mparticle.internal.messages.BaseMPMessage;
 
 public interface MessageManagerCallbacks {
     String getApiKey() throws MParticleApiClientImpl.MPNoConfigException;
+
+    UploadSettings getUploadSettings() throws MParticleApiClientImpl.MPNoConfigException;
 
     void delayedStart();
 

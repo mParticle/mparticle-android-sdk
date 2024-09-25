@@ -40,7 +40,6 @@ class MParticleApiClientImplTest {
             MockContext()
         )
         client.mDeviceRampNumber = 50
-        MParticleApiClientImpl.setSupportedKitString("")
         val mockUrl = PowerMockito.mock(MPUrl::class.java)
         mockConnection = PowerMockito.mock(MPConnection::class.java)
         Mockito.`when`(mockUrl.openConnection()).thenReturn(mockConnection)

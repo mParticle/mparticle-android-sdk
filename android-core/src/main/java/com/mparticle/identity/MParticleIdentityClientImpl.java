@@ -297,7 +297,7 @@ public class MParticleIdentityClientImpl extends MParticleBaseClientImpl impleme
     }
 
     MPUrl getUrl(String endpoint) throws MalformedURLException {
-        return getUrl(Endpoint.IDENTITY, endpoint);
+        return getUrl(Endpoint.IDENTITY, endpoint, null);
     }
 
     private String getApiKey() {
