@@ -164,5 +164,6 @@ public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
 
     private void upgradeUploadsTable(SQLiteDatabase db) {
         db.execSQL(UploadTable.UPLOAD_ADD_UPLOAD_SETTINGS_COLUMN);
+        // TODO: BEN - insert current upload settings
     }
 }

@@ -10,9 +10,9 @@ import android.os.Message;
 import androidx.annotation.Nullable;
 
 import com.mparticle.MParticle;
-import com.mparticle.database.UploadSettings;
 import com.mparticle.identity.AliasRequest;
 import com.mparticle.identity.AliasResponse;
+import com.mparticle.internal.database.UploadSettings;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.listeners.InternalListenerManager;
 import com.mparticle.internal.messages.MPAliasMessage;
@@ -160,7 +160,7 @@ public class UploadHandler extends BaseHandler {
      * - persist all of the resulting upload batch objects
      * - mark the messages as having been uploaded.
      */
-    protected void prepareMessageUploads(UploadSettings uploadSettings) throws Exception {
+    public void prepareMessageUploads(UploadSettings uploadSettings) throws Exception {
         String currentSessionId = mAppStateManager.getSession().mSessionID;
         long remainingHeap = MPUtility.getRemainingHeapInBytes();
         if (remainingHeap < Constants.LIMIT_MAX_UPLOAD_SIZE) {
@@ -173,7 +173,7 @@ public class UploadHandler extends BaseHandler {
         }
         try {
             mParticleDBManager.cleanupMessages();
-            mParticleDBManager.createMessagesForUploadMessage(mConfigManager, mMessageManager.getDeviceAttributes(), currentSessionId);
+            mParticleDBManager.createMessagesForUploadMessage(mConfigManager, mMessageManager.getDeviceAttributes(), currentSessionId, uploadSettings);
         } catch (Exception e) {
             Logger.verbose("Error preparing batch upload in mParticle DB: " + e.getMessage());
         }
@@ -195,9 +195,9 @@ public class UploadHandler extends BaseHandler {
                 String message = readyUpload.getMessage();
                 InternalListenerManager.getListener().onCompositeObjects(readyUpload, message);
                 if (readyUpload.isAliasRequest()) {
-                    uploadAliasRequest(readyUpload.getId(), message);
+                    uploadAliasRequest(readyUpload.getId(), message, readyUpload.getUploadSettings());
                 } else {
-                    uploadMessage(readyUpload.getId(), message);
+                    uploadMessage(readyUpload.getId(), message, readyUpload.getUploadSettings());
                 }
             }
         } catch (MParticleApiClientImpl.MPThrottleException e) {
@@ -210,11 +210,11 @@ public class UploadHandler extends BaseHandler {
         }
     }
 
-    void uploadMessage(int id, String message) throws IOException, MParticleApiClientImpl.MPThrottleException {
+    void uploadMessage(int id, String message, UploadSettings uploadSettings) throws IOException, MParticleApiClientImpl.MPThrottleException {
         int responseCode = -1;
         boolean sampling = false;
         try {
-            responseCode = mApiClient.sendMessageBatch(message);
+            responseCode = mApiClient.sendMessageBatch(message, uploadSettings);
         } catch (MParticleApiClientImpl.MPRampException e) {
             sampling = true;
             Logger.debug("This device is being sampled.");
@@ -234,12 +234,12 @@ public class UploadHandler extends BaseHandler {
         }
     }
 
-    void uploadAliasRequest(int id, String aliasRequestMessage) throws IOException, MParticleApiClientImpl.MPThrottleException {
+    void uploadAliasRequest(int id, String aliasRequestMessage, UploadSettings uploadSettings) throws IOException, MParticleApiClientImpl.MPThrottleException {
         MParticleApiClient.AliasNetworkResponse response = new MParticleApiClientImpl.AliasNetworkResponse(-1);
         boolean sampling = false;
 
         try {
-            response = mApiClient.sendAliasRequest(aliasRequestMessage);
+            response = mApiClient.sendAliasRequest(aliasRequestMessage, uploadSettings);
         } catch (JSONException e) {
             response.setErrorMessage("Unable to deserialize Alias Request");
             Logger.error(response.getErrorMessage());

@@ -11,7 +11,6 @@ import androidx.annotation.Nullable;
 
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
-import com.mparticle.database.UploadSettings;
 import com.mparticle.identity.UserAttributeListenerWrapper;
 import com.mparticle.internal.BatchId;
 import com.mparticle.internal.ConfigManager;
@@ -25,9 +24,9 @@ import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MessageBatch;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.MessageManagerCallbacks;
-import com.mparticle.internal.UploadHandler;
 import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.MPDatabaseImpl;
+import com.mparticle.internal.database.UploadSettings;
 import com.mparticle.internal.listeners.InternalListenerManager;
 import com.mparticle.internal.messages.BaseMPMessage;
 
@@ -476,8 +475,8 @@ public class MParticleDBManager {
         return UploadService.deleteUpload(getDatabase(), id);
     }
 
-    public void insertAliasRequest(String apiKey, JSONObject request) {
-        UploadService.insertAliasRequest(getDatabase(), apiKey, request);
+    public void insertAliasRequest(JSONObject request, UploadSettings uploadSettings) {
+        UploadService.insertAliasRequest(getDatabase(), request, uploadSettings);
     }
 
     /**
@@ -646,6 +645,22 @@ public class MParticleDBManager {
         }
     }
 
+    public void resetDatabaseForWorkspaceSwitching() {
+        MPDatabase db = getDatabase();
+        try {
+            db.beginTransaction();
+            BreadcrumbService.deleteAll(db);
+            MessageService.deleteAll(db);
+            ReportingService.deleteAll(db);
+            SessionService.deleteAll(db);
+            UserAttributesService.deleteAll(db);
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+        } finally {
+            db.endTransaction();
+        }
+    }
+
     public static class AttributionChange {
         private String key;
         private Object newValue;
@@ -698,13 +713,14 @@ public class MParticleDBManager {
         private int id;
         private String message;
         private boolean isAliasRequest;
+        private UploadSettings uploadSettings;
 
-        public ReadyUpload(int id, boolean isAliasRequest, String message) {
+        public ReadyUpload(int id, boolean isAliasRequest, String message, UploadSettings uploadSettings) {
             this.id = id;
             this.message = message;
             this.isAliasRequest = isAliasRequest;
+            this.uploadSettings = uploadSettings;
         }
-
 
         public int getId() {
             return id;
@@ -716,6 +732,10 @@ public class MParticleDBManager {
 
         public boolean isAliasRequest() {
             return isAliasRequest;
+        }
+
+        public UploadSettings getUploadSettings() {
+            return uploadSettings;
         }
     }
 
