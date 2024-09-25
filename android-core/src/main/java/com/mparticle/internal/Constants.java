@@ -585,6 +585,9 @@ public class Constants {
         String SESSION_TIMEOUT = "mp::sessionTimeout";
         String REPORT_UNCAUGHT_EXCEPTIONS = "mp::reportUncaughtExceptions";
         String ENVIRONMENT = "mp::environment";
+        String IDENTITY_API_REQUEST ="mp::identity::api::request";
+        String IDENTITY_API_CACHE_TIME ="mp::identity::cache::time";
+        String IDENTITY_MAX_AGE ="mp::max:age::time";
     }
 
     public interface MiscStorageKeys {

@@ -9,6 +9,7 @@ import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
+import androidx.collection.ArrayMap;
 
 import com.mparticle.Configuration;
 import com.mparticle.ExceptionHandler;
@@ -16,6 +17,7 @@ import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApi;
+import com.mparticle.identity.IdentityHttpResponse;
 import com.mparticle.internal.messages.BaseMPMessage;
 import com.mparticle.networking.NetworkOptions;
 import com.mparticle.networking.NetworkOptionsManager;
@@ -44,22 +46,27 @@ public class ConfigManager {
     public static final String CONFIG_JSON = "json";
     public static final String KIT_CONFIG_PREFERENCES = "mparticle_config.json";
     public static final String CONFIG_JSON_TIMESTAMP = "json_timestamp";
-    private static final String KEY_TRIGGER_ITEMS = "tri";
-    private static final String KEY_MESSAGE_MATCHES = "mm";
-    private static final String KEY_TRIGGER_ITEM_HASHES = "evts";
-    private static final String KEY_INFLUENCE_OPEN = "pio";
-    static final String KEY_OPT_OUT = "oo";
     public static final String KEY_UNHANDLED_EXCEPTIONS = "cue";
     public static final String KEY_PUSH_MESSAGES = "pmk";
     public static final String KEY_DIRECT_URL_ROUTING = "dur";
     public static final String KEY_EMBEDDED_KITS = "eks";
-    static final String KEY_UPLOAD_INTERVAL = "uitl";
-    static final String KEY_SESSION_TIMEOUT = "stl";
     public static final String VALUE_APP_DEFINED = "appdefined";
     public static final String VALUE_CUE_CATCH = "forcecatch";
     public static final String PREFERENCES_FILE = "mp_preferences";
+<<<<<<< Updated upstream
     private static final String KEY_DEVICE_PERFORMANCE_METRICS_DISABLED = "dpmd";
+=======
+    public static final String KEY_INCLUDE_SESSION_HISTORY = "inhd";
+>>>>>>> Stashed changes
     public static final String WORKSPACE_TOKEN = "wst";
+    public static final String KIT_CONFIG_KEY = "kit_config";
+    public static final int DEFAULT_CONNECTION_TIMEOUT_SECONDS = 30;
+    public static final int MINIMUM_CONNECTION_TIMEOUT_SECONDS = 1;
+    public static final int DEFAULT_SESSION_TIMEOUT_SECONDS = 60;
+    public static final int DEFAULT_UPLOAD_INTERVAL = 600;
+    static final String KEY_OPT_OUT = "oo";
+    static final String KEY_UPLOAD_INTERVAL = "uitl";
+    static final String KEY_SESSION_TIMEOUT = "stl";
     static final String ALIAS_MAX_WINDOW = "alias_max_window";
     static final String KEY_RAMP = "rp";
     static final String DATAPLAN_KEY = "dpr";
@@ -70,28 +77,29 @@ public class ConfigManager {
     static final String DATAPLAN_BLOCK_EVENT_ATTRIBUTES = "ea";
     static final String DATAPLAN_BLOCK_USER_ATTRIBUTES = "ua";
     static final String DATAPLAN_BLOCK_USER_IDENTITIES = "id";
-    public static final String KIT_CONFIG_KEY = "kit_config";
     static final String MIGRATED_TO_KIT_SHARED_PREFS = "is_mig_kit_sp";
-
+    private static final String KEY_TRIGGER_ITEMS = "tri";
+    private static final String KEY_MESSAGE_MATCHES = "mm";
+    private static final String KEY_TRIGGER_ITEM_HASHES = "evts";
+    private static final String KEY_INFLUENCE_OPEN = "pio";
+    private static final String KEY_DEVICE_PERFORMANCE_METRICS_DISABLED = "dpmd";
     private static final int DEVMODE_UPLOAD_INTERVAL_MILLISECONDS = 10 * 1000;
     private static final int DEFAULT_MAX_ALIAS_WINDOW_DAYS = 90;
-    private Context mContext;
+    static SharedPreferences sPreferences;
     private static NetworkOptions sNetworkOptions;
+    private static JSONArray sPushKeys;
+    private static boolean sInProgress;
+    private static final Set<IdentityApi.MpIdChangeListener> mpIdChangeListeners = new HashSet<IdentityApi.MpIdChangeListener>();
+    private Context mContext;
     private boolean mIgnoreDataplanOptionsFromConfig = false;
     private MParticleOptions.DataplanOptions mDataplanOptions;
-
-    static SharedPreferences sPreferences;
-
-    private static JSONArray sPushKeys;
     private boolean directUrlRouting = false;
     private UserStorage mUserStorage;
     private String mLogUnhandledExceptions = VALUE_APP_DEFINED;
-
     private boolean mSendOoEvents;
     private JSONObject mProviderPersistence;
     private int mRampValue = -1;
     private int mUserBucket = -1;
-
     private int mSessionTimeoutInterval = -1;
     private int mUploadInterval = -1;
     private long mInfluenceOpenTimeout = 3600 * 1000;
@@ -101,27 +109,11 @@ public class ConfigManager {
     private String mDataplanId;
     private Integer mDataplanVersion;
     private Integer mMaxConfigAge;
-    public static final int DEFAULT_CONNECTION_TIMEOUT_SECONDS = 30;
-    public static final int MINIMUM_CONNECTION_TIMEOUT_SECONDS = 1;
-    public static final int DEFAULT_SESSION_TIMEOUT_SECONDS = 60;
-    public static final int DEFAULT_UPLOAD_INTERVAL = 600;
-    private List<ConfigLoadedListener> configUpdatedListeners = new ArrayList<>();
+    private final List<ConfigLoadedListener> configUpdatedListeners = new ArrayList<>();
     private List<SideloadedKit> sideloadedKits = new ArrayList<>();
 
     private ConfigManager() {
         super();
-    }
-
-    public static ConfigManager getInstance(Context context) {
-        ConfigManager configManager = null;
-        MParticle mParticle = MParticle.getInstance();
-        if (mParticle != null) {
-            configManager = MParticle.getInstance().Internal().getConfigManager();
-        }
-        if (configManager == null) {
-            configManager = new ConfigManager(context);
-        }
-        return configManager;
     }
 
     public ConfigManager(Context context) {
@@ -159,6 +151,173 @@ public class ConfigManager {
                 configuration.apply(this);
             }
         }
+    }
+
+    public static ConfigManager getInstance(Context context) {
+        ConfigManager configManager = null;
+        MParticle mParticle = MParticle.getInstance();
+        if (mParticle != null) {
+            configManager = MParticle.getInstance().Internal().getConfigManager();
+        }
+        if (configManager == null) {
+            configManager = new ConfigManager(context);
+        }
+        return configManager;
+    }
+
+    public static UserStorage getUserStorage(Context context) {
+        return UserStorage.create(context, getMpid(context));
+    }
+
+    public static UserStorage getUserStorage(Context context, long mpid) {
+        return UserStorage.create(context, mpid);
+    }
+
+    static void deleteConfigManager(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            context.deleteSharedPreferences(PREFERENCES_FILE);
+            sPreferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
+        } else {
+            if (sPreferences == null) {
+                sPreferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
+            }
+            sPreferences.edit().clear().commit();
+        }
+    }
+
+    public static MParticle.Environment getEnvironment() {
+        if (sPreferences != null) {
+            int env = sPreferences.getInt(Constants.PrefKeys.ENVIRONMENT, MParticle.Environment.Production.getValue());
+            for (MParticle.Environment environment : MParticle.Environment.values()) {
+                if (environment.getValue() == env) {
+                    return environment;
+                }
+            }
+        }
+        return MParticle.Environment.Production;
+    }
+
+    public void setEnvironment(MParticle.Environment environment) {
+        if (environment != null) {
+            sPreferences.edit().putInt(Constants.PrefKeys.ENVIRONMENT, environment.getValue()).apply();
+        } else {
+            sPreferences.edit().remove(Constants.PrefKeys.ENVIRONMENT).apply();
+        }
+    }
+
+    public static Boolean isDisplayPushNotifications(Context context) {
+        return getPreferences(context).getBoolean(Constants.PrefKeys.DISPLAY_PUSH_NOTIFICATIONS, false);
+    }
+
+    static SharedPreferences getPreferences(Context context) {
+        return context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
+    }
+
+    public static JSONArray getPushKeys(Context context) {
+        if (sPushKeys == null) {
+            String arrayString = getPreferences(context).getString(KEY_PUSH_MESSAGES, null);
+            try {
+                sPushKeys = new JSONArray(arrayString);
+            } catch (Exception e) {
+                sPushKeys = new JSONArray();
+            }
+        }
+        return sPushKeys;
+    }
+
+    public static int getPushTitle(Context context) {
+        return getPreferences(context)
+                .getInt(Constants.PrefKeys.PUSH_TITLE, 0);
+    }
+
+    public static int getPushIcon(Context context) {
+        return getPreferences(context)
+                .getInt(Constants.PrefKeys.PUSH_ICON, 0);
+    }
+
+    public static int getBreadcrumbLimit(Context context) {
+        return getUserStorage(context).getBreadcrumbLimit();
+    }
+
+    public static int getBreadcrumbLimit(Context context, long mpId) {
+        return getUserStorage(context, mpId).getBreadcrumbLimit();
+    }
+
+    public static String getCurrentUserLtv(Context context) {
+        return getUserStorage(context).getLtv();
+    }
+
+    public static void setNeedsToMigrate(Context context, boolean needsToMigrate) {
+        UserStorage.setNeedsToMigrate(context, needsToMigrate);
+    }
+
+    public static void clear() {
+        sPreferences.edit().clear().apply();
+    }
+
+    //for testing
+    static void clearMpid(Context context) {
+        if (sPreferences == null) {
+            sPreferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
+        }
+        sPreferences.edit().remove(Constants.PrefKeys.MPID).apply();
+    }
+
+    public static long getMpid(Context context) {
+        return getMpid(context, false);
+    }
+
+    public static long getMpid(Context context, boolean allowTemporary) {
+        if (sPreferences == null) {
+            sPreferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
+        }
+        if (allowTemporary && sInProgress) {
+            return Constants.TEMPORARY_MPID;
+        } else {
+            return sPreferences.getLong(Constants.PrefKeys.MPID, Constants.TEMPORARY_MPID);
+        }
+    }
+
+    private static synchronized JSONArray getIdentityCache() {
+        String json = sPreferences.getString(Constants.PrefKeys.IDENTITY_API_REQUEST, null);
+        if (json != null) {
+            try {
+                JSONArray jsonArray = new JSONArray(json);
+                return jsonArray;
+            } catch (JSONException e) {
+                Logger.error("Failed to fetch identity cache from storage :  " + e.getMessage());
+            }
+        }
+        return new JSONArray();
+    }
+
+    public static void setIdentityRequestInProgress(boolean inProgress) {
+        sInProgress = inProgress;
+    }
+
+    private static boolean fixUpUserIdentities(JSONArray identities) {
+        boolean changeMade = false;
+        try {
+            for (int i = 0; i < identities.length(); i++) {
+                JSONObject identity = identities.getJSONObject(i);
+                if (!identity.has(Constants.MessageKey.IDENTITY_DATE_FIRST_SEEN)) {
+                    identity.put(Constants.MessageKey.IDENTITY_DATE_FIRST_SEEN, 0);
+                    changeMade = true;
+                }
+                if (!identity.has(Constants.MessageKey.IDENTITY_FIRST_SEEN)) {
+                    identity.put(Constants.MessageKey.IDENTITY_FIRST_SEEN, true);
+                    changeMade = true;
+                }
+            }
+
+        } catch (JSONException jse) {
+
+        }
+        return changeMade;
+    }
+
+    public static void addMpIdChangeListener(IdentityApi.MpIdChangeListener listener) {
+        mpIdChangeListeners.add(listener);
     }
 
     public void onMParticleStarted() {
@@ -211,14 +370,6 @@ public class ConfigManager {
         return mUserStorage;
     }
 
-    public static UserStorage getUserStorage(Context context) {
-        return UserStorage.create(context, getMpid(context));
-    }
-
-    public static UserStorage getUserStorage(Context context, long mpid) {
-        return UserStorage.create(context, mpid);
-    }
-
     public void deleteUserStorage(Context context, long mpid) {
         if (mUserStorage != null) {
             mUserStorage.deleteUserConfig(context, mpid);
@@ -227,18 +378,6 @@ public class ConfigManager {
 
     public void deleteUserStorage(long mpId) {
         deleteUserStorage(mContext, mpId);
-    }
-
-    static void deleteConfigManager(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            context.deleteSharedPreferences(PREFERENCES_FILE);
-            sPreferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
-        } else {
-            if (sPreferences == null) {
-                sPreferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
-            }
-            sPreferences.edit().clear().commit();
-        }
     }
 
     void migrateConfigIfNeeded() {
@@ -286,12 +425,6 @@ public class ConfigManager {
         return sPreferences.getString(CONFIG_JSON, "");
     }
 
-    void setConfigTimestamp(Long timestamp) {
-        sPreferences.edit()
-                .putLong(CONFIG_JSON_TIMESTAMP, timestamp)
-                .apply();
-    }
-
     @Nullable
     Long getConfigTimestamp() {
         if (sPreferences.contains(CONFIG_JSON_TIMESTAMP)) {
@@ -299,6 +432,12 @@ public class ConfigManager {
         } else {
             return null;
         }
+    }
+
+    void setConfigTimestamp(Long timestamp) {
+        sPreferences.edit()
+                .putLong(CONFIG_JSON_TIMESTAMP, timestamp)
+                .apply();
     }
 
     public void saveConfigJson(JSONObject combinedConfig) throws JSONException {
@@ -586,31 +725,11 @@ public class ConfigManager {
             return DEVMODE_UPLOAD_INTERVAL_MILLISECONDS;
         } else {
             if (mUploadInterval > 0) {
-                return 1000 * mUploadInterval;
+                return 1000L * mUploadInterval;
             } else {
-                return (1000 * sPreferences.getInt(Constants.PrefKeys.UPLOAD_INTERVAL, DEFAULT_UPLOAD_INTERVAL));
+                return (1000L * sPreferences.getInt(Constants.PrefKeys.UPLOAD_INTERVAL, DEFAULT_UPLOAD_INTERVAL));
             }
         }
-    }
-
-    public void setEnvironment(MParticle.Environment environment) {
-        if (environment != null) {
-            sPreferences.edit().putInt(Constants.PrefKeys.ENVIRONMENT, environment.getValue()).apply();
-        } else {
-            sPreferences.edit().remove(Constants.PrefKeys.ENVIRONMENT).apply();
-        }
-    }
-
-    public static MParticle.Environment getEnvironment() {
-        if (sPreferences != null) {
-            int env = sPreferences.getInt(Constants.PrefKeys.ENVIRONMENT, MParticle.Environment.Production.getValue());
-            for (MParticle.Environment environment : MParticle.Environment.values()) {
-                if (environment.getValue() == env) {
-                    return environment;
-                }
-            }
-        }
-        return MParticle.Environment.Production;
     }
 
     public void setUploadInterval(int uploadInterval) {
@@ -642,6 +761,12 @@ public class ConfigManager {
         }
     }
 
+    public void setPushSenderId(String senderId) {
+        sPreferences.edit().putString(Constants.PrefKeys.PUSH_SENDER_ID, senderId)
+                .putBoolean(Constants.PrefKeys.PUSH_ENABLED, true)
+                .apply();
+    }
+
     public @Nullable String getPushInstanceId() {
         PushRegistrationHelper.PushRegistration pushRegistration = getPushRegistration();
         if (pushRegistration != null) {
@@ -651,10 +776,23 @@ public class ConfigManager {
         }
     }
 
+    public void setPushInstanceId(@Nullable String token) {
+        sPreferences.edit().putString(Constants.PrefKeys.PUSH_INSTANCE_ID, token).apply();
+    }
+
     public PushRegistrationHelper.PushRegistration getPushRegistration() {
         String senderId = sPreferences.getString(Constants.PrefKeys.PUSH_SENDER_ID, null);
         String instanceId = sPreferences.getString(Constants.PrefKeys.PUSH_INSTANCE_ID, null);
         return new PushRegistrationHelper.PushRegistration(instanceId, senderId);
+    }
+
+    public void setPushRegistration(PushRegistrationHelper.PushRegistration pushRegistration) {
+        if (pushRegistration == null || MPUtility.isEmpty(pushRegistration.senderId)) {
+            clearPushRegistration();
+        } else {
+            setPushSenderId(pushRegistration.senderId);
+            setPushInstanceId(pushRegistration.instanceId);
+        }
     }
 
     public void setPushRegistrationFetched() {
@@ -678,25 +816,6 @@ public class ConfigManager {
     @Nullable
     public String getPushInstanceIdBackground() {
         return sPreferences.getString(Constants.PrefKeys.PUSH_INSTANCE_ID_BACKGROUND, null);
-    }
-
-    public void setPushSenderId(String senderId) {
-        sPreferences.edit().putString(Constants.PrefKeys.PUSH_SENDER_ID, senderId)
-                .putBoolean(Constants.PrefKeys.PUSH_ENABLED, true)
-                .apply();
-    }
-
-    public void setPushInstanceId(@Nullable String token) {
-        sPreferences.edit().putString(Constants.PrefKeys.PUSH_INSTANCE_ID, token).apply();
-    }
-
-    public void setPushRegistration(PushRegistrationHelper.PushRegistration pushRegistration) {
-        if (pushRegistration == null || MPUtility.isEmpty(pushRegistration.senderId)) {
-            clearPushRegistration();
-        } else {
-            setPushSenderId(pushRegistration.senderId);
-            setPushInstanceId(pushRegistration.instanceId);
-        }
     }
 
     public void setPushRegistrationInBackground(PushRegistrationHelper.PushRegistration
@@ -759,50 +878,8 @@ public class ConfigManager {
                 .apply();
     }
 
-    public static Boolean isDisplayPushNotifications(Context context) {
-        return getPreferences(context).getBoolean(Constants.PrefKeys.DISPLAY_PUSH_NOTIFICATIONS, false);
-    }
-
-    static SharedPreferences getPreferences(Context context) {
-        return context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
-    }
-
     SharedPreferences getKitConfigPreferences() {
         return mContext.getSharedPreferences(KIT_CONFIG_PREFERENCES, Context.MODE_PRIVATE);
-    }
-
-    public static JSONArray getPushKeys(Context context) {
-        if (sPushKeys == null) {
-            String arrayString = getPreferences(context).getString(KEY_PUSH_MESSAGES, null);
-            try {
-                sPushKeys = new JSONArray(arrayString);
-            } catch (Exception e) {
-                sPushKeys = new JSONArray();
-            }
-        }
-        return sPushKeys;
-    }
-
-    public static int getPushTitle(Context context) {
-        return getPreferences(context)
-                .getInt(Constants.PrefKeys.PUSH_TITLE, 0);
-    }
-
-    public static int getPushIcon(Context context) {
-        return getPreferences(context)
-                .getInt(Constants.PrefKeys.PUSH_ICON, 0);
-    }
-
-    public static int getBreadcrumbLimit(Context context) {
-        return getUserStorage(context).getBreadcrumbLimit();
-    }
-
-    public static int getBreadcrumbLimit(Context context, long mpId) {
-        return getUserStorage(context, mpId).getBreadcrumbLimit();
-    }
-
-    public static String getCurrentUserLtv(Context context) {
-        return getUserStorage(context).getLtv();
     }
 
     public void setBreadcrumbLimit(int newLimit) {
@@ -813,20 +890,12 @@ public class ConfigManager {
         getUserStorage(mpId).setBreadcrumbLimit(newLimit);
     }
 
-    public static void setNeedsToMigrate(Context context, boolean needsToMigrate) {
-        UserStorage.setNeedsToMigrate(context, needsToMigrate);
-    }
-
-    public static void clear() {
-        sPreferences.edit().clear().apply();
+    public synchronized JSONObject getProviderPersistence() {
+        return mProviderPersistence;
     }
 
     private synchronized void setProviderPersistence(JSONObject persistence) {
         mProviderPersistence = persistence;
-    }
-
-    public synchronized JSONObject getProviderPersistence() {
-        return mProviderPersistence;
     }
 
     public void setMpid(long newMpid, boolean isLoggedInUser) {
@@ -850,14 +919,6 @@ public class ConfigManager {
         }
     }
 
-    //for testing
-    static void clearMpid(Context context) {
-        if (sPreferences == null) {
-            sPreferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
-        }
-        sPreferences.edit().remove(Constants.PrefKeys.MPID).apply();
-    }
-
     public long getMpid() {
         return getMpid(false);
     }
@@ -870,19 +931,74 @@ public class ConfigManager {
         }
     }
 
-    public static long getMpid(Context context) {
-        return getMpid(context, false);
+    public synchronized void saveIdentityCache(String key, IdentityHttpResponse identityHttpResponse) throws JSONException {
+        JSONArray jsonArray = new JSONArray();
+        JSONArray identityCacheExist = getIdentityCache();
+        try {
+
+            if (identityCacheExist != null && identityCacheExist.length() > 0) {
+                for (int i = 0; i < identityCacheExist.length(); i++) {
+                    jsonArray.put(identityCacheExist.get(i));
+                }
+            }
+        } catch (Exception e) {
+            Logger.error("Error while storing identity cache: " + e.getMessage());
+
+        }
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(key, identityHttpResponse.toJson());
+        jsonArray.put(jsonObject);
+
+        sPreferences.edit().putString(Constants.PrefKeys.IDENTITY_API_REQUEST, jsonArray.toString()).apply();
     }
 
-    public static long getMpid(Context context, boolean allowTemporary) {
-        if (sPreferences == null) {
-            sPreferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
+    public synchronized ArrayMap<String, IdentityHttpResponse> fetchIdentityCache() {
+        try {
+            JSONArray jsonArray = getIdentityCache();
+            ArrayMap<String, IdentityHttpResponse> identityCache = new ArrayMap<>();
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                String key = jsonObject.keys().next();
+                JSONObject identityJson = jsonObject.getJSONObject(key);
+                IdentityHttpResponse response = IdentityHttpResponse.fromJson(identityJson);
+
+                identityCache.put(key, response);
+            }
+            return identityCache;
+        } catch (Exception e) {
+            Logger.error("Error while fetching identity cache: " + e.getMessage());
         }
-        if (allowTemporary && sInProgress) {
-            return Constants.TEMPORARY_MPID;
-        } else {
-            return sPreferences.getLong(Constants.PrefKeys.MPID, Constants.TEMPORARY_MPID);
-        }
+
+        return new ArrayMap<String, IdentityHttpResponse>();
+    }
+
+    public void saveIdentityCacheTime(long time) {
+        sPreferences.edit().putLong(Constants.PrefKeys.IDENTITY_API_CACHE_TIME, time).apply();
+    }
+
+    public void saveIdentityMaxAge(long time) {
+        sPreferences.edit().putLong(Constants.PrefKeys.IDENTITY_MAX_AGE, time).apply();
+    }
+
+    public synchronized Long getIdentityCacheTime() {
+        return sPreferences.getLong(Constants.PrefKeys.IDENTITY_API_CACHE_TIME, 0);
+    }
+
+    public Long getIdentityMaxAge() {
+        return sPreferences.getLong(Constants.PrefKeys.IDENTITY_MAX_AGE, 0);
+    }
+
+    public void clearIdentityCatch() {
+        sPreferences.edit()
+                .remove(Constants.PrefKeys.IDENTITY_API_REQUEST).apply();
+        sPreferences.edit()
+                .remove(Constants.PrefKeys.IDENTITY_API_CACHE_TIME).apply();
+    }
+
+    //keep this flag value `true` until actual implementation done
+    public boolean isIdentityCacheFlagEnabled() {
+        return true;
     }
 
     public boolean mpidExists(long mpid) {
@@ -891,12 +1007,6 @@ public class ConfigManager {
 
     public Set<Long> getMpids() {
         return UserStorage.getMpIdSet(mContext);
-    }
-
-    private static boolean sInProgress;
-
-    public static void setIdentityRequestInProgress(boolean inProgress) {
-        sInProgress = inProgress;
     }
 
     public void mergeUserConfigs(long subjectMpId, long targetMpId) {
@@ -1100,27 +1210,6 @@ public class ConfigManager {
         return mDataplanVersion;
     }
 
-    private static boolean fixUpUserIdentities(JSONArray identities) {
-        boolean changeMade = false;
-        try {
-            for (int i = 0; i < identities.length(); i++) {
-                JSONObject identity = identities.getJSONObject(i);
-                if (!identity.has(Constants.MessageKey.IDENTITY_DATE_FIRST_SEEN)) {
-                    identity.put(Constants.MessageKey.IDENTITY_DATE_FIRST_SEEN, 0);
-                    changeMade = true;
-                }
-                if (!identity.has(Constants.MessageKey.IDENTITY_FIRST_SEEN)) {
-                    identity.put(Constants.MessageKey.IDENTITY_FIRST_SEEN, true);
-                    changeMade = true;
-                }
-            }
-
-        } catch (JSONException jse) {
-
-        }
-        return changeMade;
-    }
-
     public String getDeviceApplicationStamp() {
         String das = sPreferences.getString(Constants.PrefKeys.DEVICE_APPLICATION_STAMP, null);
         if (MPUtility.isEmpty(das)) {
@@ -1223,7 +1312,7 @@ public class ConfigManager {
         sPreferences.edit().putString(Constants.PrefKeys.IDENTITY_API_CONTEXT, context).apply();
     }
 
-    public String getPreviousAdId() {
+    public synchronized String getPreviousAdId() {
         MPUtility.AdIdInfo adInfo = MPUtility.getAdIdInfo(mContext);
         if (adInfo != null && !adInfo.isLimitAdTrackingEnabled) {
             return sPreferences.getString(Constants.PrefKeys.PREVIOUS_ANDROID_ID, null);
@@ -1233,6 +1322,7 @@ public class ConfigManager {
 
     public void setPreviousAdId() {
         MPUtility.AdIdInfo adInfo = MPUtility.getAdIdInfo(mContext);
+        Logger.error("TEstAdid" + adInfo);
         if (adInfo != null && !adInfo.isLimitAdTrackingEnabled) {
             sPreferences.edit().putString(Constants.PrefKeys.PREVIOUS_ANDROID_ID, adInfo.id).apply();
         } else {
@@ -1244,20 +1334,14 @@ public class ConfigManager {
         return sPreferences.getInt(Constants.PrefKeys.IDENTITY_CONNECTION_TIMEOUT, DEFAULT_CONNECTION_TIMEOUT_SECONDS) * 1000;
     }
 
-    public int getConnectionTimeout() {
-        return DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000;
-    }
-
     public void setIdentityConnectionTimeout(int connectionTimeout) {
         if (connectionTimeout >= MINIMUM_CONNECTION_TIMEOUT_SECONDS) {
             sPreferences.edit().putInt(Constants.PrefKeys.IDENTITY_CONNECTION_TIMEOUT, connectionTimeout).apply();
         }
     }
 
-    private static Set<IdentityApi.MpIdChangeListener> mpIdChangeListeners = new HashSet<IdentityApi.MpIdChangeListener>();
-
-    public static void addMpIdChangeListener(IdentityApi.MpIdChangeListener listener) {
-        mpIdChangeListeners.add(listener);
+    public int getConnectionTimeout() {
+        return DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000;
     }
 
     private void triggerMpidChangeListenerCallbacks(long mpid, long previousMpid) {
@@ -1395,6 +1479,6 @@ public class ConfigManager {
     }
 
     public interface ConfigLoadedListener {
-        public void onConfigUpdated(ConfigType configType, boolean isNew);
+        void onConfigUpdated(ConfigType configType, boolean isNew);
     }
 }
