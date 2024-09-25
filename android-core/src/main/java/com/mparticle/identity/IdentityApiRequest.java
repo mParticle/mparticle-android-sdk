@@ -7,8 +7,20 @@ import com.mparticle.MParticle;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Class that represents observed changes in user state, can be used as a parameter in an Identity Request.
@@ -21,7 +33,7 @@ import java.util.Map;
  * @see IdentityApi#identify(IdentityApiRequest)
  * @see IdentityApi#modify(IdentityApiRequest)
  */
-public final class IdentityApiRequest {
+public final class IdentityApiRequest implements Serializable {
     private UserAliasHandler userAliasHandler = null;
     private Map<MParticle.IdentityType, String> userIdentities = new HashMap<MParticle.IdentityType, String>();
     // for /modify requests
@@ -86,6 +98,47 @@ public final class IdentityApiRequest {
     @Nullable
     public UserAliasHandler getUserAliasHandler() {
         return userAliasHandler;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true; // Check if the same object
+        if (obj == null || getClass() != obj.getClass()) return false; // Check for null and class match
+
+        IdentityApiRequest that = (IdentityApiRequest) obj; // Cast to IdentityApiRequest
+
+        // Compare all relevant fields
+        return Objects.equals(userIdentities, that.userIdentities) &&
+                Objects.equals(otherOldIdentities, that.otherOldIdentities) &&
+                Objects.equals(otherNewIdentities, that.otherNewIdentities) &&
+                Objects.equals(userAliasHandler, that.userAliasHandler) &&
+                Objects.equals(mpid, that.mpid);
+    }
+
+
+    public String objectToHash() {
+        String input =this.toString();
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = md.digest(input.getBytes());
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hashBytes) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString().substring(0, 16); // Shorten to first 16 characters
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "userIdentities"+userIdentities+" otherOldIdentities " +otherOldIdentities+" otherNewIdentities "+otherNewIdentities
+                +" userAliasHandler "+userAliasHandler+" mpid "+String.valueOf(mpid);
     }
 
     /**
