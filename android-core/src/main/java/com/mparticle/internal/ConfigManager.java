@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.net.Network;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
@@ -16,8 +15,8 @@ import com.mparticle.ExceptionHandler;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.consent.ConsentState;
-import com.mparticle.database.UploadSettings;
 import com.mparticle.identity.IdentityApi;
+import com.mparticle.internal.database.UploadSettings;
 import com.mparticle.internal.messages.BaseMPMessage;
 import com.mparticle.networking.NetworkOptions;
 import com.mparticle.networking.NetworkOptionsManager;
@@ -503,6 +502,26 @@ public class ConfigManager {
         }
     }
 
+    public String getSupportedKitString() {
+        MParticle instance = MParticle.getInstance();
+        if (instance != null) {
+            Set<Integer> supportedKitIds = instance.Internal().getKitManager().getSupportedKits();
+            if (supportedKitIds != null && !supportedKitIds.isEmpty()) {
+                StringBuilder buffer = new StringBuilder(supportedKitIds.size() * 3);
+                Iterator<Integer> it = supportedKitIds.iterator();
+                while (it.hasNext()) {
+                    Integer next = it.next();
+                    buffer.append(next);
+                    if (it.hasNext()) {
+                        buffer.append(",");
+                    }
+                }
+                return buffer.toString();
+            }
+        }
+        return "";
+    }
+
     /**
      * When the Config manager starts up, we don't want to enable everything immediately to save on app-load time.
      * This method will be called from a background thread after startup is already complete.
@@ -568,11 +587,14 @@ public class ConfigManager {
         sPreferences.edit().putBoolean(Constants.PrefKeys.REPORT_UNCAUGHT_EXCEPTIONS, log).apply();
     }
 
+    // TODO: BEN - return null instead of setting empty strings?
     public UploadSettings getUploadSettings() {
-//        NetworkOptions networkOptions = getNetworkOptions();
-//        networkOptions.
-        // TODO: BEN - finish this
-        return new UploadSettings(getApiKey(), getApiSecret(),"", false, "", false, false, new int[]{});
+        String apiKey = getApiKey();
+        String secret = getApiSecret();
+        return new UploadSettings(
+                apiKey == null ? "" : apiKey,
+                secret == null ? "" : secret,
+                getNetworkOptions(), getActiveModuleIds(), getSupportedKitString());
     }
 
     public String getApiKey() {
@@ -1294,10 +1316,10 @@ public class ConfigManager {
      silo and a hyphen (ex. "us1-", "us2-", "eu1-").  us1 was the first silo,and before other silos existed, there were no prefixes and all apiKeys
      were us1. As such, if we split on a '-' and the resulting array length is 1, then it is an older APIkey that should route to us1.
      When splitKey.length is greater than 1, then splitKey[0] will be us1, us2, eu1, au1, or st1, etc as new silos are added */
-    public String getPodPrefix() {
+    public String getPodPrefix(@NonNull String apiKey) {
         String prefix = "us1";
         try {
-            String[] prefixFromApi = getApiKey().split("-");
+            String[] prefixFromApi = apiKey.split("-");
             if (prefixFromApi.length > 1) {
                 prefix = prefixFromApi[0];
             }

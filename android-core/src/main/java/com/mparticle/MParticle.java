@@ -261,6 +261,29 @@ public class MParticle {
         MParticle.instance = instance;
     }
 
+    public static void switchWorkspace(@NonNull MParticleOptions options) {
+        if (instance != null) {
+            // End session if active
+            if (instance.isSessionActive()) {
+                instance.endSession();
+            }
+
+            // Batch any remaining messages into upload records
+            try {
+                instance.mMessageManager.mUploadHandler.prepareMessageUploads(instance.mConfigManager.getUploadSettings());
+            } catch (Exception e) {
+                Logger.error(e, "Unable to create upload records before switching workspaces");
+            }
+        }
+
+        // Reset everything except for uploads table
+        reset(options.getContext(), false, true);
+
+        // Restart the SDK using new options
+        instance = null;
+        start(options);
+    }
+
     /**
      * @return false if Android ID collection is enabled. (true by default)
      * @see MParticleOptions.Builder#androidIdEnabled(boolean)
@@ -1152,10 +1175,14 @@ public class MParticle {
      * @param context
      */
     public static void reset(@NonNull Context context) {
-        reset(context, true);
+        reset(context, true, false);
     }
 
-    static void reset(@NonNull Context context, boolean deleteDatabase) {
+    static void resetForSwitchingWorkspaces(@NonNull Context context) {
+        reset(context, false, true);
+    }
+
+    static void reset(@NonNull Context context, boolean deleteDatabase, boolean switchingWorkspaces) {
         synchronized (MParticle.class) {
             //"commit" will force all async writes stemming from an "apply" call to finish. We need to do this
             //because we need to ensure that the "getMpids()" call is returning all calls that have been made
@@ -1200,8 +1227,11 @@ public class MParticle {
                     }
                 }
             }
+
             if (deleteDatabase) {
                 context.deleteDatabase(MParticleDatabaseHelper.getDbName());
+            } else if (switchingWorkspaces) {
+                new MParticleDBManager(context).resetDatabaseForWorkspaceSwitching();
             }
         }
     }

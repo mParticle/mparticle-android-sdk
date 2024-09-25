@@ -217,11 +217,11 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
         MParticle.start(options)
         val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
         for (endpoint in MParticleBaseClientImpl.Endpoint.values()) {
-            val generatedUrl = baseClientImpl.getUrl(endpoint, endpoint.name, true)
+            val generatedUrl = baseClientImpl.getUrl(endpoint, endpoint.name)
             assertEquals(defaultUrls[endpoint].toString(), generatedUrl.defaultUrl.toString())
         }
         for (endpoint in MParticleBaseClientImpl.Endpoint.values()) {
-            val generatedUrl = baseClientImpl.getUrl(endpoint, endpoint.name, false)
+            val generatedUrl = baseClientImpl.getUrl(endpoint, endpoint.name)
             Assert.assertNotEquals(defaultUrls[endpoint].toString(), generatedUrl.toString())
             Assert.assertFalse(generatedUrl === generatedUrl.defaultUrl)
             assertEquals(
