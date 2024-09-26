@@ -21,7 +21,7 @@ interface CoreCallbacks {
     fun getCurrentActivity(): WeakReference<Activity>?
 
     @WorkerThread
-    fun getLatestKitConfiguration(): JSONArray
+    fun getLatestKitConfiguration(): JSONArray?
 
     fun getDataplanOptions(): MParticleOptions.DataplanOptions?
 
