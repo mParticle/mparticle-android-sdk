@@ -37,21 +37,18 @@ public class IdentityApi {
     public static int THROTTLE_ERROR = 429;
     public static int BAD_REQUEST = 400;
     public static int SERVER_ERROR = 500;
-
+    private static final Object lock = new Object();
+    ConfigManager mConfigManager;
+    MessageManager mMessageManager;
+    KitManager mKitManager;
+    MParticleUserDelegate mUserDelegate;
+    Set<IdentityStateListener> identityStateListeners = new HashSet<IdentityStateListener>();
     private Context mContext;
     private BaseHandler mBackgroundHandler;
     private BaseHandler mMainHandler;
     private MParticle.OperatingSystem mOperatingSystem;
-    ConfigManager mConfigManager;
-    MessageManager mMessageManager;
-    KitManager mKitManager;
-    private Internal mInternal = new Internal();
-
-    MParticleUserDelegate mUserDelegate;
+    private final Internal mInternal = new Internal();
     private MParticleIdentityClient mApiClient;
-
-    Set<IdentityStateListener> identityStateListeners = new HashSet<IdentityStateListener>();
-    private static Object lock = new Object();
 
     protected IdentityApi() {
     }
@@ -65,7 +62,7 @@ public class IdentityApi {
         this.mMessageManager = messageManager;
         this.mKitManager = kitManager;
         this.mOperatingSystem = operatingSystem;
-        configManager.addMpIdChangeListener(new IdentityStateListenerManager());
+        ConfigManager.addMpIdChangeListener(new IdentityStateListenerManager());
         setApiClient(new MParticleIdentityClientImpl(context, configManager, operatingSystem));
     }
 
@@ -93,7 +90,7 @@ public class IdentityApi {
      */
     @Nullable
     public MParticleUser getUser(@NonNull Long mpid) {
-        if (!Constants.TEMPORARY_MPID.equals(mpid) && mConfigManager.mpidExists(mpid)) {
+        if (Constants.TEMPORARY_MPID != mpid && mConfigManager.mpidExists(mpid)) {
             return MParticleUserImpl.getInstance(mContext, mpid, mUserDelegate);
         } else {
             return null;
@@ -158,7 +155,7 @@ public class IdentityApi {
     /**
      * @return an MParticleTask<IdentityApiResult> to handle the Asynchronous results
      * @see IdentityApiRequest
-     *
+     * <p>
      * calls the Identity Logout endpoint
      * @see MParticleTask and
      * @see IdentityApiResult
@@ -252,7 +249,7 @@ public class IdentityApi {
         if (updateRequest.mpid == null) {
             updateRequest.mpid = mConfigManager.getMpid();
         }
-        if (Constants.TEMPORARY_MPID.equals(updateRequest.mpid)) {
+        if (Constants.TEMPORARY_MPID == updateRequest.mpid) {
             String message = "modify() requires a non-zero MPID, please make sure a MParticleUser is present before making a modify request.";
             if (devMode) {
                 throw new IllegalArgumentException(message);
@@ -417,6 +414,18 @@ public class IdentityApi {
         void onMpIdChanged(long newMpid, long previousMpid);
     }
 
+    public static abstract class SingleUserIdentificationCallback implements IdentityStateListener {
+
+        @Override
+        public void onUserIdentified(MParticleUser user, MParticleUser previousUser) {
+            MParticle.getInstance().Identity().removeIdentityStateListener(this);
+            onUserFound(user);
+        }
+
+        public abstract void onUserFound(MParticleUser user);
+
+    }
+
     class IdentityStateListenerManager implements MpIdChangeListener {
 
         @Override
@@ -452,18 +461,6 @@ public class IdentityApi {
                 }
             }
         }
-    }
-
-    public static abstract class SingleUserIdentificationCallback implements IdentityStateListener {
-
-        @Override
-        public void onUserIdentified(MParticleUser user, MParticleUser previousUser) {
-            MParticle.getInstance().Identity().removeIdentityStateListener(this);
-            onUserFound(user);
-        }
-
-        public abstract void onUserFound(MParticleUser user);
-
     }
 
     /**
