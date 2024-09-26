@@ -4,6 +4,7 @@ import com.mparticle.MParticle
 import com.mparticle.consent.CCPAConsent
 import com.mparticle.consent.ConsentState
 import com.mparticle.consent.GDPRConsent
+import com.mparticle.internal.database.services.MessageService
 import com.mparticle.mock.MockContext
 import org.json.JSONObject
 import org.junit.Assert
@@ -144,4 +145,17 @@ class MessageBatchTest {
             consent?.getString(Constants.MessageKey.CONSENT_STATE_DOCUMENT)
         )
     }
+
+    @Test
+    @Throws(Exception::class)
+    fun testBachIdReadyMessage(){
+        val mockMp = Mockito.mock(MParticle::class.java)
+        Mockito.`when`(mockMp.environment).thenReturn(MParticle.Environment.Development)
+        MParticle.setInstance(mockMp)
+        val mockReadyMessage=Mockito.mock(MessageService.ReadyMessage::class.java)
+        Mockito.`when`(mockReadyMessage.mpid).thenReturn(4564)
+        val batch = BatchId(mockReadyMessage)
+        Assert.assertEquals(4564,batch.mpid)
+    }
+
 }
