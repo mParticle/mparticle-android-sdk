@@ -148,13 +148,13 @@ class MessageBatchTest {
 
     @Test
     @Throws(Exception::class)
-    fun testBachIdReadyMessage(){
+    fun testBachIdReadyMessage() {
         val mockMp = Mockito.mock(MParticle::class.java)
         Mockito.`when`(mockMp.environment).thenReturn(MParticle.Environment.Development)
         MParticle.setInstance(mockMp)
-        val mockReadyMessage=Mockito.mock(MessageService.ReadyMessage::class.java)
+        val mockReadyMessage = Mockito.mock(MessageService.ReadyMessage::class.java)
         Mockito.`when`(mockReadyMessage.mpid).thenReturn(4564)
         val batch = BatchId(mockReadyMessage)
-        Assert.assertEquals(4564,batch.mpid)
+        Assert.assertEquals(4564, batch.mpid)
     }
 }
