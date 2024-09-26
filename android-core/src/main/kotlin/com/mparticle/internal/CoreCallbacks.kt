@@ -16,7 +16,7 @@ interface CoreCallbacks {
 
     fun setIntegrationAttributes(kitId: Int, integrationAttributes: Map<String, String>)
 
-    fun getIntegrationAttributes(kitId: Int): Map<String, String>
+    fun getIntegrationAttributes(kitId: Int): Map<String, String>?
 
     fun getCurrentActivity(): WeakReference<Activity>?
 
