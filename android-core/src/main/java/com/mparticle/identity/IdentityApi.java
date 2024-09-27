@@ -37,18 +37,21 @@ public class IdentityApi {
     public static int THROTTLE_ERROR = 429;
     public static int BAD_REQUEST = 400;
     public static int SERVER_ERROR = 500;
-    private static final Object lock = new Object();
-    ConfigManager mConfigManager;
-    MessageManager mMessageManager;
-    KitManager mKitManager;
-    MParticleUserDelegate mUserDelegate;
-    Set<IdentityStateListener> identityStateListeners = new HashSet<IdentityStateListener>();
+
     private Context mContext;
     private BaseHandler mBackgroundHandler;
     private BaseHandler mMainHandler;
     private MParticle.OperatingSystem mOperatingSystem;
-    private final Internal mInternal = new Internal();
+    ConfigManager mConfigManager;
+    MessageManager mMessageManager;
+    KitManager mKitManager;
+    private Internal mInternal = new Internal();
+
+    MParticleUserDelegate mUserDelegate;
     private MParticleIdentityClient mApiClient;
+
+    Set<IdentityStateListener> identityStateListeners = new HashSet<IdentityStateListener>();
+    private static Object lock = new Object();
 
     protected IdentityApi() {
     }
@@ -62,7 +65,7 @@ public class IdentityApi {
         this.mMessageManager = messageManager;
         this.mKitManager = kitManager;
         this.mOperatingSystem = operatingSystem;
-        ConfigManager.addMpIdChangeListener(new IdentityStateListenerManager());
+        configManager.addMpIdChangeListener(new IdentityStateListenerManager());
         setApiClient(new MParticleIdentityClientImpl(context, configManager, operatingSystem));
     }
 
@@ -155,7 +158,7 @@ public class IdentityApi {
     /**
      * @return an MParticleTask<IdentityApiResult> to handle the Asynchronous results
      * @see IdentityApiRequest
-     * <p>
+     *
      * calls the Identity Logout endpoint
      * @see MParticleTask and
      * @see IdentityApiResult
@@ -414,18 +417,6 @@ public class IdentityApi {
         void onMpIdChanged(long newMpid, long previousMpid);
     }
 
-    public static abstract class SingleUserIdentificationCallback implements IdentityStateListener {
-
-        @Override
-        public void onUserIdentified(MParticleUser user, MParticleUser previousUser) {
-            MParticle.getInstance().Identity().removeIdentityStateListener(this);
-            onUserFound(user);
-        }
-
-        public abstract void onUserFound(MParticleUser user);
-
-    }
-
     class IdentityStateListenerManager implements MpIdChangeListener {
 
         @Override
@@ -461,6 +452,18 @@ public class IdentityApi {
                 }
             }
         }
+    }
+
+    public static abstract class SingleUserIdentificationCallback implements IdentityStateListener {
+
+        @Override
+        public void onUserIdentified(MParticleUser user, MParticleUser previousUser) {
+            MParticle.getInstance().Identity().removeIdentityStateListener(this);
+            onUserFound(user);
+        }
+
+        public abstract void onUserFound(MParticleUser user);
+
     }
 
     /**

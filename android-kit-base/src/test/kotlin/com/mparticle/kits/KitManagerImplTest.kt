@@ -331,7 +331,7 @@ class KitManagerImplTest {
         manager.updateKits(kitConfiguration)
         Assert.assertEquals(0, manager.providers.size)
         Mockito.`when`(mockUser.isLoggedIn).thenReturn(true)
-        Mockito.`when`(manager.mCoreCallbacks.getLatestKitConfiguration()).thenReturn(kitConfiguration)
+        Mockito.`when`(manager.mCoreCallbacks.latestKitConfiguration).thenReturn(kitConfiguration)
         manager.onUserIdentified(mockUser, null)
         TestCase.assertEquals(3, manager.providers.size)
     }
@@ -377,7 +377,7 @@ class KitManagerImplTest {
         manager.updateKits(kitConfiguration)
         Assert.assertEquals(3, manager.providers.size)
         Mockito.`when`(mockUser.isLoggedIn).thenReturn(false)
-        Mockito.`when`(mockCoreCallbacks.getLatestKitConfiguration()).thenReturn(kitConfiguration)
+        Mockito.`when`(mockCoreCallbacks.latestKitConfiguration).thenReturn(kitConfiguration)
         manager.onUserIdentified(mockUser, null)
         TestCase.assertEquals(0, manager.providers.size)
     }
@@ -573,7 +573,7 @@ class KitManagerImplTest {
                 put(JSONObject().apply { put("id", idOne) })
                 put(JSONObject().apply { put("id", idTwo) })
             }
-        Mockito.`when`(manager.mCoreCallbacks.getLatestKitConfiguration()).thenReturn(kitConfiguration)
+        Mockito.`when`(manager.mCoreCallbacks.latestKitConfiguration).thenReturn(kitConfiguration)
         val factory = Mockito.mock(
             KitIntegrationFactory::class.java
         )
@@ -613,7 +613,7 @@ class KitManagerImplTest {
         val kitConfiguration = JSONArray()
         kitConfiguration.put(JSONObject("{\"id\":1}"))
         kitConfiguration.put(JSONObject("{\"id\":2}"))
-        Mockito.`when`(manager.mCoreCallbacks.getLatestKitConfiguration()).thenReturn(kitConfiguration)
+        Mockito.`when`(manager.mCoreCallbacks.latestKitConfiguration).thenReturn(kitConfiguration)
         val factory = Mockito.mock(
             KitIntegrationFactory::class.java
         )

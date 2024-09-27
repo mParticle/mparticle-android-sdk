@@ -8,34 +8,34 @@ import org.json.JSONArray
 import java.lang.ref.WeakReference
 
 interface CoreCallbacks {
-    fun isBackgrounded(): Boolean
+    val isBackgrounded: Boolean
 
-    fun getUserBucket(): Int
+    val userBucket: Int
 
-    fun isEnabled(): Boolean
+    val isEnabled: Boolean
 
     fun setIntegrationAttributes(kitId: Int, integrationAttributes: Map<String, String>)
 
     fun getIntegrationAttributes(kitId: Int): Map<String, String>?
 
-    fun getCurrentActivity(): WeakReference<Activity>?
+    val currentActivity: WeakReference<Activity>
 
-    @WorkerThread
-    fun getLatestKitConfiguration(): JSONArray?
+    @get:WorkerThread
+    val latestKitConfiguration: JSONArray?
 
-    fun getDataplanOptions(): MParticleOptions.DataplanOptions?
+    val dataplanOptions: MParticleOptions.DataplanOptions?
 
-    fun isPushEnabled(): Boolean
+    val isPushEnabled: Boolean
 
-    fun getPushSenderId(): String?
+    val pushSenderId: String?
 
-    fun getPushInstanceId(): String?
+    val pushInstanceId: String?
 
-    fun getLaunchUri(): Uri?
+    val launchUri: Uri?
 
-    fun getLaunchAction(): String?
+    val launchAction: String?
 
-    fun getKitListener(): KitListener
+    val kitListener: KitListener
 
     interface KitListener {
         fun kitFound(kitId: Int)
@@ -53,28 +53,12 @@ interface CoreCallbacks {
         companion object {
             @JvmField
             val EMPTY: KitListener = object : KitListener {
-                override fun kitFound(kitId: Int) {
-                }
-
-                override fun kitConfigReceived(kitId: Int, configuration: String?) {
-                }
-
-                override fun kitExcluded(kitId: Int, reason: String?) {
-                }
-
-                override fun kitStarted(kitId: Int) {
-                }
-
-                override fun onKitApiCalled(kitId: Int, used: Boolean?, vararg objects: Any?) {
-                }
-
-                override fun onKitApiCalled(
-                    methodName: String?,
-                    kitId: Int,
-                    used: Boolean?,
-                    vararg objects: Any?
-                ) {
-                }
+                override fun kitFound(kitId: Int) {}
+                override fun kitConfigReceived(kitId: Int, configuration: String?) {}
+                override fun kitExcluded(kitId: Int, reason: String?) {}
+                override fun kitStarted(kitId: Int) {}
+                override fun onKitApiCalled(kitId: Int, used: Boolean?, vararg objects: Any?) {}
+                override fun onKitApiCalled(methodName: String?, kitId: Int, used: Boolean?, vararg objects: Any?) {}
             }
         }
     }
