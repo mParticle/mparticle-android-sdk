@@ -411,6 +411,7 @@ object Constants {
             const val PREVIOUS_SESSION_ID: String = "pid"
             const val PREVIOUS_SESSION_START: String = "pss"
 
+            // https://go.mparticle.com/work/SQDSDKS-6814
             //sandbox mode is deprecated as of > 1.6.3
             const val SANDBOX: String = "dbg"
             const val ENVIRONMENT: String = "env"
