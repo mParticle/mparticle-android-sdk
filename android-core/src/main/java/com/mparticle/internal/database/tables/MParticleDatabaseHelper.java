@@ -11,6 +11,7 @@ import androidx.annotation.VisibleForTesting;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
+import com.mparticle.internal.database.UploadSettings;
 import com.mparticle.internal.database.services.SQLiteOpenHelperWrapper;
 
 import org.json.JSONException;
@@ -164,6 +165,11 @@ public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
 
     private void upgradeUploadsTable(SQLiteDatabase db) {
         db.execSQL(UploadTable.UPLOAD_ADD_UPLOAD_SETTINGS_COLUMN);
-        // TODO: BEN - insert current upload settings
+
+        // Insert current upload settings
+        UploadSettings uploadSettings = ConfigManager.getInstance(mContext).getUploadSettings();
+        ContentValues values = new ContentValues();
+        values.put(UploadTable.UploadTableColumns.UPLOAD_SETTINGS, uploadSettings.toJson());
+        db.update(UploadTable.UploadTableColumns.TABLE_NAME, values, null, null);
     }
 }
