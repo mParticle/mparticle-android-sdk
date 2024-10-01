@@ -28,7 +28,7 @@ class AppStateManagerTest {
     fun setup() {
         val context = MockContext()
         mockContext = context.applicationContext as MockApplication
-        manager = AppStateManager(mockContext, true)
+        manager = AppStateManager(mockContext!!, true)
         prefs = mockContext?.getSharedPreferences(null, 0) as MockSharedPreferences
         val configManager = Mockito.mock(ConfigManager::class.java)
         manager.setConfigManager(configManager)
@@ -53,7 +53,7 @@ class AppStateManagerTest {
     @Test
     @Throws(Exception::class)
     fun testOnActivityStarted() {
-        Assert.assertEquals(true, manager.isBackgrounded)
+        Assert.assertEquals(true, manager.isBackgrounded())
         manager.onActivityStarted(activity)
         Mockito.verify(MParticle.getInstance()!!.Internal().kitManager, Mockito.times(1))
             .onActivityStarted(activity)
@@ -62,10 +62,10 @@ class AppStateManagerTest {
     @Test
     @Throws(Exception::class)
     fun testOnActivityResumed() {
-        Assert.assertEquals(true, manager.isBackgrounded)
+        Assert.assertEquals(true, manager.isBackgrounded())
         manager.onActivityResumed(activity)
         Assert.assertTrue(AppStateManager.mInitialized)
-        Assert.assertEquals(false, manager.isBackgrounded)
+        Assert.assertEquals(false, manager.isBackgrounded())
         manager.onActivityResumed(activity)
     }
 
@@ -124,7 +124,7 @@ class AppStateManagerTest {
     fun testSecondActivityStart() {
         manager.onActivityPaused(activity)
         Thread.sleep(1000)
-        Assert.assertEquals(true, manager.isBackgrounded)
+        Assert.assertEquals(true, manager.isBackgrounded())
         manager.onActivityResumed(activity)
         val activity2 = Mockito.mock(
             Activity::class.java
@@ -135,20 +135,20 @@ class AppStateManagerTest {
         manager.onActivityPaused(activity2)
         manager.onActivityPaused(activity3)
         Thread.sleep(1000)
-        Assert.assertEquals(false, manager.isBackgrounded)
+        Assert.assertEquals(false, manager.isBackgrounded())
         manager.onActivityPaused(activity)
         Thread.sleep(1000)
-        Assert.assertEquals(true, manager.isBackgrounded)
+        Assert.assertEquals(true, manager.isBackgrounded())
     }
 
     @Test
     @Throws(Exception::class)
     fun testOnActivityPaused() {
         manager.onActivityResumed(activity)
-        Assert.assertEquals(false, manager.isBackgrounded)
+        Assert.assertEquals(false, manager.isBackgrounded())
         manager.onActivityPaused(activity)
         Thread.sleep(1000)
-        Assert.assertEquals(true, manager.isBackgrounded)
+        Assert.assertEquals(true, manager.isBackgrounded())
         Assert.assertTrue(AppStateManager.mInitialized)
         Assert.assertTrue(manager.mLastStoppedTime.get() > 0)
         manager.onActivityResumed(activity)
@@ -190,7 +190,7 @@ class AppStateManagerTest {
                 return isBackground.value
             }
 
-            override fun getSession(): InternalSession {
+            override fun fetchSession(): InternalSession {
                 return session.value!!
             }
         }
