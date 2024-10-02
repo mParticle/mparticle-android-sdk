@@ -2,6 +2,8 @@ package com.mparticle.internal.database
 
 import android.database.sqlite.SQLiteDatabase
 import android.location.Location
+import android.net.Network
+import com.mparticle.internal.ConfigManager
 import com.mparticle.internal.InternalSession
 import com.mparticle.internal.database.services.BreadcrumbService
 import com.mparticle.internal.database.services.MessageService
@@ -19,6 +21,7 @@ import com.mparticle.internal.database.tables.ReportingTableTest
 import com.mparticle.internal.database.tables.SessionTableTest
 import com.mparticle.internal.database.tables.UserAttributeTableTest
 import com.mparticle.internal.messages.BaseMPMessage
+import com.mparticle.networking.NetworkOptions
 import com.mparticle.testutils.TestingUtils
 import org.json.JSONException
 import org.json.JSONObject
@@ -90,7 +93,7 @@ class UpgradeVersionTest : BaseTableTest() {
             1L
         )
         SessionService.insertSession(db, message, "key", "", "", 1L)
-        UploadService.insertAliasRequest(db, "key", JSONObject().put("key", "value"))
+        UploadService.insertAliasRequest(db, JSONObject().put("key", "value"), UploadSettings("apiKey", "secret", NetworkOptions.builder().build(), "", ""))
         UserAttributesService.insertAttribute(db, "key", "value", 1L, false, 1L)
 
         // test to make sure there are values in the database

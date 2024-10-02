@@ -8,6 +8,7 @@ import com.mparticle.internal.Constants
 import com.mparticle.internal.MPUtility
 import com.mparticle.internal.MParticleApiClientImpl.MPRampException
 import com.mparticle.internal.MParticleApiClientImpl.MPThrottleException
+import com.mparticle.internal.database.UploadSettings
 import com.mparticle.testutils.BaseCleanStartedEachTest
 import com.mparticle.testutils.MPLatch
 import com.mparticle.testutils.TestingUtils
@@ -36,7 +37,7 @@ class UploadMessageTest : BaseCleanStartedEachTest() {
         val matchingJSONEvents: MutableMap<Long, MutableMap<String, JSONObject>> = HashMap()
         AccessUtils.setMParticleApiClient(object : EmptyMParticleApiClient() {
             @Throws(IOException::class, MPThrottleException::class, MPRampException::class)
-            override fun sendMessageBatch(message: String): Int {
+            override fun sendMessageBatch(message: String, uploadSettings: UploadSettings): Int {
                 handler.post {
                     try {
                         val jsonObject = JSONObject(message)

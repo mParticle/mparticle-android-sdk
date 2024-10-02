@@ -1,6 +1,7 @@
 package com.mparticle.internal
 
 import android.content.Context
+import android.net.Network
 import android.os.Message
 import com.mparticle.MParticle
 import com.mparticle.MockMParticle
@@ -10,9 +11,11 @@ import com.mparticle.internal.MParticleApiClient.AliasNetworkResponse
 import com.mparticle.internal.MParticleApiClientImpl.MPRampException
 import com.mparticle.internal.MParticleApiClientImpl.MPThrottleException
 import com.mparticle.internal.database.MPDatabase
+import com.mparticle.internal.database.UploadSettings
 import com.mparticle.internal.database.services.MParticleDBManager
 import com.mparticle.internal.messages.MPAliasMessage
 import com.mparticle.mock.MockContext
+import com.mparticle.networking.NetworkOptions
 import com.mparticle.testutils.AndroidUtils
 import com.mparticle.testutils.RandomUtils
 import com.mparticle.testutils.TestingUtils
@@ -119,10 +122,10 @@ class UploadHandlerTest {
             MParticleApiClientImpl::class.java
         )
         val rampException = MPRampException()
-        Mockito.`when`(apiClient.sendMessageBatch(Mockito.anyString())).thenThrow(rampException)
+        Mockito.`when`(apiClient.sendMessageBatch(Mockito.anyString(), Mockito.any())).thenThrow(rampException)
         Mockito.`when`(handler.mParticleDBManager.deleteUpload(Mockito.anyInt())).thenReturn(1)
         handler.setApiClient(apiClient)
-        handler.uploadMessage(522, "")
+        handler.uploadMessage(522, "", mConfigManager.uploadSettings)
     }
 
     @Test
@@ -175,14 +178,18 @@ class UploadHandlerTest {
             mockApiClient.sendAliasRequest(
                 Mockito.any(
                     String::class.java
+                ),
+                Mockito.any(
+                    UploadSettings::class.java
                 )
             )
         ).thenReturn(AliasNetworkResponse(0))
+        Mockito.`when`(mConfigManager.uploadSettings).thenReturn(UploadSettings("apiKey", "secret", NetworkOptions.builder().build(), "", ""))
         uploadHandler.setApiClient(mockApiClient)
         TestCase.assertNull(deleteId.value)
         val aliasRequest = TestingUtils.getInstance().randomAliasRequest
         val request: JSONObject = MPAliasMessage(aliasRequest, "das", "apiKey")
-        uploadHandler.uploadAliasRequest(1, request.toString())
+        uploadHandler.uploadAliasRequest(1, request.toString(), mConfigManager.uploadSettings)
         TestCase.assertNull(deleteId.value)
     }
 
@@ -220,15 +227,20 @@ class UploadHandlerTest {
             mockApiClient.sendAliasRequest(
                 Mockito.any(
                     String::class.java
+                ),
+                Mockito.any(
+                    UploadSettings::class.java
                 )
             )
         ).thenReturn(AliasNetworkResponse(0))
+        Mockito.`when`(mConfigManager.uploadSettings).thenReturn(UploadSettings("apiKey", "secret", NetworkOptions.builder().build(), "", ""))
         uploadHandler.setApiClient(mockApiClient)
         TestCase.assertNull(deletedUpload.value)
         val aliasRequest = TestingUtils.getInstance().randomAliasRequest
         uploadHandler.uploadAliasRequest(
             1,
-            MPAliasMessage(aliasRequest, "das", "apiKey").toString()
+            MPAliasMessage(aliasRequest, "das", "apiKey").toString(),
+            mConfigManager.uploadSettings
         )
         Assert.assertNotNull(deletedUpload.value)
     }
@@ -267,13 +279,16 @@ class UploadHandlerTest {
             mockApiClient.sendAliasRequest(
                 Mockito.any(
                     String::class.java
+                ),
+                Mockito.any(
+                    UploadSettings::class.java
                 )
             )
         ).thenReturn(AliasNetworkResponse(202))
         TestCase.assertNull(capturedResponse.value)
         var aliasRequest = TestingUtils.getInstance().randomAliasRequest
         var aliasRequestMessage = MPAliasMessage(aliasRequest, "das", "apiKey")
-        handler.uploadAliasRequest(1, aliasRequestMessage.toString())
+        handler.uploadAliasRequest(1, aliasRequestMessage.toString(), mConfigManager.uploadSettings)
         capturedResponse.value?.isSuccessful?.let { Assert.assertTrue(it) }
         TestCase.assertNull(capturedResponse.value?.errorResponse)
         capturedResponse.value?.willRetry()?.let { Assert.assertFalse(it) }
@@ -287,13 +302,16 @@ class UploadHandlerTest {
             mockApiClient.sendAliasRequest(
                 Mockito.any(
                     String::class.java
+                ),
+                Mockito.any(
+                    UploadSettings::class.java
                 )
             )
         ).thenReturn(AliasNetworkResponse(429))
         TestCase.assertNull(capturedResponse.value)
         aliasRequest = TestingUtils.getInstance().randomAliasRequest
         aliasRequestMessage = MPAliasMessage(aliasRequest, "das", "apiKey")
-        handler.uploadAliasRequest(2, aliasRequestMessage.toString())
+        handler.uploadAliasRequest(2, aliasRequestMessage.toString(), mConfigManager.uploadSettings)
         capturedResponse.value?.isSuccessful?.let { Assert.assertFalse(it) }
         TestCase.assertNull(capturedResponse.value?.errorResponse)
         capturedResponse.value?.willRetry()?.let { Assert.assertTrue(it) }
@@ -308,13 +326,16 @@ class UploadHandlerTest {
             mockApiClient.sendAliasRequest(
                 Mockito.any(
                     String::class.java
+                ),
+                Mockito.any(
+                    UploadSettings::class.java
                 )
             )
         ).thenReturn(AliasNetworkResponse(400, error))
         TestCase.assertNull(capturedResponse.value)
         aliasRequest = TestingUtils.getInstance().randomAliasRequest
         aliasRequestMessage = MPAliasMessage(aliasRequest, "das", "apiKey")
-        handler.uploadAliasRequest(3, aliasRequestMessage.toString())
+        handler.uploadAliasRequest(3, aliasRequestMessage.toString(), mConfigManager.uploadSettings)
         capturedResponse.value?.isSuccessful?.let { Assert.assertFalse(it) }
         Assert.assertEquals(capturedResponse.value?.errorResponse, error)
         capturedResponse.value?.willRetry()?.let { Assert.assertFalse(it) }
@@ -337,6 +358,7 @@ class UploadHandlerTest {
             ConfigManager::class.java
         )
         Mockito.`when`(mockConfigManager.uploadInterval).thenReturn(100)
+        Mockito.`when`(mockConfigManager.uploadSettings).thenReturn(UploadSettings("apiKey", "secret", NetworkOptions.builder().build(), "", ""))
         val mockAppStateManager = Mockito.mock(
             AppStateManager::class.java
         )
@@ -354,6 +376,9 @@ class UploadHandlerTest {
             mockApiClient.sendMessageBatch(
                 Mockito.any(
                     String::class.java
+                ),
+                Mockito.any(
+                    UploadSettings::class.java
                 )
             )
         ).thenReturn(200)
@@ -409,7 +434,7 @@ class UploadHandlerTest {
         }
 
         @Throws(Exception::class)
-        override fun prepareMessageUploads() {
+        override fun prepareMessageUploads(uploadSettings: UploadSettings) {
             prepareMessageUploadsCalledCount++
         }
 
