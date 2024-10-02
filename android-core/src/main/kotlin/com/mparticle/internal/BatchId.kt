@@ -21,4 +21,24 @@ class BatchId {
         dataplanId = readyMessage.dataplanId
         dataplanVersion = readyMessage.dataplanVersion
     }
+
+    override fun equals(obj: Any?): Boolean {
+        if (obj !is BatchId) {
+            return false
+        }
+        for (i in 0 until fields().size) {
+            if (!MPUtility.isEqual(fields()[i], obj.fields()[i])) {
+                return false
+            }
+        }
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return fields().contentHashCode()
+    }
+
+    private fun fields(): Array<Any?> {
+        return arrayOf(mpid, sessionId, dataplanId, dataplanVersion)
+    }
 }
