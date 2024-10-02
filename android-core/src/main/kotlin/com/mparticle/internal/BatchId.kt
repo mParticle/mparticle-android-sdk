@@ -4,9 +4,9 @@ import com.mparticle.internal.database.services.MessageService.ReadyMessage
 
 class BatchId {
     val mpid: Long
-    var sessionId: String?
-    var dataplanId: String?
-    var dataplanVersion: Int?
+    val sessionId: String?
+    val dataplanId: String?
+    val dataplanVersion: Int?
 
     constructor(mpid: Long, sessionId: String?, dataplanId: String?, dataplanVersion: Int?) {
         this.mpid = mpid
