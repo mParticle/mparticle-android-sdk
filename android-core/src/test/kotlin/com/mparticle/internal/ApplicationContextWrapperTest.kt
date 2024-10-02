@@ -47,7 +47,7 @@ class ApplicationContextWrapperTest {
     var bundle2 = Mockito.mock(Bundle::class.java)
 
     inner class MockApplicationContextWrapper internal constructor(application: Application?) :
-        ApplicationContextWrapper(application) {
+        ApplicationContextWrapper(application!!) {
         override fun attachBaseContext(base: Context) {}
     }
 
