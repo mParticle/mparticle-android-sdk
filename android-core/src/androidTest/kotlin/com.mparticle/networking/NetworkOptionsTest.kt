@@ -1,8 +1,10 @@
 package com.mparticle.networking
 
+import android.net.Network
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.internal.AccessUtils
+import com.mparticle.internal.database.UploadSettings
 import com.mparticle.testutils.BaseCleanInstallEachTest
 import org.junit.After
 import org.junit.Assert
@@ -22,7 +24,7 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
         startMParticle(MParticleOptions.builder(mContext).credentials(apiKey, "secret"))
         setClients()
         for (endpoint in MParticleBaseClientImpl.Endpoint.values()) {
-            defaultUrls[endpoint] = mpClient.getUrl(endpoint, endpoint.name)
+            defaultUrls[endpoint] = mpClient.getUrl(endpoint, endpoint.name, UploadSettings(apiKey, "secret", NetworkOptions.builder().build(), "", ""))
         }
         MParticle.setInstance(null)
     }
@@ -61,7 +63,7 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
         var randIdentityPath = mRandomUtils.getAlphaString(10)
         Assert.assertEquals(
             "/v1/$randIdentityPath",
-            mpClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY, randIdentityPath).path
+            mpClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY, randIdentityPath, null).path
         )
         Assert.assertEquals(
             NetworkOptionsManager.MP_URL,
@@ -84,7 +86,8 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
             "/v1/$randIdentityPath",
             identityClient.getUrl(
                 MParticleBaseClientImpl.Endpoint.IDENTITY,
-                randIdentityPath
+                randIdentityPath,
+                null
             ).path
         )
     }
@@ -139,7 +142,7 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
         var randIdentityPath = mRandomUtils.getAlphaString(10)
         Assert.assertEquals(
             "/v1/$randIdentityPath",
-            mpClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY, randIdentityPath).path
+            mpClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY, randIdentityPath, null).path
         )
         Assert.assertEquals(
             audienceUrl,
@@ -162,7 +165,8 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
             "/v1/$randIdentityPath",
             identityClient.getUrl(
                 MParticleBaseClientImpl.Endpoint.IDENTITY,
-                randIdentityPath
+                randIdentityPath,
+                null
             ).path
         )
 
@@ -183,7 +187,8 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
             defaultUrls[MParticleBaseClientImpl.Endpoint.IDENTITY]?.path,
             mpClient.getUrl(
                 MParticleBaseClientImpl.Endpoint.IDENTITY,
-                MParticleBaseClientImpl.Endpoint.IDENTITY.name
+                MParticleBaseClientImpl.Endpoint.IDENTITY.name,
+                null
             ).path
         )
     }
@@ -237,7 +242,7 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
         var randIdentityPath = mRandomUtils.getAlphaString(10)
         Assert.assertEquals(
             "/v1/$randIdentityPath",
-            mpClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY, randIdentityPath).path
+            mpClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY, randIdentityPath, null).path
         )
         Assert.assertEquals(
             audienceUrl,
@@ -260,7 +265,8 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
             "/v1/$randIdentityPath",
             identityClient.getUrl(
                 MParticleBaseClientImpl.Endpoint.IDENTITY,
-                randIdentityPath
+                randIdentityPath,
+                null
             ).path
         )
 
@@ -281,7 +287,8 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
             defaultUrls[MParticleBaseClientImpl.Endpoint.IDENTITY]?.path,
             mpClient.getUrl(
                 MParticleBaseClientImpl.Endpoint.IDENTITY,
-                MParticleBaseClientImpl.Endpoint.IDENTITY.name
+                MParticleBaseClientImpl.Endpoint.IDENTITY.name,
+                null
             ).path
         )
     }
@@ -360,7 +367,7 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
         val randIdentityPath = mRandomUtils.getAlphaString(10)
         Assert.assertEquals(
             "/$randIdentityPath",
-            mpClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY, randIdentityPath).path
+            mpClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY, randIdentityPath, null).path
         )
 
         // test the that the Path is still the default one (make sure the overrideSubdirectory is not kicking in when it shouldn't)
@@ -391,7 +398,8 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
             identityPath,
             mpClient.getUrl(
                 MParticleBaseClientImpl.Endpoint.IDENTITY,
-                MParticleBaseClientImpl.Endpoint.IDENTITY.name
+                MParticleBaseClientImpl.Endpoint.IDENTITY.name,
+                null
             ).path
         )
     }

@@ -112,7 +112,7 @@ public class AccessUtils {
         }
 
         @Override
-        public int sendMessageBatch(String message, @NonNull UploadSettings uploadSettings) throws IOException, MParticleApiClientImpl.MPThrottleException, MParticleApiClientImpl.MPRampException {
+        public int sendMessageBatch(@NonNull String message, @NonNull UploadSettings uploadSettings) throws IOException, MParticleApiClientImpl.MPThrottleException, MParticleApiClientImpl.MPRampException {
             return 0;
         }
 

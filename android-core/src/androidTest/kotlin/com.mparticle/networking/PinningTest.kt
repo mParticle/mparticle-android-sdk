@@ -1,9 +1,11 @@
 package com.mparticle.networking
 
+import android.net.Network
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mparticle.MParticle
 import com.mparticle.identity.IdentityApiRequest
 import com.mparticle.internal.AccessUtils
+import com.mparticle.internal.database.UploadSettings
 import com.mparticle.testutils.AndroidUtils
 import com.mparticle.testutils.BaseCleanStartedEachTest
 import com.mparticle.testutils.MPLatch
@@ -97,7 +99,7 @@ open class PinningTest : BaseCleanStartedEachTest() {
             latch.countDown()
         }
         try {
-            AccessUtils.getApiClient().sendMessageBatch(JSONObject().toString())
+            AccessUtils.getApiClient().sendMessageBatch(JSONObject().toString(), UploadSettings("apiKey", "secret", NetworkOptions.builder().build(), "", ""))
         } catch (_: Exception) {
         }
         latch.await()
@@ -105,8 +107,9 @@ open class PinningTest : BaseCleanStartedEachTest() {
     }
 
     companion object {
+        @JvmStatic
         @BeforeClass
-        fun beforeClass() {
+        fun beforeClass(): Unit {
             MParticle.reset(InstrumentationRegistry.getInstrumentation().context)
         }
     }
