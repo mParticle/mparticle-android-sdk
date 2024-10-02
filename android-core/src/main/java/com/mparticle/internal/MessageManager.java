@@ -772,7 +772,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     @Override
     public UploadSettings getUploadSettings() throws MParticleApiClientImpl.MPNoConfigException {
         UploadSettings uploadSettings = mConfigManager.getUploadSettings();
-        if (MPUtility.isEmpty(uploadSettings.getApiKey()) || MPUtility.isEmpty(uploadSettings.getSecret())) {
+        if (uploadSettings == null) {
             throw new MParticleApiClientImpl.MPNoConfigException();
         }
         return uploadSettings;

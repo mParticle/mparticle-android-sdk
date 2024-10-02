@@ -127,7 +127,7 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
         String subdirectory;
         String pathPrefix;
         String pathPostfix;
-        boolean overridesSubdirectory = domainMapping.isOverridesSubdirectory();
+        boolean overridesSubdirectory = domainMapping != null && domainMapping.isOverridesSubdirectory();
         switch (endpoint) {
             case CONFIG:
                 pathPrefix = SERVICE_VERSION_4 + "/";

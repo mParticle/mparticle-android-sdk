@@ -1,13 +1,16 @@
 package com.mparticle.internal
 
+import android.net.Network
 import android.os.Message
 import com.mparticle.MParticle
 import com.mparticle.MockMParticle
 import com.mparticle.internal.Constants.MessageKey
 import com.mparticle.internal.database.MPDatabase
+import com.mparticle.internal.database.UploadSettings
 import com.mparticle.internal.database.services.MParticleDBManager
 import com.mparticle.internal.messages.MPAliasMessage
 import com.mparticle.mock.MockContext
+import com.mparticle.networking.NetworkOptions
 import com.mparticle.testutils.AndroidUtils
 import com.mparticle.testutils.TestingUtils
 import junit.framework.TestCase
@@ -37,6 +40,7 @@ class MessageHandlerTest {
         mConfigManager = MParticle.getInstance()?.Internal()?.configManager!!
         mMessageManager = Mockito.mock(MessageManager::class.java)
         Mockito.`when`(mMessageManager.apiKey).thenReturn("apiKey")
+        Mockito.`when`(mMessageManager.uploadSettings).thenReturn(UploadSettings("apiKey", "secret", NetworkOptions.builder().build(), "", ""))
         mParticleDatabaseManager = Mockito.mock(MParticleDBManager::class.java)
         handler = object : MessageHandler(
             mMessageManager,
@@ -57,7 +61,7 @@ class MessageHandlerTest {
         val insertedAliasRequest = AndroidUtils.Mutable<JSONObject?>(null)
         Mockito.`when`(mConfigManager.deviceApplicationStamp).thenReturn("das")
         val database: MParticleDBManager = object : MParticleDBManager(MockContext()) {
-            override fun insertAliasRequest(apiKey: String, request: JSONObject) {
+            override fun insertAliasRequest(request: JSONObject, uploadSettings: UploadSettings) {
                 insertedAliasRequest.value = request
             }
 

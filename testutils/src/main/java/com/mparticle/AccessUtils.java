@@ -15,8 +15,8 @@ import java.util.Set;
 
 public class AccessUtils {
 
-    public static void reset(Context context, boolean deleteDatabase) {
-        MParticle.reset(context, deleteDatabase);
+    public static void reset(Context context, boolean deleteDatabase, boolean switchingWorkspaces) {
+        MParticle.reset(context, deleteDatabase, switchingWorkspaces);
     }
 
     /**
