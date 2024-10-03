@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Handler
+import android.os.Looper
 import com.mparticle.MParticle
 import com.mparticle.MockMParticle
 import com.mparticle.mock.MockApplication
@@ -13,8 +14,14 @@ import com.mparticle.testutils.AndroidUtils
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito
+import org.powermock.api.mockito.PowerMockito
+import org.powermock.core.classloader.annotations.PrepareForTest
+import org.powermock.modules.junit4.PowerMockRunner
 
+@RunWith(PowerMockRunner::class)
+@PrepareForTest(Looper::class)
 class AppStateManagerTest {
     lateinit var manager: AppStateManager
     private var mockContext: MockApplication? = null
@@ -28,6 +35,10 @@ class AppStateManagerTest {
     fun setup() {
         val context = MockContext()
         mockContext = context.applicationContext as MockApplication
+        // Prepare and mock the Looper class
+        PowerMockito.mockStatic(Looper::class.java)
+        val looper: Looper = Mockito.mock(Looper::class.java)
+        Mockito.`when`(Looper.getMainLooper()).thenReturn(looper)
         manager = AppStateManager(mockContext!!, true)
         prefs = mockContext?.getSharedPreferences(null, 0) as MockSharedPreferences
         val configManager = Mockito.mock(ConfigManager::class.java)
@@ -194,6 +205,7 @@ class AppStateManagerTest {
                 return session.value!!
             }
         }
+        manager.session= session.value!!
         val configManager = Mockito.mock(ConfigManager::class.java)
         manager.setConfigManager(configManager)
         Mockito.`when`(MParticle.getInstance()?.Media()?.audioPlaying).thenReturn(false)
