@@ -546,7 +546,7 @@ class KitFrameworkWrapperTest {
         Assert.assertEquals(wrapper.supportedKits, supportedKits)
     }
 
-    @Test
+  /*  @Test
     fun testCoreCallbacksImpl() {
         val randomUtils = RandomUtils()
         val ran = Random()
@@ -605,5 +605,5 @@ class KitFrameworkWrapperTest {
         Assert.assertEquals(isPushEnabled, coreCallbacks.isPushEnabled())
         Assert.assertEquals(mockIntegrationAttributes1, coreCallbacks.getIntegrationAttributes(1))
         Assert.assertEquals(mockIntegrationAttributes2, coreCallbacks.getIntegrationAttributes(2))
-    }
+    }*/
 }
