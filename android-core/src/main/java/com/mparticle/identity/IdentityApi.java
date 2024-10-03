@@ -93,7 +93,7 @@ public class IdentityApi {
      */
     @Nullable
     public MParticleUser getUser(@NonNull Long mpid) {
-        if (!Constants.TEMPORARY_MPID.equals(mpid) && mConfigManager.mpidExists(mpid)) {
+        if (Constants.TEMPORARY_MPID != mpid && mConfigManager.mpidExists(mpid)) {
             return MParticleUserImpl.getInstance(mContext, mpid, mUserDelegate);
         } else {
             return null;
@@ -252,7 +252,7 @@ public class IdentityApi {
         if (updateRequest.mpid == null) {
             updateRequest.mpid = mConfigManager.getMpid();
         }
-        if (Constants.TEMPORARY_MPID.equals(updateRequest.mpid)) {
+        if (Constants.TEMPORARY_MPID == updateRequest.mpid) {
             String message = "modify() requires a non-zero MPID, please make sure a MParticleUser is present before making a modify request.";
             if (devMode) {
                 throw new IllegalArgumentException(message);
