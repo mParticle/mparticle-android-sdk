@@ -1,6 +1,5 @@
 package com.mparticle.networking
 
-import android.net.Network
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mparticle.MParticle
 import com.mparticle.identity.IdentityApiRequest
@@ -109,7 +108,7 @@ open class PinningTest : BaseCleanStartedEachTest() {
     companion object {
         @JvmStatic
         @BeforeClass
-        fun beforeClass(): Unit {
+        fun beforeClass() {
             MParticle.reset(InstrumentationRegistry.getInstrumentation().context)
         }
     }

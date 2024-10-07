@@ -2,8 +2,6 @@ package com.mparticle.internal.database
 
 import android.database.sqlite.SQLiteDatabase
 import android.location.Location
-import android.net.Network
-import com.mparticle.internal.ConfigManager
 import com.mparticle.internal.InternalSession
 import com.mparticle.internal.database.services.BreadcrumbService
 import com.mparticle.internal.database.services.MessageService
