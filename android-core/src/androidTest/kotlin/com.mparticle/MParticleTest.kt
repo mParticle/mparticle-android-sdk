@@ -12,6 +12,7 @@ import com.mparticle.internal.KitFrameworkWrapper
 import com.mparticle.internal.MParticleJSInterface
 import com.mparticle.internal.MessageManager
 import com.mparticle.internal.PushRegistrationHelper.PushRegistration
+import com.mparticle.internal.database.services.UploadService
 import com.mparticle.networking.Matcher
 import com.mparticle.networking.MockServer.JSONMatch
 import com.mparticle.testutils.AndroidUtils
@@ -327,6 +328,97 @@ class MParticleTest : BaseCleanStartedEachTest() {
         Assert.assertEquals(location, MParticle.getInstance()!!.mMessageManager.location)
         MParticle.getInstance()!!.setLocation(null)
         Assert.assertNull(MParticle.getInstance()!!.mMessageManager.location)
+    }
+
+    @Test
+    fun testSwitchWorkspacesCredentials() {
+        MParticle.setInstance(null)
+
+        val optionsBuilder = MParticleOptions.builder(mContext)
+        optionsBuilder.apiKey = "apiKey1"
+        optionsBuilder.apiSecret = "apiSecret1"
+        val options = optionsBuilder.build()
+
+        MParticle.start(options)
+        val instance1 = MParticle.getInstance()
+
+        Assert.assertEquals("apiKey1", instance1!!.mConfigManager.apiKey)
+        Assert.assertEquals("apiSecret1", instance1.mConfigManager.apiSecret)
+
+        val switchOptionsBuilder = MParticleOptions.builder(mContext)
+        switchOptionsBuilder.apiKey = "apiKey2"
+        switchOptionsBuilder.apiSecret = "apiSecret2"
+        val switchOptions = switchOptionsBuilder.build()
+
+        MParticle.switchWorkspace(switchOptions)
+        val instance2 = MParticle.getInstance()
+
+        Assert.assertEquals("apiKey2", instance2!!.mConfigManager.apiKey)
+        Assert.assertEquals("apiSecret2", instance2.mConfigManager.apiSecret)
+    }
+
+    @Test
+    fun testSwitchWorkspacesUploadSettings() {
+        MParticle.setInstance(null)
+
+        val optionsBuilder = MParticleOptions.builder(mContext)
+        optionsBuilder.apiKey = "apiKey1"
+        optionsBuilder.apiSecret = "apiSecret1"
+        val options = optionsBuilder.build()
+
+        MParticle.start(options)
+        val instance1 = MParticle.getInstance()
+
+        val eventsUrl1 = mServer.Endpoints().eventsUrl
+        Assert.assertEquals(true, eventsUrl1.path.contains(options.apiKey))
+
+        Assert.assertEquals("apiKey1", instance1!!.mConfigManager.apiKey)
+        Assert.assertEquals("apiSecret1", instance1.mConfigManager.apiSecret)
+        val event1 = MPEvent.Builder("event 1").build()
+        instance1.logEvent(event1)
+
+        val readyUploads1 = UploadService.getReadyUploads(instance1.mDatabaseManager.database)
+        Assert.assertEquals(0, readyUploads1.count())
+
+        val switchOptionsBuilder = MParticleOptions.builder(mContext)
+        switchOptionsBuilder.apiKey = "apiKey2"
+        switchOptionsBuilder.apiSecret = "apiSecret2"
+        val switchOptions = switchOptionsBuilder.build()
+
+        MParticle.switchWorkspace(switchOptions)
+        val instance2 = MParticle.getInstance()
+
+        val eventsUrl2 = mServer.Endpoints().eventsUrl
+        Assert.assertTrue(eventsUrl2.path.contains(switchOptions.apiKey))
+
+        val event2 = MPEvent.Builder("event 2").build()
+        instance2!!.logEvent(event2)
+
+        // TODO: https://go.mparticle.com/work/SQDSDKS-6840
+        val latch: CountDownLatch = MPLatch(1)
+        val received = AndroidUtils.Mutable(false)
+        mServer.waitForVerify(
+            Matcher(eventsUrl2).bodyMatch(
+                JSONMatch { jsonObject ->
+                    val hasEvent2 = jsonObject.optJSONArray("msgs")
+                        ?.toList()
+                        ?.filterIsInstance<JSONObject>()
+                        ?.any { it.optString("n") == event2.eventName }
+                    Assert.assertTrue(hasEvent2 ?: false)
+
+                    return@JSONMatch hasEvent2 ?: false
+                }
+            )
+        ) {
+            received.value = true
+            // TODO: https://go.mparticle.com/work/SQDSDKS-6842
+//            latch.countDown()
+        }
+
+        instance2.upload()
+
+        latch.await()
+        Assert.assertTrue(received.value)
     }
 
     @Throws(JSONException::class, InterruptedException::class)

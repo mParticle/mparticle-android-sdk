@@ -281,6 +281,15 @@ public class MParticle {
         MParticle.instance = instance;
     }
 
+    /**
+     * Switch the SDK to a new API key and secret.
+     * Will first batch all events that have not been sent to mParticle into upload records,
+     * then all SDK state including user defaults, database (except uploads), etc will be
+     * completely reset. After that, {@link #start(MParticleOptions)} )} will be called with
+     * the new key and secret and the SDK will initialize again as if it is a new app launch.
+     *
+     @param options Required to initialize the SDK properly
+     */
     public static void switchWorkspace(@NonNull MParticleOptions options) {
         if (instance != null) {
             // End session if active
