@@ -1,6 +1,5 @@
 package com.mparticle.networking
 
-import android.net.Network
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.internal.AccessUtils

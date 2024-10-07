@@ -1,6 +1,5 @@
 package com.mparticle.networking
 
-import android.net.Network
 import android.net.Uri
 import com.mparticle.BuildConfig
 import com.mparticle.MParticle

@@ -4,13 +4,11 @@ import android.content.SharedPreferences
 import androidx.test.filters.LargeTest
 import com.mparticle.internal.MParticleApiClientImpl.MPConfigException
 import com.mparticle.internal.MParticleApiClientImpl.MPThrottleException
-import com.mparticle.internal.database.UploadSettings
 import com.mparticle.mock.MockContext
 import com.mparticle.mock.MockSharedPreferences
 import com.mparticle.networking.MPConnection
 import com.mparticle.networking.MPUrl
 import com.mparticle.networking.MParticleBaseClientImpl
-import com.mparticle.networking.NetworkOptions
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Test
