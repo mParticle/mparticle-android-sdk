@@ -1,7 +1,6 @@
 package com.mparticle.internal
 
 import android.content.Context
-import android.net.Network
 import android.os.Message
 import com.mparticle.MParticle
 import com.mparticle.MockMParticle
