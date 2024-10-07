@@ -7,6 +7,11 @@ import android.content.SharedPreferences;
 import android.net.UrlQuerySanitizer;
 import android.os.Build;
 
+import androidx.annotation.NonNull;
+
+import com.mparticle.internal.database.UploadSettings;
+import com.mparticle.networking.NetworkOptions;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,6 +42,7 @@ public class UserStorage {
     private static final String FIRST_SEEN_TIME = "mp::first_seen";
     private static final String LAST_SEEN_TIME = "mp::last_seen";
     private static final String DEFAULT_SEEN_TIME = "mp::default_seen_time";
+    private static final String LAST_UPLOAD_SETTINGS = "mp::last_upload_settings";
 
     static final int DEFAULT_BREADCRUMB_LIMIT = 50;
 
@@ -315,6 +321,21 @@ public class UserStorage {
 
     private Long getDefaultSeenTime() {
         return getMParticleSharedPrefs(mContext).getLong(DEFAULT_SEEN_TIME, System.currentTimeMillis());
+    }
+
+    public UploadSettings getLastUploadSettings() {
+        String lastUploadSettingsJson = mPreferences.getString(LAST_UPLOAD_SETTINGS, null);
+        if (lastUploadSettingsJson != null) {
+            return UploadSettings.withJson(lastUploadSettingsJson);
+        }
+        return null;
+    }
+
+    public void setLastUploadSettings(@NonNull UploadSettings uploadSettings) {
+        String lastUploadSettingsJson = uploadSettings.toJson();
+        if (lastUploadSettingsJson != null) {
+            mPreferences.edit().putString(LAST_UPLOAD_SETTINGS, lastUploadSettingsJson).apply();
+        }
     }
 
     void setLoggedInUser(boolean knownUser) {
