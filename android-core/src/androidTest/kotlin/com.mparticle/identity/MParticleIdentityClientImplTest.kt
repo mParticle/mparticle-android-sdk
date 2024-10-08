@@ -1,6 +1,7 @@
 package com.mparticle.identity
 
 import android.os.Handler
+import android.os.Looper
 import android.util.MutableBoolean
 import com.mparticle.MParticle
 import com.mparticle.internal.ConfigManager
@@ -16,6 +17,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import java.io.IOException
+import java.lang.reflect.Method
 import java.util.concurrent.CountDownLatch
 
 class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
@@ -53,6 +55,65 @@ class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
                     ?.addFailureListener { Assert.fail("task failed") }
             }
             ?.addFailureListener { Assert.fail("task failed") }
+        latch.await()
+        Assert.assertTrue(called.value)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testLoginWithTwoDifferentUsers() {
+        // clear existing catch
+        clearIdentityCache()
+        val latch: CountDownLatch = MPLatch(2)
+        val handler = Handler(Looper.getMainLooper())
+        handler.postDelayed({ Assert.fail("Process not complete") }, (10 * 1000).toLong())
+        val called = AndroidUtils.Mutable(false)
+        val identityRequest = IdentityApiRequest.withEmptyUser()
+            .email("TestEmail@mparticle6.com")
+            .customerId("TestUser777777")
+            .build()
+        // Login with First User
+        MParticle.getInstance()?.Identity()?.login(identityRequest)?.addSuccessListener {
+            latch.countDown()
+        }
+        // Login With second User
+        MParticle.getInstance()?.Identity()?.login(IdentityApiRequest.withEmptyUser().build())?.addSuccessListener {
+            val currentLoginRequestCount = mServer.Requests().login.size
+            Assert.assertEquals(2, currentLoginRequestCount)
+            called.value = true
+            latch.countDown()
+        }
+
+        latch.await()
+        Assert.assertTrue(called.value)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testLoginAndIdentitySameUser() {
+        // clear existing catch
+        clearIdentityCache()
+        val latch: CountDownLatch = MPLatch(2)
+        val handler = Handler(Looper.getMainLooper())
+        handler.postDelayed({ Assert.fail("Process not complete") }, (10 * 1000).toLong())
+        val called = AndroidUtils.Mutable(false)
+        val identityRequest = IdentityApiRequest.withEmptyUser()
+            .email("TestEmail@mparticle6.com")
+            .customerId("TestUser777777")
+            .build()
+        // Login with First User
+        MParticle.getInstance()?.Identity()?.identify(identityRequest)?.addSuccessListener {
+            latch.countDown()
+        }
+        // Login With same User
+        MParticle.getInstance()?.Identity()?.login(identityRequest)?.addSuccessListener {
+            val currentLoginRequestCount = mServer.Requests().login.size
+            Assert.assertEquals(1, currentLoginRequestCount)
+            val currentIdentityRequestCount = mServer.Requests().login.size
+            Assert.assertEquals(1, currentIdentityRequestCount)
+            called.value = true
+            latch.countDown()
+        }
         latch.await()
         Assert.assertTrue(called.value)
     }
@@ -308,6 +369,17 @@ class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
             }
         }
         MParticle.getInstance()?.Identity()?.apiClient = mApiClient
+    }
+    private fun clearIdentityCache() {
+        val mParticleIdentityClient = MParticleIdentityClientImpl(
+            mContext,
+            mConfigManager,
+            MParticle.OperatingSystem.ANDROID
+        )
+
+        val method: Method = MParticleIdentityClientImpl::class.java.getDeclaredMethod("clearCatch")
+        method.isAccessible = true
+        method.invoke(mParticleIdentityClient)
     }
 
     @Throws(JSONException::class)
