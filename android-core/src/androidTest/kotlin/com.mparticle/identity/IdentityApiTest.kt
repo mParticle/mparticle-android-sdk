@@ -114,8 +114,6 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
         // test that change actually took place
         result.addSuccessListener { identityApiResult ->
             Assert.assertEquals(identityApiResult.user.id, mStartingMpid)
-            // After Adding Identity caching, it uses previous response
-            // Assert.assertEquals(identityApiResult.previousUser!!.id, mStartingMpid.toLong())
         }
         com.mparticle.internal.AccessUtils.awaitUploadHandler()
         request = IdentityApiRequest.withEmptyUser().build()
@@ -127,12 +125,10 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
                 MParticle.getInstance()!!
                     .Identity().currentUser!!.id
             )
-            // Assert.assertEquals(identityApiResult.previousUser!!.id, mpid1)
             latch.countDown()
             user3Called.value = true
         }
         latch.await()
-        //  Assert.assertTrue(user1Called.value)
         Assert.assertTrue(user3Called.value)
     }
 
