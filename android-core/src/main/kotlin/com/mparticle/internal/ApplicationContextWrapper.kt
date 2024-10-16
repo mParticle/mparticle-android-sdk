@@ -88,7 +88,7 @@ open class ApplicationContextWrapper(private val mBaseApplication: Application) 
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     fun registerActivityLifecycleCallbacks(
-        callback: ActivityLifecycleCallbacks?,
+        callback: ActivityLifecycleCallbacks,
         unitTesting: Boolean
     ) {
         mBaseApplication.registerActivityLifecycleCallbacks(callback)
@@ -167,7 +167,7 @@ open class ApplicationContextWrapper(private val mBaseApplication: Application) 
     inner class ActivityLifecycleCallbackRecorder : ActivityLifecycleCallbacks {
         var lifeCycleEvents: MutableList<LifeCycleEvent> =
             Collections.synchronizedList(LinkedList())
-        var MAX_LIST_SIZE: Int = 10
+        val MAX_LIST_SIZE: Int = 10
 
         override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
             recordedLifecycleList.add(
@@ -273,7 +273,7 @@ open class ApplicationContextWrapper(private val mBaseApplication: Application) 
         }
     }
 
-    internal inner class ReplayLifecycleCallbacksRunnable(var callback: ActivityLifecycleCallbacks?) :
+    internal inner class ReplayLifecycleCallbacksRunnable(var callback: ActivityLifecycleCallbacks) :
         Runnable {
         @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
         override fun run() {
@@ -300,7 +300,7 @@ open class ApplicationContextWrapper(private val mBaseApplication: Application) 
                                         when (lifeCycleEvent.methodType) {
                                             MethodType.ON_CREATED -> {
                                                 Logger.debug("Forwarding OnCreate")
-                                                callback!!.onActivityCreated(
+                                                callback.onActivityCreated(
                                                     recordedActivity,
                                                     lifeCycleEvent.bundle
                                                 )
@@ -308,22 +308,22 @@ open class ApplicationContextWrapper(private val mBaseApplication: Application) 
 
                                             MethodType.ON_STARTED -> {
                                                 Logger.debug("Forwarding OnStart")
-                                                callback!!.onActivityStarted(recordedActivity)
+                                                callback.onActivityStarted(recordedActivity)
                                             }
 
                                             MethodType.ON_RESUMED -> {
                                                 Logger.debug("Forwarding OnResume")
-                                                callback!!.onActivityResumed(recordedActivity)
+                                                callback.onActivityResumed(recordedActivity)
                                             }
 
                                             MethodType.ON_PAUSED -> {
                                                 Logger.debug("Forwarding OnPause")
-                                                callback!!.onActivityPaused(recordedActivity)
+                                                callback.onActivityPaused(recordedActivity)
                                             }
 
                                             MethodType.ON_SAVE_INSTANCE_STATE -> {
                                                 Logger.debug("Forwarding OnSaveInstance")
-                                                callback!!.onActivitySaveInstanceState(
+                                                callback.onActivitySaveInstanceState(
                                                     recordedActivity,
                                                     lifeCycleEvent.bundle!!
                                                 )
@@ -331,12 +331,12 @@ open class ApplicationContextWrapper(private val mBaseApplication: Application) 
 
                                             MethodType.ON_STOPPED -> {
                                                 Logger.debug("Forwarding OnStop")
-                                                callback!!.onActivityStopped(recordedActivity)
+                                                callback.onActivityStopped(recordedActivity)
                                             }
 
                                             MethodType.ON_DESTROYED -> {
                                                 Logger.debug("Forwarding OnDestroy")
-                                                callback!!.onActivityDestroyed(recordedActivity)
+                                                callback.onActivityDestroyed(recordedActivity)
                                             }
                                         }
                                     }
