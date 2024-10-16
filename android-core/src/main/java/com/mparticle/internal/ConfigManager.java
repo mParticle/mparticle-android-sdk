@@ -9,6 +9,7 @@ import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
+import androidx.collection.ArrayMap;
 
 import com.mparticle.Configuration;
 import com.mparticle.ExceptionHandler;
@@ -16,6 +17,7 @@ import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApi;
+import com.mparticle.identity.IdentityHttpResponse;
 import com.mparticle.internal.messages.BaseMPMessage;
 import com.mparticle.networking.NetworkOptions;
 import com.mparticle.networking.NetworkOptionsManager;
@@ -891,6 +893,90 @@ public class ConfigManager {
 
     public Set<Long> getMpids() {
         return UserStorage.getMpIdSet(mContext);
+    }
+
+    private static synchronized JSONArray getIdentityCache() {
+        String json = sPreferences.getString(Constants.PrefKeys.IDENTITY_API_REQUEST, null);
+        if (json != null) {
+            try {
+                JSONArray jsonArray = new JSONArray(json);
+                return jsonArray;
+            } catch (JSONException e) {
+                Logger.error("Failed to fetch identity cache from storage :  " + e.getMessage());
+            }
+        }
+        return new JSONArray();
+    }
+
+    public synchronized HashMap<String, IdentityHttpResponse> fetchIdentityCache() {
+        try {
+            JSONArray jsonArray = getIdentityCache();
+            HashMap<String, IdentityHttpResponse> identityCache = new HashMap<>();
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                String key = jsonObject.keys().next();
+                JSONObject identityJson = jsonObject.getJSONObject(key);
+                IdentityHttpResponse response = IdentityHttpResponse.fromJson(identityJson);
+
+                identityCache.put(key, response);
+            }
+            return identityCache;
+        } catch (Exception e) {
+            Logger.error("Error while fetching identity cache: " + e.getMessage());
+        }
+
+        return new HashMap<String, IdentityHttpResponse>();
+    }
+    public synchronized void saveIdentityCache(String key, IdentityHttpResponse identityHttpResponse) throws JSONException {
+        JSONArray jsonArray = new JSONArray();
+        JSONArray identityCacheExist = getIdentityCache();
+        try {
+
+            if (identityCacheExist != null && identityCacheExist.length() > 0) {
+                for (int i = 0; i < identityCacheExist.length(); i++) {
+                    jsonArray.put(identityCacheExist.get(i));
+                }
+            }
+        } catch (Exception e) {
+            Logger.error("Error while storing identity cache: " + e.getMessage());
+
+        }
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(key, identityHttpResponse.toJson());
+        jsonArray.put(jsonObject);
+
+        sPreferences.edit().putString(Constants.PrefKeys.IDENTITY_API_REQUEST, jsonArray.toString()).apply();
+    }
+
+    public void saveIdentityCacheTime(long time) {
+        sPreferences.edit().putLong(Constants.PrefKeys.IDENTITY_API_CACHE_TIME, time).apply();
+    }
+
+    public void saveIdentityMaxAge(long time) {
+        sPreferences.edit().putLong(Constants.PrefKeys.IDENTITY_MAX_AGE, time).apply();
+    }
+
+    public synchronized Long getIdentityCacheTime() {
+        return sPreferences.getLong(Constants.PrefKeys.IDENTITY_API_CACHE_TIME, 0);
+    }
+
+    public Long getIdentityMaxAge() {
+        return sPreferences.getLong(Constants.PrefKeys.IDENTITY_MAX_AGE, 0);
+    }
+
+    public void clearIdentityCatch() {
+        sPreferences.edit()
+                .remove(Constants.PrefKeys.IDENTITY_API_REQUEST).apply();
+        sPreferences.edit()
+                .remove(Constants.PrefKeys.IDENTITY_API_CACHE_TIME).apply();
+        sPreferences.edit()
+                .remove(Constants.PrefKeys.IDENTITY_MAX_AGE).apply();
+    }
+
+    //keep this flag value `true` until actual implementation done
+    public boolean isIdentityCacheFlagEnabled() {
+        return true;
     }
 
     private static boolean sInProgress;
