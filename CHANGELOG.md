@@ -1,3 +1,13 @@
+## [5.58.3](https://github.com/mParticle/mparticle-android-sdk/compare/v5.58.2...v5.58.3) (2024-10-24)
+
+
+### Updates & Maintenance
+
+* Migrate Internal Constants class to kotlin  ([#510](https://github.com/mParticle/mparticle-android-sdk/issues/510)) ([2fd32f6](https://github.com/mParticle/mparticle-android-sdk/commit/2fd32f6d068975b0c57bde1a50e25c3a1c5617bb))
+* Migrate MPLifecycleCallbackDelegate and MPLocationListener class to Kotlin ([#506](https://github.com/mParticle/mparticle-android-sdk/issues/506)) ([687e623](https://github.com/mParticle/mparticle-android-sdk/commit/687e6234bdfc6b24680e92f348422f4a5c298529))
+* Remove unused session history upload code ([#507](https://github.com/mParticle/mparticle-android-sdk/issues/507)) ([a86cd3b](https://github.com/mParticle/mparticle-android-sdk/commit/a86cd3b7bdc923a152ae9f5503244aadb50065de))
+* Update submodules ([81e50ca](https://github.com/mParticle/mparticle-android-sdk/commit/81e50ca7f9f185c143dbc3567772e331588f72cd))
+
 ## [5.58.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.58.1...v5.58.2) (2024-09-11)
 
 
