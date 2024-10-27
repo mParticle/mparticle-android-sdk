@@ -40,7 +40,7 @@ jobs:
       GIT_COMMITTER_EMAIL: developers@mparticle.com
     steps:
       - name: "Clone branch"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: mparticle/mparticle-android-sdk
           ref: ${{ inputs.branch_name }}
@@ -71,12 +71,12 @@ jobs:
     needs: create-regression-branch
     steps:
       - name: "Checkout future release branch"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: mparticle/mparticle-android-sdk
           ref: regression/${{ github.run_number }}
       - name: "Install JDK 17"
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: "zulu"
           java-version: "17"
@@ -90,12 +90,13 @@ jobs:
               #Disable benchmark tests as they do not work on emulators
               adb uninstall com.mparticle.kits.test; ./gradlew connectedCheck --stacktrace
               ./gradlew :android-core:cAT :android-kit-base:cAT  -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=none
-      - name: "Archive Instrumented Test Results"
-        uses: actions/upload-artifact@v3
+      - name: "Archive Daily Instrumented Test Results"
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: instrumented-test-results
+          name: "daily-instrumented-test-results"
           path: android-core/build/reports/androidTests/connected/**
+          overwrite: true
 
   instrumented-orchestrator-tests:
     name: "Instrumented Orchestrator Tests"
@@ -104,12 +105,12 @@ jobs:
     needs: create-regression-branch
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: mparticle/mparticle-android-sdk
           ref: regression/${{ github.run_number }}
       - name: "Install JDK 17"
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: "zulu"
           java-version: "17"
@@ -119,12 +120,13 @@ jobs:
         with:
           api-level: 29
           script: ./gradlew -Porchestrator=true :android-core:cAT --stacktrace
-      - name: "Archive Instrumented Orchestrator Tests Results"
-        uses: actions/upload-artifact@v3
+      - name: "Archive Daily Instrumented Orchestrator Tests Results"
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: "instrumented-orchestrator-tests-results"
+          name: "daily-instrumented-orchestrator-tests-results"
           path: android-core/build/orchestrator/**
+          overwrite: true
 
   unit-tests:
     name: "Unit Tests"
@@ -133,12 +135,12 @@ jobs:
     needs: create-regression-branch
     steps:
       - name: "Checkout future release branch"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: mparticle/mparticle-android-sdk
           ref: regression/${{ github.run_number }}
       - name: "Install JDK 17"
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: "zulu"
           java-version: "17"
@@ -148,12 +150,13 @@ jobs:
       - name: "Print Android Unit Tests Report"
         uses: asadmansr/android-test-report-action@384cd31388782f4106dc4a1b37eea2ff02e0aad7 #v1.2.0
         if: always()
-      - name: "Archive Unit Test Results"
-        uses: actions/upload-artifact@v3
+      - name: "Archive Daily Unit Test Results"
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: "unit-tests-results"
+          name: "daily-unit-tests-results"
           path: ./**/build/reports/**
+          overwrite: true
 
   lint-checks:
     name: "Lint Checks"
@@ -162,12 +165,12 @@ jobs:
     needs: create-regression-branch
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: regression/${{ github.run_number }}
           submodules: recursive
       - name: "Install JDK 17"
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: "zulu"
           java-version: "17"
@@ -179,17 +182,19 @@ jobs:
       - name: "Run Android Kit Lint"
         run: ./gradlew publishReleaseLocal -c settings-kits.gradle lint
       - name: "Archive Test Results"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: "core-lint-results"
+          name: "daily-core-lint-results"
           path: ./**/build/reports/**
+          overwrite: true
       - name: "Archive Test Kit Results"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: "kit-lint-results"
+          name: "daily-kit-lint-results"
           path: kits/**/build/reports/**
+          overwrite: true
 
   kotlin-lint-checks:
     name: "Kotlin Lint Checks"
@@ -198,12 +203,12 @@ jobs:
     needs: create-regression-branch
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: regression/${{ github.run_number }}
           submodules: recursive
       - name: "Install JDK 17"
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: "zulu"
           java-version: "17"
@@ -214,18 +219,20 @@ jobs:
         run: ./gradlew publishReleaseLocal
       - name: "Run Android Kit Kotlin Lint"
         run: ./gradlew publishReleaseLocal -c settings-kits.gradle ktlintCheck
-      - name: "Archive Test Results"
-        uses: actions/upload-artifact@v3
+      - name: "Archive Daily Test Core Results"
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: "core-ktlint-results"
+          name: "daily-core-ktlint-results"
           path: ./**/build/reports/**
-      - name: "Archive Test Kit Results"
-        uses: actions/upload-artifact@v3
+          overwrite: true
+      - name: "Archive Daily Test Kit Results"
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: "kit-ktlint-results"
+          name: "daily-kit-ktlint-results"
           path: kits/**/build/reports/**
+          overwrite: true
 
   update-kits:
     name: "Update Kits"
@@ -238,13 +245,13 @@ jobs:
       GIT_COMMITTER_EMAIL: developers@mparticle.com
     steps:
       - name: "Checkout future release branch"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: mparticle/mparticle-android-sdk
           ref: regression/${{ github.run_number }}
           submodules: recursive
       - name: "Install JDK 17"
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: "zulu"
           java-version: "17"
@@ -266,7 +273,7 @@ jobs:
       GIT_COMMITTER_EMAIL: developers@mparticle.com
     steps:
       - name: "Checkout public main branch"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: main
@@ -297,7 +304,7 @@ jobs:
       GIT_COMMITTER_EMAIL: developers@mparticle.com
     steps:
       - name: "Checkout repo"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           repository: ${{ github.repository }}
