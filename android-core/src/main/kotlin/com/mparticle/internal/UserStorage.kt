@@ -221,7 +221,7 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
         }
         set(time) {
             if (!mPreferences.contains(FIRST_SEEN_TIME)) {
-                mPreferences.edit().putLong(FIRST_SEEN_TIME, time!!).apply()
+                time?.let { mPreferences.edit().putLong(FIRST_SEEN_TIME, it).apply() }
             }
         }
 
@@ -233,7 +233,7 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
             return mPreferences.getLong(LAST_SEEN_TIME, defaultSeenTime)
         }
         set(time) {
-            mPreferences.edit().putLong(LAST_SEEN_TIME, time!!).apply()
+            time?.let { mPreferences.edit().putLong(LAST_SEEN_TIME, it).apply() }
         }
 
     //Set a default "lastSeenTime" for migration to SDK versions with MParticleUser.getLastSeenTime(),
@@ -358,7 +358,7 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
             try {
                 userStorage.deletedUserAttributes = getDeletedUserAttributes
                 userStorage.previousSessionId = previousSessionId
-                val ltv: String = ltv!!
+                val ltv: String? = ltv
                 if (ltv != null) {
                     userStorage.ltv = ltv
                 }
@@ -388,7 +388,7 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
                 }
 
                 //migrate both cookies and device application stamp
-                val cookies: String = cookies!!
+                val cookies: String? = cookies
                 var das: String? = null
                 if (cookies != null) {
                     try {
