@@ -125,9 +125,7 @@ open class AppStateManager @JvmOverloads constructor(
                     if (launchAction == null) {
                         launchAction = activity.intent.action
                     }
-                    if (activity.intent.extras != null && activity.intent.extras!!
-                            .getBundle(Constants.External.APPLINK_KEY) != null
-                    ) {
+                    if (activity.intent.extras?.getBundle(Constants.External.APPLINK_KEY) != null) {
                         val parameters = JSONObject()
                         try {
                             parameters.put(
@@ -238,7 +236,6 @@ open class AppStateManager @JvmOverloads constructor(
         if (!mInitialized) {
             initialize(null, null, null, null)
         }
-        val session = session
         session.mLastEventTime = System.currentTimeMillis()
         if (!session.isActive) {
             newSession()
@@ -301,7 +298,6 @@ open class AppStateManager @JvmOverloads constructor(
     }
 
     fun shouldEndSession(): Boolean {
-        val session = session
         val instance = MParticle.getInstance()
         return (
                 0L != session?.mSessionStartTime &&
@@ -428,7 +424,7 @@ open class AppStateManager @JvmOverloads constructor(
                 MPUtility.getAdIdInfo(MParticle.getInstance()?.Internal()?.appStateManager?.mContext)
             val currentAdId =
                 (if (adIdInfo == null) null else (if (adIdInfo.isLimitAdTrackingEnabled) null else adIdInfo.id))
-            val previousAdId = configManager!!.previousAdId
+            val previousAdId = configManager?.previousAdId
             if (currentAdId != null && currentAdId != previousAdId) {
                 val instance = MParticle.getInstance()
                 if (instance != null) {

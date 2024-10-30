@@ -278,19 +278,18 @@ open class ApplicationContextWrapper(private val mBaseApplication: Application) 
         @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
         override fun run() {
             if (callback != null && mActivityLifecycleCallbackRecorder != null && isReplayActivityLifecycle) {
-                val reference = if (MParticle.getInstance()!!
-                    .Internal().kitManager == null
+                val reference = if (MParticle.getInstance()?.Internal()?.kitManager == null
                 ) {
                     null
                 } else {
-                    MParticle.getInstance()!!
-                        .Internal().kitManager.currentActivity
+                    MParticle.getInstance()?.Internal()?.kitManager?.currentActivity
                 }
                 if (reference != null) {
                     val currentActivity = reference.get()
                     if (currentActivity != null) {
                         val recordedLifecycleList: LinkedList<LifeCycleEvent> =
-                            mActivityLifecycleCallbackRecorder!!.recordedLifecycleListCopy
+                            mActivityLifecycleCallbackRecorder?.recordedLifecycleListCopy
+                                ?: LinkedList()
                         while (recordedLifecycleList.size > 0) {
                             val lifeCycleEvent = recordedLifecycleList.removeFirst()
                             if (lifeCycleEvent.activityRef != null) {
@@ -323,10 +322,12 @@ open class ApplicationContextWrapper(private val mBaseApplication: Application) 
 
                                             MethodType.ON_SAVE_INSTANCE_STATE -> {
                                                 Logger.debug("Forwarding OnSaveInstance")
-                                                callback.onActivitySaveInstanceState(
-                                                    recordedActivity,
-                                                    lifeCycleEvent.bundle!!
-                                                )
+                                                lifeCycleEvent.bundle?.let {
+                                                    callback.onActivitySaveInstanceState(
+                                                        recordedActivity,
+                                                        it
+                                                    )
+                                                }
                                             }
 
                                             MethodType.ON_STOPPED -> {
