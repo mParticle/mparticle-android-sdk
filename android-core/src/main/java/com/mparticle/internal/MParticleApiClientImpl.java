@@ -225,7 +225,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
     public int sendMessageBatch(@NonNull String message, @NonNull UploadSettings uploadSettings) throws IOException, MPThrottleException, MPRampException {
         checkThrottleTime(Endpoint.EVENTS);
         checkRampValue();
-        MPUrl eventUrl = getUrl(Endpoint.EVENTS,null, uploadSettings);
+        MPUrl eventUrl = getUrl(Endpoint.EVENTS, null, uploadSettings);
         MPConnection connection = eventUrl.openConnection();
         connection.setConnectTimeout(mConfigManager.getConnectionTimeout());
         connection.setReadTimeout(mConfigManager.getConnectionTimeout());
