@@ -205,7 +205,7 @@ class AppStateManagerTest {
                 return session.value!!
             }
         }
-        manager.session= session.value!!
+        manager.session = session.value!!
         val configManager = Mockito.mock(ConfigManager::class.java)
         manager.setConfigManager(configManager)
         Mockito.`when`(MParticle.getInstance()?.Media()?.audioPlaying).thenReturn(false)

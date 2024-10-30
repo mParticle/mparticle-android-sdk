@@ -101,7 +101,7 @@ class MessageManagerTest {
     }
 
     @Test
-    @PrepareForTest(MessageManager::class, MPUtility::class,Looper::class)
+    @PrepareForTest(MessageManager::class, MPUtility::class, Looper::class)
     @Throws(Exception::class)
     fun testGetTotalMemory() {
         PowerMockito.mockStatic(MPUtility::class.java, Answers.RETURNS_MOCKS.get())
@@ -114,7 +114,7 @@ class MessageManagerTest {
     }
 
     @Test
-    @PrepareForTest(MessageManager::class, MPUtility::class,Looper::class)
+    @PrepareForTest(MessageManager::class, MPUtility::class, Looper::class)
     @Throws(Exception::class)
     fun testGetSystemMemoryThreshold() {
         PowerMockito.mockStatic(MPUtility::class.java, Answers.RETURNS_MOCKS.get())

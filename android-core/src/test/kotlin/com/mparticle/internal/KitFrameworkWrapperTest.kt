@@ -1,17 +1,13 @@
 package com.mparticle.internal
 
-import android.app.Activity
 import android.content.Context
-import android.net.Uri
 import com.mparticle.BaseEvent
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.MockMParticle
 import com.mparticle.commerce.CommerceEvent
-import com.mparticle.internal.KitFrameworkWrapper.CoreCallbacksImpl
 import com.mparticle.internal.PushRegistrationHelper.PushRegistration
-import com.mparticle.testutils.RandomUtils
 import org.json.JSONArray
 import org.junit.Assert
 import org.junit.Test
@@ -20,8 +16,6 @@ import org.mockito.Mockito
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
-import java.lang.ref.WeakReference
-import java.util.Random
 
 @RunWith(PowerMockRunner::class)
 class KitFrameworkWrapperTest {
