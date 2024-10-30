@@ -133,7 +133,7 @@ open class AppStateManager @JvmOverloads constructor(
                             parameters.put(
                                 Constants.External.APPLINK_KEY,
                                 MPUtility.wrapExtras(
-                                    activity.intent.extras!!.getBundle(Constants.External.APPLINK_KEY)
+                                    activity.intent.extras?.getBundle(Constants.External.APPLINK_KEY)
                                 )
                             )
                         } catch (e: Exception) {
@@ -144,7 +144,7 @@ open class AppStateManager @JvmOverloads constructor(
                 }
             }
 
-            session!!.updateBackgroundTime(mLastStoppedTime, time)
+            session.updateBackgroundTime(mLastStoppedTime, time)
 
             var isBackToForeground = false
             if (!mInitialized) {
@@ -156,7 +156,7 @@ open class AppStateManager @JvmOverloads constructor(
                 )
             } else if (isBackgrounded() && mLastStoppedTime.get() > 0) {
                 isBackToForeground = true
-                mMessageManager!!.postToMessageThread(CheckAdIdRunnable(mConfigManager))
+                mMessageManager?.postToMessageThread(CheckAdIdRunnable(mConfigManager))
                 logStateTransition(
                     Constants.StateTransitionType.STATE_TRANS_FORE,
                     currentActivityName,
@@ -171,7 +171,7 @@ open class AppStateManager @JvmOverloads constructor(
             mLastForegroundTime = time
 
             if (currentActivity != null) {
-                currentActivity!!.clear()
+                currentActivity?.clear()
                 currentActivity = null
             }
             currentActivity = WeakReference(activity)
@@ -179,7 +179,9 @@ open class AppStateManager @JvmOverloads constructor(
             val instance = MParticle.getInstance()
             if (instance != null) {
                 if (instance.isAutoTrackingEnabled) {
-                    instance.logScreen(currentActivityName!!)
+                    currentActivityName?.let {
+                        instance.logScreen(it)
+                    }
                 }
                 if (isBackToForeground) {
                     instance.Internal().kitManager.onApplicationForeground()
@@ -196,8 +198,8 @@ open class AppStateManager @JvmOverloads constructor(
         try {
             mPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false).apply()
             mLastStoppedTime = AtomicLong(time)
-            if (currentActivity != null && activity === currentActivity!!.get()) {
-                currentActivity!!.clear()
+            if (currentActivity != null && activity === currentActivity?.get()) {
+                currentActivity?.clear()
                 currentActivity = null
             }
 
@@ -207,7 +209,7 @@ open class AppStateManager @JvmOverloads constructor(
                         if (isBackgrounded()) {
                             checkSessionTimeout()
                             logBackgrounded()
-                            mConfigManager!!.setPreviousAdId()
+                            mConfigManager?.setPreviousAdId()
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -237,11 +239,11 @@ open class AppStateManager @JvmOverloads constructor(
             initialize(null, null, null, null)
         }
         val session = session
-        session!!.mLastEventTime = System.currentTimeMillis()
+        session.mLastEventTime = System.currentTimeMillis()
         if (!session.isActive) {
             newSession()
         } else {
-            mMessageManager!!.updateSessionEnd(this.session)
+            mMessageManager?.updateSessionEnd(this.session)
         }
     }
 
@@ -255,9 +257,9 @@ open class AppStateManager @JvmOverloads constructor(
         launchPackage: String?,
         interruptions: Int
     ) {
-        if (mConfigManager!!.isEnabled) {
+        if (mConfigManager?.isEnabled == true) {
             ensureActiveSession()
-            mMessageManager!!.logStateTransition(
+            mMessageManager?.logStateTransition(
                 transitionType,
                 currentActivity,
                 dataString,
@@ -279,9 +281,9 @@ open class AppStateManager @JvmOverloads constructor(
      */
     private fun newSession() {
         startSession()
-        mMessageManager!!.startSession(session)
+        mMessageManager?.startSession(session)
         Logger.debug("Started new session")
-        mMessageManager!!.startUploadLoop()
+        mMessageManager?.startUploadLoop()
         enableLocationTracking()
         checkSessionTimeout()
     }
@@ -302,20 +304,22 @@ open class AppStateManager @JvmOverloads constructor(
         val session = session
         val instance = MParticle.getInstance()
         return (
-                0L != session!!.mSessionStartTime &&
+                0L != session?.mSessionStartTime &&
                         isBackgrounded() &&
-                        session.isTimedOut(mConfigManager!!.sessionTimeout) &&
+                        mConfigManager?.sessionTimeout?.let { session.isTimedOut(it) } == true &&
                         (instance == null || !instance.Media().audioPlaying)
                 )
     }
 
     private fun checkSessionTimeout() {
-        delayedBackgroundCheckHandler.postDelayed({
-            if (shouldEndSession()) {
-                Logger.debug("Session timed out")
-                endSession()
-            }
-        }, mConfigManager!!.sessionTimeout.toLong())
+        mConfigManager?.sessionTimeout?.toLong()?.let {
+            delayedBackgroundCheckHandler.postDelayed({
+                if (shouldEndSession()) {
+                    Logger.debug("Session timed out")
+                    endSession()
+                }
+            }, it)
+        }
     }
 
     private fun initialize(
@@ -382,7 +386,7 @@ open class AppStateManager @JvmOverloads constructor(
 
     fun endSession() {
         Logger.debug("Ended session")
-        mMessageManager!!.endSession(session)
+        mMessageManager?.endSession(session)
         disableLocationTracking()
         session = InternalSession()
         val instance = MParticle.getInstance()
@@ -421,7 +425,7 @@ open class AppStateManager @JvmOverloads constructor(
     internal class CheckAdIdRunnable(var configManager: ConfigManager?) : Runnable {
         override fun run() {
             val adIdInfo =
-                MPUtility.getAdIdInfo(MParticle.getInstance()!!.Internal().appStateManager.mContext)
+                MPUtility.getAdIdInfo(MParticle.getInstance()?.Internal()?.appStateManager?.mContext)
             val currentAdId =
                 (if (adIdInfo == null) null else (if (adIdInfo.isLimitAdTrackingEnabled) null else adIdInfo.id))
             val previousAdId = configManager!!.previousAdId
@@ -484,7 +488,7 @@ open class AppStateManager @JvmOverloads constructor(
         const val APP_STATE_NOTRUNNING: String = "not_running"
 
         private fun getActivityName(activity: Activity?): String {
-            return activity!!.javaClass.canonicalName
+            return activity?.javaClass?.canonicalName ?: ""
         }
     }
 }
