@@ -8,34 +8,34 @@ import org.json.JSONArray
 import java.lang.ref.WeakReference
 
 interface CoreCallbacks {
-    val isBackgrounded: Boolean
+    fun isBackgrounded(): Boolean
 
-    val userBucket: Int
+    fun getUserBucket(): Int
 
-    val isEnabled: Boolean
+    fun isEnabled(): Boolean
 
-    fun setIntegrationAttributes(kitId: Int, integrationAttributes: Map<String?, String?>?)
+    fun setIntegrationAttributes(kitId: Int, integrationAttributes: Map<String, String>)
 
-    fun getIntegrationAttributes(kitId: Int): Map<String?, String?>?
+    fun getIntegrationAttributes(kitId: Int): Map<String, String>?
 
-    val currentActivity: WeakReference<Activity?>
+    fun getCurrentActivity(): WeakReference<Activity>?
 
-    @get:WorkerThread
-    val latestKitConfiguration: JSONArray?
+    @WorkerThread
+    fun getLatestKitConfiguration(): JSONArray?
 
-    val dataplanOptions: DataplanOptions?
+    fun getDataplanOptions(): DataplanOptions?
 
-    val isPushEnabled: Boolean
+    fun isPushEnabled(): Boolean
 
-    val pushSenderId: String?
+    fun getPushSenderId(): String?
 
-    val pushInstanceId: String?
+    fun getPushInstanceId(): String?
 
-    val launchUri: Uri?
+    fun getLaunchUri(): Uri?
 
-    val launchAction: String?
+    fun getLaunchAction(): String?
 
-    val kitListener: KitListener?
+    fun getKitListener(): KitListener?
 
     interface KitListener {
         fun kitFound(kitId: Int)
@@ -47,8 +47,9 @@ interface CoreCallbacks {
         fun kitStarted(kitId: Int)
         fun onKitApiCalled(kitId: Int, used: Boolean?, vararg objects: Any?)
         fun onKitApiCalled(methodName: String?, kitId: Int, used: Boolean?, vararg objects: Any?)
-            companion object {
-                @JvmField
+
+        companion object {
+            @JvmField
             val EMPTY: KitListener = object : KitListener {
                 override fun kitFound(kitId: Int) {}
                 override fun kitConfigReceived(kitId: Int, configuration: String?) {}
