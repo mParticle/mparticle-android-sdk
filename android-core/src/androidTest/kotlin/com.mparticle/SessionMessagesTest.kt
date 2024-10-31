@@ -28,10 +28,10 @@ class SessionMessagesTest : BaseCleanStartedEachTest() {
     fun testSessionStartMessage() {
         val sessionStartReceived = BooleanArray(1)
         sessionStartReceived[0] = false
-        Assert.assertFalse(mAppStateManager.session.isActive)
+        Assert.assertFalse(mAppStateManager.fetchSession().isActive)
         val sessionId = AndroidUtils.Mutable<String?>(null)
         mAppStateManager.ensureActiveSession()
-        sessionId.value = mAppStateManager.session.mSessionID
+        sessionId.value = mAppStateManager.fetchSession().mSessionID
         AccessUtils.awaitMessageHandler()
         MParticle.getInstance()?.upload()
         mServer.waitForVerify(
@@ -45,14 +45,14 @@ class SessionMessagesTest : BaseCleanStartedEachTest() {
                             if (eventObject.getString("dt") == Constants.MessageType.SESSION_START) {
                                 Assert.assertEquals(
                                     eventObject.getLong("ct").toFloat(),
-                                    mAppStateManager.session.mSessionStartTime.toFloat(),
+                                    mAppStateManager.fetchSession().mSessionStartTime.toFloat(),
                                     1000f
                                 )
                                 Assert.assertEquals(
                                     """started sessionID = ${sessionId.value} 
-current sessionId = ${mAppStateManager.session.mSessionID} 
+current sessionId = ${mAppStateManager.fetchSession().mSessionID} 
 sent sessionId = ${eventObject.getString("id")}""",
-                                    mAppStateManager.session.mSessionID,
+                                    mAppStateManager.fetchSession().mSessionID,
                                     eventObject.getString("id")
                                 )
                                 sessionStartReceived[0] = true
