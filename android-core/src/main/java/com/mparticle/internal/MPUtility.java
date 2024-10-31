@@ -70,6 +70,7 @@ public class MPUtility {
     private static String sOpenUDID;
     private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
     private static final String TAG = MPUtility.class.toString();
+    private static AdIdInfo infoId = null;
 
     public static long getAvailableMemory(Context context) {
         ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
@@ -122,18 +123,21 @@ public class MPUtility {
     @WorkerThread
     @Nullable
     public static AdIdInfo getAdIdInfo(Context context) {
+        if (infoId != null) {
+            return infoId;
+        }
         String packageName = context.getPackageName();
         PackageManager packageManager = context.getPackageManager();
         String installerName = packageManager.getInstallerPackageName(packageName);
         if ((installerName != null && installerName.contains("com.amazon.venezia")) ||
                 "Amazon".equals(android.os.Build.MANUFACTURER)) {
-            AdIdInfo infoId = getAmazonAdIdInfo(context);
+            infoId = getAmazonAdIdInfo(context);
             if (infoId == null) {
                 return getGoogleAdIdInfo(context);
             }
             return infoId;
         } else {
-            AdIdInfo infoId = getGoogleAdIdInfo(context);
+            infoId = getGoogleAdIdInfo(context);
             if (infoId == null) {
                 return getAmazonAdIdInfo(context);
             }
