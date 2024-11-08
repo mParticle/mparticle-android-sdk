@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * Note: This is an Experimental feature. Adding an instance of SdkListener will slow down the SDK and
  * should be used only in development.
- *
+ * <p>
  * SdkListener is a new feature which enables updates on and visibility into internal Events occuring
  * inside the SDK.
  */
@@ -123,7 +123,7 @@ public class SdkListener {
      * @param kitId  the id of the kit, corresponse with a {@link com.mparticle.MParticle.ServiceProviders}
      * @param reason a message containing the reason a kit was stopped
      */
-    public void onKitExcluded(int kitId,@Nullable String reason) {
+    public void onKitExcluded(int kitId, @Nullable String reason) {
 
     }
 
