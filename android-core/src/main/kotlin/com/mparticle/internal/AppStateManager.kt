@@ -387,7 +387,7 @@ open class AppStateManager @JvmOverloads constructor(
         session = InternalSession()
         val instance = MParticle.getInstance()
         instance?.Internal()?.kitManager?.onSessionEnd()
-        InternalListenerManager.getListener().onSessionUpdated(session)
+        InternalListenerManager.listener.onSessionUpdated(session)
     }
 
     private fun disableLocationTracking() {

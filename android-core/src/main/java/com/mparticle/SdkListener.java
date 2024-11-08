@@ -123,7 +123,7 @@ public class SdkListener {
      * @param kitId  the id of the kit, corresponse with a {@link com.mparticle.MParticle.ServiceProviders}
      * @param reason a message containing the reason a kit was stopped
      */
-    public void onKitExcluded(int kitId, @NonNull String reason) {
+    public void onKitExcluded(int kitId,@Nullable String reason) {
 
     }
 
