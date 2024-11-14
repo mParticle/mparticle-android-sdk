@@ -11,6 +11,8 @@ import com.mparticle.mock.MockApplication
 import com.mparticle.mock.MockContext
 import com.mparticle.mock.MockSharedPreferences
 import com.mparticle.testutils.AndroidUtils
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -132,7 +134,7 @@ class AppStateManagerTest {
      */
     @Test
     @Throws(Exception::class)
-    fun testSecondActivityStart() {
+    fun testSecondActivityStart() = runTest(StandardTestDispatcher()) {
         manager.onActivityPaused(activity)
         Thread.sleep(1000)
         Assert.assertEquals(true, manager.isBackgrounded())

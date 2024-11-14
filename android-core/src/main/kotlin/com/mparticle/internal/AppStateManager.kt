@@ -17,6 +17,9 @@ import com.mparticle.identity.IdentityApi.SingleUserIdentificationCallback
 import com.mparticle.identity.IdentityApiRequest
 import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.listeners.InternalListenerManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicInteger
@@ -166,6 +169,9 @@ open class AppStateManager @JvmOverloads constructor(
                     interruptions
                 )
             }
+            CoroutineScope(Dispatchers.IO).launch {
+                mConfigManager?.setPreviousAdId()
+            }
             mLastForegroundTime = time
 
             if (currentActivity != null) {
@@ -207,7 +213,6 @@ open class AppStateManager @JvmOverloads constructor(
                         if (isBackgrounded()) {
                             checkSessionTimeout()
                             logBackgrounded()
-                            mConfigManager?.setPreviousAdId()
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -421,7 +426,9 @@ open class AppStateManager @JvmOverloads constructor(
     internal class CheckAdIdRunnable(var configManager: ConfigManager?) : Runnable {
         override fun run() {
             val adIdInfo =
-                MPUtility.getAdIdInfo(MParticle.getInstance()?.Internal()?.appStateManager?.mContext)
+                MPUtility.getAdIdInfo(
+                    MParticle.getInstance()?.Internal()?.appStateManager?.mContext
+                )
             val currentAdId =
                 (if (adIdInfo == null) null else (if (adIdInfo.isLimitAdTrackingEnabled) null else adIdInfo.id))
             val previousAdId = configManager?.previousAdId
