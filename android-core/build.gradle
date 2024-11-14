@@ -159,6 +159,7 @@ dependencies {
     testImplementation project(':testutils')
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlin_version"
 
     androidTestImplementation project(':testutils')
     if (useOrchestrator()) {
@@ -167,6 +168,7 @@ dependencies {
     }
     androidTestImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlin_version"
 }
 
 
