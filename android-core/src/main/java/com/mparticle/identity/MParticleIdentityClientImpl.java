@@ -69,7 +69,8 @@ public class MParticleIdentityClientImpl extends MParticleBaseClientImpl impleme
     public  final String LOGIN_CALL = "login";
     public  final String IDENTIFY_CALL = "identify";
      final String IDENTITY_HEADER_TIMEOUT = "X-MP-Max-Age";
-    static Long maxAgeTimeForIdentityCache = 0L;
+    private Long maxAgeTimeForIdentityCache = 0L;
+    private Long maxAgeTime = 86400L;
      Long identityCacheTime = 0L;
     HashMap<String, IdentityHttpResponse> identityCacheArray = new HashMap<>();
 
@@ -87,7 +88,6 @@ public class MParticleIdentityClientImpl extends MParticleBaseClientImpl impleme
         if (existsResponse != null) {
             return existsResponse;
         }
-        Long maxAgeTime=86400L;
         Logger.verbose("Identity login request: " + jsonObject.toString());
         MPConnection connection = getPostConnection(LOGIN_PATH, jsonObject.toString());
         String url = connection.getURL().toString();
@@ -127,7 +127,7 @@ public class MParticleIdentityClientImpl extends MParticleBaseClientImpl impleme
             return existsResponse;
         }
         JSONObject jsonObject = getStateJson(request);
-        Long maxAgeTime=86400L;
+
         Logger.verbose("Identity identify request: \n" + jsonObject.toString());
         MPConnection connection = getPostConnection(IDENTIFY_PATH, jsonObject.toString());
         String url = connection.getURL().toString();
