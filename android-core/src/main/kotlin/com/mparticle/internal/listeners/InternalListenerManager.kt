@@ -163,7 +163,7 @@ class InternalListenerManager private constructor(private val context: Context) 
     }
 
     override fun onNetworkRequestStarted(
-        type: SdkListener.Endpoint?, url: String?, body: JSONObject?, vararg objects: Any
+        type: SdkListener.Endpoint, url: String, body: JSONObject?, vararg objects: Any
     ) {
         for (obj in objects) {
             onCompositeObjects(obj, body)
@@ -174,7 +174,7 @@ class InternalListenerManager private constructor(private val context: Context) 
         }
         broadcast(object : SdkListenerRunnable {
             override fun run(listener: SdkListener) {
-                listener.onNetworkRequestStarted(type!!, url!!, body!!)
+                listener.onNetworkRequestStarted(type, url, body ?: JSONObject())
             }
         })
     }
@@ -190,7 +190,7 @@ class InternalListenerManager private constructor(private val context: Context) 
         })
     }
 
-    override fun onSessionUpdated(internalSession: InternalSession?) {
+    override fun onSessionUpdated(internalSession: InternalSession) {
         broadcast(object : SdkListenerRunnable {
             override fun run(listener: SdkListener) {
                 listener.onSessionUpdated(InternalSession(internalSession))

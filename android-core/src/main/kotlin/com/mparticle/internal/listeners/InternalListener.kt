@@ -79,8 +79,8 @@ interface InternalListener {
      * @param objects any underlying objects that the request body is derived from, for example, an IdentityApiRequest instance
      */
     fun onNetworkRequestStarted(
-        type: SdkListener.Endpoint?,
-        url: String?,
+        type: SdkListener.Endpoint,
+        url: String,
         body: JSONObject?,
         vararg objects: Any
     )
@@ -105,7 +105,7 @@ interface InternalListener {
      *
      * @param internalSession
      */
-    fun onSessionUpdated(internalSession: InternalSession?)
+    fun onSessionUpdated(internalSession: InternalSession)
 
     /**
      * indicates that a Kit dependency is present
@@ -170,8 +170,8 @@ interface InternalListener {
             }
 
             override fun onNetworkRequestStarted(
-                type: SdkListener.Endpoint?,
-                url: String?,
+                type: SdkListener.Endpoint,
+                url: String,
                 body: JSONObject?,
                 vararg objects: Any
             ) { /* stub */
@@ -185,7 +185,7 @@ interface InternalListener {
             ) { /* stub */
             }
 
-            override fun onSessionUpdated(internalSession: InternalSession?) { /* stub */
+            override fun onSessionUpdated(internalSession: InternalSession) { /* stub */
             }
 
             override fun onKitDetected(kitId: Int) { /* stub */
