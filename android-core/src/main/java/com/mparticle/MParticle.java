@@ -288,6 +288,8 @@ public class MParticle {
      * completely reset. After that, {@link #start(MParticleOptions)} )} will be called with
      * the new key and secret and the SDK will initialize again as if it is a new app launch.
      *
+     * <i>Warning: this method will make synchronous calls into SQLite and disk</i>
+     *
      @param options Required to initialize the SDK properly
      */
     public static void switchWorkspace(@NonNull MParticleOptions options) {
