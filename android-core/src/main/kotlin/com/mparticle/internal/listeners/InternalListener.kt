@@ -1,21 +1,15 @@
-package com.mparticle.internal.listeners;
+package com.mparticle.internal.listeners
 
-import android.content.ContentValues;
-import android.os.Build;
-import android.os.Message;
+import android.content.ContentValues
+import android.os.Build
+import android.os.Message
+import androidx.annotation.RequiresApi
+import com.mparticle.SdkListener
+import com.mparticle.identity.AliasResponse
+import com.mparticle.internal.InternalSession
+import org.json.JSONObject
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-
-import com.mparticle.SdkListener;
-import com.mparticle.identity.AliasResponse;
-import com.mparticle.internal.InternalSession;
-
-import org.json.JSONObject;
-
-public interface InternalListener {
-
+interface InternalListener {
     /**
      * This method should be called within the body of a public API method. Generally
      * we only want to instrument API methods which "do something", i.e., log an event or change
@@ -23,7 +17,7 @@ public interface InternalListener {
      *
      * @param objects the arguments passed into the API method
      */
-    void onApiCalled(Object... objects);
+    fun onApiCalled(vararg objects: Any)
 
     /**
      * To be called when a Kit's API method is invoked. This overloaded variant should be used when
@@ -34,7 +28,7 @@ public interface InternalListener {
      * @param used    whether the Kit's method returned ReportingMessages, or null if return type is void
      * @param objects the arguments supplied to the Kit
      */
-    void onKitApiCalled(int kitId, Boolean used, Object... objects);
+    fun onKitApiCalled(kitId: Int, used: Boolean, vararg objects: Any)
 
     /**
      * to be called when a Kit's API method is invoked, and the name of the Kit's method is different
@@ -45,7 +39,7 @@ public interface InternalListener {
      * @param used       whether the Kit's method returned ReportingMessages, or null if return type is void
      * @param objects    the arguments supplied to the Kit
      */
-    void onKitApiCalled(String methodName, int kitId, Boolean used, Object... objects);
+    fun onKitApiCalled(methodName: String, kitId: Int, used: Boolean, vararg objects: Any)
 
     /**
      * establishes a child-parent relationship between two objects. It is not necessary to call this
@@ -54,7 +48,7 @@ public interface InternalListener {
      * @param child  the child object
      * @param parent the parent object
      */
-    void onCompositeObjects(@Nullable Object child, @Nullable Object parent);
+    fun onCompositeObjects(child: Any?, parent: Any?)
 
     /**
      * denotes that an object is going to be passed to a new Thread, and is a candidate to be a "composite"
@@ -64,7 +58,7 @@ public interface InternalListener {
      * @param handlerName the Name of the Handler class, for example "com.mparticle.internal.MessageHandler"
      * @param msg         the Message object
      */
-    void onThreadMessage(@NonNull String handlerName, @NonNull Message msg, boolean onNewThread);
+    fun onThreadMessage(handlerName: String, msg: Message, onNewThread: Boolean)
 
     /**
      * indicates that an entry has been stored in the Database
@@ -74,7 +68,7 @@ public interface InternalListener {
      * @param contentValues the ContentValues object to be inserted
      */
     @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
-    void onEntityStored(Long rowId, String tableName, ContentValues contentValues);
+    fun onEntityStored(rowId: Long, tableName: String, contentValues: ContentValues?)
 
     /**
      * indicates that a Network Request has been started
@@ -84,7 +78,12 @@ public interface InternalListener {
      * @param body    the request body
      * @param objects any underlying objects that the request body is derived from, for example, an IdentityApiRequest instance
      */
-    void onNetworkRequestStarted(SdkListener.Endpoint type, String url, JSONObject body, Object... objects);
+    fun onNetworkRequestStarted(
+        type: SdkListener.Endpoint,
+        url: String,
+        body: JSONObject?,
+        vararg objects: Any
+    )
 
     /**
      * indicates that a NetworkRequest has been finished
@@ -93,7 +92,12 @@ public interface InternalListener {
      * @param response     the response body
      * @param responseCode the response code
      */
-    void onNetworkRequestFinished(SdkListener.Endpoint type, String url, JSONObject response, int responseCode);
+    fun onNetworkRequestFinished(
+        type: SdkListener.Endpoint,
+        url: String,
+        response: JSONObject?,
+        responseCode: Int
+    )
 
     /**
      * this should be called when the current Session changes, for example, it starts, stops or the
@@ -101,14 +105,14 @@ public interface InternalListener {
      *
      * @param internalSession
      */
-    void onSessionUpdated(InternalSession internalSession);
+    fun onSessionUpdated(internalSession: InternalSession)
 
     /**
      * indicates that a Kit dependency is present
      *
      * @param kitId
      */
-    void onKitDetected(int kitId);
+    fun onKitDetected(kitId: Int)
 
     /**
      * indicates that we have received a configuration for a Kit
@@ -116,7 +120,7 @@ public interface InternalListener {
      * @param kitId
      * @param configuration
      */
-    void onKitConfigReceived(int kitId, String configuration);
+    fun onKitConfigReceived(kitId: Int, configuration: String?)
 
     /**
      * indicates that a Kit was present, and a configuration was received for it, but it was not started,
@@ -126,44 +130,88 @@ public interface InternalListener {
      * @param kitId
      * @param reason
      */
-    void onKitExcluded(int kitId, String reason);
+    fun onKitExcluded(kitId: Int, reason: String?)
 
     /**
      * indicates that a Kit successfully executed it's onKitCreate() method
      *
      * @param kitId
      */
-    void onKitStarted(int kitId);
+    fun onKitStarted(kitId: Int)
 
-    void onAliasRequestFinished(AliasResponse aliasResponse);
+    fun onAliasRequestFinished(aliasResponse: AliasResponse?)
 
-    InternalListener EMPTY = new InternalListener() {
-        public void onApiCalled(Object... objects) { /* stub */}
+    companion object {
+        @JvmField
+        val EMPTY: InternalListener = object : InternalListener {
+            override fun onApiCalled(vararg objects: Any) { /* stub */
+            }
 
-        public void onKitApiCalled(int kitId, Boolean used, Object... objects) { /* stub */}
+            override fun onKitApiCalled(
+                kitId: Int,
+                used: Boolean,
+                vararg objects: Any
+            ) { /* stub */
+            }
 
-        public void onKitApiCalled(String methodName, int kitId, Boolean used, Object... objects) { /* stub */}
+            override fun onKitApiCalled(
+                methodName: String,
+                kitId: Int,
+                used: Boolean,
+                vararg objects: Any
+            ) { /* stub */
+            }
 
-        public void onEntityStored(Long rowId, String tableName, ContentValues contentValues) { /* stub */}
+            override fun onEntityStored(
+                rowId: Long,
+                tableName: String,
+                contentValues: ContentValues?
+            ) { /* stub */
+            }
 
-        public void onNetworkRequestStarted(SdkListener.Endpoint type, String url, JSONObject body, Object... objects) { /* stub */}
+            override fun onNetworkRequestStarted(
+                type: SdkListener.Endpoint,
+                url: String,
+                body: JSONObject?,
+                vararg objects: Any
+            ) { /* stub */
+            }
 
-        public void onNetworkRequestFinished(SdkListener.Endpoint type, String url, JSONObject response, int responseCode) { /* stub */}
+            override fun onNetworkRequestFinished(
+                type: SdkListener.Endpoint,
+                url: String,
+                response: JSONObject?,
+                responseCode: Int
+            ) { /* stub */
+            }
 
-        public void onSessionUpdated(InternalSession internalSession) { /* stub */}
+            override fun onSessionUpdated(internalSession: InternalSession) { /* stub */
+            }
 
-        public void onKitDetected(int kitId) { /* stub */}
+            override fun onKitDetected(kitId: Int) { /* stub */
+            }
 
-        public void onKitConfigReceived(int kitId, String configuration) { /* stub */}
+            override fun onKitConfigReceived(kitId: Int, configuration: String?) { /* stub */
+            }
 
-        public void onKitExcluded(int kitId, String reason) { /* stub */}
+            override fun onKitExcluded(kitId: Int, reason: String?) { /* stub */
+            }
 
-        public void onKitStarted(int kitId) { /* stub */}
+            override fun onKitStarted(kitId: Int) { /* stub */
+            }
 
-        public void onAliasRequestFinished(AliasResponse aliasResponse) { /* stub */}
+            override fun onAliasRequestFinished(aliasResponse: AliasResponse?) { /* stub */
+            }
 
-        public void onCompositeObjects(Object child, Object parent) { /* stub */}
+            override fun onCompositeObjects(child: Any?, parent: Any?) { /* stub */
+            }
 
-        public void onThreadMessage(String handlerName, Message msg, boolean onNewThread) { /* stub */ }
-    };
+            override fun onThreadMessage(
+                handlerName: String,
+                msg: Message,
+                onNewThread: Boolean
+            ) { /* stub */
+            }
+        }
+    }
 }
