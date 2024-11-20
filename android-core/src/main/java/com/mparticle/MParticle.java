@@ -288,31 +288,51 @@ public class MParticle {
      * completely reset. After that, {@link #start(MParticleOptions)} )} will be called with
      * the new key and secret and the SDK will initialize again as if it is a new app launch.
      *
-     * <i>Warning: this method will make synchronous calls into SQLite and disk</i>
-     *
      @param options Required to initialize the SDK properly
      */
     public static void switchWorkspace(@NonNull MParticleOptions options) {
-        if (instance != null) {
-            // End session if active
-            if (instance.isSessionActive()) {
-                instance.endSession();
-            }
+        synchronized (MParticle.class) {
+            MParticle localInstance = instance;
+            if (localInstance == null) {
+                performWorkspaceSwitch(options);
+            } else {
+                // End session if active
+                if (localInstance.isSessionActive()) {
+                    localInstance.endSession();
+                }
 
-            // Batch any remaining messages into upload records
-            try {
-                instance.mMessageManager.mUploadHandler.prepareMessageUploads(instance.mConfigManager.getUploadSettings());
-            } catch (Exception e) {
-                Logger.error(e, "Unable to create upload records before switching workspaces");
+                // Wait for the message thread to finish before processing upload records
+                localInstance.mMessageManager.getMessageHandler().post(() -> {
+                    // Process the upload records on the upload thread
+                    localInstance.mMessageManager.mUploadHandler.post(() -> {
+                        try {
+                            UploadSettings uploadSettings = localInstance.mConfigManager.getUploadSettings();
+                            localInstance.mMessageManager.mUploadHandler.prepareMessageUploads(uploadSettings);
+                        } catch (Exception e) {
+                            Logger.error(e, "Unable to create upload records before switching workspaces");
+                        }
+
+                        //
+                        performWorkspaceSwitch(options);
+                    });
+                });
             }
         }
+    }
 
-        // Reset everything except for uploads table
-        reset(options.getContext(), false, true);
+    private static void performWorkspaceSwitch(@NonNull MParticleOptions options) {
+        final HandlerThread handlerThread = new HandlerThread("mParticleSwitchWorkspaceHandler");
+        handlerThread.start();
+        new Handler(handlerThread.getLooper()).post(() -> {
+            // Reset everything except for uploads table
+            resetForSwitchingWorkspaces(options.getContext());
 
-        // Restart the SDK using new options
-        instance = null;
-        start(options);
+            // Restart the SDK using new options
+            instance = null;
+            start(options);
+
+            handlerThread.quit();
+        });
     }
 
     /**
