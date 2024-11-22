@@ -121,12 +121,5 @@ open class BaseMPMessageBuilder(messageType: String) : JSONObject() {
     }
 
     val keys: Array<String?>
-        get() {
-            val strings: MutableList<String?> = ArrayList<String?>()
-            val iterator = keys()
-            while (iterator.hasNext()) {
-                strings.add(iterator.next())
-            }
-            return strings.toTypedArray<String?>()
-        }
+        get() = keys().asSequence().toList().toTypedArray()
 }
