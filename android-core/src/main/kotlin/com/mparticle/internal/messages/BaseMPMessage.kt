@@ -54,11 +54,12 @@ open class BaseMPMessage : JSONObject {
         }
 
     val sessionId: String
-        get() = if (Constants.MessageType.SESSION_START == messageType) {
-            optString(Constants.MessageKey.ID, Constants.NO_SESSION_ID)
-        } else {
-            optString(Constants.MessageKey.SESSION_ID, Constants.NO_SESSION_ID)
-        }
+        get() =
+            if (Constants.MessageType.SESSION_START == messageType) {
+                optString(Constants.MessageKey.ID, Constants.NO_SESSION_ID)
+            } else {
+                optString(Constants.MessageKey.SESSION_ID, Constants.NO_SESSION_ID)
+            }
 
     val messageType: String
         get() = optString(Constants.MessageKey.TYPE)
