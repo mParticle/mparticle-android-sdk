@@ -74,10 +74,17 @@ rootProject.project('android-core').android.buildTypes.all {
 
 task zipSources(type: Jar) {
     def fileName = "$project.rootDir/android-core/build/intermediates/javac/${targetBuildType}/classes"
+    def kotlinClassesPath = "$project.rootDir/android-core/build/tmp/kotlin-classes/${targetBuildType}"
+
     from(fileTree(dir: fileName)) {
-        destinationDir new File("$project.projectDir/libs")
-        archiveName "mparticle.jar"
+        include '**/*.class' // Include Java classes
+
     }
+    from(fileTree(dir: kotlinClassesPath)) {
+        include '**/*.class' // Include Kotlin classes
+    }
+    destinationDir new File("$project.projectDir/libs")
+    archiveName "mparticle.jar"
     outputs.upToDateWhen { false }
 }
 
