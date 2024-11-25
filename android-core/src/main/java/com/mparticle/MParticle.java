@@ -312,7 +312,6 @@ public class MParticle {
                             Logger.error(e, "Unable to create upload records before switching workspaces");
                         }
 
-                        //
                         performWorkspaceSwitch(options);
                     });
                 });

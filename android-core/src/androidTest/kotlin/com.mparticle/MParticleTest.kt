@@ -27,6 +27,7 @@ import org.junit.Test
 import java.io.File
 import java.util.Arrays
 import java.util.concurrent.CountDownLatch
+import kotlin.test.assertTrue
 
 class MParticleTest : BaseCleanStartedEachTest() {
     private val configResponse =
