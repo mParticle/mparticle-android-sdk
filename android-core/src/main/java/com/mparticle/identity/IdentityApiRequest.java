@@ -242,9 +242,9 @@ public final class IdentityApiRequest {
     }
 
     public String objectToHash() {
-        String input =this.toString();
+        String input = this.toString();
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
             byte[] hashBytes = md.digest(input.getBytes());
             StringBuilder hexString = new StringBuilder();
             for (byte b : hashBytes) {
@@ -253,8 +253,9 @@ public final class IdentityApiRequest {
                 hexString.append(hex);
             }
             return hexString.toString().substring(0, 16); // Shorten to first 16 characters
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            Logger.error("Exception while initializing SHA-1 on device:" + e);
         }
+        return null;
     }
 }

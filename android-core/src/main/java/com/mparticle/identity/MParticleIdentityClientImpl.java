@@ -172,7 +172,8 @@ public class MParticleIdentityClientImpl extends MParticleBaseClientImpl impleme
                     identityCacheTime = System.currentTimeMillis();
                     mConfigManager.saveIdentityCacheTime(identityCacheTime);
                 }
-                String key = request.objectToHash() + callType;
+                String key = (request.objectToHash() == null) ? null : request.objectToHash() + callType;
+
 
                 identityCacheArray.put(key, identityHttpResponse);
                 mConfigManager.saveIdentityCache(key, identityHttpResponse);
