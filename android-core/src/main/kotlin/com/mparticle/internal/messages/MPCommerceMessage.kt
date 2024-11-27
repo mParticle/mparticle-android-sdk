@@ -117,7 +117,7 @@ class MPCommerceMessage protected constructor(builder: Builder, session: Interna
                             impression.products.takeIf { it.isNotEmpty() }?.let {
                                 val productsJson = JSONArray()
                                 impressionJson.put(Constants.Commerce.IMPRESSION_PRODUCT_LIST, productsJson)
-                                for (product in impression.products) {
+                                for (product in it) {
                                     productsJson.put(JSONObject(product.toString()))
                                 }
                             }
