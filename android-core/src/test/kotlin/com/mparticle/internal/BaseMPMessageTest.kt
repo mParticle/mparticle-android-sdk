@@ -5,7 +5,9 @@ import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.MockMParticle
 import com.mparticle.commerce.CommerceEvent
+import com.mparticle.commerce.Impression
 import com.mparticle.commerce.Product
+import com.mparticle.commerce.Promotion
 import com.mparticle.internal.messages.BaseMPMessage
 import com.mparticle.internal.messages.BaseMPMessageBuilder
 import com.mparticle.internal.messages.MPCommerceMessage
@@ -96,6 +98,56 @@ class BaseMPMessageTest {
         val builder = MPCommerceMessage.Builder(event)
             .timestamp(12345) as MPCommerceMessage.Builder
         val message = builder.build(InternalSession(), null, 0)
+        Assert.assertNotNull(message)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testNullCartOnCommerceEventWithImpression() {
+        MParticle.setInstance(MockMParticle())
+        val impression = Impression("Test Products List", Product.Builder("foo", "bar", 10.0).build())
+
+        val event =
+            CommerceEvent.Builder(impression)
+                .screen("TestScreen")
+                .nonInteraction(true)
+                .customAttributes(
+                    mapOf(
+                        "size" to "XL",
+                        "color" to "RED"
+                    )
+                )
+                .currency("USD")
+                .build()
+        val builder = MPCommerceMessage.Builder(event)
+            .timestamp(12345) as MPCommerceMessage.Builder
+        val message = builder.build(InternalSession(), null, 0)
+
+        Assert.assertNotNull(message)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testNullCartOnCommerceEventWithPromotion() {
+        MParticle.setInstance(MockMParticle())
+
+        val event = Promotion().apply {
+            id = "1234"
+            creative = "test_banner_1"
+            name = "50% off sale"
+            position = "test_button"
+        }.let {
+            CommerceEvent.Builder(Promotion.CLICK, it)
+                .productListName("Testing Product List Name")
+                .productListSource("Testing source")
+                .checkoutStep(2)
+                .customAttributes(mapOf("Promotion ATT" to "Promotion Testing")).build()
+        }
+
+        val builder = MPCommerceMessage.Builder(event)
+            .timestamp(12345) as MPCommerceMessage.Builder
+        val message = builder.build(InternalSession(), null, 0)
+
         Assert.assertNotNull(message)
     }
 }
