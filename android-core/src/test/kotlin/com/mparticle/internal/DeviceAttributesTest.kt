@@ -1,18 +1,45 @@
 package com.mparticle.internal
 
+import android.app.Application
+import android.bluetooth.BluetoothAdapter
 import android.content.Context
+import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.content.res.Configuration
+import android.content.res.Resources
+import android.telephony.TelephonyManager
+import android.util.DisplayMetrics
 import com.mparticle.MParticle
 import com.mparticle.MockMParticle
+import com.mparticle.internal.PushRegistrationHelper.PushRegistration
 import com.mparticle.mock.MockContext
 import com.mparticle.mock.MockSharedPreferences
 import org.json.JSONObject
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito
+import org.mockito.Mockito.doReturn
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
+import org.powermock.api.mockito.PowerMockito
+import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
+import java.lang.reflect.Field
 
 @RunWith(PowerMockRunner::class)
+@PrepareForTest(Context::class, Application::class, BluetoothAdapter::class, TelephonyManager::class)
 class DeviceAttributesTest {
+
+    private lateinit var context: Context
+
+    @Before
+    fun setUp() {
+        PowerMockito.mockStatic(BluetoothAdapter::class.java)
+        PowerMockito.mockStatic(TelephonyManager::class.java)
+    }
+
     @Test
     @Throws(Exception::class)
     fun testCollectAppInfo() {
@@ -91,5 +118,90 @@ class DeviceAttributesTest {
             Assert.assertFalse(osStringValues.contains(osString))
             osStringValues.add(osString)
         }
+    }
+
+    @Test
+    fun testDeviceInfo() {
+        val application = PowerMockito.mock(Application::class.java)
+        val mockAdapter = mock(BluetoothAdapter::class.java)
+        val mockTelephonyManager = mock(TelephonyManager::class.java)
+        val mockResources = mock(Resources::class.java)
+        val mockDisplayMetrics = mock(DisplayMetrics::class.java)
+        val mockConfiguration = mock(Configuration::class.java)
+        `when`(application.getResources()).thenReturn(mockResources)
+
+        PowerMockito.`when`(BluetoothAdapter.getDefaultAdapter()).thenReturn(mockAdapter)
+        `when`(mockResources.displayMetrics).thenReturn(mockDisplayMetrics)
+        `when`(mockResources.configuration).thenReturn(mockConfiguration)
+        Mockito.`when`(application.getSystemService(Context.TELEPHONY_SERVICE))
+            .thenReturn(mockTelephonyManager)
+        Mockito.`when`(mockTelephonyManager.phoneType)
+            .thenReturn(TelephonyManager.PHONE_TYPE_GSM)
+        Mockito.`when`(mockTelephonyManager.networkOperatorName)
+            .thenReturn("TestingNetworkOperatorName")
+        Mockito.`when`(mockTelephonyManager.networkCountryIso)
+            .thenReturn("US")
+        Mockito.`when`(mockTelephonyManager.networkOperator)
+            .thenReturn("310260")
+        val packageManager = Mockito.mock(PackageManager::class.java)
+        doReturn(packageManager).`when`(application).packageManager
+        doReturn("TestPackage").`when`(application).packageName
+        doReturn("TestInstallerPackage").`when`(packageManager).getInstallerPackageName("TestPackage")
+        DeviceAttributes.setDeviceImei("123kalksdlkasd")
+        val attributes =
+            DeviceAttributes(MParticle.OperatingSystem.ANDROID).getDeviceInfo(application)
+        Assert.assertNotNull(attributes)
+    }
+
+    @Test
+    fun testGetAppInfo() {
+        val mDeviceAttributes = DeviceAttributes(MParticle.OperatingSystem.ANDROID)
+        val application = PowerMockito.mock(Application::class.java)
+        val mockSharedPreferences = PowerMockito.mock(SharedPreferences::class.java)
+        val mockSharedPreferencesEditor = PowerMockito.mock(SharedPreferences.Editor::class.java)
+        Mockito.`when`(application.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE)).thenReturn(mockSharedPreferences)
+        Mockito.`when`(application.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE).edit()).thenReturn(mockSharedPreferencesEditor)
+        val field: Field = DeviceAttributes::class.java.getDeclaredField("appInfo")
+        field.isAccessible = true
+        val mockJson = JSONObject().apply {
+            put("key", "value")
+        }
+        // Set the private field value
+        field.set(mDeviceAttributes, mockJson)
+        val attributes = mDeviceAttributes.getAppInfo(application, true) as JSONObject
+        Assert.assertNotNull(attributes)
+    }
+
+    @Test
+    fun testWhen_OperatingSystem_Is_NULL() {
+        val mDeviceAttributes = DeviceAttributes(null)
+        Assert.assertEquals("Android", mDeviceAttributes.operatingSystemString)
+    }
+
+    @Test
+    @PrepareForTest(MPUtility::class, BluetoothAdapter::class, TelephonyManager::class)
+    fun testUpdateDeviceInfo() {
+        context = mock(Context::class.java)
+        val application = PowerMockito.mock(Application::class.java)
+        val packageManager = Mockito.mock(PackageManager::class.java)
+        PowerMockito.mockStatic(MPUtility::class.java)
+        val mockAdIdInfo = PowerMockito.mock(MPUtility.AdIdInfo::class.java)
+
+        Mockito.`when`(MPUtility.getAdIdInfo(context)).thenReturn(mockAdIdInfo)
+
+        doReturn(packageManager).`when`(application).packageManager
+        doReturn("TestPackage").`when`(application).packageName
+        doReturn("TestInstallerPackage").`when`(packageManager).getInstallerPackageName("TestPackage")
+        DeviceAttributes.setDeviceImei("123kalksdlkasd")
+        val mockMp = MockMParticle()
+        MParticle.setInstance(mockMp)
+        val registration = PushRegistration("instance id", "1234545")
+        Mockito.`when`(
+            MParticle.getInstance()!!.Internal().configManager.pushRegistration
+        ).thenReturn(registration)
+        val result = MPUtility.getAdIdInfo(context)
+        val attributes =
+            DeviceAttributes(MParticle.OperatingSystem.ANDROID).getDeviceInfo(application)
+        Assert.assertNotNull(attributes)
     }
 }
