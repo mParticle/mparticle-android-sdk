@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.telephony.TelephonyManager
-import android.util.Log
 import com.mparticle.MParticle
 import com.mparticle.internal.Constants.MessageKey
 import com.mparticle.internal.Constants.PrefKeys
