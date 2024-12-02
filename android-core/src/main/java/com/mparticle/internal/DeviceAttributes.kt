@@ -296,6 +296,7 @@ class DeviceAttributes
         return getAppInfo(context, false)
     }
 
+    //https://go.mparticle.com/work/SQDSDKS-6951
     fun getAppInfo(context: Context, forceUpdateInstallReferrer: Boolean): JSONObject {
         if (appInfo == null) {
             appInfo = getStaticApplicationInfo(context)
