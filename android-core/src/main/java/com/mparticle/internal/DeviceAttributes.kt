@@ -170,9 +170,9 @@ class DeviceAttributes
 
             val application = appContext as? Application
             // device ID
-
+            if (application != null) {
                 addAndroidId(attributes, application)
-
+            }
 
             attributes.put(MessageKey.DEVICE_BLUETOOTH_ENABLED, MPUtility.isBluetoothEnabled(appContext))
             attributes.put(MessageKey.DEVICE_BLUETOOTH_VERSION, MPUtility.getBluetoothVersion(appContext))
