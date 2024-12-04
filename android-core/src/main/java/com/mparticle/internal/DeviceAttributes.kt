@@ -26,7 +26,7 @@ class DeviceAttributes
             try {
                 val kits = MParticle.getInstance()?.Internal()?.kitManager?.supportedKits
                 var count = 0
-                if (kits != null) {
+                kits?.let {
                     for (kitId in kits) {
                         if (kitId >= 1000000) {
                             count++
@@ -184,7 +184,7 @@ class DeviceAttributes
             attributes.put(MessageKey.DEVICE_ROOTED, rootedObject)
 
             // screen height/width
-            val displayMetrics = appContext.getResources().displayMetrics
+            val displayMetrics = appContext.resources.displayMetrics
             attributes.put(MessageKey.SCREEN_HEIGHT, displayMetrics.heightPixels)
             attributes.put(MessageKey.SCREEN_WIDTH, displayMetrics.widthPixels)
             attributes.put(MessageKey.SCREEN_DPI, displayMetrics.densityDpi)
@@ -246,7 +246,7 @@ class DeviceAttributes
                 val instance = MParticle.getInstance()
                 // check instance nullability here and decline to act if it is not available. Don't want to have the case where we are overriding isLimiAdTrackingEnabled
                 // just because there was a timing issue with the singleton
-                if (instance != null) {
+                instance?.let {
                     if (adIdInfo.isLimitAdTrackingEnabled) {
                         message = adIdInfo.advertiser.descriptiveName + " Advertising ID tracking is disabled on this device."
                     } else {
@@ -268,7 +268,7 @@ class DeviceAttributes
 
         try {
             val mParticle = MParticle.getInstance()
-            if (mParticle != null) {
+            mParticle?.let {
                 val configManager = mParticle.Internal().configManager
                 val registration = configManager.pushRegistration
                 if (registration != null && !MPUtility.isEmpty(registration.instanceId)) {
@@ -326,6 +326,7 @@ class DeviceAttributes
         val deviceImei: String?
             get() = _deviceImei ?: null
 
+        //TO-DO Once the public and all the class is converted to Kotlin, remove the getter and setter and use a single property instead.
         @JvmStatic
         fun setDeviceImei(deviceImei: String?) {
             _deviceImei = deviceImei
