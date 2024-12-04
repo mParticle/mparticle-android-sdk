@@ -297,7 +297,7 @@ class DeviceAttributes
         return getAppInfo(context, false)
     }
 
-    //https://go.mparticle.com/work/SQDSDKS-6951
+    // https://go.mparticle.com/work/SQDSDKS-6951
     fun getAppInfo(context: Context, forceUpdateInstallReferrer: Boolean): JSONObject {
         if (appInfo == null) {
             appInfo = getStaticApplicationInfo(context)
@@ -326,7 +326,7 @@ class DeviceAttributes
         val deviceImei: String?
             get() = _deviceImei ?: null
 
-        //TO-DO Once the public and all the class is converted to Kotlin, remove the getter and setter and use a single property instead.
+        // TO-DO Once the public and all the class is converted to Kotlin, remove the getter and setter and use a single property instead.
         @JvmStatic
         fun setDeviceImei(deviceImei: String?) {
             _deviceImei = deviceImei
