@@ -168,9 +168,11 @@ class DeviceAttributes
             attributes.put(MessageKey.MODEL, Build.MODEL)
             attributes.put(MessageKey.RELEASE_VERSION, Build.VERSION.RELEASE)
 
-            val application = appContext as Application
+            val application = appContext as? Application
             // device ID
-            addAndroidId(attributes, application)
+
+                addAndroidId(attributes, application)
+
 
             attributes.put(MessageKey.DEVICE_BLUETOOTH_ENABLED, MPUtility.isBluetoothEnabled(appContext))
             attributes.put(MessageKey.DEVICE_BLUETOOTH_VERSION, MPUtility.getBluetoothVersion(appContext))
@@ -196,22 +198,21 @@ class DeviceAttributes
             attributes.put(MessageKey.TIMEZONE, TimeZone.getDefault().rawOffset / (1000 * 60 * 60))
             // network
             val telephonyManager = appContext
-                .getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-            val phoneType = telephonyManager.phoneType
-            if (phoneType != TelephonyManager.PHONE_TYPE_NONE) {
+                .getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager
+            if (telephonyManager?.phoneType != TelephonyManager.PHONE_TYPE_NONE) {
                 // NOTE: network attributes can be empty if phone is in airplane
                 // mode and will not be set
-                val networkCarrier = telephonyManager.networkOperatorName
-                if (0 != networkCarrier.length) {
+                val networkCarrier = telephonyManager?.networkOperatorName
+                if (0 != networkCarrier?.length) {
                     attributes.put(MessageKey.NETWORK_CARRIER, networkCarrier)
                 }
-                val networkCountry = telephonyManager.networkCountryIso
-                if (0 != networkCountry.length) {
+                val networkCountry = telephonyManager?.networkCountryIso
+                if (0 != networkCountry?.length) {
                     attributes.put(MessageKey.NETWORK_COUNTRY, networkCountry)
                 }
                 // android combines MNC+MCC into network operator
-                val networkOperator = telephonyManager.networkOperator
-                if (6 == networkOperator.length) {
+                val networkOperator = telephonyManager?.networkOperator
+                if (6 == networkOperator?.length) {
                     attributes.put(MessageKey.MOBILE_COUNTRY_CODE, networkOperator.substring(0, 3))
                     attributes.put(MessageKey.MOBILE_NETWORK_CODE, networkOperator.substring(3))
                 }
