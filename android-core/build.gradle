@@ -86,6 +86,7 @@ android {
             jvmArgs += ['--add-opens', 'java.base/java.util.concurrent=ALL-UNNAMED']
             jvmArgs += ['--add-opens', 'java.base/java.util.concurrent.atomic=ALL-UNNAMED']
             jvmArgs += ['--add-opens', 'java.base/java.lang.ref=ALL-UNNAMED']
+            jvmArgs += ['--add-opens', 'java.base/java.lang.reflect=ALL-UNNAMED']
         }
         if (useOrchestrator()) {
             execution 'ANDROIDX_TEST_ORCHESTRATOR'
