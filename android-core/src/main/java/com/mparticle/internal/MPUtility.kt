@@ -34,7 +34,6 @@ import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.UnsupportedEncodingException
 import java.lang.reflect.InvocationTargetException
-import java.lang.reflect.Method
 import java.math.BigInteger
 import java.net.HttpURLConnection
 import java.security.InvalidKeyException
@@ -197,7 +196,7 @@ object MPUtility {
     @JvmStatic
     fun getGpsEnabled(context: Context): String? {
         if (PackageManager.PERMISSION_GRANTED == context
-                .checkCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+            .checkCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
         ) {
             val manager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
             return manager.isProviderEnabled(LocationManager.GPS_PROVIDER).toString()
@@ -257,7 +256,7 @@ object MPUtility {
         return String(chars)
     }
 
-  @JvmStatic
+    @JvmStatic
     fun getJsonResponse(connection: MPConnection): JSONObject? {
         return try {
             getJsonResponse(connection.inputStream)
@@ -291,7 +290,7 @@ object MPUtility {
             null
         } catch (jse: JSONException) {
             null
-        }catch (e: Exception){
+        } catch (e: Exception) {
             null
         }
     }
@@ -346,7 +345,7 @@ object MPUtility {
     val timeZone: String?
         get() {
             try {
-                //Some Android 8 devices crash here for no clear reason.
+                // Some Android 8 devices crash here for no clear reason.
                 return TimeZone.getDefault().getDisplayName(false, 0)
             } catch (ignored: Exception) {
             } catch (e: AssertionError) {
@@ -357,7 +356,7 @@ object MPUtility {
     @JvmStatic
     fun getOrientation(context: Context?): Int {
         var orientation = Configuration.ORIENTATION_UNDEFINED
-       context?.let {
+        context?.let {
             val displayMetrics = context.resources.displayMetrics
             orientation = if (displayMetrics.widthPixels == displayMetrics.heightPixels) {
                 Configuration.ORIENTATION_SQUARE
@@ -398,7 +397,7 @@ object MPUtility {
             try {
                 val localFileReader = FileReader(str1)
                 val localBufferedReader = BufferedReader(localFileReader, 8192)
-                str2 = localBufferedReader.readLine() //meminfo
+                str2 = localBufferedReader.readLine() // meminfo
                 arrayOfString = str2.split("\\s+".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
                 initial_memory = (arrayOfString[1].toInt() * 1024).toLong()
                 localBufferedReader.close()
@@ -412,7 +411,8 @@ object MPUtility {
     fun getOpenUDID(context: Context): String? {
         if (sOpenUDID == null) {
             val sharedPrefs = context.getSharedPreferences(
-                Constants.PREFS_FILE, Context.MODE_PRIVATE
+                Constants.PREFS_FILE,
+                Context.MODE_PRIVATE
             )
             sOpenUDID = sharedPrefs.getString(Constants.PrefKeys.OPEN_UDID, null)
             if (sOpenUDID == null) {
@@ -430,7 +430,8 @@ object MPUtility {
     @JvmStatic
     fun getRampUdid(context: Context): String {
         val sharedPrefs = context.getSharedPreferences(
-            Constants.PREFS_FILE, Context.MODE_PRIVATE
+            Constants.PREFS_FILE,
+            Context.MODE_PRIVATE
         )
         var rampUdid = sharedPrefs.getString(Constants.PrefKeys.DEVICE_RAMP_UDID, null)
         if (rampUdid == null) {
@@ -457,17 +458,20 @@ object MPUtility {
         return try {
             UUID.nameUUIDFromBytes(versionCode.toByteArray()).toString()
         } catch (e: AssertionError) {
-
-            //Some devices do not have MD5 and will throw a NoSuchAlgorithmException.
+            // Some devices do not have MD5 and will throw a NoSuchAlgorithmException.
             DeviceAttributes.UNKNOWN
         }
     }
 
     @JvmStatic
     fun isTablet(context: Context): Boolean {
-        return ((context.resources.configuration.screenLayout
-                and Configuration.SCREENLAYOUT_SIZE_MASK)
-                >= Configuration.SCREENLAYOUT_SIZE_LARGE)
+        return (
+            (
+                context.resources.configuration.screenLayout
+                    and Configuration.SCREENLAYOUT_SIZE_MASK
+                )
+                >= Configuration.SCREENLAYOUT_SIZE_LARGE
+            )
     }
 
     @JvmStatic
@@ -564,7 +568,6 @@ object MPUtility {
                 Class.forName("com.google.android.gms.ads.identifier.AdvertisingIdClient")
                 return true
             } catch (ignored: ClassNotFoundException) {
-
             }
             return false
         }
@@ -673,7 +676,7 @@ object MPUtility {
             } else {
                 return null
             }
-        }catch (e:Exception){
+        } catch (e: Exception) {
         }
         return null
     }
@@ -825,9 +828,9 @@ object MPUtility {
         try {
             return map.containsKey(null)
         } catch (ignore: RuntimeException) {
-            //At this point we should be able to conclude that the implementation of the map does
-            //not allow for null keys, if you get an exception when you check for a null key, but
-            //there is no guarantee in the Map documentation, so we still have to check by hand.
+            // At this point we should be able to conclude that the implementation of the map does
+            // not allow for null keys, if you get an exception when you check for a null key, but
+            // there is no guarantee in the Map documentation, so we still have to check by hand.
             for ((key) in ArrayList(map.entries)) {
                 if (key == null) {
                     return true
@@ -881,12 +884,10 @@ object MPUtility {
         try {
             return stringValue.toInt()
         } catch (ignored: NumberFormatException) {
-
         }
         try {
             return stringValue.toDouble()
         } catch (ignored: NumberFormatException) {
-
         }
 
         return stringValue
