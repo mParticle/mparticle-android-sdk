@@ -426,9 +426,11 @@ open class AppStateManager @JvmOverloads constructor(
     internal class CheckAdIdRunnable(var configManager: ConfigManager?) : Runnable {
         override fun run() {
             val adIdInfo =
-                MPUtility.getAdIdInfo(
-                    MParticle.getInstance()?.Internal()?.appStateManager?.mContext
-                )
+                MParticle.getInstance()?.Internal()?.appStateManager?.mContext?.let {
+                    MPUtility.getAdIdInfo(
+                        it
+                    )
+                }
             val currentAdId =
                 (if (adIdInfo == null) null else (if (adIdInfo.isLimitAdTrackingEnabled) null else adIdInfo.id))
             val previousAdId = configManager?.previousAdId

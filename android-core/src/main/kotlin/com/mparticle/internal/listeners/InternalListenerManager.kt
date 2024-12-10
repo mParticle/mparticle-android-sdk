@@ -328,7 +328,7 @@ class InternalListenerManager private constructor(private val context: Context) 
 
         @JvmStatic
         fun start(context: Context?): InternalListenerManager? {
-            val canRun = MPUtility.isAppDebuggable(context) || context?.packageName == MPUtility.getProp(INTERNAL_LISTENER_PROP)
+            val canRun = context?.let { MPUtility.isAppDebuggable(it) } == true || context?.packageName == MPUtility.getProp(INTERNAL_LISTENER_PROP)
             if (instance == null && context != null && canRun) {
                 instance = InternalListenerManager(context.applicationContext)
             }

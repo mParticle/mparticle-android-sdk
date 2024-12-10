@@ -180,7 +180,7 @@ class DeviceAttributes
             attributes.put(MessageKey.DEVICE_SUPPORTS_TELEPHONY, MPUtility.hasTelephony(appContext))
 
             val rootedObject = JSONObject()
-            rootedObject.put(MessageKey.DEVICE_ROOTED_CYDIA, MPUtility.isPhoneRooted())
+            rootedObject.put(MessageKey.DEVICE_ROOTED_CYDIA, MPUtility.isPhoneRooted)
             attributes.put(MessageKey.DEVICE_ROOTED, rootedObject)
 
             // screen height/width
@@ -194,7 +194,7 @@ class DeviceAttributes
             attributes.put(MessageKey.DEVICE_COUNTRY, locale.displayCountry)
             attributes.put(MessageKey.DEVICE_LOCALE_COUNTRY, locale.country)
             attributes.put(MessageKey.DEVICE_LOCALE_LANGUAGE, locale.language)
-            attributes.put(MessageKey.DEVICE_TIMEZONE_NAME, MPUtility.getTimeZone())
+            attributes.put(MessageKey.DEVICE_TIMEZONE_NAME, MPUtility.timeZone)
             attributes.put(MessageKey.TIMEZONE, TimeZone.getDefault().rawOffset / (1000 * 60 * 60))
             // network
             val telephonyManager = appContext
@@ -218,7 +218,7 @@ class DeviceAttributes
                 }
             }
             attributes.put(MessageKey.DEVICE_IS_TABLET, MPUtility.isTablet(appContext))
-            attributes.put(MessageKey.DEVICE_IS_IN_DST, MPUtility.isInDaylightSavings())
+            attributes.put(MessageKey.DEVICE_IS_IN_DST, MPUtility.isInDaylightSavings)
 
             if (!MPUtility.isEmpty(deviceImei)) {
                 attributes.put(MessageKey.DEVICE_IMEI, deviceImei)
