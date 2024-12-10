@@ -584,7 +584,7 @@ object MPUtility {
 
     @JvmStatic
     val isFirebaseAvailable: Boolean
-        get() =  (isFirebaseAvailablePostV21 || isFirebaseAvailablePreV21)
+        get() = (isFirebaseAvailablePostV21 || isFirebaseAvailablePreV21)
 
     @JvmStatic
     val isFirebaseAvailablePostV21: Boolean
@@ -648,30 +648,30 @@ object MPUtility {
     }
 
     fun wrapExtras(extras: Bundle?): JSONObject? {
-            if (extras != null && !extras.isEmpty) {
-                val parameters = JSONObject()
-                for (key in extras.keySet()) {
-                    var value: Any?
-                    if ((extras.getBundle(key).also { value = it }) != null) {
+        if (extras != null && !extras.isEmpty) {
+            val parameters = JSONObject()
+            for (key in extras.keySet()) {
+                var value: Any?
+                if ((extras.getBundle(key).also { value = it }) != null) {
+                    try {
+                        parameters.put(key, wrapExtras(value as Bundle))
+                    } catch (ignored: JSONException) {
+                    }
+                } else if ((extras[key].also { value = it }) != null) {
+                    val stringVal = value.toString()
+                    if ((stringVal.length < 500)) {
                         try {
-                            parameters.put(key, wrapExtras(value as Bundle))
+                            parameters.put(key, stringVal)
                         } catch (ignored: JSONException) {
-                        }
-                    } else if ((extras[key].also { value = it }) != null) {
-                        val stringVal = value.toString()
-                        if ((stringVal.length < 500)) {
-                            try {
-                                parameters.put(key, stringVal)
-                            } catch (ignored: JSONException) {
-                            }
                         }
                     }
                 }
-                return parameters
-            } else {
-                return null
             }
+            return parameters
+        } else {
+            return null
         }
+    }
 
     @JvmStatic
     fun mapToJson(map: Map<String, *>?): JSONObject? {
