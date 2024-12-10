@@ -311,15 +311,15 @@ object MPUtility {
     }
 
     fun getErrorMessage(connection: HttpURLConnection): String? {
-        val `is` = connection.errorStream ?: return null
+        val errorStream = connection.errorStream ?: return null
         val responseBuilder = StringBuilder()
-        val `in` = BufferedReader(InputStreamReader(`is`))
+        val streamReader = BufferedReader(InputStreamReader(errorStream))
         var line: String
         try {
-            while ((`in`.readLine().also { line = it }) != null) {
+            while ((streamReader.readLine().also { line = it }) != null) {
                 responseBuilder.append(line + '\n')
             }
-            `in`.close()
+            streamReader.close()
             return responseBuilder.toString()
         } catch (e: Exception) {
             return e.message
@@ -584,11 +584,7 @@ object MPUtility {
 
     @JvmStatic
     val isFirebaseAvailable: Boolean
-        get() = if (isFirebaseAvailablePostV21 || isFirebaseAvailablePreV21) {
-            true
-        } else {
-            false
-        }
+        get() =  (isFirebaseAvailablePostV21 || isFirebaseAvailablePreV21)
 
     @JvmStatic
     val isFirebaseAvailablePostV21: Boolean
@@ -652,7 +648,6 @@ object MPUtility {
     }
 
     fun wrapExtras(extras: Bundle?): JSONObject? {
-        try {
             if (extras != null && !extras.isEmpty) {
                 val parameters = JSONObject()
                 for (key in extras.keySet()) {
@@ -676,10 +671,7 @@ object MPUtility {
             } else {
                 return null
             }
-        } catch (e: Exception) {
         }
-        return null
-    }
 
     @JvmStatic
     fun mapToJson(map: Map<String, *>?): JSONObject? {
