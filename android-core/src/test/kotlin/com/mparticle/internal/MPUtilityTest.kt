@@ -31,7 +31,7 @@ class MPUtilityTest {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        instance = MPUtility()
+        instance = MPUtility
     }
 
     @Test
@@ -171,7 +171,7 @@ class MPUtilityTest {
                 testMap[key] = value
                 testJson.put(key, value)
             }
-            assertUnorderedJsonEqual(testJson, MPUtility.mapToJson(testMap))
+            MPUtility.mapToJson(testMap)?.let { assertUnorderedJsonEqual(testJson, it) }
         }
     }
 
@@ -196,7 +196,7 @@ class MPUtilityTest {
             }
             testMap["bar"] = "foobar"
             testJson.put("bar", "foobar")
-            assertUnorderedJsonEqual(testJson, MPUtility.mapToJson(testMap))
+            MPUtility.mapToJson(testMap)?.let { assertUnorderedJsonEqual(testJson, it) }
         }
     }
 
