@@ -32,7 +32,6 @@ open class BaseHandler : Handler {
         }
     }
 
-
     fun await(latch: CountDownLatch?) {
         this.sendMessage(obtainMessage(-1, latch))
     }
@@ -44,8 +43,8 @@ open class BaseHandler : Handler {
         }
         handling = true
         try {
-                messageQueue.remove(msg)
-            if ( msg.what == -1 && msg.obj is CountDownLatch) {
+            messageQueue.remove(msg)
+            if (msg.what == -1 && msg.obj is CountDownLatch) {
                 (msg.obj as CountDownLatch).countDown()
             } else {
                 if (isEnabled) {
@@ -70,7 +69,7 @@ open class BaseHandler : Handler {
             listener.onThreadMessage(javaClass.name, msg, false)
         }
 
-            messageQueue[msg] = true
+        messageQueue[msg] = true
 
         return super.sendMessageAtTime(msg, uptimeMillis)
     }
@@ -87,7 +86,7 @@ open class BaseHandler : Handler {
         super.removeMessages(what)
     }
 
-    //Override this in order to handle messages
+    // Override this in order to handle messages
     open fun handleMessageImpl(msg: Message?) {
     }
 }

@@ -1,9 +1,6 @@
 package com.mparticle.internal
 
-import android.bluetooth.BluetoothAdapter
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.os.Message
 import com.mparticle.MParticle
 import com.mparticle.MockMParticle
@@ -120,9 +117,11 @@ class UploadHandlerTest {
     fun testRampSampling() {
         val message = Mockito.mock(Message::class.java)
 
-        Mockito.`when`(message.toString()).thenAnswer(Answer {
-            "Mocked Message"
-        })
+        Mockito.`when`(message.toString()).thenAnswer(
+            Answer {
+                "Mocked Message"
+            }
+        )
 
         handler.handleMessage(message)
         val apiClient = Mockito.mock(
