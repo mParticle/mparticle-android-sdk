@@ -17,7 +17,7 @@ open class BaseHandler : Handler {
     private var handling = false
     private val messageQueue: ConcurrentHashMap<Message, Boolean> = ConcurrentHashMap<Message, Boolean>()
 
-    fun getMessageQueue(): Set<Message?> {
+    fun getMessageQueue(): Set<Message> {
         return messageQueue.keys
     }
 
@@ -75,12 +75,10 @@ open class BaseHandler : Handler {
     }
 
     fun removeMessage(what: Int) {
-        val messages: Set<Message?> = messageQueue.keys
+        val messages: Set<Message> = messageQueue.keys
         for (message in messages) {
-            message?.let {
-                if (message.what == what) {
-                    messageQueue.remove(message)
-                }
+            if (message.what == what) {
+                messageQueue.remove(message)
             }
         }
         super.removeMessages(what)
