@@ -168,11 +168,6 @@ jobs:
           git push origin HEAD:main
           git push origin HEAD:development
           git push -f origin HEAD:chore/dependabot
-      - name: "Push release commits to internal main"
-        if: ${{ github.event.inputs.dryRun == 'false' }}
-        run: |
-          git remote add internal https://${{ secrets.MP_SEMANTIC_RELEASE_BOT }}@github.com/mParticle/mparticle-android-sdk-internal.git
-          git push internal HEAD:main
       - name: "Delete release branch"
         if: ${{ github.event.inputs.dryRun == 'false' }}
         run: |
