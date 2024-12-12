@@ -1,3 +1,11 @@
+## [5.58.4](https://github.com/mParticle/mparticle-android-sdk/compare/v5.58.3...v5.58.4) (2024-12-12)
+
+
+### Updates & Maintenance
+
+* Fix release action trying to push to old internal repo ([09101f2](https://github.com/mParticle/mparticle-android-sdk/commit/09101f2bd6e529b857bfb66c8196f7754d0e26e6))
+* Update submodules ([36a6396](https://github.com/mParticle/mparticle-android-sdk/commit/36a6396a3f91293d74b77318ca06e3e44cd8c6ad))
+
 ## [5.58.3](https://github.com/mParticle/mparticle-android-sdk/compare/v5.58.2...v5.58.3) (2024-10-24)
 
 
