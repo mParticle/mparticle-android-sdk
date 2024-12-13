@@ -1,6 +1,7 @@
 package com.mparticle.internal;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Looper;
 import android.os.Message;
 
@@ -241,7 +242,7 @@ import java.util.UUID;
             case STORE_ALIAS_MESSAGE:
                 try {
                     MPAliasMessage aliasMessage = (MPAliasMessage) msg.obj;
-                    mMParticleDBManager.insertAliasRequest(mMessageManagerCallbacks.getApiKey(), aliasMessage);
+                    mMParticleDBManager.insertAliasRequest(aliasMessage, mMessageManagerCallbacks.getUploadSettings());
 
                     MParticle instance = MParticle.getInstance();
                     if (instance != null) {
