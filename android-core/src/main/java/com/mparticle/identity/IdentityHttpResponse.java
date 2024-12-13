@@ -135,4 +135,31 @@ public final class IdentityHttpResponse {
         }
         return builder.toString();
     }
+
+    public static IdentityHttpResponse fromJson(@NonNull JSONObject jsonObject) throws JSONException {
+        int httpCode = jsonObject.optInt("http_code", 0);
+        return new IdentityHttpResponse(httpCode, jsonObject);
+    }
+
+    @NonNull
+    public JSONObject toJson() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("http_code", httpCode);
+        jsonObject.put(MPID, mpId);
+        jsonObject.put(CONTEXT, context);
+        jsonObject.put(LOGGED_IN, loggedIn);
+
+        if (!errors.isEmpty()) {
+            JSONArray errorsArray = new JSONArray();
+            for (Error error : errors) {
+                JSONObject errorObject = new JSONObject();
+                errorObject.put(CODE, error.code);
+                errorObject.put(MESSAGE, error.message);
+                errorsArray.put(errorObject);
+            }
+            jsonObject.put(ERRORS, errorsArray);
+        }
+
+        return jsonObject;
+    }
 }

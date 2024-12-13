@@ -4,17 +4,26 @@ import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Handler
+import android.os.Looper
 import com.mparticle.MParticle
 import com.mparticle.MockMParticle
 import com.mparticle.mock.MockApplication
 import com.mparticle.mock.MockContext
 import com.mparticle.mock.MockSharedPreferences
 import com.mparticle.testutils.AndroidUtils
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito
+import org.powermock.api.mockito.PowerMockito
+import org.powermock.core.classloader.annotations.PrepareForTest
+import org.powermock.modules.junit4.PowerMockRunner
 
+@RunWith(PowerMockRunner::class)
+@PrepareForTest(Looper::class)
 class AppStateManagerTest {
     lateinit var manager: AppStateManager
     private var mockContext: MockApplication? = null
@@ -28,7 +37,11 @@ class AppStateManagerTest {
     fun setup() {
         val context = MockContext()
         mockContext = context.applicationContext as MockApplication
-        manager = AppStateManager(mockContext, true)
+        // Prepare and mock the Looper class
+        PowerMockito.mockStatic(Looper::class.java)
+        val looper: Looper = Mockito.mock(Looper::class.java)
+        Mockito.`when`(Looper.getMainLooper()).thenReturn(looper)
+        manager = AppStateManager(mockContext!!, true)
         prefs = mockContext?.getSharedPreferences(null, 0) as MockSharedPreferences
         val configManager = Mockito.mock(ConfigManager::class.java)
         manager.setConfigManager(configManager)
@@ -53,7 +66,7 @@ class AppStateManagerTest {
     @Test
     @Throws(Exception::class)
     fun testOnActivityStarted() {
-        Assert.assertEquals(true, manager.isBackgrounded)
+        Assert.assertEquals(true, manager.isBackgrounded())
         manager.onActivityStarted(activity)
         Mockito.verify(MParticle.getInstance()!!.Internal().kitManager, Mockito.times(1))
             .onActivityStarted(activity)
@@ -62,10 +75,10 @@ class AppStateManagerTest {
     @Test
     @Throws(Exception::class)
     fun testOnActivityResumed() {
-        Assert.assertEquals(true, manager.isBackgrounded)
+        Assert.assertEquals(true, manager.isBackgrounded())
         manager.onActivityResumed(activity)
         Assert.assertTrue(AppStateManager.mInitialized)
-        Assert.assertEquals(false, manager.isBackgrounded)
+        Assert.assertEquals(false, manager.isBackgrounded())
         manager.onActivityResumed(activity)
     }
 
@@ -121,10 +134,10 @@ class AppStateManagerTest {
      */
     @Test
     @Throws(Exception::class)
-    fun testSecondActivityStart() {
+    fun testSecondActivityStart() = runTest(StandardTestDispatcher()) {
         manager.onActivityPaused(activity)
         Thread.sleep(1000)
-        Assert.assertEquals(true, manager.isBackgrounded)
+        Assert.assertEquals(true, manager.isBackgrounded())
         manager.onActivityResumed(activity)
         val activity2 = Mockito.mock(
             Activity::class.java
@@ -135,20 +148,20 @@ class AppStateManagerTest {
         manager.onActivityPaused(activity2)
         manager.onActivityPaused(activity3)
         Thread.sleep(1000)
-        Assert.assertEquals(false, manager.isBackgrounded)
+        Assert.assertEquals(false, manager.isBackgrounded())
         manager.onActivityPaused(activity)
         Thread.sleep(1000)
-        Assert.assertEquals(true, manager.isBackgrounded)
+        Assert.assertEquals(true, manager.isBackgrounded())
     }
 
     @Test
     @Throws(Exception::class)
     fun testOnActivityPaused() {
         manager.onActivityResumed(activity)
-        Assert.assertEquals(false, manager.isBackgrounded)
+        Assert.assertEquals(false, manager.isBackgrounded())
         manager.onActivityPaused(activity)
         Thread.sleep(1000)
-        Assert.assertEquals(true, manager.isBackgrounded)
+        Assert.assertEquals(true, manager.isBackgrounded())
         Assert.assertTrue(AppStateManager.mInitialized)
         Assert.assertTrue(manager.mLastStoppedTime.get() > 0)
         manager.onActivityResumed(activity)
@@ -190,10 +203,11 @@ class AppStateManagerTest {
                 return isBackground.value
             }
 
-            override fun getSession(): InternalSession {
+            override fun fetchSession(): InternalSession {
                 return session.value!!
             }
         }
+        manager.session = session.value!!
         val configManager = Mockito.mock(ConfigManager::class.java)
         manager.setConfigManager(configManager)
         Mockito.`when`(MParticle.getInstance()?.Media()?.audioPlaying).thenReturn(false)

@@ -451,6 +451,8 @@ public class MockServer {
                     IdentityRequest.IdentityRequestBody request = new IdentityRequest(connection).getBody();
                     response.responseCode = 200;
                     response.responseBody = getIdentityResponse(request.previousMpid != null && request.previousMpid != 0 ? request.previousMpid : ran.nextLong(), ran.nextBoolean());
+                    response.setHeader("X-MP-Max-Age", "86400");
+
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }

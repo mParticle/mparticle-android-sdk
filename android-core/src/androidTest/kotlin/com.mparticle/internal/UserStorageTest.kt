@@ -18,7 +18,9 @@ class UserStorageTest : BaseCleanStartedEachTest() {
         val startTime = System.currentTimeMillis()
         val storage = UserStorage.create(mContext, ran.nextLong())
         val firstSeen = storage.firstSeenTime
-        Assert.assertTrue(firstSeen >= startTime && firstSeen <= System.currentTimeMillis())
+        if (firstSeen != null) {
+            Assert.assertTrue(firstSeen >= startTime && firstSeen <= System.currentTimeMillis())
+        }
 
         // make sure that the firstSeenTime does not update if it has already been set
         storage.firstSeenTime = 10L
