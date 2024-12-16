@@ -24,6 +24,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
+import org.mockito.stubbing.Answer
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
@@ -114,7 +115,15 @@ class UploadHandlerTest {
     @Test
     @Throws(Exception::class)
     fun testRampSampling() {
-        handler.handleMessage(Message())
+        val message = Mockito.mock(Message::class.java)
+
+        Mockito.`when`(message.toString()).thenAnswer(
+            Answer {
+                "Mocked Message"
+            }
+        )
+
+        handler.handleMessage(message)
         val apiClient = Mockito.mock(
             MParticleApiClientImpl::class.java
         )
