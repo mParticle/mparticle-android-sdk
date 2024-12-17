@@ -968,11 +968,11 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 .apply();
     }
 
-    boolean isFirstRunForAST() {
+    synchronized boolean isFirstRunForAST() {
         return sPreferences.getBoolean(Constants.PrefKeys.FIRSTRUN_AST + mConfigManager.getApiKey(), true) && isFirstRunForMessageLegacy();
     }
 
-    void setFirstRunForAST(boolean firstRun) {
+    synchronized void setFirstRunForAST(boolean firstRun) {
         sPreferences.edit()
                 .putBoolean(Constants.PrefKeys.FIRSTRUN_AST + mConfigManager.getApiKey(), firstRun)
                 .remove(Constants.PrefKeys.FIRSTRUN_OBSELETE + mConfigManager.getApiKey())
