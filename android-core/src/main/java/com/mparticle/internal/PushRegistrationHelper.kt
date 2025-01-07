@@ -65,9 +65,9 @@ object PushRegistrationHelper {
             val newPushRegistration = PushRegistration(instanceId, senderId)
             val pushRegistration = configManager.pushRegistration
 
-            //If this new push registration matches the existing persisted value we can will defer logging it until a new Session starts
+            // If this new push registration matches the existing persisted value we can will defer logging it until a new Session starts
             if (mParticle == null || (mParticle.currentSession == null && newPushRegistration == pushRegistration)) {
-                //If the SDK isn't started, OR if a Session hasn't started and this is a duplicate push registration,
+                // If the SDK isn't started, OR if a Session hasn't started and this is a duplicate push registration,
                 // log the push notification as a background push in the ConfigManager and we will send a IdentityApi.modify() call when it starts up.
                 ConfigManager.getInstance(context).setPushRegistrationInBackground(PushRegistration(instanceId, senderId))
             } else {
