@@ -26,6 +26,7 @@ import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.MessageManagerCallbacks;
 import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.MPDatabaseImpl;
+import com.mparticle.internal.database.UploadSettings;
 import com.mparticle.internal.listeners.InternalListenerManager;
 import com.mparticle.internal.messages.BaseMPMessage;
 
@@ -141,7 +142,7 @@ public class MParticleDBManager {
         return MessageService.hasMessagesForUpload(db);
     }
 
-    public void createMessagesForUploadMessage(ConfigManager configManager, DeviceAttributes deviceAttributes, String currentSessionId) throws JSONException {
+    public void createMessagesForUploadMessage(ConfigManager configManager, DeviceAttributes deviceAttributes, String currentSessionId, UploadSettings uploadSettings) throws JSONException {
         MPDatabase db = getDatabase();
         db.beginTransaction();
         try {
@@ -186,7 +187,7 @@ public class MParticleDBManager {
             for (JSONObject deviceInfo : deviceInfos) {
                 deviceAttributes.updateDeviceInfo(mContext, deviceInfo);
             }
-            createUploads(uploadMessagesByBatchId, db, deviceAttributes, configManager, currentSessionId);
+            createUploads(uploadMessagesByBatchId, db, deviceAttributes, configManager, currentSessionId, uploadSettings);
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
@@ -239,7 +240,7 @@ public class MParticleDBManager {
         return uploadMessagesByBatchId;
     }
 
-    private void createUploads(Map<BatchId, MessageBatch> uploadMessagesByBatchId, MPDatabase db, DeviceAttributes deviceAttributes, ConfigManager configManager, String currentSessionId) {
+    private void createUploads(Map<BatchId, MessageBatch> uploadMessagesByBatchId, MPDatabase db, DeviceAttributes deviceAttributes, ConfigManager configManager, String currentSessionId, UploadSettings uploadSettings) {
         for (Map.Entry<BatchId, MessageBatch> messageBatchEntry : uploadMessagesByBatchId.entrySet()) {
             BatchId batchId = messageBatchEntry.getKey();
             MessageBatch uploadMessage = messageBatchEntry.getValue();
@@ -274,7 +275,7 @@ public class MParticleDBManager {
                     }
                 }
 
-                UploadService.insertUpload(db, batch, configManager.getApiKey());
+                UploadService.insertUpload(db, batch, uploadSettings);
                 cleanSessions(currentSessionId);
             }
         }
@@ -474,8 +475,8 @@ public class MParticleDBManager {
         return UploadService.deleteUpload(getDatabase(), id);
     }
 
-    public void insertAliasRequest(String apiKey, JSONObject request) {
-        UploadService.insertAliasRequest(getDatabase(), apiKey, request);
+    public void insertAliasRequest(JSONObject request, UploadSettings uploadSettings) {
+        UploadService.insertAliasRequest(getDatabase(), request, uploadSettings);
     }
 
     /**
@@ -644,6 +645,22 @@ public class MParticleDBManager {
         }
     }
 
+    public void resetDatabaseForWorkspaceSwitching() {
+        MPDatabase db = getDatabase();
+        try {
+            db.beginTransaction();
+            BreadcrumbService.deleteAll(db);
+            MessageService.deleteAll(db);
+            ReportingService.deleteAll(db);
+            SessionService.deleteAll(db);
+            UserAttributesService.deleteAll(db);
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+        } finally {
+            db.endTransaction();
+        }
+    }
+
     public static class AttributionChange {
         private String key;
         private Object newValue;
@@ -696,13 +713,14 @@ public class MParticleDBManager {
         private int id;
         private String message;
         private boolean isAliasRequest;
+        private UploadSettings uploadSettings;
 
-        public ReadyUpload(int id, boolean isAliasRequest, String message) {
+        public ReadyUpload(int id, boolean isAliasRequest, String message, UploadSettings uploadSettings) {
             this.id = id;
             this.message = message;
             this.isAliasRequest = isAliasRequest;
+            this.uploadSettings = uploadSettings;
         }
-
 
         public int getId() {
             return id;
@@ -714,6 +732,10 @@ public class MParticleDBManager {
 
         public boolean isAliasRequest() {
             return isAliasRequest;
+        }
+
+        public UploadSettings getUploadSettings() {
+            return uploadSettings;
         }
     }
 

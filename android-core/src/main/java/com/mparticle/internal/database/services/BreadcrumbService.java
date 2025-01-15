@@ -105,4 +105,8 @@ public class BreadcrumbService extends BreadcrumbTable {
         }
         return new JSONArray();
     }
+
+    public static void deleteAll(MPDatabase db) {
+        db.delete(BreadcrumbTableColumns.TABLE_NAME, null, null);
+    }
 }
