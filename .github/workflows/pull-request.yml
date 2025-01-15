@@ -28,7 +28,7 @@ jobs:
           key: avd-29
       - name: create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
-        uses: reactivecircus/android-emulator-runner@d94c3fbe4fe6a29e4a5ba47c12fb47677c73656b #v2.28.0
+        uses: reactivecircus/android-emulator-runner@v2 #v2.28.0
         with:
           api-level: 29
           force-avd-creation: false
@@ -41,7 +41,7 @@ jobs:
             sudo udevadm control --reload-rules
             sudo udevadm trigger --name-match=kvm
       - name: "Run Instrumented Tests"
-        uses: reactivecircus/android-emulator-runner@d94c3fbe4fe6a29e4a5ba47c12fb47677c73656b #v2.28.0
+        uses: reactivecircus/android-emulator-runner@v2 #v2.28.0
         with:
           api-level: 29
           force-avd-creation: false
@@ -76,7 +76,7 @@ jobs:
 
       - name: create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
-        uses: reactivecircus/android-emulator-runner@d94c3fbe4fe6a29e4a5ba47c12fb47677c73656b #v2.28.0
+        uses: reactivecircus/android-emulator-runner@v2 #v2.28.0
         with:
           api-level: 29
           force-avd-creation: false
@@ -89,7 +89,7 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
       - name: "Run Instrumented Orchestrator Tests"
-        uses: reactivecircus/android-emulator-runner@d94c3fbe4fe6a29e4a5ba47c12fb47677c73656b #v2.28.0
+        uses: reactivecircus/android-emulator-runner@v2 #v2.28.0
         with:
           api-level: 29
           force-avd-creation: false
