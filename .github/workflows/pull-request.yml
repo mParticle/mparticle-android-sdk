@@ -26,7 +26,7 @@ jobs:
             ~/.android/avd/*
             ~/.android/adb*
           key: avd-29
-      - name: create AVD and generate snapshot for caching testing
+      - name: create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
         uses: reactivecircus/android-emulator-runner@62dbb605bba737720e10b196cb4220d374026a6d #v2.33.0
         with:
