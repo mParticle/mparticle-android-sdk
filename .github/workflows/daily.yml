@@ -82,7 +82,7 @@ jobs:
           java-version: "17"
           cache: "gradle"
       - name: "Run Instrumented Tests"
-        uses: reactivecircus/android-emulator-runner@842c587ad8aa4c68eeba24c396e15af4c2e9f30a #v2.33.0
+        uses: reactivecircus/android-emulator-runner@62dbb605bba737720e10b196cb4220d374026a6d #v2.33.0
         with:
           api-level: 29
           #script: ./gradlew :android-core:cAT :android-kit-base:cAT --stacktrace
@@ -115,7 +115,7 @@ jobs:
           java-version: "17"
           cache: "gradle"
       - name: "Run Instrumented Orchestrator Tests"
-        uses: reactivecircus/android-emulator-runner@842c587ad8aa4c68eeba24c396e15af4c2e9f30a #v2.33.0
+        uses: reactivecircus/android-emulator-runner@62dbb605bba737720e10b196cb4220d374026a6d #v2.33.0
         with:
           api-level: 29
           script: ./gradlew -Porchestrator=true :android-core:cAT --stacktrace
