@@ -4,7 +4,7 @@ on:
 jobs:
   cross-platform-tests:
     timeout-minutes: 30
-    runs-on: macOS-15
+    runs-on: ubuntu-latest
     steps:
       - name: "Checkout Cross Platform Tests Repo"
         uses: actions/checkout@v3
