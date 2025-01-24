@@ -1,3 +1,13 @@
+## [5.58.5](https://github.com/mParticle/mparticle-android-sdk/compare/v5.58.4...v5.58.5) (2025-01-24)
+
+
+### Updates & Maintenance
+
+* Add issue autorespond and close workflow ([#526](https://github.com/mParticle/mparticle-android-sdk/issues/526)) ([28ccb97](https://github.com/mParticle/mparticle-android-sdk/commit/28ccb97f1dc709d25ed686dae241f8462c62b9cf))
+* Update cross-platform-tests.yml ([#530](https://github.com/mParticle/mparticle-android-sdk/issues/530)) ([0924e88](https://github.com/mParticle/mparticle-android-sdk/commit/0924e88331d3f92fb7bdd774fd33e162c4fc0aa2))
+* update emulator version tag ([#537](https://github.com/mParticle/mparticle-android-sdk/issues/537)) ([4f2fea6](https://github.com/mParticle/mparticle-android-sdk/commit/4f2fea6290e497e32d6045fb2d1d32f44538f1f2))
+* Update submodules ([ab53cb1](https://github.com/mParticle/mparticle-android-sdk/commit/ab53cb1f54e5251980045b8f754fca14966d95fa))
+
 ## [5.58.4](https://github.com/mParticle/mparticle-android-sdk/compare/v5.58.3...v5.58.4) (2024-12-12)
 
 
