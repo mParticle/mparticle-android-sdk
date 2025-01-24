@@ -229,19 +229,19 @@ class MParticleTest : BaseCleanStartedEachTest() {
         startMParticle()
         MParticle.getInstance()!!.Messaging().enablePushNotifications(senderId)
         var fetchedSenderId: String? =
-            MParticle.getInstance()!!.mInternal.getConfigManager().getPushSenderId()
+            MParticle.getInstance()!!.mInternal.getConfigManager().pushSenderId
         Assert.assertTrue(
-            MParticle.getInstance()!!.mInternal.getConfigManager().isPushEnabled() ?: false
+            MParticle.getInstance()!!.mInternal.getConfigManager().isPushEnabled ?: false
         )
         Assert.assertEquals(senderId, fetchedSenderId)
         val otherSenderId = "senderIdLogPushRegistration"
         MParticle.getInstance()!!.logPushRegistration("instanceId", otherSenderId)
-        fetchedSenderId = MParticle.getInstance()!!.mInternal.getConfigManager().getPushSenderId()
+        fetchedSenderId = MParticle.getInstance()!!.mInternal.getConfigManager().pushSenderId
         Assert.assertEquals(otherSenderId, fetchedSenderId)
         MParticle.getInstance()!!.Messaging().disablePushNotifications()
-        fetchedSenderId = MParticle.getInstance()!!.mInternal.getConfigManager().getPushSenderId()
+        fetchedSenderId = MParticle.getInstance()!!.mInternal.getConfigManager().pushSenderId
         Assert.assertFalse(
-            MParticle.getInstance()!!.mInternal.getConfigManager().isPushEnabled() ?: false
+            MParticle.getInstance()!!.mInternal.getConfigManager().isPushEnabled ?: false
         )
         Assert.assertNull(fetchedSenderId)
     }
@@ -342,7 +342,7 @@ class MParticleTest : BaseCleanStartedEachTest() {
         Assert.assertTrue(databaseJson.getJSONArray("messages").length() > 0)
         Assert.assertEquals(6, allTables.size.toLong())
         Assert.assertTrue(
-            10 < (MParticle.getInstance()!!.mInternal.getConfigManager().getMpids()?.size ?: 0)
+            10 < (MParticle.getInstance()!!.mInternal.getConfigManager().mpids?.size ?: 0)
         )
 
         // Set strict mode, so if we get any warning or error messages during the reset/restart phase,

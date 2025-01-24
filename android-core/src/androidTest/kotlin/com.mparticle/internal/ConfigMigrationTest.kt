@@ -124,8 +124,8 @@ class ConfigMigrationTest : BaseCleanInstallEachTest() {
     }
 
     private fun setOldConfigState(config: JSONObject) {
-        ConfigManager.getInstance(mContext).getKitConfigPreferences().edit()
-            .remove(ConfigManager.KIT_CONFIG_KEY)
+        ConfigManager.getInstance(mContext).kitConfigPreferences?.edit()
+            ?.remove(ConfigManager.KIT_CONFIG_KEY)
         ConfigManager.getPreferences(mContext).edit()
             .putString(oldConfigSharedprefsKey, config.toString()).apply()
     }
@@ -144,7 +144,7 @@ class ConfigMigrationTest : BaseCleanInstallEachTest() {
         assertNull(JSONObject(configString).optJSONArray(ConfigManager.KEY_EMBEDDED_KITS))
         assertEquals(
             config.optString(ConfigManager.KEY_EMBEDDED_KITS, JSONArray().toString()),
-            ConfigManager.getInstance(mContext).kitConfigPreferences.getString(
+            ConfigManager.getInstance(mContext).kitConfigPreferences?.getString(
                 ConfigManager.KIT_CONFIG_KEY,
                 JSONArray().toString()
             )

@@ -156,7 +156,7 @@ class MessageManagerTest {
         Assert.assertFalse(sessionStart.has(MessageKey.PREVIOUS_SESSION_START))
         Assert.assertEquals(
             appStateManager.session.mSessionID,
-            configManager.userStorage.getPreviousSessionId(null)
+            configManager.userStorage?.getPreviousSessionId(null)
         )
         Assert.assertFalse(
             prefs.getBoolean(
@@ -164,8 +164,8 @@ class MessageManagerTest {
                 true
             )
         )
-        configManager.userStorage.setPreviousSessionForeground(42000)
-        configManager.userStorage.setPreviousSessionStart(24000)
+        configManager.userStorage?.setPreviousSessionForeground(42000)
+        configManager.userStorage?.setPreviousSessionStart(24000)
         prefs.commit()
         sessionStart = manager.startSession(appStateManager.session)
         Assert.assertNotNull(sessionStart)
@@ -179,13 +179,13 @@ class MessageManagerTest {
 
     @Test
     fun testIncrementSessionCounter() {
-        var count = configManager.userStorage.getCurrentSessionCounter(-5)
-        Assert.assertEquals(-5, count.toLong())
+        var count = configManager.userStorage?.getCurrentSessionCounter(-5)
+        Assert.assertEquals(-5, count)
         for (i in 0..9) {
-            configManager.userStorage.incrementSessionCounter()
+            configManager.userStorage?.incrementSessionCounter()
         }
-        count = configManager.userStorage.getCurrentSessionCounter(-5)
-        Assert.assertEquals(10, count.toLong())
+        count = configManager.userStorage?.getCurrentSessionCounter(-5)
+        Assert.assertEquals(10, count)
     }
 
     @Test
@@ -204,8 +204,8 @@ class MessageManagerTest {
                 Message::class.java
             )
         )
-        val time = configManager.userStorage.getPreviousSessionForegound(-1)
-        Assert.assertEquals(5000, time)
+        val time = configManager.userStorage?.getPreviousSessionForegound(-1)
+        Assert.assertEquals(5000, time?.toInt())
     }
 
     @Test
@@ -353,7 +353,7 @@ class MessageManagerTest {
         )
         Assert.assertEquals(
             message.getInt(MessageKey.BREADCRUMB_SESSION_COUNTER).toLong(),
-            configManager.userStorage.currentSessionCounter.toLong()
+            configManager.userStorage?.currentSessionCounter?.toLong()
         )
         Assert.assertEquals(message.getString(MessageKey.BREADCRUMB_LABEL), "test crumb")
         Mockito.verify(messageHandler, Mockito.times(2)).sendMessage(
@@ -410,7 +410,7 @@ class MessageManagerTest {
         )
         Assert.assertEquals(
             message.getInt(MessageKey.ERROR_SESSION_COUNT).toLong(),
-            configManager.userStorage.currentSessionCounter.toLong()
+            configManager.userStorage?.currentSessionCounter?.toLong()
         )
         Mockito.verify(messageHandler, Mockito.times(3)).sendMessage(
             Mockito.any(
@@ -432,7 +432,7 @@ class MessageManagerTest {
         )
         Assert.assertEquals(
             message.getInt(MessageKey.ERROR_SESSION_COUNT).toLong(),
-            configManager.userStorage.currentSessionCounter.toLong()
+            configManager.userStorage?.currentSessionCounter?.toLong()
         )
         Mockito.verify(messageHandler, Mockito.times(4)).sendMessage(
             Mockito.any(
@@ -454,7 +454,7 @@ class MessageManagerTest {
         )
         Assert.assertEquals(
             message.getInt(MessageKey.ERROR_SESSION_COUNT).toLong(),
-            configManager.userStorage.currentSessionCounter.toLong()
+            configManager.userStorage?.currentSessionCounter?.toLong()
         )
         Mockito.verify(messageHandler, Mockito.times(5)).sendMessage(
             Mockito.any(

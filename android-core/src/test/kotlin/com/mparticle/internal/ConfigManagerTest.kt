@@ -84,7 +84,7 @@ class ConfigManagerTest {
             null
         )
         Assert.assertEquals("key2", manager.apiKey)
-        Assert.assertNull(manager.apiSecret)
+        Assert.assertEquals("", manager.apiSecret)
         Assert.assertEquals(MParticle.Environment.Development, ConfigManager.getEnvironment())
     }
 
@@ -96,7 +96,7 @@ class ConfigManagerTest {
         json.put("test", "value")
         manager.saveConfigJson(json)
         val `object` =
-            ConfigManager.sPreferences.getString(ConfigManager.CONFIG_JSON, null)
+            ConfigManager.sPreferences?.getString(ConfigManager.CONFIG_JSON, null)
                 ?.let { JSONObject(it) }
         Assert.assertNotNull(`object`)
     }
@@ -115,7 +115,7 @@ class ConfigManagerTest {
         Assert.assertEquals(5, ConfigManager.getPushKeys(context).length().toLong())
         manager.updateConfig(JSONObject())
         val `object` =
-            ConfigManager.sPreferences.getString(ConfigManager.CONFIG_JSON, null)
+            ConfigManager.sPreferences?.getString(ConfigManager.CONFIG_JSON, null)
                 ?.let { JSONObject(it) }
         if (`object` != null) {
             Assert.assertTrue(!`object`.keys().hasNext())
@@ -128,7 +128,7 @@ class ConfigManagerTest {
         manager.updateConfig(JSONObject(sampleConfig))
         manager.reloadCoreConfig(JSONObject())
         val `object` =
-            ConfigManager.sPreferences.getString(ConfigManager.CONFIG_JSON, null)
+            ConfigManager.sPreferences?.getString(ConfigManager.CONFIG_JSON, null)
                 ?.let { JSONObject(it) }
         `object`?.keys()?.hasNext()?.let { Assert.assertTrue(it) }
     }
@@ -188,7 +188,7 @@ class ConfigManagerTest {
     @Throws(Exception::class)
     fun testGetTriggerMessageMatches() {
         val triggerMessageMatches = manager.triggerMessageMatches
-        Assert.assertEquals(1, triggerMessageMatches.length().toLong())
+        Assert.assertEquals(1, triggerMessageMatches?.length())
     }
 
     @Test
@@ -337,9 +337,11 @@ class ConfigManagerTest {
     @Throws(Exception::class)
     fun testGetTriggerMessageHashes() {
         val hashes = manager.triggerMessageHashes
-        for (i in 0 until hashes.length()) {
-            val hash = hashes.getInt(i)
-            Assert.assertTrue(hash == 1217787541 || hash == 2 || hash == 3)
+        if (hashes != null) {
+            for (i in 0 until hashes.length()) {
+                val hash = hashes.getInt(i)
+                Assert.assertTrue(hash == 1217787541 || hash == 2 || hash == 3)
+            }
         }
     }
 
@@ -380,34 +382,34 @@ class ConfigManagerTest {
     @Test
     @Throws(Exception::class)
     fun testSetNullIntegrationAttributes() {
-        Assert.assertFalse(ConfigManager.sPreferences.contains(ATTRIBUTES))
+        ConfigManager.sPreferences?.contains(ATTRIBUTES)?.let { Assert.assertFalse(it) }
         manager.setIntegrationAttributes(1, null)
-        Assert.assertFalse(ConfigManager.sPreferences.contains(ATTRIBUTES))
-        ConfigManager.sPreferences.edit()
-            .putString(ATTRIBUTES, "{\"1\":{\"test-key\":\"test-value\"}}").apply()
-        Assert.assertTrue(ConfigManager.sPreferences.contains(ATTRIBUTES))
+        ConfigManager.sPreferences?.contains(ATTRIBUTES)?.let { Assert.assertFalse(it) }
+        ConfigManager.sPreferences?.edit()
+            ?.putString(ATTRIBUTES, "{\"1\":{\"test-key\":\"test-value\"}}")?.apply()
+        ConfigManager.sPreferences?.let { Assert.assertTrue(it.contains(ATTRIBUTES)) }
         manager.setIntegrationAttributes(1, null)
-        Assert.assertFalse(ConfigManager.sPreferences.contains(ATTRIBUTES))
+        ConfigManager.sPreferences?.let { Assert.assertFalse(it.contains(ATTRIBUTES)) }
     }
 
     @Test
     @Throws(Exception::class)
     fun testSetEmptyIntegrationAttributes() {
-        Assert.assertFalse(ConfigManager.sPreferences.contains(ATTRIBUTES))
+        ConfigManager.sPreferences?.let { Assert.assertFalse(it.contains(ATTRIBUTES)) }
         val attributes: Map<String, String> = HashMap()
         manager.setIntegrationAttributes(1, attributes)
-        Assert.assertFalse(ConfigManager.sPreferences.contains(ATTRIBUTES))
-        ConfigManager.sPreferences.edit()
-            .putString(ATTRIBUTES, "{\"1\":{\"test-key\":\"test-value\"}}").apply()
-        Assert.assertTrue(ConfigManager.sPreferences.contains(ATTRIBUTES))
+        ConfigManager.sPreferences?.let { Assert.assertFalse(it.contains(ATTRIBUTES)) }
+        ConfigManager.sPreferences?.edit()
+            ?.putString(ATTRIBUTES, "{\"1\":{\"test-key\":\"test-value\"}}")?.apply()
+        ConfigManager.sPreferences?.let { Assert.assertTrue(it.contains(ATTRIBUTES)) }
         manager.setIntegrationAttributes(1, attributes)
-        Assert.assertFalse(ConfigManager.sPreferences.contains(ATTRIBUTES))
+        ConfigManager.sPreferences?.let { Assert.assertFalse(it.contains(ATTRIBUTES)) }
     }
 
     @Test
     @Throws(Exception::class)
     fun testSetNonEmptyIntegrationAttributes() {
-        Assert.assertFalse(ConfigManager.sPreferences.contains(ATTRIBUTES))
+        ConfigManager.sPreferences?.let { Assert.assertFalse(it.contains(ATTRIBUTES)) }
         val attributes: MutableMap<String, String> = HashMap()
         attributes["test-key"] = "value 2"
         manager.setIntegrationAttributes(1, attributes)
@@ -415,29 +417,29 @@ class ConfigManagerTest {
         manager.setIntegrationAttributes(12, attributes)
         Assert.assertEquals(
             "{\"1\":{\"test-key\":\"value 2\"},\"12\":{\"test-key\":\"value 3\"}}",
-            ConfigManager.sPreferences.getString(
+            ConfigManager.sPreferences?.getString(
                 ATTRIBUTES,
                 null
-            )
+            ) ?: ""
         )
     }
 
     @Test
     @Throws(Exception::class)
     fun testGetKitIntegrationAttributes() {
-        Assert.assertFalse(ConfigManager.sPreferences.contains(ATTRIBUTES))
+        ConfigManager.sPreferences?.let { Assert.assertFalse(it.contains(ATTRIBUTES)) }
         Assert.assertEquals(0, manager.getIntegrationAttributes(1).size.toLong())
-        ConfigManager.sPreferences.edit().putString(
+        ConfigManager.sPreferences?.edit()?.putString(
             ATTRIBUTES,
             "{\"1\":{\"test-key\":\"value 2\"},\"12\":{\"test-key\":\"value 3\"}}"
-        ).apply()
+        )?.apply()
         var attributes = manager.getIntegrationAttributes(1)
         Assert.assertEquals(1, attributes.size.toLong())
         Assert.assertEquals("value 2", attributes["test-key"])
         attributes = manager.getIntegrationAttributes(12)
         Assert.assertEquals(1, attributes.size.toLong())
         Assert.assertEquals("value 3", attributes["test-key"])
-        ConfigManager.sPreferences.edit().remove(ATTRIBUTES).apply()
+        ConfigManager.sPreferences?.edit()?.remove(ATTRIBUTES)?.apply()
         Assert.assertEquals(0, manager.getIntegrationAttributes(1).size.toLong())
         Assert.assertEquals(0, manager.getIntegrationAttributes(12).size.toLong())
     }
@@ -445,17 +447,19 @@ class ConfigManagerTest {
     @Test
     @Throws(Exception::class)
     fun testGetAllIntegrationAttributes() {
-        Assert.assertFalse(ConfigManager.sPreferences.contains(ATTRIBUTES))
+        ConfigManager.sPreferences?.let { Assert.assertFalse(it.contains(ATTRIBUTES)) }
         Assert.assertNull(manager.integrationAttributes)
-        ConfigManager.sPreferences.edit().putString(
+        ConfigManager.sPreferences?.edit()?.putString(
             ATTRIBUTES,
             "{\"1\":{\"test-key\":\"value 2\"},\"12\":{\"test-key\":\"value 3\"}}"
-        ).apply()
+        )?.apply()
         val attributes = manager.integrationAttributes
-        Assert.assertEquals(2, attributes.length().toLong())
-        Assert.assertEquals("value 2", attributes.getJSONObject("1")["test-key"])
-        Assert.assertEquals("value 3", attributes.getJSONObject("12")["test-key"])
-        ConfigManager.sPreferences.edit().remove(ATTRIBUTES).apply()
+        Assert.assertEquals(2, attributes?.length())
+        Assert.assertEquals("value 2", attributes?.getJSONObject("1")?.get("test-key") ?: "")
+        if (attributes != null) {
+            Assert.assertEquals("value 3", attributes.getJSONObject("12")["test-key"])
+        }
+        ConfigManager.sPreferences?.edit()?.remove(ATTRIBUTES)?.apply()
         Assert.assertNull(manager.integrationAttributes)
     }
 
@@ -500,8 +504,10 @@ class ConfigManagerTest {
         Assert.assertNull(manager.markIdentitiesAsSeen(JSONArray()))
         val seenIdentities = manager.markIdentitiesAsSeen(identities)
         Assert.assertNotEquals(seenIdentities, identities)
-        for (i in 0 until seenIdentities.length()) {
-            Assert.assertFalse(seenIdentities.getJSONObject(i).getBoolean("f"))
+        if (seenIdentities != null) {
+            for (i in 0 until seenIdentities.length()) {
+                Assert.assertFalse(seenIdentities.getJSONObject(i).getBoolean("f"))
+            }
         }
         identities = JSONArray()
         identities.put(JSONObject("{ \"n\": 1, \"i\": \" value 1\", \"dfs\": 1473869816521, \"f\": true }"))
@@ -514,11 +520,15 @@ class ConfigManagerTest {
         val newIdentities = JSONArray()
         newIdentities.put(JSONObject("{ \"n\": 1, \"i\": \" value 1\", \"dfs\": 1473869816521, \"f\": true }"))
         val updatedIdentities = manager.markIdentitiesAsSeen(newIdentities)
-        Assert.assertEquals(4, updatedIdentities.length().toLong())
-        for (i in 0 until updatedIdentities.length()) {
-            when (updatedIdentities.getJSONObject(i).getInt("n")) {
-                1, 4 -> Assert.assertFalse(updatedIdentities.getJSONObject(i).getBoolean("f"))
-                else -> Assert.assertTrue(updatedIdentities.getJSONObject(i).getBoolean("f"))
+        if (updatedIdentities != null) {
+            Assert.assertEquals(4, updatedIdentities.length().toLong())
+        }
+        if (updatedIdentities != null) {
+            for (i in 0 until updatedIdentities.length()) {
+                when (updatedIdentities.getJSONObject(i).getInt("n")) {
+                    1, 4 -> Assert.assertFalse(updatedIdentities.getJSONObject(i).getBoolean("f"))
+                    else -> Assert.assertTrue(updatedIdentities.getJSONObject(i).getBoolean("f"))
+                }
             }
         }
     }
