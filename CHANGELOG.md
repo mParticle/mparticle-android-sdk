@@ -1,3 +1,11 @@
+## [5.58.6](https://github.com/mParticle/mparticle-android-sdk/compare/v5.58.5...v5.58.6) (2025-01-30)
+
+
+### Updates & Maintenance
+
+* Migrate Internal OS Helper class to kotlin ([#515](https://github.com/mParticle/mparticle-android-sdk/issues/515)) ([#536](https://github.com/mParticle/mparticle-android-sdk/issues/536)) ([6ce2e7d](https://github.com/mParticle/mparticle-android-sdk/commit/6ce2e7d08642e3b64c2c3251a44aca5967975d66))
+* Migrate Internal user storage class to kotlin ([#516](https://github.com/mParticle/mparticle-android-sdk/issues/516)) ([#539](https://github.com/mParticle/mparticle-android-sdk/issues/539)) ([fab4925](https://github.com/mParticle/mparticle-android-sdk/commit/fab49257dd28495250ffca9ce8383ad60c0b728a))
+
 ## [5.58.5](https://github.com/mParticle/mparticle-android-sdk/compare/v5.58.4...v5.58.5) (2025-01-24)
 
 
