@@ -10,7 +10,6 @@ import com.mparticle.identity.IdentityApiRequest
 import com.mparticle.identity.IdentityStateListener
 import com.mparticle.internal.ConfigManager
 import com.mparticle.internal.KitFrameworkWrapper
-import com.mparticle.internal.Logger
 import com.mparticle.internal.MParticleJSInterface
 import com.mparticle.internal.MessageManager
 import com.mparticle.internal.PushRegistrationHelper.PushRegistration
@@ -332,24 +331,24 @@ class MParticleTest : BaseCleanStartedEachTest() {
     }
 
     @Test
+    fun testEnableLocationTracking() {
+        val location = Location("")
+        val mp = MParticle.getInstance()
+        mp!!.enableLocationTracking(LocationManager.NETWORK_PROVIDER, 30 * 1000, 1000)
+        mp!!.setLocation(location)
+        Assert.assertEquals(location, mp!!.mMessageManager.location)
+        Assert.assertNotNull(mp.mMessageManager.location)
+    }
+
+    @Test
     fun testEnableLocationTrackingAndDisableLocationTracking() {
         val location = Location("")
         val mp = MParticle.getInstance()
-        mp!!.enableLocationTracking(LocationManager.NETWORK_PROVIDER, 30*1000, 1000)
+        mp!!.enableLocationTracking(LocationManager.NETWORK_PROVIDER, 30 * 1000, 1000)
         mp!!.setLocation(location)
         Assert.assertEquals(location, mp!!.mMessageManager.location)
         mp.disableLocationTracking()
         Assert.assertNull(mp.mMessageManager.location)
-    }
-
-    @Test
-    fun testEnableLocationTracking() {
-        val location = Location("")
-        val mp = MParticle.getInstance()
-        mp!!.enableLocationTracking(LocationManager.NETWORK_PROVIDER, 30*1000, 1000)
-        mp!!.setLocation(location)
-        Assert.assertEquals(location, mp!!.mMessageManager.location)
-        Assert.assertNotNull(mp.mMessageManager.location)
     }
 
     @Throws(JSONException::class, InterruptedException::class)
