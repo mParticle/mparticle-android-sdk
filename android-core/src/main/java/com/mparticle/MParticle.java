@@ -722,6 +722,7 @@ public class MParticle {
                     }
                 }
                 mLocationListener = null;
+                setLocation(null);
                 SharedPreferences.Editor editor = mPreferences.edit();
                 editor.remove(PrefKeys.LOCATION_PROVIDER)
                         .remove(PrefKeys.LOCATION_MINTIME)
