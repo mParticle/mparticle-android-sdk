@@ -46,9 +46,7 @@ internal open class MessageHandler : BaseHandler {
         mContext = context
         mMParticleDBManager = dbManager
         mDataplanId = dataplanId
-        if (dataplanVersion != null) {
-            mDataplanVersion = dataplanVersion
-        }
+        mDataplanVersion = dataplanVersion
     }
 
     constructor(
@@ -62,12 +60,8 @@ internal open class MessageHandler : BaseHandler {
         mMessageManagerCallbacks = messageManager
         mContext = context
         mMParticleDBManager = dbManager
-        if (dataplanId != null) {
-            mDataplanId = dataplanId
-        }
-        if (dataplanVersion != null) {
-            mDataplanVersion = dataplanVersion
-        }
+        mDataplanId = dataplanId
+        mDataplanVersion = dataplanVersion
     }
 
     open fun databaseAvailable(): Boolean {
