@@ -131,35 +131,38 @@ class ConfigManagerInstrumentedTest : BaseAbstractTest() {
         val loadedKitLocal = AndroidUtils.Mutable(false)
         setCachedConfig(simpleConfigWithKits)
         mServer.setupConfigDeferred()
-        val configLoadedListener = ConfigLoadedListener { configType, isNew ->
-            if (!isNew) {
-                when (configType) {
-                    ConfigType.CORE -> {
-                        if (loadedCoreLocal.value) {
-                            Assert.fail("core config already loaded")
-                        } else {
-                            Logger.error("LOADED CACHED Core")
-                            loadedCoreLocal.value = true
+        val configLoadedListener = object : ConfigLoadedListener {
+            override fun onConfigUpdated(configType: ConfigType, isNew: Boolean) {
+                if (!isNew) {
+                    when (configType) {
+                        ConfigType.CORE -> {
+                            if (loadedCoreLocal.value) {
+                                Assert.fail("core config already loaded")
+                            } else {
+                                Logger.error("LOADED CACHED Core")
+                                loadedCoreLocal.value = true
+                            }
+                            if (loadedKitLocal.value) {
+                                Assert.fail("kit config already loaded")
+                            } else {
+                                Logger.error("LOADED CACHED Kit")
+                                loadedKitLocal.value = true
+                            }
                         }
-                        if (loadedKitLocal.value) {
+
+                        ConfigType.KIT -> if (loadedKitLocal.value) {
                             Assert.fail("kit config already loaded")
                         } else {
                             Logger.error("LOADED CACHED Kit")
                             loadedKitLocal.value = true
                         }
                     }
-                    ConfigType.KIT -> if (loadedKitLocal.value) {
-                        Assert.fail("kit config already loaded")
-                    } else {
-                        Logger.error("LOADED CACHED Kit")
-                        loadedKitLocal.value = true
-                    }
                 }
+                if (loadedCoreLocal.value && loadedKitLocal.value) {
+                    latch.countDown()
+                }
+                Logger.error("KIT = " + loadedKitLocal.value + " Core: " + loadedCoreLocal.value)
             }
-            if (loadedCoreLocal.value && loadedKitLocal.value) {
-                latch.countDown()
-            }
-            Logger.error("KIT = " + loadedKitLocal.value + " Core: " + loadedCoreLocal.value)
         }
         val options = MParticleOptions.builder(mContext)
             .credentials("key", "secret")
