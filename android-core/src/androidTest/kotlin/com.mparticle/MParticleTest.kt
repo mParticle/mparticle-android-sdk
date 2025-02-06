@@ -348,6 +348,7 @@ class MParticleTest : BaseCleanStartedEachTest() {
         mp!!.setLocation(location)
         Assert.assertEquals(location, mp!!.mMessageManager.location)
         mp.disableLocationTracking()
+        mp.setLocation(null)
         Assert.assertNull(mp.mMessageManager.location)
     }
 
