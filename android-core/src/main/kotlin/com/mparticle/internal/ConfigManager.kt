@@ -244,11 +244,9 @@ open class ConfigManager {
             }
         }
         set(timestamp) {
-            if (timestamp != null) {
-                sPreferences?.edit()
-                    ?.putLong(CONFIG_JSON_TIMESTAMP, timestamp)
-                    ?.apply()
-            }
+            sPreferences?.edit()
+                ?.putLong(CONFIG_JSON_TIMESTAMP, timestamp ?: 0L)
+                ?.apply()
         }
 
     @JvmOverloads
