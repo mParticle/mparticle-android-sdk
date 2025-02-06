@@ -2,6 +2,7 @@ package com.mparticle
 
 import android.content.Context
 import android.location.Location
+import android.location.LocationManager
 import android.os.Handler
 import android.os.Looper
 import android.webkit.WebView
@@ -327,6 +328,27 @@ class MParticleTest : BaseCleanStartedEachTest() {
         Assert.assertEquals(location, MParticle.getInstance()!!.mMessageManager.location)
         MParticle.getInstance()!!.setLocation(null)
         Assert.assertNull(MParticle.getInstance()!!.mMessageManager.location)
+    }
+
+    @Test
+    fun testEnableLocationTracking() {
+        val location = Location("")
+        val mp = MParticle.getInstance()
+        mp!!.enableLocationTracking(LocationManager.NETWORK_PROVIDER, 30 * 1000, 1000)
+        mp!!.setLocation(location)
+        Assert.assertEquals(location, mp!!.mMessageManager.location)
+        Assert.assertNotNull(mp.mMessageManager.location)
+    }
+
+    @Test
+    fun testEnableLocationTrackingAndDisableLocationTracking() {
+        val location = Location("")
+        val mp = MParticle.getInstance()
+        mp!!.enableLocationTracking(LocationManager.NETWORK_PROVIDER, 30 * 1000, 1000)
+        mp!!.setLocation(location)
+        Assert.assertEquals(location, mp!!.mMessageManager.location)
+        mp.disableLocationTracking()
+        Assert.assertNull(mp.mMessageManager.location)
     }
 
     @Throws(JSONException::class, InterruptedException::class)
