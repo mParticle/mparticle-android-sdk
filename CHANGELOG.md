@@ -1,3 +1,15 @@
+## [5.58.7](https://github.com/mParticle/mparticle-android-sdk/compare/v5.58.6...v5.58.7) (2025-02-07)
+
+
+### Bug Fixes
+
+* Disable location tracking to stop setting location updates ([#540](https://github.com/mParticle/mparticle-android-sdk/issues/540)) ([8f68edb](https://github.com/mParticle/mparticle-android-sdk/commit/8f68edb2dd06a9e606bd099a2334fdc389f01907))
+
+
+### Updates & Maintenance
+
+* Update submodules ([a9ca8d9](https://github.com/mParticle/mparticle-android-sdk/commit/a9ca8d90e93996936ebc57a46b2c7e5efc32f4e7))
+
 ## [5.58.6](https://github.com/mParticle/mparticle-android-sdk/compare/v5.58.5...v5.58.6) (2025-01-30)
 
 
