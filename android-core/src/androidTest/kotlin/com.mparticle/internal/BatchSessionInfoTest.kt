@@ -36,11 +36,11 @@ class BatchSessionInfoTest : BaseCleanStartedEachTest() {
 
         AccessUtils.awaitMessageHandler()
         MParticle.getInstance()?.Internal()?.apply {
-            val sessionId = appStateManager.session.mSessionID
+            val sessionId = appStateManager.fetchSession().mSessionID
             appStateManager.endSession()
             appStateManager.ensureActiveSession()
             InstallReferrerHelper.setInstallReferrer(mContext, "222")
-            assertNotEquals(sessionId, appStateManager.session.mSessionID)
+            assertNotEquals(sessionId, appStateManager.fetchSession().mSessionID)
         }
 
         var messageCount = 0

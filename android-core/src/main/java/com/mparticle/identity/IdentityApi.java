@@ -21,6 +21,8 @@ import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.listeners.ApiClass;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -347,6 +349,7 @@ public class IdentityApi {
             mMainHandler.removeCallbacksAndMessages(null);
         }
     }
+
 
     private BaseIdentityTask makeIdentityRequest(IdentityApiRequest request, final IdentityNetworkRequestRunnable networkRequest) {
         if (request == null) {

@@ -8,6 +8,8 @@ import com.mparticle.internal.database.services.AccessUtils
 import com.mparticle.internal.database.services.MParticleDBManager
 import com.mparticle.testutils.BaseCleanStartedEachTest
 import com.mparticle.testutils.MPLatch
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.json.JSONException
 import org.junit.Assert
 import org.junit.Before
@@ -33,7 +35,7 @@ class AppStateManagerInstrumentedTest : BaseCleanStartedEachTest() {
         }
         mAppStateManager?.ensureActiveSession()
         for (mpid in mpids) {
-            mAppStateManager?.session?.addMpid(mpid)
+            mAppStateManager?.fetchSession()?.addMpid(mpid)
         }
         val checked = BooleanArray(1)
         val latch: CountDownLatch = MPLatch(1)
@@ -72,7 +74,7 @@ class AppStateManagerInstrumentedTest : BaseCleanStartedEachTest() {
         mpids.add(Constants.TEMPORARY_MPID)
         mAppStateManager?.ensureActiveSession()
         for (mpid in mpids) {
-            mAppStateManager?.session?.addMpid(mpid)
+            mAppStateManager?.fetchSession()?.addMpid(mpid)
         }
         val latch: CountDownLatch = MPLatch(1)
         val checked = MutableBoolean(false)
@@ -104,7 +106,7 @@ class AppStateManagerInstrumentedTest : BaseCleanStartedEachTest() {
 
     @Test
     @Throws(InterruptedException::class)
-    fun testOnApplicationForeground() {
+    fun testOnApplicationForeground() = runTest(StandardTestDispatcher()) {
         val latch: CountDownLatch = MPLatch(2)
         val kitManagerTester = KitManagerTester(mContext, latch)
         com.mparticle.AccessUtils.setKitManager(kitManagerTester)

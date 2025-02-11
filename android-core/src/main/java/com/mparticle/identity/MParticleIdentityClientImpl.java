@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -65,6 +66,13 @@ public class MParticleIdentityClientImpl extends MParticleBaseClientImpl impleme
 
     private static final String SERVICE_VERSION_1 = "/v1";
     private MParticle.OperatingSystem mOperatingSystem;
+    public  final String LOGIN_CALL = "login";
+    public  final String IDENTIFY_CALL = "identify";
+     final String IDENTITY_HEADER_TIMEOUT = "X-MP-Max-Age";
+    private Long maxAgeTimeForIdentityCache = 0L;
+    private Long maxAgeTime = 86400L;
+     Long identityCacheTime = 0L;
+    HashMap<String, IdentityHttpResponse> identityCacheArray = new HashMap<>();
 
     public MParticleIdentityClientImpl(Context context, ConfigManager configManager, MParticle.OperatingSystem operatingSystem) {
         super(context, configManager);
@@ -75,18 +83,32 @@ public class MParticleIdentityClientImpl extends MParticleBaseClientImpl impleme
 
     public IdentityHttpResponse login(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getStateJson(request);
+        IdentityHttpResponse existsResponse = checkIfExists(request, LOGIN_CALL);
+
+        if (existsResponse != null) {
+            return existsResponse;
+        }
         Logger.verbose("Identity login request: " + jsonObject.toString());
         MPConnection connection = getPostConnection(LOGIN_PATH, jsonObject.toString());
         String url = connection.getURL().toString();
         InternalListenerManager.getListener().onNetworkRequestStarted(SdkListener.Endpoint.IDENTITY_LOGIN, url, jsonObject, request);
         connection = makeUrlRequest(Endpoint.IDENTITY, connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
+        try {
+            maxAgeTime  = Long.valueOf(connection.getHeaderField(IDENTITY_HEADER_TIMEOUT));
+            maxAgeTimeForIdentityCache = maxAgeTime;
+        }catch (Exception e){
+
+        }
         JSONObject response = MPUtility.getJsonResponse(connection);
         InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.IDENTITY_LOGIN, url, response, responseCode);
-        return parseIdentityResponse(responseCode, response);
+        IdentityHttpResponse loginHttpResponse = parseIdentityResponse(responseCode, response);
+        catchRequest(request, loginHttpResponse, LOGIN_CALL, maxAgeTime);
+        return loginHttpResponse;
     }
 
     public IdentityHttpResponse logout(IdentityApiRequest request) throws JSONException, IOException {
+        clearCatch();
         JSONObject jsonObject = getStateJson(request);
         Logger.verbose("Identity logout request: \n" + jsonObject.toString());
         MPConnection connection = getPostConnection(LOGOUT_PATH, jsonObject.toString());
@@ -100,19 +122,33 @@ public class MParticleIdentityClientImpl extends MParticleBaseClientImpl impleme
     }
 
     public IdentityHttpResponse identify(IdentityApiRequest request) throws JSONException, IOException {
+        IdentityHttpResponse existsResponse = checkIfExists(request, IDENTIFY_CALL);
+        if (existsResponse != null) {
+            return existsResponse;
+        }
         JSONObject jsonObject = getStateJson(request);
+
         Logger.verbose("Identity identify request: \n" + jsonObject.toString());
         MPConnection connection = getPostConnection(IDENTIFY_PATH, jsonObject.toString());
         String url = connection.getURL().toString();
         InternalListenerManager.getListener().onNetworkRequestStarted(SdkListener.Endpoint.IDENTITY_IDENTIFY, url, jsonObject, request);
         connection = makeUrlRequest(Endpoint.IDENTITY, connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
+        try {
+            maxAgeTime  = Long.valueOf(connection.getHeaderField(IDENTITY_HEADER_TIMEOUT));
+            maxAgeTimeForIdentityCache = maxAgeTime;
+        }catch (Exception e){
+
+        }
         JSONObject response = MPUtility.getJsonResponse(connection);
         InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.IDENTITY_IDENTIFY, url, response, responseCode);
-        return parseIdentityResponse(responseCode, response);
+        IdentityHttpResponse identityHttpResponse = parseIdentityResponse(responseCode, response);
+        catchRequest(request, identityHttpResponse, IDENTIFY_CALL, maxAgeTime);
+        return identityHttpResponse;
     }
 
     public IdentityHttpResponse modify(IdentityApiRequest request) throws JSONException, IOException {
+        clearCatch();
         JSONObject jsonObject = getChangeJson(request);
         Logger.verbose("Identity modify request: \n" + jsonObject.toString());
         JSONArray identityChanges = jsonObject.optJSONArray("identity_changes");
@@ -127,6 +163,57 @@ public class MParticleIdentityClientImpl extends MParticleBaseClientImpl impleme
         JSONObject response = MPUtility.getJsonResponse(connection);
         InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.IDENTITY_MODIFY, url, response, responseCode);
         return parseIdentityResponse(responseCode, response);
+    }
+
+    private void catchRequest(IdentityApiRequest request, IdentityHttpResponse identityHttpResponse, String callType, Long maxAgeTime) throws JSONException {
+        if (mConfigManager.isIdentityCacheFlagEnabled()) {
+            try {
+                if (identityCacheTime <= 0L) {
+                    identityCacheTime = System.currentTimeMillis();
+                    mConfigManager.saveIdentityCacheTime(identityCacheTime);
+                }
+                String key = (request.objectToHash() == null) ? null : request.objectToHash() + callType;
+
+
+                identityCacheArray.put(key, identityHttpResponse);
+                mConfigManager.saveIdentityCache(key, identityHttpResponse);
+                mConfigManager.saveIdentityMaxAge(maxAgeTime);
+            } catch (Exception e) {
+                Logger.error("Exception while processing Identity caching " + e);
+            }
+        }
+    }
+
+    private void clearCatch() {
+        identityCacheArray.clear();
+        mConfigManager.clearIdentityCatch();
+    }
+
+    private IdentityHttpResponse checkIfExists(IdentityApiRequest request, String callType) {
+        if (mConfigManager.isIdentityCacheFlagEnabled()) {
+            try {
+                String key = request.objectToHash() + callType;
+                if (identityCacheTime <= 0L) {
+                    identityCacheTime = mConfigManager.getIdentityCacheTime();
+                }
+                if (maxAgeTimeForIdentityCache <= 0L) {
+                    maxAgeTimeForIdentityCache = mConfigManager.getIdentityMaxAge();
+                }
+                if (identityCacheArray.isEmpty()) {
+                    identityCacheArray = mConfigManager.fetchIdentityCache();
+                }
+                if ((((System.currentTimeMillis() - identityCacheTime) / 1000) <= maxAgeTimeForIdentityCache) && identityCacheArray.containsKey(key)) {
+                    return identityCacheArray.get(key);
+                } else {
+                    return null;
+
+                }
+            } catch (Exception e) {
+                Logger.error("Exception  " + e);
+
+            }
+        }
+        return null;
     }
 
     private JSONObject getBaseJson() throws JSONException {
@@ -281,7 +368,7 @@ public class MParticleIdentityClientImpl extends MParticleBaseClientImpl impleme
         return connection;
     }
 
-    private MPConnection getPostConnection(String endpoint, String message) throws IOException {
+    public MPConnection getPostConnection(String endpoint, String message) throws IOException {
         return getPostConnection(null, endpoint, message);
     }
 
