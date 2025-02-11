@@ -7,7 +7,6 @@ import com.mparticle.MParticleOptions
 import com.mparticle.internal.AccessUtils
 import com.mparticle.internal.ConfigManager
 import com.mparticle.testutils.BaseCleanInstallEachTest
-import junit.framework.TestCase
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Before
