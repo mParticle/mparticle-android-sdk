@@ -25,7 +25,7 @@ include (
         //Neura hosts kit
         ':kits:onetrust-kit',
         ':kits:optimizely-kit',
-        ':kits:pilgrim-kit',
+      //  ':kits:pilgrim-kit',
         ':kits:radar-kit',
         ':kits:responsys-kit',
         ':kits:revealmobile-kit',
