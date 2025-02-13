@@ -5,6 +5,9 @@ import android.content.SharedPreferences;
 
 import com.mparticle.MParticle;
 import com.mparticle.SdkListener;
+import com.mparticle.audience.AudienceResponse;
+import com.mparticle.audience.BaseAudienceTask;
+import com.mparticle.identity.IdentityApi;
 import com.mparticle.internal.listeners.InternalListenerManager;
 import com.mparticle.networking.MPConnection;
 import com.mparticle.networking.MPUrl;
@@ -27,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -203,28 +207,29 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         }
     }
 
-    public JSONObject fetchAudiences() {
-
-        JSONObject response = null;
+    public void fetchUserAudience(BaseAudienceTask task, long mpId) {
+        JSONObject jsonResponse = null;
         try {
-            Logger.debug("Starting Segment Network request");
-            MPConnection connection = getUrl(Endpoint.AUDIENCE).openConnection();
-            connection.setConnectTimeout(mConfigManager.getConnectionTimeout());
-            connection.setReadTimeout(mConfigManager.getConnectionTimeout());
+            MPConnection connection = getUrl(Endpoint.AUDIENCE,mpId).openConnection();
+            Logger.verbose("Audience API request: \n" + connection.getURL().toString());
             connection.setRequestProperty("User-Agent", mUserAgent);
-
             addMessageSignature(connection, null);
+            connection.setRequestProperty("x-mp-key", mApiKey);
             makeUrlRequest(Endpoint.AUDIENCE, connection, true);
             if (connection.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
-                Logger.error("Segment call forbidden: is Segmentation enabled for your account?");
+                Logger.error("Audience API call forbidden: is the Audience API enabled for your account?");
             }
-            response = MPUtility.getJsonResponse(connection);
-            parseCookies(response);
-
+            jsonResponse = MPUtility.getJsonResponse(connection);
+            Logger.verbose("Audience API response: \n Status code: " +connection.getResponseCode()+ "  JSON response: "+ jsonResponse);
+            if (jsonResponse != null && connection.getResponseCode() == 200) {
+                task.setSuccessful(new AudienceResponse(connection.getResponseCode(), jsonResponse));
+            } else {
+                task.setFailed(new AudienceResponse(connection.getResponseCode(), "mParticle Audience API failed."));
+            }
         } catch (Exception e) {
-            Logger.error("Segment call failed: " + e.getMessage());
+            Logger.error("mParticle Audience API failed. " + e);
+            task.setFailed(new AudienceResponse(IdentityApi.UNKNOWN_ERROR, Objects.requireNonNull(e.getMessage())));
         }
-        return response;
     }
 
     public int sendMessageBatch(String message) throws IOException, MPThrottleException, MPRampException {

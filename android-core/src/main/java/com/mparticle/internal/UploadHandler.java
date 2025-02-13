@@ -10,12 +10,13 @@ import android.os.Message;
 import androidx.annotation.Nullable;
 
 import com.mparticle.MParticle;
+import com.mparticle.audience.AudienceResponse;
+import com.mparticle.audience.AudienceTask;
 import com.mparticle.identity.AliasRequest;
 import com.mparticle.identity.AliasResponse;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.listeners.InternalListenerManager;
 import com.mparticle.internal.messages.MPAliasMessage;
-import com.mparticle.segmentation.SegmentListener;
 
 import org.json.JSONException;
 
@@ -290,8 +291,9 @@ public class UploadHandler extends BaseHandler {
         isNetworkConnected = connected;
     }
 
-    public void fetchSegments(long timeout, String endpointId, SegmentListener listener) {
-        new SegmentRetriever(audienceDB, mApiClient).fetchSegments(timeout, endpointId, listener);
+
+    public AudienceTask<AudienceResponse> fetchUserAudiences(long mpId) {
+        return new UserAudiencesRetriever(mApiClient).fetchAudiences(mpId,mConfigManager.isFeatureFlagEnabled());
     }
 
     //added so unit tests can subclass

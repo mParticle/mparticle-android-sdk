@@ -887,11 +887,6 @@ public class MParticle {
         return mConfigManager.getSessionTimeout() / 1000;
     }
 
-    public void getUserSegments(long timeout, @NonNull String endpointId, @NonNull SegmentListener listener) {
-        if (mMessageManager != null && mMessageManager.mUploadHandler != null) {
-            mMessageManager.mUploadHandler.fetchSegments(timeout, endpointId, listener);
-        }
-    }
 
     /**
      * Instrument a WebView so that communication can be facilitated between this Native SDK instance and any
