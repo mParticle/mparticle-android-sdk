@@ -1,3 +1,12 @@
+## [5.58.8](https://github.com/mParticle/mparticle-android-sdk/compare/v5.58.7...v5.58.8) (2025-02-13)
+
+
+### Updates & Maintenance
+
+* Migrate Internal CoreCallback class to kotlin  ([#543](https://github.com/mParticle/mparticle-android-sdk/issues/543)) ([c9c8cfb](https://github.com/mParticle/mparticle-android-sdk/commit/c9c8cfba4b9a9d8676c4d6bccd7910ff27527016))
+* Remove Pilgrim-kit from cross-platform testing ([#544](https://github.com/mParticle/mparticle-android-sdk/issues/544)) ([08401bc](https://github.com/mParticle/mparticle-android-sdk/commit/08401bcd20212473a7ac8fd33580cd3b169f1ac6))
+* Update submodules ([2386eba](https://github.com/mParticle/mparticle-android-sdk/commit/2386eba0bf094ace8ea002cfd6697e5a88ccdca0))
+
 ## [5.58.7](https://github.com/mParticle/mparticle-android-sdk/compare/v5.58.6...v5.58.7) (2025-02-07)
 
 
