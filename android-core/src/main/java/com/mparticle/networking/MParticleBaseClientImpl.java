@@ -196,13 +196,14 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
                         .build();
                 return MPUrl.getUrl(uri.toString(), generateDefaultURL(isDefaultDomain, uri, defaultDomain, (pathPrefix + pathPostfix)));
             case AUDIENCE:
-                pathPostfix = SERVICE_VERSION_2 + "/" + mApiKey + "/audience?mpID=" + mConfigManager.getMpid();
-                uri = new Uri.Builder()
-                        .scheme(BuildConfig.SCHEME)
-                        .encodedAuthority(url)
-                        .path(pathPostfix)
-                        .build();
-                return MPUrl.getUrl(uri.toString(), generateDefaultURL(isDefaultDomain, uri, defaultDomain, pathPostfix));
+                    pathPostfix = SERVICE_VERSION_1 + "/" + mApiKey + "/audience";
+                    uri = new Uri.Builder()
+                            .scheme(BuildConfig.SCHEME)
+                            .encodedAuthority(url)
+                            .path(pathPostfix)
+                            .appendQueryParameter("mpID",String.valueOf( mConfigManager.getMpid()))
+                            .build();
+                    return MPUrl.getUrl(uri.toString(), generateDefaultURL(isDefaultDomain, uri, defaultDomain, pathPostfix));
             default:
                 return null;
         }

@@ -293,7 +293,7 @@ public class UploadHandler extends BaseHandler {
 
 
     public AudienceTask<AudienceResponse> fetchUserAudiences(long mpId) {
-        return new UserAudiencesRetriever(mApiClient).fetchAudiences(mpId,mConfigManager.isFeatureFlagEnabled());
+        return new UserAudiencesRetriever(mApiClient).fetchAudiences(mpId,mConfigManager.isAudienceFeatureFlagEnabled());
     }
 
     //added so unit tests can subclass

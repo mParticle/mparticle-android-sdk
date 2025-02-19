@@ -55,6 +55,8 @@ public class ConfigManager {
     public static final String KEY_EMBEDDED_KITS = "eks";
     static final String KEY_UPLOAD_INTERVAL = "uitl";
     static final String KEY_SESSION_TIMEOUT = "stl";
+    public static final String KEY_FLAGS = "flags";
+    public static final String KEY_AUDIENCE_API = "AudienceAPI";
     public static final String VALUE_APP_DEFINED = "appdefined";
     public static final String VALUE_CUE_CATCH = "forcecatch";
     public static final String PREFERENCES_FILE = "mp_preferences";
@@ -86,6 +88,7 @@ public class ConfigManager {
     private boolean directUrlRouting = false;
     private UserStorage mUserStorage;
     private String mLogUnhandledExceptions = VALUE_APP_DEFINED;
+    private boolean audienceAPIFlag = false;
 
     private boolean mSendOoEvents;
     private JSONObject mProviderPersistence;
@@ -409,6 +412,13 @@ public class ConfigManager {
         if (responseJSON.has(KEY_DIRECT_URL_ROUTING)) {
             directUrlRouting = responseJSON.optBoolean(KEY_DIRECT_URL_ROUTING);
             editor.putBoolean(KEY_DIRECT_URL_ROUTING, directUrlRouting);
+        }
+
+        if (responseJSON.has(KEY_FLAGS)) {
+            JSONObject items = responseJSON.getJSONObject(KEY_FLAGS);
+            if (items.has(KEY_AUDIENCE_API)) {
+                audienceAPIFlag = items.getBoolean(KEY_AUDIENCE_API);
+            }
         }
 
         mRampValue = responseJSON.optInt(KEY_RAMP, -1);
@@ -1271,9 +1281,8 @@ public class ConfigManager {
         }
     }
 
-    //keep this flag value `false` until actual implementation done
-    public boolean isFeatureFlagEnabled() {
-        return false;
+    public boolean isAudienceFeatureFlagEnabled() {
+        return audienceAPIFlag;
     }
 
     public ConsentState getConsentState(long mpid) {
