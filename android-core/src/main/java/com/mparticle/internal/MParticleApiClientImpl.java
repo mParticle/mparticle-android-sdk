@@ -217,7 +217,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
             connection.setRequestProperty("x-mp-key", mApiKey);
             makeUrlRequest(Endpoint.AUDIENCE, connection, true);
             if (connection.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
-                Logger.error("Audience API call forbidden: is the Audience API enabled for your account?");
+                Logger.error("Audience API call forbidden: is the Audience API enabled for your account");
             }
             jsonResponse = MPUtility.getJsonResponse(connection);
             Logger.verbose("Audience API response: \n Status code: " +connection.getResponseCode()+ "  JSON response: "+ jsonResponse);
