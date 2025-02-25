@@ -19,6 +19,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 
 public class MParticleBaseClientImpl implements MParticleBaseClient {
@@ -92,14 +93,24 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
     }
 
     protected MPUrl getUrl(Endpoint endpoint) throws MalformedURLException {
-        return getUrl(endpoint, null);
+        return getUrl(endpoint, null, null);
+    }
+
+    protected MPUrl getUrl(Endpoint endpoint, @Nullable long mpId) throws MalformedURLException {
+        HashMap<String, String> audienceQueryParams = new HashMap<>();
+        audienceQueryParams.put("mpid", String.valueOf(mpId));
+        return getUrl(endpoint, null, audienceQueryParams);
     }
 
     protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath) throws MalformedURLException {
-        return getUrl(endpoint, identityPath, false);
+        return getUrl(endpoint, identityPath, false,null);
     }
 
-    protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath, boolean forceDefaultUrl) throws MalformedURLException {
+    protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath, HashMap<String, String> audienceQueryParams) throws MalformedURLException {
+        return getUrl(endpoint, identityPath, false, audienceQueryParams);
+    }
+
+    protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath, boolean forceDefaultUrl, HashMap<String, String> audienceQueryParams) throws MalformedURLException {
         NetworkOptions networkOptions = mConfigManager.getNetworkOptions();
         DomainMapping domainMapping = networkOptions.getDomain(endpoint);
         String url = NetworkOptionsManager.getDefaultUrl(endpoint);
@@ -185,13 +196,14 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
                         .build();
                 return MPUrl.getUrl(uri.toString(), generateDefaultURL(isDefaultDomain, uri, defaultDomain, (pathPrefix + pathPostfix)));
             case AUDIENCE:
-                pathPostfix = SERVICE_VERSION_2 + "/" + mApiKey + "/audience?mpID=" + mConfigManager.getMpid();
-                uri = new Uri.Builder()
-                        .scheme(BuildConfig.SCHEME)
-                        .encodedAuthority(url)
-                        .path(pathPostfix)
-                        .build();
-                return MPUrl.getUrl(uri.toString(), generateDefaultURL(isDefaultDomain, uri, defaultDomain, pathPostfix));
+                    pathPostfix = SERVICE_VERSION_1 + "/" + mApiKey + "/audience";
+                    uri = new Uri.Builder()
+                            .scheme(BuildConfig.SCHEME)
+                            .encodedAuthority(url)
+                            .path(pathPostfix)
+                            .appendQueryParameter("mpid", String.valueOf(mConfigManager.getMpid()))
+                            .build();
+                    return MPUrl.getUrl(uri.toString(), generateDefaultURL(isDefaultDomain, uri, defaultDomain, pathPostfix));
             default:
                 return null;
         }
