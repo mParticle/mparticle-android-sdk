@@ -33,7 +33,7 @@ class AppStateManagerInstrumentedTest : BaseCleanStartedEachTest() {
         }
         mAppStateManager?.ensureActiveSession()
         for (mpid in mpids) {
-            mAppStateManager?.session?.addMpid(mpid)
+            mAppStateManager?.fetchSession()?.addMpid(mpid)
         }
         val checked = BooleanArray(1)
         val latch: CountDownLatch = MPLatch(1)
@@ -72,7 +72,7 @@ class AppStateManagerInstrumentedTest : BaseCleanStartedEachTest() {
         mpids.add(Constants.TEMPORARY_MPID)
         mAppStateManager?.ensureActiveSession()
         for (mpid in mpids) {
-            mAppStateManager?.session?.addMpid(mpid)
+            mAppStateManager?.fetchSession()?.addMpid(mpid)
         }
         val latch: CountDownLatch = MPLatch(1)
         val checked = MutableBoolean(false)

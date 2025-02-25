@@ -1,6 +1,7 @@
 package com.mparticle.internal
 
 import android.location.Location
+import android.os.Looper
 import android.os.Message
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
@@ -32,6 +33,7 @@ import java.util.Random
 import java.util.concurrent.atomic.AtomicLong
 
 @RunWith(PowerMockRunner::class)
+@PrepareForTest(Looper::class)
 class MessageManagerTest {
     private lateinit var context: MockContext
     private lateinit var configManager: ConfigManager
@@ -52,6 +54,10 @@ class MessageManagerTest {
         Mockito.`when`(MParticle.getInstance()?.Internal()?.configManager?.mpid)
             .thenReturn(defaultId)
         Mockito.`when`(configManager.mpid).thenReturn(defaultId)
+        // Prepare and mock the Looper class
+        PowerMockito.mockStatic(Looper::class.java)
+        val looper: Looper = Mockito.mock(Looper::class.java)
+        Mockito.`when`(Looper.getMainLooper()).thenReturn(looper)
         appStateManager = AppStateManager(context, true)
         messageHandler = Mockito.mock(MessageHandler::class.java)
         uploadHandler = Mockito.mock(UploadHandler::class.java)
@@ -71,7 +77,7 @@ class MessageManagerTest {
     }
 
     @Test
-    @PrepareForTest(MessageManager::class, MPUtility::class)
+    @PrepareForTest(MessageManager::class, MPUtility::class, Looper::class)
     @Throws(Exception::class)
     fun testGetStateInfo() {
         PowerMockito.mockStatic(MPUtility::class.java, Answers.RETURNS_MOCKS.get())
@@ -95,7 +101,7 @@ class MessageManagerTest {
     }
 
     @Test
-    @PrepareForTest(MessageManager::class, MPUtility::class)
+    @PrepareForTest(MessageManager::class, MPUtility::class, Looper::class)
     @Throws(Exception::class)
     fun testGetTotalMemory() {
         PowerMockito.mockStatic(MPUtility::class.java, Answers.RETURNS_MOCKS.get())
@@ -108,7 +114,7 @@ class MessageManagerTest {
     }
 
     @Test
-    @PrepareForTest(MessageManager::class, MPUtility::class)
+    @PrepareForTest(MessageManager::class, MPUtility::class, Looper::class)
     @Throws(Exception::class)
     fun testGetSystemMemoryThreshold() {
         PowerMockito.mockStatic(MPUtility::class.java, Answers.RETURNS_MOCKS.get())

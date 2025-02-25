@@ -9,7 +9,6 @@ import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.MockMParticle
 import com.mparticle.commerce.CommerceEvent
-import com.mparticle.internal.KitFrameworkWrapper.CoreCallbacksImpl
 import com.mparticle.internal.PushRegistrationHelper.PushRegistration
 import com.mparticle.testutils.RandomUtils
 import org.json.JSONArray
@@ -576,7 +575,7 @@ class KitFrameworkWrapperTest {
         val mockIntegrationAttributes2 = randomUtils.getRandomAttributes(5)
         Mockito.`when`(mockAppStateManager.launchUri).thenReturn(mockLaunchUri)
         Mockito.`when`(mockAppStateManager.currentActivity).thenReturn(WeakReference(mockActivity))
-        Mockito.`when`(mockAppStateManager.isBackgrounded).thenReturn(isBackground)
+        Mockito.`when`(mockAppStateManager.isBackgrounded()).thenReturn(isBackground)
         Mockito.`when`(mockConfigManager.latestKitConfiguration).thenReturn(mockKitConfiguration)
         Mockito.`when`(mockConfigManager.pushInstanceId).thenReturn(mockPushInstanceId)
         Mockito.`when`(mockConfigManager.pushSenderId).thenReturn(mockPushSenderId)
@@ -587,7 +586,7 @@ class KitFrameworkWrapperTest {
             .thenReturn(mockIntegrationAttributes1)
         Mockito.`when`(mockConfigManager.getIntegrationAttributes(2))
             .thenReturn(mockIntegrationAttributes2)
-        val coreCallbacks: CoreCallbacks = CoreCallbacksImpl(
+        val coreCallbacks: CoreCallbacks = KitFrameworkWrapper.CoreCallbacksImpl(
             Mockito.mock(
                 KitFrameworkWrapper::class.java
             ),
