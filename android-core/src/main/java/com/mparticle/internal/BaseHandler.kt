@@ -85,6 +85,6 @@ open class BaseHandler : Handler {
     }
 
     // Override this in order to handle messages
-    open fun handleMessageImpl(msg: Message?) {
+    open fun handleMessageImpl(msg: Message) {
     }
 }
