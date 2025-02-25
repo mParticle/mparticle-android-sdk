@@ -34,8 +34,8 @@ open class AppStateManager @JvmOverloads constructor(
     private val mPreferences: SharedPreferences
     open var session: InternalSession = InternalSession()
 
-    var currentActivity: WeakReference<Activity?>? = null
-        private set
+    open var currentActivity: WeakReference<Activity?>? = null
+        set
 
     var currentActivityName: String? = null
         private set
@@ -63,8 +63,8 @@ open class AppStateManager @JvmOverloads constructor(
 
     var mUnitTesting: Boolean = false
     private var mMessageManager: MessageManager? = null
-    var launchUri: Uri? = null
-        private set
+    open var launchUri: Uri? = null
+         set
     var launchAction: String? = null
         private set
 

@@ -1,6 +1,8 @@
 package com.mparticle.internal
 
+import android.app.Activity
 import android.content.Context
+import android.net.Uri
 import com.mparticle.BaseEvent
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
@@ -8,6 +10,7 @@ import com.mparticle.MParticleOptions
 import com.mparticle.MockMParticle
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.internal.PushRegistrationHelper.PushRegistration
+import com.mparticle.testutils.RandomUtils
 import org.json.JSONArray
 import org.junit.Assert
 import org.junit.Test
@@ -16,6 +19,8 @@ import org.mockito.Mockito
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
+import java.lang.ref.WeakReference
+import java.util.Random
 
 @RunWith(PowerMockRunner::class)
 class KitFrameworkWrapperTest {
@@ -540,7 +545,7 @@ class KitFrameworkWrapperTest {
         Assert.assertEquals(wrapper.supportedKits, supportedKits)
     }
 
-  /*  @Test
+    @Test
     fun testCoreCallbacksImpl() {
         val randomUtils = RandomUtils()
         val ran = Random()
@@ -581,7 +586,7 @@ class KitFrameworkWrapperTest {
             .thenReturn(mockIntegrationAttributes1)
         Mockito.`when`(mockConfigManager.getIntegrationAttributes(2))
             .thenReturn(mockIntegrationAttributes2)
-        val coreCallbacks: CoreCallbacks = CoreCallbacksImpl(
+        val coreCallbacks: CoreCallbacks = KitFrameworkWrapper.CoreCallbacksImpl(
             Mockito.mock(
                 KitFrameworkWrapper::class.java
             ),
@@ -599,5 +604,5 @@ class KitFrameworkWrapperTest {
         Assert.assertEquals(isPushEnabled, coreCallbacks.isPushEnabled())
         Assert.assertEquals(mockIntegrationAttributes1, coreCallbacks.getIntegrationAttributes(1))
         Assert.assertEquals(mockIntegrationAttributes2, coreCallbacks.getIntegrationAttributes(2))
-    }*/
+    }
 }
