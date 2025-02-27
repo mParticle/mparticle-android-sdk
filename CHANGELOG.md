@@ -1,3 +1,16 @@
+## [5.58.10](https://github.com/mParticle/mparticle-android-sdk/compare/v5.58.9...v5.58.10) (2025-02-27)
+
+
+### Bug Fixes
+
+* previous Google ad Id from being null on cold launch ([#546](https://github.com/mParticle/mparticle-android-sdk/issues/546)) ([3051a82](https://github.com/mParticle/mparticle-android-sdk/commit/3051a823c48720c4810ace37f8a5241768ede0fc))
+
+
+### Updates & Maintenance
+
+* Migrate Internal Application context class to kotlin ([#545](https://github.com/mParticle/mparticle-android-sdk/issues/545)) ([ecd2833](https://github.com/mParticle/mparticle-android-sdk/commit/ecd2833a505059b95654b684b771595c92a146eb))
+* Update submodules ([e9cb498](https://github.com/mParticle/mparticle-android-sdk/commit/e9cb49839ad7c77beff5ef8e6d3db60073b7ec21))
+
 ## [5.58.9](https://github.com/mParticle/mparticle-android-sdk/compare/v5.58.8...v5.58.9) (2025-02-13)
 
 
