@@ -19,8 +19,9 @@ internal class ProviderPersistence(config: JSONObject, context: Context) : JSONO
         val configPersistence = config.getJSONArray(KEY_PERSISTENCE)
         for (i in 0 until configPersistence.length()) {
             val values = JSONObject()
-            if (configPersistence.getJSONObject(i).has(KEY_PERSISTENCE_ANDROID)) {
-                val files = configPersistence.getJSONObject(i).getJSONArray(KEY_PERSISTENCE_ANDROID)
+            val jsonObjectAtIndex = configPersistence.getJSONObject(i)
+            if (jsonObjectAtIndex.has(KEY_PERSISTENCE_ANDROID)) {
+                val files = jsonObjectAtIndex.getJSONArray(KEY_PERSISTENCE_ANDROID)
 
                 for (fileIndex in 0 until files.length()) {
                     val fileObject = files.getJSONObject(fileIndex)
@@ -29,9 +30,10 @@ internal class ProviderPersistence(config: JSONObject, context: Context) : JSONO
                     val fileObjects = fileObject.getJSONArray(KEY_PERSISTENCE_KEY_LIST)
                     val editor = preferences.edit()
                     for (keyIndex in 0 until fileObjects.length()) {
-                        val type = fileObjects.getJSONObject(keyIndex).getInt(KEY_PERSISTENCE_TYPE)
-                        val key = fileObjects.getJSONObject(keyIndex).getString(KEY_PERSISTENCE_KEY)
-                        val mpKey = fileObjects.getJSONObject(keyIndex).getString(KEY_PERSISTENCE_MPVAR)
+                        val fileObjectsAtKeyIndex = fileObjects.getJSONObject(keyIndex)
+                        val type = fileObjectsAtKeyIndex.getInt(KEY_PERSISTENCE_TYPE)
+                        val key = fileObjectsAtKeyIndex.getString(KEY_PERSISTENCE_KEY)
+                        val mpKey = fileObjectsAtKeyIndex.getString(KEY_PERSISTENCE_MPVAR)
                         val mpPersistenceKey = MPPREFIX + mpKey
                         if (preferences.contains(mpPersistenceKey)) {
                             values.put(mpKey, preferences.getString(mpPersistenceKey, null))
@@ -93,16 +95,13 @@ internal class ProviderPersistence(config: JSONObject, context: Context) : JSONO
             var defaultString = defaultString
             if (!isEmpty(defaultString) && defaultString.startsWith("%")) {
                 defaultString = defaultString.lowercase(Locale.getDefault())
-                if (defaultString.equals(MACRO_GUID_NO_DASHES, ignoreCase = true)) {
-                    return UUID.randomUUID().toString().replace("-", "")
-                } else if (defaultString == MACRO_OMNITURE_AID) {
-                    return generateAID()
-                } else if (defaultString == MACRO_GUID) {
-                    return UUID.randomUUID().toString()
-                } else if (defaultString == MACRO_TIMESTAMP) {
-                    return System.currentTimeMillis().toString()
-                } else if (defaultString == MACRO_GUID_LEAST_SIG) {
-                    return UUID.randomUUID().leastSignificantBits.toString()
+                return when {
+                    defaultString.equals(MACRO_GUID_NO_DASHES, ignoreCase = true) -> UUID.randomUUID().toString().replace("-", "")
+                    defaultString == MACRO_OMNITURE_AID -> generateAID()
+                    defaultString == MACRO_GUID -> UUID.randomUUID().toString()
+                    defaultString == MACRO_TIMESTAMP -> System.currentTimeMillis().toString()
+                    defaultString == MACRO_GUID_LEAST_SIG -> UUID.randomUUID().leastSignificantBits.toString()
+                    else -> defaultString
                 }
             }
             return defaultString
