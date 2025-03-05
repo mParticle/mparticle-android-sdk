@@ -1,3 +1,15 @@
+## [5.58.11](https://github.com/mParticle/mparticle-android-sdk/compare/v5.58.10...v5.58.11) (2025-03-05)
+
+
+### Bug Fixes
+
+* Update Kotlin version to be compatible with Braze ([#547](https://github.com/mParticle/mparticle-android-sdk/issues/547)) ([50d73b3](https://github.com/mParticle/mparticle-android-sdk/commit/50d73b3168db250626afe6641bc691173c2024f4))
+
+
+### Updates & Maintenance
+
+* Update submodules ([b9ccc6c](https://github.com/mParticle/mparticle-android-sdk/commit/b9ccc6c68001267d0a962fdcbf9f58298f01ce0f))
+
 ## [5.58.10](https://github.com/mParticle/mparticle-android-sdk/compare/v5.58.9...v5.58.10) (2025-02-27)
 
 
