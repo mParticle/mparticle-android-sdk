@@ -9,5 +9,4 @@ public interface SQLiteOpenHelperWrapper {
     void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion);
 
     void onDowngrade(SQLiteDatabase database, int oldVersion, int newVersion);
-
 }

@@ -52,7 +52,6 @@ class AppStateManagerInstrumentedTest : BaseCleanStartedEachTest() {
                             }
                         }
                         checked[0] = true
-                        latch.countDown()
                     } catch (e: JSONException) {
                         e.printStackTrace()
                     }
