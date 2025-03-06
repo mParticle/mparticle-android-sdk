@@ -14,7 +14,6 @@ public class UploadSettings {
     private final String mActiveKits;
     private final String mSupportedKits;
 
-    // TODO: BEN - Accept null values?
     public UploadSettings(@NonNull String apiKey, @NonNull String secret, @NonNull NetworkOptions networkOptions, @NonNull String activeKits, @NonNull String supportedKits) {
         mApiKey = apiKey;
         mSecret = secret;
