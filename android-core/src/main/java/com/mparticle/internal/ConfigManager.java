@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.Network;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
@@ -336,7 +337,7 @@ public class ConfigManager {
         }
     }
 
-    void clearConfig() {
+    public void clearConfig() {
         sPreferences.edit()
                 .remove(CONFIG_JSON)
                 .remove(CONFIG_JSON_TIMESTAMP)
@@ -587,14 +588,14 @@ public class ConfigManager {
         sPreferences.edit().putBoolean(Constants.PrefKeys.REPORT_UNCAUGHT_EXCEPTIONS, log).apply();
     }
 
-    // TODO: BEN - return null instead of setting empty strings?
     public UploadSettings getUploadSettings() {
         String apiKey = getApiKey();
         String secret = getApiSecret();
-        return new UploadSettings(
-                apiKey == null ? "" : apiKey,
-                secret == null ? "" : secret,
-                getNetworkOptions(), getActiveModuleIds(), getSupportedKitString());
+        if (apiKey == null || secret == null) {
+            return null;
+        }
+
+        return new UploadSettings(apiKey, secret, getNetworkOptions(), getActiveModuleIds(), getSupportedKitString());
     }
 
     public String getApiKey() {
@@ -1348,6 +1349,14 @@ public class ConfigManager {
     public synchronized void setNetworkOptions(NetworkOptions networkOptions) {
         sNetworkOptions = networkOptions;
         sPreferences.edit().remove(Constants.PrefKeys.NETWORK_OPTIONS).apply();
+    }
+
+    public UploadSettings getLastUploadSettings() {
+        return getUserStorage().getLastUploadSettings();
+    }
+
+    public void setLastUploadSettings(@NonNull UploadSettings uploadSettings) {
+        getUserStorage().setLastUploadSettings(uploadSettings);
     }
 
     @NonNull

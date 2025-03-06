@@ -42,6 +42,7 @@ import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MParticleJSInterface;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.PushRegistrationHelper;
+import com.mparticle.internal.database.UploadSettings;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.database.tables.MParticleDatabaseHelper;
 import com.mparticle.internal.listeners.ApiClass;
@@ -60,6 +61,7 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -188,6 +190,24 @@ public class MParticle {
                     instance = new MParticle(options);
                     instance.mKitManager = new KitFrameworkWrapper(options.getContext(), instance.mMessageManager, instance.Internal().getConfigManager(), instance.Internal().getAppStateManager(), options);
                     instance.mIdentityApi = new IdentityApi(options.getContext(), instance.mInternal.getAppStateManager(), instance.mMessageManager, instance.mConfigManager, instance.mKitManager, options.getOperatingSystem());
+
+                    // Check if we've switched workspaces on startup
+                    UploadSettings lastUploadSettings = instance.mConfigManager.getLastUploadSettings();
+                    if (lastUploadSettings != null && !Objects.equals(lastUploadSettings.getApiKey(), options.getApiKey())) {
+                        // Different workspace, so batch previous messages under old upload settings before starting
+                        try {
+                            instance.mMessageManager.mUploadHandler.prepareMessageUploads(lastUploadSettings);
+                        } catch (Exception e) {
+                            Logger.error(e, "Unable to create upload records for previous workspace");
+                        }
+
+                        // Delete the cached config
+                        instance.mConfigManager.clearConfig();
+                    }
+
+                    // Cache the upload settings in case we switch workspaces on startup
+                    instance.mConfigManager.setLastUploadSettings(instance.mConfigManager.getUploadSettings());
+
                     instance.mMessageManager.refreshConfiguration();
                     instance.identify(options);
                     if (options.hasLocationTracking()) {
