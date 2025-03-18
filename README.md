@@ -16,7 +16,7 @@ You can grab the Core SDK via Maven Central. Please see the badge above and foll
 
 ```groovy
 dependencies {
-    implementation 'com.mparticle:android-core:5.58.11'
+    implementation 'com.mparticle:android-core:5.58.12'
 }
 ```
 
@@ -27,8 +27,8 @@ Several integrations require additional client-side add-on libraries called "kit
 ```groovy
 dependencies {
     implementation (
-        'com.mparticle:android-example-kit:5.58.11',
-        'com.mparticle:android-another-kit:5.58.11'
+        'com.mparticle:android-example-kit:5.58.12',
+        'com.mparticle:android-another-kit:5.58.12'
     )
 }
 ```
