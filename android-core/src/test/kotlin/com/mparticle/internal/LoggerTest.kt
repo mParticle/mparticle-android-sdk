@@ -52,11 +52,11 @@ class LoggerTest {
             null,
             null
         )
-        Assert.assertNotNull(Logger.getLogHandler())
-        Assert.assertTrue(Logger.getLogHandler() is DefaultLogHandler)
+        Assert.assertNotNull(Logger.logHandler)
+        Assert.assertTrue(Logger.logHandler is DefaultLogHandler)
         val called = BooleanArray(6)
         val logHandlerTest = LogHandlerTest(called)
-        Logger.setLogHandler(logHandlerTest)
+        Logger.logHandler=logHandlerTest
         assertTrueUpTo(0, called)
         Logger.verbose("testMessage")
         assertTrueUpTo(1, called)
@@ -68,10 +68,10 @@ class LoggerTest {
         assertTrueUpTo(4, called)
         Logger.error("testMessage")
         assertTrueUpTo(5, called)
-        Assert.assertEquals(logHandlerTest, Logger.getLogHandler())
-        Logger.setLogHandler(null)
-        Assert.assertNotNull(Logger.getLogHandler())
-        Assert.assertTrue(Logger.getLogHandler() is DefaultLogHandler)
+        Assert.assertEquals(logHandlerTest, Logger.logHandler)
+        Logger.logHandler =null
+        Assert.assertNotNull(Logger.logHandler)
+        Assert.assertTrue(Logger.logHandler is DefaultLogHandler)
     }
 
     private fun assertTrueUpTo(limit: Int, called: BooleanArray) {
