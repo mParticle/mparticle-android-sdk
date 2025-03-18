@@ -29,6 +29,7 @@ import com.mparticle.identity.AliasRequest;
 import com.mparticle.identity.UserAttributeListenerWrapper;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
+import com.mparticle.internal.database.UploadSettings;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.messages.BaseMPMessage;
 import com.mparticle.internal.messages.BaseMPMessageBuilder;
@@ -766,6 +767,15 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             throw new MParticleApiClientImpl.MPNoConfigException();
         }
         return apiKey;
+    }
+
+    @Override
+    public UploadSettings getUploadSettings() throws MParticleApiClientImpl.MPNoConfigException {
+        UploadSettings uploadSettings = mConfigManager.getUploadSettings();
+        if (uploadSettings == null) {
+            throw new MParticleApiClientImpl.MPNoConfigException();
+        }
+        return uploadSettings;
     }
 
     @SuppressLint("MissingPermission")

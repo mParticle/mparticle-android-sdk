@@ -2,10 +2,12 @@ package com.mparticle.internal.database.services;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.os.Message;
 
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.database.MPDatabase;
+import com.mparticle.internal.database.tables.BreadcrumbTable;
 import com.mparticle.internal.database.tables.MessageTable;
 import com.mparticle.internal.listeners.InternalListenerManager;
 import com.mparticle.internal.messages.BaseMPMessage;
@@ -229,6 +231,10 @@ public class MessageService extends MessageTable {
         }
         InternalListenerManager.getListener().onCompositeObjects(message, contentValues);
         db.insert(MessageTableColumns.TABLE_NAME, null, contentValues);
+    }
+
+    public static void deleteAll(MPDatabase db) {
+        db.delete(MessageTableColumns.TABLE_NAME, null, null);
     }
 
     public static class ReadyMessage {

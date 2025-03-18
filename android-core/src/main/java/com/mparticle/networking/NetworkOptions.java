@@ -114,7 +114,7 @@ public class NetworkOptions {
     }
 
 
-    private JSONObject toJson() {
+    public JSONObject toJson() {
         JSONObject networkOptions = new JSONObject();
         try {
             JSONArray domainMappingsJson = new JSONArray();

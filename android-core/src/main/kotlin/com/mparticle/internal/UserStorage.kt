@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.net.UrlQuerySanitizer
 import android.os.Build
+import com.mparticle.internal.database.UploadSettings
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -250,6 +251,21 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
             DEFAULT_SEEN_TIME,
             System.currentTimeMillis()
         )
+
+    fun getLastUploadSettings(): UploadSettings? {
+        val lastUploadSettingsJson = mPreferences.getString(LAST_UPLOAD_SETTINGS, null)
+        if (lastUploadSettingsJson != null) {
+            return UploadSettings.withJson(lastUploadSettingsJson)
+        }
+        return null
+    }
+
+    fun setLastUploadSettings(uploadSettings: UploadSettings) {
+        val lastUploadSettingsJson = uploadSettings.toJson()
+        if (lastUploadSettingsJson != null) {
+            mPreferences.edit().putString(LAST_UPLOAD_SETTINGS, lastUploadSettingsJson).apply()
+        }
+    }
 
     fun setLoggedInUser(knownUser: Boolean) {
         mPreferences.edit().putBoolean(KNOWN_USER, knownUser).apply()
@@ -531,6 +547,7 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
         private const val FIRST_SEEN_TIME = "mp::first_seen"
         private const val LAST_SEEN_TIME = "mp::last_seen"
         private const val DEFAULT_SEEN_TIME = "mp::default_seen_time"
+        private const val LAST_UPLOAD_SETTINGS = "mp::last_upload_settings"
 
         const val DEFAULT_BREADCRUMB_LIMIT: Int = 50
 

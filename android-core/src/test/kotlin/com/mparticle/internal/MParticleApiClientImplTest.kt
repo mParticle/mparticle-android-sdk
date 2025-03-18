@@ -40,7 +40,6 @@ class MParticleApiClientImplTest {
             MockContext()
         )
         client.mDeviceRampNumber = 50
-        MParticleApiClientImpl.setSupportedKitString("")
         val mockUrl = PowerMockito.mock(MPUrl::class.java)
         mockConnection = PowerMockito.mock(MPConnection::class.java)
         Mockito.`when`(mockUrl.openConnection()).thenReturn(mockConnection)
@@ -212,7 +211,7 @@ class MParticleApiClientImplTest {
         Mockito.`when`(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString()))
             .thenReturn("encoded")
         try {
-            client.sendMessageBatch("")
+            client.sendMessageBatch("", configManager.uploadSettings)
         } catch (e: Exception) {
             if (e is MPThrottleException) {
                 throw e
@@ -224,7 +223,7 @@ class MParticleApiClientImplTest {
         )
         var e: Exception? = null
         try {
-            client.sendMessageBatch("")
+            client.sendMessageBatch("", configManager.uploadSettings)
         } catch (cfe: MPThrottleException) {
             e = cfe
         }
@@ -272,7 +271,7 @@ class MParticleApiClientImplTest {
         Mockito.`when`(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString()))
             .thenReturn("encoded")
         try {
-            client.sendAliasRequest("")
+            client.sendAliasRequest("", configManager.uploadSettings)
         } catch (e: Exception) {
             if (e is MPThrottleException) {
                 throw e
@@ -284,7 +283,7 @@ class MParticleApiClientImplTest {
         )
         var e: Exception? = null
         try {
-            client.sendAliasRequest("")
+            client.sendAliasRequest("", configManager.uploadSettings)
         } catch (cfe: MPThrottleException) {
             e = cfe
         }
@@ -307,8 +306,8 @@ class MParticleApiClientImplTest {
         Mockito.`when`(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString()))
             .thenReturn("encoded")
         try {
-            client.sendMessageBatch("")
-            client.sendAliasRequest("")
+            client.sendMessageBatch("", configManager.uploadSettings)
+            client.sendAliasRequest("", configManager.uploadSettings)
         } catch (e: Exception) {
             if (e is MPThrottleException) {
                 throw e
@@ -326,14 +325,14 @@ class MParticleApiClientImplTest {
         )
         var ex: MPThrottleException? = null
         try {
-            client.sendMessageBatch("")
+            client.sendMessageBatch("", configManager.uploadSettings)
         } catch (e: Exception) {
             if (e is MPThrottleException) {
                 throw e
             }
         }
         try {
-            client.sendAliasRequest("")
+            client.sendAliasRequest("", configManager.uploadSettings)
         } catch (e: MPThrottleException) {
             ex = e
         }
@@ -350,14 +349,14 @@ class MParticleApiClientImplTest {
         )
         ex = null
         try {
-            client.sendAliasRequest("")
+            client.sendAliasRequest("", configManager.uploadSettings)
         } catch (e: Exception) {
             if (e is MPThrottleException) {
                 throw e
             }
         }
         try {
-            client.sendMessageBatch("")
+            client.sendMessageBatch("", configManager.uploadSettings)
         } catch (e: MPThrottleException) {
             ex = e
         }
