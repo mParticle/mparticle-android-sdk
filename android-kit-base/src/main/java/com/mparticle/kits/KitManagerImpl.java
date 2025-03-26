@@ -3,6 +3,7 @@ package com.mparticle.kits;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -1315,6 +1316,27 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 provider.reset();
             } catch (Exception e) {
                 Logger.warning("Failed to call reset for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public void execute(String viewName,
+                        Map<String, String> attributes,
+                        Runnable onUnload,
+                        Runnable onLoad,
+                        Runnable onShouldHideLoadingIndicator,
+                        Runnable onShouldShowLoadingIndicator,
+                        Map<String, WeakReference<Object>> placeHolders,
+                        Map<String, WeakReference<Typeface>> fontTypefaces) {
+        for (KitIntegration provider : providers.values()) {
+            try {
+                if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
+                    MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
+                    ((KitIntegration.RoktListener) provider).execute(viewName,attributes, onUnload,onLoad,onShouldHideLoadingIndicator,onShouldShowLoadingIndicator,placeHolders,fontTypefaces,FilteredMParticleUser.getInstance(user.getId(), provider));
+                }
+            } catch (Exception e) {
+                Logger.warning("Failed to call onLoginCompleted for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
