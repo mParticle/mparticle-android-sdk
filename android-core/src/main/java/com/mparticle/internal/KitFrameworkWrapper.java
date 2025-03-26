@@ -3,6 +3,7 @@ package com.mparticle.internal;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -643,6 +644,20 @@ public class KitFrameworkWrapper implements KitManager {
     public void reset() {
         if (mKitManager != null) {
             mKitManager.reset();
+        }
+    }
+
+    @Override
+    public void execute(String viewName,
+                        Map<String, String> attributes,
+                        Runnable onUnload,
+                        Runnable onLoad,
+                        Runnable onShouldHideLoadingIndicator,
+                        Runnable onShouldShowLoadingIndicator,
+                        Map<String, WeakReference<Object>> placeHolders,
+                        Map<String, WeakReference<Typeface>> fontTypefaces) {
+        if (mKitManager != null) {
+            mKitManager.execute(viewName,attributes, onUnload, onLoad, onShouldHideLoadingIndicator, onShouldShowLoadingIndicator,placeHolders,fontTypefaces);
         }
     }
 

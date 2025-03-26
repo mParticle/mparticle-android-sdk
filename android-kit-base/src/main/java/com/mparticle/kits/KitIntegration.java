@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -607,5 +608,17 @@ public abstract class KitIntegration {
 
     public interface BatchListener {
         List<ReportingMessage> logBatch(JSONObject jsonObject);
+    }
+
+    public interface RoktListener {
+        void execute(String viewName,
+                     Map<String, String> attributes,
+                     Runnable onUnload,
+                     Runnable onLoad,
+                     Runnable onShouldHideLoadingIndicator,
+                     Runnable onShouldShowLoadingIndicator,
+                     Map<String, WeakReference<Object>> placeHolders,
+                     Map<String, WeakReference<Typeface>> fontTypefaces,
+                     FilteredMParticleUser user);
     }
 }
