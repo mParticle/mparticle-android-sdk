@@ -1333,6 +1333,13 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             try {
                 if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
                     MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
+                    Map<String, Object> objectAttributes = new HashMap<>();
+
+                    for (Map.Entry<String, String> entry : attributes.entrySet()) {
+                        objectAttributes.put(entry.getKey(), entry.getValue());
+                    }
+
+                    user.setUserAttributes(objectAttributes);
                     ((KitIntegration.RoktListener) provider).execute(viewName,attributes, onUnload,onLoad,onShouldHideLoadingIndicator,onShouldShowLoadingIndicator,placeHolders,fontTypefaces,FilteredMParticleUser.getInstance(user.getId(), provider));
                 }
             } catch (Exception e) {
