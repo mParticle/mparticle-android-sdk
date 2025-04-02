@@ -1340,10 +1340,18 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     }
 
                     user.setUserAttributes(objectAttributes);
-                    ((KitIntegration.RoktListener) provider).execute(viewName,attributes, onUnload,onLoad,onShouldHideLoadingIndicator,onShouldShowLoadingIndicator,placeHolders,fontTypefaces,FilteredMParticleUser.getInstance(user.getId(), provider));
+                    ((KitIntegration.RoktListener) provider).execute(viewName,
+                            attributes,
+                            onUnload,
+                            onLoad,
+                            onShouldHideLoadingIndicator,
+                            onShouldShowLoadingIndicator,
+                            placeHolders,
+                            fontTypefaces,
+                            FilteredMParticleUser.getInstance(user.getId(), provider));
                 }
             } catch (Exception e) {
-                Logger.warning("Failed to call onLoginCompleted for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call execute for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }

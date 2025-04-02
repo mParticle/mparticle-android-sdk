@@ -657,7 +657,14 @@ public class KitFrameworkWrapper implements KitManager {
                         Map<String, WeakReference<Object>> placeHolders,
                         Map<String, WeakReference<Typeface>> fontTypefaces) {
         if (mKitManager != null) {
-            mKitManager.execute(viewName,attributes, onUnload, onLoad, onShouldHideLoadingIndicator, onShouldShowLoadingIndicator,placeHolders,fontTypefaces);
+            mKitManager.execute(viewName,
+                    attributes,
+                    onUnload,
+                    onLoad,
+                    onShouldHideLoadingIndicator,
+                    onShouldShowLoadingIndicator,
+                    placeHolders,
+                    fontTypefaces);
         }
     }
 
