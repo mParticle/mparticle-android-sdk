@@ -1798,8 +1798,28 @@ public class MParticle {
                             Map<String, WeakReference<Object>> placeHolders,
                             Map<String, WeakReference<Typeface>> fontTypefaces) {
              if (mConfigManager.isEnabled()) {
-                 mKitManager.execute(viewName,attributes, onUnload,onLoad,onShouldHideLoadingIndicator,onShouldShowLoadingIndicator,placeHolders,fontTypefaces);
+                 mKitManager.execute(viewName,
+                         attributes,
+                         onUnload,
+                         onLoad,
+                         onShouldHideLoadingIndicator,
+                         onShouldShowLoadingIndicator,
+                         placeHolders,
+                         fontTypefaces);
              }
+        }
+        public void selectPlacements(String viewName,
+                                     Map<String, String> attributes) {
+            if (mConfigManager.isEnabled()) {
+                mKitManager.execute(viewName,
+                        attributes,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null);
+            }
         }
     }
     /**
