@@ -6,6 +6,7 @@ import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.internal.AccessUtils
 import com.mparticle.internal.ConfigManager
+import com.mparticle.internal.database.UploadSettings
 import com.mparticle.testutils.BaseCleanInstallEachTest
 import org.junit.Assert
 import org.junit.Assert.assertEquals
@@ -23,7 +24,7 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
         startMParticle(MParticleOptions.builder(mContext).credentials(apiKey, "secret"))
         val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
         for (endpoint in MParticleBaseClientImpl.Endpoint.values()) {
-            defaultUrls[endpoint] = baseClientImpl.getUrl(endpoint, endpoint.name, false)
+            defaultUrls[endpoint] = baseClientImpl.getUrl(endpoint, endpoint.name, UploadSettings(apiKey, "secret", NetworkOptions.builder().build(), "", ""))
         }
         MParticle.setInstance(null)
     }
@@ -147,9 +148,9 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
             .build()
         MParticle.start(options)
         val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
-        map.forEach { key, value ->
-            mConfigManager?.setCredentials(key, value)
-            val prefix = mConfigManager?.podPrefix
+        map.forEach { (key, value) ->
+            mConfigManager.setCredentials(key, value)
+            val prefix = mConfigManager.getPodPrefix(key)
             assertEquals(value, prefix)
             assertEquals(
                 "${NetworkOptionsManager.MP_URL_PREFIX}.$prefix.mparticle.com",
@@ -215,13 +216,14 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
             )
             .build()
         MParticle.start(options)
+        val uploadSettings = UploadSettings(apiKey, "secret", options.networkOptions, "", "")
         val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
         for (endpoint in MParticleBaseClientImpl.Endpoint.values()) {
-            val generatedUrl = baseClientImpl.getUrl(endpoint, endpoint.name, true)
+            val generatedUrl = baseClientImpl.getUrl(endpoint, endpoint.name, uploadSettings)
             assertEquals(defaultUrls[endpoint].toString(), generatedUrl.defaultUrl.toString())
         }
         for (endpoint in MParticleBaseClientImpl.Endpoint.values()) {
-            val generatedUrl = baseClientImpl.getUrl(endpoint, endpoint.name, false)
+            val generatedUrl = baseClientImpl.getUrl(endpoint, endpoint.name, uploadSettings)
             Assert.assertNotEquals(defaultUrls[endpoint].toString(), generatedUrl.toString())
             Assert.assertFalse(generatedUrl === generatedUrl.defaultUrl)
             assertEquals(

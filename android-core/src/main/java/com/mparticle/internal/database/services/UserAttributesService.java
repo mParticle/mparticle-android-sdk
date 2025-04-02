@@ -5,6 +5,7 @@ import android.database.Cursor;
 
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.database.MPDatabase;
+import com.mparticle.internal.database.tables.BreadcrumbTable;
 import com.mparticle.internal.database.tables.UserAttributesTable;
 
 import java.util.ArrayList;
@@ -77,5 +78,9 @@ public class UserAttributesService extends UserAttributesTable {
             }
         }
         return attributes;
+    }
+
+    public static void deleteAll(MPDatabase db) {
+        db.delete(UserAttributesTableColumns.TABLE_NAME, null, null);
     }
 }

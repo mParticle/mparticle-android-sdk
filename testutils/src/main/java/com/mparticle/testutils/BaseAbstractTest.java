@@ -3,6 +3,7 @@ package com.mparticle.testutils;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
@@ -84,6 +85,7 @@ public abstract class BaseAbstractTest {
         startMParticle(MParticleOptions.builder(mContext));
     }
 
+    @SuppressLint("MParticleInitialization")
     protected void startMParticle(MParticleOptions.Builder optionsBuilder) throws InterruptedException {
         MParticle.setInstance(null);
         final CountDownLatch latch = new MPLatch(1);
@@ -128,7 +130,7 @@ public abstract class BaseAbstractTest {
     }
 
     protected void clearStorage() {
-        com.mparticle.AccessUtils.reset(mContext, false);
+        com.mparticle.AccessUtils.reset(mContext, false, false);
         MPDatabase database = new MParticleDBManager(mContext).getDatabase();
         List<String> tableNames = getAllTables(database);
         for (String tableName : tableNames) {
