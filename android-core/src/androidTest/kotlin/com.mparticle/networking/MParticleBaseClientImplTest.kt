@@ -24,7 +24,8 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
         startMParticle(MParticleOptions.builder(mContext).credentials(apiKey, "secret"))
         val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
         for (endpoint in MParticleBaseClientImpl.Endpoint.values()) {
-            defaultUrls[endpoint] = baseClientImpl.getUrl(endpoint, endpoint.name,null, UploadSettings(apiKey, "secret", NetworkOptions.builder().build(), "", ""))
+            defaultUrls[endpoint] =
+                baseClientImpl.getUrl(endpoint, endpoint.name, null, UploadSettings(apiKey, "secret", NetworkOptions.builder().build(), "", ""))
         }
         MParticle.setInstance(null)
     }
