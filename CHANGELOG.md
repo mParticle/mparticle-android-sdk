@@ -1,3 +1,16 @@
+## [5.59.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.58.12...v5.59.0) (2025-04-03)
+
+
+### Features
+
+* Add Workspace Switching feature ([#551](https://github.com/mParticle/mparticle-android-sdk/issues/551)) ([de72f0a](https://github.com/mParticle/mparticle-android-sdk/commit/de72f0a0afe0917e1550ea9a31e212a9682fc4f4))
+
+
+### Updates & Maintenance
+
+* Downgrade API level to 28 for both instrument test and instrument… ([#552](https://github.com/mParticle/mparticle-android-sdk/issues/552)) ([ddf8f4f](https://github.com/mParticle/mparticle-android-sdk/commit/ddf8f4f19dd159193e9c80a764270f4eadc1973f))
+* Downgrade API level to 28 for daily yml file ([#553](https://github.com/mParticle/mparticle-android-sdk/issues/553)) ([12eef85](https://github.com/mParticle/mparticle-android-sdk/commit/12eef852fe8329d46631206f158ec5c77bbacf2c))
+
 ## [5.58.12](https://github.com/mParticle/mparticle-android-sdk/compare/v5.58.11...v5.58.12) (2025-03-18)
 
 
