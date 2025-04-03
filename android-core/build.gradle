@@ -84,6 +84,7 @@ android {
             jvmArgs += ['--add-opens', 'java.base/java.text=ALL-UNNAMED']
             jvmArgs += ['--add-opens', 'java.base/java.math=ALL-UNNAMED']
             jvmArgs += ['--add-opens', 'java.base/java.util.concurrent=ALL-UNNAMED']
+            jvmArgs += ['--add-opens', 'java.base/java.util.concurrent.atomic=ALL-UNNAMED']
             jvmArgs += ['--add-opens', 'java.base/java.lang.ref=ALL-UNNAMED']
         }
         if (useOrchestrator()) {
@@ -168,6 +169,7 @@ dependencies {
     }
     androidTestImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlin_version"
 }
 
 

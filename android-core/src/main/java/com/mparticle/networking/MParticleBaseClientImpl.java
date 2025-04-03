@@ -11,6 +11,7 @@ import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
+import com.mparticle.internal.database.UploadSettings;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -93,7 +94,7 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
     }
 
     protected MPUrl getUrl(Endpoint endpoint) throws MalformedURLException {
-        return getUrl(endpoint, null, null);
+        return getUrl(endpoint, null, null,null);
     }
 
     protected MPUrl getUrl(Endpoint endpoint, @Nullable long mpId) throws MalformedURLException {
@@ -103,17 +104,18 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
     }
 
     protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath) throws MalformedURLException {
-        return getUrl(endpoint, identityPath, false,null);
+        return getUrl(endpoint, identityPath, null,null);
     }
 
     protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath, HashMap<String, String> audienceQueryParams) throws MalformedURLException {
-        return getUrl(endpoint, identityPath, false, audienceQueryParams);
+        return getUrl(endpoint, identityPath,  audienceQueryParams,null);
     }
 
-    protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath, boolean forceDefaultUrl, HashMap<String, String> audienceQueryParams) throws MalformedURLException {
-        NetworkOptions networkOptions = mConfigManager.getNetworkOptions();
+    protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath,HashMap<String, String> audienceQueryParams, @Nullable UploadSettings uploadSettings) throws MalformedURLException {
+        NetworkOptions networkOptions = uploadSettings == null ? mConfigManager.getNetworkOptions() : uploadSettings.getNetworkOptions();
         DomainMapping domainMapping = networkOptions.getDomain(endpoint);
         String url = NetworkOptionsManager.getDefaultUrl(endpoint);
+        String apiKey = uploadSettings == null ? mApiKey : uploadSettings.getApiKey();
 
         // `defaultDomain` variable is for URL generation when domain mapping is specified.
         String defaultDomain = url;
@@ -129,7 +131,7 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
         if (endpoint != Endpoint.CONFIG) {
             // Set URL with pod prefix if it’s the default domain and endpoint is not CONFIG
             if (isDefaultDomain) {
-                url = getPodUrl(url, mConfigManager.getPodPrefix(), mConfigManager.isDirectUrlRoutingEnabled());
+                url = getPodUrl(url, mConfigManager.getPodPrefix(apiKey), mConfigManager.isDirectUrlRoutingEnabled());
             } else {
                 // When domain mapping is specified, generate the default domain. Whether podRedirection is enabled or not, always use the original URL.
                 defaultDomain = getPodUrl(defaultDomain, null, false);
@@ -140,7 +142,7 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
         String subdirectory;
         String pathPrefix;
         String pathPostfix;
-        boolean overridesSubdirectory = domainMapping.isOverridesSubdirectory();
+        boolean overridesSubdirectory = domainMapping != null && domainMapping.isOverridesSubdirectory();
         switch (endpoint) {
             case CONFIG:
                 pathPrefix = SERVICE_VERSION_4 + "/";
@@ -167,7 +169,7 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
             case EVENTS:
                 pathPrefix = SERVICE_VERSION_2 + "/";
                 subdirectory = overridesSubdirectory ? "" : pathPrefix;
-                pathPostfix = mApiKey + "/events";
+                pathPostfix = apiKey + "/events";
                 uri = new Uri.Builder()
                         .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
@@ -178,7 +180,7 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
             case ALIAS:
                 pathPrefix = SERVICE_VERSION_1 + "/identity/";
                 subdirectory = overridesSubdirectory ? "" : pathPrefix;
-                pathPostfix = mApiKey + "/alias";
+                pathPostfix = apiKey + "/alias";
                 uri = new Uri.Builder()
                         .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)

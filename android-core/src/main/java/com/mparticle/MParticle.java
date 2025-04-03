@@ -42,6 +42,7 @@ import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MParticleJSInterface;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.PushRegistrationHelper;
+import com.mparticle.internal.database.UploadSettings;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.database.tables.MParticleDatabaseHelper;
 import com.mparticle.internal.listeners.ApiClass;
@@ -60,6 +61,7 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -188,6 +190,24 @@ public class MParticle {
                     instance = new MParticle(options);
                     instance.mKitManager = new KitFrameworkWrapper(options.getContext(), instance.mMessageManager, instance.Internal().getConfigManager(), instance.Internal().getAppStateManager(), options);
                     instance.mIdentityApi = new IdentityApi(options.getContext(), instance.mInternal.getAppStateManager(), instance.mMessageManager, instance.mConfigManager, instance.mKitManager, options.getOperatingSystem());
+
+                    // Check if we've switched workspaces on startup
+                    UploadSettings lastUploadSettings = instance.mConfigManager.getLastUploadSettings();
+                    if (lastUploadSettings != null && !Objects.equals(lastUploadSettings.getApiKey(), options.getApiKey())) {
+                        // Different workspace, so batch previous messages under old upload settings before starting
+                        try {
+                            instance.mMessageManager.mUploadHandler.prepareMessageUploads(lastUploadSettings);
+                        } catch (Exception e) {
+                            Logger.error(e, "Unable to create upload records for previous workspace");
+                        }
+
+                        // Delete the cached config
+                        instance.mConfigManager.clearConfig();
+                    }
+
+                    // Cache the upload settings in case we switch workspaces on startup
+                    instance.mConfigManager.setLastUploadSettings(instance.mConfigManager.getUploadSettings());
+
                     instance.mMessageManager.refreshConfiguration();
                     instance.identify(options);
                     if (options.hasLocationTracking()) {
@@ -259,6 +279,59 @@ public class MParticle {
      */
     public static void setInstance(@Nullable MParticle instance) {
         MParticle.instance = instance;
+    }
+
+    /**
+     * Switch the SDK to a new API key and secret.
+     * Will first batch all events that have not been sent to mParticle into upload records,
+     * then all SDK state including user defaults, database (except uploads), etc will be
+     * completely reset. After that, {@link #start(MParticleOptions)} )} will be called with
+     * the new key and secret and the SDK will initialize again as if it is a new app launch.
+     *
+     @param options Required to initialize the SDK properly
+     */
+    public static void switchWorkspace(@NonNull MParticleOptions options) {
+        synchronized (MParticle.class) {
+            MParticle localInstance = instance;
+            if (localInstance == null) {
+                performWorkspaceSwitch(options);
+            } else {
+                // End session if active
+                if (localInstance.isSessionActive()) {
+                    localInstance.endSession();
+                }
+
+                // Wait for the message thread to finish before processing upload records
+                localInstance.mMessageManager.getMessageHandler().post(() -> {
+                    // Process the upload records on the upload thread
+                    localInstance.mMessageManager.mUploadHandler.post(() -> {
+                        try {
+                            UploadSettings uploadSettings = localInstance.mConfigManager.getUploadSettings();
+                            localInstance.mMessageManager.mUploadHandler.prepareMessageUploads(uploadSettings);
+                        } catch (Exception e) {
+                            Logger.error(e, "Unable to create upload records before switching workspaces");
+                        }
+
+                        performWorkspaceSwitch(options);
+                    });
+                });
+            }
+        }
+    }
+
+    private static void performWorkspaceSwitch(@NonNull MParticleOptions options) {
+        final HandlerThread handlerThread = new HandlerThread("mParticleSwitchWorkspaceHandler");
+        handlerThread.start();
+        new Handler(handlerThread.getLooper()).post(() -> {
+            // Reset everything except for uploads table
+            resetForSwitchingWorkspaces(options.getContext());
+
+            // Restart the SDK using new options
+            instance = null;
+            start(options);
+
+            handlerThread.quit();
+        });
     }
 
     /**
@@ -1148,10 +1221,14 @@ public class MParticle {
      * @param context
      */
     public static void reset(@NonNull Context context) {
-        reset(context, true);
+        reset(context, true, false);
     }
 
-    static void reset(@NonNull Context context, boolean deleteDatabase) {
+    static void resetForSwitchingWorkspaces(@NonNull Context context) {
+        reset(context, false, true);
+    }
+
+    static void reset(@NonNull Context context, boolean deleteDatabase, boolean switchingWorkspaces) {
         synchronized (MParticle.class) {
             //"commit" will force all async writes stemming from an "apply" call to finish. We need to do this
             //because we need to ensure that the "getMpids()" call is returning all calls that have been made
@@ -1196,8 +1273,11 @@ public class MParticle {
                     }
                 }
             }
+
             if (deleteDatabase) {
                 context.deleteDatabase(MParticleDatabaseHelper.getDbName());
+            } else if (switchingWorkspaces) {
+                new MParticleDBManager(context).resetDatabaseForWorkspaceSwitching();
             }
         }
     }

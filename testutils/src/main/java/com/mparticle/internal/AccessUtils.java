@@ -9,6 +9,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.mparticle.MParticle;
 import com.mparticle.audience.BaseAudienceTask;
 import com.mparticle.identity.IdentityStateListener;
+import com.mparticle.internal.database.UploadSettings;
 import com.mparticle.internal.database.tables.MParticleDatabaseHelper;
 import com.mparticle.kits.KitManagerImpl;
 import com.mparticle.networking.BaseNetworkConnection;
@@ -112,7 +113,7 @@ public class AccessUtils {
         }
 
         @Override
-        public int sendMessageBatch(String message) throws IOException, MParticleApiClientImpl.MPThrottleException, MParticleApiClientImpl.MPRampException {
+        public int sendMessageBatch(@NonNull String message, @NonNull UploadSettings uploadSettings) throws IOException, MParticleApiClientImpl.MPThrottleException, MParticleApiClientImpl.MPRampException {
             return 0;
         }
 
@@ -126,8 +127,9 @@ public class AccessUtils {
             return null;
         }
 
+        @NonNull
         @Override
-        public AliasNetworkResponse sendAliasRequest(@NonNull String request) throws JSONException, IOException, MParticleApiClientImpl.MPThrottleException, MParticleApiClientImpl.MPRampException {
+        public AliasNetworkResponse sendAliasRequest(@NonNull String request, @NonNull UploadSettings uploadSettings) throws JSONException, IOException, MParticleApiClientImpl.MPThrottleException, MParticleApiClientImpl.MPRampException {
             return new AliasNetworkResponse(0);
         }
 

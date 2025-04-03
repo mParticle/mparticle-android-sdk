@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.mparticle.audience.BaseAudienceTask;
+import com.mparticle.internal.database.UploadSettings;
 import com.mparticle.networking.MParticleBaseClient;
 
 import org.json.JSONException;
@@ -19,14 +20,14 @@ public interface MParticleApiClient extends MParticleBaseClient {
 
     void fetchConfig(boolean force) throws IOException, MParticleApiClientImpl.MPConfigException;
 
-    int sendMessageBatch(String message) throws IOException, MParticleApiClientImpl.MPThrottleException, MParticleApiClientImpl.MPRampException;
+    int sendMessageBatch(@NonNull String message, @NonNull UploadSettings uploadSettings) throws IOException, MParticleApiClientImpl.MPThrottleException, MParticleApiClientImpl.MPRampException;
 
     void fetchUserAudience(BaseAudienceTask task,long mpId);
 
     JSONObject getCookies();
 
     @NonNull
-    AliasNetworkResponse sendAliasRequest(@NonNull String message) throws JSONException, IOException, MParticleApiClientImpl.MPThrottleException, MParticleApiClientImpl.MPRampException;
+    AliasNetworkResponse sendAliasRequest(@NonNull String message, @NonNull UploadSettings uploadSettings) throws JSONException, IOException, MParticleApiClientImpl.MPThrottleException, MParticleApiClientImpl.MPRampException;
 
     class AliasNetworkResponse {
         private int responseCode;

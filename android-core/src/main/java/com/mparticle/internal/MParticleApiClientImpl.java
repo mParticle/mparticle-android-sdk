@@ -3,11 +3,14 @@ package com.mparticle.internal;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.annotation.NonNull;
+
 import com.mparticle.MParticle;
 import com.mparticle.SdkListener;
 import com.mparticle.audience.AudienceResponse;
 import com.mparticle.audience.BaseAudienceTask;
 import com.mparticle.identity.IdentityApi;
+import com.mparticle.internal.database.UploadSettings;
 import com.mparticle.internal.listeners.InternalListenerManager;
 import com.mparticle.networking.MPConnection;
 import com.mparticle.networking.MPUrl;
@@ -65,14 +68,11 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
     private final ConfigManager mConfigManager;
     private final String mApiSecret;
     private MPUrl mConfigUrl;
-    private MPUrl mEventUrl;
-    private MPUrl mAliasUrl;
     private final String mUserAgent;
     private final SharedPreferences mPreferences;
     private final String mApiKey;
     private final Context mContext;
     Integer mDeviceRampNumber = null;
-    private static String sSupportedKits;
     private JSONObject mCurrentCookies;
 
     /**
@@ -108,11 +108,6 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         mConfigUrl = configUrl;
     }
 
-    static void setSupportedKitString(String supportedKitString) {
-        sSupportedKits = supportedKitString;
-    }
-
-
     @Override
     public void fetchConfig() throws IOException, MPConfigException {
         fetchConfig(false);
@@ -143,7 +138,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
             connection.setReadTimeout(mConfigManager.getConnectionTimeout());
             connection.setRequestProperty(HEADER_ENVIRONMENT, Integer.toString(mConfigManager.getEnvironment().getValue()));
 
-            String supportedKits = getSupportedKitString();
+            String supportedKits = mConfigManager.getSupportedKitString();
             if (!MPUtility.isEmpty(supportedKits)) {
                 connection.setRequestProperty(HEADER_KITS, supportedKits);
             }
@@ -232,13 +227,11 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         }
     }
 
-    public int sendMessageBatch(String message) throws IOException, MPThrottleException, MPRampException {
+    public int sendMessageBatch(@NonNull String message, @NonNull UploadSettings uploadSettings) throws IOException, MPThrottleException, MPRampException {
         checkThrottleTime(Endpoint.EVENTS);
         checkRampValue();
-        if (mEventUrl == null) {
-            mEventUrl = getUrl(Endpoint.EVENTS);
-        }
-        MPConnection connection = mEventUrl.openConnection();
+        MPUrl eventUrl = getUrl(Endpoint.EVENTS, null,null, uploadSettings);
+        MPConnection connection = eventUrl.openConnection();
         connection.setConnectTimeout(mConfigManager.getConnectionTimeout());
         connection.setReadTimeout(mConfigManager.getConnectionTimeout());
         connection.setDoOutput(true);
@@ -247,11 +240,11 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         connection.setRequestProperty("Content-Encoding", "gzip");
         connection.setRequestProperty("User-Agent", mUserAgent);
 
-        String activeKits = mConfigManager.getActiveModuleIds();
+        String activeKits = uploadSettings.getActiveKits();
         if (!MPUtility.isEmpty(activeKits)) {
             connection.setRequestProperty(HEADER_KITS, activeKits);
         }
-        String supportedKits = getSupportedKitString();
+        String supportedKits = uploadSettings.getSupportedKits();
         if (!MPUtility.isEmpty(supportedKits)) {
             connection.setRequestProperty(HEADER_BUNDLED_KITS, supportedKits);
         }
@@ -268,7 +261,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         makeUrlRequest(Endpoint.EVENTS, connection, message, true);
 
         Logger.verbose("Upload request attempt:\n" +
-                "URL- " + mEventUrl.toString());
+                "URL- " + eventUrl.toString());
 
         Logger.verbose(message);
 
@@ -295,15 +288,14 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         return connection.getResponseCode();
     }
 
+    @NonNull
     @Override
-    public AliasNetworkResponse sendAliasRequest(String message) throws IOException, MPThrottleException, MPRampException {
+    public AliasNetworkResponse sendAliasRequest(@NonNull String message, @NonNull UploadSettings uploadSettings) throws IOException, MPThrottleException, MPRampException {
         checkThrottleTime(Endpoint.ALIAS);
         Logger.verbose("Identity alias request:\n" + message);
 
-        if (mAliasUrl == null) {
-            mAliasUrl = getUrl(Endpoint.ALIAS);
-        }
-        MPConnection connection = mAliasUrl.openConnection();
+        MPUrl aliasUrl = getUrl(Endpoint.ALIAS, null, null, uploadSettings);
+        MPConnection connection = aliasUrl.openConnection();
         connection.setConnectTimeout(mConfigManager.getConnectionTimeout());
         connection.setReadTimeout(mConfigManager.getConnectionTimeout());
         connection.setDoOutput(true);
@@ -419,30 +411,6 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
                 mDeviceRampNumber > mConfigManager.getCurrentRampValue()) {
             throw new MPRampException();
         }
-    }
-
-    private String getSupportedKitString() {
-        if (sSupportedKits == null) {
-            MParticle instance = MParticle.getInstance();
-            if (instance != null) {
-                Set<Integer> supportedKitIds = instance.Internal().getKitManager().getSupportedKits();
-                if (supportedKitIds != null && supportedKitIds.size() > 0) {
-                    StringBuilder buffer = new StringBuilder(supportedKitIds.size() * 3);
-                    Iterator<Integer> it = supportedKitIds.iterator();
-                    while (it.hasNext()) {
-                        Integer next = it.next();
-                        buffer.append(next);
-                        if (it.hasNext()) {
-                            buffer.append(",");
-                        }
-                    }
-                    sSupportedKits = buffer.toString();
-                }
-            } else {
-                sSupportedKits = "";
-            }
-        }
-        return sSupportedKits;
     }
 
     public void setCookies(JSONObject serverCookies) {

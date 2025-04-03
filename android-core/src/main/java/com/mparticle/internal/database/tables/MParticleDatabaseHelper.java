@@ -11,6 +11,7 @@ import androidx.annotation.VisibleForTesting;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
+import com.mparticle.internal.database.UploadSettings;
 import com.mparticle.internal.database.services.SQLiteOpenHelperWrapper;
 
 import org.json.JSONException;
@@ -20,7 +21,7 @@ import java.util.Iterator;
 
 public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
     private final Context mContext;
-    public static final int DB_VERSION = 9;
+    public static final int DB_VERSION = 10;
     private static String DB_NAME = "mparticle.db";
 
     public static String getDbName() {
@@ -71,6 +72,9 @@ public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
             }
             if (oldVersion < 9) {
                 upgradeMessageTable(db);
+            }
+            if (oldVersion < 10) {
+                upgradeUploadsTable(db);
             }
         } catch (Exception e) {
             Logger.warning("Exception while upgrading SQLite Database:\n" + e.getMessage() + "\nThis may have been caused by the database having been already upgraded");
@@ -157,5 +161,15 @@ public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void upgradeUploadsTable(SQLiteDatabase db) {
+        db.execSQL(UploadTable.UPLOAD_ADD_UPLOAD_SETTINGS_COLUMN);
+
+        // Insert current upload settings
+        UploadSettings uploadSettings = ConfigManager.getInstance(mContext).getUploadSettings();
+        ContentValues values = new ContentValues();
+        values.put(UploadTable.UploadTableColumns.UPLOAD_SETTINGS, uploadSettings.toJson());
+        db.update(UploadTable.UploadTableColumns.TABLE_NAME, values, null, null);
     }
 }

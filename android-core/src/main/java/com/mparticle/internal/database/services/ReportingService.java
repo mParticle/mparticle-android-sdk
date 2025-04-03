@@ -6,6 +6,7 @@ import android.database.Cursor;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.JsonReportingMessage;
 import com.mparticle.internal.database.MPDatabase;
+import com.mparticle.internal.database.tables.BreadcrumbTable;
 import com.mparticle.internal.database.tables.ReportingTable;
 import com.mparticle.internal.listeners.InternalListenerManager;
 
@@ -78,6 +79,10 @@ public class ReportingService extends ReportingTable {
         String[] whereArgs = new String[]{Long.toString(messageId)};
         String whereClause = "_id =?";
         database.delete(ReportingTableColumns.TABLE_NAME, whereClause, whereArgs);
+    }
+
+    public static void deleteAll(MPDatabase db) {
+        db.delete(ReportingTableColumns.TABLE_NAME, null, null);
     }
 
     public static class ReportingMessage {
