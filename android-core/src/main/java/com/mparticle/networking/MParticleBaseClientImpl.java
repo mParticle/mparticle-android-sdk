@@ -20,6 +20,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 
 public class MParticleBaseClientImpl implements MParticleBaseClient {
@@ -93,16 +94,30 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
     }
 
     protected MPUrl getUrl(Endpoint endpoint) throws MalformedURLException {
-        return getUrl(endpoint, null, null);
+        return getUrl(endpoint, null, null,null);
     }
 
-    protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath, @Nullable UploadSettings uploadSettings) throws MalformedURLException {
+    protected MPUrl getUrl(Endpoint endpoint, @Nullable long mpId) throws MalformedURLException {
+        HashMap<String, String> audienceQueryParams = new HashMap<>();
+        audienceQueryParams.put("mpid", String.valueOf(mpId));
+        return getUrl(endpoint, null, audienceQueryParams);
+    }
+
+    protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath) throws MalformedURLException {
+        return getUrl(endpoint, identityPath, null,null);
+    }
+
+    protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath, HashMap<String, String> audienceQueryParams) throws MalformedURLException {
+        return getUrl(endpoint, identityPath,  audienceQueryParams,null);
+    }
+
+    protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath,HashMap<String, String> audienceQueryParams, @Nullable UploadSettings uploadSettings) throws MalformedURLException {
         NetworkOptions networkOptions = uploadSettings == null ? mConfigManager.getNetworkOptions() : uploadSettings.getNetworkOptions();
         DomainMapping domainMapping = networkOptions.getDomain(endpoint);
         String url = NetworkOptionsManager.getDefaultUrl(endpoint);
         String apiKey = uploadSettings == null ? mApiKey : uploadSettings.getApiKey();
 
-                // `defaultDomain` variable is for URL generation when domain mapping is specified.
+        // `defaultDomain` variable is for URL generation when domain mapping is specified.
         String defaultDomain = url;
         boolean isDefaultDomain = true;
 
@@ -183,13 +198,14 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
                         .build();
                 return MPUrl.getUrl(uri.toString(), generateDefaultURL(isDefaultDomain, uri, defaultDomain, (pathPrefix + pathPostfix)));
             case AUDIENCE:
-                pathPostfix = SERVICE_VERSION_2 + "/" + mApiKey + "/audience?mpID=" + mConfigManager.getMpid();
-                uri = new Uri.Builder()
-                        .scheme(BuildConfig.SCHEME)
-                        .encodedAuthority(url)
-                        .path(pathPostfix)
-                        .build();
-                return MPUrl.getUrl(uri.toString(), generateDefaultURL(isDefaultDomain, uri, defaultDomain, pathPostfix));
+                    pathPostfix = SERVICE_VERSION_1 + "/" + mApiKey + "/audience";
+                    uri = new Uri.Builder()
+                            .scheme(BuildConfig.SCHEME)
+                            .encodedAuthority(url)
+                            .path(pathPostfix)
+                            .appendQueryParameter("mpid", String.valueOf(mConfigManager.getMpid()))
+                            .build();
+                    return MPUrl.getUrl(uri.toString(), generateDefaultURL(isDefaultDomain, uri, defaultDomain, pathPostfix));
             default:
                 return null;
         }

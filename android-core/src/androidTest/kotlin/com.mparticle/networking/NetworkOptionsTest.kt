@@ -23,7 +23,8 @@ class NetworkOptionsTest : BaseCleanInstallEachTest() {
         startMParticle(MParticleOptions.builder(mContext).credentials(apiKey, "secret"))
         setClients()
         for (endpoint in MParticleBaseClientImpl.Endpoint.values()) {
-            defaultUrls[endpoint] = mpClient.getUrl(endpoint, endpoint.name, UploadSettings(apiKey, "secret", NetworkOptions.builder().build(), "", ""))
+            defaultUrls[endpoint] =
+                mpClient.getUrl(endpoint, endpoint.name, null, UploadSettings(apiKey, "secret", NetworkOptions.builder().build(), "", ""))
         }
         MParticle.setInstance(null)
     }
