@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
+import android.view.View;
 import android.webkit.WebView;
 
 import androidx.annotation.NonNull;
@@ -1795,7 +1796,7 @@ public class MParticle {
                             Runnable onLoad,
                             Runnable onShouldHideLoadingIndicator,
                             Runnable onShouldShowLoadingIndicator,
-                            Map<String, WeakReference<Object>> placeHolders,
+                            Map<String, WeakReference<Widget>> placeHolders,
                             Map<String, WeakReference<Typeface>> fontTypefaces) {
              if (mConfigManager.isEnabled()) {
                  mKitManager.execute(viewName,

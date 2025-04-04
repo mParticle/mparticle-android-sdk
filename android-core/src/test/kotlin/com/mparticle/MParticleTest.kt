@@ -1,5 +1,6 @@
 package com.mparticle
 
+import android.graphics.Typeface
 import android.os.Looper
 import android.os.SystemClock
 import android.webkit.WebView
@@ -25,10 +26,16 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
+import java.lang.ref.WeakReference
 import java.util.LinkedList
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -459,6 +466,53 @@ class MParticleTest {
         for (identityType in MParticle.IdentityType.values()) {
             Assert.assertEquals(identityType, MParticle.IdentityType.parseInt(identityType.value))
         }
+    }
+
+    @Test
+    fun testSelectPlacements_withFullParams_whenEnabled() {
+        var instance: MParticle = InnerMockMParticle()
+        MParticle.setInstance(instance)
+        `when`(instance.mConfigManager.isEnabled).thenReturn(true)
+
+        val attributes = mutableMapOf<String, String>()
+        attributes["key"]= "value"
+
+        val placeholders: Map<String, WeakReference<Widget>> = HashMap()
+        val fonts: Map<String, WeakReference<Typeface>> = HashMap()
+
+        val onLoad: Runnable = mock(Runnable::class.java)
+        val onUnload: Runnable = mock(Runnable::class.java)
+        val onHide: Runnable = mock(Runnable::class.java)
+        val onShow: Runnable = mock(Runnable::class.java)
+
+        instance.rokt!!.selectPlacements("testView", attributes, onUnload, onLoad, onHide, onShow, placeholders, fonts)
+
+        verify(instance.mKitManager)?.execute("testView", attributes, onUnload, onLoad, onHide, onShow, placeholders, fonts)
+    }
+
+    @Test
+    fun testSelectPlacements_withBasicParams_whenEnabled() {
+        var instance: MParticle = InnerMockMParticle()
+        MParticle.setInstance(instance)
+        `when`(instance.mConfigManager.isEnabled()).thenReturn(true)
+
+        val attributes = mutableMapOf<String, String>()
+        attributes.put("a", "b")
+
+        instance.rokt.selectPlacements("basicView", attributes)
+
+        verify(instance.mKitManager).execute("basicView", attributes, null, null, null, null, null, null)
+    }
+
+    @Test
+    fun testSelectPlacements_withBasicParams_whenDisabled() {
+        var instance: MParticle = InnerMockMParticle()
+        MParticle.setInstance(instance)
+        `when`(instance.mConfigManager.isEnabled()).thenReturn(false)
+
+        instance.rokt.selectPlacements("basicView", HashMap())
+
+        verify(instance.mKitManager, never()).execute(any(), any(), any(), any(), any(), any(), any(), any())
     }
 
     inner class InnerMockMParticle : MParticle() {

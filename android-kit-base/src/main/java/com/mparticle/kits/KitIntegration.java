@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
+import com.mparticle.Widget;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.MParticleUser;
@@ -617,7 +618,7 @@ public abstract class KitIntegration {
                      Runnable onLoad,
                      Runnable onShouldHideLoadingIndicator,
                      Runnable onShouldShowLoadingIndicator,
-                     Map<String, WeakReference<Object>> placeHolders,
+                     Map<String, WeakReference<Widget>> placeHolders,
                      Map<String, WeakReference<Typeface>> fontTypefaces,
                      FilteredMParticleUser user);
     }

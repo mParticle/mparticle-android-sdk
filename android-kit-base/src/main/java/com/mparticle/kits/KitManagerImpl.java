@@ -24,6 +24,7 @@ import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.UserAttributeListener;
+import com.mparticle.Widget;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
@@ -1327,7 +1328,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                         Runnable onLoad,
                         Runnable onShouldHideLoadingIndicator,
                         Runnable onShouldShowLoadingIndicator,
-                        Map<String, WeakReference<Object>> placeHolders,
+                        Map<String, WeakReference<Widget>> placeHolders,
                         Map<String, WeakReference<Typeface>> fontTypefaces) {
         for (KitIntegration provider : providers.values()) {
             try {
