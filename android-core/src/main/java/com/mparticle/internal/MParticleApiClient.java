@@ -3,6 +3,7 @@ package com.mparticle.internal;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.mparticle.audience.BaseAudienceTask;
 import com.mparticle.internal.database.UploadSettings;
 import com.mparticle.networking.MParticleBaseClient;
 
@@ -21,7 +22,7 @@ public interface MParticleApiClient extends MParticleBaseClient {
 
     int sendMessageBatch(@NonNull String message, @NonNull UploadSettings uploadSettings) throws IOException, MParticleApiClientImpl.MPThrottleException, MParticleApiClientImpl.MPRampException;
 
-    JSONObject fetchAudiences();
+    void fetchUserAudience(BaseAudienceTask task,long mpId);
 
     JSONObject getCookies();
 

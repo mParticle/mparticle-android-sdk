@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.mparticle.MParticle;
+import com.mparticle.audience.BaseAudienceTask;
 import com.mparticle.identity.IdentityStateListener;
 import com.mparticle.internal.database.UploadSettings;
 import com.mparticle.internal.database.tables.MParticleDatabaseHelper;
@@ -116,9 +117,9 @@ public class AccessUtils {
             return 0;
         }
 
+
         @Override
-        public JSONObject fetchAudiences() {
-            return null;
+        public void fetchUserAudience(BaseAudienceTask Task, long mpId) {
         }
 
         @Override

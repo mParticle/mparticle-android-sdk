@@ -24,7 +24,8 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
         startMParticle(MParticleOptions.builder(mContext).credentials(apiKey, "secret"))
         val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
         for (endpoint in MParticleBaseClientImpl.Endpoint.values()) {
-            defaultUrls[endpoint] = baseClientImpl.getUrl(endpoint, endpoint.name, UploadSettings(apiKey, "secret", NetworkOptions.builder().build(), "", ""))
+            defaultUrls[endpoint] =
+                baseClientImpl.getUrl(endpoint, endpoint.name, null, UploadSettings(apiKey, "secret", NetworkOptions.builder().build(), "", ""))
         }
         MParticle.setInstance(null)
     }
@@ -219,11 +220,11 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
         val uploadSettings = UploadSettings(apiKey, "secret", options.networkOptions, "", "")
         val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
         for (endpoint in MParticleBaseClientImpl.Endpoint.values()) {
-            val generatedUrl = baseClientImpl.getUrl(endpoint, endpoint.name, uploadSettings)
+            val generatedUrl = baseClientImpl.getUrl(endpoint, endpoint.name, null, uploadSettings)
             assertEquals(defaultUrls[endpoint].toString(), generatedUrl.defaultUrl.toString())
         }
         for (endpoint in MParticleBaseClientImpl.Endpoint.values()) {
-            val generatedUrl = baseClientImpl.getUrl(endpoint, endpoint.name, uploadSettings)
+            val generatedUrl = baseClientImpl.getUrl(endpoint, endpoint.name, null, uploadSettings)
             Assert.assertNotEquals(defaultUrls[endpoint].toString(), generatedUrl.toString())
             Assert.assertFalse(generatedUrl === generatedUrl.defaultUrl)
             assertEquals(
