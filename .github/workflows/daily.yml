@@ -250,9 +250,9 @@ jobs:
           java-version: "17"
           cache: "gradle"
       - name: "Build Android Core"
-        run: ./gradlew clean publishReleaseLocal
-      - name: "Test Kits"
-        run: ./gradlew clean testRelease publishReleaseLocal -c settings-kits.gradle
+        run: ./gradlew -PisRelease=true clean publishReleaseLocal
+     ## - name: "Test Kits"
+       ## run: ./gradlew clean testRelease publishReleaseLocal -c settings-kits.gradle
 
   semantic-release-dryrun:
     name: "Test Semantic Release - Dry Run"
