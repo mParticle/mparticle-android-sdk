@@ -1,3 +1,18 @@
+## [5.60.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.59.0...v5.60.0) (2025-04-07)
+
+
+### Features
+
+* Remove the existing code and added new method 'getUserAudience' ([#542](https://github.com/mParticle/mparticle-android-sdk/issues/542)) ([cf8328a](https://github.com/mParticle/mparticle-android-sdk/commit/cf8328ab70dd7c92021dd31181d296519aebd135))
+
+
+### Updates & Maintenance
+
+* Remove manual build variant detection via isRelease flag ([#554](https://github.com/mParticle/mparticle-android-sdk/issues/554)) ([85f8c5c](https://github.com/mParticle/mparticle-android-sdk/commit/85f8c5c4f895717a31d399f4950f72cdb30eb14a))
+* Remove need for -PisRelease=true flag in Gradle command ([#555](https://github.com/mParticle/mparticle-android-sdk/issues/555)) ([185b621](https://github.com/mParticle/mparticle-android-sdk/commit/185b62131da180d6ee91268f9da703bd1769160d))
+* Update GitHub workflow to remove Test Kits step ([#556](https://github.com/mParticle/mparticle-android-sdk/issues/556)) ([6873903](https://github.com/mParticle/mparticle-android-sdk/commit/6873903e527154352b88e98e38fc8145b131431d))
+* Update submodules ([3274ce7](https://github.com/mParticle/mparticle-android-sdk/commit/3274ce7c3ce87f1558ac057888c4633cc9d55897))
+
 ## [5.59.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.58.12...v5.59.0) (2025-04-03)
 
 
