@@ -475,7 +475,7 @@ class MParticleTest {
         `when`(instance.mConfigManager.isEnabled).thenReturn(true)
 
         val attributes = mutableMapOf<String, String>()
-        attributes["key"]= "value"
+        attributes["key"] = "value"
 
         val placeholders: Map<String, WeakReference<Widget>> = HashMap()
         val fonts: Map<String, WeakReference<Typeface>> = HashMap()
