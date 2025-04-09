@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -51,12 +52,12 @@ import com.mparticle.media.MPMediaAPI;
 import com.mparticle.media.MediaCallbacks;
 import com.mparticle.messaging.MPMessagingAPI;
 import com.mparticle.messaging.ProviderCloudMessage;
-import com.mparticle.segmentation.SegmentListener;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -111,6 +112,7 @@ public class MParticle {
     protected boolean locationTrackingEnabled = false;
     @NonNull
     protected Internal mInternal = new Internal();
+    protected Rokt rokt = new Rokt();
     private IdentityStateListener mDeferredModifyPushRegistrationListener;
     @NonNull
     private WrapperSdkVersion wrapperSdkVersion = new WrapperSdkVersion(WrapperSdk.WrapperNone, null);
@@ -1170,6 +1172,10 @@ public class MParticle {
     public Internal Internal() {
         return mInternal;
     }
+    @NonNull
+    public Rokt Rokt() {
+        return rokt;
+    }
 
     void refreshConfiguration() {
         Logger.debug("Refreshing configuration...");
@@ -1703,6 +1709,7 @@ public class MParticle {
         int SWRVE = 1145;
         int BLUESHIFT = 1144;
         int NEURA = 147;
+        int ROKT = 181;
         @NonNull
         String BROADCAST_ACTIVE = "MPARTICLE_SERVICE_PROVIDER_ACTIVE_";
         @NonNull
@@ -1774,6 +1781,46 @@ public class MParticle {
     }
 
 
+    /**
+     * Rokt Integration
+     * */
+    public class Rokt{
+        protected Rokt(){
+
+        }
+        public void selectPlacements(String viewName,
+                            Map<String, String> attributes,
+                            Runnable onUnload,
+                            Runnable onLoad,
+                            Runnable onShouldHideLoadingIndicator,
+                            Runnable onShouldShowLoadingIndicator,
+                            Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
+                            Map<String, WeakReference<Typeface>> fontTypefaces) {
+             if (mConfigManager.isEnabled()) {
+                 mKitManager.execute(viewName,
+                         attributes,
+                         onUnload,
+                         onLoad,
+                         onShouldHideLoadingIndicator,
+                         onShouldShowLoadingIndicator,
+                         placeHolders,
+                         fontTypefaces);
+             }
+        }
+        public void selectPlacements(String viewName,
+                                     Map<String, String> attributes) {
+            if (mConfigManager.isEnabled()) {
+                mKitManager.execute(viewName,
+                        attributes,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null);
+            }
+        }
+    }
     /**
      * @hidden
      */
