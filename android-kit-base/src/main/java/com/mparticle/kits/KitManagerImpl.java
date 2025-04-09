@@ -3,6 +3,7 @@ package com.mparticle.kits;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.UserAttributeListener;
+import com.mparticle.RoktEmbeddedView;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
@@ -1315,6 +1317,42 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 provider.reset();
             } catch (Exception e) {
                 Logger.warning("Failed to call reset for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public void execute(String viewName,
+                        Map<String, String> attributes,
+                        Runnable onUnload,
+                        Runnable onLoad,
+                        Runnable onShouldHideLoadingIndicator,
+                        Runnable onShouldShowLoadingIndicator,
+                        Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
+                        Map<String, WeakReference<Typeface>> fontTypefaces) {
+        for (KitIntegration provider : providers.values()) {
+            try {
+                if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
+                    MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
+                    Map<String, Object> objectAttributes = new HashMap<>();
+
+                    for (Map.Entry<String, String> entry : attributes.entrySet()) {
+                        objectAttributes.put(entry.getKey(), entry.getValue());
+                    }
+
+                    user.setUserAttributes(objectAttributes);
+                    ((KitIntegration.RoktListener) provider).execute(viewName,
+                            attributes,
+                            onUnload,
+                            onLoad,
+                            onShouldHideLoadingIndicator,
+                            onShouldShowLoadingIndicator,
+                            placeHolders,
+                            fontTypefaces,
+                            FilteredMParticleUser.getInstance(user.getId(), provider));
+                }
+            } catch (Exception e) {
+                Logger.warning("Failed to call execute for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
