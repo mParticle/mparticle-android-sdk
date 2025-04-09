@@ -29,6 +29,7 @@ include (
         ':kits:radar-kit',
         ':kits:responsys-kit',
         ':kits:revealmobile-kit',
+        ':kits:rokt-kit',
         ':kits:singular-kit',
         ':kits:skyhook-kit',
         //Swrve hosts kit
