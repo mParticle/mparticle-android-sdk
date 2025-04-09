@@ -64,6 +64,7 @@ public class KitIntegrationFactory {
         knownIntegrations.put(MParticle.ServiceProviders.SWRVE, "com.mparticle.kits.SwrveKit");
         knownIntegrations.put(MParticle.ServiceProviders.BLUESHIFT, "com.mparticle.kits.BlueshiftKit");
         knownIntegrations.put(MParticle.ServiceProviders.NEURA, "com.mparticle.kits.NeuraKit");
+        knownIntegrations.put(MParticle.ServiceProviders.ROKT, "com.mparticle.kits.RoktKit");
     }
 
     public KitIntegration createInstance(KitManagerImpl manager, KitConfiguration configuration) throws JSONException, ClassNotFoundException {

@@ -3,6 +3,7 @@ package com.mparticle.internal;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
+import com.mparticle.RoktEmbeddedView;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
@@ -119,6 +121,15 @@ public interface KitManager {
     void onModifyCompleted(MParticleUser user, IdentityApiRequest request);
 
     void reset();
+
+    void execute(String viewName,
+                 Map<String, String> attributes,
+                 Runnable onUnload,
+                 Runnable onLoad,
+                 Runnable onShouldHideLoadingIndicator,
+                 Runnable onShouldShowLoadingIndicator,
+                 Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
+                 Map<String, WeakReference<Typeface>> fontTypefaces);
 
     enum KitStatus {
         NOT_CONFIGURED,
