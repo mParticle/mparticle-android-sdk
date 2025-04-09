@@ -18,6 +18,7 @@ import com.mparticle.internal.MessageManager
 import com.mparticle.media.MPMediaAPI
 import com.mparticle.messaging.MPMessagingAPI
 import com.mparticle.mock.MockContext
+import com.mparticle.rokt.RoktEmbeddedView
 import com.mparticle.testutils.AndroidUtils
 import com.mparticle.testutils.RandomUtils
 import org.junit.Assert
