@@ -24,7 +24,6 @@ import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.UserAttributeListener;
-import com.mparticle.RoktEmbeddedView;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
@@ -37,6 +36,7 @@ import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.ReportingManager;
 import com.mparticle.kits.mappings.CustomMapping;
+import com.mparticle.rokt.RoktEmbeddedView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
