@@ -16,7 +16,7 @@ import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
-import com.mparticle.Widget;
+import com.mparticle.RoktEmbeddedView;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
@@ -655,7 +655,7 @@ public class KitFrameworkWrapper implements KitManager {
                         Runnable onLoad,
                         Runnable onShouldHideLoadingIndicator,
                         Runnable onShouldShowLoadingIndicator,
-                        Map<String, WeakReference<Widget>> placeHolders,
+                        Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
                         Map<String, WeakReference<Typeface>> fontTypefaces) {
         if (mKitManager != null) {
             mKitManager.execute(viewName,

@@ -477,7 +477,7 @@ class MParticleTest {
         val attributes = mutableMapOf<String, String>()
         attributes["key"] = "value"
 
-        val placeholders: Map<String, WeakReference<Widget>> = HashMap()
+        val placeholders: Map<String, WeakReference<RoktEmbeddedView>> = HashMap()
         val fonts: Map<String, WeakReference<Typeface>> = HashMap()
 
         val onLoad: Runnable = mock(Runnable::class.java)

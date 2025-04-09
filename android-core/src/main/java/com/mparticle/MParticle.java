@@ -14,7 +14,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
-import android.view.View;
 import android.webkit.WebView;
 
 import androidx.annotation.NonNull;
@@ -53,7 +52,6 @@ import com.mparticle.media.MPMediaAPI;
 import com.mparticle.media.MediaCallbacks;
 import com.mparticle.messaging.MPMessagingAPI;
 import com.mparticle.messaging.ProviderCloudMessage;
-import com.mparticle.segmentation.SegmentListener;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
@@ -1796,7 +1794,7 @@ public class MParticle {
                             Runnable onLoad,
                             Runnable onShouldHideLoadingIndicator,
                             Runnable onShouldShowLoadingIndicator,
-                            Map<String, WeakReference<Widget>> placeHolders,
+                            Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
                             Map<String, WeakReference<Typeface>> fontTypefaces) {
              if (mConfigManager.isEnabled()) {
                  mKitManager.execute(viewName,
