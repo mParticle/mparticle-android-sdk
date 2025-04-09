@@ -52,6 +52,7 @@ import com.mparticle.media.MPMediaAPI;
 import com.mparticle.media.MediaCallbacks;
 import com.mparticle.messaging.MPMessagingAPI;
 import com.mparticle.messaging.ProviderCloudMessage;
+import com.mparticle.rokt.RoktEmbeddedView;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
