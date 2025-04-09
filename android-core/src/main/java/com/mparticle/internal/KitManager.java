@@ -15,10 +15,10 @@ import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
-import com.mparticle.RoktEmbeddedView;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
+import com.mparticle.rokt.RoktEmbeddedView;
 
 import org.json.JSONArray;
 

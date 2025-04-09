@@ -15,10 +15,10 @@ import androidx.annotation.Nullable;
 import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
-import com.mparticle.RoktEmbeddedView;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.MParticleUser;
+import com.mparticle.rokt.RoktEmbeddedView;
 
 import org.json.JSONObject;
 
