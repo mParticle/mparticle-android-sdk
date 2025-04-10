@@ -29,6 +29,7 @@ import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.IdentityStateListener;
 import com.mparticle.identity.MParticleUser;
+import com.mparticle.internal.Constants;
 import com.mparticle.internal.CoreCallbacks;
 import com.mparticle.internal.KitManager;
 import com.mparticle.internal.KitsLoadedCallback;
@@ -51,6 +52,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -1336,6 +1338,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
                     JSONArray jsonArray = new JSONArray();
                     KitConfiguration kitConfig = provider.getConfiguration();
+                    if (attributes == null) {
+                        attributes = new HashMap<>();
+                    }
                     if (kitConfig != null) {
                         try {
                             jsonArray = kitConfig.getPlacementAttributesMapping();
@@ -1358,6 +1363,12 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                         objectAttributes.put(entry.getKey(), entry.getValue());
                     }
                     user.setUserAttributes(objectAttributes);
+
+                    if (!attributes.containsKey(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
+                        attributes.put(Constants.MessageKey.SANDBOX_MODE_ROKT, String.valueOf(
+                                Objects.toString(MPUtility.isDevEnv(), "false")));  // Default value is "false" if null:wq
+                    }
+
                     ((KitIntegration.RoktListener) provider).execute(viewName,
                             attributes,
                             onUnload,
