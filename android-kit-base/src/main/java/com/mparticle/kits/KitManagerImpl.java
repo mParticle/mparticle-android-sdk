@@ -1373,8 +1373,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     user.setUserAttributes(objectAttributes);
 
                     if (!attributes.containsKey(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
-                        attributes.put(Constants.MessageKey.SANDBOX_MODE_ROKT, String.valueOf(
-                                Objects.toString(MPUtility.isDevEnv(), "false")));  // Default value is "false" if null:wq
+                        attributes.put(Constants.MessageKey.SANDBOX_MODE_ROKT, String.valueOf(Objects.toString(MPUtility.isDevEnv(), "false")));  // Default value is "false" if null
                     }
 
                     ((KitIntegration.RoktListener) provider).execute(viewName,
