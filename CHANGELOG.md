@@ -1,3 +1,22 @@
+## [5.61.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.60.0...v5.61.0) (2025-04-11)
+
+
+### Features
+
+* Add support for Rokt first-party kit ([#550](https://github.com/mParticle/mparticle-android-sdk/issues/550)) ([8229921](https://github.com/mParticle/mparticle-android-sdk/commit/82299213847d89873b7ade46dbf6a59f0137c534))
+
+
+### Bug Fixes
+
+* changed rokt widget namespace ([#558](https://github.com/mParticle/mparticle-android-sdk/issues/558)) ([5910509](https://github.com/mParticle/mparticle-android-sdk/commit/5910509f5200cf290c7d66600403697309c75de5))
+* Disable instrumentation tests temporarily ([#561](https://github.com/mParticle/mparticle-android-sdk/issues/561)) ([372b117](https://github.com/mParticle/mparticle-android-sdk/commit/372b1174a141fb96910a6d04097196bfaf46ee36))
+* Remove broken job dependencies after disabling instrumentation t… ([#562](https://github.com/mParticle/mparticle-android-sdk/issues/562)) ([296582f](https://github.com/mParticle/mparticle-android-sdk/commit/296582f9d36ba3d21438a48bd655b8476a54ef9f))
+
+
+### Updates & Maintenance
+
+* Add rokt submodule ([#557](https://github.com/mParticle/mparticle-android-sdk/issues/557)) ([6a4cfda](https://github.com/mParticle/mparticle-android-sdk/commit/6a4cfda900351bacb160772f079a5146bcd6bc89))
+
 ## [5.60.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.59.0...v5.60.0) (2025-04-07)
 
 
