@@ -80,8 +80,8 @@
 	path = kits/revealmobile-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-revealmobile.git
 [submodule "kits/rokt-kit"]
-    path = kits/rokt-kit
-    url = git@github.com:mparticle-integrations/mparticle-android-integration-rokt.git
+	path = kits/rokt-kit
+	url = https://github.com/mparticle-integrations/mparticle-android-integration-rokt.git
 [submodule "kits/singular-kit"]
 	path = kits/singular-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-singular.git
