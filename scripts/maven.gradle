@@ -15,7 +15,8 @@ afterEvaluate {
                 artifactId = project.name
                 version = project.version
                 if (project.plugins.findPlugin("com.android.library")) {
-                    from components.release
+                    // Use findByName for better compatibility with newer AGP versions
+                    from components.findByName('release')
                 } else {
                     from components.java
                 }
@@ -56,7 +57,8 @@ afterEvaluate {
                 artifactId = project.name
                 version = project.version
                 if (project.plugins.findPlugin("com.android.library")) {
-                    from components.debug
+                    // Use findByName for better compatibility with newer AGP versions
+                    from components.findByName('debug')
                 } else {
                     from components.java
                 }
@@ -96,11 +98,11 @@ afterEvaluate {
         }
         repositories {
             maven {
-                    credentials {
-                        username System.getenv('sonatypeUsername')
-                        password System.getenv('sonatypePassword')
-                    }
-                    url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+                credentials {
+                    username System.getenv('sonatypeUsername')
+                    password System.getenv('sonatypePassword')
+                }
+                url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
             }
         }
     }

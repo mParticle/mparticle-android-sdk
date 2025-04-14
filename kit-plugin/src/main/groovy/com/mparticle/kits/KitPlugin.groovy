@@ -142,7 +142,7 @@ class KitPlugin implements Plugin<Project> {
             def signingKey = System.getenv("mavenSigningKeyId")
             def signingPassword = System.getenv("mavenSigningKeyPassword")
 
-            if (signingKey != null) {
+            /*if (signingKey != null) {
                 target.extensions.add('signing.keyId', signingKey)
                 target.extensions.add('signing.password', signingPassword)
 
@@ -150,7 +150,7 @@ class KitPlugin implements Plugin<Project> {
                 signing.required = { target.gradle.taskGraph.hasTask("publishReleasePublicationToMavenRepository") }
                 signing.useInMemoryPgpKeys(signingKey, signingPassword)
                 signing.sign publishing.publications.findByName("release")
-            }
+            }*/
         }
 
         //Publishing task aliases for simpler local development

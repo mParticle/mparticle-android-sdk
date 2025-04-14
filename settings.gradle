@@ -9,3 +9,12 @@ include ':android-core',
 
 project(':kit-plugin').name = 'android-kit-plugin'
 project(':tooling:android-plugin').name = 'android-plugin'
+
+
+/*include (
+        ':kits:rokt-kit'
+)
+project(':kits').getChildren().each {
+    proj -> proj.name = 'android-' + proj.name
+}*/
+include ':example'
