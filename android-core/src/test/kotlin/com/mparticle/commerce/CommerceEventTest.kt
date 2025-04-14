@@ -26,13 +26,13 @@ class CommerceEventTest {
         val event = CommerceEvent.Builder(Product.ADD_TO_CART, product).addProduct(product2).build()
         Assert.assertEquals("name 2", event.products?.get(1)?.name)
         val errorMessage = AndroidUtils.Mutable<String?>(null)
-        Logger.setLogHandler(object : DefaultLogHandler() {
-            override fun log(priority: MParticle.LogLevel, error: Throwable?, messages: String) {
+        Logger.logHandler = object : DefaultLogHandler() {
+            override fun log(priority: MParticle.LogLevel, error: Throwable?, messages: String?) {
                 if (priority == MParticle.LogLevel.ERROR) {
                     errorMessage.value = messages
                 }
             }
-        })
+        }
         CommerceEvent.Builder(Promotion.VIEW, Promotion().setId("whatever")).addProduct(product2)
             .build()
         Assert.assertNotNull("Should have logged Error", errorMessage.value)
@@ -50,13 +50,13 @@ class CommerceEventTest {
             .transactionAttributes(TransactionAttributes().setId("the id")).build()
         Assert.assertEquals("the id", event.transactionAttributes?.id)
         val errorMessage = AndroidUtils.Mutable<String?>(null)
-        Logger.setLogHandler(object : DefaultLogHandler() {
-            override fun log(priority: MParticle.LogLevel, error: Throwable?, messages: String) {
+        Logger.logHandler = object : DefaultLogHandler() {
+            override fun log(priority: MParticle.LogLevel, error: Throwable?, messages: String?) {
                 if (priority == MParticle.LogLevel.ERROR) {
                     errorMessage.value = messages
                 }
             }
-        })
+        }
         CommerceEvent.Builder(Product.PURCHASE, product).build()
         Assert.assertNotNull("Should have logged Error", errorMessage.value)
     }
@@ -102,13 +102,13 @@ class CommerceEventTest {
                 .build()
         Assert.assertEquals("promo id", event.promotions?.get(0)?.id)
         val errorMessage = AndroidUtils.Mutable<String?>(null)
-        Logger.setLogHandler(object : DefaultLogHandler() {
-            override fun log(priority: MParticle.LogLevel, error: Throwable?, messages: String) {
+        Logger.logHandler = object : DefaultLogHandler() {
+            override fun log(priority: MParticle.LogLevel, error: Throwable?, messages: String?) {
                 if (priority == MParticle.LogLevel.ERROR) {
                     errorMessage.value = messages
                 }
             }
-        })
+        }
         CommerceEvent.Builder(Product.ADD_TO_CART, product).nonInteraction(true)
             .addPromotion(Promotion().setId("promo id")).build()
         Assert.assertNotNull("Should have logged Error", errorMessage.value)
