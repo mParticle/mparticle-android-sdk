@@ -191,6 +191,13 @@
     *;
 }
 
+-keep public class com.mparticle.rokt.* {
+    *;
+}
+-keep public class com.mparticle.audience.* {
+    *;
+}
+
 -keepclassmembernames class * {
     java.lang.Class class$(java.lang.String);
     java.lang.Class class$(java.lang.String, boolean);
