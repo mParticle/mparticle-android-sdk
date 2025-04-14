@@ -1,3 +1,19 @@
+## [5.61.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.61.1...v5.61.2) (2025-04-14)
+
+
+### Bug Fixes
+
+* Add a rule to make sure RoktEmbeddedView and related classes are not removed in release builds ([#566](https://github.com/mParticle/mparticle-android-sdk/issues/566)) ([1a78039](https://github.com/mParticle/mparticle-android-sdk/commit/1a78039dd3cb4383a82f74861254e995eca60c0c))
+* Align Kotlin files with correct package structure ([#565](https://github.com/mParticle/mparticle-android-sdk/issues/565)) ([9b4bd7b](https://github.com/mParticle/mparticle-android-sdk/commit/9b4bd7b0000eed7eb1f2fbd10187cafb52ee30c6))
+* Rokt Submodule link ([#564](https://github.com/mParticle/mparticle-android-sdk/issues/564)) ([e06bf8a](https://github.com/mParticle/mparticle-android-sdk/commit/e06bf8a0f403c571d76b5268305858b21387897c))
+
+
+### Updates & Maintenance
+
+* add rokt-kit as a new submodule ([b897439](https://github.com/mParticle/mparticle-android-sdk/commit/b897439ea06e3989a31a25ed1a014e82f1774856))
+* set rokt-kit submodule to track main branch ([75b72f6](https://github.com/mParticle/mparticle-android-sdk/commit/75b72f67a521d2ac278bac26ce2a6f28c87de6a2))
+* Update submodules ([735fc1f](https://github.com/mParticle/mparticle-android-sdk/commit/735fc1f1beb52fdaac7efbb65d3c66240ce625ed))
+
 ## [5.61.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.61.0...v5.61.1) (2025-04-11)
 
 
