@@ -1,5 +1,7 @@
 package com.mparticle.kits;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.internal.Logger;
@@ -15,8 +17,10 @@ import java.util.Set;
 public class KitIntegrationFactory {
 
     final Map<Integer, Class> supportedKits = new HashMap<>();
-    private Map<Integer, String> knownIntegrations = new HashMap<Integer, String>();
-    private Map<Integer, MPSideloadedKit> sideloadedKitMap = new HashMap<>();
+    @VisibleForTesting
+    public Map<Integer, String> knownIntegrations = new HashMap<Integer, String>();
+    @VisibleForTesting
+    public Map<Integer, MPSideloadedKit> sideloadedKitMap = new HashMap<>();
 
     public KitIntegrationFactory(MParticleOptions options) {
         supportedKits.clear();
@@ -109,6 +113,7 @@ public class KitIntegrationFactory {
     }
 
     private void loadIntegrations(MParticleOptions options) {
+        filterKits(options);
         loadSideloadedIntegrations(options);
         for (Map.Entry<Integer, String> entry : knownIntegrations.entrySet()) {
             Class kitClass = loadKit(entry.getValue());
@@ -126,6 +131,13 @@ public class KitIntegrationFactory {
             Logger.verbose("Kit not bundled: ", className);
         }
         return null;
+    }
+
+    private void filterKits(MParticleOptions options) {
+        for (Integer filteredKit : options.getFilteredKits()) {
+            Logger.verbose("Filtering kit: " + knownIntegrations.get(filteredKit));
+            knownIntegrations.remove(filteredKit);
+        }
     }
 
     public void addSupportedKit(int kitId, Class<? extends KitIntegration> kitIntegration) {

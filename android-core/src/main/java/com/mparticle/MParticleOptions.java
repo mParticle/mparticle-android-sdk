@@ -55,6 +55,7 @@ public class MParticleOptions {
     private DataplanOptions mDataplanOptions;
     private Map<Class, List<Configuration>> mConfigurations = new HashMap();
     private List<SideloadedKit> sideloadedKits = new ArrayList<>();
+    private List<Integer> filteredKits = new ArrayList<>();
 
     private MParticleOptions() {
     }
@@ -147,6 +148,7 @@ public class MParticleOptions {
         this.mDataplanOptions = builder.dataplanOptions;
         this.mConfigurations = builder.configurations;
         this.sideloadedKits = builder.sideloadedKits;
+        this.filteredKits = builder.filteredKits;
     }
 
     /**
@@ -189,6 +191,16 @@ public class MParticleOptions {
     @NonNull
     public List<SideloadedKit> getSideloadedKits() {
         return sideloadedKits;
+    }
+
+    /**
+     * Get list of filtered kits
+     *
+     * @return
+     */
+    @NonNull
+    public List<Integer> getFilteredKits() {
+        return filteredKits;
     }
 
     /**
@@ -400,6 +412,7 @@ public class MParticleOptions {
         private Map<Class, List<Configuration>> configurations = new HashMap();
         private boolean isAppDebuggable;
         private List<SideloadedKit> sideloadedKits = new ArrayList<>();
+        private List<Integer> filteredKits = new ArrayList<>();
 
         private Builder(Context context) {
             this.context = context;
@@ -451,6 +464,18 @@ public class MParticleOptions {
                 }
             }
             this.sideloadedKits = _kits;
+            return this;
+        }
+
+        /**
+         * Add filtered kits
+         *
+         * @param kits
+         * @return
+         */
+        @NonNull
+        public Builder filteredKits(@NonNull List<Integer> kits) {
+            filteredKits.addAll(kits);
             return this;
         }
 

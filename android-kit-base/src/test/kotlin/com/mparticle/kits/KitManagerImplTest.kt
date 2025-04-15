@@ -603,6 +603,27 @@ class KitManagerImplTest {
     }
 
     @Test
+    fun shouldFilterKitsFromKnownIntegrations() {
+        val options = MParticleOptions.builder(MockContext()).build()
+        val filteredKitOptions = MParticleOptions.builder(MockContext())
+            .filteredKits(listOf(MParticle.ServiceProviders.ADJUST))
+            .build()
+
+        val filteredKitIntegrationFactory = KitIntegrationFactory(filteredKitOptions)
+        val kitIntegrationFactory = KitIntegrationFactory(options)
+
+        val knownKitsSize = kitIntegrationFactory.knownIntegrations.size
+        val filteredKnownKitsSize = filteredKitIntegrationFactory.knownIntegrations.size
+        Assert.assertEquals(knownKitsSize - 1, filteredKnownKitsSize)
+        Assert.assertNotNull(
+            kitIntegrationFactory.knownIntegrations[MParticle.ServiceProviders.ADJUST]
+        )
+        Assert.assertNull(
+            filteredKitIntegrationFactory.knownIntegrations[MParticle.ServiceProviders.ADJUST]
+        )
+    }
+
+    @Test
     @Throws(Exception::class)
     fun testShouldEnableKitOnOptIn() {
         val mockUser = Mockito.mock(MParticleUser::class.java)
