@@ -194,7 +194,7 @@ public class MParticleOptions {
     }
 
     /**
-     * Get list of filteredKits kits
+     * Get list of disabled kits
      *
      * @return
      * */
@@ -481,7 +481,7 @@ public class MParticleOptions {
         }
 
         /**
-         * Add Filter kits options
+         * Add disable kits option
          *
          * @param kits
          * @return

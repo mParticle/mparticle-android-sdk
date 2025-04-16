@@ -26,6 +26,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
+import java.util.Arrays
 import java.util.LinkedList
 
 class KitManagerImplTest {
@@ -584,9 +585,7 @@ class KitManagerImplTest {
         val sideloadedKit = Mockito.mock(KitIntegration::class.java)
         Mockito.`when`(sideloadedKit.isDisabled).thenReturn(false)
         Mockito.`when`(sideloadedKit.configuration).thenReturn(
-            Mockito.mock(
-                KitConfiguration::class.java
-            )
+            Mockito.mock(KitConfiguration::class.java)
         )
         Mockito.`when`(
             factory.createInstance(
@@ -606,9 +605,13 @@ class KitManagerImplTest {
     fun shouldFilterKitsFromKnownIntegrations() {
         val options = MParticleOptions.builder(MockContext()).build()
         val filteredKitOptions = MParticleOptions.builder(MockContext())
-            .disableKits(listOf(MParticle.ServiceProviders.ADJUST))
-            .disableKits(listOf(MParticle.ServiceProviders.APPBOY))
-            .disableKits(listOf(MParticle.ServiceProviders.CLEVERTAP))
+            .disableKits(
+                Arrays.asList(
+                    MParticle.ServiceProviders.ADJUST,
+                    MParticle.ServiceProviders.APPBOY,
+                    MParticle.ServiceProviders.CLEVERTAP
+                )
+            )
             .build()
 
         val filteredKitIntegrationFactory = KitIntegrationFactory(filteredKitOptions)
@@ -634,7 +637,7 @@ class KitManagerImplTest {
     }
 
     @Test
-    fun shouldFilterKitsFromKnownIntegrations_When_filter_Is_Empty() {
+    fun shouldNotFilterKitsFromKnownIntegrationsWhenFilterIsEmpty() {
         val options = MParticleOptions.builder(MockContext()).build()
         val filteredKitOptions = MParticleOptions.builder(MockContext())
             .disableKits(emptyList())
@@ -685,7 +688,7 @@ class KitManagerImplTest {
         val field = KitIntegrationFactory::class.java.getDeclaredField("knownIntegrations")
         field.isAccessible = true
         val knownIntegrations = field.get(factory) as Map<*, *>
-
+        Assert.assertNull(knownIntegrations[MParticle.ServiceProviders.ADJUST])
         // Verify that a different kit is still present
         Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.APPBOY])
         Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.URBAN_AIRSHIP])
