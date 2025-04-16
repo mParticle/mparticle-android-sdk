@@ -633,7 +633,6 @@ class KitManagerImplTest {
         Assert.assertNull(filteredKitIntegrations[MParticle.ServiceProviders.CLEVERTAP])
     }
 
-
     @Test
     fun shouldFilterKitsFromKnownIntegrations_When_filter_Is_Empty() {
         val options = MParticleOptions.builder(MockContext()).build()
