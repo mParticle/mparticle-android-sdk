@@ -606,9 +606,9 @@ class KitManagerImplTest {
     fun shouldFilterKitsFromKnownIntegrations() {
         val options = MParticleOptions.builder(MockContext()).build()
         val filteredKitOptions = MParticleOptions.builder(MockContext())
-            .filteredKits(listOf(MParticle.ServiceProviders.ADJUST))
-            .filteredKits(listOf(MParticle.ServiceProviders.APPBOY))
-            .filteredKits(listOf(MParticle.ServiceProviders.CLEVERTAP))
+            .disableKits(listOf(MParticle.ServiceProviders.ADJUST))
+            .disableKits(listOf(MParticle.ServiceProviders.APPBOY))
+            .disableKits(listOf(MParticle.ServiceProviders.CLEVERTAP))
             .build()
 
         val filteredKitIntegrationFactory = KitIntegrationFactory(filteredKitOptions)
@@ -637,7 +637,7 @@ class KitManagerImplTest {
     fun shouldFilterKitsFromKnownIntegrations_When_filter_Is_Empty() {
         val options = MParticleOptions.builder(MockContext()).build()
         val filteredKitOptions = MParticleOptions.builder(MockContext())
-            .filteredKits(emptyList())
+            .disableKits(emptyList())
             .build()
 
         val filteredKitIntegrationFactory = KitIntegrationFactory(filteredKitOptions)
@@ -657,7 +657,7 @@ class KitManagerImplTest {
     fun shouldIgnoreUnknownKitInFilter() {
         val options = MParticleOptions.builder(MockContext()).build()
         val filteredKitOptions = MParticleOptions.builder(MockContext())
-            .filteredKits(listOf(1231, 132132))
+            .disableKits(listOf(1231, 132132))
             .build()
 
         val filteredKitIntegrationFactory = KitIntegrationFactory(filteredKitOptions)
@@ -677,7 +677,7 @@ class KitManagerImplTest {
     fun shouldRetainUnfilteredKits() {
         val filteredKitId = MParticle.ServiceProviders.ADJUST
         val options = MParticleOptions.builder(MockContext())
-            .filteredKits(listOf(filteredKitId))
+            .disableKits(listOf(filteredKitId))
             .build()
 
         val factory = KitIntegrationFactory(options)

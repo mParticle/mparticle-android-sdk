@@ -121,7 +121,7 @@ public class KitIntegrationFactory {
     }
 
     private void filterKits(MParticleOptions options) {
-        for (Integer filteredKit : options.getFilteredKits()) {
+        for (Integer filteredKit : options.getDisabledKits()) {
             Logger.verbose("Filtering kit: " + knownIntegrations.get(filteredKit));
             knownIntegrations.remove(filteredKit);
         }
