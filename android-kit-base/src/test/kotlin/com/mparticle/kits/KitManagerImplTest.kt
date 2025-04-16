@@ -603,6 +603,128 @@ class KitManagerImplTest {
     }
 
     @Test
+    fun shouldFilterKitsFromKnownIntegrations() {
+        val options = MParticleOptions.builder(MockContext()).build()
+        val filteredKitOptions = MParticleOptions.builder(MockContext())
+            .filteredKits(listOf(MParticle.ServiceProviders.ADJUST))
+            .filteredKits(listOf(MParticle.ServiceProviders.APPBOY))
+            .filteredKits(listOf(MParticle.ServiceProviders.CLEVERTAP))
+            .build()
+
+        val filteredKitIntegrationFactory = KitIntegrationFactory(filteredKitOptions)
+        val kitIntegrationFactory = KitIntegrationFactory(options)
+        val knownIntegrationsField = KitIntegrationFactory::class.java.getDeclaredField("knownIntegrations")
+        knownIntegrationsField.isAccessible = true
+
+        val withoutFilterIntegration = knownIntegrationsField.get(kitIntegrationFactory) as Map<*, *>
+        val filteredKitIntegrations = knownIntegrationsField.get(filteredKitIntegrationFactory) as Map<*, *>
+
+        val knownKitsSize = withoutFilterIntegration.size
+        val filteredKnownKitsSize = filteredKitIntegrations.size
+        Assert.assertEquals(knownKitsSize - 3, filteredKnownKitsSize)
+        // list of All the kits without Filter
+        Assert.assertNotNull(withoutFilterIntegration[MParticle.ServiceProviders.ADJUST])
+        Assert.assertNotNull(withoutFilterIntegration[MParticle.ServiceProviders.APPBOY])
+        Assert.assertNotNull(withoutFilterIntegration[MParticle.ServiceProviders.CLEVERTAP])
+
+        // Filtered kits; the specified kit should not be present (should be null)
+        Assert.assertNull(filteredKitIntegrations[MParticle.ServiceProviders.ADJUST])
+        Assert.assertNull(filteredKitIntegrations[MParticle.ServiceProviders.APPBOY])
+        Assert.assertNull(filteredKitIntegrations[MParticle.ServiceProviders.CLEVERTAP])
+    }
+
+
+    @Test
+    fun shouldFilterKitsFromKnownIntegrations_When_filter_Is_Empty() {
+        val options = MParticleOptions.builder(MockContext()).build()
+        val filteredKitOptions = MParticleOptions.builder(MockContext())
+            .filteredKits(emptyList())
+            .build()
+
+        val filteredKitIntegrationFactory = KitIntegrationFactory(filteredKitOptions)
+        val kitIntegrationFactory = KitIntegrationFactory(options)
+        val knownIntegrationsField = KitIntegrationFactory::class.java.getDeclaredField("knownIntegrations")
+        knownIntegrationsField.isAccessible = true
+
+        val knownIntegrations = knownIntegrationsField.get(kitIntegrationFactory) as Map<*, *>
+        val filteredKnownIntegrations = knownIntegrationsField.get(filteredKitIntegrationFactory) as Map<*, *>
+
+        val knownKitsSize = knownIntegrations.size
+        val filteredKnownKitsSize = filteredKnownIntegrations.size
+        Assert.assertEquals(knownKitsSize, filteredKnownKitsSize)
+    }
+
+    @Test
+    fun shouldIgnoreUnknownKitInFilter() {
+        val options = MParticleOptions.builder(MockContext()).build()
+        val filteredKitOptions = MParticleOptions.builder(MockContext())
+            .filteredKits(listOf(1231, 132132))
+            .build()
+
+        val filteredKitIntegrationFactory = KitIntegrationFactory(filteredKitOptions)
+        val kitIntegrationFactory = KitIntegrationFactory(options)
+        val knownIntegrationsField = KitIntegrationFactory::class.java.getDeclaredField("knownIntegrations")
+        knownIntegrationsField.isAccessible = true
+
+        val knownIntegrations = knownIntegrationsField.get(kitIntegrationFactory) as Map<*, *>
+        val filteredKnownIntegrations = knownIntegrationsField.get(filteredKitIntegrationFactory) as Map<*, *>
+
+        val knownKitsSize = knownIntegrations.size
+        val filteredKnownKitsSize = filteredKnownIntegrations.size
+        Assert.assertEquals(knownKitsSize, filteredKnownKitsSize)
+    }
+
+    @Test
+    fun shouldRetainUnfilteredKits() {
+        val filteredKitId = MParticle.ServiceProviders.ADJUST
+        val options = MParticleOptions.builder(MockContext())
+            .filteredKits(listOf(filteredKitId))
+            .build()
+
+        val factory = KitIntegrationFactory(options)
+
+        val field = KitIntegrationFactory::class.java.getDeclaredField("knownIntegrations")
+        field.isAccessible = true
+        val knownIntegrations = field.get(factory) as Map<*, *>
+
+        // Verify that a different kit is still present
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.APPBOY])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.URBAN_AIRSHIP])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.TUNE])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.KOCHAVA])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.COMSCORE])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.FORESEE_ID])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.BRANCH_METRICS])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.FLURRY])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.LOCALYTICS])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.CRITTERCISM])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.WOOTRIC])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.APPSFLYER])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.APPTENTIVE])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.APPTIMIZE])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.BUTTON])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.LEANPLUM])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.REVEAL_MOBILE])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.RADAR])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.ITERABLE])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.SKYHOOK])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.SINGULAR])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.ADOBE])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.TAPLYTICS])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.OPTIMIZELY])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.RESPONSYS])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.CLEVERTAP])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.ONETRUST])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.GOOGLE_ANALYTICS_FIREBASE])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.GOOGLE_ANALYTICS_FIREBASE_GA4])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.PILGRIM])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.SWRVE])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.BLUESHIFT])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.NEURA])
+        Assert.assertNotNull(knownIntegrations[MParticle.ServiceProviders.ROKT])
+    }
+
+    @Test
     @Throws(Exception::class)
     fun testShouldEnableKitOnOptIn() {
         val mockUser = Mockito.mock(MParticleUser::class.java)
