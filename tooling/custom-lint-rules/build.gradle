@@ -4,8 +4,12 @@ apply plugin: 'java-library'
 apply plugin: 'kotlin'
 apply plugin: 'com.android.lint'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
+
+kotlin {
+    jvmToolchain(17)
+}
 
 buildscript {
     ext {
@@ -39,7 +43,7 @@ dependencies {
     lintBuild files(jar)
     lintJar files('libs/mparticle-min.jar')
     lintJar project(':tooling:common')
-    implementation configurations.lintJar
+    implementation files(configurations.lintJar)
     compileOnly "com.android.tools.lint:lint-api:$lintVersion"
     compileOnly "com.android.tools.lint:lint-checks:$lintVersion"
     compileOnly 'org.codehaus.groovy:groovy-all:3.0.13'
@@ -51,7 +55,7 @@ dependencies {
 
 jar {
     dependsOn(":tooling:common:jar")
-    archiveName 'lint.jar'
+    archiveFileName = 'lint.jar'
     manifest {
         attributes 'Manifest-Version': 1.0
         attributes 'Lint-Registry-v2': 'com.mparticle.lints.MParticleIssueRegistry'
@@ -74,10 +78,9 @@ rootProject.project('android-core').android.buildTypes.all {
 
 task zipSources(type: Jar) {
     def fileName = "$project.rootDir/android-core/build/intermediates/javac/${targetBuildType}/classes"
-    from(fileTree(dir: fileName)) {
-        destinationDir new File("$project.projectDir/libs")
-        archiveName "mparticle.jar"
-    }
+    from(fileTree(dir: fileName))
+    destinationDirectory.set(new File("$project.projectDir/libs"))
+    archiveFileName.set("mparticle.jar")
     outputs.upToDateWhen { false }
 }
 

@@ -220,3 +220,30 @@
 -keepnames class * implements android.os.Parcelable {
     public static final ** CREATOR;
 }
+
+# Firebase and GMS CloudMessaging
+-dontwarn com.google.android.gms.cloudmessaging.**
+-dontwarn com.google.firebase.messaging.**
+-keep class com.google.firebase.messaging.** { *; }
+
+# Java 9+ StringConcatFactory
+-dontwarn java.lang.invoke.StringConcatFactory
+-keep class java.lang.invoke.StringConcatFactory { *; }
+
+# Keep lambdas
+-keepclassmembers class * {
+    private static synthetic *** lambda$*(...);
+}
+
+# Keep any classes referenced but not found during R8 minification
+-ignorewarnings
+-keep class ** { *; }
+
+# Additional rules to prevent minification errors with Kotlin
+-keepattributes *Annotation*, InnerClasses, Signature, EnclosingMethod
+-keepclassmembers class kotlin.Metadata {
+    public <methods>;
+}
+-keepclassmembers class * {
+    @kotlin.Metadata <methods>;
+}

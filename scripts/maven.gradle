@@ -7,6 +7,17 @@ allprojects {
     ext."signing.password" = System.getenv("mavenSigningKeyPassword")
 }
 
+// For AGP 8.x compatibility, configure Android library projects
+if (project.plugins.findPlugin("com.android.library")) {
+    android {
+        publishing {
+            // Configure publishing for both variants
+            singleVariant("release")
+            singleVariant("debug")
+        }
+    }
+}
+
 afterEvaluate {
     publishing {
         publications {
@@ -15,11 +26,13 @@ afterEvaluate {
                 artifactId = project.name
                 version = project.version
                 if (project.plugins.findPlugin("com.android.library")) {
+                    // For AGP 8.x, reference the component directly
                     from components.release
                 } else {
                     from components.java
                 }
 
+                // Add sources/javadoc artifacts for all project types
                 if (project.tasks.findByName('generateJavadocsJar')) {
                     artifact project.tasks.getByName('generateJavadocsJar')
                 }
@@ -56,15 +69,16 @@ afterEvaluate {
                 artifactId = project.name
                 version = project.version
                 if (project.plugins.findPlugin("com.android.library")) {
+                    // For AGP 8.x, reference the component directly
                     from components.debug
                 } else {
                     from components.java
                 }
 
+                // Add sources/javadoc artifacts for all project types
                 if (project.tasks.findByName('generateJavadocsJar')) {
                     artifact project.tasks.getByName('generateJavadocsJar')
                 }
-
                 if (project.tasks.findByName('generateSourcesJar')) {
                     artifact project.tasks.getByName('generateSourcesJar')
                 }
@@ -96,11 +110,11 @@ afterEvaluate {
         }
         repositories {
             maven {
-                    credentials {
-                        username System.getenv('sonatypeUsername')
-                        password System.getenv('sonatypePassword')
-                    }
-                    url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+                credentials {
+                    username System.getenv('sonatypeUsername')
+                    password System.getenv('sonatypePassword')
+                }
+                url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
             }
         }
     }
