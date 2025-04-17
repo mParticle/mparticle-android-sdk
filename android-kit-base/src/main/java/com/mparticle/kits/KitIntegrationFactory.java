@@ -109,6 +109,7 @@ public class KitIntegrationFactory {
     }
 
     private void loadIntegrations(MParticleOptions options) {
+        filterKits(options);
         loadSideloadedIntegrations(options);
         for (Map.Entry<Integer, String> entry : knownIntegrations.entrySet()) {
             Class kitClass = loadKit(entry.getValue());
@@ -116,6 +117,13 @@ public class KitIntegrationFactory {
                 supportedKits.put(entry.getKey(), kitClass);
                 Logger.debug(entry.getValue().substring(entry.getValue().lastIndexOf(".") + 1) + " detected.");
             }
+        }
+    }
+
+    private void filterKits(MParticleOptions options) {
+        for (Integer filteredKit : options.getDisabledKits()) {
+            Logger.verbose("Filtering kit: " + knownIntegrations.get(filteredKit));
+            knownIntegrations.remove(filteredKit);
         }
     }
 

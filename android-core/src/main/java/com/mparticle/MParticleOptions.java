@@ -55,6 +55,7 @@ public class MParticleOptions {
     private DataplanOptions mDataplanOptions;
     private Map<Class, List<Configuration>> mConfigurations = new HashMap();
     private List<SideloadedKit> sideloadedKits = new ArrayList<>();
+    private List<Integer> disabledKits = new ArrayList<>();
 
     private MParticleOptions() {
     }
@@ -147,6 +148,7 @@ public class MParticleOptions {
         this.mDataplanOptions = builder.dataplanOptions;
         this.mConfigurations = builder.configurations;
         this.sideloadedKits = builder.sideloadedKits;
+        this.disabledKits = builder.disabledKits;
     }
 
     /**
@@ -189,6 +191,16 @@ public class MParticleOptions {
     @NonNull
     public List<SideloadedKit> getSideloadedKits() {
         return sideloadedKits;
+    }
+
+    /**
+     * Get list of disabled kits
+     *
+     * @return
+     * */
+    @NonNull
+    public List<Integer> getDisabledKits() {
+        return disabledKits;
     }
 
     /**
@@ -400,6 +412,7 @@ public class MParticleOptions {
         private Map<Class, List<Configuration>> configurations = new HashMap();
         private boolean isAppDebuggable;
         private List<SideloadedKit> sideloadedKits = new ArrayList<>();
+        private List<Integer> disabledKits = new ArrayList<>();
 
         private Builder(Context context) {
             this.context = context;
@@ -464,6 +477,18 @@ public class MParticleOptions {
         @NonNull
         public Builder environment(@NonNull MParticle.Environment environment) {
             this.environment = environment;
+            return this;
+        }
+
+        /**
+         * Add disable kits option
+         *
+         * @param kits
+         * @return
+         */
+        @NonNull
+        public Builder disableKits(@NonNull List<Integer> kits) {
+            disabledKits.addAll(kits);
             return this;
         }
 
