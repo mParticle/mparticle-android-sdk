@@ -1781,6 +1781,92 @@ public class MParticle {
         void onReset();
     }
 
+    /**
+     * ### Optional callback events for when the view loads and unloads.
+     */
+    public interface MpRoktEventCallback {
+        /**
+         * onLoad Callback will be triggered immediately when the View displays.
+         */
+        void onLoad();
+
+        /**
+         * onUnLoad Callback will be triggered if the View failed to show or it closed.
+         */
+        void onUnload(UnloadReasons reason);
+
+        /**
+         * onShouldShowLoadingIndicator callback will be triggered if View start processing
+         */
+        void onShouldShowLoadingIndicator();
+
+        /**
+         * onShouldHideLoadingIndicator callback will be triggered if View end processing
+         */
+        void onShouldHideLoadingIndicator();
+    }
+
+    /**
+     * Enum representing the reasons for unloading.
+     */
+    public enum UnloadReasons {
+        /**
+         * Called when there are no offers to display so the view does not get loaded in.
+         */
+        NO_OFFERS,
+
+        /**
+         * View has been rendered and has been completed.
+         */
+        FINISHED,
+
+        /**
+         * Operation to fetch view took too long to resolve.
+         */
+        TIMEOUT,
+
+        /**
+         * Some error has occurred regarding the network.
+         */
+        NETWORK_ERROR,
+
+        /**
+         * View is empty.
+         */
+        NO_WIDGET,
+
+        /**
+         * Init request was not successful.
+         */
+        INIT_FAILED,
+
+        /**
+         * Placeholder string mismatch.
+         */
+        UNKNOWN_PLACEHOLDER,
+
+        /**
+         * Catch-all for all issues.
+         */
+        UNKNOWN;
+
+        /**
+         * Returns the enum constant matching the provided string.
+         * If no match is found, UNKNOWN is returned.
+         *
+         * @param value the name of the enum constant to look up
+         * @return the corresponding UnloadReasons constant or UNKNOWN if no match is found
+         */
+        public static UnloadReasons from(String value) {
+            for (UnloadReasons reason : UnloadReasons.values()) {
+                if (reason.name().equals(value)) {
+                    return reason;
+                }
+            }
+            return UNKNOWN;
+        }
+    }
+
 
     /**
      * Rokt Integration
@@ -1791,19 +1877,13 @@ public class MParticle {
         }
         public void selectPlacements(String viewName,
                             Map<String, String> attributes,
-                            Runnable onUnload,
-                            Runnable onLoad,
-                            Runnable onShouldHideLoadingIndicator,
-                            Runnable onShouldShowLoadingIndicator,
+                            MpRoktEventCallback mpRoktEventCallback,
                             Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
                             Map<String, WeakReference<Typeface>> fontTypefaces) {
              if (mConfigManager.isEnabled()) {
                  mKitManager.execute(viewName,
                          attributes,
-                         onUnload,
-                         onLoad,
-                         onShouldHideLoadingIndicator,
-                         onShouldShowLoadingIndicator,
+                         mpRoktEventCallback,
                          placeHolders,
                          fontTypefaces);
              }
@@ -1815,10 +1895,8 @@ public class MParticle {
                         attributes,
                         null,
                         null,
-                        null,
-                        null,
-                        null,
-                        null);
+                        null
+                );
             }
         }
     }
