@@ -1,3 +1,20 @@
+## [5.62.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.61.2...v5.62.0) (2025-04-18)
+
+
+### Features
+
+* Add option to disable kits in MParticleOptions ([#570](https://github.com/mParticle/mparticle-android-sdk/issues/570)) ([d7e4154](https://github.com/mParticle/mparticle-android-sdk/commit/d7e4154466d5286f9febe420b561b6fb74073556))
+
+
+### Bug Fixes
+
+* Add ProGuard rule to preserve method visibility ([#571](https://github.com/mParticle/mparticle-android-sdk/issues/571)) ([f01e404](https://github.com/mParticle/mparticle-android-sdk/commit/f01e4042a969e6bc4b9a4b8bfae4c8e077e1839a))
+
+
+### Updates & Maintenance
+
+* Add Test Kits step to GitHub workflow ([#568](https://github.com/mParticle/mparticle-android-sdk/issues/568)) ([9415ded](https://github.com/mParticle/mparticle-android-sdk/commit/9415ded3be826e7ca7d6900be96eb5029709b98c))
+
 ## [5.61.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.61.1...v5.61.2) (2025-04-14)
 
 
