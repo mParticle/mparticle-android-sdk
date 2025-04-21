@@ -605,7 +605,7 @@ class KitManagerImplTest {
     fun shouldFilterKitsFromKnownIntegrations() {
         val options = MParticleOptions.builder(MockContext()).build()
         val filteredKitOptions = MParticleOptions.builder(MockContext())
-            .disableKits(
+            .disabledKits(
                 Arrays.asList(
                     MParticle.ServiceProviders.ADJUST,
                     MParticle.ServiceProviders.APPBOY,
@@ -640,7 +640,7 @@ class KitManagerImplTest {
     fun shouldNotFilterKitsFromKnownIntegrationsWhenFilterIsEmpty() {
         val options = MParticleOptions.builder(MockContext()).build()
         val filteredKitOptions = MParticleOptions.builder(MockContext())
-            .disableKits(emptyList())
+            .disabledKits(emptyList())
             .build()
 
         val filteredKitIntegrationFactory = KitIntegrationFactory(filteredKitOptions)
@@ -660,7 +660,7 @@ class KitManagerImplTest {
     fun shouldIgnoreUnknownKitInFilter() {
         val options = MParticleOptions.builder(MockContext()).build()
         val filteredKitOptions = MParticleOptions.builder(MockContext())
-            .disableKits(listOf(1231, 132132))
+            .disabledKits(listOf(1231, 132132))
             .build()
 
         val filteredKitIntegrationFactory = KitIntegrationFactory(filteredKitOptions)
@@ -680,7 +680,7 @@ class KitManagerImplTest {
     fun shouldRetainUnfilteredKits() {
         val filteredKitId = MParticle.ServiceProviders.ADJUST
         val options = MParticleOptions.builder(MockContext())
-            .disableKits(listOf(filteredKitId))
+            .disabledKits(listOf(filteredKitId))
             .build()
 
         val factory = KitIntegrationFactory(options)
