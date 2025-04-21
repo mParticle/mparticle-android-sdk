@@ -487,7 +487,7 @@ public class MParticleOptions {
          * @return
          */
         @NonNull
-        public Builder disableKits(@NonNull List<Integer> kits) {
+        public Builder disabledKits(@NonNull List<Integer> kits) {
             disabledKits.addAll(kits);
             return this;
         }
