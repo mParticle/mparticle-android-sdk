@@ -1,3 +1,10 @@
+## [5.62.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.62.0...v5.62.1) (2025-04-23)
+
+
+### Bug Fixes
+
+* Rename disabled kit method name ([#573](https://github.com/mParticle/mparticle-android-sdk/issues/573)) ([86f1558](https://github.com/mParticle/mparticle-android-sdk/commit/86f155877d8567336180a790784341d9b32e64ce))
+
 ## [5.62.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.61.2...v5.62.0) (2025-04-18)
 
 
