@@ -29,9 +29,9 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
+import java.lang.ref.WeakReference
 import java.util.Arrays
 import java.util.LinkedList
-import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 
 class KitManagerImplTest {
@@ -779,17 +779,17 @@ class KitManagerImplTest {
 
         val configJSONObj = JSONObject().apply {
             put("id", kitId)
-      }
+        }
         val mockedKitConfig = KitConfiguration.createKitConfiguration(configJSONObj)
         Mockito.`when`(sideloadedKit.configuration).thenReturn(mockedKitConfig)
 
-        val settingsMap =  hashMapOf(
-        "placementAttributes" to """
+        val settingsMap = hashMapOf(
+            "placementAttributes" to """
         [
             {"map": "number", "value": "no"},
             {"map": "customerId", "value": "minorcatid"}
         ]
-    """.trimIndent()
+            """.trimIndent()
         )
         val field = KitConfiguration::class.java.getDeclaredField("settings")
         field.isAccessible = true
@@ -824,8 +824,9 @@ class KitManagerImplTest {
             Pair("lastname", "Test1"),
             Pair("number", "(123) 456-9898"),
             Pair("customerId", "55555"),
-            Pair("country", "US"))
-        manager.execute("Test",attributes,null,null,null,null,null,null)
+            Pair("country", "US")
+        )
+        manager.execute("Test", attributes, null, null, null, null, null, null)
         Assert.assertEquals(5, attributes.size)
         Assert.assertEquals("(123) 456-9898", attributes["no"])
         Assert.assertEquals("55555", attributes["minorcatid"])
@@ -845,13 +846,13 @@ class KitManagerImplTest {
         val mockedKitConfig = KitConfiguration.createKitConfiguration(configJSONObj)
         Mockito.`when`(sideloadedKit.configuration).thenReturn(mockedKitConfig)
 
-        val settingsMap =  hashMapOf(
+        val settingsMap = hashMapOf(
             "placementAttributes" to """
         [
               {"map": "number", "value": "no"},
             {"map": "customerId", "value": "minorcatid"}
         ]
-    """.trimIndent()
+            """.trimIndent()
         )
         val field = KitConfiguration::class.java.getDeclaredField("settings")
         field.isAccessible = true
@@ -886,8 +887,9 @@ class KitManagerImplTest {
             Pair("lastname", "Test1"),
             Pair("call", "(123) 456-9898"),
             Pair("postal", "5-45555"),
-            Pair("country", "US"))
-        manager.execute("Test",attributes,null,null,null,null,null,null)
+            Pair("country", "US")
+        )
+        manager.execute("Test", attributes, null, null, null, null, null, null)
         Assert.assertEquals(5, attributes.size)
         Assert.assertEquals("(123) 456-9898", attributes["call"])
         Assert.assertEquals("5-45555", attributes["postal"])
@@ -907,13 +909,13 @@ class KitManagerImplTest {
         val mockedKitConfig = KitConfiguration.createKitConfiguration(configJSONObj)
         Mockito.`when`(sideloadedKit.configuration).thenReturn(mockedKitConfig)
 
-        val settingsMap =  hashMapOf(
+        val settingsMap = hashMapOf(
             "placementAttributes" to """
         [
               {"map": "number", "value": "no"},
             {"map": "customerId", "value": "minorcatid"}
         ]
-    """.trimIndent()
+            """.trimIndent()
         )
         val field = KitConfiguration::class.java.getDeclaredField("settings")
         field.isAccessible = true
@@ -948,8 +950,9 @@ class KitManagerImplTest {
             Pair("lastname", "Test1"),
             Pair("no", "(123) 456-9898"),
             Pair("minorcatid", "5-45555"),
-            Pair("country", "US"))
-        manager.execute("Test",attributes,null,null,null,null,null,null)
+            Pair("country", "US")
+        )
+        manager.execute("Test", attributes, null, null, null, null, null, null)
         Assert.assertEquals(5, attributes.size)
         Assert.assertEquals("(123) 456-9898", attributes["no"])
         Assert.assertEquals("5-45555", attributes["minorcatid"])
@@ -969,12 +972,12 @@ class KitManagerImplTest {
         val mockedKitConfig = KitConfiguration.createKitConfiguration(configJSONObj)
         Mockito.`when`(sideloadedKit.configuration).thenReturn(mockedKitConfig)
 
-        val settingsMap =  hashMapOf(
+        val settingsMap = hashMapOf(
             "placementAttributes" to """
         [
            
         ]
-    """.trimIndent()
+            """.trimIndent()
         )
         val field = KitConfiguration::class.java.getDeclaredField("settings")
         field.isAccessible = true
@@ -1009,8 +1012,9 @@ class KitManagerImplTest {
             Pair("lastname", "Test1"),
             Pair("number", "(123) 456-9898"),
             Pair("customerId", "55555"),
-            Pair("country", "US"))
-        manager.execute("Test",attributes,null,null,null,null,null,null)
+            Pair("country", "US")
+        )
+        manager.execute("Test", attributes, null, null, null, null, null, null)
         Assert.assertEquals(5, attributes.size)
         Assert.assertEquals("(123) 456-9898", attributes["number"])
         Assert.assertEquals("55555", attributes["customerId"])
@@ -1020,7 +1024,7 @@ class KitManagerImplTest {
     }
 
     internal inner class mockProvider(val config: KitConfiguration) : KitIntegration(), KitIntegration.RoktListener {
-       override fun isDisabled(): Boolean = false
+        override fun isDisabled(): Boolean = false
         override fun getName(): String = "FakeProvider"
         override fun onKitCreate(settings: MutableMap<String, String>?, context: Context?): MutableList<ReportingMessage> {
             TODO("Not yet implemented")
@@ -1029,7 +1033,6 @@ class KitManagerImplTest {
         override fun setOptOut(optedOut: Boolean): MutableList<ReportingMessage> {
             TODO("Not yet implemented")
         }
-
 
         override fun getConfiguration(): KitConfiguration {
             return config
