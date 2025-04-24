@@ -1338,7 +1338,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     KitConfiguration kitConfig = provider.getConfiguration();
                     if (kitConfig != null) {
                         try {
-                            jsonArray = kitConfig.getPlacementAttributes();
+                            jsonArray = kitConfig.getPlacementAttributesMapping();
                         } catch (JSONException e) {
                             Logger.warning("Invalid placementAttributes for kit: " + provider.getName() + " JSON: " + e.getMessage());
                         }
@@ -1353,7 +1353,6 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                             attributes.put(mapTo, value);
                         }
                     }
-
                     Map<String, Object> objectAttributes = new HashMap<>();
                     for (Map.Entry<String, String> entry : attributes.entrySet()) {
                         objectAttributes.put(entry.getKey(), entry.getValue());

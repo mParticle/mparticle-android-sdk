@@ -784,7 +784,7 @@ class KitManagerImplTest {
         Mockito.`when`(sideloadedKit.configuration).thenReturn(mockedKitConfig)
 
         val settingsMap = hashMapOf(
-            "placementAttributes" to """
+            "placementAttributesMapping" to """
         [
             {"map": "number", "value": "no"},
             {"map": "customerId", "value": "minorcatid"}
@@ -847,7 +847,7 @@ class KitManagerImplTest {
         Mockito.`when`(sideloadedKit.configuration).thenReturn(mockedKitConfig)
 
         val settingsMap = hashMapOf(
-            "placementAttributes" to """
+            "placementAttributesMapping" to """
         [
               {"map": "number", "value": "no"},
             {"map": "customerId", "value": "minorcatid"}
@@ -910,7 +910,7 @@ class KitManagerImplTest {
         Mockito.`when`(sideloadedKit.configuration).thenReturn(mockedKitConfig)
 
         val settingsMap = hashMapOf(
-            "placementAttributes" to """
+            "placementAttributesMapping" to """
         [
               {"map": "number", "value": "no"},
             {"map": "customerId", "value": "minorcatid"}
@@ -973,7 +973,7 @@ class KitManagerImplTest {
         Mockito.`when`(sideloadedKit.configuration).thenReturn(mockedKitConfig)
 
         val settingsMap = hashMapOf(
-            "placementAttributes" to """
+            "placementAttributesMapping" to """
         [
            
         ]
