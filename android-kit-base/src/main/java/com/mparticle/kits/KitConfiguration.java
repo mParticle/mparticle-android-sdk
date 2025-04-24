@@ -61,6 +61,7 @@ public class KitConfiguration {
     private final static String KEY_CONSENT_FORWARDING_RULES_VALUE_CONSENTED = "c";
     private final static String KEY_CONSENT_FORWARDING_RULES_VALUE_HASH = "h";
     private final static String KEY_EXCLUDE_ANONYMOUS_USERS = "eau";
+    private final static String KEY_PLACEMENT_ATTRIBUTES = "placementAttributes";
 
     //If set to true, our sdk honor user's optout wish. If false, we still collect data on opt-ed out users, but only for reporting.
     private final static String HONOR_OPT_OUT = "honorOptOut";
@@ -984,6 +985,14 @@ public class KitConfiguration {
             return Boolean.parseBoolean(optOut);
         }
         return true;
+    }
+
+    public JSONArray getPlacementAttributes() throws JSONException {
+        if (!settings.containsKey(KEY_PLACEMENT_ATTRIBUTES)) {
+            return new JSONArray();
+        }
+        String jsonArrayStr = settings.get(KEY_PLACEMENT_ATTRIBUTES);
+        return new JSONArray(jsonArrayStr);
     }
 
     boolean shouldSetIdentity(MParticle.IdentityType identityType) {
