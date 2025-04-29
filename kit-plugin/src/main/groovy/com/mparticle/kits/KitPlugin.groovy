@@ -139,17 +139,13 @@ class KitPlugin implements Plugin<Project> {
                 url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
             }
 
-            def signingKey = System.getenv("mavenSigningKeyId")
-            def signingPassword = System.getenv("mavenSigningKeyPassword")
-
-            if (signingKey != null) {
-                target.extensions.add('signing.keyId', signingKey)
-                target.extensions.add('signing.password', signingPassword)
-
-                SigningExtension signing = new SigningExtension(target)
+            target.extensions.configure(SigningExtension) { signing ->
                 signing.required = { target.gradle.taskGraph.hasTask("publishReleasePublicationToMavenRepository") }
-                signing.useInMemoryPgpKeys(signingKey, signingPassword)
-                signing.sign publishing.publications.findByName("release")
+                def signingKey = target.findProperty('signingKey') ?: System.getenv("mavenSigningKeyId")
+                def signingPassword = target.findProperty('signingPassword') ?: System.getenv("mavenSigningKeyPassword")
+                if (signingKey && signingPassword) {
+                    signing.useInMemoryPgpKeys(target.property('signingKey'), target.property('signingPassword'))
+                }
             }
         }
 
