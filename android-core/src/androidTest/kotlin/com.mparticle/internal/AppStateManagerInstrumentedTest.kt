@@ -11,6 +11,7 @@ import com.mparticle.testutils.MPLatch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.json.JSONException
+import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -65,42 +66,52 @@ class AppStateManagerInstrumentedTest : BaseCleanStartedEachTest() {
 
     @Test
     @Throws(Exception::class)
-    fun testDontIncludeDefaultMpidSessionEnd() {
-        val mpids: MutableSet<Long> = HashSet()
-        for (i in 0..4) {
-            mpids.add(ran.nextLong())
-        }
+    fun testSessionEndExcludesTemporaryMpid() {
+        // Arrange
+        val mpids: MutableSet<Long> = mutableSetOf()
+        repeat(5) { mpids.add(ran.nextLong()) }
         mpids.add(Constants.TEMPORARY_MPID)
+
         mAppStateManager?.ensureActiveSession()
-        for (mpid in mpids) {
+        mpids.forEach { mpid ->
             mAppStateManager?.fetchSession()?.addMpid(mpid)
         }
-        val latch: CountDownLatch = MPLatch(1)
-        val checked = MutableBoolean(false)
-        AccessUtils.setMessageStoredListener(
-            MParticleDBManager.MessageListener { message ->
-                if (message.messageType == Constants.MessageType.SESSION_END) {
-                    try {
-                        val mpidsArray =
-                            message.getJSONArray(Constants.MessageKey.SESSION_SPANNING_MPIDS)
-                        if (mpidsArray.length() == mpids.size - 1) {
-                            for (i in 0 until mpidsArray.length()) {
-                                if (!mpids.contains(mpidsArray.getLong(i)) || mpidsArray.getLong(i) == Constants.TEMPORARY_MPID) {
-                                    return@MessageListener
-                                }
-                            }
-                            checked.value = true
-                            latch.countDown()
-                        }
-                    } catch (e: JSONException) {
-                        e.printStackTrace()
+
+        val latch = CountDownLatch(1)
+        val wasChecked = MutableBoolean(false)
+
+        AccessUtils.setMessageStoredListener { message ->
+            if (message.messageType != Constants.MessageType.SESSION_END) return@setMessageStoredListener
+
+            try {
+                val mpidsArray = message.getJSONArray(Constants.MessageKey.SESSION_SPANNING_MPIDS)
+
+                // Assert size (TEMPORARY_MPID should not be present)
+                if (mpidsArray.length() != mpids.size - 1) return@setMessageStoredListener
+
+                // Validate each MPID
+                for (i in 0 until mpidsArray.length()) {
+                    val mpid = mpidsArray.getLong(i)
+                    if (mpid == Constants.TEMPORARY_MPID || !mpids.contains(mpid)) {
+                        return@setMessageStoredListener
                     }
                 }
+
+                wasChecked.value = true
+                latch.countDown()
+            } catch (e: JSONException) {
+                e.printStackTrace()
             }
-        )
+        }
+
+        // Act
         mAppStateManager?.endSession()
+
+        // Await verification
         latch.await()
-        Assert.assertTrue(checked.value)
+
+        // Assert
+        Assert.assertTrue("Temporary MPID should not be included in session end event", wasChecked.value)
     }
 
     @Test
@@ -148,5 +159,10 @@ class AppStateManagerInstrumentedTest : BaseCleanStartedEachTest() {
             onApplicationForegroundCalled = true
             latch.countDown()
         }
+    }
+
+    @After
+    fun tearDown() {
+        AccessUtils.setMessageStoredListener(null) // Clear listener
     }
 }
