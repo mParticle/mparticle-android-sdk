@@ -1368,9 +1368,13 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     }
                     Map<String, Object> objectAttributes = new HashMap<>();
                     for (Map.Entry<String, String> entry : attributes.entrySet()) {
-                        objectAttributes.put(entry.getKey(), entry.getValue());
+                        if(!attributes.containsKey(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
+                            objectAttributes.put(entry.getKey(), entry.getValue());
+                        }
                     }
-                    user.setUserAttributes(objectAttributes);
+                    if (user != null) {
+                        user.setUserAttributes(objectAttributes);
+                    }
 
                     if (!attributes.containsKey(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
                         attributes.put(Constants.MessageKey.SANDBOX_MODE_ROKT, String.valueOf(Objects.toString(MPUtility.isDevEnv(), "false")));  // Default value is "false" if null
