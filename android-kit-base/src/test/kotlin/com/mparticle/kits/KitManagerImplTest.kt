@@ -1158,7 +1158,6 @@ class KitManagerImplTest {
         Assert.assertEquals("true", attributes["sandbox"])
     }
 
-
     @Test
     fun testRokt_SandboxMode_When_SandBox_is_Pass_In_Attributes_And_Environment_Is_DEV() {
         val sideloadedKit = Mockito.mock(MPSideloadedKit::class.java)
