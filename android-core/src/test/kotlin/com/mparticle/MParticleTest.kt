@@ -485,10 +485,26 @@ class MParticleTest {
         val onUnload: Runnable = mock(Runnable::class.java)
         val onHide: Runnable = mock(Runnable::class.java)
         val onShow: Runnable = mock(Runnable::class.java)
+        val    callbacks = object : MParticle.MpRoktEventCallback {
+            override fun onLoad() {
+                println("View loaded")
+            }
 
-        instance.rokt!!.selectPlacements("testView", attributes, onUnload, onLoad, onHide, onShow, placeholders, fonts)
+            override fun onUnload(reason: MParticle.UnloadReasons) {
+                println("View unloaded due to: $reason")
+            }
 
-        verify(instance.mKitManager)?.execute("testView", attributes, onUnload, onLoad, onHide, onShow, placeholders, fonts)
+            override fun onShouldShowLoadingIndicator() {
+                println("Show loading indicator")
+            }
+
+            override fun onShouldHideLoadingIndicator() {
+                println("Hide loading indicator")
+            }
+        }
+        instance.rokt!!.selectPlacements("testView", attributes,callbacks, placeholders, fonts)
+
+        verify(instance.mKitManager)?.execute("testView", attributes, callbacks, placeholders, fonts)
     }
 
     @Test
@@ -502,7 +518,7 @@ class MParticleTest {
 
         instance.rokt.selectPlacements("basicView", attributes)
 
-        verify(instance.mKitManager).execute("basicView", attributes, null, null, null, null, null, null)
+        verify(instance.mKitManager).execute("basicView", attributes, null, null, null)
     }
 
     @Test
@@ -513,7 +529,7 @@ class MParticleTest {
 
         instance.rokt.selectPlacements("basicView", HashMap())
 
-        verify(instance.mKitManager, never()).execute(any(), any(), any(), any(), any(), any(), any(), any())
+        verify(instance.mKitManager, never()).execute(any(), any(), any(), any(), any())
     }
 
     inner class InnerMockMParticle : MParticle() {
