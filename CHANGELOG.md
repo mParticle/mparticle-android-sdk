@@ -1,3 +1,34 @@
+## [5.62.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.62.1...v5.62.2) (2025-04-23)
+
+
+### Updates & Maintenance
+
+* Update submodules ([d2cebb2](https://github.com/mParticle/mparticle-android-sdk/commit/d2cebb2c8bac094f0512ee6142b59b469b58e81f))
+
+## [5.62.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.62.0...v5.62.1) (2025-04-23)
+
+
+### Bug Fixes
+
+* Rename disabled kit method name ([#573](https://github.com/mParticle/mparticle-android-sdk/issues/573)) ([86f1558](https://github.com/mParticle/mparticle-android-sdk/commit/86f155877d8567336180a790784341d9b32e64ce))
+
+## [5.62.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.61.2...v5.62.0) (2025-04-18)
+
+
+### Features
+
+* Add option to disable kits in MParticleOptions ([#570](https://github.com/mParticle/mparticle-android-sdk/issues/570)) ([d7e4154](https://github.com/mParticle/mparticle-android-sdk/commit/d7e4154466d5286f9febe420b561b6fb74073556))
+
+
+### Bug Fixes
+
+* Add ProGuard rule to preserve method visibility ([#571](https://github.com/mParticle/mparticle-android-sdk/issues/571)) ([f01e404](https://github.com/mParticle/mparticle-android-sdk/commit/f01e4042a969e6bc4b9a4b8bfae4c8e077e1839a))
+
+
+### Updates & Maintenance
+
+* Add Test Kits step to GitHub workflow ([#568](https://github.com/mParticle/mparticle-android-sdk/issues/568)) ([9415ded](https://github.com/mParticle/mparticle-android-sdk/commit/9415ded3be826e7ca7d6900be96eb5029709b98c))
+
 ## [5.61.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.61.1...v5.61.2) (2025-04-14)
 
 

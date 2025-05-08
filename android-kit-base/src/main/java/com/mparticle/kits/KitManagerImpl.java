@@ -1331,12 +1331,29 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             try {
                 if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
                     MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
+                    JSONArray jsonArray = new JSONArray();
+                    KitConfiguration kitConfig = provider.getConfiguration();
+                    if (kitConfig != null) {
+                        try {
+                            jsonArray = kitConfig.getPlacementAttributesMapping();
+                        } catch (JSONException e) {
+                            Logger.warning("Invalid placementAttributes for kit: " + provider.getName() + " JSON: " + e.getMessage());
+                        }
+                    }
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject obj = jsonArray.optJSONObject(i);
+                        if (obj == null) continue;
+                        String mapFrom = obj.optString("map");
+                        String mapTo = obj.optString("value");
+                        if (attributes.containsKey(mapFrom)) {
+                            String value = attributes.remove(mapFrom);
+                            attributes.put(mapTo, value);
+                        }
+                    }
                     Map<String, Object> objectAttributes = new HashMap<>();
-
                     for (Map.Entry<String, String> entry : attributes.entrySet()) {
                         objectAttributes.put(entry.getKey(), entry.getValue());
                     }
-
                     user.setUserAttributes(objectAttributes);
                     ((KitIntegration.RoktListener) provider).execute(viewName,
                             attributes,

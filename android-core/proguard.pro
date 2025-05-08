@@ -96,6 +96,7 @@
 -keep class com.mparticle.MParticle$OperatingSystem { *; }
 -keep class com.mparticle.MParticle$MpRoktEventCallback { *; }
 -keep class com.mparticle.MParticle$UnloadReasons { *; }
+-keep class com.mparticle.MParticle$Rokt { *; }
 
 -keep class com.mparticle.Session { *; }
 -keep class com.mparticle.MPEvent { *; }
