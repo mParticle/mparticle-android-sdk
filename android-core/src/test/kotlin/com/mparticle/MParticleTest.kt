@@ -481,11 +481,7 @@ class MParticleTest {
         val placeholders: Map<String, WeakReference<RoktEmbeddedView>> = HashMap()
         val fonts: Map<String, WeakReference<Typeface>> = HashMap()
 
-        val onLoad: Runnable = mock(Runnable::class.java)
-        val onUnload: Runnable = mock(Runnable::class.java)
-        val onHide: Runnable = mock(Runnable::class.java)
-        val onShow: Runnable = mock(Runnable::class.java)
-        val    callbacks = object : MParticle.MpRoktEventCallback {
+        val callbacks = object : MParticle.MpRoktEventCallback {
             override fun onLoad() {
                 println("View loaded")
             }
@@ -502,7 +498,7 @@ class MParticleTest {
                 println("Hide loading indicator")
             }
         }
-        instance.rokt!!.selectPlacements("testView", attributes,callbacks, placeholders, fonts)
+        instance.rokt!!.selectPlacements("testView", attributes, callbacks, placeholders, fonts)
 
         verify(instance.mKitManager)?.execute("testView", attributes, callbacks, placeholders, fonts)
     }

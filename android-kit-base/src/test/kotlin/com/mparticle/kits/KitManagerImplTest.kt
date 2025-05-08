@@ -826,7 +826,7 @@ class KitManagerImplTest {
             Pair("customerId", "55555"),
             Pair("country", "US")
         )
-        manager.execute("Test", attributes, null, null, null, null, null, null)
+        manager.execute("Test", attributes, null, null, null)
         Assert.assertEquals(5, attributes.size)
         Assert.assertEquals("(123) 456-9898", attributes["no"])
         Assert.assertEquals("55555", attributes["minorcatid"])
@@ -889,7 +889,7 @@ class KitManagerImplTest {
             Pair("postal", "5-45555"),
             Pair("country", "US")
         )
-        manager.execute("Test", attributes, null, null, null, null, null, null)
+        manager.execute("Test", attributes, null, null, null)
         Assert.assertEquals(5, attributes.size)
         Assert.assertEquals("(123) 456-9898", attributes["call"])
         Assert.assertEquals("5-45555", attributes["postal"])
@@ -952,7 +952,7 @@ class KitManagerImplTest {
             Pair("minorcatid", "5-45555"),
             Pair("country", "US")
         )
-        manager.execute("Test", attributes, null, null, null, null, null, null)
+        manager.execute("Test", attributes, null, null, null)
         Assert.assertEquals(5, attributes.size)
         Assert.assertEquals("(123) 456-9898", attributes["no"])
         Assert.assertEquals("5-45555", attributes["minorcatid"])
@@ -1014,7 +1014,7 @@ class KitManagerImplTest {
             Pair("customerId", "55555"),
             Pair("country", "US")
         )
-        manager.execute("Test", attributes, null, null, null, null, null, null)
+        manager.execute("Test", attributes, null, null, null)
         Assert.assertEquals(5, attributes.size)
         Assert.assertEquals("(123) 456-9898", attributes["number"])
         Assert.assertEquals("55555", attributes["customerId"])
@@ -1041,10 +1041,7 @@ class KitManagerImplTest {
         override fun execute(
             viewName: String?,
             attributes: MutableMap<String, String>?,
-            onUnload: Runnable?,
-            onLoad: Runnable?,
-            onShouldHideLoadingIndicator: Runnable?,
-            onShouldShowLoadingIndicator: Runnable?,
+            mpRoktEventCallback: MParticle.MpRoktEventCallback?,
             placeHolders: MutableMap<String, WeakReference<RoktEmbeddedView>>?,
             fontTypefaces: MutableMap<String, WeakReference<Typeface>>?,
             user: FilteredMParticleUser?
