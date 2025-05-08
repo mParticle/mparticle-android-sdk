@@ -1877,13 +1877,13 @@ public class MParticle {
         }
         public void selectPlacements(String viewName,
                             Map<String, String> attributes,
-                            MpRoktEventCallback mpRoktEventCallback,
+                            MpRoktEventCallback callbacks,
                             Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
                             Map<String, WeakReference<Typeface>> fontTypefaces) {
              if (mConfigManager.isEnabled()) {
                  mKitManager.execute(viewName,
                          attributes,
-                         mpRoktEventCallback,
+                         callbacks,
                          placeHolders,
                          fontTypefaces);
              }
