@@ -1324,10 +1324,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     @Override
     public void execute(String viewName,
                         Map<String, String> attributes,
-                        Runnable onUnload,
-                        Runnable onLoad,
-                        Runnable onShouldHideLoadingIndicator,
-                        Runnable onShouldShowLoadingIndicator,
+                        MParticle.MpRoktEventCallback mpRoktEventCallback,
                         Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
                         Map<String, WeakReference<Typeface>> fontTypefaces) {
         for (KitIntegration provider : providers.values()) {
@@ -1360,10 +1357,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     user.setUserAttributes(objectAttributes);
                     ((KitIntegration.RoktListener) provider).execute(viewName,
                             attributes,
-                            onUnload,
-                            onLoad,
-                            onShouldHideLoadingIndicator,
-                            onShouldShowLoadingIndicator,
+                            mpRoktEventCallback,
                             placeHolders,
                             fontTypefaces,
                             FilteredMParticleUser.getInstance(user.getId(), provider));

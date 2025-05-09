@@ -124,10 +124,7 @@ public interface KitManager {
 
     void execute(String viewName,
                  Map<String, String> attributes,
-                 Runnable onUnload,
-                 Runnable onLoad,
-                 Runnable onShouldHideLoadingIndicator,
-                 Runnable onShouldShowLoadingIndicator,
+                 MParticle.MpRoktEventCallback mpRoktEventCallback,
                  Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
                  Map<String, WeakReference<Typeface>> fontTypefaces);
 
