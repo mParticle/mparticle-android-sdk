@@ -1,3 +1,16 @@
+## [5.63.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.62.2...v5.63.0) (2025-05-12)
+
+
+### Features
+
+* Add user attributes mapping logic in Rokt execute flow ([#574](https://github.com/mParticle/mparticle-android-sdk/issues/574)) ([37666be](https://github.com/mParticle/mparticle-android-sdk/commit/37666be14d665addf769ff2059b4a94e944bd5c2))
+* Added Callback Support ([#569](https://github.com/mParticle/mparticle-android-sdk/issues/569)) ([9976373](https://github.com/mParticle/mparticle-android-sdk/commit/99763736dd369d0a98042815b25821420d949e2d))
+
+
+### Updates & Maintenance
+
+* Update submodules ([4470ad1](https://github.com/mParticle/mparticle-android-sdk/commit/4470ad10ee710080de7078a98b6d88760862eedd))
+
 ## [5.62.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.62.1...v5.62.2) (2025-04-23)
 
 
