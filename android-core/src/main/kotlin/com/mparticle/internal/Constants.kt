@@ -464,7 +464,7 @@ object Constants {
             //batch was mutated
             const val MODIFIED_BATCH: String = "mb"
 
-            //Sandbox mode for
+            //Sandbox mode for Rokt
             const val SANDBOX_MODE_ROKT: String = "sandbox"
         }
     }
