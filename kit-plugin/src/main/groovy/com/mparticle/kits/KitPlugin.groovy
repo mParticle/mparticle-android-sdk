@@ -6,6 +6,7 @@ import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.plugins.signing.SigningExtension
+import org.gradle.api.JavaVersion
 
 class KitPlugin implements Plugin<Project> {
     void apply(Project target) {
@@ -35,7 +36,14 @@ class KitPlugin implements Plugin<Project> {
         androidLib.defaultConfig.buildConfigField("String", "VERSION_CODE", '\"' + dateInt + '\"')
         androidLib.buildTypes.release.minifyEnabled false
         androidLib.buildTypes.release.consumerProguardFiles 'consumer-proguard.pro'
-        androidLib.lintOptions.abortOnError true
+        androidLib.lint.abortOnError true
+
+        // Add Java 17 compatibility
+        androidLib.compileOptions {
+            sourceCompatibility = 17
+            targetCompatibility = 17
+        }
+
         androidLib.testOptions.unitTests.all {  jvmArgs += ['--add-opens', 'java.base/java.lang=ALL-UNNAMED']
             jvmArgs += ['--add-opens', 'java.base/java.lang.reflect=ALL-UNNAMED']
             jvmArgs += ['--add-opens', 'java.base/java.util=ALL-UNNAMED']
@@ -47,6 +55,12 @@ class KitPlugin implements Plugin<Project> {
         //formerly in maven.gradle
         target.apply(plugin: 'maven-publish')
         target.apply(plugin: 'signing')
+
+        // Configure publishing for AGP 8.x
+        androidLib.publishing {
+            singleVariant("release")
+            singleVariant("debug")
+        }
 
         target.afterEvaluate {
             PublishingExtension publishing = target.extensions.findByName('publishing')
@@ -142,14 +156,19 @@ class KitPlugin implements Plugin<Project> {
             def signingKey = System.getenv("mavenSigningKeyId")
             def signingPassword = System.getenv("mavenSigningKeyPassword")
 
-            if (signingKey != null) {
-                target.extensions.add('signing.keyId', signingKey)
-                target.extensions.add('signing.password', signingPassword)
+            // Updated signing approach for Gradle 8.x
+            if (signingKey != null && signingPassword != null) {
+                target.plugins.apply('signing')
 
-                SigningExtension signing = new SigningExtension(target)
-                signing.required = { target.gradle.taskGraph.hasTask("publishReleasePublicationToMavenRepository") }
-                signing.useInMemoryPgpKeys(signingKey, signingPassword)
-                signing.sign publishing.publications.findByName("release")
+                // Configure signing options
+                target.signing {
+                    def required = target.provider {
+                        target.gradle.taskGraph.hasTask("publishReleasePublicationToMavenRepository")
+                    }
+                    setRequired(required)
+                    useInMemoryPgpKeys(signingKey, signingPassword)
+                    sign publishing.publications.findByName("release")
+                }
             }
         }
 
@@ -158,4 +177,3 @@ class KitPlugin implements Plugin<Project> {
         target.task("publishReleaseLocal") { dependsOn "publishReleasePublicationToMavenLocal" }
     }
 }
-
