@@ -16,17 +16,9 @@ import com.mparticle.consent.GDPRConsent
 import com.mparticle.identity.IdentityApi
 import com.mparticle.identity.IdentityApiResult
 import com.mparticle.identity.MParticleUser
-import com.mparticle.identity.TaskFailureListener
-import com.mparticle.internal.AppStateManager
-import com.mparticle.internal.ConfigManager
 import com.mparticle.internal.CoreCallbacks
-import com.mparticle.internal.KitFrameworkWrapper
-import com.mparticle.internal.KitsLoadedCallback
-import com.mparticle.internal.MessageManager
 import com.mparticle.internal.SideloadedKit
 import com.mparticle.kits.KitIntegration.AttributeListener
-import com.mparticle.media.MPMediaAPI
-import com.mparticle.messaging.MPMessagingAPI
 import com.mparticle.mock.MockContext
 import com.mparticle.mock.MockKitConfiguration
 import com.mparticle.mock.MockKitManagerImpl
@@ -43,7 +35,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
-import org.mockito.Mockito.CALLS_REAL_METHODS
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
@@ -1092,10 +1083,9 @@ class KitManagerImplTest {
             Runnable::class.java
         )
         method.isAccessible = true
-        val result = method.invoke(manager,"Test@gmail.com", user, instance,runnable)
+        val result = method.invoke(manager, "Test@gmail.com", user, instance, runnable)
         verify(mockTask).addSuccessListener(any())
     }
-
 
     @Test
     fun testConfirmEmail_When_EmailAlreadySynced() {
@@ -1140,7 +1130,7 @@ class KitManagerImplTest {
             Runnable::class.java
         )
         method.isAccessible = true
-        val result = method.invoke(manager,"Test@gmail.com", user, instance,runnable)
+        val result = method.invoke(manager, "Test@gmail.com", user, instance, runnable)
         Mockito.verify(runnable).run()
     }
 
@@ -1187,7 +1177,7 @@ class KitManagerImplTest {
             Runnable::class.java
         )
         method.isAccessible = true
-        val result = method.invoke(manager,null, user, instance,runnable)
+        val result = method.invoke(manager, null, user, instance, runnable)
         Mockito.verify(runnable).run()
     }
 
@@ -1234,7 +1224,7 @@ class KitManagerImplTest {
             Runnable::class.java
         )
         method.isAccessible = true
-        val result = method.invoke(manager,null, user, instance,runnable)
+        val result = method.invoke(manager, null, user, instance, runnable)
         Mockito.verify(runnable).run()
     }
 
@@ -1281,33 +1271,6 @@ class KitManagerImplTest {
         override fun logCommerceEvent(event: CommerceEvent) {
             super.logCommerceEvent(event)
             logCommerceEventCalled++
-        }
-    }
-
-    inner class InnerMockMParticle : MParticle() {
-        init {
-            mConfigManager = ConfigManager(MockContext())
-            mKitManager = Mockito.mock(KitFrameworkWrapper::class.java)
-            val realAppStateManager = AppStateManager(MockContext())
-            mAppStateManager = Mockito.spy(realAppStateManager)
-            mConfigManager = Mockito.mock(ConfigManager::class.java)
-            mKitManager = Mockito.mock(KitFrameworkWrapper::class.java)
-            mMessageManager = Mockito.mock(MessageManager::class.java)
-            mMessaging = Mockito.mock(MPMessagingAPI::class.java)
-            mMedia = Mockito.mock(MPMediaAPI::class.java)
-            mIdentityApi = IdentityApi(
-                MockContext(),
-                mAppStateManager,
-                mMessageManager,
-                mInternal.configManager,
-                mKitManager,
-                OperatingSystem.ANDROID
-            )
-            Mockito.`when`(mKitManager.updateKits(Mockito.any())).thenReturn(KitsLoadedCallback())
-            val event = MPEvent.Builder("this")
-                .customAttributes(HashMap<String, String?>())
-                .build()
-            val attributes = event.customAttributes
         }
     }
 }
