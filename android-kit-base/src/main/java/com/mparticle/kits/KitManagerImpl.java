@@ -1,5 +1,7 @@
 package com.mparticle.kits;
 
+import static android.util.Log.e;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.util.Log;
 
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
@@ -23,12 +26,18 @@ import com.mparticle.Configuration;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
+import com.mparticle.MParticleTask;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
+import com.mparticle.identity.IdentityApi;
 import com.mparticle.identity.IdentityApiRequest;
+import com.mparticle.identity.IdentityApiResult;
+import com.mparticle.identity.IdentityHttpResponse;
 import com.mparticle.identity.IdentityStateListener;
 import com.mparticle.identity.MParticleUser;
+import com.mparticle.identity.TaskFailureListener;
+import com.mparticle.identity.TaskSuccessListener;
 import com.mparticle.internal.CoreCallbacks;
 import com.mparticle.internal.KitManager;
 import com.mparticle.internal.KitsLoadedCallback;
@@ -54,6 +63,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 public class KitManagerImpl implements KitManager, AttributionListener, UserAttributeListener, IdentityStateListener {
 
@@ -1330,8 +1340,12 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         for (KitIntegration provider : providers.values()) {
             try {
                 if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
-                    MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
+                    MParticle instance = MParticle.getInstance();
+                    MParticleUser user = instance.Identity().getCurrentUser();
+                    String email = attributes != null ? attributes.get("email") : null;
+                    confirmEmail(email,user,instance, () -> {
                     JSONArray jsonArray = new JSONArray();
+
                     KitConfiguration kitConfig = provider.getConfiguration();
                     if (kitConfig != null) {
                         try {
@@ -1361,10 +1375,58 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                             placeHolders,
                             fontTypefaces,
                             FilteredMParticleUser.getInstance(user.getId(), provider));
+                    });
                 }
             } catch (Exception e) {
                 Logger.warning("Failed to call execute for kit: " + provider.getName() + ": " + e.getMessage());
             }
+        }
+    }
+
+    private void confirmEmail(
+            @Nullable String email,
+            @Nullable MParticleUser user,
+            MParticle instance,
+            Runnable runnable
+    ) {
+        if (email != null && user != null) {
+            String existingEmail = user.getUserIdentities().get(MParticle.IdentityType.Email);
+
+            if (!email.equals(existingEmail)) {
+                // If there's an existing email but it doesn't match the passed-in email, log a warning
+                if (existingEmail != null) {
+                    Logger.warning( String.format(
+                            "The existing email on the user (%s) does not match the email passed to selectPlacements (%s). " +
+                                    "Please make sure to sync the email identity to mParticle as soon as it's available. " +
+                                    "Identifying user with the provided email before continuing to selectPlacements.",
+                            existingEmail, email
+                    ));
+                }
+
+                IdentityApiRequest identityRequest = IdentityApiRequest.withUser(user)
+                        .email(email)
+                        .build();
+                MParticleTask<IdentityApiResult> task = instance.Identity().identify(identityRequest);
+                task.addFailureListener(new TaskFailureListener() {
+                    @Override
+                    public void onFailure(IdentityHttpResponse result) {
+                        Logger.error( "Failed to sync email from selectPlacement to user: " + result.getErrors().toString());
+
+                        runnable.run();
+                    }
+                });
+                task.addSuccessListener(new TaskSuccessListener() {
+                    @Override
+                    public void onSuccess(IdentityApiResult result) {
+                        Logger.debug("Updated email identity based on selectPlacement's attributes: " + result.getUser().getUserIdentities().get(MParticle.IdentityType.Email));
+                        runnable.run();
+                    }
+                });
+            } else {
+                runnable.run();
+            }
+        } else {
+            runnable.run();
         }
     }
 
