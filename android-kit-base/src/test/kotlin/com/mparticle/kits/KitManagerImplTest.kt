@@ -1079,11 +1079,11 @@ class KitManagerImplTest {
             "confirmEmail",
             String::class.java,
             MParticleUser::class.java,
-            MParticle::class.java,
+            IdentityApi::class.java,
             Runnable::class.java
         )
         method.isAccessible = true
-        val result = method.invoke(manager, "Test@gmail.com", user, instance, runnable)
+        val result = method.invoke(manager, "Test@gmail.com", user, identityApi, runnable)
         verify(mockTask).addSuccessListener(any())
     }
 
@@ -1126,11 +1126,11 @@ class KitManagerImplTest {
             "confirmEmail",
             String::class.java,
             MParticleUser::class.java,
-            MParticle::class.java,
+            IdentityApi::class.java,
             Runnable::class.java
         )
         method.isAccessible = true
-        val result = method.invoke(manager, "Test@gmail.com", user, instance, runnable)
+        val result = method.invoke(manager, "Test@gmail.com", user, identityApi, runnable)
         Mockito.verify(runnable).run()
     }
 
@@ -1173,11 +1173,11 @@ class KitManagerImplTest {
             "confirmEmail",
             String::class.java,
             MParticleUser::class.java,
-            MParticle::class.java,
+            IdentityApi::class.java,
             Runnable::class.java
         )
         method.isAccessible = true
-        val result = method.invoke(manager, null, user, instance, runnable)
+        val result = method.invoke(manager, null, user, identityApi, runnable)
         Mockito.verify(runnable).run()
     }
 
@@ -1220,11 +1220,11 @@ class KitManagerImplTest {
             "confirmEmail",
             String::class.java,
             MParticleUser::class.java,
-            MParticle::class.java,
+            IdentityApi::class.java,
             Runnable::class.java
         )
         method.isAccessible = true
-        val result = method.invoke(manager, null, user, instance, runnable)
+        val result = method.invoke(manager, null, user, identityApi, runnable)
         Mockito.verify(runnable).run()
     }
 

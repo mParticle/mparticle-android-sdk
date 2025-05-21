@@ -1343,7 +1343,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     MParticle instance = MParticle.getInstance();
                     MParticleUser user = instance.Identity().getCurrentUser();
                     String email = attributes != null ? attributes.get("email") : null;
-                    confirmEmail(email,user,instance, () -> {
+                    confirmEmail(email,user,instance.Identity(), () -> {
                     JSONArray jsonArray = new JSONArray();
 
                     KitConfiguration kitConfig = provider.getConfiguration();
@@ -1386,7 +1386,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     private void confirmEmail(
             @Nullable String email,
             @Nullable MParticleUser user,
-            MParticle instance,
+            IdentityApi identityApi,
             Runnable runnable
     ) {
         if (email != null && user != null) {
@@ -1406,7 +1406,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 IdentityApiRequest identityRequest = IdentityApiRequest.withUser(user)
                         .email(email)
                         .build();
-                MParticleTask<IdentityApiResult> task = instance.Identity().identify(identityRequest);
+                MParticleTask<IdentityApiResult> task = identityApi.identify(identityRequest);
                 task.addFailureListener(new TaskFailureListener() {
                     @Override
                     public void onFailure(IdentityHttpResponse result) {
