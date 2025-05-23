@@ -1342,9 +1342,13 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         for (KitIntegration provider : providers.values()) {
             try {
                 if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
+                    if (attributes == null) {
+                        attributes = new HashMap<>();
+                    }
                     MParticle instance = MParticle.getInstance();
                     MParticleUser user = instance.Identity().getCurrentUser();
-                    String email = attributes != null ? attributes.get("email") : null;
+                    String email = attributes.get("email");
+                    Map<String, String> finalAttributes = attributes;
                     confirmEmail(email,user,instance.Identity(), () -> {
                     JSONArray jsonArray = new JSONArray();
 
@@ -1361,14 +1365,14 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                         if (obj == null) continue;
                         String mapFrom = obj.optString("map");
                         String mapTo = obj.optString("value");
-                        if (attributes.containsKey(mapFrom)) {
-                            String value = attributes.remove(mapFrom);
-                            attributes.put(mapTo, value);
+                        if (finalAttributes.containsKey(mapFrom)) {
+                            String value = finalAttributes.remove(mapFrom);
+                            finalAttributes.put(mapTo, value);
                         }
                     }
                     Map<String, Object> objectAttributes = new HashMap<>();
-                    for (Map.Entry<String, String> entry : attributes.entrySet()) {
-                        if(!attributes.containsKey(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
+                    for (Map.Entry<String, String> entry : finalAttributes.entrySet()) {
+                        if(!finalAttributes.containsKey(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
                             objectAttributes.put(entry.getKey(), entry.getValue());
                         }
                     }
@@ -1376,12 +1380,12 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                         user.setUserAttributes(objectAttributes);
                     }
 
-                    if (!attributes.containsKey(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
-                        attributes.put(Constants.MessageKey.SANDBOX_MODE_ROKT, String.valueOf(Objects.toString(MPUtility.isDevEnv(), "false")));  // Default value is "false" if null
+                    if (!finalAttributes.containsKey(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
+                        finalAttributes.put(Constants.MessageKey.SANDBOX_MODE_ROKT, String.valueOf(Objects.toString(MPUtility.isDevEnv(), "false")));  // Default value is "false" if null
                     }
 
                     ((KitIntegration.RoktListener) provider).execute(viewName,
-                            attributes,
+                            finalAttributes,
                             mpRoktEventCallback,
                             placeHolders,
                             fontTypefaces,
