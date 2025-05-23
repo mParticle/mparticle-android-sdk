@@ -21,30 +21,30 @@ class InternalListenerManagerTest {
         PowerMockito.mockStatic(MPUtility::class.java)
         Mockito.`when`(MPUtility.isDevEnv()).thenReturn(true)
         Mockito.`when`(MPUtility.getProp(Mockito.anyString())).thenReturn(mockContext.packageName)
-        Assert.assertNotNull(InternalListenerManager.getListener())
-        Assert.assertEquals(InternalListenerManager.getListener(), InternalListener.EMPTY)
-        Assert.assertFalse(InternalListenerManager.isEnabled())
+        Assert.assertNotNull(InternalListenerManager.listener)
+        Assert.assertEquals(InternalListenerManager.listener, InternalListener.EMPTY)
+        Assert.assertFalse(InternalListenerManager.isEnabled)
         mockContext.isDebuggable = true
         val manager = InternalListenerManager.start(mockContext)
         Assert.assertNotNull(manager)
 
         // Manager is started, but should still be a brick until an SdkListener is added.
-        Assert.assertNotNull(InternalListenerManager.getListener())
-        Assert.assertEquals(InternalListenerManager.getListener(), InternalListener.EMPTY)
-        Assert.assertFalse(InternalListenerManager.isEnabled())
+        Assert.assertNotNull(InternalListenerManager.listener)
+        Assert.assertEquals(InternalListenerManager.listener, InternalListener.EMPTY)
+        Assert.assertFalse(InternalListenerManager.isEnabled)
         val listener = SdkListener()
         manager?.addListener(listener)
 
         // Manager should now be active, since a listener was added.
-        Assert.assertNotNull(InternalListenerManager.getListener())
-        Assert.assertNotEquals(InternalListenerManager.getListener(), InternalListener.EMPTY)
-        Assert.assertTrue(InternalListenerManager.isEnabled())
+        Assert.assertNotNull(InternalListenerManager.listener)
+        Assert.assertNotEquals(InternalListenerManager.listener, InternalListener.EMPTY)
+        Assert.assertTrue(InternalListenerManager.isEnabled)
         manager?.removeListener(listener)
 
         // Manager should go back to being a brick, since it's listener was removed.
-        Assert.assertNotNull(InternalListenerManager.getListener())
-        Assert.assertEquals(InternalListenerManager.getListener(), InternalListener.EMPTY)
-        Assert.assertFalse(InternalListenerManager.isEnabled())
+        Assert.assertNotNull(InternalListenerManager.listener)
+        Assert.assertEquals(InternalListenerManager.listener, InternalListener.EMPTY)
+        Assert.assertFalse(InternalListenerManager.isEnabled)
     }
 
     @Test
@@ -57,9 +57,9 @@ class InternalListenerManagerTest {
         val manager = InternalListenerManager.start(context)
 
         // B rick instance of InternalListenerManager should act like a brick.
-        Assert.assertNotNull(InternalListenerManager.getListener())
-        Assert.assertEquals(InternalListenerManager.getListener(), InternalListener.EMPTY)
-        Assert.assertFalse(InternalListenerManager.isEnabled())
+        Assert.assertNotNull(InternalListenerManager.listener)
+        Assert.assertEquals(InternalListenerManager.listener, InternalListener.EMPTY)
+        Assert.assertFalse(InternalListenerManager.isEnabled)
         Assert.assertNull(manager)
     }
 
