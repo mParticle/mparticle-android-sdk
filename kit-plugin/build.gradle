@@ -9,13 +9,13 @@ apply from: '../scripts/maven.gradle'
 dependencies {
     implementation gradleApi()
     implementation localGroovy()
-    compileOnly "com.android.tools.build:gradle:7.3.1"
-    testImplementation "com.android.tools.build:gradle:4.1.3"
+    compileOnly "com.android.tools.build:gradle:$gradle_version"
+    testImplementation "com.android.tools.build:gradle:$gradle_version"
 }
 
 compileGroovy {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 dependencies {
