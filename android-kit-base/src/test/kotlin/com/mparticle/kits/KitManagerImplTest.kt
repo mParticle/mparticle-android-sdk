@@ -853,6 +853,7 @@ class KitManagerImplTest {
         Assert.assertEquals("Test1", attributes["lastname"])
         Assert.assertEquals("Test", attributes["test"])
         Assert.assertEquals("US", attributes["country"])
+        Assert.assertEquals("false", attributes["sandbox"])
     }
 
     @Test
@@ -918,6 +919,7 @@ class KitManagerImplTest {
         Assert.assertEquals("Test1", attributes["lastname"])
         Assert.assertEquals("Test", attributes["test"])
         Assert.assertEquals("US", attributes["country"])
+        Assert.assertEquals("false", attributes["sandbox"])
     }
 
     @Test
@@ -982,6 +984,7 @@ class KitManagerImplTest {
         Assert.assertEquals("Test1", attributes["lastname"])
         Assert.assertEquals("Test", attributes["test"])
         Assert.assertEquals("US", attributes["country"])
+        Assert.assertEquals("false", attributes["sandbox"])
     }
 
     @Test
@@ -1045,6 +1048,7 @@ class KitManagerImplTest {
         Assert.assertEquals("Test1", attributes["lastname"])
         Assert.assertEquals("Test", attributes["test"])
         Assert.assertEquals("US", attributes["country"])
+        Assert.assertEquals("false", attributes["sandbox"])
     }
 
     @Test

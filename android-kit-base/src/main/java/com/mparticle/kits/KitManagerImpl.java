@@ -1372,7 +1372,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     }
                     Map<String, Object> objectAttributes = new HashMap<>();
                     for (Map.Entry<String, String> entry : finalAttributes.entrySet()) {
-                        if(!finalAttributes.containsKey(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
+                        if(!entry.getKey().equals(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
                             objectAttributes.put(entry.getKey(), entry.getValue());
                         }
                     }
