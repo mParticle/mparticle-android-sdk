@@ -13,11 +13,6 @@ import java.util.concurrent.CountDownLatch;
 public class BaseHandler extends Handler {
     private volatile boolean disabled;
     private volatile boolean handling;
-    private ConcurrentHashMap<Message, Boolean> messageQueue = new ConcurrentHashMap();
-
-    public Set<Message> getMessageQueue() {
-        return messageQueue.keySet();
-    }
 
     public BaseHandler() {
     }
@@ -50,9 +45,6 @@ public class BaseHandler extends Handler {
         }
         handling = true;
         try {
-            if (msg != null) {
-                messageQueue.remove(msg);
-            }
             if (msg != null && msg.what == -1 && msg.obj instanceof CountDownLatch) {
                 ((CountDownLatch) msg.obj).countDown();
             } else {
@@ -78,20 +70,7 @@ public class BaseHandler extends Handler {
         if (InternalListenerManager.isEnabled()) {
             InternalListenerManager.getListener().onThreadMessage(getClass().getName(), msg, false);
         }
-        if (msg != null) {
-            messageQueue.put(msg, true);
-        }
         return super.sendMessageAtTime(msg, uptimeMillis);
-    }
-
-    public void removeMessage(int what) {
-        Set<Message> messages = messageQueue.keySet();
-        for (Message message : messages) {
-            if (message.what == what) {
-                messageQueue.remove(message);
-            }
-        }
-        super.removeMessages(what);
     }
 
     //Override this in order to handle messages
