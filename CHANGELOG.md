@@ -1,3 +1,21 @@
+## [5.64.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.63.0...v5.64.0) (2025-05-30)
+
+
+### Features
+
+* Fire Identify if Provided Email in Rokt SelectPlacements ([#578](https://github.com/mParticle/mparticle-android-sdk/issues/578)) ([8325080](https://github.com/mParticle/mparticle-android-sdk/commit/8325080ea251daf7e3f380db83c031b5ea91a960))
+
+
+### Bug Fixes
+
+* Removes `messageQueue` since produces memory leaks ([#576](https://github.com/mParticle/mparticle-android-sdk/issues/576)) ([5a2c35a](https://github.com/mParticle/mparticle-android-sdk/commit/5a2c35a791c2063942df73766129344f075ac59c))
+
+
+### Updates & Maintenance
+
+* Migrate Internal listeners class to kotlin ([#548](https://github.com/mParticle/mparticle-android-sdk/issues/548)) ([de96056](https://github.com/mParticle/mparticle-android-sdk/commit/de96056f03c0d812e492aff2cb1d8c83650df720))
+* Update submodules ([5ffd95f](https://github.com/mParticle/mparticle-android-sdk/commit/5ffd95f67f4ee25d114ac9be4dfa57d7e77d03d1))
+
 ## [5.63.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.62.2...v5.63.0) (2025-05-12)
 
 
