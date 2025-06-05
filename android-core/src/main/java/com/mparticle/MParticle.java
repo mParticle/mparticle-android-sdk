@@ -1875,11 +1875,12 @@ public class MParticle {
         protected Rokt(){
 
         }
-        public void selectPlacements(String viewName,
-                            Map<String, String> attributes,
-                            MpRoktEventCallback callbacks,
-                            Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
-                            Map<String, WeakReference<Typeface>> fontTypefaces) {
+
+        public void selectPlacements(@NonNull String viewName,
+                                     @NonNull Map<String, String> attributes,
+                                     @Nullable MpRoktEventCallback callbacks,
+                                     @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
+                                     @Nullable Map<String, WeakReference<Typeface>> fontTypefaces) {
              if (mConfigManager.isEnabled()) {
                  mKitManager.execute(viewName,
                          attributes,
@@ -1888,8 +1889,8 @@ public class MParticle {
                          fontTypefaces);
              }
         }
-        public void selectPlacements(String viewName,
-                                     Map<String, String> attributes) {
+        public void selectPlacements(@NonNull String viewName,
+                                     @NonNull Map<String, String> attributes) {
             if (mConfigManager.isEnabled()) {
                 mKitManager.execute(viewName,
                         attributes,
