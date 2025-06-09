@@ -17,6 +17,7 @@ import com.mparticle.identity.IdentityApi
 import com.mparticle.identity.IdentityApiResult
 import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.CoreCallbacks
+import com.mparticle.internal.MPUtility
 import com.mparticle.internal.SideloadedKit
 import com.mparticle.kits.KitIntegration.AttributeListener
 import com.mparticle.mock.MockContext
@@ -48,7 +49,7 @@ import java.util.LinkedList
 import java.util.concurrent.ConcurrentHashMap
 
 @RunWith(PowerMockRunner::class)
-@PrepareForTest(Looper::class, SystemClock::class)
+@PrepareForTest(Looper::class, SystemClock::class, MPUtility::class)
 class KitManagerImplTest {
     var mparticle: MParticle? = null
     var mockIdentity: IdentityApi? = null
@@ -843,13 +844,15 @@ class KitManagerImplTest {
             Pair("customerId", "55555"),
             Pair("country", "US")
         )
+
         manager.execute("Test", attributes, null, null, null)
-        Assert.assertEquals(5, attributes.size)
+        Assert.assertEquals(6, attributes.size)
         Assert.assertEquals("(123) 456-9898", attributes["no"])
         Assert.assertEquals("55555", attributes["minorcatid"])
         Assert.assertEquals("Test1", attributes["lastname"])
         Assert.assertEquals("Test", attributes["test"])
         Assert.assertEquals("US", attributes["country"])
+        Assert.assertEquals("false", attributes["sandbox"])
     }
 
     @Test
@@ -906,13 +909,16 @@ class KitManagerImplTest {
             Pair("postal", "5-45555"),
             Pair("country", "US")
         )
+
         manager.execute("Test", attributes, null, null, null)
-        Assert.assertEquals(5, attributes.size)
+        Assert.assertEquals(6, attributes.size)
+
         Assert.assertEquals("(123) 456-9898", attributes["call"])
         Assert.assertEquals("5-45555", attributes["postal"])
         Assert.assertEquals("Test1", attributes["lastname"])
         Assert.assertEquals("Test", attributes["test"])
         Assert.assertEquals("US", attributes["country"])
+        Assert.assertEquals("false", attributes["sandbox"])
     }
 
     @Test
@@ -969,13 +975,15 @@ class KitManagerImplTest {
             Pair("minorcatid", "5-45555"),
             Pair("country", "US")
         )
+
         manager.execute("Test", attributes, null, null, null)
-        Assert.assertEquals(5, attributes.size)
+        Assert.assertEquals(6, attributes.size)
         Assert.assertEquals("(123) 456-9898", attributes["no"])
         Assert.assertEquals("5-45555", attributes["minorcatid"])
         Assert.assertEquals("Test1", attributes["lastname"])
         Assert.assertEquals("Test", attributes["test"])
         Assert.assertEquals("US", attributes["country"])
+        Assert.assertEquals("false", attributes["sandbox"])
     }
 
     @Test
@@ -1031,13 +1039,15 @@ class KitManagerImplTest {
             Pair("customerId", "55555"),
             Pair("country", "US")
         )
+
         manager.execute("Test", attributes, null, null, null)
-        Assert.assertEquals(5, attributes.size)
+        Assert.assertEquals(6, attributes.size)
         Assert.assertEquals("(123) 456-9898", attributes["number"])
         Assert.assertEquals("55555", attributes["customerId"])
         Assert.assertEquals("Test1", attributes["lastname"])
         Assert.assertEquals("Test", attributes["test"])
         Assert.assertEquals("US", attributes["country"])
+        Assert.assertEquals("false", attributes["sandbox"])
     }
 
     @Test
@@ -1226,6 +1236,192 @@ class KitManagerImplTest {
         method.isAccessible = true
         val result = method.invoke(manager, null, user, identityApi, runnable)
         Mockito.verify(runnable).run()
+    }
+
+    @Test
+    fun testRokt_SandboxMode_When_Default_Environment() {
+        val sideloadedKit = Mockito.mock(MPSideloadedKit::class.java)
+        val kitId = 6000000
+
+        val configJSONObj = JSONObject().apply {
+            put("id", kitId)
+        }
+        val mockedKitConfig = KitConfiguration.createKitConfiguration(configJSONObj)
+        Mockito.`when`(sideloadedKit.configuration).thenReturn(mockedKitConfig)
+
+        val settingsMap = hashMapOf(
+            "placementAttributesMapping" to """
+        []
+            """.trimIndent()
+        )
+        val field = KitConfiguration::class.java.getDeclaredField("settings")
+        field.isAccessible = true
+        field.set(mockedKitConfig, settingsMap)
+
+        val mockedProvider = mockProvider(mockedKitConfig)
+
+        val options = MParticleOptions.builder(MockContext())
+            .sideloadedKits(mutableListOf(sideloadedKit) as List<SideloadedKit>).build()
+        val manager: KitManagerImpl = MockKitManagerImpl(options)
+        val factory = Mockito.mock(KitIntegrationFactory::class.java)
+        manager.setKitFactory(factory)
+
+        Mockito.`when`(factory.isSupported(Mockito.anyInt())).thenReturn(true)
+        val supportedKit = mutableSetOf(kitId)
+        Mockito.`when`(manager.supportedKits).thenReturn(supportedKit)
+        Mockito.`when`(sideloadedKit.isDisabled).thenReturn(false)
+        Mockito.`when`(
+            factory.createInstance(
+                Mockito.any(
+                    KitManagerImpl::class.java
+                ),
+                Mockito.any(KitConfiguration::class.java)
+            )
+        ).thenReturn(sideloadedKit)
+        manager.providers = ConcurrentHashMap<Int, KitIntegration>().apply {
+            put(42, mockedProvider)
+        }
+
+        val attributes = hashMapOf(
+            Pair("test", "Test"),
+            Pair("lastname", "Test1"),
+            Pair("number", "(123) 456-9898"),
+            Pair("customerId", "55555"),
+            Pair("country", "US")
+        )
+        manager.execute("Test", attributes, null, null, null)
+        Assert.assertEquals(6, attributes.size)
+        Assert.assertEquals("(123) 456-9898", attributes["number"])
+        Assert.assertEquals("55555", attributes["customerId"])
+        Assert.assertEquals("Test1", attributes["lastname"])
+        Assert.assertEquals("Test", attributes["test"])
+        Assert.assertEquals("US", attributes["country"])
+        Assert.assertEquals("false", attributes["sandbox"])
+    }
+
+    @Test
+    fun testRokt_SandboxMode_When_Environment_IS_Development() {
+        val sideloadedKit = Mockito.mock(MPSideloadedKit::class.java)
+        val kitId = 6000000
+
+        val configJSONObj = JSONObject().apply {
+            put("id", kitId)
+        }
+        val mockedKitConfig = KitConfiguration.createKitConfiguration(configJSONObj)
+
+        val settingsMap = hashMapOf(
+            "placementAttributesMapping" to """
+        []
+            """.trimIndent()
+        )
+        val field = KitConfiguration::class.java.getDeclaredField("settings")
+        field.isAccessible = true
+        field.set(mockedKitConfig, settingsMap)
+
+        val mockedProvider = mockProvider(mockedKitConfig)
+
+        val options = MParticleOptions.builder(MockContext())
+            .sideloadedKits(mutableListOf(sideloadedKit) as List<SideloadedKit>).build()
+        val manager: KitManagerImpl = MockKitManagerImpl(options)
+        val factory = Mockito.mock(KitIntegrationFactory::class.java)
+        manager.setKitFactory(factory)
+
+        Mockito.`when`(factory.isSupported(Mockito.anyInt())).thenReturn(true)
+        PowerMockito.mockStatic(MPUtility::class.java)
+        Mockito.`when`(MPUtility.isDevEnv()).thenReturn(true)
+        val supportedKit = mutableSetOf(kitId)
+        Mockito.`when`(manager.supportedKits).thenReturn(supportedKit)
+        Mockito.`when`(sideloadedKit.isDisabled).thenReturn(false)
+        Mockito.`when`(
+            factory.createInstance(
+                Mockito.any(
+                    KitManagerImpl::class.java
+                ),
+                Mockito.any(KitConfiguration::class.java)
+            )
+        ).thenReturn(sideloadedKit)
+        manager.providers = ConcurrentHashMap<Int, KitIntegration>().apply {
+            put(42, mockedProvider)
+        }
+
+        val attributes = hashMapOf(
+            Pair("test", "Test"),
+            Pair("lastname", "Test1"),
+            Pair("number", "(123) 456-9898"),
+            Pair("customerId", "55555"),
+            Pair("country", "US")
+        )
+        manager.execute("Test", attributes, null, null, null)
+        Assert.assertEquals(6, attributes.size)
+        Assert.assertEquals("(123) 456-9898", attributes["number"])
+        Assert.assertEquals("55555", attributes["customerId"])
+        Assert.assertEquals("Test1", attributes["lastname"])
+        Assert.assertEquals("Test", attributes["test"])
+        Assert.assertEquals("US", attributes["country"])
+        Assert.assertEquals("true", attributes["sandbox"])
+    }
+
+    @Test
+    fun testRokt_SandboxMode_When_SandBox_is_Pass_In_Attributes_And_Environment_Is_DEV() {
+        val sideloadedKit = Mockito.mock(MPSideloadedKit::class.java)
+        val kitId = 6000000
+
+        val configJSONObj = JSONObject().apply {
+            put("id", kitId)
+        }
+        val mockedKitConfig = KitConfiguration.createKitConfiguration(configJSONObj)
+
+        val settingsMap = hashMapOf(
+            "placementAttributesMapping" to """
+        []
+            """.trimIndent()
+        )
+        val field = KitConfiguration::class.java.getDeclaredField("settings")
+        field.isAccessible = true
+        field.set(mockedKitConfig, settingsMap)
+
+        val mockedProvider = mockProvider(mockedKitConfig)
+
+        val options = MParticleOptions.builder(MockContext())
+            .sideloadedKits(mutableListOf(sideloadedKit) as List<SideloadedKit>).build()
+        val manager: KitManagerImpl = MockKitManagerImpl(options)
+        val factory = Mockito.mock(KitIntegrationFactory::class.java)
+        manager.setKitFactory(factory)
+
+        Mockito.`when`(factory.isSupported(Mockito.anyInt())).thenReturn(true)
+        PowerMockito.mockStatic(MPUtility::class.java)
+        Mockito.`when`(MPUtility.isDevEnv()).thenReturn(true)
+        val supportedKit = mutableSetOf(kitId)
+        Mockito.`when`(manager.supportedKits).thenReturn(supportedKit)
+        Mockito.`when`(sideloadedKit.isDisabled).thenReturn(false)
+        Mockito.`when`(
+            factory.createInstance(
+                Mockito.any(
+                    KitManagerImpl::class.java
+                ),
+                Mockito.any(KitConfiguration::class.java)
+            )
+        ).thenReturn(sideloadedKit)
+        manager.providers = ConcurrentHashMap<Int, KitIntegration>().apply {
+            put(42, mockedProvider)
+        }
+
+        val attributes = hashMapOf(
+            Pair("test", "Test"),
+            Pair("lastname", "Test1"),
+            Pair("number", "(123) 456-9898"),
+            Pair("customerId", "55555"),
+            Pair("country", "US"),
+            Pair("sandbox", "false")
+        )
+        manager.execute("Test", attributes, null, null, null)
+        Assert.assertEquals(6, attributes.size)
+        Assert.assertEquals("(123) 456-9898", attributes["number"])
+        Assert.assertEquals("55555", attributes["customerId"])
+        Assert.assertEquals("Test1", attributes["lastname"])
+        Assert.assertEquals("Test", attributes["test"])
+        Assert.assertEquals("US", attributes["country"])
+        Assert.assertEquals("false", attributes["sandbox"])
     }
 
     internal inner class mockProvider(val config: KitConfiguration) : KitIntegration(), KitIntegration.RoktListener {
