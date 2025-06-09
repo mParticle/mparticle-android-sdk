@@ -5,6 +5,8 @@ import android.util.AttributeSet
 import android.widget.FrameLayout
 
 class RoktEmbeddedView : FrameLayout {
+    var dimensionCallBack: RoktLayoutDimensionCallBack? = null
+
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
