@@ -1,3 +1,21 @@
+## [5.65.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.64.0...v5.65.0) (2025-06-09)
+
+
+### Features
+
+* Add sandbox mode to attributes ([#559](https://github.com/mParticle/mparticle-android-sdk/issues/559)) ([cbccd13](https://github.com/mParticle/mparticle-android-sdk/commit/cbccd1322857c5c972ba236f7aaca6debc73fd98))
+
+
+### Bug Fixes
+
+* Add @NonNull and @Nullable annotations to execute method parameters ([#579](https://github.com/mParticle/mparticle-android-sdk/issues/579)) ([9089098](https://github.com/mParticle/mparticle-android-sdk/commit/908909886eecbc0dcefc95838c50d3851715d123))
+* add Rokt dimensions layout to show embedded placements correctly ([#580](https://github.com/mParticle/mparticle-android-sdk/issues/580)) ([9d6813c](https://github.com/mParticle/mparticle-android-sdk/commit/9d6813c66aee6d8dc38740ee6366d7881de623c2))
+
+
+### Updates & Maintenance
+
+* Update submodules ([4ed38b5](https://github.com/mParticle/mparticle-android-sdk/commit/4ed38b55e5c6bbcdbe9025994ca669e601b31fe8))
+
 ## [5.64.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.63.0...v5.64.0) (2025-05-30)
 
 
