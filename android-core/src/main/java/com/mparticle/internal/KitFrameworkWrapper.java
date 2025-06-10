@@ -20,6 +20,7 @@ import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.listeners.InternalListenerManager;
+import com.mparticle.rokt.RoktConfig;
 import com.mparticle.rokt.RoktEmbeddedView;
 
 import org.json.JSONArray;
@@ -653,13 +654,15 @@ public class KitFrameworkWrapper implements KitManager {
                         Map<String, String> attributes,
                         MParticle.MpRoktEventCallback mpRoktEventCallback,
                         Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
-                        Map<String, WeakReference<Typeface>> fontTypefaces) {
+                        Map<String, WeakReference<Typeface>> fontTypefaces,
+                        RoktConfig config) {
         if (mKitManager != null) {
             mKitManager.execute(viewName,
                     attributes,
                     mpRoktEventCallback,
                     placeHolders,
-                    fontTypefaces);
+                    fontTypefaces,
+                    config);
         }
     }
 

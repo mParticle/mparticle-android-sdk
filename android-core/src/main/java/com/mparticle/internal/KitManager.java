@@ -18,6 +18,7 @@ import com.mparticle.MParticleOptions;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
+import com.mparticle.rokt.RoktConfig;
 import com.mparticle.rokt.RoktEmbeddedView;
 
 import org.json.JSONArray;
@@ -126,7 +127,8 @@ public interface KitManager {
                  Map<String, String> attributes,
                  MParticle.MpRoktEventCallback mpRoktEventCallback,
                  Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
-                 Map<String, WeakReference<Typeface>> fontTypefaces);
+                 Map<String, WeakReference<Typeface>> fontTypefaces,
+                 RoktConfig config);
 
     enum KitStatus {
         NOT_CONFIGURED,
