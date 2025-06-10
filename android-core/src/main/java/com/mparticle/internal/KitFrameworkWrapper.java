@@ -8,6 +8,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 
@@ -16,6 +17,7 @@ import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
+import com.mparticle.WrapperSdkVersion;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
@@ -649,17 +651,24 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     @Override
-    public void execute(String viewName,
-                        Map<String, String> attributes,
-                        MParticle.MpRoktEventCallback mpRoktEventCallback,
-                        Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
-                        Map<String, WeakReference<Typeface>> fontTypefaces) {
+    public void execute(@NonNull String viewName,
+                        @NonNull Map<String, String> attributes,
+                        @Nullable MParticle.MpRoktEventCallback mpRoktEventCallback,
+                        @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
+                        @Nullable Map<String, WeakReference<Typeface>> fontTypefaces) {
         if (mKitManager != null) {
             mKitManager.execute(viewName,
                     attributes,
                     mpRoktEventCallback,
                     placeHolders,
                     fontTypefaces);
+        }
+    }
+
+    @Override
+    public void setWrapperSdkVersion(WrapperSdkVersion wrapperSdkVersion) {
+        if (mKitManager != null) {
+            mKitManager.setWrapperSdkVersion(wrapperSdkVersion);
         }
     }
 

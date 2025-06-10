@@ -1,7 +1,5 @@
 package com.mparticle.kits;
 
-import static android.util.Log.e;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -12,7 +10,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
-import android.util.Log;
 
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
@@ -28,6 +25,7 @@ import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.MParticleTask;
 import com.mparticle.UserAttributeListener;
+import com.mparticle.WrapperSdkVersion;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApi;
@@ -65,7 +63,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 
 public class KitManagerImpl implements KitManager, AttributionListener, UserAttributeListener, IdentityStateListener {
 
@@ -1396,6 +1393,11 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 Logger.warning("Failed to call execute for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
+    }
+
+    @Override
+    public void setWrapperSdkVersion(WrapperSdkVersion wrapperSdkVersion) {
+
     }
 
     private void confirmEmail(

@@ -9,6 +9,7 @@ import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.MParticleTask
+import com.mparticle.WrapperSdkVersion
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.commerce.Product
 import com.mparticle.consent.ConsentState
@@ -1448,6 +1449,10 @@ class KitManagerImplTest {
             user: FilteredMParticleUser?
         ) {
             println("Executed with $attributes")
+        }
+
+        override fun setWrapperSdkVersion(wrapperSdkVersion: WrapperSdkVersion?) {
+            println("setWrapperSdkVersion with $wrapperSdkVersion")
         }
     }
     internal inner class KitManagerEventCounter : MockKitManagerImpl() {

@@ -9,12 +9,14 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.mparticle.AttributionResult;
 import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
+import com.mparticle.WrapperSdkVersion;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
@@ -122,11 +124,14 @@ public interface KitManager {
 
     void reset();
 
-    void execute(String viewName,
-                 Map<String, String> attributes,
-                 MParticle.MpRoktEventCallback mpRoktEventCallback,
-                 Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
-                 Map<String, WeakReference<Typeface>> fontTypefaces);
+    void execute(
+            @NonNull String viewName,
+            @NonNull Map<String, String> attributes,
+            @Nullable MParticle.MpRoktEventCallback mpRoktEventCallback,
+            @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
+            @Nullable Map<String, WeakReference<Typeface>> fontTypefaces);
+
+    void setWrapperSdkVersion(WrapperSdkVersion wrapperSdkVersion);
 
     enum KitStatus {
         NOT_CONFIGURED,
