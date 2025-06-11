@@ -1331,11 +1331,11 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     }
 
     @Override
-    public void execute(String viewName,
-                        Map<String, String> attributes,
-                        MParticle.MpRoktEventCallback mpRoktEventCallback,
-                        Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
-                        Map<String, WeakReference<Typeface>> fontTypefaces) {
+    public void execute(@NonNull String viewName,
+                        @NonNull Map<String, String> attributes,
+                        @Nullable MParticle.MpRoktEventCallback mpRoktEventCallback,
+                        @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
+                        @Nullable Map<String, WeakReference<Typeface>> fontTypefaces) {
         for (KitIntegration provider : providers.values()) {
             try {
                 if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
@@ -1396,8 +1396,16 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     }
 
     @Override
-    public void setWrapperSdkVersion(WrapperSdkVersion wrapperSdkVersion) {
-
+    public void setWrapperSdkVersion(@NonNull WrapperSdkVersion wrapperSdkVersion) {
+        for (KitIntegration provider : providers.values()) {
+            try {
+                if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
+                    ((KitIntegration.RoktListener) provider).setWrapperSdkVersion(wrapperSdkVersion);
+                }
+            } catch (Exception e) {
+                Logger.warning("Failed to call execute for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
     }
 
     private void confirmEmail(

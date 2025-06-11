@@ -666,7 +666,7 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     @Override
-    public void setWrapperSdkVersion(WrapperSdkVersion wrapperSdkVersion) {
+    public void setWrapperSdkVersion(@NonNull WrapperSdkVersion wrapperSdkVersion) {
         if (mKitManager != null) {
             mKitManager.setWrapperSdkVersion(wrapperSdkVersion);
         }

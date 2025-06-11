@@ -9,6 +9,7 @@ import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.MParticleTask
+import com.mparticle.WrapperSdk
 import com.mparticle.WrapperSdkVersion
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.commerce.Product
@@ -38,8 +39,10 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.withSettings
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
@@ -1425,6 +1428,40 @@ class KitManagerImplTest {
         Assert.assertEquals("false", attributes["sandbox"])
     }
 
+    @Test
+    fun testSetWrapperSdkVersion() {
+        val manager: KitManagerImpl = MockKitManagerImpl()
+
+        val enabledRoktListener = mock(
+                KitIntegration::class.java,
+                withSettings().extraInterfaces(KitIntegration.RoktListener::class.java)
+            )
+        `when`(enabledRoktListener.isDisabled).thenReturn(false)
+
+        val disabledRoktListener = mock(
+                KitIntegration::class.java,
+                withSettings().extraInterfaces(KitIntegration.RoktListener::class.java)
+            )
+        `when`(disabledRoktListener.isDisabled).thenReturn(true)
+
+        val nonRoktListener = mock(KitIntegration::class.java)
+        `when`(nonRoktListener.isDisabled).thenReturn(false)
+
+        manager.providers = ConcurrentHashMap<Int, KitIntegration>().apply {
+            put(1, enabledRoktListener)
+            put(2, disabledRoktListener)
+            put(3, nonRoktListener)
+        }
+
+        val wrapperSdkVersion = WrapperSdkVersion(WrapperSdk.WrapperFlutter, "1.2.3")
+        manager.setWrapperSdkVersion(wrapperSdkVersion)
+
+        verify(enabledRoktListener as KitIntegration.RoktListener)
+            .setWrapperSdkVersion(wrapperSdkVersion)
+        verify(disabledRoktListener as KitIntegration.RoktListener, never())
+            .setWrapperSdkVersion(wrapperSdkVersion)
+    }
+
     internal inner class mockProvider(val config: KitConfiguration) : KitIntegration(), KitIntegration.RoktListener {
         override fun isDisabled(): Boolean = false
         override fun getName(): String = "FakeProvider"
@@ -1441,8 +1478,8 @@ class KitManagerImplTest {
         }
 
         override fun execute(
-            viewName: String?,
-            attributes: MutableMap<String, String>?,
+            viewName: String,
+            attributes: MutableMap<String, String>,
             mpRoktEventCallback: MParticle.MpRoktEventCallback?,
             placeHolders: MutableMap<String, WeakReference<RoktEmbeddedView>>?,
             fontTypefaces: MutableMap<String, WeakReference<Typeface>>?,
@@ -1451,10 +1488,11 @@ class KitManagerImplTest {
             println("Executed with $attributes")
         }
 
-        override fun setWrapperSdkVersion(wrapperSdkVersion: WrapperSdkVersion?) {
+        override fun setWrapperSdkVersion(wrapperSdkVersion: WrapperSdkVersion) {
             println("setWrapperSdkVersion with $wrapperSdkVersion")
         }
     }
+
     internal inner class KitManagerEventCounter : MockKitManagerImpl() {
         var logBaseEventCalled = 0
         var logCommerceEventCalled = 0

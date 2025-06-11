@@ -131,7 +131,7 @@ public interface KitManager {
             @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
             @Nullable Map<String, WeakReference<Typeface>> fontTypefaces);
 
-    void setWrapperSdkVersion(WrapperSdkVersion wrapperSdkVersion);
+    void setWrapperSdkVersion(@NonNull WrapperSdkVersion wrapperSdkVersion);
 
     enum KitStatus {
         NOT_CONFIGURED,
