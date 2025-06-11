@@ -1,3 +1,15 @@
+## [5.66.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.65.0...v5.66.0) (2025-06-11)
+
+
+### Features
+
+* Add RoktConfig in MP layer ([#581](https://github.com/mParticle/mparticle-android-sdk/issues/581)) ([6a71621](https://github.com/mParticle/mparticle-android-sdk/commit/6a71621c506a5212e151ae30981aa04c2c2ce6b3))
+
+
+### Updates & Maintenance
+
+* Update submodules ([a05d1dd](https://github.com/mParticle/mparticle-android-sdk/commit/a05d1ddacc1c92613df108f04d33065ea866f60c))
+
 ## [5.65.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.64.0...v5.65.0) (2025-06-09)
 
 
