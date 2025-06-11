@@ -540,7 +540,7 @@ class MParticleTest {
         val attributes = mutableMapOf<String, String>()
         attributes.put("a", "b")
 
-        instance.rokt.reportConversion("132", "1111",true)
+        instance.rokt.reportConversion("132", "1111", true)
 
         verify(instance.mKitManager).purchaseFinalized("132", "1111", true)
     }
@@ -551,11 +551,10 @@ class MParticleTest {
         MParticle.setInstance(instance)
         `when`(instance.mConfigManager.isEnabled()).thenReturn(false)
 
-        instance.rokt.reportConversion("132", "1111",true)
+        instance.rokt.reportConversion("132", "1111", true)
 
-        verify(instance.mKitManager, never()).purchaseFinalized("132", "1111",true)
+        verify(instance.mKitManager, never()).purchaseFinalized("132", "1111", true)
     }
-
 
     inner class InnerMockMParticle : MParticle() {
         init {
