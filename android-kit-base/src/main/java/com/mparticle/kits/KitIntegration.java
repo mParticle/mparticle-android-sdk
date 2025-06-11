@@ -620,5 +620,7 @@ public abstract class KitIntegration {
                      Map<String, WeakReference<Typeface>> fontTypefaces,
                      FilteredMParticleUser user,
                      RoktConfig config);
+
+        void purchaseFinalized(@NonNull String placementId, @NonNull String catalogItemId, boolean status);
     }
 }

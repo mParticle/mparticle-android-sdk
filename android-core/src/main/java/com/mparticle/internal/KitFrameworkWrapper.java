@@ -8,6 +8,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 
@@ -663,6 +664,13 @@ public class KitFrameworkWrapper implements KitManager {
                     placeHolders,
                     fontTypefaces,
                     config);
+        }
+    }
+
+    @Override
+    public void purchaseFinalized(@NonNull String placementId, @NonNull String catalogItemId, boolean status) {
+        if (mKitManager != null) {
+            mKitManager.purchaseFinalized(placementId, catalogItemId, status);
         }
     }
 

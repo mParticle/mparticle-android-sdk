@@ -130,6 +130,8 @@ public interface KitManager {
                  Map<String, WeakReference<Typeface>> fontTypefaces,
                  RoktConfig config);
 
+    void purchaseFinalized(@NonNull String placementId, @NonNull String catalogItemId, boolean status);
+
     enum KitStatus {
         NOT_CONFIGURED,
         STOPPED,

@@ -1877,6 +1877,7 @@ public class MParticle {
 
         }
 
+
         public void selectPlacements(@NonNull String viewName,
                                      @NonNull Map<String, String> attributes,
                                      @Nullable MpRoktEventCallback callbacks,
@@ -1902,6 +1903,12 @@ public class MParticle {
                         null,
                         null
                 );
+            }
+        }
+
+        public void reportConversion(@NonNull String placementId, @NonNull String catalogItemId, boolean status) {
+            if (mConfigManager.isEnabled()) {
+                mKitManager.purchaseFinalized(placementId, catalogItemId, status);
             }
         }
     }
