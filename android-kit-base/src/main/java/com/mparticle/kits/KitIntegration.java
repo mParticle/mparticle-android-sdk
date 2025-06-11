@@ -19,6 +19,7 @@ import com.mparticle.WrapperSdkVersion;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.MParticleUser;
+import com.mparticle.rokt.RoktConfig;
 import com.mparticle.rokt.RoktEmbeddedView;
 
 import org.json.JSONObject;
@@ -618,7 +619,8 @@ public abstract class KitIntegration {
                      @Nullable MParticle.MpRoktEventCallback mpRoktEventCallback,
                      @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
                      @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
-                     @Nullable FilteredMParticleUser user);
+                     @Nullable FilteredMParticleUser user,
+                     @Nullable RoktConfig config);
 
         /**
          * Set the SDK version of the mParticle SDK.
