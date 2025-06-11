@@ -52,6 +52,7 @@ import com.mparticle.media.MPMediaAPI;
 import com.mparticle.media.MediaCallbacks;
 import com.mparticle.messaging.MPMessagingAPI;
 import com.mparticle.messaging.ProviderCloudMessage;
+import com.mparticle.rokt.RoktConfig;
 import com.mparticle.rokt.RoktEmbeddedView;
 
 import org.jetbrains.annotations.NotNull;
@@ -1880,13 +1881,15 @@ public class MParticle {
                                      @NonNull Map<String, String> attributes,
                                      @Nullable MpRoktEventCallback callbacks,
                                      @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
-                                     @Nullable Map<String, WeakReference<Typeface>> fontTypefaces) {
+                                     @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
+                                     @Nullable RoktConfig config) {
              if (mConfigManager.isEnabled()) {
                  mKitManager.execute(viewName,
                          attributes,
                          callbacks,
                          placeHolders,
-                         fontTypefaces);
+                         fontTypefaces,
+                         config);
              }
         }
         public void selectPlacements(@NonNull String viewName,
@@ -1894,6 +1897,7 @@ public class MParticle {
             if (mConfigManager.isEnabled()) {
                 mKitManager.execute(viewName,
                         attributes,
+                        null,
                         null,
                         null,
                         null

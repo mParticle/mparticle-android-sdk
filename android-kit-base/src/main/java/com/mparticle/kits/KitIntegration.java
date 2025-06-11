@@ -18,6 +18,7 @@ import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.MParticleUser;
+import com.mparticle.rokt.RoktConfig;
 import com.mparticle.rokt.RoktEmbeddedView;
 
 import org.json.JSONObject;
@@ -617,6 +618,7 @@ public abstract class KitIntegration {
                      MParticle.MpRoktEventCallback mpRoktEventCallback,
                      Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
                      Map<String, WeakReference<Typeface>> fontTypefaces,
-                     FilteredMParticleUser user);
+                     FilteredMParticleUser user,
+                     RoktConfig config);
     }
 }

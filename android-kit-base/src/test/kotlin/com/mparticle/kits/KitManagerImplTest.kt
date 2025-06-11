@@ -24,6 +24,7 @@ import com.mparticle.mock.MockContext
 import com.mparticle.mock.MockKitConfiguration
 import com.mparticle.mock.MockKitManagerImpl
 import com.mparticle.mock.MockMParticle
+import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
 import com.mparticle.testutils.TestingUtils
 import junit.framework.TestCase
@@ -845,7 +846,7 @@ class KitManagerImplTest {
             Pair("country", "US")
         )
 
-        manager.execute("Test", attributes, null, null, null)
+        manager.execute("Test", attributes, null, null, null, null)
         Assert.assertEquals(6, attributes.size)
         Assert.assertEquals("(123) 456-9898", attributes["no"])
         Assert.assertEquals("55555", attributes["minorcatid"])
@@ -910,7 +911,7 @@ class KitManagerImplTest {
             Pair("country", "US")
         )
 
-        manager.execute("Test", attributes, null, null, null)
+        manager.execute("Test", attributes, null, null, null, null)
         Assert.assertEquals(6, attributes.size)
 
         Assert.assertEquals("(123) 456-9898", attributes["call"])
@@ -976,7 +977,7 @@ class KitManagerImplTest {
             Pair("country", "US")
         )
 
-        manager.execute("Test", attributes, null, null, null)
+        manager.execute("Test", attributes, null, null, null, null)
         Assert.assertEquals(6, attributes.size)
         Assert.assertEquals("(123) 456-9898", attributes["no"])
         Assert.assertEquals("5-45555", attributes["minorcatid"])
@@ -1040,7 +1041,7 @@ class KitManagerImplTest {
             Pair("country", "US")
         )
 
-        manager.execute("Test", attributes, null, null, null)
+        manager.execute("Test", attributes, null, null, null, null)
         Assert.assertEquals(6, attributes.size)
         Assert.assertEquals("(123) 456-9898", attributes["number"])
         Assert.assertEquals("55555", attributes["customerId"])
@@ -1289,7 +1290,7 @@ class KitManagerImplTest {
             Pair("customerId", "55555"),
             Pair("country", "US")
         )
-        manager.execute("Test", attributes, null, null, null)
+        manager.execute("Test", attributes, null, null, null, null)
         Assert.assertEquals(6, attributes.size)
         Assert.assertEquals("(123) 456-9898", attributes["number"])
         Assert.assertEquals("55555", attributes["customerId"])
@@ -1351,7 +1352,7 @@ class KitManagerImplTest {
             Pair("customerId", "55555"),
             Pair("country", "US")
         )
-        manager.execute("Test", attributes, null, null, null)
+        manager.execute("Test", attributes, null, null, null, null)
         Assert.assertEquals(6, attributes.size)
         Assert.assertEquals("(123) 456-9898", attributes["number"])
         Assert.assertEquals("55555", attributes["customerId"])
@@ -1414,7 +1415,7 @@ class KitManagerImplTest {
             Pair("country", "US"),
             Pair("sandbox", "false")
         )
-        manager.execute("Test", attributes, null, null, null)
+        manager.execute("Test", attributes, null, null, null, null)
         Assert.assertEquals(6, attributes.size)
         Assert.assertEquals("(123) 456-9898", attributes["number"])
         Assert.assertEquals("55555", attributes["customerId"])
@@ -1445,7 +1446,8 @@ class KitManagerImplTest {
             mpRoktEventCallback: MParticle.MpRoktEventCallback?,
             placeHolders: MutableMap<String, WeakReference<RoktEmbeddedView>>?,
             fontTypefaces: MutableMap<String, WeakReference<Typeface>>?,
-            user: FilteredMParticleUser?
+            user: FilteredMParticleUser?,
+            config: RoktConfig
         ) {
             println("Executed with $attributes")
         }

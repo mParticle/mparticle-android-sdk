@@ -18,6 +18,7 @@ import com.mparticle.internal.MessageManager
 import com.mparticle.media.MPMediaAPI
 import com.mparticle.messaging.MPMessagingAPI
 import com.mparticle.mock.MockContext
+import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
 import com.mparticle.testutils.AndroidUtils
 import com.mparticle.testutils.RandomUtils
@@ -481,6 +482,8 @@ class MParticleTest {
         val placeholders: Map<String, WeakReference<RoktEmbeddedView>> = HashMap()
         val fonts: Map<String, WeakReference<Typeface>> = HashMap()
 
+        val config = RoktConfig.Builder().colorMode(RoktConfig.ColorMode.DARK).build()
+
         val callbacks = object : MParticle.MpRoktEventCallback {
             override fun onLoad() {
                 println("View loaded")
@@ -498,9 +501,9 @@ class MParticleTest {
                 println("Hide loading indicator")
             }
         }
-        instance.rokt!!.selectPlacements("testView", attributes, callbacks, placeholders, fonts)
+        instance.rokt!!.selectPlacements("testView", attributes, callbacks, placeholders, fonts, config)
 
-        verify(instance.mKitManager)?.execute("testView", attributes, callbacks, placeholders, fonts)
+        verify(instance.mKitManager)?.execute("testView", attributes, callbacks, placeholders, fonts, config)
     }
 
     @Test
@@ -514,7 +517,7 @@ class MParticleTest {
 
         instance.rokt.selectPlacements("basicView", attributes)
 
-        verify(instance.mKitManager).execute("basicView", attributes, null, null, null)
+        verify(instance.mKitManager).execute("basicView", attributes, null, null, null, null)
     }
 
     @Test
@@ -525,7 +528,7 @@ class MParticleTest {
 
         instance.rokt.selectPlacements("basicView", HashMap())
 
-        verify(instance.mKitManager, never()).execute(any(), any(), any(), any(), any())
+        verify(instance.mKitManager, never()).execute(any(), any(), any(), any(), any(), any())
     }
 
     inner class InnerMockMParticle : MParticle() {

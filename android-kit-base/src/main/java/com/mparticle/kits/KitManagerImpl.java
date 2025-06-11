@@ -46,6 +46,7 @@ import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.ReportingManager;
 import com.mparticle.kits.mappings.CustomMapping;
+import com.mparticle.rokt.RoktConfig;
 import com.mparticle.rokt.RoktEmbeddedView;
 
 import org.json.JSONArray;
@@ -1338,7 +1339,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                         Map<String, String> attributes,
                         MParticle.MpRoktEventCallback mpRoktEventCallback,
                         Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
-                        Map<String, WeakReference<Typeface>> fontTypefaces) {
+                        Map<String, WeakReference<Typeface>> fontTypefaces,
+                        RoktConfig config) {
         for (KitIntegration provider : providers.values()) {
             try {
                 if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
@@ -1389,7 +1391,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                             mpRoktEventCallback,
                             placeHolders,
                             fontTypefaces,
-                            FilteredMParticleUser.getInstance(user.getId(), provider));
+                            FilteredMParticleUser.getInstance(user.getId(), provider),
+                            config);
                     });
                 }
             } catch (Exception e) {
