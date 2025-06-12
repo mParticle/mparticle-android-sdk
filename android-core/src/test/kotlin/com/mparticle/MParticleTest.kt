@@ -30,7 +30,6 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
@@ -540,7 +539,7 @@ class MParticleTest {
         val attributes = mutableMapOf<String, String>()
         attributes.put("a", "b")
 
-        instance.rokt.reportConversion("132", "1111", true)
+        instance.rokt.purchaseFinalized("132", "1111", true)
 
         verify(instance.mKitManager).purchaseFinalized("132", "1111", true)
     }
@@ -551,7 +550,7 @@ class MParticleTest {
         MParticle.setInstance(instance)
         `when`(instance.mConfigManager.isEnabled()).thenReturn(false)
 
-        instance.rokt.reportConversion("132", "1111", true)
+        instance.rokt.purchaseFinalized("132", "1111", true)
 
         verify(instance.mKitManager, never()).purchaseFinalized("132", "1111", true)
     }

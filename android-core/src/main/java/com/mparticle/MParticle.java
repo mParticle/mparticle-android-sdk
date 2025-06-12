@@ -1906,7 +1906,7 @@ public class MParticle {
             }
         }
 
-        public void reportConversion(@NonNull String placementId, @NonNull String catalogItemId, boolean status) {
+        public void purchaseFinalized(@NonNull String placementId, @NonNull String catalogItemId, boolean status) {
             if (mConfigManager.isEnabled()) {
                 mKitManager.purchaseFinalized(placementId, catalogItemId, status);
             }

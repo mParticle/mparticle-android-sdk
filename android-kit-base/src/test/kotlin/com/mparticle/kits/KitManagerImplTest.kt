@@ -1453,7 +1453,7 @@ class KitManagerImplTest {
         }
 
         override fun purchaseFinalized(placementId: String, catalogItemId: String, status: Boolean) {
-            TODO("Not yet implemented")
+            println("purchaseFinalized with placementId: $placementId  catalogItemId : $catalogItemId status : $status ")
         }
     }
     internal inner class KitManagerEventCounter : MockKitManagerImpl() {
