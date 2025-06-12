@@ -30,7 +30,6 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
@@ -529,6 +528,31 @@ class MParticleTest {
         instance.rokt.selectPlacements("basicView", HashMap())
 
         verify(instance.mKitManager, never()).execute(any(), any(), any(), any(), any(), any())
+    }
+
+    @Test
+    fun testReportConversion_withBasicParams_whenEnabled() {
+        var instance: MParticle = InnerMockMParticle()
+        MParticle.setInstance(instance)
+        `when`(instance.mConfigManager.isEnabled()).thenReturn(true)
+
+        val attributes = mutableMapOf<String, String>()
+        attributes.put("a", "b")
+
+        instance.rokt.purchaseFinalized("132", "1111", true)
+
+        verify(instance.mKitManager).purchaseFinalized("132", "1111", true)
+    }
+
+    @Test
+    fun testReportConversion_withBasicParams_whenDisabled() {
+        var instance: MParticle = InnerMockMParticle()
+        MParticle.setInstance(instance)
+        `when`(instance.mConfigManager.isEnabled()).thenReturn(false)
+
+        instance.rokt.purchaseFinalized("132", "1111", true)
+
+        verify(instance.mKitManager, never()).purchaseFinalized("132", "1111", true)
     }
 
     inner class InnerMockMParticle : MParticle() {

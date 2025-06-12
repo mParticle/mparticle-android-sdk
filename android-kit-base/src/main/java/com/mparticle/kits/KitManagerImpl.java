@@ -1401,6 +1401,19 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         }
     }
 
+    @Override
+    public void purchaseFinalized(@NonNull String placementId, @NonNull String catalogItemId, boolean status) {
+        for (KitIntegration provider : providers.values()) {
+            try {
+                if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
+                    ((KitIntegration.RoktListener) provider).purchaseFinalized(placementId,catalogItemId,status);
+                }
+            } catch (Exception e) {
+                Logger.warning("Failed to call purchaseFinalized for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
     private void confirmEmail(
             @Nullable String email,
             @Nullable MParticleUser user,
