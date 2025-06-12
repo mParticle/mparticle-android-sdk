@@ -629,5 +629,7 @@ public abstract class KitIntegration {
          * @param wrapperSdkVersion the version of the mParticle SDK
          */
         void setWrapperSdkVersion(@NonNull WrapperSdkVersion wrapperSdkVersion);
+
+        void purchaseFinalized(@NonNull String placementId, @NonNull String catalogItemId, boolean status);
     }
 }

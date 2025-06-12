@@ -1485,9 +1485,13 @@ class KitManagerImplTest {
             placeHolders: MutableMap<String, WeakReference<RoktEmbeddedView>>?,
             fontTypefaces: MutableMap<String, WeakReference<Typeface>>?,
             user: FilteredMParticleUser?,
-            config: RoktConfig
+            config: RoktConfig?
         ) {
             println("Executed with $attributes")
+        }
+
+        override fun purchaseFinalized(placementId: String, catalogItemId: String, status: Boolean) {
+            println("purchaseFinalized with placementId: $placementId  catalogItemId : $catalogItemId status : $status ")
         }
 
         override fun setWrapperSdkVersion(wrapperSdkVersion: WrapperSdkVersion) {

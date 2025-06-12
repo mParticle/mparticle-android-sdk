@@ -1406,7 +1406,20 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     ((KitIntegration.RoktListener) provider).setWrapperSdkVersion(wrapperSdkVersion);
                 }
             } catch (Exception e) {
-                Logger.warning("Failed to call execute for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call setWrapperSdkVersion for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public void purchaseFinalized(@NonNull String placementId, @NonNull String catalogItemId, boolean status) {
+        for (KitIntegration provider : providers.values()) {
+            try {
+                if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
+                    ((KitIntegration.RoktListener) provider).purchaseFinalized(placementId,catalogItemId,status);
+                }
+            } catch (Exception e) {
+                Logger.warning("Failed to call purchaseFinalized for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }

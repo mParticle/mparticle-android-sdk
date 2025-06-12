@@ -675,6 +675,13 @@ public class KitFrameworkWrapper implements KitManager {
         }
     }
 
+    @Override
+    public void purchaseFinalized(@NonNull String placementId, @NonNull String catalogItemId, boolean status) {
+        if (mKitManager != null) {
+            mKitManager.purchaseFinalized(placementId, catalogItemId, status);
+        }
+    }
+
     static class CoreCallbacksImpl implements CoreCallbacks {
         KitFrameworkWrapper mKitFrameworkWrapper;
         ConfigManager mConfigManager;
