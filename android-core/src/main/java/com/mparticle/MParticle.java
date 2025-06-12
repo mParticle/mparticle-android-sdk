@@ -1877,7 +1877,6 @@ public class MParticle {
 
         }
 
-
         public void selectPlacements(@NonNull String viewName,
                                      @NonNull Map<String, String> attributes,
                                      @Nullable MpRoktEventCallback callbacks,
@@ -1893,6 +1892,7 @@ public class MParticle {
                          config);
              }
         }
+
         public void selectPlacements(@NonNull String viewName,
                                      @NonNull Map<String, String> attributes) {
             if (mConfigManager.isEnabled()) {
