@@ -1895,6 +1895,7 @@ public class MParticle {
                          config);
              }
         }
+
         public void selectPlacements(@NonNull String viewName,
                                      @NonNull Map<String, String> attributes) {
             if (mConfigManager.isEnabled()) {
@@ -1912,6 +1913,12 @@ public class MParticle {
             if (mConfigManager.isEnabled()) {
                 WrapperSdkVersion wrapperSdkVersion = new WrapperSdkVersion(wrapperSdk, version);
                 mKitManager.setWrapperSdkVersion(wrapperSdkVersion);
+            }
+        }
+
+        public void purchaseFinalized(@NonNull String placementId, @NonNull String catalogItemId, boolean status) {
+            if (mConfigManager.isEnabled()) {
+                mKitManager.purchaseFinalized(placementId, catalogItemId, status);
             }
         }
     }

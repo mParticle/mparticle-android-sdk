@@ -134,6 +134,8 @@ public interface KitManager {
 
     void setWrapperSdkVersion(@NonNull WrapperSdkVersion wrapperSdkVersion);
 
+    void purchaseFinalized(@NonNull String placementId, @NonNull String catalogItemId, boolean status);
+
     enum KitStatus {
         NOT_CONFIGURED,
         STOPPED,

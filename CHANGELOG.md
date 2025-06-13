@@ -1,3 +1,15 @@
+## [5.67.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.66.0...v5.67.0) (2025-06-13)
+
+
+### Features
+
+* Add support purchaseFinalized API in android core ([#583](https://github.com/mParticle/mparticle-android-sdk/issues/583)) ([c041ddb](https://github.com/mParticle/mparticle-android-sdk/commit/c041ddb09ddb2bbe2d2640fc44ac9e64d1b2b795))
+
+
+### Updates & Maintenance
+
+* Update submodules ([9f98440](https://github.com/mParticle/mparticle-android-sdk/commit/9f98440b59ae75100fd9cedd90e7d47a3329a5bf))
+
 ## [5.66.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.65.0...v5.66.0) (2025-06-11)
 
 

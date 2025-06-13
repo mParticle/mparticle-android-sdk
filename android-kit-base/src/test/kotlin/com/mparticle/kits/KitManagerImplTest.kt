@@ -1493,6 +1493,10 @@ class KitManagerImplTest {
         override fun setWrapperSdkVersion(wrapperSdkVersion: WrapperSdkVersion) {
             println("setWrapperSdkVersion with $wrapperSdkVersion")
         }
+
+        override fun purchaseFinalized(placementId: String, catalogItemId: String, status: Boolean) {
+            println("purchaseFinalized with placementId: $placementId  catalogItemId : $catalogItemId status : $status ")
+        }
     }
 
     internal inner class KitManagerEventCounter : MockKitManagerImpl() {
