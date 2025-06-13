@@ -389,8 +389,9 @@ public class MParticle {
             this.wrapperSdkVersion = new WrapperSdkVersion(wrapperSdk, version);
         }
 
-        // Regardless of whether the wrapperSdk is set or not, we will set it in the rokt instance
-        rokt.setWrapperSdk(wrapperSdk, version);
+        if (mConfigManager.isEnabled()) {
+            mKitManager.setWrapperSdkVersion(wrapperSdkVersion);
+        }
     }
 
     /**
@@ -1906,13 +1907,6 @@ public class MParticle {
                         null,
                         null
                 );
-            }
-        }
-
-        public void setWrapperSdk(@NotNull WrapperSdk wrapperSdk, @NotNull String version) {
-            if (mConfigManager.isEnabled()) {
-                WrapperSdkVersion wrapperSdkVersion = new WrapperSdkVersion(wrapperSdk, version);
-                mKitManager.setWrapperSdkVersion(wrapperSdkVersion);
             }
         }
 
