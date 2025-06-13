@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
+import com.mparticle.WrapperSdkVersion;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.MParticleUser;
@@ -613,13 +614,21 @@ public abstract class KitIntegration {
     }
 
     public interface RoktListener {
-        void execute(String viewName,
-                     Map<String, String> attributes,
-                     MParticle.MpRoktEventCallback mpRoktEventCallback,
-                     Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
-                     Map<String, WeakReference<Typeface>> fontTypefaces,
-                     FilteredMParticleUser user,
-                     RoktConfig config);
+        void execute(@NonNull String viewName,
+                     @NonNull Map<String, String> attributes,
+                     @Nullable MParticle.MpRoktEventCallback mpRoktEventCallback,
+                     @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
+                     @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
+                     @Nullable FilteredMParticleUser user,
+                     @Nullable RoktConfig config);
+
+        /**
+         * Set the SDK version of the mParticle SDK.
+         * This should match the value set in MParticle.getWrapperSdkVersion()
+         *
+         * @param wrapperSdkVersion the version of the mParticle SDK
+         */
+        void setWrapperSdkVersion(@NonNull WrapperSdkVersion wrapperSdkVersion);
 
         void purchaseFinalized(@NonNull String placementId, @NonNull String catalogItemId, boolean status);
     }

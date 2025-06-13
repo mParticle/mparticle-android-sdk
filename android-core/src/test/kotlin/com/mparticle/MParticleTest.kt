@@ -531,6 +531,31 @@ class MParticleTest {
     }
 
     @Test
+    fun testRoktSetWrapperSdk_whenEnabled() {
+        val instance: MParticle = InnerMockMParticle()
+        MParticle.setInstance(instance)
+        `when`(instance.mConfigManager.isEnabled()).thenReturn(true)
+
+        val expectedSdk = WrapperSdk.WrapperFlutter
+        val expectedVersion = "1.0.0"
+
+        instance.setWrapperSdk(expectedSdk, expectedVersion)
+
+        verify(instance.mKitManager).setWrapperSdkVersion(WrapperSdkVersion(expectedSdk, expectedVersion))
+    }
+
+    @Test
+    fun testRoktSetWrapperSdk_whenDisabled_kitManagerNotCalled() {
+        val instance: MParticle = InnerMockMParticle()
+        MParticle.setInstance(instance)
+        `when`(instance.mConfigManager.isEnabled()).thenReturn(false)
+
+        instance.rokt.selectPlacements("basicView", HashMap())
+
+        verify(instance.mKitManager, never()).setWrapperSdkVersion(any())
+    }
+
+    @Test
     fun testReportConversion_withBasicParams_whenEnabled() {
         var instance: MParticle = InnerMockMParticle()
         MParticle.setInstance(instance)

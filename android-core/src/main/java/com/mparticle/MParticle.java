@@ -388,6 +388,10 @@ public class MParticle {
         if (this.wrapperSdkVersion.getSdk() == WrapperSdk.WrapperNone && (wrapperSdk != WrapperSdk.WrapperNone && !version.isEmpty())) {
             this.wrapperSdkVersion = new WrapperSdkVersion(wrapperSdk, version);
         }
+
+        if (mConfigManager.isEnabled()) {
+            mKitManager.setWrapperSdkVersion(wrapperSdkVersion);
+        }
     }
 
     /**

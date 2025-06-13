@@ -17,6 +17,7 @@ import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
+import com.mparticle.WrapperSdkVersion;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
@@ -651,12 +652,12 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     @Override
-    public void execute(String viewName,
-                        Map<String, String> attributes,
-                        MParticle.MpRoktEventCallback mpRoktEventCallback,
-                        Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
-                        Map<String, WeakReference<Typeface>> fontTypefaces,
-                        RoktConfig config) {
+    public void execute(@NonNull String viewName,
+                        @NonNull Map<String, String> attributes,
+                        @Nullable MParticle.MpRoktEventCallback mpRoktEventCallback,
+                        @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
+                        @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
+                        @Nullable RoktConfig config) {
         if (mKitManager != null) {
             mKitManager.execute(viewName,
                     attributes,
@@ -664,6 +665,13 @@ public class KitFrameworkWrapper implements KitManager {
                     placeHolders,
                     fontTypefaces,
                     config);
+        }
+    }
+
+    @Override
+    public void setWrapperSdkVersion(@NonNull WrapperSdkVersion wrapperSdkVersion) {
+        if (mKitManager != null) {
+            mKitManager.setWrapperSdkVersion(wrapperSdkVersion);
         }
     }
 
