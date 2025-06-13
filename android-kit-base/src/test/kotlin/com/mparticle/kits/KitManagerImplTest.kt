@@ -1434,15 +1434,15 @@ class KitManagerImplTest {
         val manager: KitManagerImpl = MockKitManagerImpl()
 
         val enabledRoktListener = mock(
-                KitIntegration::class.java,
-                withSettings().extraInterfaces(KitIntegration.RoktListener::class.java)
-            )
+            KitIntegration::class.java,
+            withSettings().extraInterfaces(KitIntegration.RoktListener::class.java)
+        )
         `when`(enabledRoktListener.isDisabled).thenReturn(false)
 
         val disabledRoktListener = mock(
-                KitIntegration::class.java,
-                withSettings().extraInterfaces(KitIntegration.RoktListener::class.java)
-            )
+            KitIntegration::class.java,
+            withSettings().extraInterfaces(KitIntegration.RoktListener::class.java)
+        )
         `when`(disabledRoktListener.isDisabled).thenReturn(true)
 
         val nonRoktListener = mock(KitIntegration::class.java)
@@ -1485,7 +1485,7 @@ class KitManagerImplTest {
             placeHolders: MutableMap<String, WeakReference<RoktEmbeddedView>>?,
             fontTypefaces: MutableMap<String, WeakReference<Typeface>>?,
             user: FilteredMParticleUser?,
-            config: RoktConfig
+            config: RoktConfig?
         ) {
             println("Executed with $attributes")
         }
