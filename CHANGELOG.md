@@ -1,3 +1,15 @@
+## [5.68.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.67.0...v5.68.0) (2025-06-14)
+
+
+### Features
+
+* Passthrough SDK type to Rokt Kit ([#582](https://github.com/mParticle/mparticle-android-sdk/issues/582)) ([8114d84](https://github.com/mParticle/mparticle-android-sdk/commit/8114d847165b0f429ad367dd7a3cf1e6f5a2cd11))
+
+
+### Updates & Maintenance
+
+* Update submodules ([5b7bb9e](https://github.com/mParticle/mparticle-android-sdk/commit/5b7bb9e4728bd1ef44a53fa2699ed68ab372cbce))
+
 ## [5.67.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.66.0...v5.67.0) (2025-06-13)
 
 
