@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
+import com.mparticle.MpRoktEventCallback;
 import com.mparticle.WrapperSdkVersion;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
@@ -616,7 +617,7 @@ public abstract class KitIntegration {
     public interface RoktListener {
         void execute(@NonNull String viewName,
                      @NonNull Map<String, String> attributes,
-                     @Nullable MParticle.MpRoktEventCallback mpRoktEventCallback,
+                     @Nullable MpRoktEventCallback mpRoktEventCallback,
                      @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
                      @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
                      @Nullable FilteredMParticleUser user,

@@ -9,6 +9,7 @@ import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.MParticleTask
+import com.mparticle.MpRoktEventCallback
 import com.mparticle.WrapperSdk
 import com.mparticle.WrapperSdkVersion
 import com.mparticle.commerce.CommerceEvent
@@ -1481,7 +1482,7 @@ class KitManagerImplTest {
         override fun execute(
             viewName: String,
             attributes: MutableMap<String, String>,
-            mpRoktEventCallback: MParticle.MpRoktEventCallback?,
+            mpRoktEventCallback: MpRoktEventCallback?,
             placeHolders: MutableMap<String, WeakReference<RoktEmbeddedView>>?,
             fontTypefaces: MutableMap<String, WeakReference<Typeface>>?,
             user: FilteredMParticleUser?,
