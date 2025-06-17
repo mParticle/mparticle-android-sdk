@@ -98,7 +98,7 @@ sealed interface RoktEvent {
         val linkedProductId: String,
         val totalPrice: Double,
         val quantity: Int,
-        val unitPrice: Double,
+        val unitPrice: Double
     ) : RoktEvent
 }
 
