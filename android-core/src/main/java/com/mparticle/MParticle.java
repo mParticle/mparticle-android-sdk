@@ -385,12 +385,14 @@ public class MParticle {
      * @param version
      */
     public void setWrapperSdk(@NotNull WrapperSdk wrapperSdk, @NotNull String version) {
+        // Set instance wrapperSdkVersion if it is not set or if the wrapperSdk is different from the current one
         if (this.wrapperSdkVersion.getSdk() == WrapperSdk.WrapperNone && (wrapperSdk != WrapperSdk.WrapperNone && !version.isEmpty())) {
             this.wrapperSdkVersion = new WrapperSdkVersion(wrapperSdk, version);
         }
 
         if (mConfigManager.isEnabled()) {
-            mKitManager.setWrapperSdkVersion(wrapperSdkVersion);
+            // Regardless of instance wrapperSdkVersion, set the wrapperSdkVersion in KitManager
+            mKitManager.setWrapperSdkVersion(new WrapperSdkVersion(wrapperSdk, version));
         }
     }
 
