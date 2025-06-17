@@ -65,7 +65,14 @@ class RoktTest {
                 println("Hide loading indicator")
             }
         }
-        rokt.selectPlacements("testView", attributes, callbacks, placeholders, fonts, config)
+        rokt.selectPlacements(
+            identifier = "testView",
+            attributes = attributes,
+            callbacks = callbacks,
+            embeddedViews = placeholders,
+            fontTypefaces = fonts,
+            config = config
+        )
 
         verify(kitManager)?.execute("testView", attributes, callbacks, placeholders, fonts, config)
     }
@@ -77,7 +84,7 @@ class RoktTest {
         val attributes = mutableMapOf<String, String>()
         attributes["a"] = "b"
 
-        rokt.selectPlacements("basicView", attributes)
+        rokt.selectPlacements(attributes = attributes, identifier = "basicView")
 
         verify(kitManager).execute("basicView", attributes, null, null, null, null)
     }
@@ -86,7 +93,10 @@ class RoktTest {
     fun testSelectPlacements_withBasicParams_whenDisabled() {
         `when`(configManager.isEnabled()).thenReturn(false)
 
-        rokt.selectPlacements("basicView", HashMap())
+        rokt.selectPlacements(
+            identifier = "basicView",
+            attributes = HashMap()
+        )
 
         verify(kitManager, never()).execute(any(), any(), any(), any(), any(), any())
     }
@@ -95,7 +105,10 @@ class RoktTest {
     fun testRoktSetWrapperSdk_whenDisabled_kitManagerNotCalled() {
         `when`(configManager.isEnabled()).thenReturn(false)
 
-        rokt.selectPlacements("basicView", HashMap())
+        rokt.selectPlacements(
+            identifier = "basicView",
+            attributes = HashMap()
+        )
 
         verify(kitManager, never()).setWrapperSdkVersion(any())
     }

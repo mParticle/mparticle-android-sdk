@@ -15,21 +15,15 @@ class Rokt internal constructor(
 ) {
 
     fun selectPlacements(
-        viewName: String,
+        identifier: String,
         attributes: Map<String, String>,
         callbacks: MpRoktEventCallback? = null,
-        placeHolders: Map<String, WeakReference<RoktEmbeddedView>>? = null,
+        embeddedViews: Map<String, WeakReference<RoktEmbeddedView>>? = null,
         fontTypefaces: Map<String, WeakReference<Typeface>>? = null,
         config: RoktConfig? = null
     ) {
         if (mConfigManager.isEnabled) {
-            mKitManager.execute(viewName, attributes, callbacks, placeHolders, fontTypefaces, config)
-        }
-    }
-
-    fun selectPlacements(viewName: String, attributes: Map<String, String>) {
-        if (mConfigManager.isEnabled) {
-            mKitManager.execute(viewName, attributes, null, null, null, null)
+            mKitManager.execute(identifier, attributes, callbacks, embeddedViews, fontTypefaces, config)
         }
     }
 

@@ -126,10 +126,10 @@ public interface KitManager {
 
     void reset();
 
-    void execute(@NonNull String viewName,
+    void execute(@NonNull String identifier,
                  @NonNull Map<String, String> attributes,
                  @Nullable MpRoktEventCallback mpRoktEventCallback,
-                 @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
+                 @Nullable Map<String, WeakReference<RoktEmbeddedView>> embeddedViews,
                  @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
                  @Nullable RoktConfig config);
 
