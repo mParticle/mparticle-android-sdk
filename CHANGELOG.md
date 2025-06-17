@@ -1,3 +1,15 @@
+## [5.69.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.68.0...v5.69.0) (2025-06-17)
+
+
+### Features
+
+* Always set the wrapperSdkVersion in KitManager ([#584](https://github.com/mParticle/mparticle-android-sdk/issues/584)) ([a473157](https://github.com/mParticle/mparticle-android-sdk/commit/a4731572656dccc0dc6e3511539bbe8db38792e1))
+
+
+### Bug Fixes
+
+* ensure user attributes are applied before proceeding with Rokt execution ([#585](https://github.com/mParticle/mparticle-android-sdk/issues/585)) ([df0450e](https://github.com/mParticle/mparticle-android-sdk/commit/df0450e724e9d5b2945739fc3304d87cb0b3a567))
+
 ## [5.68.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.67.0...v5.68.0) (2025-06-14)
 
 
