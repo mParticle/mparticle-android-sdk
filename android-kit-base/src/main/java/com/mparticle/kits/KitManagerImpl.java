@@ -24,6 +24,7 @@ import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.MParticleTask;
+import com.mparticle.TypedUserAttributeListener;
 import com.mparticle.MpRoktEventCallback;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.WrapperSdkVersion;
@@ -1335,7 +1336,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     @Override
     public void execute(@NonNull String viewName,
                         @NonNull Map<String, String> attributes,
-                        @Nullable MpRoktEventCallback mpRoktEventCallback,
+                        @Nullable MParticle.MpRoktEventCallback mpRoktEventCallback,
                         @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
                         @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
                         @Nullable RoktConfig config) {
