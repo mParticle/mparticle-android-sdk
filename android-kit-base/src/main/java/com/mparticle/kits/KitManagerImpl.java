@@ -24,6 +24,7 @@ import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.MParticleTask;
+import com.mparticle.TypedUserAttributeListener;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.WrapperSdkVersion;
 import com.mparticle.commerce.CommerceEvent;
@@ -1369,27 +1370,21 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                             finalAttributes.put(mapTo, value);
                         }
                     }
-                    Map<String, Object> objectAttributes = new HashMap<>();
-                    for (Map.Entry<String, String> entry : finalAttributes.entrySet()) {
-                        if(!entry.getKey().equals(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
-                            objectAttributes.put(entry.getKey(), entry.getValue());
-                        }
-                    }
-                    if (user != null) {
-                        user.setUserAttributes(objectAttributes);
-                    }
+                        setRoktAttributesOnUser(finalAttributes, user, () -> {
+                            if (!finalAttributes.containsKey(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
+                                finalAttributes.put(Constants.MessageKey.SANDBOX_MODE_ROKT, String.valueOf(Objects.toString(MPUtility.isDevEnv(), "false")));  // Default value is "false" if null
+                            }
 
-                    if (!finalAttributes.containsKey(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
-                        finalAttributes.put(Constants.MessageKey.SANDBOX_MODE_ROKT, String.valueOf(Objects.toString(MPUtility.isDevEnv(), "false")));  // Default value is "false" if null
-                    }
-
-                    ((KitIntegration.RoktListener) provider).execute(viewName,
-                            finalAttributes,
-                            mpRoktEventCallback,
-                            placeHolders,
-                            fontTypefaces,
-                            FilteredMParticleUser.getInstance(user.getId(), provider),
-                            config);
+                            Long userId = (user != null) ? user.getId() : null;
+                            FilteredMParticleUser filteredUser = FilteredMParticleUser.getInstance(userId, provider);
+                            ((KitIntegration.RoktListener) provider).execute(viewName,
+                                    finalAttributes,
+                                    mpRoktEventCallback,
+                                    placeHolders,
+                                    fontTypefaces,
+                                    filteredUser,
+                                    config);
+                        });
                     });
                 }
             } catch (Exception e) {
@@ -1421,6 +1416,31 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             } catch (Exception e) {
                 Logger.warning("Failed to call purchaseFinalized for kit: " + provider.getName() + ": " + e.getMessage());
             }
+        }
+    }
+
+    private void setRoktAttributesOnUser(
+            Map<String, String> finalAttributes,
+            MParticleUser user,
+            Runnable runnable
+    ) {
+        Map<String, Object> objectAttributes = new HashMap<>();
+        for (Map.Entry<String, String> entry : finalAttributes.entrySet()) {
+            if(!entry.getKey().equals(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
+                objectAttributes.put(entry.getKey(), entry.getValue());
+            }
+        }
+        if (user != null) {
+            user.setUserAttributes(objectAttributes);
+            // Use asynchronous getUserAttributes with callback to ensure attributes are set before proceeding
+            user.getUserAttributes(new TypedUserAttributeListener() {
+                @Override
+                public void onUserAttributesReceived(@NonNull Map<String, ?> userAttributes, @NonNull Map<String, ? extends List<String>> userAttributeLists, long mpid) {
+                    runnable.run();
+                }
+            });
+        } else {
+            runnable.run();
         }
     }
 
