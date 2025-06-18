@@ -50,8 +50,10 @@ jobs:
           #script: ./gradlew :android-core:cAT :android-kit-base:cAT --stacktrace
           script: |
             # Disable benchmark tests as they do not work on emulators
-            adb uninstall com.mparticle.kits.test; ./gradlew connectedCheck --stacktrace
-            ./gradlew :android-core:cAT :android-kit-base:cAT  -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=none
+            adb uninstall com.mparticle.kits.test || true
+            adb uninstall com.mparticle.testutils.test || true
+            ./gradlew connectedCheck --stacktrace
+            ./gradlew :android-core:cAT :android-kit-base:cAT -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=none
       - name: "Archive Instrumented Tests Results"
         uses: actions/upload-artifact@v4
         if: always()
