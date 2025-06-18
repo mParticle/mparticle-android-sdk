@@ -226,7 +226,7 @@ public class DomainMapping {
             return new JSONObject()
                     .put("mType", mType.value)
                     .put("url", mUrl)
-                    .put("overridesSubdirectory",overridesSubdirectory)
+                    .put("overridesSubdirectory", overridesSubdirectory)
                     .put("mCertificates", certificatesJson);
         } catch (JSONException jse) {
             Logger.error(jse);
