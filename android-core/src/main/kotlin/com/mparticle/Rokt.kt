@@ -40,10 +40,9 @@ class Rokt internal constructor(
         }
     }
 
-    fun purchaseFinalized(placementId: String?="", catalogItemId: String?="012", status: Boolean?=false) {
+    fun purchaseFinalized(placementId: String, catalogItemId: String, status: Boolean) {
         if (mConfigManager.isEnabled) {
-            mKitManager.purchaseFinalized(placementId?:"", catalogItemId?:"000", status?:false)
-
+            mKitManager.purchaseFinalized(placementId, catalogItemId, status)
         }
     }
 }
