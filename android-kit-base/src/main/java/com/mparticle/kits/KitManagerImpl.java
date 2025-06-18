@@ -24,7 +24,7 @@ import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.MParticleTask;
-import com.mparticle.TypedUserAttributeListener;
+import com.mparticle.MpRoktEventCallback;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.WrapperSdkVersion;
 import com.mparticle.commerce.CommerceEvent;
@@ -1335,7 +1335,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     @Override
     public void execute(@NonNull String viewName,
                         @NonNull Map<String, String> attributes,
-                        @Nullable MParticle.MpRoktEventCallback mpRoktEventCallback,
+                        @Nullable MpRoktEventCallback mpRoktEventCallback,
                         @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
                         @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
                         @Nullable RoktConfig config) {
@@ -1370,21 +1370,27 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                             finalAttributes.put(mapTo, value);
                         }
                     }
-                        setRoktAttributesOnUser(finalAttributes, user, () -> {
-                            if (!finalAttributes.containsKey(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
-                                finalAttributes.put(Constants.MessageKey.SANDBOX_MODE_ROKT, String.valueOf(Objects.toString(MPUtility.isDevEnv(), "false")));  // Default value is "false" if null
-                            }
+                    Map<String, Object> objectAttributes = new HashMap<>();
+                    for (Map.Entry<String, String> entry : finalAttributes.entrySet()) {
+                        if(!entry.getKey().equals(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
+                            objectAttributes.put(entry.getKey(), entry.getValue());
+                        }
+                    }
+                    if (user != null) {
+                        user.setUserAttributes(objectAttributes);
+                    }
 
-                            Long userId = (user != null) ? user.getId() : null;
-                            FilteredMParticleUser filteredUser = FilteredMParticleUser.getInstance(userId, provider);
-                            ((KitIntegration.RoktListener) provider).execute(viewName,
-                                    finalAttributes,
-                                    mpRoktEventCallback,
-                                    placeHolders,
-                                    fontTypefaces,
-                                    filteredUser,
-                                    config);
-                        });
+                    if (!finalAttributes.containsKey(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
+                        finalAttributes.put(Constants.MessageKey.SANDBOX_MODE_ROKT, String.valueOf(Objects.toString(MPUtility.isDevEnv(), "false")));  // Default value is "false" if null
+                    }
+
+                    ((KitIntegration.RoktListener) provider).execute(viewName,
+                            finalAttributes,
+                            mpRoktEventCallback,
+                            placeHolders,
+                            fontTypefaces,
+                            FilteredMParticleUser.getInstance(user.getId(), provider),
+                            config);
                     });
                 }
             } catch (Exception e) {
@@ -1416,31 +1422,6 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             } catch (Exception e) {
                 Logger.warning("Failed to call purchaseFinalized for kit: " + provider.getName() + ": " + e.getMessage());
             }
-        }
-    }
-
-    private void setRoktAttributesOnUser(
-            Map<String, String> finalAttributes,
-            MParticleUser user,
-            Runnable runnable
-    ) {
-        Map<String, Object> objectAttributes = new HashMap<>();
-        for (Map.Entry<String, String> entry : finalAttributes.entrySet()) {
-            if(!entry.getKey().equals(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
-                objectAttributes.put(entry.getKey(), entry.getValue());
-            }
-        }
-        if (user != null) {
-            user.setUserAttributes(objectAttributes);
-            // Use asynchronous getUserAttributes with callback to ensure attributes are set before proceeding
-            user.getUserAttributes(new TypedUserAttributeListener() {
-                @Override
-                public void onUserAttributesReceived(@NonNull Map<String, ?> userAttributes, @NonNull Map<String, ? extends List<String>> userAttributeLists, long mpid) {
-                    runnable.run();
-                }
-            });
-        } else {
-            runnable.run();
         }
     }
 

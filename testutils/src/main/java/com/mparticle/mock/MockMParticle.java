@@ -35,11 +35,4 @@ public class MockMParticle extends MParticle {
             super();
         }
     }
-
-    class MockRokt extends Rokt {
-
-        MockRokt() {
-            super();
-        }
-    }
 }

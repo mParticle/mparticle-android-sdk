@@ -17,6 +17,7 @@ import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
+import com.mparticle.MpRoktEventCallback;
 import com.mparticle.WrapperSdkVersion;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
@@ -654,7 +655,7 @@ public class KitFrameworkWrapper implements KitManager {
     @Override
     public void execute(@NonNull String viewName,
                         @NonNull Map<String, String> attributes,
-                        @Nullable MParticle.MpRoktEventCallback mpRoktEventCallback,
+                        @Nullable MpRoktEventCallback mpRoktEventCallback,
                         @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
                         @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
                         @Nullable RoktConfig config) {
