@@ -53,6 +53,9 @@ jobs:
             adb uninstall com.mparticle.kits.test || true
             adb uninstall com.mparticle.testutils.test || true
             ./gradlew connectedCheck --stacktrace
+            
+            adb uninstall com.mparticle.kits.test || true
+            adb uninstall com.mparticle.testutils.test || true
             ./gradlew :android-core:cAT :android-kit-base:cAT -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=none
       - name: "Archive Instrumented Tests Results"
         uses: actions/upload-artifact@v4
