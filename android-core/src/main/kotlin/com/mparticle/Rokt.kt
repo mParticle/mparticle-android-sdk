@@ -13,18 +13,6 @@ class Rokt internal constructor(
     private val mConfigManager: ConfigManager,
     private val mKitManager: KitManager
 ) {
-    companion object {
-        @JvmStatic
-        @Volatile
-        private var instance: Rokt? = null
-
-        @JvmStatic
-        fun getInstance(configManager: ConfigManager, kitManager: KitManager): Rokt {
-            return instance ?: synchronized(this) {
-                instance ?: Rokt(configManager, kitManager).also { instance = it }
-            }
-        }
-    }
 
     @JvmOverloads
     fun selectPlacements(

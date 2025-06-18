@@ -238,3 +238,14 @@
 -keepnames class * implements android.os.Parcelable {
     public static final ** CREATOR;
 }
+
+-keepclassmembers class com.mparticle.Rokt {
+    <init>(...);
+    void *(...);
+    void *$default(...);
+    <fields>;
+}
+
+-keep interface com.mparticle.MpRoktEventCallback { *; }
+-keep interface com.mparticle.UnloadReasons { *; }
+-keep class com.mparticle.UnloadReasons { *; }
