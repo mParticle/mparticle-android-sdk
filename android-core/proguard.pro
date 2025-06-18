@@ -198,6 +198,20 @@
 -keep public class com.mparticle.rokt.* {
     *;
 }
+
+# Additional Rokt-specific rules to preserve all classes and method signatures
+-keep class com.mparticle.rokt.RoktConfig { *; }
+-keep class com.mparticle.rokt.RoktConfig$Builder { *; }
+-keep class com.mparticle.rokt.RoktConfig$ColorMode { *; }
+-keep class com.mparticle.rokt.CacheConfig { *; }
+-keep class com.mparticle.rokt.RoktEmbeddedView { *; }
+-keep class com.mparticle.rokt.RoktLayoutDimensionCallBack { *; }
+
+# Preserve all method signatures in the Rokt class to prevent overload resolution issues
+-keepclassmembers class com.mparticle.Rokt {
+    public void selectPlacements(...);
+    public void purchaseFinalized(...);
+}
 -keep public class com.mparticle.audience.* {
     *;
 }

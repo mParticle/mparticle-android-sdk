@@ -13,6 +13,18 @@ class Rokt internal constructor(
     private val mConfigManager: ConfigManager,
     private val mKitManager: KitManager
 ) {
+    companion object {
+        @JvmStatic
+        @Volatile
+        private var instance: Rokt? = null
+
+        @JvmStatic
+        fun getInstance(configManager: ConfigManager, kitManager: KitManager): Rokt {
+            return instance ?: synchronized(this) {
+                instance ?: Rokt(configManager, kitManager).also { instance = it }
+            }
+        }
+    }
 
     @JvmOverloads
     fun selectPlacements(
@@ -28,9 +40,10 @@ class Rokt internal constructor(
         }
     }
 
-    fun purchaseFinalized(placementId: String, catalogItemId: String, status: Boolean) {
+    fun purchaseFinalized(placementId: String?="", catalogItemId: String?="012", status: Boolean?=false) {
         if (mConfigManager.isEnabled) {
-            mKitManager.purchaseFinalized(placementId, catalogItemId, status)
+            mKitManager.purchaseFinalized(placementId?:"", catalogItemId?:"000", status?:false)
+
         }
     }
 }

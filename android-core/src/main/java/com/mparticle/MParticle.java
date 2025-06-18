@@ -190,7 +190,7 @@ public class MParticle {
                     instance = new MParticle(options);
                     instance.mKitManager = new KitFrameworkWrapper(options.getContext(), instance.mMessageManager, instance.Internal().getConfigManager(), instance.Internal().getAppStateManager(), options);
                     instance.mIdentityApi = new IdentityApi(options.getContext(), instance.mInternal.getAppStateManager(), instance.mMessageManager, instance.mConfigManager, instance.mKitManager, options.getOperatingSystem());
-                    instance.rokt = new Rokt(instance.mConfigManager, instance.mKitManager);
+                    instance.rokt = Rokt.getInstance(instance.mConfigManager, instance.mKitManager);
 
                     // Check if we've switched workspaces on startup
                     UploadSettings lastUploadSettings = instance.mConfigManager.getLastUploadSettings();
