@@ -206,6 +206,7 @@
 -keep class com.mparticle.rokt.CacheConfig { *; }
 -keep class com.mparticle.rokt.RoktEmbeddedView { *; }
 -keep class com.mparticle.rokt.RoktLayoutDimensionCallBack { *; }
+-keep class com.mparticle.rokt.RoktOptions { *; }
 
 # Preserve annotation classes
 -keep class androidx.annotation.NonNull { *; }

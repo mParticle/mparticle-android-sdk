@@ -28,6 +28,7 @@ import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.listeners.InternalListenerManager;
 import com.mparticle.rokt.RoktConfig;
 import com.mparticle.rokt.RoktEmbeddedView;
+import com.mparticle.rokt.RoktOptions;
 
 import org.json.JSONArray;
 
@@ -515,6 +516,15 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     @NonNull
+    @Override
+    @NonNull
+    public RoktOptions getRoktOptions() {
+        if (mKitManager != null) {
+            return mKitManager.getRoktOptions();
+        }
+        return mOptions != null ? mOptions.getRoktOptions() : new RoktOptions();
+    }
+
     @Override
     public Map<Integer, KitStatus> getKitStatus() {
         if (mKitManager != null) {
