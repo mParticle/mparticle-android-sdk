@@ -28,9 +28,8 @@ sealed interface RoktEvent {
     /**
      * FirstPositiveEngagement event will be triggered when the user positively engaged with the offer first time
      * @param placementId - identifier for the placement emitting the event
-     * @param fulfillmentAttributes - an interface using which additional attributes can be sent from the SDK
      */
-    data class FirstPositiveEngagement(val placementId: String, val fulfillmentAttributes: FulfillmentAttributes) : RoktEvent
+    data class FirstPositiveEngagement(val placementId: String) : RoktEvent
 
     /**
      * PlacementInteractive event will be triggered when placement has been rendered and is interactable
@@ -100,12 +99,4 @@ sealed interface RoktEvent {
         val quantity: Int,
         val unitPrice: Double
     ) : RoktEvent
-}
-
-interface FulfillmentAttributes {
-    /**
-     * Additional attributes emitted from the Rokt SDK.
-     * @param attributes A map of key-value pairs containing additional attributes.
-     */
-    fun sendAttributes(attributes: Map<String, String>)
 }

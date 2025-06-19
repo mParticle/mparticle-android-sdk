@@ -6,6 +6,8 @@ import com.mparticle.internal.KitManager
 import com.mparticle.internal.listeners.ApiClass
 import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import java.lang.ref.WeakReference
 
 @ApiClass
@@ -25,6 +27,14 @@ class Rokt internal constructor(
     ) {
         if (mConfigManager.isEnabled) {
             mKitManager.execute(identifier, attributes, callbacks, embeddedViews, fontTypefaces, config)
+        }
+    }
+
+    fun events(identifier: String) : Flow<RoktEvent> {
+        return if (mConfigManager.isEnabled) {
+            mKitManager.events(identifier)
+        } else {
+            flowOf()
         }
     }
 

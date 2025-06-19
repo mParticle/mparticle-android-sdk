@@ -10,6 +10,7 @@ import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.MParticleTask
 import com.mparticle.MpRoktEventCallback
+import com.mparticle.RoktEvent
 import com.mparticle.WrapperSdk
 import com.mparticle.WrapperSdkVersion
 import com.mparticle.commerce.CommerceEvent
@@ -31,6 +32,8 @@ import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
 import com.mparticle.testutils.TestingUtils
 import junit.framework.TestCase
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -1489,6 +1492,11 @@ class KitManagerImplTest {
             config: RoktConfig?
         ) {
             println("Executed with $attributes")
+        }
+
+        override fun events(identifier: String): Flow<RoktEvent> {
+            println("events called with identfier: $identifier")
+            return flowOf()
         }
 
         override fun setWrapperSdkVersion(wrapperSdkVersion: WrapperSdkVersion) {

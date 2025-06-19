@@ -1,5 +1,7 @@
 package com.mparticle.kits;
 
+import static kotlinx.coroutines.flow.FlowKt.flowOf;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +27,7 @@ import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.MParticleTask;
 import com.mparticle.MpRoktEventCallback;
+import com.mparticle.RoktEvent;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.WrapperSdkVersion;
 import com.mparticle.commerce.CommerceEvent;
@@ -65,6 +68,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
+
+import kotlinx.coroutines.flow.Flow;
 
 public class KitManagerImpl implements KitManager, AttributionListener, UserAttributeListener, IdentityStateListener {
 
@@ -1397,6 +1402,20 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 Logger.warning("Failed to call execute for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
+    }
+
+    @Override
+    public Flow<RoktEvent> events(@NonNull String identifier) {
+        for (KitIntegration provider : providers.values()) {
+            try {
+                if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
+                    return ((KitIntegration.RoktListener) provider).events(identifier);
+                }
+            } catch (Exception e) {
+                Logger.warning("Failed to call setWrapperSdkVersion for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+        return flowOf();
     }
 
     @Override
