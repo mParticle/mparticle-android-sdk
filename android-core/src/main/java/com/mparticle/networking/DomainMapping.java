@@ -226,6 +226,7 @@ public class DomainMapping {
             return new JSONObject()
                     .put("mType", mType.value)
                     .put("url", mUrl)
+                    .put("overridesSubdirectory", overridesSubdirectory)
                     .put("mCertificates", certificatesJson);
         } catch (JSONException jse) {
             Logger.error(jse);
@@ -325,7 +326,8 @@ public class DomainMapping {
                 JSONObject jsonObject = new JSONObject(jsonString);
                 int type = jsonObject.getInt("mType");
                 String newUrl = jsonObject.getString("url");
-                Builder builder = new Builder(Endpoint.parseInt(type), newUrl);
+                boolean overridesSubdirectory = jsonObject.getBoolean("overridesSubdirectory");
+                Builder builder = new Builder(Endpoint.parseInt(type), newUrl, overridesSubdirectory);
                 JSONArray certificatesJsonArray = jsonObject.getJSONArray("mCertificates");
                 for (int i = 0; i < certificatesJsonArray.length(); i++) {
                     builder.addCertificate(Certificate.withCertificate(certificatesJsonArray.getJSONObject(i)));
