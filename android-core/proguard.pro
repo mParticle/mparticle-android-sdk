@@ -206,6 +206,7 @@
 -keep class com.mparticle.rokt.CacheConfig { *; }
 -keep class com.mparticle.rokt.RoktEmbeddedView { *; }
 -keep class com.mparticle.rokt.RoktLayoutDimensionCallBack { *; }
+-keep class com.mparticle.rokt.RoktOptions { *; }
 
 # Preserve all method signatures in the Rokt class to prevent overload resolution issues
 -keepclassmembers class com.mparticle.Rokt {
