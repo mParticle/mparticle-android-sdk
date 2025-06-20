@@ -24,6 +24,7 @@ import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.rokt.RoktConfig;
 import com.mparticle.rokt.RoktEmbeddedView;
+import com.mparticle.rokt.RoktOptions;
 
 import org.json.JSONArray;
 
@@ -89,6 +90,9 @@ public interface KitManager {
     KitsLoadedCallback updateKits(JSONArray jsonArray);
 
     void updateDataplan(@NonNull MParticleOptions.DataplanOptions dataplanOptions);
+
+    @NonNull
+    RoktOptions getRoktOptions();
 
     @NonNull
     Map<Integer, KitStatus> getKitStatus();

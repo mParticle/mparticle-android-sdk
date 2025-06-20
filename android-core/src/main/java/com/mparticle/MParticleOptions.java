@@ -15,6 +15,7 @@ import com.mparticle.internal.PushRegistrationHelper;
 import com.mparticle.internal.SideloadedKit;
 import com.mparticle.networking.NetworkOptions;
 import com.mparticle.networking.NetworkOptionsManager;
+import com.mparticle.rokt.RoktOptions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -51,6 +52,7 @@ public class MParticleOptions {
     private NetworkOptions mNetworkOptions;
     private String mDataplanId;
     private Integer mDataplanVersion;
+    private RoktOptions mRoktOptions;
     private MParticle.OperatingSystem mOperatingSystem = MParticle.OperatingSystem.ANDROID;
     private DataplanOptions mDataplanOptions;
     private Map<Class, List<Configuration>> mConfigurations = new HashMap();
@@ -143,6 +145,7 @@ public class MParticleOptions {
             this.mOperatingSystem = builder.operatingSystem;
         }
         this.mNetworkOptions = NetworkOptionsManager.validateAndResolve(builder.networkOptions);
+        this.mRoktOptions = builder.roktOptions;
         this.mDataplanId = builder.dataplanId;
         this.mDataplanVersion = builder.dataplanVersion;
         this.mDataplanOptions = builder.dataplanOptions;
@@ -335,6 +338,11 @@ public class MParticleOptions {
         return mNetworkOptions;
     }
 
+    @NonNull
+    public RoktOptions getRoktOptions() {
+        return mRoktOptions;
+    }
+
     @Nullable
     public String getDataplanId() {
         return mDataplanId;
@@ -409,6 +417,7 @@ public class MParticleOptions {
         private Integer dataplanVersion;
         private MParticle.OperatingSystem operatingSystem;
         private DataplanOptions dataplanOptions;
+        private RoktOptions roktOptions;
         private Map<Class, List<Configuration>> configurations = new HashMap();
         private boolean isAppDebuggable;
         private List<SideloadedKit> sideloadedKits = new ArrayList<>();
@@ -748,6 +757,12 @@ public class MParticleOptions {
         @NonNull
         public Builder dataplanOptions(DataplanOptions dataplanOptions) {
             this.dataplanOptions = dataplanOptions;
+            return this;
+        }
+
+        @NonNull
+        public Builder roktOptions(@NonNull RoktOptions roktOptions) {
+            this.roktOptions = roktOptions;
             return this;
         }
 

@@ -206,23 +206,13 @@
 -keep class com.mparticle.rokt.CacheConfig { *; }
 -keep class com.mparticle.rokt.RoktEmbeddedView { *; }
 -keep class com.mparticle.rokt.RoktLayoutDimensionCallBack { *; }
-
-# Preserve annotation classes
--keep class androidx.annotation.NonNull { *; }
--keep class androidx.annotation.Nullable { *; }
--keepclassmembers class com.mparticle.** {
-    @androidx.annotation.NonNull *;
-    @androidx.annotation.Nullable *;
-}
+-keep class com.mparticle.rokt.RoktOptions { *; }
 
 # Preserve all method signatures in the Rokt class to prevent overload resolution issues
 -keepclassmembers class com.mparticle.Rokt {
-    *;
+    public void selectPlacements(...);
+    public void purchaseFinalized(...);
 }
--keepclassmembers class com.mparticle.KitIntegration$RoktListener* {
-     *;
- }
-
 -keep public class com.mparticle.audience.* {
     *;
 }

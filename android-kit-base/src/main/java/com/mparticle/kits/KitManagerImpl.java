@@ -50,6 +50,7 @@ import com.mparticle.internal.ReportingManager;
 import com.mparticle.kits.mappings.CustomMapping;
 import com.mparticle.rokt.RoktConfig;
 import com.mparticle.rokt.RoktEmbeddedView;
+import com.mparticle.rokt.RoktOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -86,6 +87,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     KitIntegrationFactory mKitIntegrationFactory;
     private DataplanFilter mDataplanFilter = DataplanFilterImpl.EMPTY;
     private KitOptions mKitOptions;
+    private RoktOptions mRoktOptions;
     private volatile List<KitConfiguration> kitConfigurations = new ArrayList<>();
 
     private static final String RESERVED_KEY_LTV = "$Amount";
@@ -104,6 +106,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         mReportingManager = reportingManager;
         mCoreCallbacks = coreCallbacks;
         mKitIntegrationFactory = new KitIntegrationFactory(options);
+        if (options != null) {
+            mRoktOptions = options.getRoktOptions();
+        }
         MParticle instance = MParticle.getInstance();
         if (instance != null) {
             instance.Identity().addIdentityStateListener(this);
@@ -202,6 +207,12 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             mDataplanFilter = DataplanFilterImpl.EMPTY;
             Logger.info("Clearing Data Plan");
         }
+    }
+
+    @Override
+    @NonNull
+    public RoktOptions getRoktOptions() {
+        return mRoktOptions != null ? mRoktOptions : new RoktOptions();
     }
 
     /**
