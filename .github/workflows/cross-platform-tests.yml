@@ -61,6 +61,7 @@ jobs:
             adb uninstall com.mparticle.kits.test || true
             adb uninstall com.mparticle.legacyTest || true
             adb uninstall com.mparticle.test || true
+            adb uninstall com.mparticle.cpt.testing.test || true
             ./gradlew runAndroid
       - name: "Archive Test Results"
         if: ${{ always() }}
