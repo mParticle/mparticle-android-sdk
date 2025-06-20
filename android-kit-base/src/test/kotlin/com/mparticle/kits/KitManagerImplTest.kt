@@ -32,12 +32,16 @@ import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
 import com.mparticle.testutils.TestingUtils
 import junit.framework.TestCase
+import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.test.runTest
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import org.junit.Assert
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -1465,6 +1469,198 @@ class KitManagerImplTest {
             .setWrapperSdkVersion(wrapperSdkVersion)
         verify(disabledRoktListener as KitIntegration.RoktListener, never())
             .setWrapperSdkVersion(wrapperSdkVersion)
+    }
+
+    @Test
+    fun testEvents_noProviders_returnsEmptyFlow() {
+        val manager: KitManagerImpl = MockKitManagerImpl()
+
+        val result = manager.events("test-identifier")
+
+        runTest {
+            val elements = result.toList()
+            assertTrue(elements.isEmpty())
+        }
+    }
+
+    @Test
+    fun testEvents_providersExistButNotRoktListeners_returnsEmptyFlow() {
+        val manager: KitManagerImpl = MockKitManagerImpl()
+
+        val nonRoktProvider = mock(KitIntegration::class.java)
+        `when`(nonRoktProvider.isDisabled).thenReturn(false)
+        `when`(nonRoktProvider.getName()).thenReturn("NonRoktProvider")
+
+        manager.providers = ConcurrentHashMap<Int, KitIntegration>().apply {
+            put(1, nonRoktProvider)
+        }
+
+        val result = manager.events("test-identifier")
+
+        runTest {
+            val elements = result.toList()
+            assertTrue(elements.isEmpty())
+        }
+    }
+
+    @Test
+    fun testEvents_roktListenerDisabled_returnsEmptyFlow() {
+        val manager: KitManagerImpl = MockKitManagerImpl()
+
+        val disabledRoktProvider = mock(
+            KitIntegration::class.java,
+            withSettings().extraInterfaces(KitIntegration.RoktListener::class.java)
+        )
+        `when`(disabledRoktProvider.isDisabled).thenReturn(true)
+        `when`(disabledRoktProvider.getName()).thenReturn("DisabledRoktProvider")
+
+        manager.providers = ConcurrentHashMap<Int, KitIntegration>().apply {
+            put(1, disabledRoktProvider)
+        }
+
+        val result = manager.events("test-identifier")
+
+        runTest {
+            val elements = result.toList()
+            assertTrue(elements.isEmpty())
+        }
+    }
+
+    @Test
+    fun testEvents_roktListenerEnabled_delegatesToProvider() {
+        val manager: KitManagerImpl = MockKitManagerImpl()
+
+        val enabledRoktProvider = mock(
+            KitIntegration::class.java,
+            withSettings().extraInterfaces(KitIntegration.RoktListener::class.java)
+        )
+        `when`(enabledRoktProvider.isDisabled).thenReturn(false)
+        `when`(enabledRoktProvider.getName()).thenReturn("EnabledRoktProvider")
+
+        val expectedFlow: Flow<RoktEvent> = flowOf()
+        val testIdentifier = "test-identifier"
+        `when`((enabledRoktProvider as KitIntegration.RoktListener).events(testIdentifier))
+            .thenReturn(expectedFlow)
+
+        manager.providers = ConcurrentHashMap<Int, KitIntegration>().apply {
+            put(1, enabledRoktProvider)
+        }
+
+        val result = manager.events(testIdentifier)
+
+        verify(enabledRoktProvider as KitIntegration.RoktListener).events(testIdentifier)
+        assertEquals(expectedFlow, result)
+    }
+
+    @Test
+    fun testEvents_multipleProviders_usesFirstEnabledRoktListener() {
+        val manager: KitManagerImpl = MockKitManagerImpl()
+
+        val nonRoktProvider = mock(KitIntegration::class.java)
+        `when`(nonRoktProvider.isDisabled).thenReturn(false)
+        `when`(nonRoktProvider.getName()).thenReturn("NonRoktProvider")
+
+        val disabledRoktProvider = mock(
+            KitIntegration::class.java,
+            withSettings().extraInterfaces(KitIntegration.RoktListener::class.java)
+        )
+        `when`(disabledRoktProvider.isDisabled).thenReturn(true)
+        `when`(disabledRoktProvider.getName()).thenReturn("DisabledRoktProvider")
+
+        val enabledRoktProvider = mock(
+            KitIntegration::class.java,
+            withSettings().extraInterfaces(KitIntegration.RoktListener::class.java)
+        )
+        `when`(enabledRoktProvider.isDisabled).thenReturn(false)
+        `when`(enabledRoktProvider.getName()).thenReturn("EnabledRoktProvider")
+
+        val secondEnabledRoktProvider = mock(
+            KitIntegration::class.java,
+            withSettings().extraInterfaces(KitIntegration.RoktListener::class.java)
+        )
+        `when`(secondEnabledRoktProvider.isDisabled).thenReturn(false)
+        `when`(secondEnabledRoktProvider.getName()).thenReturn("SecondEnabledRoktProvider")
+
+        val expectedFlow: Flow<RoktEvent> = flowOf()
+        val testIdentifier = "test-identifier"
+        `when`((enabledRoktProvider as KitIntegration.RoktListener).events(testIdentifier))
+            .thenReturn(expectedFlow)
+        `when`((secondEnabledRoktProvider as KitIntegration.RoktListener).events(testIdentifier))
+            .thenReturn(flowOf())
+
+        manager.providers = ConcurrentHashMap<Int, KitIntegration>().apply {
+            put(1, nonRoktProvider)
+            put(2, disabledRoktProvider)
+            put(3, enabledRoktProvider)
+            put(4, secondEnabledRoktProvider)
+        }
+
+        val result = manager.events(testIdentifier)
+
+        verify(enabledRoktProvider as KitIntegration.RoktListener).events(testIdentifier)
+        verify(secondEnabledRoktProvider as KitIntegration.RoktListener, never()).events(any())
+        assertEquals(expectedFlow, result)
+    }
+
+    @Test
+    fun testEvents_providerThrowsException_returnsEmptyFlow() {
+        val manager: KitManagerImpl = MockKitManagerImpl()
+
+        val exceptionRoktProvider = mock(
+            KitIntegration::class.java,
+            withSettings().extraInterfaces(KitIntegration.RoktListener::class.java)
+        )
+        `when`(exceptionRoktProvider.isDisabled).thenReturn(false)
+        `when`(exceptionRoktProvider.getName()).thenReturn("ExceptionRoktProvider")
+        `when`((exceptionRoktProvider as KitIntegration.RoktListener).events(any()))
+            .thenThrow(RuntimeException("Test exception"))
+
+        manager.providers = ConcurrentHashMap<Int, KitIntegration>().apply {
+            put(1, exceptionRoktProvider)
+        }
+
+        val result = manager.events("test-identifier")
+
+        runTest {
+            val elements = result.toList()
+            assertTrue(elements.isEmpty())
+        }
+    }
+
+    @Test
+    fun testEvents_providerThrowsException_continuesToNextProvider() {
+        val manager: KitManagerImpl = MockKitManagerImpl()
+
+        val exceptionRoktProvider = mock(
+            KitIntegration::class.java,
+            withSettings().extraInterfaces(KitIntegration.RoktListener::class.java)
+        )
+        `when`(exceptionRoktProvider.isDisabled).thenReturn(false)
+        `when`(exceptionRoktProvider.getName()).thenReturn("ExceptionRoktProvider")
+        `when`((exceptionRoktProvider as KitIntegration.RoktListener).events(any()))
+            .thenThrow(RuntimeException("Test exception"))
+
+        val workingRoktProvider = mock(
+            KitIntegration::class.java,
+            withSettings().extraInterfaces(KitIntegration.RoktListener::class.java)
+        )
+        `when`(workingRoktProvider.isDisabled).thenReturn(false)
+        `when`(workingRoktProvider.getName()).thenReturn("WorkingRoktProvider")
+
+        val expectedFlow: Flow<RoktEvent> = flowOf()
+        val testIdentifier = "test-identifier"
+        `when`((workingRoktProvider as KitIntegration.RoktListener).events(testIdentifier))
+            .thenReturn(expectedFlow)
+
+        manager.providers = ConcurrentHashMap<Int, KitIntegration>().apply {
+            put(1, exceptionRoktProvider)
+            put(2, workingRoktProvider)
+        }
+
+        val result = manager.events(testIdentifier)
+
+        verify(workingRoktProvider as KitIntegration.RoktListener).events(testIdentifier)
+        assertEquals(expectedFlow, result)
     }
 
     internal inner class mockProvider(val config: KitConfiguration) : KitIntegration(), KitIntegration.RoktListener {
