@@ -338,6 +338,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         getContext().sendBroadcast(intent);
     }
 
+    @NonNull
     @Override
     public Map<Integer, KitStatus> getKitStatus() {
         Map<Integer, KitStatus> kitStatusMap = new HashMap<>();

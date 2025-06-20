@@ -514,6 +514,7 @@ public class KitFrameworkWrapper implements KitManager {
         }
     }
 
+    @NonNull
     @Override
     public Map<Integer, KitStatus> getKitStatus() {
         if (mKitManager != null) {
