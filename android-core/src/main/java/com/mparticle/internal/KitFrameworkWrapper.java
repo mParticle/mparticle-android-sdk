@@ -525,6 +525,7 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     @Override
+    @NonNull
     public Map<Integer, KitStatus> getKitStatus() {
         if (mKitManager != null) {
             return mKitManager.getKitStatus();
