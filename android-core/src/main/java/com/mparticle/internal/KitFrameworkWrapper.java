@@ -1,5 +1,7 @@
 package com.mparticle.internal;
 
+import static kotlinx.coroutines.flow.FlowKt.flowOf;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +20,7 @@ import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.MpRoktEventCallback;
+import com.mparticle.RoktEvent;
 import com.mparticle.WrapperSdkVersion;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
@@ -38,6 +41,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+import kotlinx.coroutines.flow.Flow;
 
 public class KitFrameworkWrapper implements KitManager {
     private final Context mContext;
@@ -509,6 +514,7 @@ public class KitFrameworkWrapper implements KitManager {
         }
     }
 
+    @NonNull
     @Override
     public Map<Integer, KitStatus> getKitStatus() {
         if (mKitManager != null) {
@@ -666,6 +672,15 @@ public class KitFrameworkWrapper implements KitManager {
                     placeHolders,
                     fontTypefaces,
                     config);
+        }
+    }
+
+    @Override
+    public Flow<RoktEvent> events(@NonNull String identifier) {
+        if (mKitManager != null) {
+            return mKitManager.events(identifier);
+        } else {
+            return flowOf();
         }
     }
 

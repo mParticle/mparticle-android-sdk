@@ -16,6 +16,7 @@ import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MpRoktEventCallback;
+import com.mparticle.RoktEvent;
 import com.mparticle.WrapperSdkVersion;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
@@ -31,6 +32,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import kotlinx.coroutines.flow.Flow;
 
 /**
  * Base Kit implementation - all Kits must subclass this.
@@ -622,6 +625,8 @@ public abstract class KitIntegration {
                      @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
                      @Nullable FilteredMParticleUser user,
                      @Nullable RoktConfig config);
+
+        Flow<RoktEvent> events(@NonNull String identifier);
 
         /**
          * Set the SDK version of the mParticle SDK.

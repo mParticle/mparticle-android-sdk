@@ -51,4 +51,25 @@ allprojects {
     }
 
     apply plugin: 'org.jlleitschuh.gradle.ktlint'
+    
+    // Apply shared signing configuration to all Android projects
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            android {
+                signingConfigs {
+                    debug {
+                        storeFile file("${rootProject.projectDir}/debug.keystore")
+                        storePassword "android"
+                        keyAlias "androiddebugkey"
+                        keyPassword "android"
+                    }
+                }
+                buildTypes {
+                    debug {
+                        signingConfig signingConfigs.debug
+                    }
+                }
+            }
+        }
+    }
 }

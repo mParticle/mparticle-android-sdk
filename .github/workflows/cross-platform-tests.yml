@@ -56,7 +56,13 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew runAndroid
+          script: |
+            adb uninstall com.mparticle.kittests || true
+            adb uninstall com.mparticle.kits.test || true
+            adb uninstall com.mparticle.legacyTest || true
+            adb uninstall com.mparticle.test || true
+            adb uninstall com.mparticle.cpt.testing.test || true
+            ./gradlew runAndroid
       - name: "Archive Test Results"
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
