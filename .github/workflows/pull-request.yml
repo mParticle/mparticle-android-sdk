@@ -50,6 +50,7 @@ jobs:
           script: |
             # Disable benchmark tests as they do not work on emulators
             adb uninstall com.mparticle.kittests || true
+            adb uninstall com.mparticle.kits.test || true
             adb uninstall com.mparticle.legacyTest || true
             adb uninstall com.mparticle.test || true
 
@@ -102,10 +103,11 @@ jobs:
           disable-animations: true
           script: |
             # Disable benchmark tests as they do not work on emulators
-            adb uninstall com.mparticle.test || true
-            adb uninstall com.mparticle.legacyTest || true
             adb uninstall com.mparticle.kittests || true
-
+            adb uninstall com.mparticle.kits.test || true
+            adb uninstall com.mparticle.legacyTest || true
+            adb uninstall com.mparticle.test || true
+            
             ./gradlew connectedCheck --stacktrace
             ./gradlew -Porchestrator=true :android-core:cAT -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=none
       - name: "Archive Instrumented Orchestrator Tests Results"
