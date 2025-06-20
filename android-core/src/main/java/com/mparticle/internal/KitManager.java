@@ -17,6 +17,7 @@ import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.MpRoktEventCallback;
+import com.mparticle.RoktEvent;
 import com.mparticle.WrapperSdkVersion;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
@@ -31,6 +32,8 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import kotlinx.coroutines.flow.Flow;
 
 public interface KitManager {
 
@@ -136,6 +139,8 @@ public interface KitManager {
                  @Nullable Map<String, WeakReference<RoktEmbeddedView>> embeddedViews,
                  @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
                  @Nullable RoktConfig config);
+
+    Flow<RoktEvent> events(@NonNull String identifier);
 
     void setWrapperSdkVersion(@NonNull WrapperSdkVersion wrapperSdkVersion);
 

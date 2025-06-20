@@ -7,6 +7,10 @@ import com.mparticle.internal.ConfigManager
 import com.mparticle.internal.KitManager
 import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -19,6 +23,8 @@ import org.mockito.MockitoAnnotations
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
 import java.lang.ref.WeakReference
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @RunWith(PowerMockRunner::class)
 @PrepareForTest(Looper::class, SystemClock::class)
@@ -132,5 +138,34 @@ class RoktTest {
         rokt.purchaseFinalized("132", "1111", true)
 
         verify(kitManager, never()).purchaseFinalized("132", "1111", true)
+    }
+
+    @Test
+    fun testEvents_whenEnabled_delegatesToKitManager() {
+        `when`(configManager.isEnabled).thenReturn(true)
+
+        val testIdentifier = "test-identifier"
+        val expectedFlow: Flow<RoktEvent> = flowOf()
+        `when`(kitManager.events(testIdentifier)).thenReturn(expectedFlow)
+
+        val result = rokt.events(testIdentifier)
+
+        verify(kitManager).events(testIdentifier)
+        assertEquals(expectedFlow, result)
+    }
+
+    @Test
+    fun testEvents_whenDisabled_returnsEmptyFlow() {
+        `when`(configManager.isEnabled).thenReturn(false)
+
+        val testIdentifier = "test-identifier"
+
+        val result = rokt.events(testIdentifier)
+
+        verify(kitManager, never()).events(any())
+        runTest {
+            val elements = result.toList()
+            assertTrue(elements.isEmpty())
+        }
     }
 }

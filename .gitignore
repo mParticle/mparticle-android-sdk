@@ -23,6 +23,7 @@ local.properties
 
 # Keystore
 *keystore
+!debug.keystore
 
 # OS X files
 .DS_Store

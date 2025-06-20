@@ -70,6 +70,9 @@ dependencies {
     androidTestImplementation 'com.google.firebase:firebase-messaging:20.0.0'
 
     androidTestUtil 'androidx.test:orchestrator:1.4.2'
+
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_version"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlin_version"
 }
 
 boolean legacyTest() {

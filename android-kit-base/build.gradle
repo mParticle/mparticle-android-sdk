@@ -29,6 +29,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    
     sourceSets {
         androidTest.java.srcDirs += 'src/androidTest/kotlin'
         main.java.srcDirs += 'src/main/kotlin'
@@ -75,6 +76,9 @@ task generateSourcesJar(type: Jar) {
 dependencies {
     api project(':android-core')
     api 'androidx.annotation:annotation:[1.0.0,)'
+
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_version"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlin_version"
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation files('libs/java-json.jar')

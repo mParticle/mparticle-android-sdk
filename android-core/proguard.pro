@@ -250,3 +250,6 @@
 -keep interface com.mparticle.MpRoktEventCallback { *; }
 -keep interface com.mparticle.UnloadReasons { *; }
 -keep class com.mparticle.UnloadReasons { *; }
+-keep class com.mparticle.RoktEvent { *; }
+-keepclassmembers class com.mparticle.RoktEvent { *; }
+-keepclasseswithmembers class com.mparticle.RoktEvent$* { *; }
