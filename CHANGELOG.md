@@ -1,3 +1,22 @@
+## [5.70.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.69.0...v5.70.0) (2025-06-23)
+
+
+### Features
+
+* Add support for the fontFilePathMap ([#589](https://github.com/mParticle/mparticle-android-sdk/issues/589)) ([71cd132](https://github.com/mParticle/mparticle-android-sdk/commit/71cd1323a2903c90a7f72aef40d49389cbda85bb))
+* SQDSDKS-7420 update select placements ([#586](https://github.com/mParticle/mparticle-android-sdk/issues/586)) ([e583057](https://github.com/mParticle/mparticle-android-sdk/commit/e583057a1cfd1f6da29bf9fc5e99f1c91ac02233))
+* SQDSDKS-7422 - Add all Rokt events ([#587](https://github.com/mParticle/mparticle-android-sdk/issues/587)) ([2487f70](https://github.com/mParticle/mparticle-android-sdk/commit/2487f703b1b110266d82db933dbd19384588cc7f))
+
+
+### Bug Fixes
+
+* Include missing overridesSubdirectory flag in networkOptions for domain mapping ([#588](https://github.com/mParticle/mparticle-android-sdk/issues/588)) ([88c73b8](https://github.com/mParticle/mparticle-android-sdk/commit/88c73b83c1fb8f72e88f289f00b9d038a9359fad))
+
+
+### Updates & Maintenance
+
+* Update submodules ([4429471](https://github.com/mParticle/mparticle-android-sdk/commit/4429471610d522b937c983f4478b5e3fa6b110e5))
+
 ## [5.69.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.68.0...v5.69.0) (2025-06-17)
 
 
