@@ -1,3 +1,15 @@
+## [5.70.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.70.0...v5.70.1) (2025-06-24)
+
+
+### Bug Fixes
+
+* Restore ProGuard rules to preserve Rokt class members ([#590](https://github.com/mParticle/mparticle-android-sdk/issues/590)) ([219b1d0](https://github.com/mParticle/mparticle-android-sdk/commit/219b1d006fbf5c678371dbac92d5161ae4bd207e))
+
+
+### Updates & Maintenance
+
+* Create CODEOWNERS ([#591](https://github.com/mParticle/mparticle-android-sdk/issues/591)) ([eee1e27](https://github.com/mParticle/mparticle-android-sdk/commit/eee1e2774ddc779521622bd43936675236a8cd79))
+
 ## [5.70.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.69.0...v5.70.0) (2025-06-23)
 
 
