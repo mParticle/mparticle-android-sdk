@@ -1,6 +1,5 @@
 package com.mparticle
 
-import android.graphics.Typeface
 import android.os.Looper
 import android.os.SystemClock
 import android.webkit.WebView
@@ -18,7 +17,6 @@ import com.mparticle.internal.MessageManager
 import com.mparticle.media.MPMediaAPI
 import com.mparticle.messaging.MPMessagingAPI
 import com.mparticle.mock.MockContext
-import com.mparticle.rokt.RoktEmbeddedView
 import com.mparticle.testutils.AndroidUtils
 import com.mparticle.testutils.RandomUtils
 import org.junit.Assert
@@ -27,16 +25,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
-import java.lang.ref.WeakReference
 import java.util.LinkedList
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -470,62 +464,17 @@ class MParticleTest {
     }
 
     @Test
-    fun testSelectPlacements_withFullParams_whenEnabled() {
-        var instance: MParticle = InnerMockMParticle()
-        MParticle.setInstance(instance)
-        `when`(instance.mConfigManager.isEnabled).thenReturn(true)
-
-        val attributes = mutableMapOf<String, String>()
-        attributes["key"] = "value"
-
-        val placeholders: Map<String, WeakReference<RoktEmbeddedView>> = HashMap()
-        val fonts: Map<String, WeakReference<Typeface>> = HashMap()
-
-        val callbacks = object : MParticle.MpRoktEventCallback {
-            override fun onLoad() {
-                println("View loaded")
-            }
-
-            override fun onUnload(reason: MParticle.UnloadReasons) {
-                println("View unloaded due to: $reason")
-            }
-
-            override fun onShouldShowLoadingIndicator() {
-                println("Show loading indicator")
-            }
-
-            override fun onShouldHideLoadingIndicator() {
-                println("Hide loading indicator")
-            }
-        }
-        instance.rokt!!.selectPlacements("testView", attributes, callbacks, placeholders, fonts)
-
-        verify(instance.mKitManager)?.execute("testView", attributes, callbacks, placeholders, fonts)
-    }
-
-    @Test
-    fun testSelectPlacements_withBasicParams_whenEnabled() {
-        var instance: MParticle = InnerMockMParticle()
+    fun testRoktSetWrapperSdk_whenEnabled() {
+        val instance: MParticle = InnerMockMParticle()
         MParticle.setInstance(instance)
         `when`(instance.mConfigManager.isEnabled()).thenReturn(true)
 
-        val attributes = mutableMapOf<String, String>()
-        attributes.put("a", "b")
+        val expectedSdk = WrapperSdk.WrapperFlutter
+        val expectedVersion = "1.0.0"
 
-        instance.rokt.selectPlacements("basicView", attributes)
+        instance.setWrapperSdk(expectedSdk, expectedVersion)
 
-        verify(instance.mKitManager).execute("basicView", attributes, null, null, null)
-    }
-
-    @Test
-    fun testSelectPlacements_withBasicParams_whenDisabled() {
-        var instance: MParticle = InnerMockMParticle()
-        MParticle.setInstance(instance)
-        `when`(instance.mConfigManager.isEnabled()).thenReturn(false)
-
-        instance.rokt.selectPlacements("basicView", HashMap())
-
-        verify(instance.mKitManager, never()).execute(any(), any(), any(), any(), any())
+        verify(instance.mKitManager).setWrapperSdkVersion(WrapperSdkVersion(expectedSdk, expectedVersion))
     }
 
     inner class InnerMockMParticle : MParticle() {

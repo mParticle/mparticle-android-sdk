@@ -1,6 +1,6 @@
 package com.mparticle.kits;
 
-import static android.util.Log.e;
+import static kotlinx.coroutines.flow.FlowKt.flowOf;
 
 import android.app.Activity;
 import android.content.Context;
@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
-import android.util.Log;
 
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
@@ -27,7 +26,10 @@ import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.MParticleTask;
+import com.mparticle.MpRoktEventCallback;
+import com.mparticle.RoktEvent;
 import com.mparticle.UserAttributeListener;
+import com.mparticle.WrapperSdkVersion;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApi;
@@ -38,6 +40,7 @@ import com.mparticle.identity.IdentityStateListener;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.identity.TaskFailureListener;
 import com.mparticle.identity.TaskSuccessListener;
+import com.mparticle.internal.Constants;
 import com.mparticle.internal.CoreCallbacks;
 import com.mparticle.internal.KitManager;
 import com.mparticle.internal.KitsLoadedCallback;
@@ -45,7 +48,9 @@ import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.ReportingManager;
 import com.mparticle.kits.mappings.CustomMapping;
+import com.mparticle.rokt.RoktConfig;
 import com.mparticle.rokt.RoktEmbeddedView;
+import com.mparticle.rokt.RoktOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -60,10 +65,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
+
+import kotlinx.coroutines.flow.Flow;
 
 public class KitManagerImpl implements KitManager, AttributionListener, UserAttributeListener, IdentityStateListener {
 
@@ -80,6 +87,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     KitIntegrationFactory mKitIntegrationFactory;
     private DataplanFilter mDataplanFilter = DataplanFilterImpl.EMPTY;
     private KitOptions mKitOptions;
+    private RoktOptions mRoktOptions;
     private volatile List<KitConfiguration> kitConfigurations = new ArrayList<>();
 
     private static final String RESERVED_KEY_LTV = "$Amount";
@@ -98,6 +106,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         mReportingManager = reportingManager;
         mCoreCallbacks = coreCallbacks;
         mKitIntegrationFactory = new KitIntegrationFactory(options);
+        if (options != null) {
+            mRoktOptions = options.getRoktOptions();
+        }
         MParticle instance = MParticle.getInstance();
         if (instance != null) {
             instance.Identity().addIdentityStateListener(this);
@@ -196,6 +207,12 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             mDataplanFilter = DataplanFilterImpl.EMPTY;
             Logger.info("Clearing Data Plan");
         }
+    }
+
+    @Override
+    @NonNull
+    public RoktOptions getRoktOptions() {
+        return mRoktOptions != null ? mRoktOptions : new RoktOptions();
     }
 
     /**
@@ -332,6 +349,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         getContext().sendBroadcast(intent);
     }
 
+    @NonNull
     @Override
     public Map<Integer, KitStatus> getKitStatus() {
         Map<Integer, KitStatus> kitStatusMap = new HashMap<>();
@@ -1332,17 +1350,22 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     }
 
     @Override
-    public void execute(String viewName,
-                        Map<String, String> attributes,
-                        MParticle.MpRoktEventCallback mpRoktEventCallback,
-                        Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
-                        Map<String, WeakReference<Typeface>> fontTypefaces) {
+    public void execute(@NonNull String viewName,
+                        @NonNull Map<String, String> attributes,
+                        @Nullable MpRoktEventCallback mpRoktEventCallback,
+                        @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
+                        @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
+                        @Nullable RoktConfig config) {
         for (KitIntegration provider : providers.values()) {
             try {
                 if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
+                    if (attributes == null) {
+                        attributes = new HashMap<>();
+                    }
                     MParticle instance = MParticle.getInstance();
                     MParticleUser user = instance.Identity().getCurrentUser();
-                    String email = attributes != null ? attributes.get("email") : null;
+                    String email = attributes.get("email");
+                    Map<String, String> finalAttributes = attributes;
                     confirmEmail(email,user,instance.Identity(), () -> {
                     JSONArray jsonArray = new JSONArray();
 
@@ -1359,26 +1382,76 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                         if (obj == null) continue;
                         String mapFrom = obj.optString("map");
                         String mapTo = obj.optString("value");
-                        if (attributes.containsKey(mapFrom)) {
-                            String value = attributes.remove(mapFrom);
-                            attributes.put(mapTo, value);
+                        if (finalAttributes.containsKey(mapFrom)) {
+                            String value = finalAttributes.remove(mapFrom);
+                            finalAttributes.put(mapTo, value);
                         }
                     }
                     Map<String, Object> objectAttributes = new HashMap<>();
-                    for (Map.Entry<String, String> entry : attributes.entrySet()) {
-                        objectAttributes.put(entry.getKey(), entry.getValue());
+                    for (Map.Entry<String, String> entry : finalAttributes.entrySet()) {
+                        if(!entry.getKey().equals(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
+                            objectAttributes.put(entry.getKey(), entry.getValue());
+                        }
                     }
-                    user.setUserAttributes(objectAttributes);
+                    if (user != null) {
+                        user.setUserAttributes(objectAttributes);
+                    }
+
+                    if (!finalAttributes.containsKey(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
+                        finalAttributes.put(Constants.MessageKey.SANDBOX_MODE_ROKT, String.valueOf(Objects.toString(MPUtility.isDevEnv(), "false")));  // Default value is "false" if null
+                    }
+
                     ((KitIntegration.RoktListener) provider).execute(viewName,
-                            attributes,
+                            finalAttributes,
                             mpRoktEventCallback,
                             placeHolders,
                             fontTypefaces,
-                            FilteredMParticleUser.getInstance(user.getId(), provider));
+                            FilteredMParticleUser.getInstance(user.getId(), provider),
+                            config);
                     });
                 }
             } catch (Exception e) {
                 Logger.warning("Failed to call execute for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public Flow<RoktEvent> events(@NonNull String identifier) {
+        for (KitIntegration provider : providers.values()) {
+            try {
+                if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
+                    return ((KitIntegration.RoktListener) provider).events(identifier);
+                }
+            } catch (Exception e) {
+                Logger.warning("Failed to call setWrapperSdkVersion for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+        return flowOf();
+    }
+
+    @Override
+    public void setWrapperSdkVersion(@NonNull WrapperSdkVersion wrapperSdkVersion) {
+        for (KitIntegration provider : providers.values()) {
+            try {
+                if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
+                    ((KitIntegration.RoktListener) provider).setWrapperSdkVersion(wrapperSdkVersion);
+                }
+            } catch (Exception e) {
+                Logger.warning("Failed to call setWrapperSdkVersion for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public void purchaseFinalized(@NonNull String placementId, @NonNull String catalogItemId, boolean status) {
+        for (KitIntegration provider : providers.values()) {
+            try {
+                if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
+                    ((KitIntegration.RoktListener) provider).purchaseFinalized(placementId,catalogItemId,status);
+                }
+            } catch (Exception e) {
+                Logger.warning("Failed to call purchaseFinalized for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }

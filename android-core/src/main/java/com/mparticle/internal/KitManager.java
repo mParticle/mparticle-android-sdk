@@ -9,16 +9,22 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.mparticle.AttributionResult;
 import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
+import com.mparticle.MpRoktEventCallback;
+import com.mparticle.RoktEvent;
+import com.mparticle.WrapperSdkVersion;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
+import com.mparticle.rokt.RoktConfig;
 import com.mparticle.rokt.RoktEmbeddedView;
+import com.mparticle.rokt.RoktOptions;
 
 import org.json.JSONArray;
 
@@ -26,6 +32,8 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import kotlinx.coroutines.flow.Flow;
 
 public interface KitManager {
 
@@ -84,6 +92,9 @@ public interface KitManager {
     void updateDataplan(@NonNull MParticleOptions.DataplanOptions dataplanOptions);
 
     @NonNull
+    RoktOptions getRoktOptions();
+
+    @NonNull
     Map<Integer, KitStatus> getKitStatus();
 
     void onActivityCreated(Activity activity, Bundle savedInstanceState);
@@ -122,11 +133,18 @@ public interface KitManager {
 
     void reset();
 
-    void execute(String viewName,
-                 Map<String, String> attributes,
-                 MParticle.MpRoktEventCallback mpRoktEventCallback,
-                 Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
-                 Map<String, WeakReference<Typeface>> fontTypefaces);
+    void execute(@NonNull String identifier,
+                 @NonNull Map<String, String> attributes,
+                 @Nullable MpRoktEventCallback mpRoktEventCallback,
+                 @Nullable Map<String, WeakReference<RoktEmbeddedView>> embeddedViews,
+                 @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
+                 @Nullable RoktConfig config);
+
+    Flow<RoktEvent> events(@NonNull String identifier);
+
+    void setWrapperSdkVersion(@NonNull WrapperSdkVersion wrapperSdkVersion);
+
+    void purchaseFinalized(@NonNull String placementId, @NonNull String catalogItemId, boolean status);
 
     enum KitStatus {
         NOT_CONFIGURED,

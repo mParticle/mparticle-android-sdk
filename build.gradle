@@ -44,7 +44,7 @@ subprojects {
 
 allprojects {
     group = 'com.mparticle'
-    version = '5.63.0-SNAPSHOT'
+    version = '5.70.2-SNAPSHOT'
     if (project.hasProperty('isRelease') && project.isRelease) {
         version = version.toString().replace("-SNAPSHOT", "")
     }
@@ -60,4 +60,25 @@ allprojects {
     }
 
     apply plugin: 'org.jlleitschuh.gradle.ktlint'
+    
+    // Apply shared signing configuration to all Android projects
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            android {
+                signingConfigs {
+                    debug {
+                        storeFile file("${rootProject.projectDir}/debug.keystore")
+                        storePassword "android"
+                        keyAlias "androiddebugkey"
+                        keyPassword "android"
+                    }
+                }
+                buildTypes {
+                    debug {
+                        signingConfig signingConfigs.debug
+                    }
+                }
+            }
+        }
+    }
 }

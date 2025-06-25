@@ -8,19 +8,33 @@ import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.MockMParticle
+import com.mparticle.RoktEvent
+import com.mparticle.WrapperSdk
+import com.mparticle.WrapperSdkVersion
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.internal.PushRegistrationHelper.PushRegistration
 import com.mparticle.testutils.RandomUtils
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.test.runTest
 import org.json.JSONArray
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
 import java.lang.ref.WeakReference
 import java.util.Random
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @RunWith(PowerMockRunner::class)
 class KitFrameworkWrapperTest {
@@ -604,5 +618,93 @@ class KitFrameworkWrapperTest {
         Assert.assertEquals(isPushEnabled, coreCallbacks.isPushEnabled())
         Assert.assertEquals(mockIntegrationAttributes1, coreCallbacks.getIntegrationAttributes(1))
         Assert.assertEquals(mockIntegrationAttributes2, coreCallbacks.getIntegrationAttributes(2))
+    }
+
+    @Test
+    fun testSetWrapperSdkVersion_noCalls() {
+        val wrapper = KitFrameworkWrapper(
+            mock(
+                Context::class.java
+            ),
+            mock(ReportingManager::class.java),
+            mock(ConfigManager::class.java),
+            mock(AppStateManager::class.java),
+            true,
+            mock(MParticleOptions::class.java)
+        )
+
+        val mockKitManager = mock(KitManager::class.java)
+        wrapper.setKitManager(mockKitManager)
+
+        verify(mockKitManager, times(0)).setWrapperSdkVersion(any())
+    }
+
+    @Test
+    fun testSetWrapperSdkVersion_kitManagerSet_setWrapperVersionCalled() {
+        val wrapper = KitFrameworkWrapper(
+            mock(
+                Context::class.java
+            ),
+            mock(ReportingManager::class.java),
+            mock(ConfigManager::class.java),
+            mock(AppStateManager::class.java),
+            true,
+            mock(MParticleOptions::class.java)
+        )
+
+        val mockKitManager = mock(KitManager::class.java)
+        wrapper.setKitManager(mockKitManager)
+
+        val expectedSdkVersion = WrapperSdkVersion(WrapperSdk.WrapperFlutter, "1.0.0")
+        wrapper.setWrapperSdkVersion(expectedSdkVersion)
+
+        verify(mockKitManager).setWrapperSdkVersion(expectedSdkVersion)
+    }
+
+    @Test
+    fun testEvents_kitManagerNull_returnsEmptyFlow() {
+        val wrapper = KitFrameworkWrapper(
+            mock(
+                Context::class.java
+            ),
+            mock(ReportingManager::class.java),
+            mock(ConfigManager::class.java),
+            mock(AppStateManager::class.java),
+            true,
+            mock(MParticleOptions::class.java)
+        )
+
+        val result = wrapper.events("test-identifier")
+
+        runTest {
+            val elements = result.toList()
+            assertTrue(elements.isEmpty())
+        }
+    }
+
+    @Test
+    fun testEvents_kitManagerSet_delegatesToKitManager() {
+        val wrapper = KitFrameworkWrapper(
+            mock(
+                Context::class.java
+            ),
+            mock(ReportingManager::class.java),
+            mock(ConfigManager::class.java),
+            mock(AppStateManager::class.java),
+            true,
+            mock(MParticleOptions::class.java)
+        )
+
+        val mockKitManager = mock(KitManager::class.java)
+        val expectedFlow: Flow<RoktEvent> = flowOf()
+        val testIdentifier = "test-identifier"
+
+        `when`(mockKitManager.events(testIdentifier)).thenReturn(expectedFlow)
+        wrapper.setKitManager(mockKitManager)
+
+        val result = wrapper.events(testIdentifier)
+
+        verify(mockKitManager).events(testIdentifier)
+        assertEquals(expectedFlow, result)
     }
 }

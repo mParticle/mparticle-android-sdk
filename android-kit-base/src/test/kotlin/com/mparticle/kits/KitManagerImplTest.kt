@@ -9,6 +9,10 @@ import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.MParticleTask
+import com.mparticle.MpRoktEventCallback
+import com.mparticle.RoktEvent
+import com.mparticle.WrapperSdk
+import com.mparticle.WrapperSdkVersion
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.commerce.Product
 import com.mparticle.consent.ConsentState
@@ -17,27 +21,37 @@ import com.mparticle.identity.IdentityApi
 import com.mparticle.identity.IdentityApiResult
 import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.CoreCallbacks
+import com.mparticle.internal.MPUtility
 import com.mparticle.internal.SideloadedKit
 import com.mparticle.kits.KitIntegration.AttributeListener
 import com.mparticle.mock.MockContext
 import com.mparticle.mock.MockKitConfiguration
 import com.mparticle.mock.MockKitManagerImpl
 import com.mparticle.mock.MockMParticle
+import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
 import com.mparticle.testutils.TestingUtils
 import junit.framework.TestCase
+import junit.framework.TestCase.assertEquals
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.test.runTest
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import org.junit.Assert
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.withSettings
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
@@ -48,7 +62,7 @@ import java.util.LinkedList
 import java.util.concurrent.ConcurrentHashMap
 
 @RunWith(PowerMockRunner::class)
-@PrepareForTest(Looper::class, SystemClock::class)
+@PrepareForTest(Looper::class, SystemClock::class, MPUtility::class)
 class KitManagerImplTest {
     var mparticle: MParticle? = null
     var mockIdentity: IdentityApi? = null
@@ -843,13 +857,15 @@ class KitManagerImplTest {
             Pair("customerId", "55555"),
             Pair("country", "US")
         )
-        manager.execute("Test", attributes, null, null, null)
-        Assert.assertEquals(5, attributes.size)
+
+        manager.execute("Test", attributes, null, null, null, null)
+        Assert.assertEquals(6, attributes.size)
         Assert.assertEquals("(123) 456-9898", attributes["no"])
         Assert.assertEquals("55555", attributes["minorcatid"])
         Assert.assertEquals("Test1", attributes["lastname"])
         Assert.assertEquals("Test", attributes["test"])
         Assert.assertEquals("US", attributes["country"])
+        Assert.assertEquals("false", attributes["sandbox"])
     }
 
     @Test
@@ -906,13 +922,16 @@ class KitManagerImplTest {
             Pair("postal", "5-45555"),
             Pair("country", "US")
         )
-        manager.execute("Test", attributes, null, null, null)
-        Assert.assertEquals(5, attributes.size)
+
+        manager.execute("Test", attributes, null, null, null, null)
+        Assert.assertEquals(6, attributes.size)
+
         Assert.assertEquals("(123) 456-9898", attributes["call"])
         Assert.assertEquals("5-45555", attributes["postal"])
         Assert.assertEquals("Test1", attributes["lastname"])
         Assert.assertEquals("Test", attributes["test"])
         Assert.assertEquals("US", attributes["country"])
+        Assert.assertEquals("false", attributes["sandbox"])
     }
 
     @Test
@@ -969,13 +988,15 @@ class KitManagerImplTest {
             Pair("minorcatid", "5-45555"),
             Pair("country", "US")
         )
-        manager.execute("Test", attributes, null, null, null)
-        Assert.assertEquals(5, attributes.size)
+
+        manager.execute("Test", attributes, null, null, null, null)
+        Assert.assertEquals(6, attributes.size)
         Assert.assertEquals("(123) 456-9898", attributes["no"])
         Assert.assertEquals("5-45555", attributes["minorcatid"])
         Assert.assertEquals("Test1", attributes["lastname"])
         Assert.assertEquals("Test", attributes["test"])
         Assert.assertEquals("US", attributes["country"])
+        Assert.assertEquals("false", attributes["sandbox"])
     }
 
     @Test
@@ -1031,13 +1052,15 @@ class KitManagerImplTest {
             Pair("customerId", "55555"),
             Pair("country", "US")
         )
-        manager.execute("Test", attributes, null, null, null)
-        Assert.assertEquals(5, attributes.size)
+
+        manager.execute("Test", attributes, null, null, null, null)
+        Assert.assertEquals(6, attributes.size)
         Assert.assertEquals("(123) 456-9898", attributes["number"])
         Assert.assertEquals("55555", attributes["customerId"])
         Assert.assertEquals("Test1", attributes["lastname"])
         Assert.assertEquals("Test", attributes["test"])
         Assert.assertEquals("US", attributes["country"])
+        Assert.assertEquals("false", attributes["sandbox"])
     }
 
     @Test
@@ -1228,6 +1251,418 @@ class KitManagerImplTest {
         Mockito.verify(runnable).run()
     }
 
+    @Test
+    fun testRokt_SandboxMode_When_Default_Environment() {
+        val sideloadedKit = Mockito.mock(MPSideloadedKit::class.java)
+        val kitId = 6000000
+
+        val configJSONObj = JSONObject().apply {
+            put("id", kitId)
+        }
+        val mockedKitConfig = KitConfiguration.createKitConfiguration(configJSONObj)
+        Mockito.`when`(sideloadedKit.configuration).thenReturn(mockedKitConfig)
+
+        val settingsMap = hashMapOf(
+            "placementAttributesMapping" to """
+        []
+            """.trimIndent()
+        )
+        val field = KitConfiguration::class.java.getDeclaredField("settings")
+        field.isAccessible = true
+        field.set(mockedKitConfig, settingsMap)
+
+        val mockedProvider = mockProvider(mockedKitConfig)
+
+        val options = MParticleOptions.builder(MockContext())
+            .sideloadedKits(mutableListOf(sideloadedKit) as List<SideloadedKit>).build()
+        val manager: KitManagerImpl = MockKitManagerImpl(options)
+        val factory = Mockito.mock(KitIntegrationFactory::class.java)
+        manager.setKitFactory(factory)
+
+        Mockito.`when`(factory.isSupported(Mockito.anyInt())).thenReturn(true)
+        val supportedKit = mutableSetOf(kitId)
+        Mockito.`when`(manager.supportedKits).thenReturn(supportedKit)
+        Mockito.`when`(sideloadedKit.isDisabled).thenReturn(false)
+        Mockito.`when`(
+            factory.createInstance(
+                Mockito.any(
+                    KitManagerImpl::class.java
+                ),
+                Mockito.any(KitConfiguration::class.java)
+            )
+        ).thenReturn(sideloadedKit)
+        manager.providers = ConcurrentHashMap<Int, KitIntegration>().apply {
+            put(42, mockedProvider)
+        }
+
+        val attributes = hashMapOf(
+            Pair("test", "Test"),
+            Pair("lastname", "Test1"),
+            Pair("number", "(123) 456-9898"),
+            Pair("customerId", "55555"),
+            Pair("country", "US")
+        )
+        manager.execute("Test", attributes, null, null, null, null)
+        Assert.assertEquals(6, attributes.size)
+        Assert.assertEquals("(123) 456-9898", attributes["number"])
+        Assert.assertEquals("55555", attributes["customerId"])
+        Assert.assertEquals("Test1", attributes["lastname"])
+        Assert.assertEquals("Test", attributes["test"])
+        Assert.assertEquals("US", attributes["country"])
+        Assert.assertEquals("false", attributes["sandbox"])
+    }
+
+    @Test
+    fun testRokt_SandboxMode_When_Environment_IS_Development() {
+        val sideloadedKit = Mockito.mock(MPSideloadedKit::class.java)
+        val kitId = 6000000
+
+        val configJSONObj = JSONObject().apply {
+            put("id", kitId)
+        }
+        val mockedKitConfig = KitConfiguration.createKitConfiguration(configJSONObj)
+
+        val settingsMap = hashMapOf(
+            "placementAttributesMapping" to """
+        []
+            """.trimIndent()
+        )
+        val field = KitConfiguration::class.java.getDeclaredField("settings")
+        field.isAccessible = true
+        field.set(mockedKitConfig, settingsMap)
+
+        val mockedProvider = mockProvider(mockedKitConfig)
+
+        val options = MParticleOptions.builder(MockContext())
+            .sideloadedKits(mutableListOf(sideloadedKit) as List<SideloadedKit>).build()
+        val manager: KitManagerImpl = MockKitManagerImpl(options)
+        val factory = Mockito.mock(KitIntegrationFactory::class.java)
+        manager.setKitFactory(factory)
+
+        Mockito.`when`(factory.isSupported(Mockito.anyInt())).thenReturn(true)
+        PowerMockito.mockStatic(MPUtility::class.java)
+        Mockito.`when`(MPUtility.isDevEnv()).thenReturn(true)
+        val supportedKit = mutableSetOf(kitId)
+        Mockito.`when`(manager.supportedKits).thenReturn(supportedKit)
+        Mockito.`when`(sideloadedKit.isDisabled).thenReturn(false)
+        Mockito.`when`(
+            factory.createInstance(
+                Mockito.any(
+                    KitManagerImpl::class.java
+                ),
+                Mockito.any(KitConfiguration::class.java)
+            )
+        ).thenReturn(sideloadedKit)
+        manager.providers = ConcurrentHashMap<Int, KitIntegration>().apply {
+            put(42, mockedProvider)
+        }
+
+        val attributes = hashMapOf(
+            Pair("test", "Test"),
+            Pair("lastname", "Test1"),
+            Pair("number", "(123) 456-9898"),
+            Pair("customerId", "55555"),
+            Pair("country", "US")
+        )
+        manager.execute("Test", attributes, null, null, null, null)
+        Assert.assertEquals(6, attributes.size)
+        Assert.assertEquals("(123) 456-9898", attributes["number"])
+        Assert.assertEquals("55555", attributes["customerId"])
+        Assert.assertEquals("Test1", attributes["lastname"])
+        Assert.assertEquals("Test", attributes["test"])
+        Assert.assertEquals("US", attributes["country"])
+        Assert.assertEquals("true", attributes["sandbox"])
+    }
+
+    @Test
+    fun testRokt_SandboxMode_When_SandBox_is_Pass_In_Attributes_And_Environment_Is_DEV() {
+        val sideloadedKit = Mockito.mock(MPSideloadedKit::class.java)
+        val kitId = 6000000
+
+        val configJSONObj = JSONObject().apply {
+            put("id", kitId)
+        }
+        val mockedKitConfig = KitConfiguration.createKitConfiguration(configJSONObj)
+
+        val settingsMap = hashMapOf(
+            "placementAttributesMapping" to """
+        []
+            """.trimIndent()
+        )
+        val field = KitConfiguration::class.java.getDeclaredField("settings")
+        field.isAccessible = true
+        field.set(mockedKitConfig, settingsMap)
+
+        val mockedProvider = mockProvider(mockedKitConfig)
+
+        val options = MParticleOptions.builder(MockContext())
+            .sideloadedKits(mutableListOf(sideloadedKit) as List<SideloadedKit>).build()
+        val manager: KitManagerImpl = MockKitManagerImpl(options)
+        val factory = Mockito.mock(KitIntegrationFactory::class.java)
+        manager.setKitFactory(factory)
+
+        Mockito.`when`(factory.isSupported(Mockito.anyInt())).thenReturn(true)
+        PowerMockito.mockStatic(MPUtility::class.java)
+        Mockito.`when`(MPUtility.isDevEnv()).thenReturn(true)
+        val supportedKit = mutableSetOf(kitId)
+        Mockito.`when`(manager.supportedKits).thenReturn(supportedKit)
+        Mockito.`when`(sideloadedKit.isDisabled).thenReturn(false)
+        Mockito.`when`(
+            factory.createInstance(
+                Mockito.any(
+                    KitManagerImpl::class.java
+                ),
+                Mockito.any(KitConfiguration::class.java)
+            )
+        ).thenReturn(sideloadedKit)
+        manager.providers = ConcurrentHashMap<Int, KitIntegration>().apply {
+            put(42, mockedProvider)
+        }
+
+        val attributes = hashMapOf(
+            Pair("test", "Test"),
+            Pair("lastname", "Test1"),
+            Pair("number", "(123) 456-9898"),
+            Pair("customerId", "55555"),
+            Pair("country", "US"),
+            Pair("sandbox", "false")
+        )
+        manager.execute("Test", attributes, null, null, null, null)
+        Assert.assertEquals(6, attributes.size)
+        Assert.assertEquals("(123) 456-9898", attributes["number"])
+        Assert.assertEquals("55555", attributes["customerId"])
+        Assert.assertEquals("Test1", attributes["lastname"])
+        Assert.assertEquals("Test", attributes["test"])
+        Assert.assertEquals("US", attributes["country"])
+        Assert.assertEquals("false", attributes["sandbox"])
+    }
+
+    @Test
+    fun testSetWrapperSdkVersion() {
+        val manager: KitManagerImpl = MockKitManagerImpl()
+
+        val enabledRoktListener = mock(
+            KitIntegration::class.java,
+            withSettings().extraInterfaces(KitIntegration.RoktListener::class.java)
+        )
+        `when`(enabledRoktListener.isDisabled).thenReturn(false)
+
+        val disabledRoktListener = mock(
+            KitIntegration::class.java,
+            withSettings().extraInterfaces(KitIntegration.RoktListener::class.java)
+        )
+        `when`(disabledRoktListener.isDisabled).thenReturn(true)
+
+        val nonRoktListener = mock(KitIntegration::class.java)
+        `when`(nonRoktListener.isDisabled).thenReturn(false)
+
+        manager.providers = ConcurrentHashMap<Int, KitIntegration>().apply {
+            put(1, enabledRoktListener)
+            put(2, disabledRoktListener)
+            put(3, nonRoktListener)
+        }
+
+        val wrapperSdkVersion = WrapperSdkVersion(WrapperSdk.WrapperFlutter, "1.2.3")
+        manager.setWrapperSdkVersion(wrapperSdkVersion)
+
+        verify(enabledRoktListener as KitIntegration.RoktListener)
+            .setWrapperSdkVersion(wrapperSdkVersion)
+        verify(disabledRoktListener as KitIntegration.RoktListener, never())
+            .setWrapperSdkVersion(wrapperSdkVersion)
+    }
+
+    @Test
+    fun testEvents_noProviders_returnsEmptyFlow() {
+        val manager: KitManagerImpl = MockKitManagerImpl()
+
+        val result = manager.events("test-identifier")
+
+        runTest {
+            val elements = result.toList()
+            assertTrue(elements.isEmpty())
+        }
+    }
+
+    @Test
+    fun testEvents_providersExistButNotRoktListeners_returnsEmptyFlow() {
+        val manager: KitManagerImpl = MockKitManagerImpl()
+
+        val nonRoktProvider = mock(KitIntegration::class.java)
+        `when`(nonRoktProvider.isDisabled).thenReturn(false)
+        `when`(nonRoktProvider.getName()).thenReturn("NonRoktProvider")
+
+        manager.providers = ConcurrentHashMap<Int, KitIntegration>().apply {
+            put(1, nonRoktProvider)
+        }
+
+        val result = manager.events("test-identifier")
+
+        runTest {
+            val elements = result.toList()
+            assertTrue(elements.isEmpty())
+        }
+    }
+
+    @Test
+    fun testEvents_roktListenerDisabled_returnsEmptyFlow() {
+        val manager: KitManagerImpl = MockKitManagerImpl()
+
+        val disabledRoktProvider = mock(
+            KitIntegration::class.java,
+            withSettings().extraInterfaces(KitIntegration.RoktListener::class.java)
+        )
+        `when`(disabledRoktProvider.isDisabled).thenReturn(true)
+        `when`(disabledRoktProvider.getName()).thenReturn("DisabledRoktProvider")
+
+        manager.providers = ConcurrentHashMap<Int, KitIntegration>().apply {
+            put(1, disabledRoktProvider)
+        }
+
+        val result = manager.events("test-identifier")
+
+        runTest {
+            val elements = result.toList()
+            assertTrue(elements.isEmpty())
+        }
+    }
+
+    @Test
+    fun testEvents_roktListenerEnabled_delegatesToProvider() {
+        val manager: KitManagerImpl = MockKitManagerImpl()
+
+        val enabledRoktProvider = mock(
+            KitIntegration::class.java,
+            withSettings().extraInterfaces(KitIntegration.RoktListener::class.java)
+        )
+        `when`(enabledRoktProvider.isDisabled).thenReturn(false)
+        `when`(enabledRoktProvider.getName()).thenReturn("EnabledRoktProvider")
+
+        val expectedFlow: Flow<RoktEvent> = flowOf()
+        val testIdentifier = "test-identifier"
+        `when`((enabledRoktProvider as KitIntegration.RoktListener).events(testIdentifier))
+            .thenReturn(expectedFlow)
+
+        manager.providers = ConcurrentHashMap<Int, KitIntegration>().apply {
+            put(1, enabledRoktProvider)
+        }
+
+        val result = manager.events(testIdentifier)
+
+        verify(enabledRoktProvider as KitIntegration.RoktListener).events(testIdentifier)
+        assertEquals(expectedFlow, result)
+    }
+
+    @Test
+    fun testEvents_multipleProviders_usesFirstEnabledRoktListener() {
+        val manager: KitManagerImpl = MockKitManagerImpl()
+
+        val nonRoktProvider = mock(KitIntegration::class.java)
+        `when`(nonRoktProvider.isDisabled).thenReturn(false)
+        `when`(nonRoktProvider.getName()).thenReturn("NonRoktProvider")
+
+        val disabledRoktProvider = mock(
+            KitIntegration::class.java,
+            withSettings().extraInterfaces(KitIntegration.RoktListener::class.java)
+        )
+        `when`(disabledRoktProvider.isDisabled).thenReturn(true)
+        `when`(disabledRoktProvider.getName()).thenReturn("DisabledRoktProvider")
+
+        val enabledRoktProvider = mock(
+            KitIntegration::class.java,
+            withSettings().extraInterfaces(KitIntegration.RoktListener::class.java)
+        )
+        `when`(enabledRoktProvider.isDisabled).thenReturn(false)
+        `when`(enabledRoktProvider.getName()).thenReturn("EnabledRoktProvider")
+
+        val secondEnabledRoktProvider = mock(
+            KitIntegration::class.java,
+            withSettings().extraInterfaces(KitIntegration.RoktListener::class.java)
+        )
+        `when`(secondEnabledRoktProvider.isDisabled).thenReturn(false)
+        `when`(secondEnabledRoktProvider.getName()).thenReturn("SecondEnabledRoktProvider")
+
+        val expectedFlow: Flow<RoktEvent> = flowOf()
+        val testIdentifier = "test-identifier"
+        `when`((enabledRoktProvider as KitIntegration.RoktListener).events(testIdentifier))
+            .thenReturn(expectedFlow)
+        `when`((secondEnabledRoktProvider as KitIntegration.RoktListener).events(testIdentifier))
+            .thenReturn(flowOf())
+
+        manager.providers = ConcurrentHashMap<Int, KitIntegration>().apply {
+            put(1, nonRoktProvider)
+            put(2, disabledRoktProvider)
+            put(3, enabledRoktProvider)
+            put(4, secondEnabledRoktProvider)
+        }
+
+        val result = manager.events(testIdentifier)
+
+        verify(enabledRoktProvider as KitIntegration.RoktListener).events(testIdentifier)
+        verify(secondEnabledRoktProvider as KitIntegration.RoktListener, never()).events(any())
+        assertEquals(expectedFlow, result)
+    }
+
+    @Test
+    fun testEvents_providerThrowsException_returnsEmptyFlow() {
+        val manager: KitManagerImpl = MockKitManagerImpl()
+
+        val exceptionRoktProvider = mock(
+            KitIntegration::class.java,
+            withSettings().extraInterfaces(KitIntegration.RoktListener::class.java)
+        )
+        `when`(exceptionRoktProvider.isDisabled).thenReturn(false)
+        `when`(exceptionRoktProvider.getName()).thenReturn("ExceptionRoktProvider")
+        `when`((exceptionRoktProvider as KitIntegration.RoktListener).events(any()))
+            .thenThrow(RuntimeException("Test exception"))
+
+        manager.providers = ConcurrentHashMap<Int, KitIntegration>().apply {
+            put(1, exceptionRoktProvider)
+        }
+
+        val result = manager.events("test-identifier")
+
+        runTest {
+            val elements = result.toList()
+            assertTrue(elements.isEmpty())
+        }
+    }
+
+    @Test
+    fun testEvents_providerThrowsException_continuesToNextProvider() {
+        val manager: KitManagerImpl = MockKitManagerImpl()
+
+        val exceptionRoktProvider = mock(
+            KitIntegration::class.java,
+            withSettings().extraInterfaces(KitIntegration.RoktListener::class.java)
+        )
+        `when`(exceptionRoktProvider.isDisabled).thenReturn(false)
+        `when`(exceptionRoktProvider.getName()).thenReturn("ExceptionRoktProvider")
+        `when`((exceptionRoktProvider as KitIntegration.RoktListener).events(any()))
+            .thenThrow(RuntimeException("Test exception"))
+
+        val workingRoktProvider = mock(
+            KitIntegration::class.java,
+            withSettings().extraInterfaces(KitIntegration.RoktListener::class.java)
+        )
+        `when`(workingRoktProvider.isDisabled).thenReturn(false)
+        `when`(workingRoktProvider.getName()).thenReturn("WorkingRoktProvider")
+
+        val expectedFlow: Flow<RoktEvent> = flowOf()
+        val testIdentifier = "test-identifier"
+        `when`((workingRoktProvider as KitIntegration.RoktListener).events(testIdentifier))
+            .thenReturn(expectedFlow)
+
+        manager.providers = ConcurrentHashMap<Int, KitIntegration>().apply {
+            put(1, exceptionRoktProvider)
+            put(2, workingRoktProvider)
+        }
+
+        val result = manager.events(testIdentifier)
+
+        verify(workingRoktProvider as KitIntegration.RoktListener).events(testIdentifier)
+        assertEquals(expectedFlow, result)
+    }
+
     internal inner class mockProvider(val config: KitConfiguration) : KitIntegration(), KitIntegration.RoktListener {
         override fun isDisabled(): Boolean = false
         override fun getName(): String = "FakeProvider"
@@ -1244,16 +1679,31 @@ class KitManagerImplTest {
         }
 
         override fun execute(
-            viewName: String?,
-            attributes: MutableMap<String, String>?,
-            mpRoktEventCallback: MParticle.MpRoktEventCallback?,
+            viewName: String,
+            attributes: MutableMap<String, String>,
+            mpRoktEventCallback: MpRoktEventCallback?,
             placeHolders: MutableMap<String, WeakReference<RoktEmbeddedView>>?,
             fontTypefaces: MutableMap<String, WeakReference<Typeface>>?,
-            user: FilteredMParticleUser?
+            user: FilteredMParticleUser?,
+            config: RoktConfig?
         ) {
             println("Executed with $attributes")
         }
+
+        override fun events(identifier: String): Flow<RoktEvent> {
+            println("events called with identfier: $identifier")
+            return flowOf()
+        }
+
+        override fun setWrapperSdkVersion(wrapperSdkVersion: WrapperSdkVersion) {
+            println("setWrapperSdkVersion with $wrapperSdkVersion")
+        }
+
+        override fun purchaseFinalized(placementId: String, catalogItemId: String, status: Boolean) {
+            println("purchaseFinalized with placementId: $placementId  catalogItemId : $catalogItemId status : $status ")
+        }
     }
+
     internal inner class KitManagerEventCounter : MockKitManagerImpl() {
         var logBaseEventCalled = 0
         var logCommerceEventCalled = 0

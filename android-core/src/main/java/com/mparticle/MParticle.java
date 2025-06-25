@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Typeface;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -52,13 +51,11 @@ import com.mparticle.media.MPMediaAPI;
 import com.mparticle.media.MediaCallbacks;
 import com.mparticle.messaging.MPMessagingAPI;
 import com.mparticle.messaging.ProviderCloudMessage;
-import com.mparticle.rokt.RoktEmbeddedView;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -113,7 +110,7 @@ public class MParticle {
     protected boolean locationTrackingEnabled = false;
     @NonNull
     protected Internal mInternal = new Internal();
-    protected Rokt rokt = new Rokt();
+    protected Rokt rokt;
     private IdentityStateListener mDeferredModifyPushRegistrationListener;
     @NonNull
     private WrapperSdkVersion wrapperSdkVersion = new WrapperSdkVersion(WrapperSdk.WrapperNone, null);
@@ -193,6 +190,7 @@ public class MParticle {
                     instance = new MParticle(options);
                     instance.mKitManager = new KitFrameworkWrapper(options.getContext(), instance.mMessageManager, instance.Internal().getConfigManager(), instance.Internal().getAppStateManager(), options);
                     instance.mIdentityApi = new IdentityApi(options.getContext(), instance.mInternal.getAppStateManager(), instance.mMessageManager, instance.mConfigManager, instance.mKitManager, options.getOperatingSystem());
+                    instance.rokt = new Rokt(instance.mConfigManager, instance.mKitManager);
 
                     // Check if we've switched workspaces on startup
                     UploadSettings lastUploadSettings = instance.mConfigManager.getLastUploadSettings();
@@ -384,8 +382,14 @@ public class MParticle {
      * @param version
      */
     public void setWrapperSdk(@NotNull WrapperSdk wrapperSdk, @NotNull String version) {
+        // Set instance wrapperSdkVersion if it is not set or if the wrapperSdk is different from the current one
         if (this.wrapperSdkVersion.getSdk() == WrapperSdk.WrapperNone && (wrapperSdk != WrapperSdk.WrapperNone && !version.isEmpty())) {
             this.wrapperSdkVersion = new WrapperSdkVersion(wrapperSdk, version);
+        }
+
+        if (mConfigManager.isEnabled()) {
+            // Regardless of instance wrapperSdkVersion, set the wrapperSdkVersion in KitManager
+            mKitManager.setWrapperSdkVersion(new WrapperSdkVersion(wrapperSdk, version));
         }
     }
 
@@ -1781,125 +1785,6 @@ public class MParticle {
         void onReset();
     }
 
-    /**
-     * ### Optional callback events for when the view loads and unloads.
-     */
-    public interface MpRoktEventCallback {
-        /**
-         * onLoad Callback will be triggered immediately when the View displays.
-         */
-        void onLoad();
-
-        /**
-         * onUnLoad Callback will be triggered if the View failed to show or it closed.
-         */
-        void onUnload(UnloadReasons reason);
-
-        /**
-         * onShouldShowLoadingIndicator callback will be triggered if View start processing
-         */
-        void onShouldShowLoadingIndicator();
-
-        /**
-         * onShouldHideLoadingIndicator callback will be triggered if View end processing
-         */
-        void onShouldHideLoadingIndicator();
-    }
-
-    /**
-     * Enum representing the reasons for unloading.
-     */
-    public enum UnloadReasons {
-        /**
-         * Called when there are no offers to display so the view does not get loaded in.
-         */
-        NO_OFFERS,
-
-        /**
-         * View has been rendered and has been completed.
-         */
-        FINISHED,
-
-        /**
-         * Operation to fetch view took too long to resolve.
-         */
-        TIMEOUT,
-
-        /**
-         * Some error has occurred regarding the network.
-         */
-        NETWORK_ERROR,
-
-        /**
-         * View is empty.
-         */
-        NO_WIDGET,
-
-        /**
-         * Init request was not successful.
-         */
-        INIT_FAILED,
-
-        /**
-         * Placeholder string mismatch.
-         */
-        UNKNOWN_PLACEHOLDER,
-
-        /**
-         * Catch-all for all issues.
-         */
-        UNKNOWN;
-
-        /**
-         * Returns the enum constant matching the provided string.
-         * If no match is found, UNKNOWN is returned.
-         *
-         * @param value the name of the enum constant to look up
-         * @return the corresponding UnloadReasons constant or UNKNOWN if no match is found
-         */
-        public static UnloadReasons from(String value) {
-            for (UnloadReasons reason : UnloadReasons.values()) {
-                if (reason.name().equals(value)) {
-                    return reason;
-                }
-            }
-            return UNKNOWN;
-        }
-    }
-
-
-    /**
-     * Rokt Integration
-     * */
-    public class Rokt{
-        protected Rokt(){
-
-        }
-        public void selectPlacements(String viewName,
-                            Map<String, String> attributes,
-                            MpRoktEventCallback callbacks,
-                            Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
-                            Map<String, WeakReference<Typeface>> fontTypefaces) {
-             if (mConfigManager.isEnabled()) {
-                 mKitManager.execute(viewName,
-                         attributes,
-                         callbacks,
-                         placeHolders,
-                         fontTypefaces);
-             }
-        }
-        public void selectPlacements(String viewName,
-                                     Map<String, String> attributes) {
-            if (mConfigManager.isEnabled()) {
-                mKitManager.execute(viewName,
-                        attributes,
-                        null,
-                        null,
-                        null
-                );
-            }
-        }
-    }
     /**
      * @hidden
      */

@@ -97,6 +97,8 @@
 -keep class com.mparticle.MParticle$MpRoktEventCallback { *; }
 -keep class com.mparticle.MParticle$UnloadReasons { *; }
 -keep class com.mparticle.MParticle$Rokt { *; }
+-keep class com.mparticle.WrapperSdk { *; }
+-keep class com.mparticle.WrapperSdkVersion { *; }
 
 -keep class com.mparticle.Session { *; }
 -keep class com.mparticle.MPEvent { *; }
@@ -196,6 +198,31 @@
 -keep public class com.mparticle.rokt.* {
     *;
 }
+
+# Additional Rokt-specific rules to preserve all classes and method signatures
+-keep class com.mparticle.rokt.RoktConfig { *; }
+-keep class com.mparticle.rokt.RoktConfig$Builder { *; }
+-keep class com.mparticle.rokt.RoktConfig$ColorMode { *; }
+-keep class com.mparticle.rokt.CacheConfig { *; }
+-keep class com.mparticle.rokt.RoktEmbeddedView { *; }
+-keep class com.mparticle.rokt.RoktLayoutDimensionCallBack { *; }
+-keep class com.mparticle.rokt.RoktOptions { *; }
+
+# Preserve annotation classes
+-keep class androidx.annotation.NonNull { *; }
+-keep class androidx.annotation.Nullable { *; }
+-keepclassmembers class com.mparticle.** {
+    @androidx.annotation.NonNull *;
+    @androidx.annotation.Nullable *;
+}
+
+# Preserve all method signatures in the Rokt class to prevent overload resolution issues
+-keepclassmembers class com.mparticle.Rokt {
+    *;
+}
+-keepclassmembers class com.mparticle.KitIntegration$RoktListener* {
+     *;
+ }
 -keep public class com.mparticle.audience.* {
     *;
 }
@@ -223,6 +250,7 @@
     public static final ** CREATOR;
 }
 
+<<<<<<< feat/SQDSDKS-7068-gradle-8
 # Firebase and GMS CloudMessaging
 -dontwarn com.google.android.gms.cloudmessaging.**
 -dontwarn com.google.firebase.messaging.**
@@ -249,3 +277,18 @@
 -keepclassmembers class * {
     @kotlin.Metadata <methods>;
 }
+=======
+-keepclassmembers class com.mparticle.Rokt {
+    <init>(...);
+    void *(...);
+    void *$default(...);
+    <fields>;
+}
+
+-keep interface com.mparticle.MpRoktEventCallback { *; }
+-keep interface com.mparticle.UnloadReasons { *; }
+-keep class com.mparticle.UnloadReasons { *; }
+-keep class com.mparticle.RoktEvent { *; }
+-keepclassmembers class com.mparticle.RoktEvent { *; }
+-keepclasseswithmembers class com.mparticle.RoktEvent$* { *; }
+>>>>>>> development

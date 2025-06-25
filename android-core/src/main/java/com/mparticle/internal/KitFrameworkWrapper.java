@@ -1,5 +1,7 @@
 package com.mparticle.internal;
 
+import static kotlinx.coroutines.flow.FlowKt.flowOf;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -8,6 +10,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 
@@ -16,11 +19,16 @@ import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
+import com.mparticle.MpRoktEventCallback;
+import com.mparticle.RoktEvent;
+import com.mparticle.WrapperSdkVersion;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.listeners.InternalListenerManager;
+import com.mparticle.rokt.RoktConfig;
 import com.mparticle.rokt.RoktEmbeddedView;
+import com.mparticle.rokt.RoktOptions;
 
 import org.json.JSONArray;
 
@@ -34,6 +42,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+import kotlinx.coroutines.flow.Flow;
 
 public class KitFrameworkWrapper implements KitManager {
     private final Context mContext;
@@ -506,6 +516,16 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     @Override
+    @NonNull
+    public RoktOptions getRoktOptions() {
+        if (mKitManager != null) {
+            return mKitManager.getRoktOptions();
+        }
+        return mOptions != null ? mOptions.getRoktOptions() : new RoktOptions();
+    }
+
+    @Override
+    @NonNull
     public Map<Integer, KitStatus> getKitStatus() {
         if (mKitManager != null) {
             return mKitManager.getKitStatus();
@@ -649,17 +669,42 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     @Override
-    public void execute(String viewName,
-                        Map<String, String> attributes,
-                        MParticle.MpRoktEventCallback mpRoktEventCallback,
-                        Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
-                        Map<String, WeakReference<Typeface>> fontTypefaces) {
+    public void execute(@NonNull String viewName,
+                        @NonNull Map<String, String> attributes,
+                        @Nullable MpRoktEventCallback mpRoktEventCallback,
+                        @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
+                        @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
+                        @Nullable RoktConfig config) {
         if (mKitManager != null) {
             mKitManager.execute(viewName,
                     attributes,
                     mpRoktEventCallback,
                     placeHolders,
-                    fontTypefaces);
+                    fontTypefaces,
+                    config);
+        }
+    }
+
+    @Override
+    public Flow<RoktEvent> events(@NonNull String identifier) {
+        if (mKitManager != null) {
+            return mKitManager.events(identifier);
+        } else {
+            return flowOf();
+        }
+    }
+
+    @Override
+    public void setWrapperSdkVersion(@NonNull WrapperSdkVersion wrapperSdkVersion) {
+        if (mKitManager != null) {
+            mKitManager.setWrapperSdkVersion(wrapperSdkVersion);
+        }
+    }
+
+    @Override
+    public void purchaseFinalized(@NonNull String placementId, @NonNull String catalogItemId, boolean status) {
+        if (mKitManager != null) {
+            mKitManager.purchaseFinalized(placementId, catalogItemId, status);
         }
     }
 

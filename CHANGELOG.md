@@ -1,3 +1,125 @@
+## [5.70.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.70.1...v5.70.2) (2025-06-25)
+
+
+### Updates & Maintenance
+
+* Update submodules ([9ae94fa](https://github.com/mParticle/mparticle-android-sdk/commit/9ae94fa1731b3de321f41178736afbbbef39f63e))
+
+## [5.70.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.70.0...v5.70.1) (2025-06-24)
+
+
+### Bug Fixes
+
+* Restore ProGuard rules to preserve Rokt class members ([#590](https://github.com/mParticle/mparticle-android-sdk/issues/590)) ([219b1d0](https://github.com/mParticle/mparticle-android-sdk/commit/219b1d006fbf5c678371dbac92d5161ae4bd207e))
+
+
+### Updates & Maintenance
+
+* Create CODEOWNERS ([#591](https://github.com/mParticle/mparticle-android-sdk/issues/591)) ([eee1e27](https://github.com/mParticle/mparticle-android-sdk/commit/eee1e2774ddc779521622bd43936675236a8cd79))
+
+## [5.70.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.69.0...v5.70.0) (2025-06-23)
+
+
+### Features
+
+* Add support for the fontFilePathMap ([#589](https://github.com/mParticle/mparticle-android-sdk/issues/589)) ([71cd132](https://github.com/mParticle/mparticle-android-sdk/commit/71cd1323a2903c90a7f72aef40d49389cbda85bb))
+* SQDSDKS-7420 update select placements ([#586](https://github.com/mParticle/mparticle-android-sdk/issues/586)) ([e583057](https://github.com/mParticle/mparticle-android-sdk/commit/e583057a1cfd1f6da29bf9fc5e99f1c91ac02233))
+* SQDSDKS-7422 - Add all Rokt events ([#587](https://github.com/mParticle/mparticle-android-sdk/issues/587)) ([2487f70](https://github.com/mParticle/mparticle-android-sdk/commit/2487f703b1b110266d82db933dbd19384588cc7f))
+
+
+### Bug Fixes
+
+* Include missing overridesSubdirectory flag in networkOptions for domain mapping ([#588](https://github.com/mParticle/mparticle-android-sdk/issues/588)) ([88c73b8](https://github.com/mParticle/mparticle-android-sdk/commit/88c73b83c1fb8f72e88f289f00b9d038a9359fad))
+
+
+### Updates & Maintenance
+
+* Update submodules ([4429471](https://github.com/mParticle/mparticle-android-sdk/commit/4429471610d522b937c983f4478b5e3fa6b110e5))
+
+## [5.69.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.68.0...v5.69.0) (2025-06-17)
+
+
+### Features
+
+* Always set the wrapperSdkVersion in KitManager ([#584](https://github.com/mParticle/mparticle-android-sdk/issues/584)) ([a473157](https://github.com/mParticle/mparticle-android-sdk/commit/a4731572656dccc0dc6e3511539bbe8db38792e1))
+
+
+### Bug Fixes
+
+* ensure user attributes are applied before proceeding with Rokt execution ([#585](https://github.com/mParticle/mparticle-android-sdk/issues/585)) ([df0450e](https://github.com/mParticle/mparticle-android-sdk/commit/df0450e724e9d5b2945739fc3304d87cb0b3a567))
+
+## [5.68.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.67.0...v5.68.0) (2025-06-14)
+
+
+### Features
+
+* Passthrough SDK type to Rokt Kit ([#582](https://github.com/mParticle/mparticle-android-sdk/issues/582)) ([8114d84](https://github.com/mParticle/mparticle-android-sdk/commit/8114d847165b0f429ad367dd7a3cf1e6f5a2cd11))
+
+
+### Updates & Maintenance
+
+* Update submodules ([5b7bb9e](https://github.com/mParticle/mparticle-android-sdk/commit/5b7bb9e4728bd1ef44a53fa2699ed68ab372cbce))
+
+## [5.67.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.66.0...v5.67.0) (2025-06-13)
+
+
+### Features
+
+* Add support purchaseFinalized API in android core ([#583](https://github.com/mParticle/mparticle-android-sdk/issues/583)) ([c041ddb](https://github.com/mParticle/mparticle-android-sdk/commit/c041ddb09ddb2bbe2d2640fc44ac9e64d1b2b795))
+
+
+### Updates & Maintenance
+
+* Update submodules ([9f98440](https://github.com/mParticle/mparticle-android-sdk/commit/9f98440b59ae75100fd9cedd90e7d47a3329a5bf))
+
+## [5.66.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.65.0...v5.66.0) (2025-06-11)
+
+
+### Features
+
+* Add RoktConfig in MP layer ([#581](https://github.com/mParticle/mparticle-android-sdk/issues/581)) ([6a71621](https://github.com/mParticle/mparticle-android-sdk/commit/6a71621c506a5212e151ae30981aa04c2c2ce6b3))
+
+
+### Updates & Maintenance
+
+* Update submodules ([a05d1dd](https://github.com/mParticle/mparticle-android-sdk/commit/a05d1ddacc1c92613df108f04d33065ea866f60c))
+
+## [5.65.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.64.0...v5.65.0) (2025-06-09)
+
+
+### Features
+
+* Add sandbox mode to attributes ([#559](https://github.com/mParticle/mparticle-android-sdk/issues/559)) ([cbccd13](https://github.com/mParticle/mparticle-android-sdk/commit/cbccd1322857c5c972ba236f7aaca6debc73fd98))
+
+
+### Bug Fixes
+
+* Add @NonNull and @Nullable annotations to execute method parameters ([#579](https://github.com/mParticle/mparticle-android-sdk/issues/579)) ([9089098](https://github.com/mParticle/mparticle-android-sdk/commit/908909886eecbc0dcefc95838c50d3851715d123))
+* add Rokt dimensions layout to show embedded placements correctly ([#580](https://github.com/mParticle/mparticle-android-sdk/issues/580)) ([9d6813c](https://github.com/mParticle/mparticle-android-sdk/commit/9d6813c66aee6d8dc38740ee6366d7881de623c2))
+
+
+### Updates & Maintenance
+
+* Update submodules ([4ed38b5](https://github.com/mParticle/mparticle-android-sdk/commit/4ed38b55e5c6bbcdbe9025994ca669e601b31fe8))
+
+## [5.64.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.63.0...v5.64.0) (2025-05-30)
+
+
+### Features
+
+* Fire Identify if Provided Email in Rokt SelectPlacements ([#578](https://github.com/mParticle/mparticle-android-sdk/issues/578)) ([8325080](https://github.com/mParticle/mparticle-android-sdk/commit/8325080ea251daf7e3f380db83c031b5ea91a960))
+
+
+### Bug Fixes
+
+* Removes `messageQueue` since produces memory leaks ([#576](https://github.com/mParticle/mparticle-android-sdk/issues/576)) ([5a2c35a](https://github.com/mParticle/mparticle-android-sdk/commit/5a2c35a791c2063942df73766129344f075ac59c))
+
+
+### Updates & Maintenance
+
+* Migrate Internal listeners class to kotlin ([#548](https://github.com/mParticle/mparticle-android-sdk/issues/548)) ([de96056](https://github.com/mParticle/mparticle-android-sdk/commit/de96056f03c0d812e492aff2cb1d8c83650df720))
+* Update submodules ([5ffd95f](https://github.com/mParticle/mparticle-android-sdk/commit/5ffd95f67f4ee25d114ac9be4dfa57d7e77d03d1))
+
 ## [5.63.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.62.2...v5.63.0) (2025-05-12)
 
 

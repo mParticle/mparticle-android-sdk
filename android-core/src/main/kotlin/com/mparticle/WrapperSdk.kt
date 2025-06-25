@@ -6,7 +6,8 @@ enum class WrapperSdk(wrapperSdkId: Int, wrapperSdkName: String) {
     WrapperSdkReactNative(2, "React Native"),
     WrapperSdkCordova(3, "Cordova"),
     WrapperXamarin(4, "Xamarin"),
-    WrapperFlutter(5, "Flutter");
+    WrapperFlutter(5, "Flutter"),
+    WrapperMaui(6, "Maui");
 }
 
 /**
