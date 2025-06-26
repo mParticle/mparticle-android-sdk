@@ -252,21 +252,6 @@
     public static final ** CREATOR;
 }
 
--keepclassmembers class com.mparticle.Rokt {
-    <init>(...);
-    void *(...);
-    void *$default(...);
-    <fields>;
-}
-
--keep interface com.mparticle.MpRoktEventCallback { *; }
--keep interface com.mparticle.UnloadReasons { *; }
--keep class com.mparticle.UnloadReasons { *; }
--keep class com.mparticle.RoktEvent { *; }
--keepclassmembers class com.mparticle.RoktEvent { *; }
--keepclasseswithmembers class com.mparticle.RoktEvent$* { *; }
-
-
 # Firebase and GMS CloudMessaging
 -dontwarn com.google.android.gms.cloudmessaging.**
 -dontwarn com.google.firebase.messaging.**
@@ -293,3 +278,16 @@
 -keepclassmembers class * {
     @kotlin.Metadata <methods>;
 }
+-keepclassmembers class com.mparticle.Rokt {
+    <init>(...);
+    void *(...);
+    void *$default(...);
+    <fields>;
+}
+
+-keep interface com.mparticle.MpRoktEventCallback { *; }
+-keep interface com.mparticle.UnloadReasons { *; }
+-keep class com.mparticle.UnloadReasons { *; }
+-keep class com.mparticle.RoktEvent { *; }
+-keepclassmembers class com.mparticle.RoktEvent { *; }
+-keepclasseswithmembers class com.mparticle.RoktEvent$* { *; }
