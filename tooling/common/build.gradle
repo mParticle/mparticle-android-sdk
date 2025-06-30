@@ -16,10 +16,10 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.toVersion(JAVA_VERSION)
+    targetCompatibility = JavaVersion.toVersion(JAVA_VERSION)
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(Integer.parseInt(JAVA_VERSION))
 }
