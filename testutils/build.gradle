@@ -6,12 +6,12 @@ android {
     testNamespace 'com.mparticle.legacyTest'
     compileSdk 33
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17 // Set to your desired Java version
-        targetCompatibility = JavaVersion.VERSION_17 // Set to your desired Java version
+        sourceCompatibility = JavaVersion.toVersion(JAVA_VERSION)
+        targetCompatibility = JavaVersion.toVersion(JAVA_VERSION)
     }
 
     kotlinOptions {
-        jvmTarget = "17" // Should match the Java version above
+        jvmTarget = JAVA_VERSION
     }
     defaultConfig {
         //This is set to 21 to avoid slow multidex.

@@ -1,8 +1,8 @@
 apply plugin: 'groovy'
 apply plugin: 'kotlin'
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
+sourceCompatibility = JavaVersion.toVersion(JAVA_VERSION)
+targetCompatibility = JavaVersion.toVersion(JAVA_VERSION)
 
 
 ext {
