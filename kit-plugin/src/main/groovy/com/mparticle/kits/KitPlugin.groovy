@@ -140,9 +140,9 @@ class KitPlugin implements Plugin<Project> {
             }
 
             target.extensions.configure(SigningExtension) { signing ->
-                signing.required = { target.gradle.taskGraph.hasTask("publishReleasePublicationToMavenRepository") }
-                def signingKey = target.findProperty('signingKey') ?: System.getenv("mavenSigningKeyId")
-                def signingPassword = target.findProperty('signingPassword') ?: System.getenv("mavenSigningKeyPassword")
+                signing.required = { target.gradle.taskGraph.hasTask('publishReleasePublicationToMavenRepository') }
+                def signingKey = target.findProperty('signingKey') ?: System.getenv('mavenSigningKeyId')
+                def signingPassword = target.findProperty('signingPassword') ?: System.getenv('mavenSigningKeyPassword')
                 if (signingKey && signingPassword) {
                     signing.useInMemoryPgpKeys(target.property('signingKey'), target.property('signingPassword'))
                 }
