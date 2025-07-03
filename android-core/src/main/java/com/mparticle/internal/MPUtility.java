@@ -593,7 +593,9 @@ public class MPUtility {
 
     public static boolean isInstallRefApiAvailable() {
         try {
+            Class.forName("com.android.installreferrer.api.InstallReferrerClient");
             Class.forName("com.android.installreferrer.api.InstallReferrerStateListener");
+            Class.forName("com.android.installreferrer.api.ReferrerDetails");
             return true;
         } catch (Exception ignored) {
         }

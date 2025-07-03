@@ -15,6 +15,30 @@ import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 
+/**
+ * Helper class to fetch install referrer via reflection.
+ * <p>
+ * To test the install referrer functionality:
+ * 1. Set test application `applicationId` to a real app's Play Store package name, e.g. "com.medium.reader".
+ * <p>
+ * 2. Ensure the app is fully uninstalled from the test device:
+ *    `adb uninstall com.medium.reader`
+ * <p>
+ * 3. Broadcast the test referrer to the Play Store. This will open the Play Store app:
+ *    `adb shell "am start -a android.intent.action.VIEW -d 'https://play.google.com/store/apps/details?id=com.medium.reader&referrer=utm_source%3Dgoogle%26utm_medium%3Dcpc%26utm_term%3Drunning%252Bshoes%26utm_content%3Dcontent%26utm_campaign%3Dpromo'"`
+ * <p>
+ * 4. Install the debug version of your test app.
+ * <p>
+ * 5. Launch the app and check the logs for the referrer:
+ *    `adb logcat -d | grep 'Install Referrer received'`
+ * <p>
+ * 6. Verify the referrer is logged in the test app's logs by checking for the utm_* parameters passed in during step 3.
+ *    e.g. `Install Referrer received: utm_source=google&utm_medium=cpc&utm_term=running%2Bshoes&utm_content=content&utm_campaign=promo`
+ *
+ * @see <a href="https://developer.android.com/reference/com/android/installreferrer/api/InstallReferrerClient">InstallReferrerClient</a>
+ * @see <a href="https://medium.com/@madicdjordje/how-to-test-the-play-store-install-referrer-api-78a63d59945b">How to Test the Play Store Install Referrer API</a>
+ * @noinspection JavadocLinkAsPlainText
+ */
 public class InstallReferrerHelper {
 
     @Nullable
