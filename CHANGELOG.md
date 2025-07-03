@@ -1,3 +1,10 @@
+## [5.70.3](https://github.com/mParticle/mparticle-android-sdk/compare/v5.70.2...v5.70.3) (2025-07-03)
+
+
+### Bug Fixes
+
+* Refactor InstallReferrerClient to use reflection ([#592](https://github.com/mParticle/mparticle-android-sdk/issues/592)) ([2d00a6d](https://github.com/mParticle/mparticle-android-sdk/commit/2d00a6d6f29255c759115fa3baa605daa656ff94))
+
 ## [5.70.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.70.1...v5.70.2) (2025-06-25)
 
 
