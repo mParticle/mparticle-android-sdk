@@ -271,11 +271,12 @@
 -keepclassmembers class * {
     @kotlin.Metadata <methods>;
 }
--keepclassmembers class com.mparticle.Rokt {
-    <init>(...);
-    void *(...);
-    void *$default(...);
-    <fields>;
+
+-keep public class com.mparticle.Rokt {
+    public <init>(...);
+    public void *(...);
+    public void *$default(...);
+    public <fields>;
 }
 
 -keep interface com.mparticle.MpRoktEventCallback { *; }
