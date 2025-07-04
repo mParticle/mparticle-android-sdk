@@ -1,6 +1,8 @@
 package com.mparticle
 
-// RoktEvent interface for handling events from the Rokt SDK.
+/**
+ * RoktEvent interface for handling events from the Rokt SDK.
+ */
 sealed interface RoktEvent {
     /**
      * ShowLoadingIndicator event will be triggered before SDK calls Rokt backend
