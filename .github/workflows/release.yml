@@ -119,10 +119,10 @@ jobs:
     needs: semantic-release
     runs-on: ubuntu-latest
     env:
-      sonatypeUsername: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
-      sonatypePassword: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
-      mavenSigningKeyId: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY }}
-      mavenSigningKeyPassword: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_PASSWORD }}
+      ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+      ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+      ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY }}
+      ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_PASSWORD }}
     steps:
       - name: "Checkout release branch"
         uses: actions/checkout@v3
