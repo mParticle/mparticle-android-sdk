@@ -2,6 +2,7 @@ buildscript {
     ext.kotlin_version = '1.9.20'
     ext.kotlin_coroutines_version = '1.9.0'
     ext.gradle_version = '8.1.4'
+    ext.dokka_version = '1.9.20'
 
     repositories {
         mavenCentral()
@@ -10,6 +11,7 @@ buildscript {
     dependencies {
         classpath "com.android.tools.build:gradle:$gradle_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
     }
 }
 
