@@ -1086,6 +1086,7 @@ public class MParticle {
      * @see MParticle.ServiceProviders
      * @deprecated
      */
+    @Deprecated
     public boolean isProviderActive(int serviceProviderId) {
         return isKitActive(serviceProviderId);
     }
