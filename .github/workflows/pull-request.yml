@@ -1,9 +1,18 @@
 name: "Build and Test"
 
-on: [ push, workflow_dispatch, pull_request ]
+on: [ workflow_dispatch, pull_request ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+  checks: write
+  id-token: write
 
 jobs:
-
   instrumented-tests:
     name: "Instrumented Tests"
     timeout-minutes: 30
@@ -54,10 +63,10 @@ jobs:
             adb uninstall com.mparticle.legacyTest || true
             adb uninstall com.mparticle.test || true
 
-            ./gradlew connectedCheck --stacktrace
-            
-            ./gradlew :android-core:cAT -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=none
-            ./gradlew :android-kit-base:cAT -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=none
+            ./gradlew connectedCheck --info --stacktrace
+
+            ./gradlew :android-core:cAT -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=none --info
+            ./gradlew :android-kit-base:cAT -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=none --info
       - name: "Archive Instrumented Tests Results"
         uses: actions/upload-artifact@v4
         if: always()
@@ -220,3 +229,19 @@ jobs:
     name: "Save PR Number for Dependabot Automerge"
     needs: [ instrumented-tests, instrumented-orchestrator-tests, unit-tests, lint-checks, kotlin-lint-checks, kit-compatibility-test ]
     uses: mParticle/mparticle-workflows/.github/workflows/dependabot-save-pr-number.yml@main
+
+  pr-notify:
+    if: >
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.draft == false
+    needs:
+      - instrumented-tests
+      - unit-tests
+      - lint-checks
+      - kotlin-lint-checks
+      - security-checks
+    name: Notify GChat
+    uses: ROKT/rokt-workflows/.github/workflows/oss_pr_opened_notification.yml@main
+    secrets:
+      gchat_webhook: ${{ secrets.GCHAT_PRS_WEBHOOK }}
+
