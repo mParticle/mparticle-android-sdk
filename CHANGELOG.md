@@ -1,3 +1,16 @@
+## [5.70.3](https://github.com/mParticle/mparticle-android-sdk/compare/v5.70.2...v5.70.3) (2025-07-08)
+
+
+### Bug Fixes
+
+* Refactor InstallReferrerClient to use reflection ([#592](https://github.com/mParticle/mparticle-android-sdk/issues/592)) ([2d00a6d](https://github.com/mParticle/mparticle-android-sdk/commit/2d00a6d6f29255c759115fa3baa605daa656ff94))
+
+
+### Updates & Maintenance
+
+* Migrate from OSSRH to Central Publishing Portal ([#594](https://github.com/mParticle/mparticle-android-sdk/issues/594)) ([c3eb8bf](https://github.com/mParticle/mparticle-android-sdk/commit/c3eb8bfecf333b9a18fad315ad058e5575407723))
+* Update GitHub Actions workflow ([#593](https://github.com/mParticle/mparticle-android-sdk/issues/593)) ([48b546b](https://github.com/mParticle/mparticle-android-sdk/commit/48b546ba22a0bbbd3420321a887f0bf7aaa7f4b1))
+
 ## [5.70.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.70.1...v5.70.2) (2025-06-25)
 
 
