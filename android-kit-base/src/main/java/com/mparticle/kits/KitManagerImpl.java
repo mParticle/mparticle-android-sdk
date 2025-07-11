@@ -1421,12 +1421,14 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         for (KitIntegration provider : providers.values()) {
             try {
                 if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
+                    Logger.verbose("Calling events for kit: " + provider.getName() + " with identifier: " + identifier);
                     return ((KitIntegration.RoktListener) provider).events(identifier);
                 }
             } catch (Exception e) {
                 Logger.warning("Failed to call setWrapperSdkVersion for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
+        Logger.warning("No RoktListener found");
         return flowOf();
     }
 
@@ -1451,6 +1453,19 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     ((KitIntegration.RoktListener) provider).purchaseFinalized(placementId,catalogItemId,status);
                 }
             } catch (Exception e) {
+                Logger.warning("Failed to call purchaseFinalized for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public void close() {
+        for (final KitIntegration provider : providers.values()) {
+            try {
+                if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
+                    ((KitIntegration.RoktListener) provider).close();
+                }
+            } catch (final Exception e) {
                 Logger.warning("Failed to call purchaseFinalized for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }

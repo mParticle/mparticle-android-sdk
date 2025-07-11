@@ -708,6 +708,13 @@ public class KitFrameworkWrapper implements KitManager {
         }
     }
 
+    @Override
+    public void close() {
+        if (mKitManager != null) {
+            mKitManager.close();
+        }
+    }
+
     static class CoreCallbacksImpl implements CoreCallbacks {
         KitFrameworkWrapper mKitFrameworkWrapper;
         ConfigManager mConfigManager;
