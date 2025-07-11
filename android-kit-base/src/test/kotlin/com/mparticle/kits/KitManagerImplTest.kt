@@ -1702,6 +1702,10 @@ class KitManagerImplTest {
         override fun purchaseFinalized(placementId: String, catalogItemId: String, status: Boolean) {
             println("purchaseFinalized with placementId: $placementId  catalogItemId : $catalogItemId status : $status ")
         }
+
+        override fun close() {
+            println("close called")
+        }
     }
 
     internal inner class KitManagerEventCounter : MockKitManagerImpl() {

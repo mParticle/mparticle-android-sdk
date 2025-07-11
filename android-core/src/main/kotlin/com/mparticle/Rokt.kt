@@ -43,4 +43,10 @@ class Rokt internal constructor(
             mKitManager.purchaseFinalized(placementId, catalogItemId, status)
         }
     }
+
+    fun close() {
+        if (mConfigManager.isEnabled) {
+            mKitManager.close()
+        }
+    }
 }
