@@ -1466,7 +1466,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     ((KitIntegration.RoktListener) provider).close();
                 }
             } catch (final Exception e) {
-                Logger.warning("Failed to call purchaseFinalized for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call close for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
