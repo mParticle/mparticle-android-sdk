@@ -146,6 +146,8 @@ public interface KitManager {
 
     void purchaseFinalized(@NonNull String placementId, @NonNull String catalogItemId, boolean status);
 
+    void close();
+
     enum KitStatus {
         NOT_CONFIGURED,
         STOPPED,

@@ -637,5 +637,7 @@ public abstract class KitIntegration {
         void setWrapperSdkVersion(@NonNull WrapperSdkVersion wrapperSdkVersion);
 
         void purchaseFinalized(@NonNull String placementId, @NonNull String catalogItemId, boolean status);
+
+        void close();
     }
 }
