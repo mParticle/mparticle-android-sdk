@@ -1,3 +1,15 @@
+## [5.71.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.70.3...v5.71.0) (2025-07-15)
+
+
+### Features
+
+* Add Rokt close implementation ([#596](https://github.com/mParticle/mparticle-android-sdk/issues/596)) ([371d27a](https://github.com/mParticle/mparticle-android-sdk/commit/371d27aa8c6ac13d604b68fb241bb5701f6f44ad))
+
+
+### Updates & Maintenance
+
+* Update submodules ([f2dfad0](https://github.com/mParticle/mparticle-android-sdk/commit/f2dfad0252e3e3a4112fde7d6fd30421192bed3a))
+
 ## [5.70.3](https://github.com/mParticle/mparticle-android-sdk/compare/v5.70.2...v5.70.3) (2025-07-09)
 
 
