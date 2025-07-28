@@ -1365,8 +1365,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     MParticle instance = MParticle.getInstance();
                     MParticleUser user = instance.Identity().getCurrentUser();
                     String email = attributes.get("email");
+                    String hashedEmail = attributes.get("other");
                     Map<String, String> finalAttributes = attributes;
-                    confirmEmail(email,user,instance.Identity(), () -> {
+                    confirmEmail(email,hashedEmail,user,instance.Identity(), () -> {
                     JSONArray jsonArray = new JSONArray();
 
                     KitConfiguration kitConfig = provider.getConfiguration();
@@ -1473,32 +1474,46 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
     private void confirmEmail(
             @Nullable String email,
+            @Nullable String hashedEmail,
             @Nullable MParticleUser user,
             IdentityApi identityApi,
             Runnable runnable
     ) {
-        if (email != null && user != null) {
+        if ((email != null || hashedEmail != null) && user != null) {
             String existingEmail = user.getUserIdentities().get(MParticle.IdentityType.Email);
+            String existingHashedEmail = user.getUserIdentities().get(MParticle.IdentityType.Other);
 
-            if (!email.equals(existingEmail)) {
+            if (!Objects.equals(email, existingEmail) || !Objects.equals(hashedEmail, existingHashedEmail)) {
                 // If there's an existing email but it doesn't match the passed-in email, log a warning
-                if (existingEmail != null) {
-                    Logger.warning( String.format(
+                if (existingEmail != null && email != null) {
+                    Logger.warning(String.format(
                             "The existing email on the user (%s) does not match the email passed to selectPlacements (%s). " +
                                     "Please make sure to sync the email identity to mParticle as soon as it's available. " +
                                     "Identifying user with the provided email before continuing to selectPlacements.",
                             existingEmail, email
                     ));
+                } else if (existingHashedEmail != null && hashedEmail != null) {
+                    Logger.warning(String.format(
+                            "The existing hashed email on the user (%s) does not match the hashed email passed to selectPlacements (%s). " +
+                                    "Please make sure to sync the email identity to mParticle as soon as it's available. " +
+                                    "Identifying user with the provided email before continuing to selectPlacements.",
+                            existingHashedEmail, hashedEmail
+                    ));
                 }
 
-                IdentityApiRequest identityRequest = IdentityApiRequest.withUser(user)
-                        .email(email)
-                        .build();
+                IdentityApiRequest.Builder identityBuilder = IdentityApiRequest.withUser(user);
+                if (email != null) {
+                    identityBuilder.email(email);
+                }
+                if (hashedEmail != null) {
+                    identityBuilder.userIdentity(MParticle.IdentityType.Other, hashedEmail);
+                }
+                IdentityApiRequest identityRequest = identityBuilder.build();
                 MParticleTask<IdentityApiResult> task = identityApi.identify(identityRequest);
                 task.addFailureListener(new TaskFailureListener() {
                     @Override
                     public void onFailure(IdentityHttpResponse result) {
-                        Logger.error( "Failed to sync email from selectPlacement to user: " + result.getErrors().toString());
+                        Logger.error("Failed to sync email from selectPlacement to user: " + result.getErrors().toString());
 
                         runnable.run();
                     }
