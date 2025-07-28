@@ -152,7 +152,7 @@ public class NetworkOptions {
                         Logger.warning("Duplicate DomainMapping submitted, DomainMapping:\n" + domain.toJson().toString(4) + "\n will overwrite DomainMapping:\n" + domain.toJson().toString(4));
                         loggedDomainTypes.add(domain.getType());
                     } catch (JSONException e) {
-                        e.printStackTrace();
+                        Logger.error(e);
                     }
                 }
             }
