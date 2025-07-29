@@ -1417,7 +1417,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         }
     }
 
-    public static String getValueIgnoreCase(Map<String, String> map, String searchKey) {
+    private String getValueIgnoreCase(Map<String, String> map, String searchKey) {
         for (Map.Entry<String, String> entry : map.entrySet()) {
             if (entry.getKey().equalsIgnoreCase(searchKey)) {
                 return entry.getValue();

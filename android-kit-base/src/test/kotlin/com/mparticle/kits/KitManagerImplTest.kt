@@ -41,6 +41,7 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import org.junit.Assert
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -1397,6 +1398,98 @@ class KitManagerImplTest {
         method.isAccessible = true
         val result = method.invoke(manager, null, null, user, identityApi, runnable)
         verify(runnable).run()
+    }
+
+    @Test
+    fun testGetValueIgnoreCase_keyExistsDifferentCase() {
+        val sideloadedKit = mock(MPSideloadedKit::class.java)
+        val options = MParticleOptions.builder(MockContext())
+            .sideloadedKits(mutableListOf(sideloadedKit) as List<SideloadedKit>).build()
+        val kitId = 6000000
+
+        val configJSONObj = JSONObject().apply {
+            put("id", kitId)
+        }
+        val mockedKitConfig = KitConfiguration.createKitConfiguration(configJSONObj)
+        `when`(sideloadedKit.configuration).thenReturn(mockedKitConfig)
+        val manager: KitManagerImpl = MockKitManagerImpl(options)
+        val method: Method = KitManagerImpl::class.java.getDeclaredMethod(
+            "getValueIgnoreCase",
+            Map::class.java, String::class.java
+        )
+        method.isAccessible = true
+        val map = hashMapOf("Email" to "test@example.com")
+        val result = method.invoke(manager, map,"email")
+        assertEquals("test@example.com", result)
+    }
+
+    @Test
+    fun testGetValueIgnoreCase_when__no_match() {
+        val sideloadedKit = mock(MPSideloadedKit::class.java)
+        val options = MParticleOptions.builder(MockContext())
+            .sideloadedKits(mutableListOf(sideloadedKit) as List<SideloadedKit>).build()
+        val kitId = 6000000
+
+        val configJSONObj = JSONObject().apply {
+            put("id", kitId)
+        }
+        val mockedKitConfig = KitConfiguration.createKitConfiguration(configJSONObj)
+        `when`(sideloadedKit.configuration).thenReturn(mockedKitConfig)
+        val manager: KitManagerImpl = MockKitManagerImpl(options)
+        val method: Method = KitManagerImpl::class.java.getDeclaredMethod(
+            "getValueIgnoreCase",
+            Map::class.java, String::class.java
+        )
+        method.isAccessible = true
+        val map = mapOf("Name" to "Test")
+        val result =method.invoke(manager,map, "email")
+        assertNull(result)
+    }
+
+    @Test
+    fun testGetValueIgnoreCase_when_empty_map_returns_null() {
+        val sideloadedKit = mock(MPSideloadedKit::class.java)
+        val options = MParticleOptions.builder(MockContext())
+            .sideloadedKits(mutableListOf(sideloadedKit) as List<SideloadedKit>).build()
+        val kitId = 6000000
+
+        val configJSONObj = JSONObject().apply {
+            put("id", kitId)
+        }
+        val mockedKitConfig = KitConfiguration.createKitConfiguration(configJSONObj)
+        `when`(sideloadedKit.configuration).thenReturn(mockedKitConfig)
+        val manager: KitManagerImpl = MockKitManagerImpl(options)
+        val method: Method = KitManagerImpl::class.java.getDeclaredMethod(
+            "getValueIgnoreCase",
+            Map::class.java, String::class.java
+        )
+        method.isAccessible = true
+        val map = emptyMap<String, String>()
+        val result =method.invoke(manager,map, "email")
+        assertNull(result)
+    }
+
+    @Test
+    fun testGetValueIgnoreCase_when_empty_key_returns_null1() {
+        val sideloadedKit = mock(MPSideloadedKit::class.java)
+        val options = MParticleOptions.builder(MockContext())
+            .sideloadedKits(mutableListOf(sideloadedKit) as List<SideloadedKit>).build()
+        val kitId = 6000000
+
+        val configJSONObj = JSONObject().apply {
+            put("id", kitId)
+        }
+        val mockedKitConfig = KitConfiguration.createKitConfiguration(configJSONObj)
+        `when`(sideloadedKit.configuration).thenReturn(mockedKitConfig)
+        val manager: KitManagerImpl = MockKitManagerImpl(options)
+        val method: Method = KitManagerImpl::class.java.getDeclaredMethod(
+            "getValueIgnoreCase",
+            Map::class.java, String::class.java
+        )
+        method.isAccessible = true
+        val map = mapOf("Name" to "Test")
+        val result =method.invoke(manager,map, null)
+        assertNull(result)
     }
 
     @Test
