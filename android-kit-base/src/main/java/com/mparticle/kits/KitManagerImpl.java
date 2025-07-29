@@ -74,28 +74,32 @@ import kotlinx.coroutines.flow.Flow;
 
 public class KitManagerImpl implements KitManager, AttributionListener, UserAttributeListener, IdentityStateListener {
 
-    private static final String RESERVED_KEY_LTV = "$Amount";
-    private static final String METHOD_NAME = "$MethodName";
-    private static final String LOG_LTV = "LogLTVIncrease";
-    private static final HandlerThread kitHandlerThread;
+    private static HandlerThread kitHandlerThread;
 
     static {
         kitHandlerThread = new HandlerThread("mParticle_kit_thread");
         kitHandlerThread.start();
     }
 
-    protected final CoreCallbacks mCoreCallbacks;
     private final ReportingManager mReportingManager;
-    private final Context mContext;
-    KitIntegrationFactory mKitIntegrationFactory;
-    ConcurrentHashMap<Integer, KitIntegration> providers = new ConcurrentHashMap<Integer, KitIntegration>();
+    protected final CoreCallbacks mCoreCallbacks;
     private Handler mKitHandler;
+    KitIntegrationFactory mKitIntegrationFactory;
     private DataplanFilter mDataplanFilter = DataplanFilterImpl.EMPTY;
     private KitOptions mKitOptions;
     private RoktOptions mRoktOptions;
     private volatile List<KitConfiguration> kitConfigurations = new ArrayList<>();
-    private final Map<Integer, AttributionResult> mAttributionResultsMap = new TreeMap<>();
-    private final ArrayList<KitsLoadedListener> kitsLoadedListeners = new ArrayList<>();
+
+    private static final String RESERVED_KEY_LTV = "$Amount";
+    private static final String METHOD_NAME = "$MethodName";
+    private static final String LOG_LTV = "LogLTVIncrease";
+
+    private Map<Integer, AttributionResult> mAttributionResultsMap = new TreeMap<>();
+    private ArrayList<KitsLoadedListener> kitsLoadedListeners = new ArrayList<>();
+
+
+    ConcurrentHashMap<Integer, KitIntegration> providers = new ConcurrentHashMap<Integer, KitIntegration>();
+    private final Context mContext;
 
     public KitManagerImpl(Context context, ReportingManager reportingManager, CoreCallbacks coreCallbacks, MParticleOptions options) {
         mContext = context;
@@ -115,26 +119,6 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             }
         }
         initializeKitIntegrationFactory();
-    }
-
-    public static String getValueIgnoreCase(Map<String, String> map, String searchKey) {
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            if (entry.getKey().equalsIgnoreCase(searchKey)) {
-                return entry.getValue();
-            }
-        }
-        return null;
-    }
-
-    @Nullable
-    private static Intent getMockInstallReferrerIntent(@NonNull String referrer) {
-        if (!MPUtility.isEmpty(referrer)) {
-            Intent fakeReferralIntent = new Intent("com.android.vending.INSTALL_REFERRER");
-            fakeReferralIntent.putExtra(com.mparticle.internal.Constants.REFERRER, referrer);
-            return fakeReferralIntent;
-        } else {
-            return null;
-        }
     }
 
     public void setKitOptions(KitOptions kitOptions) {
@@ -383,10 +367,6 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         return kitStatusMap;
     }
 
-    //================================================================================
-    // General KitIntegration forwarding
-    //================================================================================
-
     @Override
     public boolean isKitActive(int serviceProviderId) {
         KitIntegration provider = providers.get(serviceProviderId);
@@ -398,6 +378,10 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         KitIntegration kit = providers.get(kitId);
         return kit == null ? null : kit.getInstance();
     }
+
+    //================================================================================
+    // General KitIntegration forwarding
+    //================================================================================
 
     @Override
     public void setLocation(Location location) {
@@ -434,8 +418,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         userAttributeLists = mDataplanFilter.transformUserAttributes(userAttributeLists);
         KitIntegration provider = providers.get(serviceId);
         if (provider != null) {
-            return provider.getSurveyUrl((Map<String, String>) KitConfiguration.filterAttributes(provider.getConfiguration().getUserAttributeFilters(), userAttributes),
-                    (Map<String, List<String>>) KitConfiguration.filterAttributes(provider.getConfiguration().getUserAttributeFilters(), userAttributeLists));
+            return provider.getSurveyUrl((Map<String, String>) provider.getConfiguration().filterAttributes(provider.getConfiguration().getUserAttributeFilters(), userAttributes),
+                    (Map<String, List<String>>) provider.getConfiguration().filterAttributes(provider.getConfiguration().getUserAttributeFilters(), userAttributeLists));
         } else {
             return null;
         }
@@ -457,18 +441,10 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         reloadKits();
     }
 
-    //================================================================================
-    // KitIntegration.CommerceListener forwarding
-    //================================================================================
-
     @Override
     public Set<Integer> getSupportedKits() {
         return mKitIntegrationFactory.getSupportedKits();
     }
-
-    //================================================================================
-    // KitIntegration.PushListener forwarding
-    //================================================================================
 
     @Override
     public void logEvent(BaseEvent event) {
@@ -494,6 +470,10 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             logCommerceEvent((CommerceEvent) event);
         }
     }
+
+    //================================================================================
+    // KitIntegration.CommerceListener forwarding
+    //================================================================================
 
     protected void logCommerceEvent(CommerceEvent event) {
         for (KitIntegration provider : providers.values()) {
@@ -572,6 +552,10 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             }
         }
     }
+
+    //================================================================================
+    // KitIntegration.PushListener forwarding
+    //================================================================================
 
     @Override
     public boolean onMessageReceived(Context context, Intent intent) {
@@ -819,10 +803,6 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         }
     }
 
-    //================================================================================
-    // KitIntegration.EventListener forwarding
-    //================================================================================
-
     @Override
     public void removeUserIdentity(MParticle.IdentityType identityType) {
         if (mDataplanFilter.isUserIdentityBlocked(identityType)) {
@@ -853,6 +833,10 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         }
     }
 
+    //================================================================================
+    // KitIntegration.EventListener forwarding
+    //================================================================================
+
     public Context getContext() {
         return this.mContext;
     }
@@ -861,6 +845,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     public WeakReference<Activity> getCurrentActivity() {
         return mCoreCallbacks.getCurrentActivity();
     }
+
 
     protected void logMPEvent(MPEvent event) {
         if (event.isScreenEvent()) {
@@ -977,10 +962,6 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         }
     }
 
-    //================================================================================
-    // KitIntegration.ActivityListener forwarding
-    //================================================================================
-
     @Override
     public void logException(Exception exception, Map<String, String> eventData, String message) {
         for (KitIntegration provider : providers.values()) {
@@ -1063,6 +1044,10 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             }
         }
     }
+
+    //================================================================================
+    // KitIntegration.ActivityListener forwarding
+    //================================================================================
 
     @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
@@ -1231,7 +1216,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         if (instance != null) {
             AttributionListener listener = instance.getAttributionListener();
             if (listener != null && result != null) {
-                Logger.debug("Attribution result returned: \n" + result);
+                Logger.debug("Attribution result returned: \n" + result.toString());
                 listener.onResult(result);
             }
         }
@@ -1243,7 +1228,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         if (instance != null) {
             AttributionListener listener = instance.getAttributionListener();
             if (listener != null && error != null) {
-                Logger.debug("Attribution error returned: \n" + error);
+                Logger.debug("Attribution error returned: \n" + error.toString());
                 listener.onError(error);
             }
         }
@@ -1432,6 +1417,15 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         }
     }
 
+    public static String getValueIgnoreCase(Map<String, String> map, String searchKey) {
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(searchKey)) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+
     @Override
     public Flow<RoktEvent> events(@NonNull String identifier) {
         for (KitIntegration provider : providers.values()) {
@@ -1466,7 +1460,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         for (KitIntegration provider : providers.values()) {
             try {
                 if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
-                    ((KitIntegration.RoktListener) provider).purchaseFinalized(placementId, catalogItemId, status);
+                    ((KitIntegration.RoktListener) provider).purchaseFinalized(placementId,catalogItemId,status);
                 }
             } catch (Exception e) {
                 Logger.warning("Failed to call purchaseFinalized for kit: " + provider.getName() + ": " + e.getMessage());
@@ -1485,16 +1479,6 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 Logger.warning("Failed to call close for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
-    }
-
-    private boolean equalsIgnoreCaseAndNullSafe(String str1, String str2) {
-        if (str1 == null && str2 == null) {
-            return false;
-        }
-        if (str1 == null || str2 == null) {
-            return true;
-        }
-        return !str1.equalsIgnoreCase(str2);
     }
 
     private void confirmEmail(
@@ -1538,7 +1522,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 task.addFailureListener(new TaskFailureListener() {
                     @Override
                     public void onFailure(IdentityHttpResponse result) {
-                        Logger.error("Failed to sync email from selectPlacement to user: " + result.getErrors());
+                        Logger.error("Failed to sync email from selectPlacement to user: " + result.getErrors().toString());
 
                         runnable.run();
                     }
@@ -1583,6 +1567,17 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
     public String getPushInstanceId() {
         return mCoreCallbacks.getPushInstanceId();
+    }
+
+    @Nullable
+    private static Intent getMockInstallReferrerIntent(@NonNull String referrer) {
+        if (!MPUtility.isEmpty(referrer)) {
+            Intent fakeReferralIntent = new Intent("com.android.vending.INSTALL_REFERRER");
+            fakeReferralIntent.putExtra(com.mparticle.internal.Constants.REFERRER, referrer);
+            return fakeReferralIntent;
+        } else {
+            return null;
+        }
     }
 
     @NonNull
@@ -1647,7 +1642,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     }
 
     public void addKitsLoadedListener(KitsLoadedListener kitsLoadedListener) {
-        kitsLoadedListeners.add(kitsLoadedListener);
+        kitsLoadedListeners.add((KitsLoadedListener) kitsLoadedListener);
     }
 
     private void onKitsLoaded(Map<Integer, KitIntegration> kits, Map<Integer, KitIntegration> previousKits, List<KitConfiguration> kitConfigs) {
