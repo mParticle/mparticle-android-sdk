@@ -1251,7 +1251,7 @@ class KitManagerImplTest {
             Runnable::class.java
         )
         method.isAccessible = true
-        val result = method.invoke(manager, null, user, "", identityApi, runnable)
+        val result = method.invoke(manager, "","", user, identityApi, runnable)
         verify(runnable).run()
     }
 
