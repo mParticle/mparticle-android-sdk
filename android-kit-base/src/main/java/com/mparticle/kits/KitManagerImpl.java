@@ -1365,7 +1365,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     MParticle instance = MParticle.getInstance();
                     MParticleUser user = instance.Identity().getCurrentUser();
                     String email = getValueIgnoreCase(attributes, "email");
-                    String hashedEmail = getValueIgnoreCase(attributes, "other");
+                    String hashedEmail = getValueIgnoreCase(attributes, "emailsha256");
                     Map<String, String> finalAttributes = attributes;
                     confirmEmail(email, hashedEmail, user, instance.Identity(), () -> {
                         JSONArray jsonArray = new JSONArray();
