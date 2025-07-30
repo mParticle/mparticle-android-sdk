@@ -20,12 +20,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 public class NetworkOptions {
 
     Map<Endpoint, DomainMapping> domainMappings = new HashMap<Endpoint, DomainMapping>();
     boolean pinningDisabledInDevelopment = false;
     boolean pinningDisabled = false;
+    private static Set<Endpoint> loggedDomainTypes = new HashSet<>();
 
     private NetworkOptions() {
     }
@@ -144,10 +147,13 @@ public class NetworkOptions {
                 domainMappings = new HashMap<Endpoint, DomainMapping>();
             }
             if (domainMappings.containsKey(domain.getType())) {
-                try {
-                    Logger.warning("Duplicate DomainMapping submitted, DomainMapping:\n" + domain.toJson().toString(4) + "\n will overwrite DomainMapping:\n" + domain.toJson().toString(4));
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                if (!loggedDomainTypes.contains(domain.getType())) {
+                    try {
+                        Logger.warning("Duplicate DomainMapping submitted, DomainMapping:\n" + domain.toJson().toString(4) + "\n will overwrite DomainMapping:\n" + domain.toJson().toString(4));
+                        loggedDomainTypes.add(domain.getType());
+                    } catch (JSONException e) {
+                        Logger.error(e);
+                    }
                 }
             }
             if (domain.getType() == EVENTS && !domain.isEventsOnly() && !domainMappings.containsKey(ALIAS)) {
