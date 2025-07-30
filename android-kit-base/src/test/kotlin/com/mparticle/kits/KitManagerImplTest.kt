@@ -1252,7 +1252,7 @@ class KitManagerImplTest {
             Runnable::class.java
         )
         method.isAccessible = true
-        val result = method.invoke(manager, "","", user, identityApi, runnable)
+        val result = method.invoke(manager, "", "", user, identityApi, runnable)
         verify(runnable).run()
     }
 
@@ -1415,11 +1415,12 @@ class KitManagerImplTest {
         val manager: KitManagerImpl = MockKitManagerImpl(options)
         val method: Method = KitManagerImpl::class.java.getDeclaredMethod(
             "getValueIgnoreCase",
-            Map::class.java, String::class.java
+            Map::class.java,
+            String::class.java
         )
         method.isAccessible = true
         val map = hashMapOf("Email" to "test@example.com")
-        val result = method.invoke(manager, map,"email")
+        val result = method.invoke(manager, map, "email")
         assertEquals("test@example.com", result)
     }
 
@@ -1438,11 +1439,12 @@ class KitManagerImplTest {
         val manager: KitManagerImpl = MockKitManagerImpl(options)
         val method: Method = KitManagerImpl::class.java.getDeclaredMethod(
             "getValueIgnoreCase",
-            Map::class.java, String::class.java
+            Map::class.java,
+            String::class.java
         )
         method.isAccessible = true
         val map = mapOf("Name" to "Test")
-        val result =method.invoke(manager,map, "email")
+        val result = method.invoke(manager, map, "email")
         assertNull(result)
     }
 
@@ -1461,11 +1463,12 @@ class KitManagerImplTest {
         val manager: KitManagerImpl = MockKitManagerImpl(options)
         val method: Method = KitManagerImpl::class.java.getDeclaredMethod(
             "getValueIgnoreCase",
-            Map::class.java, String::class.java
+            Map::class.java,
+            String::class.java
         )
         method.isAccessible = true
         val map = emptyMap<String, String>()
-        val result =method.invoke(manager,map, "email")
+        val result = method.invoke(manager, map, "email")
         assertNull(result)
     }
 
@@ -1484,11 +1487,12 @@ class KitManagerImplTest {
         val manager: KitManagerImpl = MockKitManagerImpl(options)
         val method: Method = KitManagerImpl::class.java.getDeclaredMethod(
             "getValueIgnoreCase",
-            Map::class.java, String::class.java
+            Map::class.java,
+            String::class.java
         )
         method.isAccessible = true
         val map = mapOf("Name" to "Test")
-        val result =method.invoke(manager,map, null)
+        val result = method.invoke(manager, map, null)
         assertNull(result)
     }
 
