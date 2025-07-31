@@ -1488,52 +1488,58 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             IdentityApi identityApi,
             Runnable runnable
     ) {
-        if (((email != null && !email.isEmpty()) || (hashedEmail != null && !hashedEmail.isEmpty())) && user != null) {
+        boolean hasEmail = email != null && !email.isEmpty();
+        boolean hasHashedEmail = hashedEmail != null && !hashedEmail.isEmpty();
+
+        if ((hasEmail || hasHashedEmail) && user != null) {
             String existingEmail = user.getUserIdentities().get(MParticle.IdentityType.Email);
             String existingHashedEmail = user.getUserIdentities().get(MParticle.IdentityType.Other);
 
-            if ((email != null && !email.equalsIgnoreCase(existingEmail)) || (hashedEmail != null && !hashedEmail.equalsIgnoreCase(existingHashedEmail))) {
+            boolean emailMismatch = hasEmail && !email.equalsIgnoreCase(existingEmail);
+            boolean hashedEmailMismatch = hasHashedEmail && !hashedEmail.equalsIgnoreCase(existingHashedEmail);
+
+            if (emailMismatch || hashedEmailMismatch) {
                 // If there's an existing email but it doesn't match the passed-in email, log a warning
-                if (existingEmail != null && email != null) {
+                if (emailMismatch && existingEmail != null) {
                     Logger.warning(String.format(
                             "The existing email on the user (%s) does not match the email passed to selectPlacements (%s). " +
                                     "Please make sure to sync the email identity to mParticle as soon as it's available. " +
                                     "Identifying user with the provided email before continuing to selectPlacements.",
                             existingEmail, email
                     ));
-                } else if (existingHashedEmail != null && hashedEmail != null) {
+                }
+                // If there's an existing other but it doesn't match the passed-in hashed email, log a warning
+                else if (hashedEmailMismatch && existingHashedEmail != null) {
                     Logger.warning(String.format(
                             "The existing hashed email on the user (%s) does not match the hashed email passed to selectPlacements (%s). " +
-                                    "Please make sure to sync the email identity to mParticle as soon as it's available. " +
-                                    "Identifying user with the provided email before continuing to selectPlacements.",
+                                    "Please make sure to sync the hashed email identity to mParticle as soon as it's available. " +
+                                    "Identifying user with the provided hashed email before continuing to selectPlacements.",
                             existingHashedEmail, hashedEmail
                     ));
                 }
 
                 IdentityApiRequest.Builder identityBuilder = IdentityApiRequest.withUser(user);
-                if (email != null && !email.isEmpty() && !email.equalsIgnoreCase(existingEmail)) {
+                if (emailMismatch) {
                     identityBuilder.email(email);
                 }
-                if (hashedEmail != null && !hashedEmail.isEmpty() && !hashedEmail.equalsIgnoreCase(existingHashedEmail)) {
+                if (hashedEmailMismatch) {
                     identityBuilder.userIdentity(MParticle.IdentityType.Other, hashedEmail);
                 }
+
                 IdentityApiRequest identityRequest = identityBuilder.build();
                 MParticleTask<IdentityApiResult> task = identityApi.identify(identityRequest);
-                task.addFailureListener(new TaskFailureListener() {
-                    @Override
-                    public void onFailure(IdentityHttpResponse result) {
-                        Logger.error("Failed to sync email from selectPlacement to user: " + result.getErrors().toString());
 
-                        runnable.run();
-                    }
+                task.addFailureListener(result -> {
+                    Logger.error("Failed to sync email from selectPlacement to user: " + result.getErrors());
+                    runnable.run();
                 });
-                task.addSuccessListener(new TaskSuccessListener() {
-                    @Override
-                    public void onSuccess(IdentityApiResult result) {
-                        Logger.debug("Updated email identity based on selectPlacement's attributes: " + result.getUser().getUserIdentities().get(MParticle.IdentityType.Email));
-                        runnable.run();
-                    }
+
+                task.addSuccessListener(result -> {
+                    Logger.debug("Updated email identity based on selectPlacement's attributes: " +
+                            result.getUser().getUserIdentities().get(MParticle.IdentityType.Email));
+                    runnable.run();
                 });
+
             } else {
                 runnable.run();
             }
