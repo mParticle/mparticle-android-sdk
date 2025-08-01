@@ -1364,56 +1364,66 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     }
                     MParticle instance = MParticle.getInstance();
                     MParticleUser user = instance.Identity().getCurrentUser();
-                    String email = attributes.get("email");
+                    String email = getValueIgnoreCase(attributes, "email");
+                    String hashedEmail = getValueIgnoreCase(attributes, "emailsha256");
                     Map<String, String> finalAttributes = attributes;
-                    confirmEmail(email,user,instance.Identity(), () -> {
-                    JSONArray jsonArray = new JSONArray();
+                    confirmEmail(email, hashedEmail, user, instance.Identity(), () -> {
+                        JSONArray jsonArray = new JSONArray();
 
-                    KitConfiguration kitConfig = provider.getConfiguration();
-                    if (kitConfig != null) {
-                        try {
-                            jsonArray = kitConfig.getPlacementAttributesMapping();
-                        } catch (JSONException e) {
-                            Logger.warning("Invalid placementAttributes for kit: " + provider.getName() + " JSON: " + e.getMessage());
+                        KitConfiguration kitConfig = provider.getConfiguration();
+                        if (kitConfig != null) {
+                            try {
+                                jsonArray = kitConfig.getPlacementAttributesMapping();
+                            } catch (JSONException e) {
+                                Logger.warning("Invalid placementAttributes for kit: " + provider.getName() + " JSON: " + e.getMessage());
+                            }
                         }
-                    }
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject obj = jsonArray.optJSONObject(i);
-                        if (obj == null) continue;
-                        String mapFrom = obj.optString("map");
-                        String mapTo = obj.optString("value");
-                        if (finalAttributes.containsKey(mapFrom)) {
-                            String value = finalAttributes.remove(mapFrom);
-                            finalAttributes.put(mapTo, value);
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject obj = jsonArray.optJSONObject(i);
+                            if (obj == null) continue;
+                            String mapFrom = obj.optString("map");
+                            String mapTo = obj.optString("value");
+                            if (finalAttributes.containsKey(mapFrom)) {
+                                String value = finalAttributes.remove(mapFrom);
+                                finalAttributes.put(mapTo, value);
+                            }
                         }
-                    }
-                    Map<String, Object> objectAttributes = new HashMap<>();
-                    for (Map.Entry<String, String> entry : finalAttributes.entrySet()) {
-                        if(!entry.getKey().equals(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
-                            objectAttributes.put(entry.getKey(), entry.getValue());
+                        Map<String, Object> objectAttributes = new HashMap<>();
+                        for (Map.Entry<String, String> entry : finalAttributes.entrySet()) {
+                            if (!entry.getKey().equals(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
+                                objectAttributes.put(entry.getKey(), entry.getValue());
+                            }
                         }
-                    }
-                    if (user != null) {
-                        user.setUserAttributes(objectAttributes);
-                    }
+                        if (user != null) {
+                            user.setUserAttributes(objectAttributes);
+                        }
 
-                    if (!finalAttributes.containsKey(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
-                        finalAttributes.put(Constants.MessageKey.SANDBOX_MODE_ROKT, String.valueOf(Objects.toString(MPUtility.isDevEnv(), "false")));  // Default value is "false" if null
-                    }
+                        if (!finalAttributes.containsKey(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
+                            finalAttributes.put(Constants.MessageKey.SANDBOX_MODE_ROKT, Objects.toString(MPUtility.isDevEnv(), "false"));  // Default value is "false" if null
+                        }
 
-                    ((KitIntegration.RoktListener) provider).execute(viewName,
-                            finalAttributes,
-                            mpRoktEventCallback,
-                            placeHolders,
-                            fontTypefaces,
-                            FilteredMParticleUser.getInstance(user.getId(), provider),
-                            config);
+                        ((KitIntegration.RoktListener) provider).execute(viewName,
+                                finalAttributes,
+                                mpRoktEventCallback,
+                                placeHolders,
+                                fontTypefaces,
+                                FilteredMParticleUser.getInstance(user.getId(), provider),
+                                config);
                     });
                 }
             } catch (Exception e) {
                 Logger.warning("Failed to call execute for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
+    }
+
+    private String getValueIgnoreCase(Map<String, String> map, String searchKey) {
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(searchKey)) {
+                return entry.getValue();
+            }
+        }
+        return null;
     }
 
     @Override
@@ -1473,43 +1483,63 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
     private void confirmEmail(
             @Nullable String email,
+            @Nullable String hashedEmail,
             @Nullable MParticleUser user,
             IdentityApi identityApi,
             Runnable runnable
     ) {
-        if (email != null && user != null) {
-            String existingEmail = user.getUserIdentities().get(MParticle.IdentityType.Email);
+        boolean hasEmail = email != null && !email.isEmpty();
+        boolean hasHashedEmail = hashedEmail != null && !hashedEmail.isEmpty();
 
-            if (!email.equals(existingEmail)) {
+        if ((hasEmail || hasHashedEmail) && user != null) {
+            String existingEmail = user.getUserIdentities().get(MParticle.IdentityType.Email);
+            String existingHashedEmail = user.getUserIdentities().get(MParticle.IdentityType.Other);
+
+            boolean emailMismatch = hasEmail && !email.equalsIgnoreCase(existingEmail);
+            boolean hashedEmailMismatch = hasHashedEmail && !hashedEmail.equalsIgnoreCase(existingHashedEmail);
+
+            if (emailMismatch || hashedEmailMismatch) {
                 // If there's an existing email but it doesn't match the passed-in email, log a warning
-                if (existingEmail != null) {
-                    Logger.warning( String.format(
+                if (emailMismatch && existingEmail != null) {
+                    Logger.warning(String.format(
                             "The existing email on the user (%s) does not match the email passed to selectPlacements (%s). " +
                                     "Please make sure to sync the email identity to mParticle as soon as it's available. " +
                                     "Identifying user with the provided email before continuing to selectPlacements.",
                             existingEmail, email
                     ));
                 }
+                // If there's an existing other but it doesn't match the passed-in hashed email, log a warning
+                else if (hashedEmailMismatch && existingHashedEmail != null) {
+                    Logger.warning(String.format(
+                            "The existing hashed email on the user (%s) does not match the hashed email passed to selectPlacements (%s). " +
+                                    "Please make sure to sync the hashed email identity to mParticle as soon as it's available. " +
+                                    "Identifying user with the provided hashed email before continuing to selectPlacements.",
+                            existingHashedEmail, hashedEmail
+                    ));
+                }
 
-                IdentityApiRequest identityRequest = IdentityApiRequest.withUser(user)
-                        .email(email)
-                        .build();
+                IdentityApiRequest.Builder identityBuilder = IdentityApiRequest.withUser(user);
+                if (emailMismatch) {
+                    identityBuilder.email(email);
+                }
+                if (hashedEmailMismatch) {
+                    identityBuilder.userIdentity(MParticle.IdentityType.Other, hashedEmail);
+                }
+
+                IdentityApiRequest identityRequest = identityBuilder.build();
                 MParticleTask<IdentityApiResult> task = identityApi.identify(identityRequest);
-                task.addFailureListener(new TaskFailureListener() {
-                    @Override
-                    public void onFailure(IdentityHttpResponse result) {
-                        Logger.error( "Failed to sync email from selectPlacement to user: " + result.getErrors().toString());
 
-                        runnable.run();
-                    }
+                task.addFailureListener(result -> {
+                    Logger.error("Failed to sync email from selectPlacement to user: " + result.getErrors());
+                    runnable.run();
                 });
-                task.addSuccessListener(new TaskSuccessListener() {
-                    @Override
-                    public void onSuccess(IdentityApiResult result) {
-                        Logger.debug("Updated email identity based on selectPlacement's attributes: " + result.getUser().getUserIdentities().get(MParticle.IdentityType.Email));
-                        runnable.run();
-                    }
+
+                task.addSuccessListener(result -> {
+                    Logger.debug("Updated email identity based on selectPlacement's attributes: " +
+                            result.getUser().getUserIdentities().get(MParticle.IdentityType.Email));
+                    runnable.run();
                 });
+
             } else {
                 runnable.run();
             }
