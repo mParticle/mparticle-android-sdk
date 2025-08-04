@@ -1,3 +1,20 @@
+## [5.72.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.71.0...v5.72.0) (2025-08-04)
+
+
+### Features
+
+* Handle hashed email for rokt ([#599](https://github.com/mParticle/mparticle-android-sdk/issues/599)) ([cd5f970](https://github.com/mParticle/mparticle-android-sdk/commit/cd5f970bd81f810d03a1657da4a46c039043d1da))
+
+
+### Bug Fixes
+
+* Print domain mapping logs only once per session ([#598](https://github.com/mParticle/mparticle-android-sdk/issues/598)) ([0d7e62e](https://github.com/mParticle/mparticle-android-sdk/commit/0d7e62ee94e2d7fd1781369602fb5a29ee945b34))
+
+
+### Updates & Maintenance
+
+* Update submodules ([7922018](https://github.com/mParticle/mparticle-android-sdk/commit/7922018dccfcb8f2f6c3c291118de47fa594369e))
+
 ## [5.71.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.70.3...v5.71.0) (2025-07-15)
 
 
