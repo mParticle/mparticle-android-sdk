@@ -1499,7 +1499,6 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     Map<String, String> tempAttributes = attributes;
                     confirmEmail(email, hashedEmail, user, instance.Identity(), () -> {
                         Map<String, String> finalAttributes = prepareAttributes(provider, tempAttributes, user);
-                        Logger.error("Mansi Test callComposable--> " + finalAttributes);
                         ((KitIntegration.RoktListener) provider).callRoktComposable(
                                 finalAttributes, FilteredMParticleUser.getInstance(user.getId(), provider));
                     });
