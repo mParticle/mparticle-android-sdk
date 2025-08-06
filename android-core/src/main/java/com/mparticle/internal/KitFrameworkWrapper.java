@@ -715,6 +715,13 @@ public class KitFrameworkWrapper implements KitManager {
         }
     }
 
+    @Override
+    public void callExecuteForComposable(@NonNull Map<String, String> attributes) {
+        if (mKitManager != null) {
+            mKitManager.callExecuteForComposable(attributes);
+        }
+    }
+
     static class CoreCallbacksImpl implements CoreCallbacks {
         KitFrameworkWrapper mKitFrameworkWrapper;
         ConfigManager mConfigManager;

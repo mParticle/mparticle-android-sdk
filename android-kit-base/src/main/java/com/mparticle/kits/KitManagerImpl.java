@@ -35,11 +35,8 @@ import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApi;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.IdentityApiResult;
-import com.mparticle.identity.IdentityHttpResponse;
 import com.mparticle.identity.IdentityStateListener;
 import com.mparticle.identity.MParticleUser;
-import com.mparticle.identity.TaskFailureListener;
-import com.mparticle.identity.TaskSuccessListener;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.CoreCallbacks;
 import com.mparticle.internal.KitManager;
@@ -1366,41 +1363,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     MParticleUser user = instance.Identity().getCurrentUser();
                     String email = getValueIgnoreCase(attributes, "email");
                     String hashedEmail = getValueIgnoreCase(attributes, "emailsha256");
-                    Map<String, String> finalAttributes = attributes;
+                    Map<String, String> tempAttributes = attributes;
                     confirmEmail(email, hashedEmail, user, instance.Identity(), () -> {
-                        JSONArray jsonArray = new JSONArray();
-
-                        KitConfiguration kitConfig = provider.getConfiguration();
-                        if (kitConfig != null) {
-                            try {
-                                jsonArray = kitConfig.getPlacementAttributesMapping();
-                            } catch (JSONException e) {
-                                Logger.warning("Invalid placementAttributes for kit: " + provider.getName() + " JSON: " + e.getMessage());
-                            }
-                        }
-                        for (int i = 0; i < jsonArray.length(); i++) {
-                            JSONObject obj = jsonArray.optJSONObject(i);
-                            if (obj == null) continue;
-                            String mapFrom = obj.optString("map");
-                            String mapTo = obj.optString("value");
-                            if (finalAttributes.containsKey(mapFrom)) {
-                                String value = finalAttributes.remove(mapFrom);
-                                finalAttributes.put(mapTo, value);
-                            }
-                        }
-                        Map<String, Object> objectAttributes = new HashMap<>();
-                        for (Map.Entry<String, String> entry : finalAttributes.entrySet()) {
-                            if (!entry.getKey().equals(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
-                                objectAttributes.put(entry.getKey(), entry.getValue());
-                            }
-                        }
-                        if (user != null) {
-                            user.setUserAttributes(objectAttributes);
-                        }
-
-                        if (!finalAttributes.containsKey(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
-                            finalAttributes.put(Constants.MessageKey.SANDBOX_MODE_ROKT, Objects.toString(MPUtility.isDevEnv(), "false"));  // Default value is "false" if null
-                        }
+                        Map<String, String> finalAttributes = prepareAttributes(provider, tempAttributes, user);
 
                         ((KitIntegration.RoktListener) provider).execute(viewName,
                                 finalAttributes,
@@ -1424,6 +1389,43 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             }
         }
         return null;
+    }
+
+    private Map<String, String> prepareAttributes(KitIntegration provider, Map<String, String> finalAttributes, MParticleUser user){
+        JSONArray jsonArray = new JSONArray();
+
+        KitConfiguration kitConfig = provider.getConfiguration();
+        if (kitConfig != null) {
+            try {
+                jsonArray = kitConfig.getPlacementAttributesMapping();
+            } catch (JSONException e) {
+                Logger.warning("Invalid placementAttributes for kit: " + provider.getName() + " JSON: " + e.getMessage());
+            }
+        }
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject obj = jsonArray.optJSONObject(i);
+            if (obj == null) continue;
+            String mapFrom = obj.optString("map");
+            String mapTo = obj.optString("value");
+            if (finalAttributes.containsKey(mapFrom)) {
+                String value = finalAttributes.remove(mapFrom);
+                finalAttributes.put(mapTo, value);
+            }
+        }
+        Map<String, Object> objectAttributes = new HashMap<>();
+        for (Map.Entry<String, String> entry : finalAttributes.entrySet()) {
+            if(!entry.getKey().equals(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
+                objectAttributes.put(entry.getKey(), entry.getValue());
+            }
+        }
+        if (user != null) {
+            user.setUserAttributes(objectAttributes);
+        }
+
+        if (!finalAttributes.containsKey(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
+            finalAttributes.put(Constants.MessageKey.SANDBOX_MODE_ROKT, String.valueOf(Objects.toString(MPUtility.isDevEnv(), "false")));  // Default value is "false" if null
+        }
+        return finalAttributes;
     }
 
     @Override
@@ -1477,6 +1479,33 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 }
             } catch (final Exception e) {
                 Logger.warning("Failed to call close for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public void callExecuteForComposable(@NonNull Map<String, String> attributes) {
+
+        for (KitIntegration provider : providers.values()) {
+            try {
+                if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
+                    if (attributes == null) {
+                        attributes = new HashMap<>();
+                    }
+                    MParticle instance = MParticle.getInstance();
+                    MParticleUser user = instance.Identity().getCurrentUser();
+                    String email = attributes.get("email");
+                    String hashedEmail = getValueIgnoreCase(attributes, "emailsha256");
+                    Map<String, String> tempAttributes = attributes;
+                    confirmEmail(email, hashedEmail, user, instance.Identity(), () -> {
+                        Map<String, String> finalAttributes = prepareAttributes(provider, tempAttributes, user);
+                        Logger.error("Mansi Test callComposable--> " + finalAttributes);
+                        ((KitIntegration.RoktListener) provider).callRoktComposable(
+                                finalAttributes, FilteredMParticleUser.getInstance(user.getId(), provider));
+                    });
+                }
+            } catch (Exception e) {
+                Logger.warning("Failed to call prepareRoktListener for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }

@@ -1940,6 +1940,10 @@ class KitManagerImplTest {
             return flowOf()
         }
 
+        override fun callRoktComposable(attributes: MutableMap<String, String>, user: FilteredMParticleUser?) {
+            println("callRoktComposable with $attributes")
+        }
+
         override fun setWrapperSdkVersion(wrapperSdkVersion: WrapperSdkVersion) {
             println("setWrapperSdkVersion with $wrapperSdkVersion")
         }
