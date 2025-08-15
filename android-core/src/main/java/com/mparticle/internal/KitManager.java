@@ -148,7 +148,7 @@ public interface KitManager {
 
     void close();
 
-    void callExecuteForComposable(@NonNull Map<String, String> attributes);
+    void prepareAttributesAsync(@NonNull Map<String, String> attributes);
 
     enum KitStatus {
         NOT_CONFIGURED,

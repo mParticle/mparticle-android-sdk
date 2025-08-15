@@ -1484,7 +1484,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     }
 
     @Override
-    public void callExecuteForComposable(@NonNull Map<String, String> attributes) {
+    public void prepareAttributesAsync(@NonNull Map<String, String> attributes) {
 
         for (KitIntegration provider : providers.values()) {
             try {
@@ -1499,7 +1499,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     Map<String, String> tempAttributes = attributes;
                     confirmEmail(email, hashedEmail, user, instance.Identity(), () -> {
                         Map<String, String> finalAttributes = prepareAttributes(provider, tempAttributes, user);
-                        ((KitIntegration.RoktListener) provider).callRoktComposable(
+                        ((KitIntegration.RoktListener) provider).enrichAttributes(
                                 finalAttributes, FilteredMParticleUser.getInstance(user.getId(), provider));
                     });
                 }

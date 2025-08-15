@@ -716,9 +716,9 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     @Override
-    public void callExecuteForComposable(@NonNull Map<String, String> attributes) {
+    public void prepareAttributesAsync(@NonNull Map<String, String> attributes) {
         if (mKitManager != null) {
-            mKitManager.callExecuteForComposable(attributes);
+            mKitManager.prepareAttributesAsync(attributes);
         }
     }
 

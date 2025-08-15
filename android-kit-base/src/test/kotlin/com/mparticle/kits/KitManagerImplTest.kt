@@ -1940,7 +1940,7 @@ class KitManagerImplTest {
             return flowOf()
         }
 
-        override fun callRoktComposable(attributes: MutableMap<String, String>, user: FilteredMParticleUser?) {
+        override fun enrichAttributes(attributes: MutableMap<String, String>, user: FilteredMParticleUser?) {
             println("callRoktComposable with $attributes")
         }
 

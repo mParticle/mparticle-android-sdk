@@ -628,7 +628,7 @@ public abstract class KitIntegration {
 
         Flow<RoktEvent> events(@NonNull String identifier);
 
-        void callRoktComposable(
+        void enrichAttributes(
                 @NonNull Map<String, String> attributes, @Nullable FilteredMParticleUser user);
         /**
          * Set the SDK version of the mParticle SDK.
