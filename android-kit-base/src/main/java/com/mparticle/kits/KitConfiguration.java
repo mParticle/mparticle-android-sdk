@@ -62,6 +62,7 @@ public class KitConfiguration {
     private final static String KEY_CONSENT_FORWARDING_RULES_VALUE_HASH = "h";
     private final static String KEY_EXCLUDE_ANONYMOUS_USERS = "eau";
     private final static String KEY_PLACEMENT_ATTRIBUTES_MAPPING = "placementAttributesMapping";
+    private final static String KEY_HASHED_EMAIL_IDENTITY_TYPE= "hashedEmailUserIdentityType";
 
     //If set to true, our sdk honor user's optout wish. If false, we still collect data on opt-ed out users, but only for reporting.
     private final static String HONOR_OPT_OUT = "honorOptOut";
@@ -993,6 +994,10 @@ public class KitConfiguration {
         }
         String jsonArrayStr = settings.get(KEY_PLACEMENT_ATTRIBUTES_MAPPING);
         return new JSONArray(jsonArrayStr);
+    }
+
+    public String getHashedEmailUserIdentityType() {
+        return settings.get(KEY_HASHED_EMAIL_IDENTITY_TYPE);
     }
 
     boolean shouldSetIdentity(MParticle.IdentityType identityType) {
