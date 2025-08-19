@@ -1364,7 +1364,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     String email = getValueIgnoreCase(attributes, "email");
                     String hashedEmail = getValueIgnoreCase(attributes, "emailsha256");
                     Map<String, String> tempAttributes = attributes;
-                    confirmEmail(email, hashedEmail, user, instance.Identity(), () -> {
+                    KitConfiguration kitConfig = provider.getConfiguration();
+                    confirmEmail(email, hashedEmail, user, instance.Identity(), kitConfig, () -> {
                         Map<String, String> finalAttributes = prepareAttributes(provider, tempAttributes, user);
 
                         ((KitIntegration.RoktListener) provider).execute(viewName,
@@ -1497,7 +1498,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     String email = attributes.get("email");
                     String hashedEmail = getValueIgnoreCase(attributes, "emailsha256");
                     Map<String, String> tempAttributes = attributes;
-                    confirmEmail(email, hashedEmail, user, instance.Identity(), () -> {
+                    KitConfiguration kitConfig = provider.getConfiguration();
+                    confirmEmail(email, hashedEmail, user, instance.Identity(), kitConfig, () -> {
                         Map<String, String> finalAttributes = prepareAttributes(provider, tempAttributes, user);
                         ((KitIntegration.RoktListener) provider).enrichAttributes(
                                 finalAttributes, FilteredMParticleUser.getInstance(user.getId(), provider));
@@ -1514,6 +1516,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             @Nullable String hashedEmail,
             @Nullable MParticleUser user,
             IdentityApi identityApi,
+            KitConfiguration kitConfiguration,
             Runnable runnable
     ) {
         boolean hasEmail = email != null && !email.isEmpty();
@@ -1550,8 +1553,14 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 if (emailMismatch) {
                     identityBuilder.email(email);
                 }
-                if (hashedEmailMismatch) {
-                    identityBuilder.userIdentity(MParticle.IdentityType.Other, hashedEmail);
+                if (hashedEmailMismatch && kitConfiguration != null && kitConfiguration.getHashedEmailUserIdentityType() != null) {
+                    MParticle.IdentityType type;
+                    try {
+                        type = MParticle.IdentityType.valueOf(kitConfiguration.getHashedEmailUserIdentityType());
+                    } catch (IllegalArgumentException e) {
+                        type = MParticle.IdentityType.Other; // fallback
+                    }
+                    identityBuilder.userIdentity(type, hashedEmail);
                 }
 
                 IdentityApiRequest identityRequest = identityBuilder.build();

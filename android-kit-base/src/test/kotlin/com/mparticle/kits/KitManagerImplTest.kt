@@ -1105,10 +1105,11 @@ class KitManagerImplTest {
             String::class.java,
             MParticleUser::class.java,
             IdentityApi::class.java,
+            KitConfiguration::class.java,
             Runnable::class.java
         )
         method.isAccessible = true
-        val result = method.invoke(manager, "Test@gmail.com", "", user, identityApi, runnable)
+        val result = method.invoke(manager, "Test@gmail.com", "", user, identityApi, mockedKitConfig, runnable)
         verify(mockTask).addSuccessListener(any())
     }
 
@@ -1153,10 +1154,11 @@ class KitManagerImplTest {
             String::class.java,
             MParticleUser::class.java,
             IdentityApi::class.java,
+            KitConfiguration::class.java,
             Runnable::class.java
         )
         method.isAccessible = true
-        val result = method.invoke(manager, "Test@gmail.com", null, user, identityApi, runnable)
+        val result = method.invoke(manager, "Test@gmail.com", null, user, identityApi, mockedKitConfig, runnable)
         verify(runnable).run()
     }
 
@@ -1201,10 +1203,11 @@ class KitManagerImplTest {
             String::class.java,
             MParticleUser::class.java,
             IdentityApi::class.java,
+            KitConfiguration::class.java,
             Runnable::class.java
         )
         method.isAccessible = true
-        val result = method.invoke(manager, null, null, user, identityApi, runnable)
+        val result = method.invoke(manager, null, null, user, identityApi, mockedKitConfig, runnable)
         verify(runnable).run()
     }
 
@@ -1249,10 +1252,11 @@ class KitManagerImplTest {
             String::class.java,
             MParticleUser::class.java,
             IdentityApi::class.java,
+            KitConfiguration::class.java,
             Runnable::class.java
         )
         method.isAccessible = true
-        val result = method.invoke(manager, "", "", user, identityApi, runnable)
+        val result = method.invoke(manager, "", "", user, identityApi, mockedKitConfig, runnable)
         verify(runnable).run()
     }
 
@@ -1297,10 +1301,11 @@ class KitManagerImplTest {
             String::class.java,
             MParticleUser::class.java,
             IdentityApi::class.java,
+            KitConfiguration::class.java,
             Runnable::class.java
         )
         method.isAccessible = true
-        val result = method.invoke(manager, "", "hashed_Test@gmail.com", user, identityApi, runnable)
+        val result = method.invoke(manager, "", "hashed_Test@gmail.com", user, identityApi, mockedKitConfig, runnable)
         verify(mockTask).addSuccessListener(any())
     }
 
@@ -1345,10 +1350,11 @@ class KitManagerImplTest {
             String::class.java,
             MParticleUser::class.java,
             IdentityApi::class.java,
+            KitConfiguration::class.java,
             Runnable::class.java
         )
         method.isAccessible = true
-        val result = method.invoke(manager, null, "hashed_Test@gmail.com", user, identityApi, runnable)
+        val result = method.invoke(manager, null, "hashed_Test@gmail.com", user, identityApi, mockedKitConfig, runnable)
         verify(runnable).run()
     }
 
@@ -1393,10 +1399,11 @@ class KitManagerImplTest {
             String::class.java,
             MParticleUser::class.java,
             IdentityApi::class.java,
+            KitConfiguration::class.java,
             Runnable::class.java
         )
         method.isAccessible = true
-        val result = method.invoke(manager, null, null, user, identityApi, runnable)
+        val result = method.invoke(manager, null, null, user, identityApi, mockedKitConfig, runnable)
         verify(runnable).run()
     }
 
