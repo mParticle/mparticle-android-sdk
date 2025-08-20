@@ -715,6 +715,13 @@ public class KitFrameworkWrapper implements KitManager {
         }
     }
 
+    @Override
+    public void prepareAttributesAsync(@NonNull Map<String, String> attributes) {
+        if (mKitManager != null) {
+            mKitManager.prepareAttributesAsync(attributes);
+        }
+    }
+
     static class CoreCallbacksImpl implements CoreCallbacks {
         KitFrameworkWrapper mKitFrameworkWrapper;
         ConfigManager mConfigManager;

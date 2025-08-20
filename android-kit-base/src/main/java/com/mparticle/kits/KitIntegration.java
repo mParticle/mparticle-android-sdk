@@ -628,6 +628,8 @@ public abstract class KitIntegration {
 
         Flow<RoktEvent> events(@NonNull String identifier);
 
+        void enrichAttributes(
+                @NonNull Map<String, String> attributes, @Nullable FilteredMParticleUser user);
         /**
          * Set the SDK version of the mParticle SDK.
          * This should match the value set in MParticle.getWrapperSdkVersion()
