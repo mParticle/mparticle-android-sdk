@@ -1,3 +1,15 @@
+## [5.73.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.72.0...v5.73.0) (2025-08-21)
+
+
+### Features
+
+* Implement Rokt Jetpack compose ([#600](https://github.com/mParticle/mparticle-android-sdk/issues/600)) ([8b6a3d5](https://github.com/mParticle/mparticle-android-sdk/commit/8b6a3d5a27689fe116a9f956ec45e096376133a3))
+
+
+### Updates & Maintenance
+
+* Update submodules ([dda4cdd](https://github.com/mParticle/mparticle-android-sdk/commit/dda4cdd0aadd5f80228c8daa9a3b5e14c6ce6470))
+
 ## [5.72.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.71.0...v5.72.0) (2025-08-04)
 
 
