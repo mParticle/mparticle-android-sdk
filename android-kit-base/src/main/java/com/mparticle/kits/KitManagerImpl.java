@@ -1553,12 +1553,12 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 if (emailMismatch) {
                     identityBuilder.email(email);
                 }
-                if (hashedEmailMismatch && kitConfiguration != null && kitConfiguration.getHashedEmailUserIdentityType() != null) {
+                if (hashedEmailMismatch && kitConfiguration != null) {
                     MParticle.IdentityType type;
                     try {
                         type = MParticle.IdentityType.valueOf(kitConfiguration.getHashedEmailUserIdentityType());
-                    } catch (IllegalArgumentException e) {
-                        type = MParticle.IdentityType.Other; // fallback
+                    } catch (IllegalArgumentException | NullPointerException e) {
+                        type = MParticle.IdentityType.Other; // fallback if null or invalid
                     }
                     identityBuilder.userIdentity(type, hashedEmail);
                 }
