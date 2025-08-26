@@ -1554,13 +1554,19 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     identityBuilder.email(email);
                 }
                 if (hashedEmailMismatch && kitConfiguration != null) {
-                    MParticle.IdentityType type;
+                    MParticle.IdentityType type = null;
                     try {
-                        type = MParticle.IdentityType.valueOf(kitConfiguration.getHashedEmailUserIdentityType());
-                    } catch (IllegalArgumentException | NullPointerException e) {
-                        type = MParticle.IdentityType.Other; // fallback if null or invalid
+                        String identityTypeStr = kitConfiguration.getHashedEmailUserIdentityType();
+                        if (identityTypeStr != null && !identityTypeStr.equalsIgnoreCase("UNASSIGNED")) {
+                            type = MParticle.IdentityType.valueOf(identityTypeStr);
+                        }
+                    } catch (IllegalArgumentException e) {
+                        type = MParticle.IdentityType.Other; // fallback if invalid
                     }
-                    identityBuilder.userIdentity(type, hashedEmail);
+
+                    if (type != null) {
+                        identityBuilder.userIdentity(type, hashedEmail);
+                    }
                 }
 
                 IdentityApiRequest identityRequest = identityBuilder.build();

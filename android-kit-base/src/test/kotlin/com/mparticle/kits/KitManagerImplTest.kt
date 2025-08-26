@@ -1408,6 +1408,111 @@ class KitManagerImplTest {
     }
 
     @Test
+    fun testConfirmHashedEmail_When_HashedEmailUserIdentityType_Is_Other3(){
+        var runnable: Runnable = mock(Runnable::class.java)
+        var user: MParticleUser = mock(MParticleUser::class.java)
+        val instance = MockMParticle()
+        val sideloadedKit = mock(MPSideloadedKit::class.java)
+        val kitId = 6000000
+
+        val configJSONObj = JSONObject().apply {
+            put("id", kitId)
+        }
+        val mockedKitConfig = KitConfiguration.createKitConfiguration(configJSONObj)
+
+        `when`(mockedKitConfig.hashedEmailUserIdentityType).thenReturn("Other3")
+        `when`(sideloadedKit.configuration).thenReturn(mockedKitConfig)
+        val identityApi = mock(IdentityApi::class.java)
+        val oldHashedEmail = "hashed_old@example.com"
+        val mockTask = mock(MParticleTask::class.java) as MParticleTask<IdentityApiResult>
+        `when`(identityApi.identify(any())).thenReturn(mockTask)
+        val identities: MutableMap<MParticle.IdentityType, String> = HashMap()
+        identities.put(MParticle.IdentityType.Other, oldHashedEmail)
+        `when`(user.userIdentities).thenReturn(identities)
+        instance.setIdentityApi(identityApi)
+        val settingsMap = hashMapOf(
+            "placementAttributesMapping" to """
+        [
+            // add placement attributes here if needed
+        ]
+    """.trimIndent(),
+            "hashedEmailUserIdentityType" to "Other3"
+        )
+        val field = KitConfiguration::class.java.getDeclaredField("settings")
+        field.isAccessible = true
+        field.set(mockedKitConfig, settingsMap)
+
+        val options = MParticleOptions.builder(MockContext())
+            .sideloadedKits(mutableListOf(sideloadedKit) as List<SideloadedKit>).build()
+        val manager: KitManagerImpl = MockKitManagerImpl(options)
+        val method: Method = KitManagerImpl::class.java.getDeclaredMethod(
+            "confirmEmail",
+            String::class.java,
+            String::class.java,
+            MParticleUser::class.java,
+            IdentityApi::class.java,
+            KitConfiguration::class.java,
+            Runnable::class.java
+        )
+        method.isAccessible = true
+        val result = method.invoke(manager, "", "hashed_Test@gmail.com", user, identityApi, mockedKitConfig, runnable)
+        verify(mockTask).addSuccessListener(any())
+    }
+
+
+    @Test
+    fun testConfirmHashedEmail_When_HashedEmailUserIdentityType_Is_UNASSIGNED(){
+        var runnable: Runnable = mock(Runnable::class.java)
+        var user: MParticleUser = mock(MParticleUser::class.java)
+        val instance = MockMParticle()
+        val sideloadedKit = mock(MPSideloadedKit::class.java)
+        val kitId = 6000000
+
+        val configJSONObj = JSONObject().apply {
+            put("id", kitId)
+        }
+        val mockedKitConfig = KitConfiguration.createKitConfiguration(configJSONObj)
+
+        `when`(mockedKitConfig.hashedEmailUserIdentityType).thenReturn("UNASSIGNED")
+        `when`(sideloadedKit.configuration).thenReturn(mockedKitConfig)
+        val identityApi = mock(IdentityApi::class.java)
+        val oldHashedEmail = "hashed_old@example.com"
+        val mockTask = mock(MParticleTask::class.java) as MParticleTask<IdentityApiResult>
+        `when`(identityApi.identify(any())).thenReturn(mockTask)
+        val identities: MutableMap<MParticle.IdentityType, String> = HashMap()
+        identities.put(MParticle.IdentityType.Other, oldHashedEmail)
+        `when`(user.userIdentities).thenReturn(identities)
+        instance.setIdentityApi(identityApi)
+        val settingsMap = hashMapOf(
+            "placementAttributesMapping" to """
+        [
+            // add placement attributes here if needed
+        ]
+    """.trimIndent(),
+            "hashedEmailUserIdentityType" to "UNASSIGNED"
+        )
+        val field = KitConfiguration::class.java.getDeclaredField("settings")
+        field.isAccessible = true
+        field.set(mockedKitConfig, settingsMap)
+
+        val options = MParticleOptions.builder(MockContext())
+            .sideloadedKits(mutableListOf(sideloadedKit) as List<SideloadedKit>).build()
+        val manager: KitManagerImpl = MockKitManagerImpl(options)
+        val method: Method = KitManagerImpl::class.java.getDeclaredMethod(
+            "confirmEmail",
+            String::class.java,
+            String::class.java,
+            MParticleUser::class.java,
+            IdentityApi::class.java,
+            KitConfiguration::class.java,
+            Runnable::class.java
+        )
+        method.isAccessible = true
+        val result = method.invoke(manager, "", "hashed_Test@gmail.com", user, identityApi, mockedKitConfig, runnable)
+        verify(mockTask).addSuccessListener(any())
+    }
+
+    @Test
     fun testGetValueIgnoreCase_keyExistsDifferentCase() {
         val sideloadedKit = mock(MPSideloadedKit::class.java)
         val options = MParticleOptions.builder(MockContext())
