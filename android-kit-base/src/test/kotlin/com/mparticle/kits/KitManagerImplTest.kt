@@ -1306,7 +1306,7 @@ class KitManagerImplTest {
         )
         method.isAccessible = true
         val result = method.invoke(manager, "", "hashed_Test@gmail.com", user, identityApi, mockedKitConfig, runnable)
-        verify(mockTask).addSuccessListener(any())
+        verify(runnable).run()
     }
 
     @Test
@@ -1460,7 +1460,7 @@ class KitManagerImplTest {
     }
 
     @Test
-    fun testConfirmHashedEmail_When_HashedEmailUserIdentityType_Is_UNASSIGNED() {
+    fun testConfirmHashedEmail_When_HashedEmailUserIdentityType_Is_Unknown() {
         var runnable: Runnable = mock(Runnable::class.java)
         var user: MParticleUser = mock(MParticleUser::class.java)
         val instance = MockMParticle()
@@ -1472,7 +1472,7 @@ class KitManagerImplTest {
         }
         val mockedKitConfig = KitConfiguration.createKitConfiguration(configJSONObj)
 
-        `when`(mockedKitConfig.hashedEmailUserIdentityType).thenReturn("UNASSIGNED")
+        `when`(mockedKitConfig.hashedEmailUserIdentityType).thenReturn("Unknown")
         `when`(sideloadedKit.configuration).thenReturn(mockedKitConfig)
         val identityApi = mock(IdentityApi::class.java)
         val oldHashedEmail = "hashed_old@example.com"
@@ -1488,7 +1488,7 @@ class KitManagerImplTest {
             // add placement attributes here if needed
         ]
             """.trimIndent(),
-            "hashedEmailUserIdentityType" to "UNASSIGNED"
+            "hashedEmailUserIdentityType" to "Unknown"
         )
         val field = KitConfiguration::class.java.getDeclaredField("settings")
         field.isAccessible = true
@@ -1508,7 +1508,7 @@ class KitManagerImplTest {
         )
         method.isAccessible = true
         val result = method.invoke(manager, "", "hashed_Test@gmail.com", user, identityApi, mockedKitConfig, runnable)
-        verify(mockTask).addSuccessListener(any())
+        verify(runnable).run()
     }
 
     @Test

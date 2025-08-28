@@ -1523,13 +1523,23 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         boolean hasHashedEmail = hashedEmail != null && !hashedEmail.isEmpty();
 
         if ((hasEmail || hasHashedEmail) && user != null) {
+            MParticle.IdentityType selectedIdentityType = null;
+            try {
+                String identityTypeStr = (kitConfiguration != null)
+                        ? kitConfiguration.getHashedEmailUserIdentityType()
+                        : null;
+                if (identityTypeStr != null && !identityTypeStr.equalsIgnoreCase("Unknown")) {
+                    selectedIdentityType = MParticle.IdentityType.valueOf(identityTypeStr);
+                }
+            } catch (IllegalArgumentException e) {
+                selectedIdentityType = MParticle.IdentityType.Other; // fallback if invalid value
+            }
             String existingEmail = user.getUserIdentities().get(MParticle.IdentityType.Email);
-            String existingHashedEmail = user.getUserIdentities().get(MParticle.IdentityType.Other);
-
+            String existingHashedEmail = selectedIdentityType != null ? user.getUserIdentities().get(selectedIdentityType) : null;
             boolean emailMismatch = hasEmail && !email.equalsIgnoreCase(existingEmail);
             boolean hashedEmailMismatch = hasHashedEmail && !hashedEmail.equalsIgnoreCase(existingHashedEmail);
 
-            if (emailMismatch || hashedEmailMismatch) {
+            if (emailMismatch || (hashedEmailMismatch && selectedIdentityType != null)) {
                 // If there's an existing email but it doesn't match the passed-in email, log a warning
                 if (emailMismatch && existingEmail != null) {
                     Logger.warning(String.format(
@@ -1553,20 +1563,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 if (emailMismatch) {
                     identityBuilder.email(email);
                 }
-                if (hashedEmailMismatch && kitConfiguration != null) {
-                    MParticle.IdentityType type = null;
-                    try {
-                        String identityTypeStr = kitConfiguration.getHashedEmailUserIdentityType();
-                        if (identityTypeStr != null && !identityTypeStr.equalsIgnoreCase("UNASSIGNED")) {
-                            type = MParticle.IdentityType.valueOf(identityTypeStr);
-                        }
-                    } catch (IllegalArgumentException e) {
-                        type = MParticle.IdentityType.Other; // fallback if invalid
-                    }
-
-                    if (type != null) {
-                        identityBuilder.userIdentity(type, hashedEmail);
-                    }
+                if (hashedEmailMismatch && selectedIdentityType != null) {
+                    identityBuilder.userIdentity(selectedIdentityType, hashedEmail);
                 }
 
                 IdentityApiRequest identityRequest = identityBuilder.build();
