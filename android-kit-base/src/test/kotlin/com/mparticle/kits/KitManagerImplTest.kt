@@ -1408,7 +1408,7 @@ class KitManagerImplTest {
     }
 
     @Test
-    fun testConfirmHashedEmail_When_HashedEmailUserIdentityType_Is_Other3(){
+    fun testConfirmHashedEmail_When_HashedEmailUserIdentityType_Is_Other3() {
         var runnable: Runnable = mock(Runnable::class.java)
         var user: MParticleUser = mock(MParticleUser::class.java)
         val instance = MockMParticle()
@@ -1435,7 +1435,7 @@ class KitManagerImplTest {
         [
             // add placement attributes here if needed
         ]
-    """.trimIndent(),
+            """.trimIndent(),
             "hashedEmailUserIdentityType" to "Other3"
         )
         val field = KitConfiguration::class.java.getDeclaredField("settings")
@@ -1459,9 +1459,8 @@ class KitManagerImplTest {
         verify(mockTask).addSuccessListener(any())
     }
 
-
     @Test
-    fun testConfirmHashedEmail_When_HashedEmailUserIdentityType_Is_UNASSIGNED(){
+    fun testConfirmHashedEmail_When_HashedEmailUserIdentityType_Is_UNASSIGNED() {
         var runnable: Runnable = mock(Runnable::class.java)
         var user: MParticleUser = mock(MParticleUser::class.java)
         val instance = MockMParticle()
@@ -1488,7 +1487,7 @@ class KitManagerImplTest {
         [
             // add placement attributes here if needed
         ]
-    """.trimIndent(),
+            """.trimIndent(),
             "hashedEmailUserIdentityType" to "UNASSIGNED"
         )
         val field = KitConfiguration::class.java.getDeclaredField("settings")
