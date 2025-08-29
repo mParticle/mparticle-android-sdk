@@ -1528,11 +1528,11 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 String identityTypeStr = (kitConfiguration != null)
                         ? kitConfiguration.getHashedEmailUserIdentityType()
                         : null;
-                if (identityTypeStr != null && !identityTypeStr.equalsIgnoreCase("Unknown")) {
+                if (identityTypeStr != null ) {
                     selectedIdentityType = MParticle.IdentityType.valueOf(identityTypeStr);
                 }
             } catch (IllegalArgumentException e) {
-                selectedIdentityType = MParticle.IdentityType.Other; // fallback if invalid value
+                Logger.error("Invalid identity type "+e.getMessage());
             }
             String existingEmail = user.getUserIdentities().get(MParticle.IdentityType.Email);
             String existingHashedEmail = selectedIdentityType != null ? user.getUserIdentities().get(selectedIdentityType) : null;
@@ -1563,7 +1563,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 if (emailMismatch) {
                     identityBuilder.email(email);
                 }
-                if (hashedEmailMismatch && selectedIdentityType != null) {
+                if (hashedEmailMismatch) {
                     identityBuilder.userIdentity(selectedIdentityType, hashedEmail);
                 }
 
