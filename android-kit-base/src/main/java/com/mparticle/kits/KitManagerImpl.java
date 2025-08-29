@@ -1364,7 +1364,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     String email = getValueIgnoreCase(attributes, "email");
                     String hashedEmail = getValueIgnoreCase(attributes, "emailsha256");
                     Map<String, String> tempAttributes = attributes;
-                    confirmEmail(email, hashedEmail, user, instance.Identity(), () -> {
+                    KitConfiguration kitConfig = provider.getConfiguration();
+                    confirmEmail(email, hashedEmail, user, instance.Identity(), kitConfig, () -> {
                         Map<String, String> finalAttributes = prepareAttributes(provider, tempAttributes, user);
 
                         ((KitIntegration.RoktListener) provider).execute(viewName,
@@ -1497,7 +1498,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     String email = attributes.get("email");
                     String hashedEmail = getValueIgnoreCase(attributes, "emailsha256");
                     Map<String, String> tempAttributes = attributes;
-                    confirmEmail(email, hashedEmail, user, instance.Identity(), () -> {
+                    KitConfiguration kitConfig = provider.getConfiguration();
+                    confirmEmail(email, hashedEmail, user, instance.Identity(), kitConfig, () -> {
                         Map<String, String> finalAttributes = prepareAttributes(provider, tempAttributes, user);
                         ((KitIntegration.RoktListener) provider).enrichAttributes(
                                 finalAttributes, FilteredMParticleUser.getInstance(user.getId(), provider));
@@ -1514,19 +1516,30 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             @Nullable String hashedEmail,
             @Nullable MParticleUser user,
             IdentityApi identityApi,
+            KitConfiguration kitConfiguration,
             Runnable runnable
     ) {
         boolean hasEmail = email != null && !email.isEmpty();
         boolean hasHashedEmail = hashedEmail != null && !hashedEmail.isEmpty();
 
         if ((hasEmail || hasHashedEmail) && user != null) {
+            MParticle.IdentityType selectedIdentityType = null;
+            try {
+                String identityTypeStr = (kitConfiguration != null)
+                        ? kitConfiguration.getHashedEmailUserIdentityType()
+                        : null;
+                if (identityTypeStr != null ) {
+                    selectedIdentityType = MParticle.IdentityType.valueOf(identityTypeStr);
+                }
+            } catch (IllegalArgumentException e) {
+                Logger.error("Invalid identity type "+e.getMessage());
+            }
             String existingEmail = user.getUserIdentities().get(MParticle.IdentityType.Email);
-            String existingHashedEmail = user.getUserIdentities().get(MParticle.IdentityType.Other);
-
+            String existingHashedEmail = selectedIdentityType != null ? user.getUserIdentities().get(selectedIdentityType) : null;
             boolean emailMismatch = hasEmail && !email.equalsIgnoreCase(existingEmail);
             boolean hashedEmailMismatch = hasHashedEmail && !hashedEmail.equalsIgnoreCase(existingHashedEmail);
 
-            if (emailMismatch || hashedEmailMismatch) {
+            if (emailMismatch || (hashedEmailMismatch && selectedIdentityType != null)) {
                 // If there's an existing email but it doesn't match the passed-in email, log a warning
                 if (emailMismatch && existingEmail != null) {
                     Logger.warning(String.format(
@@ -1551,7 +1564,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     identityBuilder.email(email);
                 }
                 if (hashedEmailMismatch) {
-                    identityBuilder.userIdentity(MParticle.IdentityType.Other, hashedEmail);
+                    identityBuilder.userIdentity(selectedIdentityType, hashedEmail);
                 }
 
                 IdentityApiRequest identityRequest = identityBuilder.build();
