@@ -1,3 +1,15 @@
+## [5.73.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.73.1...v5.73.2) (2025-09-09)
+
+
+### Bug Fixes
+
+* Support mutable and immutable attributes in selectPlacement ([#602](https://github.com/mParticle/mparticle-android-sdk/issues/602)) ([9958327](https://github.com/mParticle/mparticle-android-sdk/commit/9958327261e51a76f3bb79ad1274ccb84958b89c))
+
+
+### Updates & Maintenance
+
+* Update submodules ([6ef9b59](https://github.com/mParticle/mparticle-android-sdk/commit/6ef9b5989abbecbcc27912fa6cacc3f1c338a9cc))
+
 ## [5.73.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.73.0...v5.73.1) (2025-08-28)
 
 
