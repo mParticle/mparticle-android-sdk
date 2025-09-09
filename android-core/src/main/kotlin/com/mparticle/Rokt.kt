@@ -26,7 +26,7 @@ class Rokt internal constructor(
         config: RoktConfig? = null
     ) {
         if (mConfigManager.isEnabled) {
-            mKitManager.execute(identifier, attributes, callbacks, embeddedViews, fontTypefaces, config)
+            mKitManager.execute(identifier, HashMap(attributes), callbacks, embeddedViews, fontTypefaces, config)
         }
     }
 
