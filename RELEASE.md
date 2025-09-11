@@ -4,14 +4,13 @@ This document outlines the process for releasing the mParticle Android SDK and i
 
 ## Step 1: Preparing the SDK for Release
 
-The Android SDK and kits are released through the [public repository](https://github.com/mParticle/mparticle-android-sdk) using GitHub Actions. The SDK and kits are currently coupled together in the release process.
+The Android SDK and kits are released using GitHub Actions. The SDK and kits are currently coupled together in the release process.
 
 ### Pre-release Checklist
-- Ensure all commits are in the public development branch
-- Verify linear history between development and main branches
+- Ensure all commits are in the public main branch
 - Review `release.yml` in the repo for specific workflow details
-- The release job deploys the most current snapshot of development branch to main branch
-  > Note: We rarely merge anything to development branch that isn't ready for immediate release.
+- The release job deploys the most current snapshot of main branch release tag to main branch
+
 
 ## Step 2: Release via GitHub Actions
 
@@ -52,9 +51,10 @@ The Android SDK and kits are released through the [public repository](https://gi
 
 1. Navigate to the Actions tab
 2. Select "release SDK"
-3. Run the workflow from main branch
-4. Select "not dry run" 
-   > Note: Dry run performs steps up to semantic release only
+3. Run the workflow from main branch with "dry run" option first
+   > Important: Always start with a dry run to validate the release process. This will perform all steps up to semantic release without actually publishing, helping catch potential issues early.
+4. If the dry run succeeds, run the workflow again with "not dry run" option to perform the actual release
+   > Note: Only proceed with the actual release after confirming a successful dry run
 
 ### Important Notes
 
@@ -71,7 +71,7 @@ The Android SDK and kits are released through the [public repository](https://gi
 
 After a successful build through GitHub Actions, verify:
 1. Public repo has a new semantic release tag
-2. New artifact is present in Sonatype
+2. New artifact is present in [Sonatype](https://central.sonatype.com/publishing) 
 
 ## Troubleshooting
 
