@@ -13,7 +13,7 @@ Thanks for contributing! Please read this document to follow our conventions for
 
 ## Development Process
 
-1. Fork the repo and create your branch from `main`
+1. Create your branch from `main`
 2. Make your changes
 3. Add tests for any new functionality
 4. Run the test suite to ensure tests (both new and old) all pass

@@ -61,10 +61,10 @@ The Android SDK and kits are released using GitHub Actions. The SDK and kits are
 - **Release Duration**: Expect ~20 minutes due to comprehensive test suite
 - **Emulator Issues**: 
   - Sometimes GitHub Actions emulators fail
-  - We use a script version in `scripts/install-start-emulator.sh`
+  - We have a custom script to install and start the emulator `scripts/install-start-emulator.sh`
   - OS version is hardcoded to avoid issues with new releases
 - **Code Reusability**: 
-  - Reusable GitHub action code is being moved to the [parent repo](https://github.com/mParticle/mparticle-workflows)
+  - Reusable GitHub Actions are defined in the [parent repo](https://github.com/mParticle/mparticle-workflows)
   - This enables other platforms to reuse similar jobs
 
 ## Post-Release Verification
