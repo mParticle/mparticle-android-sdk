@@ -47,9 +47,17 @@ class MParticleTest : BaseCleanStartedEachTest() {
     @Test
     fun testSessionEndsOnOptOut() {
         MParticle.getInstance()!!.mAppStateManager.ensureActiveSession()
-        Assert.assertTrue(MParticle.getInstance()!!.mAppStateManager.session.isActive)
+        Assert.assertTrue(
+            MParticle
+                .getInstance()!!
+                .mAppStateManager.session.isActive,
+        )
         MParticle.getInstance()!!.optOut = true
-        Assert.assertFalse(MParticle.getInstance()!!.mAppStateManager.session.isActive)
+        Assert.assertFalse(
+            MParticle
+                .getInstance()!!
+                .mAppStateManager.session.isActive,
+        )
     }
 
     @Test
@@ -104,11 +112,12 @@ class MParticleTest : BaseCleanStartedEachTest() {
     @Throws(Exception::class)
     fun testCalledUpdateInstallReferrer() {
         val called = BooleanArray(2)
-        MParticle.getInstance()!!.mMessageManager = object : MessageManager() {
-            override fun installReferrerUpdated() {
-                called[0] = true
+        MParticle.getInstance()!!.mMessageManager =
+            object : MessageManager() {
+                override fun installReferrerUpdated() {
+                    called[0] = true
+                }
             }
-        }
         MParticle.getInstance()!!.mKitManager =
             object : KitFrameworkWrapper(mContext, null, null, null, true, null) {
                 override fun installReferrerUpdated() {
@@ -143,17 +152,21 @@ class MParticleTest : BaseCleanStartedEachTest() {
         MParticle.setInstance(null)
         val token = mRandomUtils.getAlphaNumericString(15)
         mServer.setupConfigResponse(
-            JSONObject().put(ConfigManager.WORKSPACE_TOKEN, token).toString()
+            JSONObject().put(ConfigManager.WORKSPACE_TOKEN, token).toString(),
         )
         startMParticle()
         val jsInterfaces: MutableMap<String, Any> = HashMap()
         val latch = MPLatch(1)
         Handler(Looper.getMainLooper()).post {
-            val webView: WebView = object : WebView(mContext) {
-                override fun addJavascriptInterface(`object`: Any, name: String) {
-                    jsInterfaces[name] = `object`
+            val webView: WebView =
+                object : WebView(mContext) {
+                    override fun addJavascriptInterface(
+                        `object`: Any,
+                        name: String,
+                    ) {
+                        jsInterfaces[name] = `object`
+                    }
                 }
-            }
             MParticle.getInstance()!!.registerWebView(webView)
             Assert.assertTrue(jsInterfaces[MParticleJSInterface.INTERFACE_BASE_NAME + "_" + token + "_v2"] is MParticleJSInterface)
             val clientToken = mRandomUtils.getAlphaNumericString(15)
@@ -212,10 +225,11 @@ class MParticleTest : BaseCleanStartedEachTest() {
     @Throws(InterruptedException::class)
     fun testResetIdentityCall(resetRunnable: Runnable) {
         val called = BooleanArray(2)
-        val crashListener = IdentityStateListener { user, previousUser ->
-            Assert.assertTrue(called[0])
-            throw IllegalStateException("Should not be getting callbacks after reset")
-        }
+        val crashListener =
+            IdentityStateListener { user, previousUser ->
+                Assert.assertTrue(called[0])
+                throw IllegalStateException("Should not be getting callbacks after reset")
+            }
         mServer.setupHappyIdentify(ran.nextLong(), 100)
         MParticle.getInstance()!!.Identity().addIdentityStateListener(crashListener)
         MParticle.getInstance()!!.Identity().identify(IdentityApiRequest.withEmptyUser().build())
@@ -232,19 +246,41 @@ class MParticleTest : BaseCleanStartedEachTest() {
         startMParticle()
         MParticle.getInstance()!!.Messaging().enablePushNotifications(senderId)
         var fetchedSenderId: String? =
-            MParticle.getInstance()!!.mInternal.getConfigManager().getPushSenderId()
+            MParticle
+                .getInstance()!!
+                .mInternal
+                .getConfigManager()
+                .getPushSenderId()
         Assert.assertTrue(
-            MParticle.getInstance()!!.mInternal.getConfigManager().isPushEnabled() ?: false
+            MParticle
+                .getInstance()!!
+                .mInternal
+                .getConfigManager()
+                .isPushEnabled() ?: false,
         )
         Assert.assertEquals(senderId, fetchedSenderId)
         val otherSenderId = "senderIdLogPushRegistration"
         MParticle.getInstance()!!.logPushRegistration("instanceId", otherSenderId)
-        fetchedSenderId = MParticle.getInstance()!!.mInternal.getConfigManager().getPushSenderId()
+        fetchedSenderId =
+            MParticle
+                .getInstance()!!
+                .mInternal
+                .getConfigManager()
+                .getPushSenderId()
         Assert.assertEquals(otherSenderId, fetchedSenderId)
         MParticle.getInstance()!!.Messaging().disablePushNotifications()
-        fetchedSenderId = MParticle.getInstance()!!.mInternal.getConfigManager().getPushSenderId()
+        fetchedSenderId =
+            MParticle
+                .getInstance()!!
+                .mInternal
+                .getConfigManager()
+                .getPushSenderId()
         Assert.assertFalse(
-            MParticle.getInstance()!!.mInternal.getConfigManager().isPushEnabled() ?: false
+            MParticle
+                .getInstance()!!
+                .mInternal
+                .getConfigManager()
+                .isPushEnabled() ?: false,
         )
         Assert.assertNull(fetchedSenderId)
     }
@@ -255,15 +291,17 @@ class MParticleTest : BaseCleanStartedEachTest() {
         val pushRegistrationTest = PushRegistrationTest().setServer(mServer)
         pushRegistrationTest.setContext(mContext)
         for (setPush in pushRegistrationTest.setPushes) {
-            val oldRegistration = PushRegistration(
-                mRandomUtils.getAlphaNumericString(10),
-                mRandomUtils.getAlphaNumericString(15)
-            )
+            val oldRegistration =
+                PushRegistration(
+                    mRandomUtils.getAlphaNumericString(10),
+                    mRandomUtils.getAlphaNumericString(15),
+                )
             setPush.setPushRegistration(oldRegistration)
-            val newPushRegistration = PushRegistration(
-                mRandomUtils.getAlphaNumericString(10),
-                mRandomUtils.getAlphaNumericString(15)
-            )
+            val newPushRegistration =
+                PushRegistration(
+                    mRandomUtils.getAlphaNumericString(10),
+                    mRandomUtils.getAlphaNumericString(15),
+                )
             val latch: CountDownLatch = MPLatch(1)
             val received = AndroidUtils.Mutable(false)
             mServer.waitForVerify(
@@ -285,17 +323,17 @@ class MParticleTest : BaseCleanStartedEachTest() {
                                 Assert.assertEquals(
                                     failureMessage,
                                     oldRegistration.instanceId,
-                                    identityChange.getString("old_value")
+                                    identityChange.getString("old_value"),
                                 )
                                 Assert.assertEquals(
                                     failureMessage,
                                     newPushRegistration.instanceId,
-                                    identityChange.getString("new_value")
+                                    identityChange.getString("new_value"),
                                 )
                                 Assert.assertEquals(
                                     failureMessage,
                                     "push_token",
-                                    identityChange.getString("identity_type")
+                                    identityChange.getString("identity_type"),
                                 )
                             } catch (jse: JSONException) {
                                 jse.toString()
@@ -303,13 +341,14 @@ class MParticleTest : BaseCleanStartedEachTest() {
                             return@JSONMatch true
                         }
                         false
-                    }
-                )
+                    },
+                ),
             ) {
                 received.value = true
                 latch.countDown()
             }
-            MParticle.getInstance()!!
+            MParticle
+                .getInstance()!!
                 .logPushRegistration(newPushRegistration.instanceId, newPushRegistration.senderId)
             latch.await()
         }
@@ -432,14 +471,24 @@ class MParticleTest : BaseCleanStartedEachTest() {
             MParticle.getInstance()!!.logEvent(TestingUtils.getInstance().randomMPEventRich)
         }
         for (i in 0..9) {
-            MParticle.getInstance()!!.mInternal.getConfigManager()
+            MParticle
+                .getInstance()!!
+                .mInternal
+                .getConfigManager()
                 .setMpid(ran.nextLong(), ran.nextBoolean())
         }
         val databaseJson = getDatabaseContents(listOf("messages"))
         Assert.assertTrue(databaseJson.getJSONArray("messages").length() > 0)
         Assert.assertEquals(6, allTables.size.toLong())
         Assert.assertTrue(
-            10 < (MParticle.getInstance()!!.mInternal.getConfigManager().getMpids()?.size ?: 0)
+            10 < (
+                MParticle
+                    .getInstance()!!
+                    .mInternal
+                    .getConfigManager()
+                    .getMpids()
+                    ?.size ?: 0
+            ),
         )
 
         // Set strict mode, so if we get any warning or error messages during the reset/restart phase,
@@ -451,7 +500,7 @@ class MParticleTest : BaseCleanStartedEachTest() {
         // Restart the SDK, to the point where the initial Identity call returns, make sure there are no errors on startup.
         TestingUtils.setStrictMode(
             MParticle.LogLevel.WARNING,
-            "Failed to get MParticle instance, getInstance() called prior to start()."
+            "Failed to get MParticle instance, getInstance() called prior to start().",
         )
         beforeBase()
     }
@@ -472,9 +521,9 @@ class MParticleTest : BaseCleanStartedEachTest() {
             if (sharedPreferenceName != "WebViewChromiumPrefs" && sharedPreferenceName != "com.mparticle.test_preferences") {
                 Assert.fail(
                     """
-    SharedPreference file failed to clear:
-    ${getSharedPrefsContents(sharedPreferenceName)}
-                    """.trimIndent()
+                    SharedPreference file failed to clear:
+                    ${getSharedPrefsContents(sharedPreferenceName)}
+                    """.trimIndent(),
                 )
             }
         }
@@ -491,15 +540,14 @@ class MParticleTest : BaseCleanStartedEachTest() {
         }
     }
 
-    private fun getSharedPrefsContents(name: String): String {
-        return try {
+    private fun getSharedPrefsContents(name: String): String =
+        try {
             val prefs = mContext.getSharedPreferences(name, Context.MODE_PRIVATE)
             """
-     $name:
-     ${JSONObject(prefs.all).toString(4)}
+            $name:
+            ${JSONObject(prefs.all).toString(4)}
             """.trimIndent()
         } catch (e: JSONException) {
             "error printing SharedPrefs :/"
         }
-    }
 }

@@ -17,16 +17,18 @@ class ReportingServiceTest : BaseMPServiceTest() {
             ReportingService.insertReportingMessage(database, reportingMessage, 2L)
         }
         Assert.assertEquals(
-            ReportingService.getReportingMessagesForUpload(
-                database,
-                true,
-                2L
-            ).size.toLong(),
-            20
+            ReportingService
+                .getReportingMessagesForUpload(
+                    database,
+                    true,
+                    2L,
+                ).size
+                .toLong(),
+            20,
         )
         Assert.assertEquals(
             ReportingService.getReportingMessagesForUpload(database).size.toLong(),
-            20
+            20,
         )
     }
 
@@ -37,114 +39,136 @@ class ReportingServiceTest : BaseMPServiceTest() {
             ReportingService.insertReportingMessage(database, reportingMessage, 2L)
         }
         Assert.assertEquals(
-            ReportingService.getReportingMessagesForUpload(
-                database,
-                true,
-                2L
-            ).size.toLong(),
-            2
+            ReportingService
+                .getReportingMessagesForUpload(
+                    database,
+                    true,
+                    2L,
+                ).size
+                .toLong(),
+            2,
         )
         Assert.assertEquals(
-            ReportingService.getReportingMessagesForUpload(
-                database,
-                true,
-                3L
-            ).size.toLong(),
-            0
+            ReportingService
+                .getReportingMessagesForUpload(
+                    database,
+                    true,
+                    3L,
+                ).size
+                .toLong(),
+            0,
         )
         Assert.assertEquals(
-            ReportingService.getReportingMessagesForUpload(
-                database,
-                true,
-                4L
-            ).size.toLong(),
-            0
+            ReportingService
+                .getReportingMessagesForUpload(
+                    database,
+                    true,
+                    4L,
+                ).size
+                .toLong(),
+            0,
         )
         Assert.assertEquals(
             ReportingService.getReportingMessagesForUpload(database).size.toLong(),
-            2
+            2,
         )
         for (reportingMessage in getNReportingMessages(3, "123")) {
             ReportingService.insertReportingMessage(database, reportingMessage, 3L)
         }
         Assert.assertEquals(
-            ReportingService.getReportingMessagesForUpload(
-                database,
-                true,
-                2L
-            ).size.toLong(),
-            2
+            ReportingService
+                .getReportingMessagesForUpload(
+                    database,
+                    true,
+                    2L,
+                ).size
+                .toLong(),
+            2,
         )
         Assert.assertEquals(
-            ReportingService.getReportingMessagesForUpload(
-                database,
-                true,
-                3L
-            ).size.toLong(),
-            3
+            ReportingService
+                .getReportingMessagesForUpload(
+                    database,
+                    true,
+                    3L,
+                ).size
+                .toLong(),
+            3,
         )
         Assert.assertEquals(
-            ReportingService.getReportingMessagesForUpload(
-                database,
-                false,
-                4L
-            ).size.toLong(),
-            5
+            ReportingService
+                .getReportingMessagesForUpload(
+                    database,
+                    false,
+                    4L,
+                ).size
+                .toLong(),
+            5,
         )
         Assert.assertEquals(
-            ReportingService.getReportingMessagesForUpload(
-                database,
-                true,
-                4L
-            ).size.toLong(),
-            0
+            ReportingService
+                .getReportingMessagesForUpload(
+                    database,
+                    true,
+                    4L,
+                ).size
+                .toLong(),
+            0,
         )
         Assert.assertEquals(
             ReportingService.getReportingMessagesForUpload(database).size.toLong(),
-            5
+            5,
         )
         for (reportingMessage in getNReportingMessages(3, "123")) {
             ReportingService.insertReportingMessage(
                 database,
                 reportingMessage,
-                Constants.TEMPORARY_MPID
+                Constants.TEMPORARY_MPID,
             )
         }
         Assert.assertEquals(
-            ReportingService.getReportingMessagesForUpload(
-                database,
-                true,
-                2L
-            ).size.toLong(),
-            2
+            ReportingService
+                .getReportingMessagesForUpload(
+                    database,
+                    true,
+                    2L,
+                ).size
+                .toLong(),
+            2,
         )
         Assert.assertEquals(
-            ReportingService.getReportingMessagesForUpload(
-                database,
-                true,
-                3L
-            ).size.toLong(),
-            3
+            ReportingService
+                .getReportingMessagesForUpload(
+                    database,
+                    true,
+                    3L,
+                ).size
+                .toLong(),
+            3,
         )
         Assert.assertEquals(
-            ReportingService.getReportingMessagesForUpload(
-                database,
-                true,
-                Constants.TEMPORARY_MPID
-            ).size.toLong(),
-            3
+            ReportingService
+                .getReportingMessagesForUpload(
+                    database,
+                    true,
+                    Constants.TEMPORARY_MPID,
+                ).size
+                .toLong(),
+            3,
         )
         Assert.assertEquals(
-            ReportingService.getReportingMessagesForUpload(
-                database,
-                false,
-                4L
-            ).size.toLong(),
-            8
+            ReportingService
+                .getReportingMessagesForUpload(
+                    database,
+                    false,
+                    4L,
+                ).size
+                .toLong(),
+            8,
         )
         Assert.assertEquals(
             ReportingService.getReportingMessagesForUpload(database).size.toLong(),
-            5
+            5,
         )
     }
 
@@ -185,25 +209,28 @@ class ReportingServiceTest : BaseMPServiceTest() {
             reportingMessages,
             Comparator { o1, o2 ->
                 try {
-                    return@Comparator o1.msgObject.getInt("a random Number")
+                    return@Comparator o1.msgObject
+                        .getInt("a random Number")
                         .compareTo(o2.msgObject.getInt("a random Number"))
                 } catch (e: JSONException) {
                     e.printStackTrace()
                 }
                 -1
-            }
+            },
         )
         Collections.sort(
             jsonReportingMessages,
             Comparator { o1, o2 ->
                 try {
-                    return@Comparator o1.toJson().getInt("a random Number")
+                    return@Comparator o1
+                        .toJson()
+                        .getInt("a random Number")
                         .compareTo(o2.toJson().getInt("a random Number"))
                 } catch (e: JSONException) {
                     e.printStackTrace()
                 }
                 -1
-            }
+            },
         )
         Assert.assertEquals(jsonReportingMessages.size.toLong(), reportingMessages.size.toLong())
         var i = 0
@@ -213,16 +240,18 @@ class ReportingServiceTest : BaseMPServiceTest() {
         }
     }
 
-    private fun getNReportingMessages(n: Int): List<JsonReportingMessage> {
-        return getNReportingMessages(n, null)
-    }
+    private fun getNReportingMessages(n: Int): List<JsonReportingMessage> = getNReportingMessages(n, null)
 
-    private fun getNReportingMessages(n: Int, sessionId: String?): List<JsonReportingMessage> {
+    private fun getNReportingMessages(
+        n: Int,
+        sessionId: String?,
+    ): List<JsonReportingMessage> {
         val reportingMessages: MutableList<JsonReportingMessage> = ArrayList()
         for (i in 0 until n) {
             reportingMessages.add(
-                TestingUtils.getInstance()
-                    .getRandomReportingMessage(sessionId ?: ran.nextInt().toString())
+                TestingUtils
+                    .getInstance()
+                    .getRandomReportingMessage(sessionId ?: ran.nextInt().toString()),
             )
         }
         return reportingMessages
@@ -230,7 +259,7 @@ class ReportingServiceTest : BaseMPServiceTest() {
 
     private fun equals(
         jsonReportingMessage: JsonReportingMessage,
-        reportingMessage: ReportingService.ReportingMessage
+        reportingMessage: ReportingService.ReportingMessage,
     ): Boolean {
         val reportingString = reportingMessage.msgObject.toString()
         val origString = jsonReportingMessage.toJson().toString()

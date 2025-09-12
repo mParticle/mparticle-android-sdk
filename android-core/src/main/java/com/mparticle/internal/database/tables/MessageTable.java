@@ -4,9 +4,9 @@ import android.provider.BaseColumns;
 
 public class MessageTable extends MpIdDependentTable {
 
-    public static final String ADD_DATAPLAN_VERSION_COLUMN = "ALTER TABLE " + MessageTableColumns.TABLE_NAME +
+    public static final String ADD_DATAPLAN_VERSION_COLUMN = "ALTER TABLE " + MessageTableColumns.TABLE_NAME
             " ADD COLUMN " + MessageTableColumns.DATAPLAN_VERSION + " NUMBER";
-    public static final String ADD_DATAPLAN_ID_COLUMN = "ALTER TABLE " + MessageTableColumns.TABLE_NAME +
+    public static final String ADD_DATAPLAN_ID_COLUMN = "ALTER TABLE " + MessageTableColumns.TABLE_NAME
             " ADD COLUMN " + MessageTableColumns.DATAPLAN_ID + " TEXT";
 
     @Override
@@ -29,18 +29,18 @@ public class MessageTable extends MpIdDependentTable {
     }
 
     static final String CREATE_MESSAGES_DDL =
-            "CREATE TABLE IF NOT EXISTS " + MessageTableColumns.TABLE_NAME + " (" + BaseColumns._ID +
-                    " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    MessageTableColumns.SESSION_ID + " STRING NOT NULL, " +
-                    MessageTableColumns.API_KEY + " STRING NOT NULL, " +
-                    MessageTableColumns.MESSAGE + " TEXT, " +
-                    MessageTableColumns.STATUS + " INTEGER, " +
-                    MessageTableColumns.CREATED_AT + " INTEGER NOT NULL, " +
-                    MessageTableColumns.MESSAGE_TYPE + " TEXT, " +
-                    MessageTableColumns.CF_UUID + " TEXT, " +
-                    MessageTableColumns.MP_ID + " INTEGER, " +
-                    MessageTableColumns.DATAPLAN_ID + " TEXT," +
-                    MessageTableColumns.DATAPLAN_VERSION + " INTEGER" +
+            "CREATE TABLE IF NOT EXISTS " + MessageTableColumns.TABLE_NAME + " (" + BaseColumns._ID
+                    " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    MessageTableColumns.SESSION_ID + " STRING NOT NULL, "
+                    MessageTableColumns.API_KEY + " STRING NOT NULL, "
+                    MessageTableColumns.MESSAGE + " TEXT, "
+                    MessageTableColumns.STATUS + " INTEGER, "
+                    MessageTableColumns.CREATED_AT + " INTEGER NOT NULL, "
+                    MessageTableColumns.MESSAGE_TYPE + " TEXT, "
+                    MessageTableColumns.CF_UUID + " TEXT, "
+                    MessageTableColumns.MP_ID + " INTEGER, "
+                    MessageTableColumns.DATAPLAN_ID + " TEXT,"
+                    MessageTableColumns.DATAPLAN_VERSION + " INTEGER"
                     ");";
 
 }

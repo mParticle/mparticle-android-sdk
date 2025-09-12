@@ -23,18 +23,19 @@ import org.jetbrains.uast.util.isConstructorCall
  *
  * @see com.mparticle.lints.dtos.UnresolvedObject
  */
-abstract class CallScanner : BaseDetector(), Detector.UastScanner {
-
+abstract class CallScanner :
+    BaseDetector(),
+    Detector.UastScanner {
     abstract fun onInstanceCollected(
         context: JavaContext,
         unresolvedExpression: Expression,
-        reportingNode: UExpression
+        reportingNode: UExpression,
     )
 
     abstract fun getApplicableClasses(): List<Class<*>>
 
-    override fun createUastHandler(context: JavaContext): UElementHandler? {
-        return object : UElementHandler() {
+    override fun createUastHandler(context: JavaContext): UElementHandler? =
+        object : UElementHandler() {
             override fun visitCallExpression(node: UCallExpression) {
                 try {
                     if (!disabled && ofInterest(node)) {
@@ -45,7 +46,7 @@ abstract class CallScanner : BaseDetector(), Detector.UastScanner {
 
                         if (variable != null && method != null) {
                             VariableCollector(variable, method, expression).getUnresolvedObject(
-                                false
+                                false,
                             )
                         }
                         if (expression != null) {
@@ -61,17 +62,15 @@ abstract class CallScanner : BaseDetector(), Detector.UastScanner {
                 }
             }
         }
-    }
 
-    override fun getApplicableUastTypes(): List<Class<out UElement>>? {
-        return listOf(UCallExpression::class.java)
-    }
+    override fun getApplicableUastTypes(): List<Class<out UElement>>? = listOf(UCallExpression::class.java)
 
     private fun ofInterest(node: UCallExpression): Boolean {
         val receiverClassName = node.receiverClassName() ?: return false
 
-        return node.isConstructorCall() && getApplicableClasses().any {
-            it.canonicalName == receiverClassName
-        }
+        return node.isConstructorCall() &&
+            getApplicableClasses().any {
+                it.canonicalName == receiverClassName
+            }
     }
 }

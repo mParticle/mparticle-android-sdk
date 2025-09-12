@@ -656,7 +656,7 @@ public class MParticle {
             mAppStateManager.ensureActiveSession();
             JSONObject eventDataJSON = MPUtility.enforceAttributeConstraints(errorAttributes);
             mMessageManager.logErrorEvent(message, null, eventDataJSON);
-            Logger.debug("Logged error with message: " + (message == null ? "<none>" : message) +
+            Logger.debug("Logged error with message: " + (message == null ? "<none>" : message)
                     " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString())
             );
             mKitManager.logError(message, errorAttributes);
@@ -729,8 +729,8 @@ public class MParticle {
             JSONObject eventDataJSON = MPUtility.enforceAttributeConstraints(eventData);
             mMessageManager.logErrorEvent(message, exception, eventDataJSON);
             Logger.debug(
-                    "Logged exception with message: " + (message == null ? "<none>" : message) +
-                            " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString()) +
+                    "Logged exception with message: " + (message == null ? "<none>" : message)
+                            " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString())
                             " with exception: " + (exception == null ? "<none>" : exception.getMessage())
             );
             mKitManager.logException(exception, eventData, message);

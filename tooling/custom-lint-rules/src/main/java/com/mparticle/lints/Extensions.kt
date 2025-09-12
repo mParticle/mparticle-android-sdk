@@ -41,17 +41,18 @@ import org.json.JSONObject
 
 internal fun UCallExpression.resolveExpression(
     instance: Expression,
-    returnValue: Boolean
+    returnValue: Boolean,
 ): Expression {
-    val expression = if (isConstructorCall()) {
-        Constructor(instance, methodName, this)
-    } else {
-        if (instance is RootParent) {
-            StaticFactory(methodName, this)
+    val expression =
+        if (isConstructorCall()) {
+            Constructor(instance, methodName, this)
         } else {
-            MethodCall(instance, methodName, this, returnValue)
+            if (instance is RootParent) {
+                StaticFactory(methodName, this)
+            } else {
+                MethodCall(instance, methodName, this, returnValue)
+            }
         }
-    }
     expression.arguments = valueArguments.map { it.resolveValue(expression) }
     return expression
 }
@@ -93,11 +94,12 @@ internal fun PsiVariable.getClassName(): String? {
 }
 
 internal fun UExpression.getUltimateReceiverVariable(): PsiVariable? {
-    val receiver = when (this) {
-        is UCallExpression -> receiver
-        is UQualifiedReferenceExpression -> receiver
-        else -> null
-    }
+    val receiver =
+        when (this) {
+            is UCallExpression -> receiver
+            is UQualifiedReferenceExpression -> receiver
+            else -> null
+        }
     if (receiver == null) {
         return null
     }
@@ -110,7 +112,7 @@ internal fun UExpression.getUltimateReceiverVariable(): PsiVariable? {
 
 internal fun UExpression.getVariableElement(
     allowChainedCalls: Boolean,
-    allowFields: Boolean
+    allowFields: Boolean,
 ): PsiVariable? {
     var parent = skipParenthesizedExprUp(getQualifiedParentOrThis().uastParent)
 
@@ -176,7 +178,8 @@ internal fun UCallExpression.receiverClassName(stripGenerics: Boolean = true): S
             isConstructorCall() -> returnType?.getClassName()
             receiver == null -> {
                 (this.resolve() as? ClsMethodImpl)?.run {
-                    stub.parentStub.psi.containingFile.name.split("__")[0]
+                    stub.parentStub.psi.containingFile.name
+                        .split("__")[0]
                 }
             }
             else -> (receiverType as? PsiClassReferenceType)?.reference?.qualifiedName
@@ -198,13 +201,12 @@ internal fun UCallExpression.receiverClassName(stripGenerics: Boolean = true): S
     return className
 }
 
-internal fun PsiType.getClassName(): String? {
-    return when (this) {
+internal fun PsiType.getClassName(): String? =
+    when (this) {
         is PsiClassReferenceType -> this.reference.qualifiedName
         is PsiImmediateClassType -> this.resolve()?.qualifiedName
         else -> null
     }
-}
 
 internal fun PsiClass.getQualifiedName(reflectable: Boolean): String? {
     if (!reflectable) {
@@ -215,9 +217,10 @@ internal fun PsiClass.getQualifiedName(reflectable: Boolean): String? {
     fun isParentTopLevel(child: PsiElement) {
         if (!child.isTopLevelKtOrJavaMember()) {
             val index = qualifiedName.indexOfLast { it == '.' }
-            qualifiedName = qualifiedName.substring(0, index) + "$" + qualifiedName.substring(
+            qualifiedName = qualifiedName.substring(0, index) + "$"
+            qualifiedName.substring(
                 index + 1,
-                qualifiedName.length
+                qualifiedName.length,
             )
             isParentTopLevel(child.parent)
         }
@@ -228,41 +231,44 @@ internal fun PsiClass.getQualifiedName(reflectable: Boolean): String? {
 
 internal fun UExpression.resolveChainedCalls(
     returnValue: Boolean,
-    instance: Expression
+    instance: Expression,
 ): Expression {
     val initialInstance = instance
     var calls = (getOutermostQualified() ?: this).getQualifiedChain().toMutableList()
     calls = calls.filter { it is UCallExpression }.toMutableList()
     // check if first call is a constructor - Product.Builder().brand("") otherwise, the instance
     // argument should be the object the chain is being called on
-    return calls.fold(initialInstance) { acc, item ->
-        (item as UCallExpression).resolveExpression(acc, true)
-    }.apply {
-        if (this is MethodCall) {
-            this.returnValue = returnValue
+    return calls
+        .fold(initialInstance) { acc, item ->
+            (item as UCallExpression).resolveExpression(acc, true)
+        }.apply {
+            if (this is MethodCall) {
+                this.returnValue = returnValue
+            }
         }
-    }
 }
 
 internal fun Pair<*, *>.resolveToEnum(): Enum<*> {
-    val className = when (first) {
-        is ClassId -> "${(first as ClassId).packageFqName}.${
-        (first as ClassId).relativeClassName.asString().replace(".", "$")
-        }"
-        is String -> first as String
-        else -> null
-    }
+    val className =
+        when (first) {
+            is ClassId -> "${(first as ClassId).packageFqName}.${
+                (first as ClassId).relativeClassName.asString().replace(".", "$")
+            }"
+            is String -> first as String
+            else -> null
+        }
     return className?.let { className ->
         val enumName = second.toString()
-        val constructor = Class.forName(className)
-            .methods.first { it.name == "valueOf" }
+        val constructor =
+            Class
+                .forName(className)
+                .methods
+                .first { it.name == "valueOf" }
         constructor.invoke(null, enumName)
     } as Enum<*>
 }
 
-internal fun List<Value>.resolve(): List<Any?> {
-    return map { it.resolve() }
-}
+internal fun List<Value>.resolve(): List<Any?> = map { it.resolve() }
 
 internal fun JSONObject.stringify(): JSONObject {
     val newJSONObject = JSONObject()

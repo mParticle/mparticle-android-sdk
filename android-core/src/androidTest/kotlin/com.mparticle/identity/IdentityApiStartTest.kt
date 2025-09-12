@@ -24,13 +24,16 @@ class IdentityApiStartTest : BaseCleanInstallEachTest() {
     @Throws(Exception::class)
     fun testInitialIdentitiesPresentWithAndroidId() {
         val identities = mRandomUtils.randomUserIdentities
-        val request = IdentityApiRequest.withEmptyUser()
-            .userIdentities(identities)
-            .build()
+        val request =
+            IdentityApiRequest
+                .withEmptyUser()
+                .userIdentities(identities)
+                .build()
         startMParticle(
-            MParticleOptions.builder(mContext)
+            MParticleOptions
+                .builder(mContext)
                 .androidIdEnabled(true)
-                .identify(request)
+                .identify(request),
         )
         Assert.assertTrue(mServer.Requests().identify.size == 1)
         assertIdentitiesMatch(mServer.Requests().identify[0], identities, true)
@@ -40,13 +43,16 @@ class IdentityApiStartTest : BaseCleanInstallEachTest() {
     @Throws(Exception::class)
     fun testInitialIdentitiesPresentWithoutAndroidId() {
         val identities = mRandomUtils.randomUserIdentities
-        val request = IdentityApiRequest.withEmptyUser()
-            .userIdentities(identities)
-            .build()
+        val request =
+            IdentityApiRequest
+                .withEmptyUser()
+                .userIdentities(identities)
+                .build()
         startMParticle(
-            MParticleOptions.builder(mContext)
+            MParticleOptions
+                .builder(mContext)
                 .androidIdEnabled(false)
-                .identify(request)
+                .identify(request),
         )
         Assert.assertTrue(mServer.Requests().identify.size == 1)
         assertIdentitiesMatch(mServer.Requests().identify[0], identities, false)
@@ -66,11 +72,16 @@ class IdentityApiStartTest : BaseCleanInstallEachTest() {
         val currentMpid = ran.nextLong()
         val identities = mRandomUtils.randomUserIdentities
         startMParticle()
-        MParticle.getInstance()?.Internal()?.configManager?.setMpid(currentMpid, ran.nextBoolean())
+        MParticle
+            .getInstance()
+            ?.Internal()
+            ?.configManager
+            ?.setMpid(currentMpid, ran.nextBoolean())
         for ((key, value) in identities) {
             AccessUtils.setUserIdentity(value, key, currentMpid)
         }
-        com.mparticle.internal.AccessUtils.awaitMessageHandler()
+        com.mparticle.internal.AccessUtils
+            .awaitMessageHandler()
         mServer = MockServer.getNewInstance(mContext)
         startMParticle()
         TestCase.assertEquals(mServer.Requests().identify.size, 1)
@@ -91,7 +102,7 @@ class IdentityApiStartTest : BaseCleanInstallEachTest() {
         com.mparticle.internal.AccessUtils.setPushInPushRegistrationHelper(
             mContext,
             instanceId,
-            mRandomUtils.getAlphaNumericString(15)
+            mRandomUtils.getAlphaNumericString(15),
         )
         val called = AndroidUtils.Mutable(false)
         var latch: CountDownLatch = MPLatch(1)
@@ -110,7 +121,7 @@ class IdentityApiStartTest : BaseCleanInstallEachTest() {
                             TestCase.assertEquals(instanceId, identityChange.getString("new_value"))
                             TestCase.assertEquals(
                                 "push_token",
-                                identityChange.getString("identity_type")
+                                identityChange.getString("identity_type"),
                             )
                             called.value = true
                         } catch (jse: JSONException) {
@@ -119,9 +130,9 @@ class IdentityApiStartTest : BaseCleanInstallEachTest() {
                         return@JSONMatch true
                     }
                     false
-                }
+                },
             ),
-            latch
+            latch,
         )
         startMParticle()
         latch.await()
@@ -132,7 +143,7 @@ class IdentityApiStartTest : BaseCleanInstallEachTest() {
         com.mparticle.internal.AccessUtils.setPushInPushRegistrationHelper(
             mContext,
             newInstanceId,
-            mRandomUtils.getAlphaNumericString(15)
+            mRandomUtils.getAlphaNumericString(15),
         )
         latch = CountDownLatch(1)
         /**
@@ -150,11 +161,11 @@ class IdentityApiStartTest : BaseCleanInstallEachTest() {
                             TestCase.assertEquals(instanceId, identityChange.getString("old_value"))
                             TestCase.assertEquals(
                                 newInstanceId,
-                                identityChange.getString("new_value")
+                                identityChange.getString("new_value"),
                             )
                             TestCase.assertEquals(
                                 "push_token",
-                                identityChange.getString("identity_type")
+                                identityChange.getString("identity_type"),
                             )
                             called.value = true
                         } catch (jse: JSONException) {
@@ -163,9 +174,9 @@ class IdentityApiStartTest : BaseCleanInstallEachTest() {
                         return@JSONMatch true
                     }
                     false
-                }
+                },
             ),
-            latch
+            latch,
         )
         startMParticle()
         latch.await()
@@ -176,7 +187,7 @@ class IdentityApiStartTest : BaseCleanInstallEachTest() {
     private fun assertIdentitiesMatch(
         request: Request,
         identities: Map<IdentityType, String>,
-        androidIdEnabled: Boolean
+        androidIdEnabled: Boolean,
     ) {
         Assert.assertTrue(request is IdentityRequest)
         val identityRequest = request.asIdentityRequest()
@@ -196,7 +207,7 @@ class IdentityApiStartTest : BaseCleanInstallEachTest() {
             val key = keys.next()
             TestCase.assertEquals(
                 copy[MParticleIdentityClientImpl.getIdentityType(key)],
-                knownIdentities.getString(key)
+                knownIdentities.getString(key),
             )
         }
     }
@@ -221,21 +232,29 @@ class IdentityApiStartTest : BaseCleanInstallEachTest() {
         val identifyLatch: CountDownLatch = MPLatch(1)
         val modifyLatch: CountDownLatch = MPLatch(1)
         MParticle.start(MParticleOptions.builder(mContext).credentials("key", "value").build())
-        MParticle.getInstance()?.Identity()
-            ?.addIdentityStateListener(object : IdentityStateListener {
-                override fun onUserIdentified(user: MParticleUser, previousUser: MParticleUser?) {
-                    Assert.assertTrue(logPushRegistrationCalled.value)
-                    identifyLatch.countDown()
-                    MParticle.getInstance()?.Identity()?.removeIdentityStateListener(this)
-                }
-            })
+        MParticle
+            .getInstance()
+            ?.Identity()
+            ?.addIdentityStateListener(
+                object : IdentityStateListener {
+                    override fun onUserIdentified(
+                        user: MParticleUser,
+                        previousUser: MParticleUser?,
+                    ) {
+                        Assert.assertTrue(logPushRegistrationCalled.value)
+                        identifyLatch.countDown()
+                        MParticle.getInstance()?.Identity()?.removeIdentityStateListener(this)
+                    }
+                },
+            )
         mServer.waitForVerify(Matcher(mServer.Endpoints().getModifyUrl(startingMpid)), modifyLatch)
         var pushRegistration: String? = null
         for (i in 0..4) {
-            MParticle.getInstance()
+            MParticle
+                .getInstance()
                 ?.logPushRegistration(
                     mRandomUtils.getAlphaString(12).also { pushRegistration = it },
-                    "senderId"
+                    "senderId",
                 )
         }
         logPushRegistrationCalled.value = true
@@ -260,15 +279,21 @@ class IdentityApiStartTest : BaseCleanInstallEachTest() {
         val called = AndroidUtils.Mutable(false)
         val latch: CountDownLatch = MPLatch(1)
         mServer.waitForVerify(Matcher(mServer.Endpoints().identifyUrl)) { request ->
-            TestCase.assertEquals("fire", request.asIdentityRequest().body.clientSdk.platform)
+            TestCase.assertEquals(
+                "fire",
+                request
+                    .asIdentityRequest()
+                    .body.clientSdk.platform,
+            )
             called.value = true
             latch.countDown()
         }
         MParticle.start(
-            MParticleOptions.builder(mContext)
+            MParticleOptions
+                .builder(mContext)
                 .credentials("key", "secret")
                 .operatingSystem(MParticle.OperatingSystem.FIRE_OS)
-                .build()
+                .build(),
         )
         latch.await()
         Assert.assertTrue(called.value)
@@ -276,15 +301,21 @@ class IdentityApiStartTest : BaseCleanInstallEachTest() {
         called.value = false
         val latch1: CountDownLatch = MPLatch(1)
         mServer.waitForVerify(Matcher(mServer.Endpoints().identifyUrl)) { request ->
-            TestCase.assertEquals("fire", request.asIdentityRequest().body.clientSdk.platform)
+            TestCase.assertEquals(
+                "fire",
+                request
+                    .asIdentityRequest()
+                    .body.clientSdk.platform,
+            )
             called.value = true
             latch1.countDown()
         }
         MParticle.start(
-            MParticleOptions.builder(mContext)
+            MParticleOptions
+                .builder(mContext)
                 .credentials("key", "secret")
                 .operatingSystem(MParticle.OperatingSystem.FIRE_OS)
-                .build()
+                .build(),
         )
         latch1.await()
         Assert.assertTrue(called.value)
@@ -303,7 +334,7 @@ class IdentityApiStartTest : BaseCleanInstallEachTest() {
                 MParticleOptions
                     .builder(mContext)
                     .pushRegistration("instanceId", "senderId")
-                    .environment(MParticle.Environment.Development)
+                    .environment(MParticle.Environment.Development),
             )
             Assert.assertTrue(MPUtility.isDevEnv())
         } catch (e: Exception) {

@@ -53,7 +53,8 @@ class MParticleOptionsTest : BaseAbstractTest() {
         clearStoredPreferences()
         thrown = false
         try {
-            MParticleOptions.builder(mContext)
+            MParticleOptions
+                .builder(mContext)
                 .credentials("", "")
                 .build()
         } catch (ex: IllegalArgumentException) {
@@ -63,7 +64,8 @@ class MParticleOptionsTest : BaseAbstractTest() {
         clearStoredPreferences()
         thrown = false
         try {
-            MParticleOptions.builder(mContext)
+            MParticleOptions
+                .builder(mContext)
                 .credentials("key", "")
                 .build()
         } catch (ex: IllegalArgumentException) {
@@ -73,7 +75,8 @@ class MParticleOptionsTest : BaseAbstractTest() {
         clearStoredPreferences()
         thrown = false
         try {
-            MParticleOptions.builder(mContext)
+            MParticleOptions
+                .builder(mContext)
                 .credentials("", "key")
                 .build()
         } catch (ex: IllegalArgumentException) {
@@ -92,7 +95,8 @@ class MParticleOptionsTest : BaseAbstractTest() {
             Assert.fail("MParticleOptions should build without credentials in a Production environment")
         }
         try {
-            MParticleOptions.builder(mProductionContext)
+            MParticleOptions
+                .builder(mProductionContext)
                 .credentials("", "")
                 .build()
         } catch (ex: IllegalArgumentException) {
@@ -108,7 +112,10 @@ class MParticleOptionsTest : BaseAbstractTest() {
             .commit()
     }
 
-    private fun setStoredPreference(apiKey: String, apiSecret: String) {
+    private fun setStoredPreference(
+        apiKey: String,
+        apiSecret: String,
+    ) {
         credentialsPreferences
             .edit()
             .putString(Constants.PrefKeys.API_KEY, apiKey)
@@ -125,13 +132,25 @@ class MParticleOptionsTest : BaseAbstractTest() {
         val key = UUID.randomUUID().toString()
         val secret = UUID.randomUUID().toString()
         startMParticle(
-            MParticleOptions.builder(mProductionContext)
-                .credentials(key, secret)
+            MParticleOptions
+                .builder(mProductionContext)
+                .credentials(key, secret),
         )
-        Assert.assertEquals(MParticle.getInstance()?.mInternal?.configManager?.apiKey, key)
         Assert.assertEquals(
-            MParticle.getInstance()?.mInternal?.configManager?.apiSecret,
-            secret
+            MParticle
+                .getInstance()
+                ?.mInternal
+                ?.configManager
+                ?.apiKey,
+            key,
+        )
+        Assert.assertEquals(
+            MParticle
+                .getInstance()
+                ?.mInternal
+                ?.configManager
+                ?.apiSecret,
+            secret,
         )
     }
 
@@ -149,8 +168,9 @@ class MParticleOptionsTest : BaseAbstractTest() {
         // test androidIdDisabled == true
         MParticle.setInstance(null)
         startMParticle(
-            MParticleOptions.builder(mContext)
-                .androidIdDisabled(true)
+            MParticleOptions
+                .builder(mContext)
+                .androidIdDisabled(true),
         )
         Assert.assertFalse(MParticle.isAndroidIdEnabled())
         Assert.assertTrue(MParticle.isAndroidIdDisabled())
@@ -159,8 +179,9 @@ class MParticleOptionsTest : BaseAbstractTest() {
         // test androidIdEnabled == false
         MParticle.setInstance(null)
         startMParticle(
-            MParticleOptions.builder(mContext)
-                .androidIdEnabled(false)
+            MParticleOptions
+                .builder(mContext)
+                .androidIdEnabled(false),
         )
         Assert.assertFalse(MParticle.isAndroidIdEnabled())
         Assert.assertTrue(MParticle.isAndroidIdDisabled())
@@ -168,16 +189,18 @@ class MParticleOptionsTest : BaseAbstractTest() {
 
         // test androidIdDisabled == false
         startMParticle(
-            MParticleOptions.builder(mContext)
-                .androidIdDisabled(false)
+            MParticleOptions
+                .builder(mContext)
+                .androidIdDisabled(false),
         )
         Assert.assertTrue(MParticle.isAndroidIdEnabled())
         Assert.assertFalse(MParticle.isAndroidIdDisabled())
 
         // test androidIdEnabled == true
         startMParticle(
-            MParticleOptions.builder(mContext)
-                .androidIdEnabled(true)
+            MParticleOptions
+                .builder(mContext)
+                .androidIdEnabled(true),
         )
         Assert.assertTrue(MParticle.isAndroidIdEnabled())
         Assert.assertFalse(MParticle.isAndroidIdDisabled())
@@ -190,14 +213,16 @@ class MParticleOptionsTest : BaseAbstractTest() {
         MParticle.getInstance()?.let { Assert.assertFalse(it.isDevicePerformanceMetricsDisabled) }
         MParticle.setInstance(null)
         startMParticle(
-            MParticleOptions.builder(mContext)
-                .devicePerformanceMetricsDisabled(false)
+            MParticleOptions
+                .builder(mContext)
+                .devicePerformanceMetricsDisabled(false),
         )
         MParticle.getInstance()?.let { Assert.assertFalse(it.isDevicePerformanceMetricsDisabled) }
         MParticle.setInstance(null)
         startMParticle(
-            MParticleOptions.builder(mContext)
-                .devicePerformanceMetricsDisabled(true)
+            MParticleOptions
+                .builder(mContext)
+                .devicePerformanceMetricsDisabled(true),
         )
         MParticle.getInstance()?.let { Assert.assertTrue(it.isDevicePerformanceMetricsDisabled) }
         MParticle.setInstance(null)
@@ -209,12 +234,13 @@ class MParticleOptionsTest : BaseAbstractTest() {
         startMParticle()
         Assert.assertEquals(Logger.getMinLogLevel(), Logger.DEFAULT_MIN_LOG_LEVEL)
         startMParticle(
-            MParticleOptions.builder(mProductionContext)
-                .logLevel(MParticle.LogLevel.VERBOSE)
+            MParticleOptions
+                .builder(mProductionContext)
+                .logLevel(MParticle.LogLevel.VERBOSE),
         )
         Assert.assertEquals(Logger.getMinLogLevel(), MParticle.LogLevel.VERBOSE)
         startMParticle(
-            MParticleOptions.builder(mProductionContext).logLevel(MParticle.LogLevel.ERROR)
+            MParticleOptions.builder(mProductionContext).logLevel(MParticle.LogLevel.ERROR),
         )
         Assert.assertEquals(Logger.getMinLogLevel(), MParticle.LogLevel.ERROR)
     }
@@ -225,11 +251,12 @@ class MParticleOptionsTest : BaseAbstractTest() {
         startMParticle()
         Assert.assertEquals(
             MParticle.getInstance()?.environment,
-            MParticle.Environment.Development
+            MParticle.Environment.Development,
         )
         startMParticle(
-            MParticleOptions.builder(mProductionContext)
-                .environment(MParticle.Environment.Production)
+            MParticleOptions
+                .builder(mProductionContext)
+                .environment(MParticle.Environment.Production),
         )
         Assert.assertEquals(MParticle.getInstance()?.environment, MParticle.Environment.Production)
         MParticle.setInstance(null)
@@ -237,8 +264,9 @@ class MParticleOptionsTest : BaseAbstractTest() {
         val debuggable = MPUtility.isAppDebuggable(productionContext)
         Assert.assertFalse(debuggable)
         startMParticle(
-            MParticleOptions.builder(productionContext)
-                .environment(MParticle.Environment.AutoDetect)
+            MParticleOptions
+                .builder(productionContext)
+                .environment(MParticle.Environment.AutoDetect),
         )
         Assert.assertEquals(MParticle.getInstance()?.environment, MParticle.Environment.Production)
         MParticle.setInstance(null)
@@ -247,32 +275,36 @@ class MParticleOptionsTest : BaseAbstractTest() {
     @Test
     @Throws(Exception::class)
     fun testEnableUncaughtExceptionLogging() {
-        val options = MParticleOptions.builder(mProductionContext)
-            .credentials("key", "secret")
-            .build()
+        val options =
+            MParticleOptions
+                .builder(mProductionContext)
+                .credentials("key", "secret")
+                .build()
         MParticle.start(options)
         MParticle.getInstance()?.mInternal?.configManager?.let {
             Assert.assertFalse(
-                it.logUnhandledExceptions
+                it.logUnhandledExceptions,
             )
         }
         MParticle.setInstance(null)
         startMParticle(
-            MParticleOptions.builder(mProductionContext)
-                .enableUncaughtExceptionLogging(true)
+            MParticleOptions
+                .builder(mProductionContext)
+                .enableUncaughtExceptionLogging(true),
         )
         MParticle.getInstance()?.mInternal?.configManager?.logUnhandledExceptions?.let {
             Assert.assertTrue(
-                it
+                it,
             )
         }
         startMParticle(
-            MParticleOptions.builder(mProductionContext)
-                .enableUncaughtExceptionLogging(false)
+            MParticleOptions
+                .builder(mProductionContext)
+                .enableUncaughtExceptionLogging(false),
         )
         MParticle.getInstance()?.mInternal?.configManager?.let {
             Assert.assertFalse(
-                it.logUnhandledExceptions
+                it.logUnhandledExceptions,
             )
         }
         MParticle.setInstance(null)
@@ -283,32 +315,50 @@ class MParticleOptionsTest : BaseAbstractTest() {
     fun testSessionTimeout() {
         startMParticle()
         Assert.assertEquals(
-            MParticle.getInstance()?.mInternal?.configManager?.sessionTimeout,
-            60000
+            MParticle
+                .getInstance()
+                ?.mInternal
+                ?.configManager
+                ?.sessionTimeout,
+            60000,
         )
         startMParticle(
-            MParticleOptions.builder(mProductionContext)
-                .sessionTimeout(-123)
+            MParticleOptions
+                .builder(mProductionContext)
+                .sessionTimeout(-123),
         )
         Assert.assertEquals(
-            MParticle.getInstance()?.mInternal?.configManager?.sessionTimeout,
-            60000
+            MParticle
+                .getInstance()
+                ?.mInternal
+                ?.configManager
+                ?.sessionTimeout,
+            60000,
         )
         MParticle.setInstance(null)
         startMParticle(
-            MParticleOptions.builder(mProductionContext)
-                .sessionTimeout(123)
+            MParticleOptions
+                .builder(mProductionContext)
+                .sessionTimeout(123),
         )
         Assert.assertEquals(
-            MParticle.getInstance()?.mInternal?.configManager?.sessionTimeout,
-            123000
+            MParticle
+                .getInstance()
+                ?.mInternal
+                ?.configManager
+                ?.sessionTimeout,
+            123000,
         )
 
         // make sure it resets if the session timeout is not specified
         startMParticle()
         Assert.assertEquals(
-            MParticle.getInstance()?.mInternal?.configManager?.sessionTimeout,
-            60000
+            MParticle
+                .getInstance()
+                ?.mInternal
+                ?.configManager
+                ?.sessionTimeout,
+            60000,
         )
         MParticle.setInstance(null)
     }
@@ -319,32 +369,35 @@ class MParticleOptionsTest : BaseAbstractTest() {
         startMParticle()
         Assert.assertEquals(
             AccessUtils.getInstallType(MParticle.getInstance()?.mMessageManager),
-            MParticle.InstallType.AutoDetect
+            MParticle.InstallType.AutoDetect,
         )
         MParticle.setInstance(null)
         startMParticle(
-            MParticleOptions.builder(mProductionContext)
-                .installType(MParticle.InstallType.KnownInstall)
+            MParticleOptions
+                .builder(mProductionContext)
+                .installType(MParticle.InstallType.KnownInstall),
         )
         Assert.assertEquals(
             AccessUtils.getInstallType(MParticle.getInstance()?.mMessageManager),
-            MParticle.InstallType.KnownInstall
+            MParticle.InstallType.KnownInstall,
         )
         startMParticle(
-            MParticleOptions.builder(mProductionContext)
-                .installType(MParticle.InstallType.KnownUpgrade)
+            MParticleOptions
+                .builder(mProductionContext)
+                .installType(MParticle.InstallType.KnownUpgrade),
         )
         Assert.assertEquals(
             AccessUtils.getInstallType(MParticle.getInstance()?.mMessageManager),
-            MParticle.InstallType.KnownUpgrade
+            MParticle.InstallType.KnownUpgrade,
         )
         startMParticle(
-            MParticleOptions.builder(mProductionContext)
-                .installType(MParticle.InstallType.AutoDetect)
+            MParticleOptions
+                .builder(mProductionContext)
+                .installType(MParticle.InstallType.AutoDetect),
         )
         Assert.assertEquals(
             AccessUtils.getInstallType(MParticle.getInstance()?.mMessageManager),
-            MParticle.InstallType.AutoDetect
+            MParticle.InstallType.AutoDetect,
         )
         MParticle.setInstance(null)
     }
@@ -355,34 +408,52 @@ class MParticleOptionsTest : BaseAbstractTest() {
         // default upload interval for production
         startMParticle()
         Assert.assertEquals(
-            MParticle.getInstance()?.mInternal?.configManager?.uploadInterval,
-            10000L
+            MParticle
+                .getInstance()
+                ?.mInternal
+                ?.configManager
+                ?.uploadInterval,
+            10000L,
         )
         MParticle.setInstance(null)
 
         // default upload interval for production
         startMParticle(MParticleOptions.builder(mProductionContext))
         Assert.assertEquals(
-            MParticle.getInstance()?.mInternal?.configManager?.uploadInterval,
-            600000L
+            MParticle
+                .getInstance()
+                ?.mInternal
+                ?.configManager
+                ?.uploadInterval,
+            600000L,
         )
         MParticle.setInstance(null)
         startMParticle(
-            MParticleOptions.builder(mProductionContext)
-                .uploadInterval(123)
+            MParticleOptions
+                .builder(mProductionContext)
+                .uploadInterval(123),
         )
         Assert.assertEquals(
-            MParticle.getInstance()?.mInternal?.configManager?.uploadInterval,
-            123000L
+            MParticle
+                .getInstance()
+                ?.mInternal
+                ?.configManager
+                ?.uploadInterval,
+            123000L,
         )
         MParticle.setInstance(null)
         startMParticle(
-            MParticleOptions.builder(mProductionContext)
-                .uploadInterval(-123)
+            MParticleOptions
+                .builder(mProductionContext)
+                .uploadInterval(-123),
         )
         Assert.assertEquals(
-            MParticle.getInstance()?.mInternal?.configManager?.uploadInterval,
-            600000L
+            MParticle
+                .getInstance()
+                ?.mInternal
+                ?.configManager
+                ?.uploadInterval,
+            600000L,
         )
         MParticle.setInstance(null)
     }
@@ -393,17 +464,22 @@ class MParticleOptionsTest : BaseAbstractTest() {
         startMParticle()
         Assert.assertNull(MParticle.getInstance()?.attributionListener)
         startMParticle(
-            MParticleOptions.builder(mContext)
-                .attributionListener(object : AttributionListener {
-                    override fun onResult(result: AttributionResult) {}
-                    override fun onError(error: AttributionError) {}
-                })
+            MParticleOptions
+                .builder(mContext)
+                .attributionListener(
+                    object : AttributionListener {
+                        override fun onResult(result: AttributionResult) {}
+
+                        override fun onError(error: AttributionError) {}
+                    },
+                ),
         )
         Assert.assertNotNull(MParticle.getInstance()?.attributionListener)
         MParticle.setInstance(null)
         startMParticle(
-            MParticleOptions.builder(mContext)
-                .attributionListener(null)
+            MParticleOptions
+                .builder(mContext)
+                .attributionListener(null),
         )
         Assert.assertNull(MParticle.getInstance()?.attributionListener)
     }
@@ -414,15 +490,17 @@ class MParticleOptionsTest : BaseAbstractTest() {
         val called = AndroidUtils.Mutable(false)
         val latch: CountDownLatch = MPLatch(1)
         startMParticle(
-            MParticleOptions.builder(mContext)
-                .operatingSystem(MParticle.OperatingSystem.FIRE_OS)
+            MParticleOptions
+                .builder(mContext)
+                .operatingSystem(MParticle.OperatingSystem.FIRE_OS),
         )
         mServer.waitForVerify(Matcher(mServer.Endpoints().eventsUrl)) { request ->
             Assert.assertEquals("FireTV", request.bodyJson.optJSONObject("di")?.optString("dp"))
             called.value = true
             latch.countDown()
         }
-        MParticle.getInstance()
+        MParticle
+            .getInstance()
             ?.logEvent(MPEvent.Builder("event name", MParticle.EventType.Location).build())
         MParticle.getInstance()?.upload()
         latch.await()
@@ -440,7 +518,8 @@ class MParticleOptionsTest : BaseAbstractTest() {
             called.value = true
             latch1.countDown()
         }
-        MParticle.getInstance()
+        MParticle
+            .getInstance()
             ?.logEvent(MPEvent.Builder("event name", MParticle.EventType.Location).build())
         MParticle.getInstance()?.upload()
         latch1.await()
@@ -454,15 +533,17 @@ class MParticleOptionsTest : BaseAbstractTest() {
     @Throws(InterruptedException::class)
     fun testLocationTracking() {
         startMParticle(
-            MParticleOptions.builder(mContext)
-                .locationTrackingDisabled()
+            MParticleOptions
+                .builder(mContext)
+                .locationTrackingDisabled(),
         )
         MParticle.getInstance()?.let { Assert.assertFalse(it.isLocationTrackingEnabled) }
         MParticle.setInstance(null)
         Assert.assertNull(MParticle.getInstance())
         startMParticle(
-            MParticleOptions.builder(mContext)
-                .locationTrackingEnabled("passive", 100, 20)
+            MParticleOptions
+                .builder(mContext)
+                .locationTrackingEnabled("passive", 100, 20),
         )
         MParticle.getInstance()?.let { Assert.assertTrue(it.isLocationTrackingEnabled) }
         MParticle.setInstance(null)
@@ -475,117 +556,170 @@ class MParticleOptionsTest : BaseAbstractTest() {
     @Throws(InterruptedException::class)
     fun testTimeout() {
         startMParticle(
-            MParticleOptions.builder(mProductionContext)
-                .identityConnectionTimeout(-123)
+            MParticleOptions
+                .builder(mProductionContext)
+                .identityConnectionTimeout(-123),
         )
         Assert.assertEquals(
-            MParticle.getInstance()?.mInternal?.configManager?.identityConnectionTimeout,
-            (ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000)
+            MParticle
+                .getInstance()
+                ?.mInternal
+                ?.configManager
+                ?.identityConnectionTimeout,
+            (ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000),
         )
         Assert.assertEquals(
-            MParticle.getInstance()?.mInternal?.configManager?.connectionTimeout,
-            (ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000)
+            MParticle
+                .getInstance()
+                ?.mInternal
+                ?.configManager
+                ?.connectionTimeout,
+            (ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000),
         )
         MParticle.setInstance(null)
         startMParticle(
-            MParticleOptions.builder(mProductionContext)
-                .identityConnectionTimeout(0)
+            MParticleOptions
+                .builder(mProductionContext)
+                .identityConnectionTimeout(0),
         )
         Assert.assertEquals(
-            MParticle.getInstance()?.mInternal?.configManager?.identityConnectionTimeout,
-            (ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000)
+            MParticle
+                .getInstance()
+                ?.mInternal
+                ?.configManager
+                ?.identityConnectionTimeout,
+            (ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000),
         )
         Assert.assertEquals(
-            MParticle.getInstance()?.mInternal?.configManager?.connectionTimeout,
-            (ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000)
+            MParticle
+                .getInstance()
+                ?.mInternal
+                ?.configManager
+                ?.connectionTimeout,
+            (ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000),
         )
         MParticle.setInstance(null)
         startMParticle(
-            MParticleOptions.builder(mProductionContext)
-                .identityConnectionTimeout(123)
+            MParticleOptions
+                .builder(mProductionContext)
+                .identityConnectionTimeout(123),
         )
         Assert.assertEquals(
-            MParticle.getInstance()?.mInternal?.configManager?.identityConnectionTimeout,
-            123000
+            MParticle
+                .getInstance()
+                ?.mInternal
+                ?.configManager
+                ?.identityConnectionTimeout,
+            123000,
         )
         Assert.assertEquals(
-            MParticle.getInstance()?.mInternal?.configManager?.connectionTimeout,
-            (ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000)
+            MParticle
+                .getInstance()
+                ?.mInternal
+                ?.configManager
+                ?.connectionTimeout,
+            (ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000),
         )
         MParticle.setInstance(null)
         startMParticle(MParticleOptions.builder(mProductionContext))
         Assert.assertEquals(
-            MParticle.getInstance()?.mInternal?.configManager?.identityConnectionTimeout,
-            (ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000)
+            MParticle
+                .getInstance()
+                ?.mInternal
+                ?.configManager
+                ?.identityConnectionTimeout,
+            (ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000),
         )
         Assert.assertEquals(
-            MParticle.getInstance()?.mInternal?.configManager?.connectionTimeout,
-            (ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000)
+            MParticle
+                .getInstance()
+                ?.mInternal
+                ?.configManager
+                ?.connectionTimeout,
+            (ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000),
         )
     }
 
     @Test
     fun testNetworkOptions() {
-        val options = MParticleOptions.builder(mProductionContext)
-            .credentials("key", "secret")
-            .build()
+        val options =
+            MParticleOptions
+                .builder(mProductionContext)
+                .credentials("key", "secret")
+                .build()
         Assert.assertTrue(
             com.mparticle.networking.AccessUtils.equals(
                 options.networkOptions,
-                com.mparticle.networking.AccessUtils.defaultNetworkOptions
-            )
+                com.mparticle.networking.AccessUtils.defaultNetworkOptions,
+            ),
         )
     }
 
     @Test
     fun testConfigStaleness() {
         // nothing set, should return null
-        var options = MParticleOptions.builder(mContext)
-            .credentials("key", "secret")
-            .build()
+        var options =
+            MParticleOptions
+                .builder(mContext)
+                .credentials("key", "secret")
+                .build()
         Assert.assertNull(options.configMaxAge)
 
         // 0 should return 0
-        options = MParticleOptions.builder(mContext)
-            .credentials("key", "secret")
-            .configMaxAgeSeconds(0)
-            .build()
+        options =
+            MParticleOptions
+                .builder(mContext)
+                .credentials("key", "secret")
+                .configMaxAgeSeconds(0)
+                .build()
         Assert.assertEquals(0, options.configMaxAge)
 
         // positive number should return positive number
         val testValue = Math.abs(ran.nextInt())
-        options = MParticleOptions.builder(mContext)
-            .credentials("key", "secret")
-            .configMaxAgeSeconds(testValue)
-            .build()
+        options =
+            MParticleOptions
+                .builder(mContext)
+                .credentials("key", "secret")
+                .configMaxAgeSeconds(testValue)
+                .build()
         Assert.assertEquals(testValue, options.configMaxAge)
 
         // negative number should get thrown out and return null
-        options = MParticleOptions.builder(mContext)
-            .credentials("key", "secret")
-            .configMaxAgeSeconds(-5)
-            .build()
+        options =
+            MParticleOptions
+                .builder(mContext)
+                .credentials("key", "secret")
+                .configMaxAgeSeconds(-5)
+                .build()
         Assert.assertNull(options.configMaxAge)
     }
 
     @Test
     fun testAndroidIdLogMessage() {
         val infoLogs = ArrayList<String?>()
-        Logger.setLogHandler(object : DefaultLogHandler() {
-            override fun log(priority: MParticle.LogLevel, error: Throwable?, messages: String) {
-                super.log(priority, error, messages)
-                if (priority == MParticle.LogLevel.INFO) {
-                    infoLogs.add(messages)
+        Logger.setLogHandler(
+            object : DefaultLogHandler() {
+                override fun log(
+                    priority: MParticle.LogLevel,
+                    error: Throwable?,
+                    messages: String,
+                ) {
+                    super.log(priority, error, messages)
+                    if (priority == MParticle.LogLevel.INFO) {
+                        infoLogs.add(messages)
+                    }
                 }
-            }
-        })
-        MParticleOptions.builder(mContext)
+            },
+        )
+        MParticleOptions
+            .builder(mContext)
             .credentials("this", "that")
             .androidIdDisabled(true)
             .build()
         Assert.assertTrue(infoLogs.contains("ANDROID_ID will not be collected based on MParticleOptions settings"))
         infoLogs.clear()
-        MParticleOptions.builder(mContext)
+        MParticleOptions
+            .builder(mContext)
             .credentials("this", "that")
             .androidIdDisabled(false)
             .build()
@@ -593,7 +727,8 @@ class MParticleOptionsTest : BaseAbstractTest() {
         infoLogs.clear()
 
         // test default
-        MParticleOptions.builder(mContext)
+        MParticleOptions
+            .builder(mContext)
             .credentials("this", "that")
             .build()
         Assert.assertTrue(infoLogs.contains("ANDROID_ID will not be collected based on default settings"))
@@ -604,20 +739,26 @@ class MParticleOptionsTest : BaseAbstractTest() {
     @Throws(InterruptedException::class)
     fun testBatchCreationCallback() {
         val listener = BatchCreationListener { batch -> batch }
-        var options = MParticleOptions.builder(mProductionContext)
-            .batchCreationListener(listener)
-            .credentials("this", "that")
-            .build()
+        var options =
+            MParticleOptions
+                .builder(mProductionContext)
+                .batchCreationListener(listener)
+                .credentials("this", "that")
+                .build()
         Assert.assertEquals(listener, options.batchCreationListener)
-        options = MParticleOptions.builder(mProductionContext)
-            .credentials("this", "that")
-            .batchCreationListener(listener)
-            .batchCreationListener(null)
-            .build()
+        options =
+            MParticleOptions
+                .builder(mProductionContext)
+                .credentials("this", "that")
+                .batchCreationListener(listener)
+                .batchCreationListener(null)
+                .build()
         Assert.assertNull(options.batchCreationListener)
-        options = MParticleOptions.builder(mProductionContext)
-            .credentials("this", "that")
-            .build()
+        options =
+            MParticleOptions
+                .builder(mProductionContext)
+                .credentials("this", "that")
+                .build()
         Assert.assertNull(options.batchCreationListener)
     }
 }

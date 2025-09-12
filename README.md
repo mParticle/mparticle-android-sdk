@@ -1,6 +1,9 @@
-<img src="https://static.mparticle.com/sdk/mp_logo_black.svg" width="280">
+# mParticle Android SDK
 
 # Android SDK
+![mParticle logo](https://static.mparticle.com/sdk/mp_logo_black.svg)
+
+## Overview
 
 [![Maven Central Status](https://maven-badges.herokuapp.com/maven-central/com.mparticle/android-core/badge.svg?style=flat-square)](https://search.maven.org/#search%7Cga%7C1%7Cmparticle)
 
@@ -37,46 +40,45 @@ dependencies {
 
 Kits are deployed as individual artifacts in Maven Central, and each has a dedicated repository if you'd like to view the source code. Review the table below to see if you need to include any kits:
 
-Kit | Maven Artifact
-----|---------
-[Adjust](https://github.com/mparticle-integrations/mparticle-android-integration-adjust)                |  [`android-adjust-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-adjust-kit%22)
-[Adobe](https://github.com/mparticle-integrations/mparticle-android-integration-adobe)                |  [`android-adobe-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-adobe-kit%22)
-[AdobeMedia](https://github.com/mparticle-integrations/mparticle-android-integration-adobe-media)                |  [`android-adobemedia-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-adobemedia-kit%22)
-[Appboy](https://github.com/mparticle-integrations/mparticle-android-integration-appboy)                |  [`android-appboy-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-appboy-kit%22)
-[AppsFlyer](https://github.com/mparticle-integrations/mparticle-android-integration-appsflyer)          |  [`android-appsflyer-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-appsflyer-kit%22)
-[Apptentive](https://github.com/mparticle-integrations/mparticle-android-integration-apptentive)          |  [`android-apptentive-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-apptentive-kit%22)
-[Apptimize](https://github.com/mparticle-integrations/mparticle-android-integration-apptimize)              |  [`android-apptimize-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-apptimize-kit%22)
-[Apteligent](https://github.com/mparticle-integrations/mparticle-android-integration-apteligent)        |  [`android-apteligent-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-apteligent-kit%22)
-[Blueshift](https://github.com/blueshift-labs/mparticle-android-integration-blueshift) |  [`android-blueshift-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-blueshift-kit%22)
-[Branch Metrics](https://github.com/mparticle-integrations/mparticle-android-integration-branch) |  [`android-branch-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-branch-kit%22)
-[Button](https://github.com/mparticle-integrations/mparticle-android-integration-button)              |  [`android-button-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-button-kit%22)
-[CleverTap](https://github.com/mparticle-integrations/mparticle-android-integration-clevertap)            |  [`android-clevertap-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-clevertap-kit%22)
-[ComScore](https://github.com/mparticle-integrations/mparticle-android-integration-comscore)            |  [`android-comscore-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-comscore-kit%22)
-[Flurry](https://github.com/mparticle-integrations/mparticle-android-integration-flurry)                |  [`android-flurry-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-flurry-kit%22)
-[ForeSee](https://github.com/mparticle-integrations/mparticle-android-integration-foresee)              |  [`android-foresee-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-foresee-kit%22)
-[Google Analytics for Firebase](https://github.com/mparticle-integrations/mparticle-android-integration-google-analytics-firebase)              |  [`android-googleanalyticsfirebase-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-googleanalyticsfirebase-kit%22)
-[Google Analytics for Firebase - GA4](https://github.com/mparticle-integrations/mparticle-android-integration-google-analytics-firebase-ga4)              |  [`android-googleanalyticsfirebasega4-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-googleanalyticsfirebasega4-kit%22)
-[Iterable](https://github.com/mparticle-integrations/mparticle-android-integration-iterable)              |  [`android-iterable-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-iterable-kit%22)
-[Kochava](https://github.com/mparticle-integrations/mparticle-android-integration-kochava)              |  [`android-kochava-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-kochava-kit%22)
-[Leanplum](https://github.com/mparticle-integrations/mparticle-android-integration-leanplum)              |  [`android-leanplum-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-leanplum-kit%22)
-[Localytics](https://github.com/mparticle-integrations/mparticle-android-integration-localytics)        |  [`android-localytics-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-localytics-kit%22)
-[Neura](https://github.com/NeuraLabs/mparticle-android-integration-neura)        |  [`android-neura-kit`](https://search.maven.org/search?q=g:com.theneura%20AND%20a:android-mparticle-sdk)
-[OneTrust](https://github.com/mparticle-integrations/mparticle-android-integration-onetrust)            | [`android-onetrust-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-onetrust-kit%22)
-[Optimizely](https://github.com/mparticle-integrations/mparticle-android-integration-optimizely)              |  [`android-optimizely-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-optimizely-kit%22)
-[Pilgrim](https://github.com/mparticle-integrations/mparticle-android-integration-pilgrim)              |  [`android-pilgrim-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-pilgrim-kit%22)
-[Radar](https://github.com/mparticle-integrations/mparticle-android-integration-radar)    |  [`android-radar-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-radar-kit%22)
-[Responsys](https://github.com/mparticle-integrations/mparticle-android-integration-responsys)              |  [`android-responsys-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-responsys-kit%22)
-[Reveal Mobile](https://github.com/mparticle-integrations/mparticle-android-integration-revealmobile)       |  [`android-revealmobile-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-revealmobile-kit%22)
-[Singular](https://github.com/mparticle-integrations/mparticle-android-integration-singular)              |  [`android-singular-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-singular-kit%22)
-[Skyhook](https://github.com/mparticle-integrations/mparticle-android-integration-skyhook)              |  [`android-skyhook-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-skyhook-kit%22)
-[Swrve](https://github.com/swrve-services/mparticle-android-integration-swrve)                            |  [`android-swrve-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-swrve-kit%22)
-[Taplytics Mobile](https://github.com/mparticle-integrations/mparticle-android-integration-taplytics)       |  [`android-taplytics-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-taplytics-kit%22)
-[Tune](https://github.com/mparticle-integrations/mparticle-android-integration-tune)                    |  [`android-tune-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-tune-kit%22)
-[Urban Airship](https://github.com/mparticle-integrations/mparticle-android-integration-urbanairship)                    |  [`android-urbanairship-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-urbanairship-kit%22)
-[Wootric](https://github.com/mparticle-integrations/mparticle-android-integration-wootric)              |  [`android-wootric-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-wootric-kit%22)
+| Kit                                                                                                                                          | Maven Artifact                                                                                                                                                          |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Adjust](https://github.com/mparticle-integrations/mparticle-android-integration-adjust)                                                     | [`android-adjust-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-adjust-kit%22)                                         |
+| [Adobe](https://github.com/mparticle-integrations/mparticle-android-integration-adobe)                                                       | [`android-adobe-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-adobe-kit%22)                                           |
+| [AdobeMedia](https://github.com/mparticle-integrations/mparticle-android-integration-adobe-media)                                            | [`android-adobemedia-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-adobemedia-kit%22)                                 |
+| [Appboy](https://github.com/mparticle-integrations/mparticle-android-integration-appboy)                                                     | [`android-appboy-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-appboy-kit%22)                                         |
+| [AppsFlyer](https://github.com/mparticle-integrations/mparticle-android-integration-appsflyer)                                               | [`android-appsflyer-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-appsflyer-kit%22)                                   |
+| [Apptentive](https://github.com/mparticle-integrations/mparticle-android-integration-apptentive)                                             | [`android-apptentive-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-apptentive-kit%22)                                 |
+| [Apptimize](https://github.com/mparticle-integrations/mparticle-android-integration-apptimize)                                               | [`android-apptimize-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-apptimize-kit%22)                                   |
+| [Apteligent](https://github.com/mparticle-integrations/mparticle-android-integration-apteligent)                                             | [`android-apteligent-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-apteligent-kit%22)                                 |
+| [Blueshift](https://github.com/blueshift-labs/mparticle-android-integration-blueshift)                                                       | [`android-blueshift-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-blueshift-kit%22)                                   |
+| [Branch Metrics](https://github.com/mparticle-integrations/mparticle-android-integration-branch)                                             | [`android-branch-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-branch-kit%22)                                         |
+| [Button](https://github.com/mparticle-integrations/mparticle-android-integration-button)                                                     | [`android-button-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-button-kit%22)                                         |
+| [CleverTap](https://github.com/mparticle-integrations/mparticle-android-integration-clevertap)                                               | [`android-clevertap-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-clevertap-kit%22)                                   |
+| [ComScore](https://github.com/mparticle-integrations/mparticle-android-integration-comscore)                                                 | [`android-comscore-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-comscore-kit%22)                                     |
+| [Flurry](https://github.com/mparticle-integrations/mparticle-android-integration-flurry)                                                     | [`android-flurry-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-flurry-kit%22)                                         |
+| [ForeSee](https://github.com/mparticle-integrations/mparticle-android-integration-foresee)                                                   | [`android-foresee-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-foresee-kit%22)                                       |
+| [Google Analytics for Firebase](https://github.com/mparticle-integrations/mparticle-android-integration-google-analytics-firebase)           | [`android-googleanalyticsfirebase-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-googleanalyticsfirebase-kit%22)       |
+| [Google Analytics for Firebase - GA4](https://github.com/mparticle-integrations/mparticle-android-integration-google-analytics-firebase-ga4) | [`android-googleanalyticsfirebasega4-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-googleanalyticsfirebasega4-kit%22) |
+| [Iterable](https://github.com/mparticle-integrations/mparticle-android-integration-iterable)                                                 | [`android-iterable-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-iterable-kit%22)                                     |
+| [Kochava](https://github.com/mparticle-integrations/mparticle-android-integration-kochava)                                                   | [`android-kochava-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-kochava-kit%22)                                       |
+| [Leanplum](https://github.com/mparticle-integrations/mparticle-android-integration-leanplum)                                                 | [`android-leanplum-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-leanplum-kit%22)                                     |
+| [Localytics](https://github.com/mparticle-integrations/mparticle-android-integration-localytics)                                             | [`android-localytics-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-localytics-kit%22)                                 |
+| [Neura](https://github.com/NeuraLabs/mparticle-android-integration-neura)                                                                    | [`android-neura-kit`](https://search.maven.org/search?q=g:com.theneura%20AND%20a:android-mparticle-sdk)                                                                 |
+| [OneTrust](https://github.com/mparticle-integrations/mparticle-android-integration-onetrust)                                                 | [`android-onetrust-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-onetrust-kit%22)                                     |
+| [Optimizely](https://github.com/mparticle-integrations/mparticle-android-integration-optimizely)                                             | [`android-optimizely-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-optimizely-kit%22)                                 |
+| [Pilgrim](https://github.com/mparticle-integrations/mparticle-android-integration-pilgrim)                                                   | [`android-pilgrim-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-pilgrim-kit%22)                                       |
+| [Radar](https://github.com/mparticle-integrations/mparticle-android-integration-radar)                                                       | [`android-radar-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-radar-kit%22)                                           |
+| [Responsys](https://github.com/mparticle-integrations/mparticle-android-integration-responsys)                                               | [`android-responsys-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-responsys-kit%22)                                   |
+| [Reveal Mobile](https://github.com/mparticle-integrations/mparticle-android-integration-revealmobile)                                        | [`android-revealmobile-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-revealmobile-kit%22)                             |
+| [Singular](https://github.com/mparticle-integrations/mparticle-android-integration-singular)                                                 | [`android-singular-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-singular-kit%22)                                     |
+| [Skyhook](https://github.com/mparticle-integrations/mparticle-android-integration-skyhook)                                                   | [`android-skyhook-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-skyhook-kit%22)                                       |
+| [Swrve](https://github.com/swrve-services/mparticle-android-integration-swrve)                                                               | [`android-swrve-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-swrve-kit%22)                                           |
+| [Taplytics Mobile](https://github.com/mparticle-integrations/mparticle-android-integration-taplytics)                                        | [`android-taplytics-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-taplytics-kit%22)                                   |
+| [Tune](https://github.com/mparticle-integrations/mparticle-android-integration-tune)                                                         | [`android-tune-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-tune-kit%22)                                             |
+| [Urban Airship](https://github.com/mparticle-integrations/mparticle-android-integration-urbanairship)                                        | [`android-urbanairship-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-urbanairship-kit%22)                             |
+| [Wootric](https://github.com/mparticle-integrations/mparticle-android-integration-wootric)                                                   | [`android-wootric-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-wootric-kit%22)                                       |
 
-
-##### Google Play Services Ads
+### Google Play Services Ads
 
 The Google Play Services Ads framework is necessary to collect the Android Advertisting ID. AAID collection is required by all attribution and audience integrations, and many other integrations. Include the `-ads` artifact, a subset of [Google Play Services](https://developers.google.com/android/guides/setup):
 
@@ -94,7 +96,7 @@ When apps target Android 13 or above, you will need to declare a Google Play ser
 
 For more information, please check out this link: [https://support.google.com/googleplay/android-developer/answer/6048248?hl=en](https://support.google.com/googleplay/android-developer/answer/6048248?hl=en)
 
-##### Firebase Cloud Messaging
+### Firebase Cloud Messaging
 
 mParticle supports several marketing automation and push messaging integrations. These require that mParticle register for an instance id using the Firebase Cloud Messaging framework:
 
@@ -121,7 +123,6 @@ Simply add this dependency to your app and the mParticle SDK will detect it:
 ```groovy
 implementation 'com.android.installreferrer:installreferrer:1+'
 ```
-
 
 ## Initialize the SDK
 
@@ -172,7 +173,7 @@ To enable Data Plan validation via linting, you must first download your Data Pl
 
 We recommended you add the Data Plan in your application's root level directory, but it can be located anywhere in your project directory since `dataPlanFile` accepts a relative file path
 
-##### 1) Add the mParticle Gradle Plugin
+### 1) Add the mParticle Gradle Plugin
 
 The next step is to configure the mParticle Gradle Plugin. In your root `build.gradle` use the following code to add the plugin dependency to your buildscript:
 
@@ -194,7 +195,7 @@ Next, apply the plugin in your project-level `build.gradle`
 apply plugin: 'com.mparticle'
 ```
 
-##### 2) Configure the Plugin
+### 2) Configure the Plugin
 
 Either configure the mParticle Plugin object
 
@@ -207,21 +208,22 @@ mparticle {
     verbose false                       //{optional) defaults to "false"
 }
 ```
-*Or*
+
+### Or
 
 provide an `mp.config` config file in the project-level directory
 
 ```json
 {
-    "dataPlanFile": "./mp-dataplan.json",      //(required) accepts filename or path
-    
-    "resultsFile": "./mp-dp-results.json",     //(optional) accepts filename or path
-    "disabled": "false",                       //(optional) defaults to "false"
-    "verbose": false                           //(optional) defaults to "false"
+  "dataPlanFile": "./mp-dataplan.json", //(required) accepts filename or path
+
+  "resultsFile": "./mp-dp-results.json", //(optional) accepts filename or path
+  "disabled": "false", //(optional) defaults to "false"
+  "verbose": false //(optional) defaults to "false"
 }
 ```
 
-##### 3) Install the mParticle CLI tool
+### 3) Install the mParticle CLI tool
 
 Install the mParticle CLI. More documentation is available in it's [Github repo](https://git.corp.mparticle.com/mParticle/mparticle-cli)
 
@@ -229,11 +231,11 @@ Install the mParticle CLI. More documentation is available in it's [Github repo]
 ./gradlew mpInstall
 ```
 
-##### 4) Viewing results
+### 4) Viewing results
 
 > Note: Any changes to your dataplan are not applied until the Gradle Project Syncs
 
-Validation Errors surface in multiple locations. 
+Validation Errors surface in multiple locations.
 
 - Individual Errors in the IDE as linting errors (red squiggly underlines), marking the offending code.
 - Written to your `resultsFile`, if you configured one in the mParticle plugin
@@ -253,36 +255,32 @@ android {
 }
 ```
 
-##### General
+### General
 
-Lint Issue ID | Description
---------------|-------
-MParticleVersionInconsistency | mParticle dependencies should, but do not have, matching versions
-MParticleInitialization | mParticle.start() is not being called in Application.onCreate(), or may be being called multiple times
-MParticleInstallRefReceiver | ReferrerReceiver is present, but has been removed
+| Lint Issue ID                 | Description                                                                                            |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------ |
+| MParticleVersionInconsistency | mParticle dependencies should, but do not have, matching versions                                      |
+| MParticleInitialization       | mParticle.start() is not being called in Application.onCreate(), or may be being called multiple times |
+| MParticleInstallRefReceiver   | ReferrerReceiver is present, but has been removed                                                      |
 
-##### Data Planning
+### Data Planning
 
-Lint Issue ID | Description
---------------|-------
-DataplanViolation | DataPlan violations
-NodeMissing | The required `node` dependency is not present in the $PATH variable
-DataPlanMissing | Unable to fetch you DataPlan, could be a problem with credentials or network connectivity
+| Lint Issue ID     | Description                                                                               |
+| ----------------- | ----------------------------------------------------------------------------------------- |
+| DataplanViolation | DataPlan violations                                                                       |
+| NodeMissing       | The required `node` dependency is not present in the $PATH variable                       |
+| DataPlanMissing   | Unable to fetch you DataPlan, could be a problem with credentials or network connectivity |
 
 ## Downloading and configuring the mParticle Kits
-For information on regarding this topic please read our [Onboarding Document](ONBOARDING.md)
 
+For information on regarding this topic please read our [Onboarding Document](ONBOARDING.md)
 
 ## Read More
 
 Just by initializing the SDK you'll be set up to track user installs, engagement, and much more. Check out our doc site to learn how to add specific event tracking to your app.
 
-* [SDK Documentation](https://docs.mparticle.com/developers/sdk/android/)
-* [Javadocs](http://docs.mparticle.com/developers/sdk/android/javadocs/index.html)
-
-## Contributing
-
-We welcome contributions! If you're interested in contributing to the mParticle Android SDK, please read our [Contributing Guidelines](CONTRIBUTING.md).
+- [SDK Documentation](https://docs.mparticle.com/developers/sdk/android/)
+- [Javadocs](http://docs.mparticle.com/developers/sdk/android/javadocs/index.html)
 
 ## License
 

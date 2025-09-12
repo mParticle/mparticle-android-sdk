@@ -3,6 +3,11 @@ name: "PR Reusable Checks"
 on:
   pull_request:
 
+permissions:
+  contents: read
+  pull-requests: read
+  checks: write
+
 jobs:
   pr-check-hadcoded-secrets:
     name: "Check PR for hardcoded secrets"

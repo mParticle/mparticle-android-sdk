@@ -16,12 +16,15 @@ abstract class ListenerTestKit : BaseTestKit() {
     var getName: (() -> String)? = null
 
     override fun getName() = getName?.invoke() ?: "Test Kit thing"
-    override fun setOptOut(optedOut: Boolean) = setOptOut?.invoke(optedOut)
-        ?: listOf()
+
+    override fun setOptOut(optedOut: Boolean) =
+        setOptOut?.invoke(optedOut)
+            ?: listOf()
 
     override fun onKitCreate(
         settings: Map<String, String>?,
-        context: Context
-    ): List<ReportingMessage> = onKitCreate?.invoke(settings, context)
-        ?: listOf()
+        context: Context,
+    ): List<ReportingMessage> =
+        onKitCreate?.invoke(settings, context)
+            ?: listOf()
 }

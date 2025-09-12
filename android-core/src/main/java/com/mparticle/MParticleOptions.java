@@ -906,12 +906,12 @@ public class MParticleOptions {
             } catch (JSONException e) {
                 dataplanString = "Unable to print Dataplan";
             }
-            return "DataplanOptions {" +
-                    "\n\tblockUserAttributes=" + blockUserAttributes +
-                    ", \n\tblockUserIdentities=" + blockUserIdentities +
-                    ", \n\tblockEventAttributes=" + blockEventAttributes +
-                    ", \n\tblockEvents=" + blockEvents +
-                    ",\n\tdataplan=" + dataplanString +
+            return "DataplanOptions {"
+                    "\n\tblockUserAttributes=" + blockUserAttributes
+                    ", \n\tblockUserIdentities=" + blockUserIdentities
+                    ", \n\tblockEventAttributes=" + blockEventAttributes
+                    ", \n\tblockEvents=" + blockEvents
+                    ",\n\tdataplan=" + dataplanString
                     "\n}";
         }
 

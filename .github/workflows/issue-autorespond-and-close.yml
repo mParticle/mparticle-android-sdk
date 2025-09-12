@@ -5,6 +5,10 @@ on:
     types:
       - opened
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   auto-respond-and-close-issue:
     uses: mparticle/mparticle-workflows/.github/workflows/auto-respond-close-issue.yml@main

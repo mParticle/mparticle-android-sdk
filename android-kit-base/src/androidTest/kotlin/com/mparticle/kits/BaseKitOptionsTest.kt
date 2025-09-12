@@ -10,30 +10,34 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 open class BaseKitOptionsTest : BaseCleanInstallEachTest() {
-
     override fun startMParticle(optionsBuilder: MParticleOptions.Builder) {
         startMParticle(optionsBuilder, true)
     }
 
-    fun startMParticle(optionsBuilder: MParticleOptions.Builder, awaitKitLoaded: Boolean) {
+    fun startMParticle(
+        optionsBuilder: MParticleOptions.Builder,
+        awaitKitLoaded: Boolean,
+    ) {
         AccessUtils.setCredentialsIfEmpty(optionsBuilder)
         val kitsLoadedLatch = MPLatch(1)
         var kitCount = 0
-        val kitsLoadedListener = object : Configuration<KitManagerImpl> {
-            override fun configures() = KitManagerImpl::class.java
+        val kitsLoadedListener =
+            object : Configuration<KitManagerImpl> {
+                override fun configures() = KitManagerImpl::class.java
 
-            override fun apply(kitManager: KitManagerImpl) {
-                kitManager.addKitsLoadedListener { kits, previousKits, kitConfigs ->
-                    if (kitConfigs.size == kitCount) {
-                        kitsLoadedLatch.countDown()
+                override fun apply(kitManager: KitManagerImpl) {
+                    kitManager.addKitsLoadedListener { kits, previousKits, kitConfigs ->
+                        if (kitConfigs.size == kitCount) {
+                            kitsLoadedLatch.countDown()
+                        }
                     }
                 }
             }
-        }
 
-        val options: MParticleOptions = optionsBuilder
-            .configuration(kitsLoadedListener)
-            .build()
+        val options: MParticleOptions =
+            optionsBuilder
+                .configuration(kitsLoadedListener)
+                .build()
         val kitOptions = options.getConfiguration(KitOptions::class.java) ?: KitOptions()
         val configuredKitOptions =
             options.getConfiguration(ConfiguredKitOptions::class.java) ?: ConfiguredKitOptions()
@@ -52,8 +56,7 @@ open class BaseKitOptionsTest : BaseCleanInstallEachTest() {
             .let {
                 kitCount = it.length()
                 JSONObject().put("eks", it)
-            }
-            .let {
+            }.let {
                 mServer.setupConfigResponse(it.toString())
             }
         if (kitConfigurations.isEmpty()) {
@@ -68,7 +71,8 @@ open class BaseKitOptionsTest : BaseCleanInstallEachTest() {
     protected fun waitForKitToStart(kitId: Int) {
         val latch = MPLatch(1)
         // wait for kit to start/reload
-        com.mparticle.internal.AccessUtils.getKitManager()
+        com.mparticle.internal.AccessUtils
+            .getKitManager()
             .addKitsLoadedListener { kits, previousKits, kitConfigs ->
                 if (kits.containsKey(kitId)) {
                     latch.countDown()
@@ -85,7 +89,8 @@ open class BaseKitOptionsTest : BaseCleanInstallEachTest() {
     @JvmOverloads
     fun waitForKitReload(after: (() -> Unit)? = null) {
         val latch = MPLatch(1)
-        com.mparticle.internal.AccessUtils.getKitManager()
+        com.mparticle.internal.AccessUtils
+            .getKitManager()
             .addKitsLoadedListener { _: Map<Int?, KitIntegration?>, _: Map<Int?, KitIntegration?>?, _: List<KitConfiguration?>? ->
                 latch.countDown()
             }

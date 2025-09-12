@@ -16,15 +16,16 @@ import org.junit.Before
 import org.junit.Test
 
 class KitBatchingTest : BaseKitOptionsTest() {
-
     @Before
     fun before() {
-        val options = MParticleOptions.builder(mContext)
-            .configuration(
-                KitOptions()
-                    .addKit(123, BatchKit::class.java)
-                    .addKit(456, EventTestKit::class.java)
-            )
+        val options =
+            MParticleOptions
+                .builder(mContext)
+                .configuration(
+                    KitOptions()
+                        .addKit(123, BatchKit::class.java)
+                        .addKit(456, EventTestKit::class.java),
+                )
         startMParticle(options)
     }
 
@@ -39,16 +40,17 @@ class KitBatchingTest : BaseKitOptionsTest() {
                 null
             }
         }
-        val event = MPEvent.Builder("some event")
-            .customAttributes(
-                mapOf(
-                    "String" to "String",
-                    "Long" to 100L,
-                    "Double" to 1.1,
-                    "Map" to mapOf("foo" to "bar", "buzz" to false)
-                )
-            )
-            .build()
+        val event =
+            MPEvent
+                .Builder("some event")
+                .customAttributes(
+                    mapOf(
+                        "String" to "String",
+                        "Long" to 100L,
+                        "Double" to 1.1,
+                        "Map" to mapOf("foo" to "bar", "buzz" to false),
+                    ),
+                ).build()
         MParticle.getInstance()?.logEvent(event)
         latch.await()
 
@@ -114,9 +116,13 @@ class KitBatchingTest : BaseKitOptionsTest() {
         assertEquals(2, batchKit.batches.size)
     }
 
-    class BatchKit : BaseTestKit(), KitIntegration.BatchListener {
+    class BatchKit :
+        BaseTestKit(),
+        KitIntegration.BatchListener {
         var batches = mutableListOf<JSONObject>()
+
         override fun getName() = "Batch Kit"
+
         private var latch = MPLatch(1)
 
         fun await() {

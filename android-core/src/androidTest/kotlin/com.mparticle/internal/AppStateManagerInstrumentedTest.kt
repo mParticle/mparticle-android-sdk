@@ -23,7 +23,11 @@ class AppStateManagerInstrumentedTest : BaseCleanStartedEachTest() {
     @Throws(Exception::class)
     fun before() {
         mAppStateManager = MParticle.getInstance()?.Internal()?.appStateManager
-        MParticle.getInstance()?.Internal()?.configManager?.setMpid(Constants.TEMPORARY_MPID, false)
+        MParticle
+            .getInstance()
+            ?.Internal()
+            ?.configManager
+            ?.setMpid(Constants.TEMPORARY_MPID, false)
     }
 
     @Test
@@ -56,7 +60,7 @@ class AppStateManagerInstrumentedTest : BaseCleanStartedEachTest() {
                         e.printStackTrace()
                     }
                 }
-            }
+            },
         )
         mAppStateManager?.endSession()
         latch.await()
@@ -96,7 +100,7 @@ class AppStateManagerInstrumentedTest : BaseCleanStartedEachTest() {
                         e.printStackTrace()
                     }
                 }
-            }
+            },
         )
         mAppStateManager?.endSession()
         latch.await()
@@ -105,22 +109,25 @@ class AppStateManagerInstrumentedTest : BaseCleanStartedEachTest() {
 
     @Test
     @Throws(InterruptedException::class)
-    fun testOnApplicationForeground() = runTest(StandardTestDispatcher()) {
-        val latch: CountDownLatch = MPLatch(2)
-        val kitManagerTester = KitManagerTester(mContext, latch)
-        com.mparticle.AccessUtils.setKitManager(kitManagerTester)
-        goToBackground()
-        Assert.assertNull(mAppStateManager?.currentActivity)
-        Thread.sleep(AppStateManager.ACTIVITY_DELAY + 100)
-        goToForeground()
-        Assert.assertNotNull(mAppStateManager?.currentActivity?.get())
-        latch.await()
-        Assert.assertTrue(kitManagerTester.onApplicationBackgroundCalled)
-        Assert.assertTrue(kitManagerTester.onApplicationForegroundCalled)
-    }
+    fun testOnApplicationForeground() =
+        runTest(StandardTestDispatcher()) {
+            val latch: CountDownLatch = MPLatch(2)
+            val kitManagerTester = KitManagerTester(mContext, latch)
+            com.mparticle.AccessUtils.setKitManager(kitManagerTester)
+            goToBackground()
+            Assert.assertNull(mAppStateManager?.currentActivity)
+            Thread.sleep(AppStateManager.ACTIVITY_DELAY + 100)
+            goToForeground()
+            Assert.assertNotNull(mAppStateManager?.currentActivity?.get())
+            latch.await()
+            Assert.assertTrue(kitManagerTester.onApplicationBackgroundCalled)
+            Assert.assertTrue(kitManagerTester.onApplicationForegroundCalled)
+        }
 
-    internal inner class KitManagerTester(context: Context?, var latch: CountDownLatch) :
-        KitFrameworkWrapper(
+    internal inner class KitManagerTester(
+        context: Context?,
+        var latch: CountDownLatch,
+    ) : KitFrameworkWrapper(
             context,
             object : ReportingManager {
                 override fun log(message: JsonReportingMessage) {
@@ -133,10 +140,11 @@ class AppStateManagerInstrumentedTest : BaseCleanStartedEachTest() {
             },
             MParticle.getInstance()?.Internal()?.configManager,
             MParticle.getInstance()?.Internal()?.appStateManager,
-            MParticleOptions.builder(mContext).credentials("some", "key").build()
+            MParticleOptions.builder(mContext).credentials("some", "key").build(),
         ) {
         var onApplicationBackgroundCalled = false
         var onApplicationForegroundCalled = false
+
         override fun onApplicationBackground() {
             Assert.assertNull(currentActivity)
             onApplicationBackgroundCalled = true

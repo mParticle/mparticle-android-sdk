@@ -15,15 +15,15 @@ class NetworkOptionsManagerTest {
         Assert.assertTrue(
             AccessUtils.equals(
                 refinedNetworkOptions,
-                NetworkOptionsManager.defaultNetworkOptions()
-            )
+                NetworkOptionsManager.defaultNetworkOptions(),
+            ),
         )
         refinedNetworkOptions = NetworkOptionsManager.validateAndResolve(null)
         Assert.assertTrue(
             AccessUtils.equals(
                 refinedNetworkOptions,
-                NetworkOptionsManager.defaultNetworkOptions()
-            )
+                NetworkOptionsManager.defaultNetworkOptions(),
+            ),
         )
         for (
         certificate in refinedNetworkOptions.domainMappings[MParticleBaseClientImpl.Endpoint.IDENTITY]!!
@@ -48,8 +48,10 @@ class NetworkOptionsManagerTest {
     @Test
     @Throws(Exception::class)
     fun partialNetworkOptionTest() {
-        val options = NetworkOptions.builder()
-            .addDomainMapping(DomainMapping.eventsMapping("www.events.com").build())
-            .build()
+        val options =
+            NetworkOptions
+                .builder()
+                .addDomainMapping(DomainMapping.eventsMapping("www.events.com").build())
+                .build()
     }
 }

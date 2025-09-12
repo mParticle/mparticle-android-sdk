@@ -5,7 +5,6 @@ object FirebaseInstanceIdToken {
 }
 
 class FirebaseInstanceId {
-
     companion object {
         @JvmStatic
         fun getInstance() = FirebaseInstanceId()
@@ -17,5 +16,9 @@ class FirebaseInstanceId {
     }
 
     fun getToken() = FirebaseInstanceIdToken.token
-    fun getToken(authority: String, scope: String) = FirebaseInstanceIdToken.token
+
+    fun getToken(
+        authority: String,
+        scope: String,
+    ) = FirebaseInstanceIdToken.token
 }

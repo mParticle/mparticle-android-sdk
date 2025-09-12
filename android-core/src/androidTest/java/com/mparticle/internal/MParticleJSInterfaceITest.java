@@ -69,98 +69,98 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
     private static String bridgeToken = new RandomUtils().getAlphaString(5);
     private static String bridgeVersion = "2";
 
-    private static final String jsStartupMParticle = "window.mParticle = {\n" +
-            "            config: {\n" +
-            "                isDevelopmentMode: true,\n" +
-            "                useCookieStorage: true,\n" +
-            "                identifyRequest: {\n" +
-            "                   userIdentities: { email: 'email@example.com', customerid: '123456' }\n" +
-            "                   },\n " +
-            "                requiredWebviewBridgeName: \"" + bridgeToken + "\",\n" +
-            "                minWebviewBridgeVersion:\"" + bridgeVersion + "\"\n" +
-            "            }\n" +
-            "        };" +
-            "    window.mParticle = window.mParticle || {};\n" +
-            "    window.mParticle.config = window.mParticle.config || {};\n" +
-            "    window.mParticle.config.rq = [];\n" +
-            "    window.mParticle.ready = function (f) {\n" +
-            "        window.mParticle.config.rq.push(f);\n" +
-            "        console.log(\"pushed f\");\n" +
+    private static final String jsStartupMParticle = "window.mParticle = {\n"
+            "            config: {\n"
+            "                isDevelopmentMode: true,\n"
+            "                useCookieStorage: true,\n"
+            "                identifyRequest: {\n"
+            "                   userIdentities: { email: 'email@example.com', customerid: '123456' }\n"
+            "                   },\n "
+            "                requiredWebviewBridgeName: \"" + bridgeToken + "\",\n"
+            "                minWebviewBridgeVersion:\"" + bridgeVersion + "\"\n"
+            "            }\n"
+            "        };"
+            "    window.mParticle = window.mParticle || {};\n"
+            "    window.mParticle.config = window.mParticle.config || {};\n"
+            "    window.mParticle.config.rq = [];\n"
+            "    window.mParticle.ready = function (f) {\n"
+            "        window.mParticle.config.rq.push(f);\n"
+            "        console.log(\"pushed f\");\n"
             "    };\n";
 
     private static final String jsTestWrapper =
-            "   mParticle.init();\n" +
-                    "   mParticle.isDebug = true;\n" +
-                    " console.log(\"testing started\")\n " +
-                    "       window.mParticle.ready(function () {\n" +
-                    "       console.log(\"mparticle started in JS land\");\n" +
-                    "%s\n" +
+            "   mParticle.init();\n"
+                    "   mParticle.isDebug = true;\n"
+                    " console.log(\"testing started\")\n "
+                    "       window.mParticle.ready(function () {\n"
+                    "       console.log(\"mparticle started in JS land\");\n"
+                    "%s\n"
                     "      })\n";
 
-    private static final String jsSetMpidFunction = "function getCookieDomain() {\n" +
-            "    var rootDomain = getDomain(document, location.hostname);\n" +
-            "    if (rootDomain === '') {\n" +
-            "        return '';\n" +
-            "    } else {\n" +
-            "        return '.' + rootDomain;\n" +
-            "    }\n" +
-            "}\n" +
-            "\n" +
-            "function getDomain(doc, locationHostname) {\n" +
-            "    var i,\n" +
-            "        testParts,\n" +
-            "        mpTest = 'mptest=cookie',\n" +
-            "        hostname = locationHostname.split('.');\n" +
-            "    for (i = hostname.length - 1; i >= 0; i--) {\n" +
-            "        testParts = hostname.slice(i).join('.');\n" +
-            "        doc.cookie = mpTest + ';domain=.' + testParts + ';';\n" +
-            "        if (doc.cookie.indexOf(mpTest) > -1){\n" +
-            "            doc.cookie = mpTest.split('=')[0] + '=;domain=.' + testParts + ';expires=Thu, 01 Jan 1970 00:00:01 GMT;';\n" +
-            "            return testParts;\n" +
-            "        }\n" +
-            "    }\n" +
-            "    return '';\n" +
-            "}\n" +
-            "\n" +
-            "\n" +
-            "function setCookie(cname, data, raw) {\n" +
-            "    var date = new Date(),\n" +
-            "        expires = new Date(date.getTime() +\n" +
-            "        (365 * 24 * 60 * 60 * 1000)).toGMTString(),\n" +
-            "        domain, cookieDomain,\n" +
-            "        value;\n" +
-            "\n" +
-            "    value = data;\n" +
-            "\n" +
-            "    cookieDomain = getCookieDomain();\n" +
-            "\n" +
-            "    if (cookieDomain === '') {\n" +
-            "        domain = '';\n" +
-            "    } else {\n" +
-            "        domain = ';domain=' + cookieDomain;\n" +
-            "    }\n" +
-            "\n" +
-            "var cookie = encodeURIComponent(cname) + '=' + value +\n" +
-            "        ';expires=' + expires;\n" +
-            "        //  +\n" +
-            "        // ';path=/' + domain;\n" +
-            "            console.log(\"SETTNG COOKIE: \" + cookie);\n" +
-            "    window.document.cookie = cookie;\n" +
-            "   console.log(\"RETRIEVING cookie: \" + window.document.cookie);\n" +
+    private static final String jsSetMpidFunction = "function getCookieDomain() {\n"
+            "    var rootDomain = getDomain(document, location.hostname);\n"
+            "    if (rootDomain === '') {\n"
+            "        return '';\n"
+            "    } else {\n"
+            "        return '.' + rootDomain;\n"
+            "    }\n"
+            "}\n"
+            "\n"
+            "function getDomain(doc, locationHostname) {\n"
+            "    var i,\n"
+            "        testParts,\n"
+            "        mpTest = 'mptest=cookie',\n"
+            "        hostname = locationHostname.split('.');\n"
+            "    for (i = hostname.length - 1; i >= 0; i--) {\n"
+            "        testParts = hostname.slice(i).join('.');\n"
+            "        doc.cookie = mpTest + ';domain=.' + testParts + ';';\n"
+            "        if (doc.cookie.indexOf(mpTest) > -1){\n"
+            "            doc.cookie = mpTest.split('=')[0] + '=;domain=.' + testParts + ';expires=Thu, 01 Jan 1970 00:00:01 GMT;';\n"
+            "            return testParts;\n"
+            "        }\n"
+            "    }\n"
+            "    return '';\n"
+            "}\n"
+            "\n"
+            "\n"
+            "function setCookie(cname, data, raw) {\n"
+            "    var date = new Date(),\n"
+            "        expires = new Date(date.getTime() +\n"
+            "        (365 * 24 * 60 * 60 * 1000)).toGMTString(),\n"
+            "        domain, cookieDomain,\n"
+            "        value;\n"
+            "\n"
+            "    value = data;\n"
+            "\n"
+            "    cookieDomain = getCookieDomain();\n"
+            "\n"
+            "    if (cookieDomain === '') {\n"
+            "        domain = '';\n"
+            "    } else {\n"
+            "        domain = ';domain=' + cookieDomain;\n"
+            "    }\n"
+            "\n"
+            "var cookie = encodeURIComponent(cname) + '=' + value +\n"
+            "        ';expires=' + expires;\n"
+            "        //  +\n"
+            "        // ';path=/' + domain;\n"
+            "            console.log(\"SETTNG COOKIE: \" + cookie);\n"
+            "    window.document.cookie = cookie;\n"
+            "   console.log(\"RETRIEVING cookie: \" + window.document.cookie);\n"
             "}";
 
-    private static final String htmlWrapper = "\n" +
-            "<html>\n" +
-            "<head>\n" +
-            "    <meta charset=\"utf-8\">\n" +
-            "    <title>Mocha Tests</title>\n" +
-            "</head>\n" +
-            "<body>\n" +
-            "    <div id=\"mocha\"></div>\n" +
-            "<script type=\"text/javascript\">\n" +
-            "%s" +
-            "\n</script>" +
-            "</body>\n" +
+    private static final String htmlWrapper = "\n"
+            "<html>\n"
+            "<head>\n"
+            "    <meta charset=\"utf-8\">\n"
+            "    <title>Mocha Tests</title>\n"
+            "</head>\n"
+            "<body>\n"
+            "    <div id=\"mocha\"></div>\n"
+            "<script type=\"text/javascript\">\n"
+            "%s"
+            "\n</script>"
+            "</body>\n"
             "</html>";
 
     @BeforeClass
@@ -170,16 +170,16 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                 InputStream inputStream = InstrumentationRegistry.getInstrumentation().getContext().getResources().openRawResource(R.raw.mparticle_js_sdk);
                 //add in all the basic configuration stuff the server would send with a production sdk fetch from the url
                 jsSdk = new StringBuilder()
-                        .append("window.mParticle = window.mParticle || {};;\n" +
-                                "window.mParticle.config = window.mParticle.config || {};;\n" +
-                                "window.mParticle.config.serviceUrl = 'jssdk.mparticle.com/v2/JS/';;\n" +
-                                "window.mParticle.config.secureServiceUrl = 'jssdks.mparticle.com/v2/JS/';;\n" +
-                                "window.mParticle.config.minWebviewBridgeVersion = 1;\n" +
-                                "window.mParticle.config.aliasMaxWindow = 90;\n" +
-                                "window.mParticle.config.kitConfigs = window.mParticle.config.kitConfigs || [];;\n" +
+                        .append("window.mParticle = window.mParticle || {};;\n"
+                                "window.mParticle.config = window.mParticle.config || {};;\n"
+                                "window.mParticle.config.serviceUrl = 'jssdk.mparticle.com/v2/JS/';;\n"
+                                "window.mParticle.config.secureServiceUrl = 'jssdks.mparticle.com/v2/JS/';;\n"
+                                "window.mParticle.config.minWebviewBridgeVersion = 1;\n"
+                                "window.mParticle.config.aliasMaxWindow = 90;\n"
+                                "window.mParticle.config.kitConfigs = window.mParticle.config.kitConfigs || [];;\n"
                                 "window.mParticle.config.pixelConfigs = window.mParticle.config.pixelConfigs || [];;")
                         .append(toString(inputStream))
-                        .append("window.mParticle.config.requestConfig = false;;\n" +
+                        .append("window.mParticle.config.requestConfig = false;;\n"
                                 "mParticle.init(null, window.mParticle.config);;")
                         .toString();
             } else {
@@ -312,9 +312,9 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
     public void testLogEvent() throws Exception {
         final JSONObject customAttributes = MPUtility.mapToJson(mRandomUtils.getRandomAttributes(10));
         final JSONObject customFlagsJSON = MPUtility.mapToJson(getCustomFlags());
-        String testJavascript = String.format("mParticle.logEvent('Play Movie Tapped',\n" +
-                "                         mParticle.EventType.Navigation,\n" +
-                "                         %s,\n" +
+        String testJavascript = String.format("mParticle.logEvent('Play Movie Tapped',\n"
+                "                         mParticle.EventType.Navigation,\n"
+                "                         %s,\n"
                 "                         %s);", customAttributes.toString(4), customFlagsJSON.toString(4));
         final MutableBoolean called = new MutableBoolean(false);
         final CountDownLatch latch = new MPLatch(2);
@@ -369,22 +369,22 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
     public void testLogCommerceEvent() throws Exception {
         final JSONObject customAttributes = MPUtility.mapToJson(mRandomUtils.getRandomAttributes(10));
         final JSONObject customFlags = MPUtility.mapToJson(getCustomFlags());
-        String testJavascript = String.format("// 1. Create the product\n" +
-                "var product = mParticle.eCommerce.createProduct(\n" +
-                "    'Double Room - Econ Rate', //\n" +
-                "    'econ-1', \n" +
-                "    100.00, \n" +
-                "    4\n" +
-                ");\n" +
-                "\n" +
-                "// 2. Summarize the transaction\n" +
-                "var transactionAttributes = {\n" +
-                "    Id: 'foo-transaction-id',\n" +
-                "    Revenue: 430.00,\n" +
-                "    Tax: 30\n" +
-                "};\n" +
-                "\n" +
-                "// 3. Log the purchase event\n" +
+        String testJavascript = String.format("// 1. Create the product\n"
+                "var product = mParticle.eCommerce.createProduct(\n"
+                "    'Double Room - Econ Rate', //\n"
+                "    'econ-1', \n"
+                "    100.00, \n"
+                "    4\n"
+                ");\n"
+                "\n"
+                "// 2. Summarize the transaction\n"
+                "var transactionAttributes = {\n"
+                "    Id: 'foo-transaction-id',\n"
+                "    Revenue: 430.00,\n"
+                "    Tax: 30\n"
+                "};\n"
+                "\n"
+                "// 3. Log the purchase event\n"
                 "mParticle.eCommerce.logPurchase(transactionAttributes, product, true, %s, %s);", customAttributes.toString(4), customFlags);
 
         final MutableBoolean called = new MutableBoolean(false);

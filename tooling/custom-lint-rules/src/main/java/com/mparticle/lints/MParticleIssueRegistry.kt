@@ -13,20 +13,22 @@ import com.mparticle.lints.detectors.ReferrerReceiverDetector
  */
 @SuppressWarnings("unused")
 class MParticleIssueRegistry : IssueRegistry() {
-    override val issues = listOf(
-        GradleBuildDetector.ISSUE,
-        MpApiDetectorKt.ISSUE,
-        ReferrerReceiverDetector.ISSUE,
-        DataplanDetector.ISSUE,
-        DataplanDetector.NODE_MISSING,
-        DataplanDetector.NO_DATA_PLAN
-    )
+    override val issues =
+        listOf(
+            GradleBuildDetector.ISSUE,
+            MpApiDetectorKt.ISSUE,
+            ReferrerReceiverDetector.ISSUE,
+            DataplanDetector.ISSUE,
+            DataplanDetector.NODE_MISSING,
+            DataplanDetector.NO_DATA_PLAN,
+        )
 
     override val api: Int = CURRENT_API
 
-    override val vendor: Vendor = Vendor(
-        vendorName = "mParticle",
-        identifier = "android-core",
-        feedbackUrl = "https://github.com/mParticle/mparticle-android-sdk"
-    )
+    override val vendor: Vendor =
+        Vendor(
+            vendorName = "mParticle",
+            identifier = "android-core",
+            feedbackUrl = "https://github.com/mParticle/mparticle-android-sdk",
+        )
 }

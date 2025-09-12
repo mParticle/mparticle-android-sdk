@@ -8,9 +8,10 @@ object Constants {
 
     const val ERROR_WARNING_FORMAT = "%d errors, %d warnings"
 
-    fun getErrorWarningMessageString(errors: Int, warnings: Int): String {
-        return String.format(ERROR_WARNING_FORMAT, errors, warnings)
-    }
+    fun getErrorWarningMessageString(
+        errors: Int,
+        warnings: Int,
+    ): String = String.format(ERROR_WARNING_FORMAT, errors, warnings)
 
     @Language("JAVA")
     const val mparticleStub =

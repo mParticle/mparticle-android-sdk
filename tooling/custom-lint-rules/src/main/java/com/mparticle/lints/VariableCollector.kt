@@ -27,7 +27,7 @@ internal class VariableCollector(
     val variable: PsiVariable,
     private val method: UMethod,
     val parent: Expression,
-    val includeInitialization: Boolean = false
+    val includeInitialization: Boolean = false,
 ) : AbstractUastVisitor() {
     private var expression: Expression? = null
 
@@ -61,28 +61,33 @@ internal class VariableCollector(
                         is USimpleNameReferenceExpression -> {
                             val reference = uastInitializer.resolve()
                             if (reference is PsiVariable) {
-                                expression = VariableCollector(
-                                    reference,
-                                    method,
-                                    parent,
-                                    true
-                                ).getUnresolvedObject(true)
+                                expression =
+                                    VariableCollector(
+                                        reference,
+                                        method,
+                                        parent,
+                                        true,
+                                    ).getUnresolvedObject(true)
                             }
                         }
 
                         is UQualifiedReferenceExpression -> {
                             // get the first call in a potential chain of calls
-                            val reference = uastInitializer.getOutermostQualified()
-                                .getQualifiedChain()[0].tryResolve()
+                            val reference =
+                                uastInitializer
+                                    .getOutermostQualified()
+                                    .getQualifiedChain()[0]
+                                    .tryResolve()
                             when (reference) {
                                 // product = productBuilder.build()
                                 is PsiVariable -> {
-                                    expression = VariableCollector(
-                                        reference,
-                                        method,
-                                        parent,
-                                        true
-                                    ).getUnresolvedObject(true)
+                                    expression =
+                                        VariableCollector(
+                                            reference,
+                                            method,
+                                            parent,
+                                            true,
+                                        ).getUnresolvedObject(true)
                                 }
                                 // product = Product.Builder()   (static method)
                                 is PsiClass -> {
@@ -96,10 +101,11 @@ internal class VariableCollector(
                         // product = new Product()
                         // map = mapOf()
                         is UCallExpression -> {
-                            expression = uastInitializer.resolveChainedCalls(
-                                true,
-                                RootParent(uastInitializer)
-                            )
+                            expression =
+                                uastInitializer.resolveChainedCalls(
+                                    true,
+                                    RootParent(uastInitializer),
+                                )
                         }
                     }
                 }

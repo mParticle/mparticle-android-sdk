@@ -38,22 +38,23 @@ class SessionMessagesTest : BaseCleanStartedEachTest() {
             Matcher(mServer.Endpoints().eventsUrl).bodyMatch(
                 JSONMatch { jsonObject ->
                     try {
-                        val jsonArray = jsonObject.optJSONArray(Constants.MessageKey.MESSAGES)
-                            ?: return@JSONMatch false
+                        val jsonArray =
+                            jsonObject.optJSONArray(Constants.MessageKey.MESSAGES)
+                                ?: return@JSONMatch false
                         for (i in 0 until jsonArray.length()) {
                             val eventObject = jsonArray.getJSONObject(i)
                             if (eventObject.getString("dt") == Constants.MessageType.SESSION_START) {
                                 Assert.assertEquals(
                                     eventObject.getLong("ct").toFloat(),
                                     mAppStateManager.fetchSession().mSessionStartTime.toFloat(),
-                                    1000f
+                                    1000f,
                                 )
                                 Assert.assertEquals(
                                     """started sessionID = ${sessionId.value} 
 current sessionId = ${mAppStateManager.fetchSession().mSessionID} 
 sent sessionId = ${eventObject.getString("id")}""",
                                     mAppStateManager.fetchSession().mSessionID,
-                                    eventObject.getString("id")
+                                    eventObject.getString("id"),
                                 )
                                 sessionStartReceived[0] = true
                                 return@JSONMatch true
@@ -64,8 +65,8 @@ sent sessionId = ${eventObject.getString("id")}""",
                         Assert.fail(e.message)
                     }
                     false
-                }
-            )
+                },
+            ),
         )
         Assert.assertTrue(sessionStartReceived[0])
     }

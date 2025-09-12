@@ -48,7 +48,7 @@ public class CaptureLogcatOnFailingTest implements TestRule {
                     }
                     message = throwable.getMessage() + ORIGINAL_CLASS_HEADER
                             + throwable.getClass().getName() + LOGCAT_HEADER
-                            + message + MOCKSERVER_HEADER +
+                            + message + MOCKSERVER_HEADER
                             requestReceivedBuilder.toString() + STACKTRACE_HEADER;
                     Throwable modifiedThrowable = new Throwable(message);
                     modifiedThrowable.setStackTrace(throwable.getStackTrace());

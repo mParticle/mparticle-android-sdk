@@ -6,7 +6,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class BaseAudienceTask : AudienceTask<AudienceResponse>() {
-
     private var isCompleted: Boolean = false
     private var isSuccessful: Boolean = false
     private var result: AudienceResponse? = null
@@ -42,17 +41,11 @@ class BaseAudienceTask : AudienceTask<AudienceResponse>() {
         }
     }
 
-    override fun isComplete(): Boolean {
-        return isCompleted
-    }
+    override fun isComplete(): Boolean = isCompleted
 
-    override fun isSuccessful(): Boolean {
-        return isSuccessful
-    }
+    override fun isSuccessful(): Boolean = isSuccessful
 
-    override fun getResult(): AudienceResponse? {
-        return result
-    }
+    override fun getResult(): AudienceResponse? = result
 
     override fun addSuccessListener(listener: AudienceTaskSuccessListener): BaseAudienceTask {
         if (listener != null) {
@@ -67,7 +60,4 @@ class BaseAudienceTask : AudienceTask<AudienceResponse>() {
         }
         return this
     }
-
-
 }
-

@@ -26,14 +26,22 @@ class CommerceEventTest {
         val event = CommerceEvent.Builder(Product.ADD_TO_CART, product).addProduct(product2).build()
         Assert.assertEquals("name 2", event.products?.get(1)?.name)
         val errorMessage = AndroidUtils.Mutable<String?>(null)
-        Logger.setLogHandler(object : DefaultLogHandler() {
-            override fun log(priority: MParticle.LogLevel, error: Throwable?, messages: String) {
-                if (priority == MParticle.LogLevel.ERROR) {
-                    errorMessage.value = messages
+        Logger.setLogHandler(
+            object : DefaultLogHandler() {
+                override fun log(
+                    priority: MParticle.LogLevel,
+                    error: Throwable?,
+                    messages: String,
+                ) {
+                    if (priority == MParticle.LogLevel.ERROR) {
+                        errorMessage.value = messages
+                    }
                 }
-            }
-        })
-        CommerceEvent.Builder(Promotion.VIEW, Promotion().setId("whatever")).addProduct(product2)
+            },
+        )
+        CommerceEvent
+            .Builder(Promotion.VIEW, Promotion().setId("whatever"))
+            .addProduct(product2)
             .build()
         Assert.assertNotNull("Should have logged Error", errorMessage.value)
         errorMessage.value = null
@@ -46,17 +54,26 @@ class CommerceEventTest {
     @Throws(Exception::class)
     fun testTransactionAttributes() {
         val product = Product.Builder("name", "sku", 0.0).build()
-        val event = CommerceEvent.Builder(Product.ADD_TO_CART, product)
-            .transactionAttributes(TransactionAttributes().setId("the id")).build()
+        val event =
+            CommerceEvent
+                .Builder(Product.ADD_TO_CART, product)
+                .transactionAttributes(TransactionAttributes().setId("the id"))
+                .build()
         Assert.assertEquals("the id", event.transactionAttributes?.id)
         val errorMessage = AndroidUtils.Mutable<String?>(null)
-        Logger.setLogHandler(object : DefaultLogHandler() {
-            override fun log(priority: MParticle.LogLevel, error: Throwable?, messages: String) {
-                if (priority == MParticle.LogLevel.ERROR) {
-                    errorMessage.value = messages
+        Logger.setLogHandler(
+            object : DefaultLogHandler() {
+                override fun log(
+                    priority: MParticle.LogLevel,
+                    error: Throwable?,
+                    messages: String,
+                ) {
+                    if (priority == MParticle.LogLevel.ERROR) {
+                        errorMessage.value = messages
+                    }
                 }
-            }
-        })
+            },
+        )
         CommerceEvent.Builder(Product.PURCHASE, product).build()
         Assert.assertNotNull("Should have logged Error", errorMessage.value)
     }
@@ -85,11 +102,15 @@ class CommerceEventTest {
         val product = Product.Builder("name", "sku", 0.0).build()
         val attributes = HashMap<String, String>()
         attributes["cool attribute key"] = "cool attribute value"
-        val event = CommerceEvent.Builder(Product.ADD_TO_CART, product).customAttributes(attributes)
-            .nonInteraction(true).build()
+        val event =
+            CommerceEvent
+                .Builder(Product.ADD_TO_CART, product)
+                .customAttributes(attributes)
+                .nonInteraction(true)
+                .build()
         Assert.assertEquals(
             "cool attribute value",
-            event.customAttributeStrings?.get("cool attribute key")
+            event.customAttributeStrings?.get("cool attribute key"),
         )
     }
 
@@ -98,27 +119,42 @@ class CommerceEventTest {
     fun testAddPromotion() {
         val product = Product.Builder("name", "sku", 0.0).build()
         val event: CommerceEvent =
-            CommerceEvent.Builder("promo", Promotion().setId("promo id")).nonInteraction(true)
+            CommerceEvent
+                .Builder("promo", Promotion().setId("promo id"))
+                .nonInteraction(true)
                 .build()
         Assert.assertEquals("promo id", event.promotions?.get(0)?.id)
         val errorMessage = AndroidUtils.Mutable<String?>(null)
-        Logger.setLogHandler(object : DefaultLogHandler() {
-            override fun log(priority: MParticle.LogLevel, error: Throwable?, messages: String) {
-                if (priority == MParticle.LogLevel.ERROR) {
-                    errorMessage.value = messages
+        Logger.setLogHandler(
+            object : DefaultLogHandler() {
+                override fun log(
+                    priority: MParticle.LogLevel,
+                    error: Throwable?,
+                    messages: String,
+                ) {
+                    if (priority == MParticle.LogLevel.ERROR) {
+                        errorMessage.value = messages
+                    }
                 }
-            }
-        })
-        CommerceEvent.Builder(Product.ADD_TO_CART, product).nonInteraction(true)
-            .addPromotion(Promotion().setId("promo id")).build()
+            },
+        )
+        CommerceEvent
+            .Builder(Product.ADD_TO_CART, product)
+            .nonInteraction(true)
+            .addPromotion(Promotion().setId("promo id"))
+            .build()
         Assert.assertNotNull("Should have logged Error", errorMessage.value)
     }
 
     @Test
     @Throws(Exception::class)
     fun testCheckoutStep() {
-        val event = CommerceEvent.Builder("promo", Promotion().setId("promo id")).checkoutStep(100)
-            .nonInteraction(true).build()
+        val event =
+            CommerceEvent
+                .Builder("promo", Promotion().setId("promo id"))
+                .checkoutStep(100)
+                .nonInteraction(true)
+                .build()
         Assert.assertEquals(100, event.checkoutStep)
     }
 
@@ -126,32 +162,49 @@ class CommerceEventTest {
     @Throws(Exception::class)
     fun testAddImpression() {
         val product = Product.Builder("name", "sku", 0.0).build()
-        val event = CommerceEvent.Builder(Impression("name", product))
-            .addImpression(Impression("name 2", product)).nonInteraction(true).build()
+        val event =
+            CommerceEvent
+                .Builder(Impression("name", product))
+                .addImpression(Impression("name 2", product))
+                .nonInteraction(true)
+                .build()
         Assert.assertEquals("name 2", event.impressions?.get(1)?.listName)
     }
 
     @Test
     @Throws(Exception::class)
     fun testCheckoutOptions() {
-        val event = CommerceEvent.Builder("promo", Promotion().setId("promo id")).checkoutStep(100)
-            .checkoutOptions("some checkout options").nonInteraction(true).build()
+        val event =
+            CommerceEvent
+                .Builder("promo", Promotion().setId("promo id"))
+                .checkoutStep(100)
+                .checkoutOptions("some checkout options")
+                .nonInteraction(true)
+                .build()
         Assert.assertEquals("some checkout options", event.checkoutOptions)
     }
 
     @Test
     @Throws(Exception::class)
     fun testProductListName() {
-        val event = CommerceEvent.Builder("promo", Promotion().setId("promo id"))
-            .productListName("the list name").nonInteraction(true).build()
+        val event =
+            CommerceEvent
+                .Builder("promo", Promotion().setId("promo id"))
+                .productListName("the list name")
+                .nonInteraction(true)
+                .build()
         Assert.assertEquals("the list name", event.productListName)
     }
 
     @Test
     @Throws(Exception::class)
     fun testProductListSource() {
-        val event = CommerceEvent.Builder("promo", Promotion().setId("promo id"))
-            .productListSource("the list source").nonInteraction(true).build()
+        val event =
+            CommerceEvent
+                .Builder("promo", Promotion().setId("promo id"))
+                .productListSource("the list source")
+                .nonInteraction(true)
+                .build()
         Assert.assertEquals("the list source", event.productListSource)
     }
 
@@ -163,8 +216,10 @@ class CommerceEventTest {
         var event = builder.build()
         Assert.assertNull(event.customFlags)
 
-        val attributes = RandomUtils.getInstance()
-            .getRandomCustomFlags(RandomUtils.getInstance().randomInt(1, 10))
+        val attributes =
+            RandomUtils
+                .getInstance()
+                .getRandomCustomFlags(RandomUtils.getInstance().randomInt(1, 10))
         for (attribute in attributes.entries) {
             for (value in attribute.value) {
                 builder.addCustomFlag(attribute.key, value)

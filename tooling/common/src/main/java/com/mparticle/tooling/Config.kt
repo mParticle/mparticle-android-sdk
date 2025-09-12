@@ -11,9 +11,8 @@ data class Config(
     var resultsFile: String? = null,
     var verbose: Boolean? = null,
     var disabled: Boolean? = null,
-    var debugReportServerMessage: Boolean? = null
+    var debugReportServerMessage: Boolean? = null,
 ) {
-
     var internalConfig: InternalConfig = InternalConfig()
 
     fun toJson(): JSONObject {
@@ -37,10 +36,11 @@ data class Config(
                 } else {
                     Config::class.java.declaredMethods
                         .firstOrNull {
-                            it.name.removePrefix("set").toLowerCase() == key?.toString()
-                                ?.toLowerCase()
-                        }
-                        ?.invoke(config, json.opt(key.toString()))
+                            it.name.removePrefix("set").toLowerCase() ==
+                                key
+                                    ?.toString()
+                                    ?.toLowerCase()
+                        }?.invoke(config, json.opt(key.toString()))
                 }
             }
             return config
@@ -49,22 +49,19 @@ data class Config(
 
     data class InternalConfig(
         var nodePath: String? = null,
-        var mpPath: String? = null
+        var mpPath: String? = null,
     ) {
-
-        fun toJson(): JSONObject {
-            return JSONObject()
+        fun toJson(): JSONObject =
+            JSONObject()
                 .putOpt("node-path", nodePath)
                 .putOpt("mp-path", mpPath)
-        }
 
         companion object {
-            fun fromJson(json: JSONObject): InternalConfig {
-                return InternalConfig(
+            fun fromJson(json: JSONObject): InternalConfig =
+                InternalConfig(
                     nodePath = json.optString("node-path", null),
-                    mpPath = json.optString("mp-path", null)
+                    mpPath = json.optString("mp-path", null),
                 )
-            }
         }
     }
 }

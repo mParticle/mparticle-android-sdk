@@ -37,24 +37,24 @@ public class SessionTable extends MpIdDependentTable {
         String CLOSED = "1";
     }
 
-    static final String SESSION_ADD_DEVICE_INFO_COLUMN = "ALTER TABLE " + SessionTableColumns.TABLE_NAME +
+    static final String SESSION_ADD_DEVICE_INFO_COLUMN = "ALTER TABLE " + SessionTableColumns.TABLE_NAME
             " ADD COLUMN " + SessionTableColumns.DEVICE_INFO + " TEXT";
 
-    static final String SESSION_ADD_APP_INFO_COLUMN = "ALTER TABLE " + SessionTableColumns.TABLE_NAME +
+    static final String SESSION_ADD_APP_INFO_COLUMN = "ALTER TABLE " + SessionTableColumns.TABLE_NAME
             " ADD COLUMN " + SessionTableColumns.APP_INFO + " TEXT";
 
     static final String CREATE_SESSIONS_DDL =
-            "CREATE TABLE IF NOT EXISTS " + SessionTableColumns.TABLE_NAME + " (" + BaseColumns._ID +
-                    " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    SessionTableColumns.SESSION_ID + " STRING NOT NULL, " +
-                    SessionTableColumns.API_KEY + " STRING NOT NULL, " +
-                    SessionTableColumns.START_TIME + " INTEGER NOT NULL," +
-                    SessionTableColumns.END_TIME + " INTEGER NOT NULL," +
-                    SessionTableColumns.SESSION_FOREGROUND_LENGTH + " INTEGER NOT NULL," +
-                    SessionTableColumns.ATTRIBUTES + " TEXT, " +
-                    SessionTableColumns.STATUS + " TEXT," +
-                    SessionTableColumns.APP_INFO + " TEXT, " +
-                    SessionTableColumns.DEVICE_INFO + " TEXT, " +
-                    SessionTableColumns.MP_ID + " INTEGER" +
+            "CREATE TABLE IF NOT EXISTS " + SessionTableColumns.TABLE_NAME + " (" + BaseColumns._ID
+                    " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    SessionTableColumns.SESSION_ID + " STRING NOT NULL, "
+                    SessionTableColumns.API_KEY + " STRING NOT NULL, "
+                    SessionTableColumns.START_TIME + " INTEGER NOT NULL,"
+                    SessionTableColumns.END_TIME + " INTEGER NOT NULL,"
+                    SessionTableColumns.SESSION_FOREGROUND_LENGTH + " INTEGER NOT NULL,"
+                    SessionTableColumns.ATTRIBUTES + " TEXT, "
+                    SessionTableColumns.STATUS + " TEXT,"
+                    SessionTableColumns.APP_INFO + " TEXT, "
+                    SessionTableColumns.DEVICE_INFO + " TEXT, "
+                    SessionTableColumns.MP_ID + " INTEGER"
                     ");";
 }

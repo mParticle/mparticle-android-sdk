@@ -13,16 +13,23 @@ import kotlin.test.assertTrue
 
 class ConfigStalenessCheckTest : BaseCleanInstallEachTest() {
     val configManager: ConfigManager
-        get() = MParticle.getInstance()?.Internal()?.configManager.assertNotNull()
+        get() =
+            MParticle
+                .getInstance()
+                ?.Internal()
+                ?.configManager
+                .assertNotNull()
 
     @Test
     fun testNeverStale() {
         val config1 = randomJson(4)
         val config2 = randomJson(4)
         var latch = MPLatch(1)
-        val options = MParticleOptions.builder(mContext)
-            .addCredentials()
-            .build()
+        val options =
+            MParticleOptions
+                .builder(mContext)
+                .addCredentials()
+                .build()
 
         mServer.setupConfigResponse(config1.toString())
 
@@ -51,7 +58,14 @@ class ConfigStalenessCheckTest : BaseCleanInstallEachTest() {
         configManager.onNewConfig { latch.countDown() }
         latch.await()
 
-        assertEquals(config2.toString(), MParticle.getInstance()?.Internal()?.configManager?.config)
+        assertEquals(
+            config2.toString(),
+            MParticle
+                .getInstance()
+                ?.Internal()
+                ?.configManager
+                ?.config,
+        )
     }
 
     @Test
@@ -59,10 +73,12 @@ class ConfigStalenessCheckTest : BaseCleanInstallEachTest() {
         val config1 = randomJson(4)
         val config2 = randomJson(4)
         var latch = MPLatch(1)
-        val options = MParticleOptions.builder(mContext)
-            .addCredentials()
-            .configMaxAgeSeconds(1)
-            .build()
+        val options =
+            MParticleOptions
+                .builder(mContext)
+                .addCredentials()
+                .configMaxAgeSeconds(1)
+                .build()
 
         mServer.setupConfigResponse(config1.toString())
 
@@ -71,7 +87,14 @@ class ConfigStalenessCheckTest : BaseCleanInstallEachTest() {
         configManager.onNewConfig { latch.countDown() }
         latch.await()
 
-        assertEquals(config1.toString(), MParticle.getInstance()?.Internal()?.configManager?.config)
+        assertEquals(
+            config1.toString(),
+            MParticle
+                .getInstance()
+                ?.Internal()
+                ?.configManager
+                ?.config,
+        )
 
         MParticle.setInstance(null)
 
@@ -92,7 +115,14 @@ class ConfigStalenessCheckTest : BaseCleanInstallEachTest() {
         latch.await()
 
         // after config has been fetched, we should see config2
-        assertEquals(config2.toString(), MParticle.getInstance()?.Internal()?.configManager?.config)
+        assertEquals(
+            config2.toString(),
+            MParticle
+                .getInstance()
+                ?.Internal()
+                ?.configManager
+                ?.config,
+        )
     }
 
     @Test
@@ -100,10 +130,12 @@ class ConfigStalenessCheckTest : BaseCleanInstallEachTest() {
         val config1 = randomJson(4)
         val config2 = randomJson(4)
         var latch = MPLatch(1)
-        val options = MParticleOptions.builder(mContext)
-            .addCredentials()
-            .configMaxAgeSeconds(100)
-            .build()
+        val options =
+            MParticleOptions
+                .builder(mContext)
+                .addCredentials()
+                .configMaxAgeSeconds(100)
+                .build()
 
         mServer.setupConfigResponse(config1.toString())
 
@@ -132,7 +164,14 @@ class ConfigStalenessCheckTest : BaseCleanInstallEachTest() {
         configManager.onNewConfig { latch.countDown() }
         latch.await()
 
-        assertEquals(config2.toString(), MParticle.getInstance()?.Internal()?.configManager?.config)
+        assertEquals(
+            config2.toString(),
+            MParticle
+                .getInstance()
+                ?.Internal()
+                ?.configManager
+                ?.config,
+        )
     }
 
     @Test
@@ -140,10 +179,12 @@ class ConfigStalenessCheckTest : BaseCleanInstallEachTest() {
         val config1 = randomJson(4)
         val config2 = randomJson(4)
         var latch = MPLatch(1)
-        val options = MParticleOptions.builder(mContext)
-            .addCredentials()
-            .configMaxAgeSeconds(0)
-            .build()
+        val options =
+            MParticleOptions
+                .builder(mContext)
+                .addCredentials()
+                .configMaxAgeSeconds(0)
+                .build()
 
         mServer.setupConfigResponse(config1.toString())
 
@@ -152,7 +193,14 @@ class ConfigStalenessCheckTest : BaseCleanInstallEachTest() {
         configManager.onNewConfig { latch.countDown() }
         latch.await()
 
-        assertEquals(config1.toString(), MParticle.getInstance()?.Internal()?.configManager?.config)
+        assertEquals(
+            config1.toString(),
+            MParticle
+                .getInstance()
+                ?.Internal()
+                ?.configManager
+                ?.config,
+        )
 
         MParticle.setInstance(null)
 

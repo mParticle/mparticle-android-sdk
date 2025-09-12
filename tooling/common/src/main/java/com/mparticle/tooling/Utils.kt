@@ -7,24 +7,29 @@ import java.io.File
 import java.io.InputStreamReader
 
 object Utils {
-    fun getCurrentFileLocation(fileName: String): String {
-        return javaClass.getResource(fileName).path.replace(
-            "file:",
-            ""
-        ).split("lint.jar")[0]
-    }
+    fun getCurrentFileLocation(fileName: String): String =
+        javaClass
+            .getResource(fileName)
+            .path
+            .replace(
+                "file:",
+                "",
+            ).split("lint.jar")[0]
 
-    fun Array<String>.executeCLI(path: String? = null, workingDirectory: String = "."): String {
+    fun Array<String>.executeCLI(
+        path: String? = null,
+        workingDirectory: String = ".",
+    ): String {
         Logger.verbose(
             "command line operation: ${
-            joinToString(" ") {
-                if (it.contains(" ")) {
-                    "\"$it\""
-                } else {
-                    it
+                joinToString(" ") {
+                    if (it.contains(" ")) {
+                        "\"$it\""
+                    } else {
+                        it
+                    }
                 }
-            }
-            }"
+            }",
         )
         var error = ""
         var result = ""
@@ -33,10 +38,11 @@ object Utils {
             val envMap = mapOf("PATH" to path)
             processBuilder.environment().putAll(envMap)
         }
-        val p = processBuilder
-            .directory(File(workingDirectory))
-            .command(*this)
-            .start()
+        val p =
+            processBuilder
+                .directory(File(workingDirectory))
+                .command(*this)
+                .start()
         result = BufferedReader(InputStreamReader(p.inputStream)).readText()
         error = BufferedReader(InputStreamReader(p.errorStream)).readText()
         Logger.verbose("result: $result")

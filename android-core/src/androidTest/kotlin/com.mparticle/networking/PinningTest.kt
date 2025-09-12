@@ -20,9 +20,7 @@ open class PinningTest : BaseCleanStartedEachTest() {
     var called: AndroidUtils.Mutable<Boolean> = AndroidUtils.Mutable(false)
     var latch: CountDownLatch = MPLatch(1)
 
-    protected open fun shouldPin(): Boolean {
-        return true
-    }
+    protected open fun shouldPin(): Boolean = true
 
     @Before
     fun before() {
@@ -38,8 +36,10 @@ open class PinningTest : BaseCleanStartedEachTest() {
             called.value = true
             latch.countDown()
         }
-        MParticle.getInstance()
-            ?.Identity()?.login(IdentityApiRequest.withEmptyUser().build())
+        MParticle
+            .getInstance()
+            ?.Identity()
+            ?.login(IdentityApiRequest.withEmptyUser().build())
         latch.await()
         Assert.assertTrue(called.value)
     }
@@ -52,8 +52,10 @@ open class PinningTest : BaseCleanStartedEachTest() {
             called.value = true
             latch.countDown()
         }
-        MParticle.getInstance()
-            ?.Identity()?.logout(IdentityApiRequest.withEmptyUser().build())
+        MParticle
+            .getInstance()
+            ?.Identity()
+            ?.logout(IdentityApiRequest.withEmptyUser().build())
         latch.await()
         Assert.assertTrue(called.value)
     }
@@ -66,8 +68,10 @@ open class PinningTest : BaseCleanStartedEachTest() {
             called.value = true
             latch.countDown()
         }
-        MParticle.getInstance()
-            ?.Identity()?.identify(IdentityApiRequest.withEmptyUser().build())
+        MParticle
+            .getInstance()
+            ?.Identity()
+            ?.identify(IdentityApiRequest.withEmptyUser().build())
         latch.await()
         Assert.assertTrue(called.value)
     }
@@ -80,10 +84,14 @@ open class PinningTest : BaseCleanStartedEachTest() {
             called.value = true
             latch.countDown()
         }
-        MParticle.getInstance()
-            ?.Identity()?.modify(
-                IdentityApiRequest.withEmptyUser()
-                    .customerId(RandomUtils().getAlphaNumericString(25)).build()
+        MParticle
+            .getInstance()
+            ?.Identity()
+            ?.modify(
+                IdentityApiRequest
+                    .withEmptyUser()
+                    .customerId(RandomUtils().getAlphaNumericString(25))
+                    .build(),
             )
         latch.await()
         Assert.assertTrue(called.value)
@@ -98,7 +106,10 @@ open class PinningTest : BaseCleanStartedEachTest() {
             latch.countDown()
         }
         try {
-            AccessUtils.getApiClient().sendMessageBatch(JSONObject().toString(), UploadSettings("apiKey", "secret", NetworkOptions.builder().build(), "", ""))
+            AccessUtils.getApiClient().sendMessageBatch(
+                JSONObject().toString(),
+                UploadSettings("apiKey", "secret", NetworkOptions.builder().build(), "", ""),
+            )
         } catch (_: Exception) {
         }
         latch.await()

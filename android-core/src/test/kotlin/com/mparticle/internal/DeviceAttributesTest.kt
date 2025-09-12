@@ -18,8 +18,11 @@ class DeviceAttributesTest {
     fun testCollectAppInfo() {
         MParticle.setInstance(MockMParticle())
         val context = MockContext()
-        context.getSharedPreferences(null, 0).edit()
-            .putString(Constants.PrefKeys.INSTALL_REFERRER, "install referrer").apply()
+        context
+            .getSharedPreferences(null, 0)
+            .edit()
+            .putString(Constants.PrefKeys.INSTALL_REFERRER, "install referrer")
+            .apply()
         val appInfo = DeviceAttributes(MParticle.OperatingSystem.ANDROID).getAppInfo(context)
         Assert.assertTrue(appInfo.getString("apn") == "com.mparticle.test")
         Assert.assertTrue(appInfo.getString("abn") == "42")
@@ -67,10 +70,10 @@ class DeviceAttributesTest {
             null,
             null,
             null,
-            null
+            null,
         ).deleteUserStorage(
             context,
-            ConfigManager.getMpid(context)
+            ConfigManager.getMpid(context),
         )
         var appInfo: JSONObject? = null
         val launchCount = 20

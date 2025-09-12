@@ -13,36 +13,44 @@ class UserAttributesServiceTest : BaseMPServiceTest() {
                 ran.nextInt().toString(),
                 System.currentTimeMillis(),
                 false,
-                3L
+                3L,
             )
         }
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesSingles(
-                database,
-                3L
-            ).size.toLong(),
-            20
+            UserAttributesService
+                .getUserAttributesSingles(
+                    database,
+                    3L,
+                ).size
+                .toLong(),
+            20,
         )
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesSingles(
-                database,
-                4L
-            ).size.toLong(),
-            0
+            UserAttributesService
+                .getUserAttributesSingles(
+                    database,
+                    4L,
+                ).size
+                .toLong(),
+            0,
         )
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesLists(
-                database,
-                3L
-            ).size.toLong(),
-            0
+            UserAttributesService
+                .getUserAttributesLists(
+                    database,
+                    3L,
+                ).size
+                .toLong(),
+            0,
         )
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesLists(
-                database,
-                4L
-            ).size.toLong(),
-            0
+            UserAttributesService
+                .getUserAttributesLists(
+                    database,
+                    4L,
+                ).size
+                .toLong(),
+            0,
         )
         for (i in 0..29) {
             UserAttributesService.insertAttribute(
@@ -51,36 +59,44 @@ class UserAttributesServiceTest : BaseMPServiceTest() {
                 ran.nextInt().toString(),
                 System.currentTimeMillis(),
                 false,
-                4L
+                4L,
             )
         }
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesSingles(
-                database,
-                3L
-            ).size.toLong(),
-            20
+            UserAttributesService
+                .getUserAttributesSingles(
+                    database,
+                    3L,
+                ).size
+                .toLong(),
+            20,
         )
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesSingles(
-                database,
-                4L
-            ).size.toLong(),
-            30
+            UserAttributesService
+                .getUserAttributesSingles(
+                    database,
+                    4L,
+                ).size
+                .toLong(),
+            30,
         )
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesLists(
-                database,
-                3L
-            ).size.toLong(),
-            0
+            UserAttributesService
+                .getUserAttributesLists(
+                    database,
+                    3L,
+                ).size
+                .toLong(),
+            0,
         )
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesLists(
-                database,
-                4L
-            ).size.toLong(),
-            0
+            UserAttributesService
+                .getUserAttributesLists(
+                    database,
+                    4L,
+                ).size
+                .toLong(),
+            0,
         )
         for (i in 0..14) {
             UserAttributesService.insertAttribute(
@@ -89,36 +105,44 @@ class UserAttributesServiceTest : BaseMPServiceTest() {
                 ran.nextInt().toString(),
                 System.currentTimeMillis(),
                 true,
-                3L
+                3L,
             )
         }
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesSingles(
-                database,
-                3L
-            ).size.toLong(),
-            20
+            UserAttributesService
+                .getUserAttributesSingles(
+                    database,
+                    3L,
+                ).size
+                .toLong(),
+            20,
         )
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesSingles(
-                database,
-                4L
-            ).size.toLong(),
-            30
+            UserAttributesService
+                .getUserAttributesSingles(
+                    database,
+                    4L,
+                ).size
+                .toLong(),
+            30,
         )
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesLists(
-                database,
-                3L
-            ).size.toLong(),
-            15
+            UserAttributesService
+                .getUserAttributesLists(
+                    database,
+                    3L,
+                ).size
+                .toLong(),
+            15,
         )
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesLists(
-                database,
-                4L
-            ).size.toLong(),
-            0
+            UserAttributesService
+                .getUserAttributesLists(
+                    database,
+                    4L,
+                ).size
+                .toLong(),
+            0,
         )
         for (i in 0..29) {
             UserAttributesService.insertAttribute(
@@ -127,43 +151,53 @@ class UserAttributesServiceTest : BaseMPServiceTest() {
                 ran.nextInt().toString(),
                 System.currentTimeMillis(),
                 true,
-                5L
+                5L,
             )
         }
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesSingles(
-                database,
-                3L
-            ).size.toLong(),
-            20
+            UserAttributesService
+                .getUserAttributesSingles(
+                    database,
+                    3L,
+                ).size
+                .toLong(),
+            20,
         )
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesSingles(
-                database,
-                4L
-            ).size.toLong(),
-            30
+            UserAttributesService
+                .getUserAttributesSingles(
+                    database,
+                    4L,
+                ).size
+                .toLong(),
+            30,
         )
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesLists(
-                database,
-                3L
-            ).size.toLong(),
-            15
+            UserAttributesService
+                .getUserAttributesLists(
+                    database,
+                    3L,
+                ).size
+                .toLong(),
+            15,
         )
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesLists(
-                database,
-                4L
-            ).size.toLong(),
-            0
+            UserAttributesService
+                .getUserAttributesLists(
+                    database,
+                    4L,
+                ).size
+                .toLong(),
+            0,
         )
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesLists(
-                database,
-                5L
-            ).size.toLong(),
-            30
+            UserAttributesService
+                .getUserAttributesLists(
+                    database,
+                    5L,
+                ).size
+                .toLong(),
+            30,
         )
     }
 
@@ -180,7 +214,7 @@ class UserAttributesServiceTest : BaseMPServiceTest() {
                 ran.nextInt().toString(),
                 System.currentTimeMillis(),
                 false,
-                2L
+                2L,
             )
         }
         for (i in 0..2) {
@@ -190,7 +224,7 @@ class UserAttributesServiceTest : BaseMPServiceTest() {
                 ran.nextInt().toString(),
                 System.currentTimeMillis(),
                 false,
-                3L
+                3L,
             )
         }
         for (i in 3..5) {
@@ -200,7 +234,7 @@ class UserAttributesServiceTest : BaseMPServiceTest() {
                 ran.nextInt().toString(),
                 System.currentTimeMillis(),
                 true,
-                2L
+                2L,
             )
         }
         for (i in 3..5) {
@@ -210,128 +244,160 @@ class UserAttributesServiceTest : BaseMPServiceTest() {
                 ran.nextInt().toString(),
                 System.currentTimeMillis(),
                 true,
-                3L
+                3L,
             )
         }
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesSingles(
-                database,
-                2L
-            ).size.toLong(),
-            3
+            UserAttributesService
+                .getUserAttributesSingles(
+                    database,
+                    2L,
+                ).size
+                .toLong(),
+            3,
         )
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesSingles(
-                database,
-                3L
-            ).size.toLong(),
-            3
+            UserAttributesService
+                .getUserAttributesSingles(
+                    database,
+                    3L,
+                ).size
+                .toLong(),
+            3,
         )
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesLists(
-                database,
-                2L
-            ).size.toLong(),
-            3
+            UserAttributesService
+                .getUserAttributesLists(
+                    database,
+                    2L,
+                ).size
+                .toLong(),
+            3,
         )
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesLists(
-                database,
-                3L
-            ).size.toLong(),
-            3
+            UserAttributesService
+                .getUserAttributesLists(
+                    database,
+                    3L,
+                ).size
+                .toLong(),
+            3,
         )
         UserAttributesService.deleteAttributes(database, "key1", 2L)
         UserAttributesService.deleteAttributes(database, "key4", 3L)
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesSingles(
-                database,
-                2L
-            ).size.toLong(),
-            2
+            UserAttributesService
+                .getUserAttributesSingles(
+                    database,
+                    2L,
+                ).size
+                .toLong(),
+            2,
         )
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesSingles(
-                database,
-                3L
-            ).size.toLong(),
-            3
+            UserAttributesService
+                .getUserAttributesSingles(
+                    database,
+                    3L,
+                ).size
+                .toLong(),
+            3,
         )
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesLists(
-                database,
-                2L
-            ).size.toLong(),
-            3
+            UserAttributesService
+                .getUserAttributesLists(
+                    database,
+                    2L,
+                ).size
+                .toLong(),
+            3,
         )
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesLists(
-                database,
-                3L
-            ).size.toLong(),
-            2
+            UserAttributesService
+                .getUserAttributesLists(
+                    database,
+                    3L,
+                ).size
+                .toLong(),
+            2,
         )
         for (i in 0..5) {
             UserAttributesService.deleteAttributes(database, "key$i", 2L)
         }
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesSingles(
-                database,
-                2L
-            ).size.toLong(),
-            0
+            UserAttributesService
+                .getUserAttributesSingles(
+                    database,
+                    2L,
+                ).size
+                .toLong(),
+            0,
         )
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesSingles(
-                database,
-                3L
-            ).size.toLong(),
-            3
+            UserAttributesService
+                .getUserAttributesSingles(
+                    database,
+                    3L,
+                ).size
+                .toLong(),
+            3,
         )
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesLists(
-                database,
-                2L
-            ).size.toLong(),
-            0
+            UserAttributesService
+                .getUserAttributesLists(
+                    database,
+                    2L,
+                ).size
+                .toLong(),
+            0,
         )
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesLists(
-                database,
-                3L
-            ).size.toLong(),
-            2
+            UserAttributesService
+                .getUserAttributesLists(
+                    database,
+                    3L,
+                ).size
+                .toLong(),
+            2,
         )
         for (i in 0..5) {
             UserAttributesService.deleteAttributes(database, "key$i", 3L)
         }
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesSingles(
-                database,
-                2L
-            ).size.toLong(),
-            0
+            UserAttributesService
+                .getUserAttributesSingles(
+                    database,
+                    2L,
+                ).size
+                .toLong(),
+            0,
         )
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesSingles(
-                database,
-                3L
-            ).size.toLong(),
-            0
+            UserAttributesService
+                .getUserAttributesSingles(
+                    database,
+                    3L,
+                ).size
+                .toLong(),
+            0,
         )
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesLists(
-                database,
-                2L
-            ).size.toLong(),
-            0
+            UserAttributesService
+                .getUserAttributesLists(
+                    database,
+                    2L,
+                ).size
+                .toLong(),
+            0,
         )
         Assert.assertEquals(
-            UserAttributesService.getUserAttributesLists(
-                database,
-                3L
-            ).size.toLong(),
-            0
+            UserAttributesService
+                .getUserAttributesLists(
+                    database,
+                    3L,
+                ).size
+                .toLong(),
+            0,
         )
 
         // easy way to test to make sure that insert is working properly after delete, just run the same test again

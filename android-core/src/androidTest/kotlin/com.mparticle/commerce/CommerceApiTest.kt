@@ -10,10 +10,14 @@ class CommerceApiTest : BaseCleanStartedEachTest() {
     @Test
     @Throws(InterruptedException::class)
     fun testCommerceProductEvent() {
-        val product = Product.Builder("name", "sku", 10.00)
-            .build()
-        val commerceEvent = CommerceEvent.Builder(Product.DETAIL, product)
-            .build()
+        val product =
+            Product
+                .Builder("name", "sku", 10.00)
+                .build()
+        val commerceEvent =
+            CommerceEvent
+                .Builder(Product.DETAIL, product)
+                .build()
         MParticle.getInstance()?.logEvent(commerceEvent)
         MParticle.getInstance()?.upload()
         verifyEventSent()
@@ -23,11 +27,14 @@ class CommerceApiTest : BaseCleanStartedEachTest() {
     @Test
     @Throws(InterruptedException::class)
     fun testCommercePromotionEvent() {
-        val promotion = Promotion()
-            .setName("name")
-            .setId("123")
-        val commerceEvent = CommerceEvent.Builder(Promotion.CLICK, promotion)
-            .build()
+        val promotion =
+            Promotion()
+                .setName("name")
+                .setId("123")
+        val commerceEvent =
+            CommerceEvent
+                .Builder(Promotion.CLICK, promotion)
+                .build()
         MParticle.getInstance()?.logEvent(commerceEvent)
         MParticle.getInstance()?.upload()
         verifyEventSent()
@@ -37,11 +44,15 @@ class CommerceApiTest : BaseCleanStartedEachTest() {
     @Test
     @Throws(InterruptedException::class)
     fun testCommerceImpressionEvent() {
-        val product = Product.Builder("name", "sku", 10.00)
-            .build()
+        val product =
+            Product
+                .Builder("name", "sku", 10.00)
+                .build()
         val impression = Impression("my impression", product)
-        val commerceEvent = CommerceEvent.Builder(impression)
-            .build()
+        val commerceEvent =
+            CommerceEvent
+                .Builder(impression)
+                .build()
         MParticle.getInstance()?.logEvent(commerceEvent)
         MParticle.getInstance()?.upload()
         verifyEventSent()
@@ -66,7 +77,7 @@ class CommerceApiTest : BaseCleanStartedEachTest() {
                         }
                     }
                     found
-                }
+                },
         )
     }
 }

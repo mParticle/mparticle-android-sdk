@@ -72,8 +72,8 @@ public class Segment {
     @Override
     @NonNull
     public String toString() {
-        return "Segment ID:  " + id + ", " +
-                "Name: " + name + ", " +
+        return "Segment ID:  " + id + ", "
+                "Name: " + name + ", "
                 "Endpoints: " + ((endpoints != null && endpoints.length > 0) ? Arrays.toString(endpoints) : "None specified.");
     }
 }

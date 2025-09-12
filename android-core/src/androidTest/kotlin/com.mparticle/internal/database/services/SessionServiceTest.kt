@@ -24,7 +24,7 @@ class SessionServiceTest : BaseMPServiceTest() {
             "foo-app-key",
             fooObject.toString(),
             fooObject.toString(),
-            1
+            1,
         )
         fooObject = JSONObject()
         val randomId = UUID.randomUUID().toString()
@@ -76,17 +76,16 @@ class SessionServiceTest : BaseMPServiceTest() {
         }
     }
 
-    internal inner class MockMessageBatch(var id: Int) : MessageBatch() {
-        override fun equals(other: Any?): Boolean {
-            return if (other is MockMessageBatch) {
+    internal inner class MockMessageBatch(
+        var id: Int,
+    ) : MessageBatch() {
+        override fun equals(other: Any?): Boolean =
+            if (other is MockMessageBatch) {
                 id == other.id
             } else {
                 super.equals(other)
             }
-        }
 
-        override fun hashCode(): Int {
-            return id
-        }
+        override fun hashCode(): Int = id
     }
 }

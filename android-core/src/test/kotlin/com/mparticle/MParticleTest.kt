@@ -56,10 +56,12 @@ class MParticleTest {
     @Throws(Exception::class)
     fun testSetUserAttribute() {
         val mp: MParticle = InnerMockMParticle()
-        val mockSession = Mockito.mock(
-            InternalSession::class.java
-        )
-        Mockito.`when`(mp.mInternal.appStateManager.session)
+        val mockSession =
+            Mockito.mock(
+                InternalSession::class.java,
+            )
+        Mockito
+            .`when`(mp.mInternal.appStateManager.session)
             .thenReturn(mockSession)
         Mockito.`when`(mp.mInternal.configManager.isEnabled).thenReturn(true)
         Mockito.`when`(mp.mInternal.configManager.mpid).thenReturn(1L)
@@ -68,33 +70,37 @@ class MParticleTest {
         Assert.assertFalse(mp.Identity().currentUser!!.setUserAttribute("", "test"))
         Assert.assertFalse(mp.Identity().currentUser!!.setUserAttribute("", ""))
         Assert.assertFalse(
-            mp.Identity().currentUser!!.setUserAttribute(String(CharArray(257)), "")
+            mp.Identity().currentUser!!.setUserAttribute(String(CharArray(257)), ""),
         )
-        val listCaptor = ArgumentCaptor.forClass(
-            MutableList::class.java
-        )
-        val stringCaptor = ArgumentCaptor.forClass(
-            String::class.java
-        )
-        val longCaptor = ArgumentCaptor.forClass(
-            Long::class.java
-        )
+        val listCaptor =
+            ArgumentCaptor.forClass(
+                MutableList::class.java,
+            )
+        val stringCaptor =
+            ArgumentCaptor.forClass(
+                String::class.java,
+            )
+        val longCaptor =
+            ArgumentCaptor.forClass(
+                Long::class.java,
+            )
         val legalString = String(CharArray(Constants.LIMIT_ATTR_KEY))
         Assert.assertTrue(
-            mp.Identity().currentUser!!.setUserAttribute(legalString, "")
+            mp.Identity().currentUser!!.setUserAttribute(legalString, ""),
         )
-        Mockito.verify(mp.mMessageManager, Mockito.times(1))
+        Mockito
+            .verify(mp.mMessageManager, Mockito.times(1))
             .setUserAttribute(legalString, "", 1, false)
         val integerList: MutableList<Int> = LinkedList()
         integerList.add(203948)
         Assert.assertTrue(
-            mp.Identity().currentUser!!.setUserAttribute("test2", integerList)
+            mp.Identity().currentUser!!.setUserAttribute("test2", integerList),
         )
         Mockito.verify(mp.mMessageManager, Mockito.times(2)).setUserAttribute(
             stringCaptor.capture(),
             listCaptor.capture(),
             longCaptor.capture(),
-            ArgumentMatchers.eq(false)
+            ArgumentMatchers.eq(false),
         )
         Assert.assertTrue(stringCaptor.value == "test2")
         var capturedStringList = listCaptor.value
@@ -106,13 +112,13 @@ class MParticleTest {
             longStringList.add("a")
         }
         Assert.assertTrue(
-            mp.Identity().currentUser!!.setUserAttribute("test3", longStringList)
+            mp.Identity().currentUser!!.setUserAttribute("test3", longStringList),
         )
         Mockito.verify(mp.mMessageManager, Mockito.times(3)).setUserAttribute(
             stringCaptor.capture(),
             listCaptor.capture(),
             longCaptor.capture(),
-            ArgumentMatchers.eq(false)
+            ArgumentMatchers.eq(false),
         )
         Assert.assertTrue(stringCaptor.value == "test3")
         Assert.assertTrue(longCaptor.value == 1L)
@@ -120,28 +126,28 @@ class MParticleTest {
         Assert.assertTrue(capturedStringList == longStringList)
         longStringList.add("too much!")
         Assert.assertFalse(
-            mp.Identity().currentUser!!.setUserAttribute("test", longStringList)
+            mp.Identity().currentUser!!.setUserAttribute("test", longStringList),
         )
         val stringList: MutableList<String> = LinkedList()
         stringList.add(String(CharArray(Constants.LIMIT_ATTR_VALUE)))
         Assert.assertTrue(
-            mp.Identity().currentUser!!.setUserAttribute("test", stringList)
+            mp.Identity().currentUser!!.setUserAttribute("test", stringList),
         )
         stringList.add(String(CharArray(Constants.LIMIT_ATTR_VALUE + 1)))
         Assert.assertFalse(
-            mp.Identity().currentUser!!.setUserAttribute("test", stringList)
+            mp.Identity().currentUser!!.setUserAttribute("test", stringList),
         )
         Assert.assertTrue(mp.Identity().currentUser!!.setUserAttribute("test", ""))
         Assert.assertTrue(
             mp.Identity().currentUser!!.setUserAttribute(
                 "test",
                 String(
-                    CharArray(4096)
-                )
-            )
+                    CharArray(4096),
+                ),
+            ),
         )
         Assert.assertFalse(
-            mp.Identity().currentUser!!.setUserAttribute("test", String(CharArray(4097)))
+            mp.Identity().currentUser!!.setUserAttribute("test", String(CharArray(4097))),
         )
         Assert.assertTrue(mp.Identity().currentUser!!.setUserAttribute("test", 1212))
     }
@@ -195,40 +201,46 @@ class MParticleTest {
     @Throws(Exception::class)
     fun testSetUserAttributeList() {
         val mp: MParticle = InnerMockMParticle()
-        val mockSession = Mockito.mock(
-            InternalSession::class.java
-        )
+        val mockSession =
+            Mockito.mock(
+                InternalSession::class.java,
+            )
         Mockito.`when`(mp.mInternal.appStateManager.session).thenReturn(mockSession)
         Mockito.`when`(mp.mInternal.configManager.isEnabled).thenReturn(true)
         Mockito.`when`(mp.mInternal.configManager.mpid).thenReturn(2L)
         MParticle.setInstance(mp)
         MParticle.start(MParticleOptions.builder(MockContext()).build())
         Assert.assertFalse(
-            mp.Identity().currentUser!!.setUserAttributeList("", "")
+            mp.Identity().currentUser!!.setUserAttributeList("", ""),
         )
         Assert.assertFalse(
-            mp.Identity().currentUser!!
-                .setUserAttributeList(String(CharArray(257)), "")
+            mp
+                .Identity()
+                .currentUser!!
+                .setUserAttributeList(String(CharArray(257)), ""),
         )
-        val listCaptor = ArgumentCaptor.forClass(
-            MutableList::class.java
-        )
-        val stringCaptor = ArgumentCaptor.forClass(
-            String::class.java
-        )
-        val longCaptor = ArgumentCaptor.forClass(
-            Long::class.java
-        )
+        val listCaptor =
+            ArgumentCaptor.forClass(
+                MutableList::class.java,
+            )
+        val stringCaptor =
+            ArgumentCaptor.forClass(
+                String::class.java,
+            )
+        val longCaptor =
+            ArgumentCaptor.forClass(
+                Long::class.java,
+            )
         val integerList: MutableList<Int> = LinkedList()
         integerList.add(203948)
         Assert.assertTrue(
-            mp.Identity().currentUser!!.setUserAttribute("test2", integerList)
+            mp.Identity().currentUser!!.setUserAttribute("test2", integerList),
         )
         Mockito.verify(mp.mMessageManager, Mockito.times(1)).setUserAttribute(
             stringCaptor.capture(),
             listCaptor.capture(),
             longCaptor.capture(),
-            ArgumentMatchers.eq(false)
+            ArgumentMatchers.eq(false),
         )
         Assert.assertTrue(stringCaptor.value == "test2")
         var capturedStringList = listCaptor.value
@@ -240,30 +252,30 @@ class MParticleTest {
             longStringList.add("a")
         }
         Assert.assertTrue(
-            mp.Identity().currentUser!!.setUserAttributeList("test3", longStringList)
+            mp.Identity().currentUser!!.setUserAttributeList("test3", longStringList),
         )
         Mockito.verify(mp.mMessageManager, Mockito.times(2)).setUserAttribute(
             stringCaptor.capture(),
             listCaptor.capture(),
             longCaptor.capture(),
-            ArgumentMatchers.eq(false)
+            ArgumentMatchers.eq(false),
         )
         Assert.assertTrue(stringCaptor.value == "test3")
         capturedStringList = listCaptor.value
         Assert.assertTrue(capturedStringList == longStringList)
         longStringList.add("too much!")
         Assert.assertFalse(
-            mp.Identity().currentUser!!.setUserAttributeList("test", longStringList)
+            mp.Identity().currentUser!!.setUserAttributeList("test", longStringList),
         )
         Assert.assertTrue(longCaptor.value == 2L)
         val stringList: MutableList<String> = LinkedList()
         stringList.add(String(CharArray(Constants.LIMIT_ATTR_VALUE)))
         Assert.assertTrue(
-            mp.Identity().currentUser!!.setUserAttributeList("test", stringList)
+            mp.Identity().currentUser!!.setUserAttributeList("test", stringList),
         )
         stringList.add(String(CharArray(Constants.LIMIT_ATTR_VALUE + 1)))
         Assert.assertFalse(
-            mp.Identity().currentUser!!.setUserAttributeList("test", stringList)
+            mp.Identity().currentUser!!.setUserAttributeList("test", stringList),
         )
     }
 
@@ -276,9 +288,10 @@ class MParticleTest {
         if (mp != null) {
             Mockito.`when`(mp.mInternal.configManager.mpid).thenReturn(12L)
             Assert.assertTrue(
-                mp.Identity().currentUser!!.incrementUserAttribute("test", 3)
+                mp.Identity().currentUser!!.incrementUserAttribute("test", 3),
             )
-            Mockito.verify(mp.mMessageManager, Mockito.times(1))
+            Mockito
+                .verify(mp.mMessageManager, Mockito.times(1))
                 .incrementUserAttribute("test", 3, 12)
         }
     }
@@ -288,16 +301,18 @@ class MParticleTest {
     fun testSetUserTag() {
         val mp: MParticle = InnerMockMParticle()
         Mockito.`when`(mp.mInternal.configManager.mpid).thenReturn(1L)
-        val mockSession = Mockito.mock(
-            InternalSession::class.java
-        )
+        val mockSession =
+            Mockito.mock(
+                InternalSession::class.java,
+            )
         Mockito.`when`(mp.mInternal.appStateManager.session).thenReturn(mockSession)
         Mockito.`when`(mp.mInternal.configManager.isEnabled).thenReturn(true)
         MParticle.setInstance(mp)
         Assert.assertFalse(mp.Identity().currentUser!!.setUserTag(""))
         Assert.assertFalse(mp.Identity().currentUser!!.setUserTag(""))
         Assert.assertTrue(mp.Identity().currentUser!!.setUserTag("blah"))
-        Mockito.verify(mp.mMessageManager, Mockito.times(1))
+        Mockito
+            .verify(mp.mMessageManager, Mockito.times(1))
             .setUserAttribute("blah", null, 1, false)
     }
 
@@ -362,46 +377,57 @@ class MParticleTest {
         val mp: MParticle = InnerMockMParticle()
         MParticle.setInstance(mp)
         val ran = RandomUtils()
-        val values = arrayOf(
-            "",
-            "123",
-            ran.getAlphaNumericString(5),
-            ran.getAlphaNumericString(20),
-            ran.getAlphaNumericString(100)
-        )
+        val values =
+            arrayOf(
+                "",
+                "123",
+                ran.getAlphaNumericString(5),
+                ran.getAlphaNumericString(20),
+                ran.getAlphaNumericString(100),
+            )
 
         // test that we apply the token stored in the ConfigManager
         for (value in values) {
-            Mockito.`when`(mp.mInternal.configManager.workspaceToken)
+            Mockito
+                .`when`(mp.mInternal.configManager.workspaceToken)
                 .thenReturn(value)
             val called = AndroidUtils.Mutable(false)
-            val webView: WebView = object : WebView(MockContext()) {
-                override fun addJavascriptInterface(`object`: Any, name: String) {
-                    Assert.assertEquals(
-                        MParticleJSInterface.INTERFACE_BASE_NAME + "_" + value + "_v2",
-                        name
-                    )
-                    called.value = true
+            val webView: WebView =
+                object : WebView(MockContext()) {
+                    override fun addJavascriptInterface(
+                        `object`: Any,
+                        name: String,
+                    ) {
+                        Assert.assertEquals(
+                            MParticleJSInterface.INTERFACE_BASE_NAME + "_" + value + "_v2",
+                            name,
+                        )
+                        called.value = true
+                    }
                 }
-            }
             mp.registerWebView(webView)
             Assert.assertTrue(called.value)
         }
 
         // Test that we override the token stored in the ConfigManager, if the Client provides a token.
         for (value in values) {
-            Mockito.`when`(mp.mInternal.configManager.workspaceToken)
+            Mockito
+                .`when`(mp.mInternal.configManager.workspaceToken)
                 .thenReturn(value)
             val called = AndroidUtils.Mutable(false)
-            val webView: WebView = object : WebView(MockContext()) {
-                override fun addJavascriptInterface(`object`: Any, name: String) {
-                    Assert.assertEquals(
-                        MParticleJSInterface.INTERFACE_BASE_NAME + "_" + "hardcode" + "_v2",
-                        name
-                    )
-                    called.value = true
+            val webView: WebView =
+                object : WebView(MockContext()) {
+                    override fun addJavascriptInterface(
+                        `object`: Any,
+                        name: String,
+                    ) {
+                        Assert.assertEquals(
+                            MParticleJSInterface.INTERFACE_BASE_NAME + "_" + "hardcode" + "_v2",
+                            name,
+                        )
+                        called.value = true
+                    }
                 }
-            }
             mp.registerWebView(webView, "hardcode")
             Assert.assertTrue(called.value)
         }
@@ -412,19 +438,20 @@ class MParticleTest {
         val instance: MParticle = InnerMockMParticle()
         instance.mIdentityApi = Mockito.mock(IdentityApi::class.java)
         Mockito.`when`(instance.Identity().currentUser).thenReturn(null)
-        Mockito.`when`(
-            instance.Identity().modify(
-                Mockito.any(
-                    IdentityApiRequest::class.java
-                )
-            )
-        ).thenThrow(RuntimeException("Unexpected Modify Request"))
+        Mockito
+            .`when`(
+                instance.Identity().modify(
+                    Mockito.any(
+                        IdentityApiRequest::class.java,
+                    ),
+                ),
+            ).thenThrow(RuntimeException("Unexpected Modify Request"))
         MParticle.setInstance(instance)
         MParticle.getInstance()!!.logPushRegistration("instanceId", "senderId")
         Mockito.`when`(instance.Identity().currentUser).thenReturn(
             Mockito.mock(
-                MParticleUser::class.java
-            )
+                MParticleUser::class.java,
+            ),
         )
         var ex: Exception? = null
         try {
@@ -442,8 +469,8 @@ class MParticleTest {
         instance.logEvent(Mockito.mock(BaseEvent::class.java))
         Mockito.verify(instance.mKitManager, Mockito.times(1)).logEvent(
             Mockito.any(
-                BaseEvent::class.java
-            )
+                BaseEvent::class.java,
+            ),
         )
         instance = InnerMockMParticle()
         Mockito.`when`(instance.mConfigManager.isEnabled).thenReturn(false)
@@ -451,8 +478,8 @@ class MParticleTest {
         instance.logEvent(Mockito.mock(MPEvent::class.java))
         Mockito.verify(instance.mKitManager, Mockito.times(0)).logEvent(
             Mockito.any(
-                BaseEvent::class.java
-            )
+                BaseEvent::class.java,
+            ),
         )
     }
 
@@ -488,18 +515,21 @@ class MParticleTest {
             mMessageManager = Mockito.mock(MessageManager::class.java)
             mMessaging = Mockito.mock(MPMessagingAPI::class.java)
             mMedia = Mockito.mock(MPMediaAPI::class.java)
-            mIdentityApi = IdentityApi(
-                MockContext(),
-                mAppStateManager,
-                mMessageManager,
-                mInternal.configManager,
-                mKitManager,
-                OperatingSystem.ANDROID
-            )
+            mIdentityApi =
+                IdentityApi(
+                    MockContext(),
+                    mAppStateManager,
+                    mMessageManager,
+                    mInternal.configManager,
+                    mKitManager,
+                    OperatingSystem.ANDROID,
+                )
             Mockito.`when`(mKitManager.updateKits(Mockito.any())).thenReturn(KitsLoadedCallback())
-            val event = MPEvent.Builder("this")
-                .customAttributes(HashMap<String, String?>())
-                .build()
+            val event =
+                MPEvent
+                    .Builder("this")
+                    .customAttributes(HashMap<String, String?>())
+                    .build()
             val attributes = event.customAttributes
         }
     }

@@ -35,24 +35,28 @@ class MessageServiceTest : BaseMPServiceTest() {
                 mpMessage,
                 mpid1,
                 null,
-                null
+                null,
             )
         }
         Assert.assertEquals(
-            MessageService.getMessagesForUpload(
-                database,
-                true,
-                mpid1
-            ).size.toLong(),
-            20
+            MessageService
+                .getMessagesForUpload(
+                    database,
+                    true,
+                    mpid1,
+                ).size
+                .toLong(),
+            20,
         )
         Assert.assertEquals(
-            MessageService.getMessagesForUpload(
-                database,
-                true,
-                Constants.TEMPORARY_MPID
-            ).size.toLong(),
-            0
+            MessageService
+                .getMessagesForUpload(
+                    database,
+                    true,
+                    Constants.TEMPORARY_MPID,
+                ).size
+                .toLong(),
+            0,
         )
         Assert.assertEquals(MessageService.getMessagesForUpload(database).size.toLong(), 20)
         for (i in 0..29) {
@@ -62,32 +66,38 @@ class MessageServiceTest : BaseMPServiceTest() {
                 mpMessage,
                 Constants.TEMPORARY_MPID,
                 null,
-                null
+                null,
             )
         }
         Assert.assertEquals(
-            MessageService.getMessagesForUpload(
-                database,
-                true,
-                mpid1
-            ).size.toLong(),
-            20
+            MessageService
+                .getMessagesForUpload(
+                    database,
+                    true,
+                    mpid1,
+                ).size
+                .toLong(),
+            20,
         )
         Assert.assertEquals(
-            MessageService.getMessagesForUpload(
-                database,
-                true,
-                mpid2
-            ).size.toLong(),
-            0
+            MessageService
+                .getMessagesForUpload(
+                    database,
+                    true,
+                    mpid2,
+                ).size
+                .toLong(),
+            0,
         )
         Assert.assertEquals(
-            MessageService.getMessagesForUpload(
-                database,
-                true,
-                Constants.TEMPORARY_MPID
-            ).size.toLong(),
-            30
+            MessageService
+                .getMessagesForUpload(
+                    database,
+                    true,
+                    Constants.TEMPORARY_MPID,
+                ).size
+                .toLong(),
+            30,
         )
         Assert.assertEquals(MessageService.getMessagesForUpload(database).size.toLong(), 20)
         for (i in 0..34) {
@@ -97,61 +107,73 @@ class MessageServiceTest : BaseMPServiceTest() {
                 mpMessage,
                 mpid2,
                 null,
-                null
+                null,
             )
         }
         Assert.assertEquals(
-            MessageService.getMessagesForUpload(
-                database,
-                true,
-                mpid1
-            ).size.toLong(),
-            20
+            MessageService
+                .getMessagesForUpload(
+                    database,
+                    true,
+                    mpid1,
+                ).size
+                .toLong(),
+            20,
         )
         Assert.assertEquals(
-            MessageService.getMessagesForUpload(
-                database,
-                true,
-                mpid2
-            ).size.toLong(),
-            35
+            MessageService
+                .getMessagesForUpload(
+                    database,
+                    true,
+                    mpid2,
+                ).size
+                .toLong(),
+            35,
         )
         Assert.assertEquals(
-            MessageService.getMessagesForUpload(
-                database,
-                true,
-                Constants.TEMPORARY_MPID
-            ).size.toLong(),
-            30
+            MessageService
+                .getMessagesForUpload(
+                    database,
+                    true,
+                    Constants.TEMPORARY_MPID,
+                ).size
+                .toLong(),
+            30,
         )
         Assert.assertEquals(MessageService.getMessagesForUpload(database).size.toLong(), 55)
         Assert.assertEquals(
             MessageService.markMessagesAsUploaded(database, Int.MAX_VALUE).toLong(),
-            55
+            55,
         )
         Assert.assertEquals(
-            MessageService.getMessagesForUpload(
-                database,
-                true,
-                mpid1
-            ).size.toLong(),
-            0
+            MessageService
+                .getMessagesForUpload(
+                    database,
+                    true,
+                    mpid1,
+                ).size
+                .toLong(),
+            0,
         )
         Assert.assertEquals(
-            MessageService.getMessagesForUpload(
-                database,
-                true,
-                mpid2
-            ).size.toLong(),
-            0
+            MessageService
+                .getMessagesForUpload(
+                    database,
+                    true,
+                    mpid2,
+                ).size
+                .toLong(),
+            0,
         )
         Assert.assertEquals(
-            MessageService.getMessagesForUpload(
-                database,
-                true,
-                Constants.TEMPORARY_MPID
-            ).size.toLong(),
-            30
+            MessageService
+                .getMessagesForUpload(
+                    database,
+                    true,
+                    Constants.TEMPORARY_MPID,
+                ).size
+                .toLong(),
+            30,
         )
         Assert.assertEquals(MessageService.getMessagesForUpload(database).size.toLong(), 0)
     }
@@ -168,7 +190,7 @@ class MessageServiceTest : BaseMPServiceTest() {
                 getMpMessage(currentSession),
                 mpid1,
                 null,
-                null
+                null,
             )
         }
         for (i in 0..29) {
@@ -178,7 +200,7 @@ class MessageServiceTest : BaseMPServiceTest() {
                 getMpMessage(currentSession),
                 Constants.TEMPORARY_MPID,
                 null,
-                null
+                null,
             )
         }
         for (i in 0..34) {
@@ -188,55 +210,65 @@ class MessageServiceTest : BaseMPServiceTest() {
                 getMpMessage(currentSession),
                 mpid2,
                 null,
-                null
+                null,
             )
         }
         Assert.assertEquals(
             MessageService.markMessagesAsUploaded(database, Int.MAX_VALUE).toLong(),
-            55
+            55,
         )
         Assert.assertEquals(
-            MessageService.getSessionHistory(
-                database,
-                previousSession
-            ).size.toLong(),
-            55
+            MessageService
+                .getSessionHistory(
+                    database,
+                    previousSession,
+                ).size
+                .toLong(),
+            55,
         )
         Assert.assertEquals(
-            MessageService.getSessionHistory(
-                database,
-                previousSession,
-                true,
-                mpid1
-            ).size.toLong(),
-            20
+            MessageService
+                .getSessionHistory(
+                    database,
+                    previousSession,
+                    true,
+                    mpid1,
+                ).size
+                .toLong(),
+            20,
         )
         Assert.assertEquals(
-            MessageService.getSessionHistory(
-                database,
-                previousSession,
-                true,
-                mpid2
-            ).size.toLong(),
-            35
+            MessageService
+                .getSessionHistory(
+                    database,
+                    previousSession,
+                    true,
+                    mpid2,
+                ).size
+                .toLong(),
+            35,
         )
         Assert.assertEquals(
-            MessageService.getSessionHistory(
-                database,
-                previousSession,
-                false,
-                mpid1
-            ).size.toLong(),
-            35
+            MessageService
+                .getSessionHistory(
+                    database,
+                    previousSession,
+                    false,
+                    mpid1,
+                ).size
+                .toLong(),
+            35,
         )
         Assert.assertEquals(
-            MessageService.getSessionHistory(
-                database,
-                previousSession,
-                false,
-                Constants.TEMPORARY_MPID
-            ).size.toLong(),
-            55
+            MessageService
+                .getSessionHistory(
+                    database,
+                    previousSession,
+                    false,
+                    Constants.TEMPORARY_MPID,
+                ).size
+                .toLong(),
+            55,
         )
     }
 
@@ -259,19 +291,20 @@ class MessageServiceTest : BaseMPServiceTest() {
                 testMessage,
                 testMpid,
                 null,
-                null
+                null,
             )
         }
         Assert.assertEquals(
             MessageService.markMessagesAsUploaded(database, Int.MAX_VALUE).toLong(),
-            100
+            100,
         )
-        val readyMessages = MessageService.getSessionHistory(
-            database,
-            previousSession,
-            false,
-            Constants.TEMPORARY_MPID
-        )
+        val readyMessages =
+            MessageService.getSessionHistory(
+                database,
+                previousSession,
+                false,
+                Constants.TEMPORARY_MPID,
+            )
         Assert.assertEquals(readyMessages.size.toLong(), testMessages.size.toLong())
         for (readyMessage in readyMessages) {
             val message = testMessages[readyMessage.message]
@@ -330,7 +363,7 @@ class MessageServiceTest : BaseMPServiceTest() {
                 getMpMessage(currentSession),
                 1,
                 null,
-                null
+                null,
             )
         }
         Assert.assertEquals(MessageService.markMessagesAsUploaded(database, 10).toLong(), 10)
@@ -338,7 +371,7 @@ class MessageServiceTest : BaseMPServiceTest() {
         MessageService.deleteOldMessages(database, currentSession)
         Assert.assertEquals(
             MessageService.getSessionHistory(database, newSession).size.toLong(),
-            10
+            10,
         )
         MessageService.deleteOldMessages(database, newSession)
         Assert.assertEquals(MessageService.getSessionHistory(database, newSession).size.toLong(), 0)
@@ -355,8 +388,10 @@ class MessageServiceTest : BaseMPServiceTest() {
         for (i in 0 until Constants.LIMIT_MAX_MESSAGE_SIZE) {
             builder.append("ab")
         }
-        val message = BaseMPMessage.Builder(builder.toString())
-            .build(InternalSession(), Location("New York City"), 1)
+        val message =
+            BaseMPMessage
+                .Builder(builder.toString())
+                .build(InternalSession(), Location("New York City"), 1)
         MessageService.insertMessage(database, "apiKey", message, 1, "b", 2)
         Assert.assertEquals(MessageService.getMessagesForUpload(database).size.toLong(), 10)
         for (i in 0..9) {

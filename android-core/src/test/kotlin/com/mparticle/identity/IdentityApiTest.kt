@@ -29,62 +29,78 @@ class IdentityApiTest {
     @Test
     fun testAliasUsersValidationRejection() {
         val identityApi = IdentityApi()
-        identityApi.mMessageManager = object : MessageManager() {
-            override fun logAliasRequest(aliasRequest: AliasRequest) {
-                Assert.fail("should not logged Alias Request:\n$aliasRequest")
+        identityApi.mMessageManager =
+            object : MessageManager() {
+                override fun logAliasRequest(aliasRequest: AliasRequest) {
+                    Assert.fail("should not logged Alias Request:\n$aliasRequest")
+                }
             }
-        }
 
         // missing previousMpid
-        var request = AliasRequest.builder()
-            .destinationMpid(123)
-            .startTime(1)
-            .endTime(2)
-            .build()
+        var request =
+            AliasRequest
+                .builder()
+                .destinationMpid(123)
+                .startTime(1)
+                .endTime(2)
+                .build()
         Assert.assertFalse(identityApi.aliasUsers(request))
 
         // missing newMpid
-        request = AliasRequest.builder()
-            .sourceMpid(123)
-            .startTime(1)
-            .endTime(2)
-            .build()
+        request =
+            AliasRequest
+                .builder()
+                .sourceMpid(123)
+                .startTime(1)
+                .endTime(2)
+                .build()
         Assert.assertFalse(identityApi.aliasUsers(request))
 
         // newMpid and previousMpid are not unique
-        request = AliasRequest.builder()
-            .destinationMpid(123)
-            .sourceMpid(123)
-            .startTime(1)
-            .endTime(2)
-            .build()
+        request =
+            AliasRequest
+                .builder()
+                .destinationMpid(123)
+                .sourceMpid(123)
+                .startTime(1)
+                .endTime(2)
+                .build()
         Assert.assertFalse(identityApi.aliasUsers(request))
 
         // endTime before startTime
-        request = AliasRequest.builder()
-            .destinationMpid(123)
-            .sourceMpid(456)
-            .startTime(2)
-            .endTime(1)
-            .build()
+        request =
+            AliasRequest
+                .builder()
+                .destinationMpid(123)
+                .sourceMpid(456)
+                .startTime(2)
+                .endTime(1)
+                .build()
         Assert.assertFalse(identityApi.aliasUsers(request))
 
         // endTime and or startTime do not exist
-        request = AliasRequest.builder()
-            .destinationMpid(1)
-            .sourceMpid(2)
-            .build()
+        request =
+            AliasRequest
+                .builder()
+                .destinationMpid(1)
+                .sourceMpid(2)
+                .build()
         Assert.assertFalse(identityApi.aliasUsers(request))
-        request = AliasRequest.builder()
-            .destinationMpid(1)
-            .sourceMpid(2)
-            .startTime(3)
-            .build()
+        request =
+            AliasRequest
+                .builder()
+                .destinationMpid(1)
+                .sourceMpid(2)
+                .startTime(3)
+                .build()
         Assert.assertFalse(identityApi.aliasUsers(request))
-        request = AliasRequest.builder()
-            .destinationMpid(1)
-            .sourceMpid(2)
-            .endTime(3).build()
+        request =
+            AliasRequest
+                .builder()
+                .destinationMpid(1)
+                .sourceMpid(2)
+                .endTime(3)
+                .build()
         Assert.assertFalse(identityApi.aliasUsers(request))
     }
 
@@ -92,29 +108,30 @@ class IdentityApiTest {
     fun testAliasUsersValidationAcceptance() {
         val identityApi = IdentityApi()
         val requestMade = AndroidUtils.Mutable(false)
-        identityApi.mMessageManager = object : MessageManager() {
-            override fun logAliasRequest(aliasRequest: AliasRequest) {
-                requestMade.value = true
+        identityApi.mMessageManager =
+            object : MessageManager() {
+                override fun logAliasRequest(aliasRequest: AliasRequest) {
+                    requestMade.value = true
+                }
             }
-        }
-        val request = AliasRequest.builder()
-            .destinationMpid(1)
-            .sourceMpid(2)
-            .startTime(3)
-            .endTime(4)
-            .build()
+        val request =
+            AliasRequest
+                .builder()
+                .destinationMpid(1)
+                .sourceMpid(2)
+                .startTime(3)
+                .endTime(4)
+                .build()
         Assert.assertTrue(identityApi.aliasUsers(request))
         Assert.assertTrue(requestMade.value)
     }
 
-    internal inner class MockUser(private var mpid: Long, private var mpLastSeenTime: Long) :
-        AbstractMParticleUser() {
-        override fun getLastSeenTime(): Long {
-            return mpLastSeenTime
-        }
+    internal inner class MockUser(
+        private var mpid: Long,
+        private var mpLastSeenTime: Long,
+    ) : AbstractMParticleUser() {
+        override fun getLastSeenTime(): Long = mpLastSeenTime
 
-        override fun getId(): Long {
-            return mpid
-        }
+        override fun getId(): Long = mpid
     }
 }
