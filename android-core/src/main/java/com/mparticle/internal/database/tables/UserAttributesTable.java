@@ -19,12 +19,12 @@ public class UserAttributesTable extends MpIdDependentTable {
     }
 
     static final String CREATE_USER_ATTRIBUTES_DDL =
-            "CREATE TABLE IF NOT EXISTS " + UserAttributesTableColumns.TABLE_NAME + " (" + BaseColumns._ID
-                    " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    UserAttributesTableColumns.ATTRIBUTE_KEY + " COLLATE NOCASE NOT NULL, "
-                    UserAttributesTableColumns.ATTRIBUTE_VALUE + " TEXT, "
-                    UserAttributesTableColumns.IS_LIST + " INTEGER NOT NULL, "
-                    UserAttributesTableColumns.CREATED_AT + " INTEGER NOT NULL, "
-                    UserAttributesTableColumns.MP_ID + " INTEGER"
+            "CREATE TABLE IF NOT EXISTS " + UserAttributesTableColumns.TABLE_NAME + " (" + BaseColumns._ID +
+                    " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    UserAttributesTableColumns.ATTRIBUTE_KEY + " COLLATE NOCASE NOT NULL, " +
+                    UserAttributesTableColumns.ATTRIBUTE_VALUE + " TEXT, " +
+                    UserAttributesTableColumns.IS_LIST + " INTEGER NOT NULL, " +
+                    UserAttributesTableColumns.CREATED_AT + " INTEGER NOT NULL, " +
+                    UserAttributesTableColumns.MP_ID + " INTEGER" +
                     ");";
 }

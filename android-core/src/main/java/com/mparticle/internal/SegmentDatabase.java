@@ -24,10 +24,10 @@ import android.database.sqlite.SQLiteOpenHelper;
     }
 
     private static final String CREATE_SEGMENT_DDL =
-            "CREATE TABLE IF NOT EXISTS " + SegmentTable.TABLE_NAME + " ("
-                    "_id INTEGER PRIMARY KEY, "
-                    SegmentTable.NAME + " TEXT NOT NULL, "
-                    SegmentTable.ENDPOINTS + " TEXT "
+            "CREATE TABLE IF NOT EXISTS " + SegmentTable.TABLE_NAME + " (" +
+                    "_id INTEGER PRIMARY KEY, " +
+                    SegmentTable.NAME + " TEXT NOT NULL, " +
+                    SegmentTable.ENDPOINTS + " TEXT " +
                     ");";
 
     interface SegmentMembershipTable {
@@ -39,11 +39,11 @@ import android.database.sqlite.SQLiteOpenHelper;
     }
 
     private static final String CREATE_SEGMENT_MEMBERSHIP_DDL =
-            "CREATE TABLE IF NOT EXISTS " + SegmentMembershipTable.TABLE_NAME + " ("
-                    "_id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    SegmentMembershipTable.SEGMENT_ID + " INTEGER NOT NULL, "
-                    SegmentMembershipTable.TIMESTAMP + " REAL NOT NULL, "
-                    SegmentMembershipTable.MEMBERSHIP_ACTION + " INTEGER NOT NULL, "
+            "CREATE TABLE IF NOT EXISTS " + SegmentMembershipTable.TABLE_NAME + " (" +
+                    "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    SegmentMembershipTable.SEGMENT_ID + " INTEGER NOT NULL, " +
+                    SegmentMembershipTable.TIMESTAMP + " REAL NOT NULL, " +
+                    SegmentMembershipTable.MEMBERSHIP_ACTION + " INTEGER NOT NULL, " +
                     " FOREIGN KEY (" + SegmentMembershipTable.SEGMENT_ID + ") REFERENCES " + SegmentTable.TABLE_NAME + " (" + SegmentTable.SEGMENT_ID + "));";
 
 

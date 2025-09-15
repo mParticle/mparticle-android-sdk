@@ -1543,8 +1543,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 // If there's an existing email but it doesn't match the passed-in email, log a warning
                 if (emailMismatch && existingEmail != null) {
                     Logger.warning(String.format(
-                            "The existing email on the user (%s) does not match the email passed to selectPlacements (%s). "
-                                    "Please make sure to sync the email identity to mParticle as soon as it's available. "
+                            "The existing email on the user (%s) does not match the email passed to selectPlacements (%s). " +
+                                    "Please make sure to sync the email identity to mParticle as soon as it's available. " +
                                     "Identifying user with the provided email before continuing to selectPlacements.",
                             existingEmail, email
                     ));
@@ -1552,8 +1552,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 // If there's an existing other but it doesn't match the passed-in hashed email, log a warning
                 else if (hashedEmailMismatch && existingHashedEmail != null) {
                     Logger.warning(String.format(
-                            "The existing hashed email on the user (%s) does not match the hashed email passed to selectPlacements (%s). "
-                                    "Please make sure to sync the hashed email identity to mParticle as soon as it's available. "
+                            "The existing hashed email on the user (%s) does not match the hashed email passed to selectPlacements (%s). " +
+                                    "Please make sure to sync the hashed email identity to mParticle as soon as it's available. " +
                                     "Identifying user with the provided hashed email before continuing to selectPlacements.",
                             existingHashedEmail, hashedEmail
                     ));
@@ -1576,7 +1576,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 });
 
                 task.addSuccessListener(result -> {
-                    Logger.debug("Updated email identity based on selectPlacement's attributes: "
+                    Logger.debug("Updated email identity based on selectPlacement's attributes: " +
                             result.getUser().getUserIdentities().get(MParticle.IdentityType.Email));
                     runnable.run();
                 });

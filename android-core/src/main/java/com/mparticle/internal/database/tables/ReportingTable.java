@@ -19,16 +19,16 @@ public class ReportingTable extends MpIdDependentTable {
     }
 
     static final String CREATE_REPORTING_DDL =
-            "CREATE TABLE IF NOT EXISTS " + ReportingTableColumns.TABLE_NAME + " (" + BaseColumns._ID
-                    " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    ReportingTableColumns.MODULE_ID + " INTEGER NOT NULL, "
-                    ReportingTableColumns.MESSAGE + " TEXT NOT NULL, "
-                    ReportingTableColumns.SESSION_ID + " STRING NOT NULL, "
-                    ReportingTableColumns.CREATED_AT + " INTEGER NOT NULL, "
-                    ReportingTableColumns.MP_ID + " INTEGER"
+            "CREATE TABLE IF NOT EXISTS " + ReportingTableColumns.TABLE_NAME + " (" + BaseColumns._ID +
+                    " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    ReportingTableColumns.MODULE_ID + " INTEGER NOT NULL, " +
+                    ReportingTableColumns.MESSAGE + " TEXT NOT NULL, " +
+                    ReportingTableColumns.SESSION_ID + " STRING NOT NULL, " +
+                    ReportingTableColumns.CREATED_AT + " INTEGER NOT NULL, " +
+                    ReportingTableColumns.MP_ID + " INTEGER" +
                     ");";
 
-    static final String REPORTING_ADD_SESSION_ID_COLUMN = "ALTER TABLE " + ReportingTableColumns.TABLE_NAME
+    static final String REPORTING_ADD_SESSION_ID_COLUMN = "ALTER TABLE " + ReportingTableColumns.TABLE_NAME +
             " ADD COLUMN " + ReportingTableColumns.SESSION_ID + " STRING";
 
 

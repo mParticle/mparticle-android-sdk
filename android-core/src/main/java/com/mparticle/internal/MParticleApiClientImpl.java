@@ -155,7 +155,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
 
             addMessageSignature(connection, null);
 
-            Logger.verbose("Config request attempt:\n"
+            Logger.verbose("Config request attempt:\n" +
                     "URL- " + mConfigUrl.toString());
 
             if (InternalListenerManager.isEnabled()) {
@@ -174,9 +174,9 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
             if (responseCode >= 200 && responseCode < 300) {
                 parseCookies(response);
 
-                Logger.verbose("Config result: \n "
-                        connection.getResponseCode() + ": "
-                        connection.getResponseMessage() + "\n"
+                Logger.verbose("Config result: \n " +
+                        connection.getResponseCode() + ": " +
+                        connection.getResponseMessage() + "\n" +
                         "response:\n" + response.toString());
 
                 String newEtag = connection.getHeaderField("ETag");
@@ -260,7 +260,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
 
         makeUrlRequest(Endpoint.EVENTS, connection, message, true);
 
-        Logger.verbose("Upload request attempt:\n"
+        Logger.verbose("Upload request attempt:\n" +
                 "URL- " + eventUrl.toString());
 
         Logger.verbose(message);
@@ -273,9 +273,9 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
                 InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.EVENTS, connection.getURL().toString(), response, responseCode);
             }
 
-            Logger.verbose("Upload result response: \n"
-                    connection.getResponseCode() + ": "
-                    connection.getResponseMessage() + "\n"
+            Logger.verbose("Upload result response: \n" +
+                    connection.getResponseCode() + ": " +
+                    connection.getResponseMessage() + "\n" +
                     "response:\n" + response.toString());
             parseCookies(response);
         } else {
@@ -317,8 +317,8 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         String error = "";
         JSONObject response = new JSONObject();
         if (responseCode >= 200 && responseCode < 300) {
-            Logger.verbose("Alias Request response: \n "
-                    connection.getResponseCode() + ": "
+            Logger.verbose("Alias Request response: \n " +
+                    connection.getResponseCode() + ": " +
                     connection.getResponseMessage());
         } else {
             response = MPUtility.getJsonResponse(connection);

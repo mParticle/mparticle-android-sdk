@@ -20,13 +20,13 @@ public class BreadcrumbTable extends MpIdDependentTable {
     }
 
     static final String CREATE_BREADCRUMBS_DDL =
-            "CREATE TABLE IF NOT EXISTS " + BreadcrumbTableColumns.TABLE_NAME + " (" + BaseColumns._ID
-                    " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    BreadcrumbTableColumns.SESSION_ID + " STRING NOT NULL, "
-                    BreadcrumbTableColumns.API_KEY + " STRING NOT NULL, "
-                    BreadcrumbTableColumns.MESSAGE + " TEXT, "
-                    BreadcrumbTableColumns.CREATED_AT + " INTEGER NOT NULL, "
-                    BreadcrumbTableColumns.CF_UUID + " TEXT, "
-                    BreadcrumbTableColumns.MP_ID + " INTEGER"
+            "CREATE TABLE IF NOT EXISTS " + BreadcrumbTableColumns.TABLE_NAME + " (" + BaseColumns._ID +
+                    " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    BreadcrumbTableColumns.SESSION_ID + " STRING NOT NULL, " +
+                    BreadcrumbTableColumns.API_KEY + " STRING NOT NULL, " +
+                    BreadcrumbTableColumns.MESSAGE + " TEXT, " +
+                    BreadcrumbTableColumns.CREATED_AT + " INTEGER NOT NULL, " +
+                    BreadcrumbTableColumns.CF_UUID + " TEXT, " +
+                    BreadcrumbTableColumns.MP_ID + " INTEGER" +
                     ");";
 }

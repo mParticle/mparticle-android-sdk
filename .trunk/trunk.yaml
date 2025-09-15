@@ -40,12 +40,9 @@ lint:
   ignore:
     - linters: [ALL]
       paths:
-        - feature/legacy/**
         - gradlew
     - linters:
         - checkov
-      paths:
-        - core/network/**/*.json
 actions:
   enabled:
     - trunk-announce

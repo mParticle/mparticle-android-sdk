@@ -48,16 +48,16 @@ class UpgradeMessageTableTest : BaseTableTest() {
 
     companion object {
         const val CREATE_MESSAGES_DDL =
-            "CREATE TABLE IF NOT EXISTS " + MessageTable.MessageTableColumns.TABLE_NAME + " (" + BaseColumns._ID
-                " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                MessageTable.MessageTableColumns.SESSION_ID + " STRING NOT NULL, "
-                MessageTable.MessageTableColumns.API_KEY + " STRING NOT NULL, "
-                MessageTable.MessageTableColumns.MESSAGE + " TEXT, "
-                MessageTable.MessageTableColumns.STATUS + " INTEGER, "
-                MessageTable.MessageTableColumns.CREATED_AT + " INTEGER NOT NULL, "
-                MessageTable.MessageTableColumns.MESSAGE_TYPE + " TEXT, "
-                MessageTable.MessageTableColumns.CF_UUID + " TEXT, "
-                MessageTable.MessageTableColumns.MP_ID + " INTEGER"
+            "CREATE TABLE IF NOT EXISTS " + MessageTable.MessageTableColumns.TABLE_NAME + " (" + BaseColumns._ID +
+                " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                MessageTable.MessageTableColumns.SESSION_ID + " STRING NOT NULL, " +
+                MessageTable.MessageTableColumns.API_KEY + " STRING NOT NULL, " +
+                MessageTable.MessageTableColumns.MESSAGE + " TEXT, " +
+                MessageTable.MessageTableColumns.STATUS + " INTEGER, " +
+                MessageTable.MessageTableColumns.CREATED_AT + " INTEGER NOT NULL, " +
+                MessageTable.MessageTableColumns.MESSAGE_TYPE + " TEXT, " +
+                MessageTable.MessageTableColumns.CF_UUID + " TEXT, " +
+                MessageTable.MessageTableColumns.MP_ID + " INTEGER" +
                 ");"
     }
 }

@@ -32,12 +32,12 @@ class ReportingTableTest : BaseTableTest() {
 
     companion object {
         const val old_CREATE_REPORTING_DDL =
-            "CREATE TABLE IF NOT EXISTS " + ReportingTable.ReportingTableColumns.TABLE_NAME + " (" + BaseColumns._ID
-                " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                ReportingTable.ReportingTableColumns.MODULE_ID + " INTEGER NOT NULL, "
-                ReportingTable.ReportingTableColumns.MESSAGE + " TEXT NOT NULL, "
-                ReportingTable.ReportingTableColumns.SESSION_ID + " STRING NOT NULL, "
-                ReportingTable.ReportingTableColumns.CREATED_AT + " INTEGER NOT NULL"
+            "CREATE TABLE IF NOT EXISTS " + ReportingTable.ReportingTableColumns.TABLE_NAME + " (" + BaseColumns._ID +
+                " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                ReportingTable.ReportingTableColumns.MODULE_ID + " INTEGER NOT NULL, " +
+                ReportingTable.ReportingTableColumns.MESSAGE + " TEXT NOT NULL, " +
+                ReportingTable.ReportingTableColumns.SESSION_ID + " STRING NOT NULL, " +
+                ReportingTable.ReportingTableColumns.CREATED_AT + " INTEGER NOT NULL" +
                 ");"
     }
 }

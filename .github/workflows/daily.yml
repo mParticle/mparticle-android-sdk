@@ -48,7 +48,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: mparticle/mparticle-android-sdk
-          ref: developmentreq
+          ref: ${{ inputs.branch_name }}
           submodules: recursive
       - name: "Import GPG Key"
         uses: crazy-max/ghaction-import-gpg@82a020f1f7f605c65dd2449b392a52c3fcfef7ef #v6.0
