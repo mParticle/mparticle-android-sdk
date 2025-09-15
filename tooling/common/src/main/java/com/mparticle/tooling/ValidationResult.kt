@@ -147,7 +147,7 @@ enum class ValidationErrorType(
     Unplanned("unplanned"),
     MissingRequied("missing_required"),
     InvalidValue("invalid_value"),
-    Unknown("unknown")
+    Unknown("unknown");
 
     companion object {
         fun forName(text: String): ValidationErrorType = values().first { it.text == text }

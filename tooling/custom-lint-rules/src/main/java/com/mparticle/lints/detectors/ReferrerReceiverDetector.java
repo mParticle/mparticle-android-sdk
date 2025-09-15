@@ -27,10 +27,10 @@ public class ReferrerReceiverDetector extends ResourceXmlDetector implements Det
     public static final Issue ISSUE = Issue.create(
             "MParticleInstallRefReceiver",
             "com.mparticle.ReferrerReceiver should no longer be used",
-            "MParticle ReferrerReceiver should no longer be registered in " + ANDROID_MANIFEST_XML + ". In order to receive InstallReferrer data, add the following dependency to your build.gradle\n"
-                    "\n"
-                    "dependencies {\n"
-                    "\timplementation 'com.android.installreferrer:installreferrer:1+'"
+            "MParticle ReferrerReceiver should no longer be registered in " + ANDROID_MANIFEST_XML + ". In order to receive InstallReferrer data, add the following dependency to your build.gradle\n" +
+                    "\n" +
+                    "dependencies {\n" +
+                    "\timplementation 'com.android.installreferrer:installreferrer:1+'" +
                     "\n}",
             Category.MESSAGES,
             10,

@@ -357,9 +357,9 @@ class MpApiDetectorKt :
                 l1?.offset == l2?.offset
 
         override fun toString(): String =
-            location.file.getAbsolutePath() + "\n"
-                location.start?.offset + " " + location.start?.line + " " + location.start?.column
-                location.end?.offset + " " + location.end?.line + " " + location.end?.column
+            location.file.getAbsolutePath() + "\n" +
+                (location.start?.offset.toString() + " " + location.start?.line + " " + location.start?.column) + "\n" +
+                (location.end?.offset.toString() + " " + location.end?.line + " " + location.end?.column)
 
         override fun compareTo(other: LocationWrapper): Int = toString().compareTo(other.toString())
     }

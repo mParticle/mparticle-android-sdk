@@ -167,7 +167,7 @@ class DataplanDetector : CallScanner() {
                             when (error.errorPointer) {
                                 "#/data/custom_attributes", "#/data/custom_attributes/${error.key}" ->
                                     getErrorMessageBySchemaKeyword(
-                                        ViolationSchemaKeywordType.get(error.schemaKeyworkd),
+                                        ViolationSchemaKeywordType.get(error.schemaKeyword),
                                         error.expected,
                                     )
                                 "#" ->
