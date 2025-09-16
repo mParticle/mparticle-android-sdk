@@ -38,7 +38,8 @@ object Constants {
     const val LIMIT_MAX_MESSAGE_SIZE: Int = 100 * 1024
     const val LIMIT_MAX_UPLOAD_SIZE: Int = 2 * LIMIT_MAX_MESSAGE_SIZE
 
-    const val GODADDY_CLASS_2_ROOT_CRT: String = "-----BEGIN CERTIFICATE-----\n" +
+    const val GODADDY_CLASS_2_ROOT_CRT: String =
+        "-----BEGIN CERTIFICATE-----\n" +
             "MIIEADCCAuigAwIBAgIBADANBgkqhkiG9w0BAQUFADBjMQswCQYDVQQGEwJVUzEh\n" +
             "MB8GA1UEChMYVGhlIEdvIERhZGR5IEdyb3VwLCBJbmMuMTEwLwYDVQQLEyhHbyBE\n" +
             "YWRkeSBDbGFzcyAyIENlcnRpZmljYXRpb24gQXV0aG9yaXR5MB4XDTA0MDYyOTE3\n" +
@@ -63,7 +64,8 @@ object Constants {
             "ReYNnyicsbkqWletNw+vHX/bvZ8=\n" +
             "-----END CERTIFICATE-----"
 
-    const val GODADDY_ROOT_G2_CRT: String = "-----BEGIN CERTIFICATE-----\n" +
+    const val GODADDY_ROOT_G2_CRT: String =
+        "-----BEGIN CERTIFICATE-----\n" +
             "MIIDxTCCAq2gAwIBAgIBADANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UEBhMCVVMx\n" +
             "EDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAYBgNVBAoT\n" +
             "EUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290IENlcnRp\n" +
@@ -87,7 +89,8 @@ object Constants {
             "4uJEvlz36hz1\n" +
             "-----END CERTIFICATE-----"
 
-    const val LETS_ENCRYPTS_ROOT_X1_CRT: String = "-----BEGIN CERTIFICATE-----\n" +
+    const val LETS_ENCRYPTS_ROOT_X1_CRT: String =
+        "-----BEGIN CERTIFICATE-----\n" +
             "MIIFazCCA1OgAwIBAgIRAIIQz7DSQONZRGPgu2OCiwAwDQYJKoZIhvcNAQELBQAw\n" +
             "TzELMAkGA1UEBhMCVVMxKTAnBgNVBAoTIEludGVybmV0IFNlY3VyaXR5IFJlc2Vh\n" +
             "cmNoIEdyb3VwMRUwEwYDVQQDEwxJU1JHIFJvb3QgWDEwHhcNMTUwNjA0MTEwNDM4\n" +
@@ -119,7 +122,8 @@ object Constants {
             "emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=\n" +
             "-----END CERTIFICATE-----"
 
-    const val LETS_ENCRYPTS_ROOT_X2_SELF_SIGN_CRT: String = "-----BEGIN CERTIFICATE-----\n" +
+    const val LETS_ENCRYPTS_ROOT_X2_SELF_SIGN_CRT: String =
+        "-----BEGIN CERTIFICATE-----\n" +
             "MIICGzCCAaGgAwIBAgIQQdKd0XLq7qeAwSxs6S+HUjAKBggqhkjOPQQDAzBPMQsw\n" +
             "CQYDVQQGEwJVUzEpMCcGA1UEChMgSW50ZXJuZXQgU2VjdXJpdHkgUmVzZWFyY2gg\n" +
             "R3JvdXAxFTATBgNVBAMTDElTUkcgUm9vdCBYMjAeFw0yMDA5MDQwMDAwMDBaFw00\n" +
@@ -134,7 +138,8 @@ object Constants {
             "/q4AaOeMSQ+2b1tbFfLn\n" +
             "-----END CERTIFICATE-----"
 
-    const val LETS_ENCRYPTS_ROOT_X2_CROSS_SIGN_CRT: String = "-----BEGIN CERTIFICATE-----\n" +
+    const val LETS_ENCRYPTS_ROOT_X2_CROSS_SIGN_CRT: String =
+        "-----BEGIN CERTIFICATE-----\n" +
             "MIIEYDCCAkigAwIBAgIQB55JKIY3b9QISMI/xjHkYzANBgkqhkiG9w0BAQsFADBP\n" +
             "MQswCQYDVQQGEwJVUzEpMCcGA1UEChMgSW50ZXJuZXQgU2VjdXJpdHkgUmVzZWFy\n" +
             "Y2ggR3JvdXAxFTATBgNVBAMTDElTUkcgUm9vdCBYMTAeFw0yMDA5MDQwMDAwMDBa\n" +

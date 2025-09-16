@@ -65,10 +65,22 @@ class PushRegistrationTest : BaseCleanStartedEachTest() {
                 val fetchedSenderId = fetchedPushValue.senderId
                 val fetchedInstanceId = fetchedPushValue.instanceId
                 if (pushRegistration.senderId != fetchedSenderId) {
-                    Assert.fail("Mismatch! When push value of \"" + pushRegistration.senderId + "\" is set with: " + setPush.name + ". A different value \"" + fetchedSenderId + "\" is returned with:" + getPush.name)
+                    Assert.fail(
+                        "Mismatch! When push value of \"" + pushRegistration.senderId + "\" is set with: " + setPush.name +
+                            ". A different value \"" +
+                            fetchedSenderId +
+                            "\" is returned with:" +
+                            getPush.name,
+                    )
                 }
                 if (pushRegistration.instanceId != fetchedInstanceId) {
-                    Assert.fail("Mismatch! When push value of \"" + pushRegistration.instanceId + "\" is set with: " + setPush.name + ". A different value \"" + fetchedInstanceId + "\" is returned with:" + getPush.name)
+                    Assert.fail(
+                        "Mismatch! When push value of \"" + pushRegistration.instanceId + "\" is set with: " + setPush.name +
+                            ". A different value \"" +
+                            fetchedInstanceId +
+                            "\" is returned with:" +
+                            getPush.name,
+                    )
                 }
             }
         }
@@ -88,7 +100,13 @@ class PushRegistrationTest : BaseCleanStartedEachTest() {
                 for (getPush in getPushes) {
                     val fetchedPushRegistration = getPush.pushRegistration
                     if (fetchedPushRegistration.instanceId != null && fetchedPushRegistration.senderId != null) {
-                        Assert.fail("Mismatch! When push value of \"" + pushRegistration + "\" is set with: " + setPush.name + ", and cleared with: " + clearPush.name + ", the value is not null when fetched with:" + getPush.name)
+                        Assert.fail(
+                            "Mismatch! When push value of \"" + pushRegistration + "\" is set with: " + setPush.name +
+                                ", and cleared with: " +
+                                clearPush.name +
+                                ", the value is not null when fetched with:" +
+                                getPush.name,
+                        )
                     }
                 }
             }
@@ -106,14 +124,24 @@ class PushRegistrationTest : BaseCleanStartedEachTest() {
             setPush.setPushRegistration(pushRegistration)
             for (pushEnabled in pushEnableds) {
                 if (!pushEnabled.isPushEnabled) {
-                    Assert.fail("Mismatch! When push value of \"" + pushRegistration + "\" is set with: " + setPush.name + ", push IS NOT enabled with:" + pushEnabled.name)
+                    Assert.fail(
+                        "Mismatch! When push value of \"" + pushRegistration + "\" is set with: " + setPush.name +
+                            ", push IS NOT enabled with:" +
+                            pushEnabled.name,
+                    )
                 }
             }
             for (clearPush in clearPushes) {
                 clearPush.clearPush()
                 for (pushEnabled in pushEnableds) {
                     if (pushEnabled.isPushEnabled) {
-                        Assert.fail("Mismatch! When push value of \"" + pushRegistration + "\" is set with: " + setPush.name + ", and cleared with: " + clearPush.name + ", push IS enabled with:" + pushEnabled.name)
+                        Assert.fail(
+                            "Mismatch! When push value of \"" + pushRegistration + "\" is set with: " + setPush.name +
+                                ", and cleared with: " +
+                                clearPush.name +
+                                ", push IS enabled with:" +
+                                pushEnabled.name,
+                        )
                     }
                 }
             }

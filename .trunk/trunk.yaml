@@ -29,7 +29,7 @@ lint:
     - actionlint@1.7.7
     - checkov@3.2.470
     - git-diff-check
-    - ktlint@1.7.1
+    - ktlint@0.48.2
     - markdownlint@0.45.0
     - prettier@3.6.2
     - shellcheck@0.11.0
@@ -41,8 +41,6 @@ lint:
     - linters: [ALL]
       paths:
         - gradlew
-    - linters:
-        - checkov
 actions:
   enabled:
     - trunk-announce
