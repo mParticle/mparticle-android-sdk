@@ -51,9 +51,9 @@ The Android SDK and kits are released using GitHub Actions. The SDK and kits are
 
 1. Navigate to the Actions tab
 2. Select "release SDK"
-3. Run the workflow from main branch with "dry run" option first
+3. Run the workflow from main branch with "true" first to perform a dry run
    > Important: Always start with a dry run to validate the release process. This will perform all steps up to semantic release without actually publishing, helping catch potential issues early.
-4. If the dry run succeeds, run the workflow again with "not dry run" option to perform the actual release
+4. If the dry run succeeds, run the workflow again with "false" option to perform the actual release
    > Note: Only proceed with the actual release after confirming a successful dry run
 
 ### Important Notes
@@ -64,7 +64,7 @@ The Android SDK and kits are released using GitHub Actions. The SDK and kits are
   - We have a custom script to install and start the emulator `scripts/install-start-emulator.sh`
   - OS version is hardcoded to avoid issues with new releases
 - **Code Reusability**: 
-  - Reusable GitHub Actions are defined in the [parent repo](https://github.com/mParticle/mparticle-workflows)
+  - Reusable GitHub Actions are defined in the [mparticle-workflows repo](https://github.com/mParticle/mparticle-workflows)
   - This enables other platforms to reuse similar jobs
 
 ## Post-Release Verification
