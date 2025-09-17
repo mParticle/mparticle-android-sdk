@@ -23,8 +23,8 @@ fi
 
 # Set PATH variable so we can find sdkmanager and avdmanager
 echo "Setting Path (emulator before tools hack)"
-export ANDROID_SDK=${HOME}/Library/Android/sdk
-export PATH=${ANDROID_SDK}/emulator:${ANDROID_SDK}/tools/:${ANDROID_HOME}/tools/bin:${PATH}
+export ANDROID_SDK="${HOME}/Library/Android/sdk"
+export PATH="${ANDROID_SDK}/emulator:${ANDROID_SDK}/tools/:${ANDROID_HOME}/tools/bin:${PATH}"
 #echo "run: sdkmanager tools"
 #sdkmanager tools
 #echo "run: kill-server"
