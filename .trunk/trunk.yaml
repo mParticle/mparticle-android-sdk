@@ -41,6 +41,7 @@ lint:
     - linters: [ALL]
       paths:
         - gradlew
+        - scripts/install-start-emulator.sh
 actions:
   enabled:
     - trunk-announce
