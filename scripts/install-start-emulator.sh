@@ -57,11 +57,11 @@ adb shell input keyevent 82 &
 
 #block until emulator is ready to run tests
 echo "Waiting for Emulator to start"
-until [[ ${bootanim} =~ "stopped" ]]; do
+until [[ $bootanim =~ "stopped" ]]; do
 	echo "run: adb reconnect offline"
 	adb reconnect offline
 	adb devices
-	bootanim=$(adb -e shell getprop init.svc.bootanim 2>&1 &)
+	bootanim="$(adb -e shell getprop init.svc.bootanim 2>&1)"
 	echo "Waiting for emulator, status is: ${bootanim}"
 	sleep 1
 	echo
