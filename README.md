@@ -1,8 +1,10 @@
 <img src="https://static.mparticle.com/sdk/mp_logo_black.svg" width="280">
 
-## Android SDK
+# Android SDK
 
 [![Maven Central Status](https://maven-badges.herokuapp.com/maven-central/com.mparticle/android-core/badge.svg?style=flat-square)](https://search.maven.org/#search%7Cga%7C1%7Cmparticle)
+
+A single SDK to collect analytics data and send it to 100+ marketing, analytics, and data platforms. Simplify your data integration with a single API.
 
 Hello! This is the public repo of the mParticle Android SDK. mParticle's mission is straightforward: make it really easy to use all of the great services in the app ecosystem. Our SDKs and platform are designed to be your abstraction layer and data hub, and we do the work of integrating with each individual app service so you don't have to.
 
@@ -277,6 +279,10 @@ Just by initializing the SDK you'll be set up to track user installs, engagement
 
 * [SDK Documentation](https://docs.mparticle.com/developers/sdk/android/)
 * [Javadocs](http://docs.mparticle.com/developers/sdk/android/javadocs/index.html)
+
+## Contributing
+
+We welcome contributions! If you're interested in contributing to the mParticle Android SDK, please read our [Contributing Guidelines](CONTRIBUTING.md).
 
 ## License
 
