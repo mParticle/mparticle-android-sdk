@@ -1,3 +1,21 @@
+## [5.74.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.73.2...v5.74.0) (2025-09-23)
+
+
+### Features
+
+* map selected identity 'emailsha256' ([#601](https://github.com/mParticle/mparticle-android-sdk/issues/601)) ([498575f](https://github.com/mParticle/mparticle-android-sdk/commit/498575f072f09ec683b9f57b173916647149f990))
+
+
+### Documentation
+
+* Updated readme file and add contributing and release file ([#603](https://github.com/mParticle/mparticle-android-sdk/issues/603)) ([975f0a3](https://github.com/mParticle/mparticle-android-sdk/commit/975f0a305ae6d8e7a2ee88e04f2bae83900d6ec8))
+
+
+### Updates & Maintenance
+
+* remove SonarCloud GitHub Actions workflow ([#606](https://github.com/mParticle/mparticle-android-sdk/issues/606)) ([41bb52f](https://github.com/mParticle/mparticle-android-sdk/commit/41bb52ff441a909d929dc3d8e3e99c9aefc416f5))
+* Update submodules ([705a321](https://github.com/mParticle/mparticle-android-sdk/commit/705a321393c10c5e54f37a8f3232c576457e4d53))
+
 ## [5.73.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.73.1...v5.73.2) (2025-09-09)
 
 
