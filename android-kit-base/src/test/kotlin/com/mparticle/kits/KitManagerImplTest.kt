@@ -1281,7 +1281,7 @@ class KitManagerImplTest {
             MParticleUser::class.java,
             IdentityApi::class.java,
             KitConfiguration::class.java,
-            Runnable::class.java
+            Runnable::class.java,
         )
         method.isAccessible = true
         val result = method.invoke(manager, "Test@gmail.com", null, user, identityApi, mockedKitConfig, runnable)
@@ -1335,7 +1335,7 @@ class KitManagerImplTest {
             MParticleUser::class.java,
             IdentityApi::class.java,
             KitConfiguration::class.java,
-            Runnable::class.java
+            Runnable::class.java,
         )
         method.isAccessible = true
         val result = method.invoke(manager, null, null, user, identityApi, mockedKitConfig, runnable)
@@ -1389,7 +1389,7 @@ class KitManagerImplTest {
             MParticleUser::class.java,
             IdentityApi::class.java,
             KitConfiguration::class.java,
-            Runnable::class.java
+            Runnable::class.java,
         )
         method.isAccessible = true
         val result = method.invoke(manager, "", "", user, identityApi, mockedKitConfig, runnable)
@@ -1443,7 +1443,7 @@ class KitManagerImplTest {
             MParticleUser::class.java,
             IdentityApi::class.java,
             KitConfiguration::class.java,
-            Runnable::class.java
+            Runnable::class.java,
         )
         method.isAccessible = true
         val result = method.invoke(manager, "", "hashed_Test@gmail.com", user, identityApi, mockedKitConfig, runnable)
@@ -1497,7 +1497,7 @@ class KitManagerImplTest {
             MParticleUser::class.java,
             IdentityApi::class.java,
             KitConfiguration::class.java,
-            Runnable::class.java
+            Runnable::class.java,
         )
         method.isAccessible = true
         val result = method.invoke(manager, null, "hashed_Test@gmail.com", user, identityApi, mockedKitConfig, runnable)
@@ -1551,7 +1551,7 @@ class KitManagerImplTest {
             MParticleUser::class.java,
             IdentityApi::class.java,
             KitConfiguration::class.java,
-            Runnable::class.java
+            Runnable::class.java,
         )
         method.isAccessible = true
         val result = method.invoke(manager, null, null, user, identityApi, mockedKitConfig, runnable)
@@ -1587,7 +1587,7 @@ class KitManagerImplTest {
             // add placement attributes here if needed
         ]
             """.trimIndent(),
-            "hashedEmailUserIdentityType" to "Other3"
+            "hashedEmailUserIdentityType" to "Other3",
         )
         val field = KitConfiguration::class.java.getDeclaredField("settings")
         field.isAccessible = true
@@ -1603,7 +1603,7 @@ class KitManagerImplTest {
             MParticleUser::class.java,
             IdentityApi::class.java,
             KitConfiguration::class.java,
-            Runnable::class.java
+            Runnable::class.java,
         )
         method.isAccessible = true
         val result = method.invoke(manager, "", "hashed_Test@gmail.com", user, identityApi, mockedKitConfig, runnable)
@@ -1639,7 +1639,7 @@ class KitManagerImplTest {
             // add placement attributes here if needed
         ]
             """.trimIndent(),
-            "hashedEmailUserIdentityType" to "Unknown"
+            "hashedEmailUserIdentityType" to "Unknown",
         )
         val field = KitConfiguration::class.java.getDeclaredField("settings")
         field.isAccessible = true
@@ -1655,7 +1655,7 @@ class KitManagerImplTest {
             MParticleUser::class.java,
             IdentityApi::class.java,
             KitConfiguration::class.java,
-            Runnable::class.java
+            Runnable::class.java,
         )
         method.isAccessible = true
         val result = method.invoke(manager, "", "hashed_Test@gmail.com", user, identityApi, mockedKitConfig, runnable)

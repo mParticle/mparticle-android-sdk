@@ -22,13 +22,13 @@ object Utils {
     ): String {
         Logger.verbose(
             "command line operation: ${
-                joinToString(" ") {
-                    if (it.contains(" ")) {
-                        "\"$it\""
-                    } else {
-                        it
-                    }
+            joinToString(" ") {
+                if (it.contains(" ")) {
+                    "\"$it\""
+                } else {
+                    it
                 }
+            }
             }",
         )
         var error = ""

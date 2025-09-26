@@ -1,6 +1,5 @@
 # mParticle Android SDK
 
-# Android SDK
 ![mParticle logo](https://static.mparticle.com/sdk/mp_logo_black.svg)
 
 ## Overview
@@ -215,11 +214,11 @@ provide an `mp.config` config file in the project-level directory
 
 ```json
 {
-  "dataPlanFile": "./mp-dataplan.json", //(required) accepts filename or path
+    "dataPlanFile": "./mp-dataplan.json", //(required) accepts filename or path
 
-  "resultsFile": "./mp-dp-results.json", //(optional) accepts filename or path
-  "disabled": "false", //(optional) defaults to "false"
-  "verbose": false //(optional) defaults to "false"
+    "resultsFile": "./mp-dp-results.json", //(optional) accepts filename or path
+    "disabled": "false", //(optional) defaults to "false"
+    "verbose": false //(optional) defaults to "false"
 }
 ```
 

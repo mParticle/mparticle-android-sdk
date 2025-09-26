@@ -439,13 +439,13 @@ class UploadHandlerTest {
         configManager: ConfigManager?,
         appStateManager: AppStateManager?,
     ) : UploadHandler(
-            MockContext(),
-            configManager,
-            appStateManager,
-            Mockito.mock(MessageManager::class.java),
-            database,
-            Mockito.mock(KitFrameworkWrapper::class.java),
-        ) {
+        MockContext(),
+        configManager,
+        appStateManager,
+        Mockito.mock(MessageManager::class.java),
+        database,
+        Mockito.mock(KitFrameworkWrapper::class.java),
+    ) {
         var message: Message? = null
         var messageDelay: Long? = null
         var uploadCalledCount = 0

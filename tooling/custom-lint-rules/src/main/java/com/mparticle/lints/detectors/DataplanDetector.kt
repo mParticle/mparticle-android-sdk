@@ -52,7 +52,11 @@ class DataplanDetector : CallScanner() {
             Issue.create(
                 "DataPlanMissing",
                 "Unable to read Data Plan",
-                "Retrieving the MParticle Data Plan is necessary to evaluate any violations. There may be a problem with locating your \"dataPlanVersionFile\". Please double check the values is correct in your \"mparticle\" block in build.gradle or your mp.config.json file",
+                """
+                |Retrieving the MParticle Data Plan is necessary to evaluate any violations.
+                |There may be a problem with locating your "dataPlanVersionFile".
+                |Please double check the values is correct in your "mparticle" block in build.gradle or your mp.config.json file
+                """.trimMargin(),
                 Category.USABILITY,
                 4,
                 Severity.INFORMATIONAL,

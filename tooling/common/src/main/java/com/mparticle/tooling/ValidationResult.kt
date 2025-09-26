@@ -8,14 +8,14 @@ data class ValidationResult(
     val eventType: String? = null,
     val data: ValidationResultData? = null,
     val error: DataPlanError? = null,
-    val arguments: List<String>
+    val arguments: List<String>,
 ) {
     var originalString: String? = null
 
     companion object {
         fun from(
             json: String?,
-            arguments: List<String>
+            arguments: List<String>,
         ): List<ValidationResult>? =
             try {
                 val jsonArray = JSONObject(json).getJSONArray("results")
@@ -53,20 +53,20 @@ data class ValidationResult(
                             "ValidationErrors",
                             data?.validationErrors?.foldRight(JSONArray()) { item, arr ->
                                 arr.put(item)
-                            }
-                        )
+                            },
+                        ),
                 )
                 .put("Event Type", eventType)
             return """
                 Arguments:
                 ${arguments.indexOfFirst { it.startsWith("--dataPlan") }.let { index ->
-                    arguments.toMutableList().apply {
-                        if (index >= 0) {
-                            val dataplan = removeAt(index + 1)
-                            add(index + 1, "${dataplan.substring(0, dataplan.length.coerceAtMost(20))}...")
-                        }
+                arguments.toMutableList().apply {
+                    if (index >= 0) {
+                        val dataplan = removeAt(index + 1)
+                        add(index + 1, "${dataplan.substring(0, dataplan.length.coerceAtMost(20))}...")
                     }
-                }.joinToString(" ")}
+                }
+            }.joinToString(" ")}
                 Response:
                 ${jsonResponse.toString(4)}
             """.trimIndent()
@@ -147,7 +147,8 @@ enum class ValidationErrorType(
     Unplanned("unplanned"),
     MissingRequied("missing_required"),
     InvalidValue("invalid_value"),
-    Unknown("unknown");
+    Unknown("unknown"),
+    ;
 
     companion object {
         fun forName(text: String): ValidationErrorType = values().first { it.text == text }

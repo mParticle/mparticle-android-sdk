@@ -128,20 +128,20 @@ class AppStateManagerInstrumentedTest : BaseCleanStartedEachTest() {
         context: Context?,
         var latch: CountDownLatch,
     ) : KitFrameworkWrapper(
-            context,
-            object : ReportingManager {
-                override fun log(message: JsonReportingMessage) {
-                    // do nothing
-                }
+        context,
+        object : ReportingManager {
+            override fun log(message: JsonReportingMessage) {
+                // do nothing
+            }
 
-                override fun logAll(messageList: List<JsonReportingMessage>) {
-                    // do nothing
-                }
-            },
-            MParticle.getInstance()?.Internal()?.configManager,
-            MParticle.getInstance()?.Internal()?.appStateManager,
-            MParticleOptions.builder(mContext).credentials("some", "key").build(),
-        ) {
+            override fun logAll(messageList: List<JsonReportingMessage>) {
+                // do nothing
+            }
+        },
+        MParticle.getInstance()?.Internal()?.configManager,
+        MParticle.getInstance()?.Internal()?.appStateManager,
+        MParticleOptions.builder(mContext).credentials("some", "key").build(),
+    ) {
         var onApplicationBackgroundCalled = false
         var onApplicationForegroundCalled = false
 

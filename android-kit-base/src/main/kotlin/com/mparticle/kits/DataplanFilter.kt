@@ -48,9 +48,9 @@ Data Plan parsed for Kit Filtering:
     blockUserAttributes=$blockUserAttributes
     blockUserIdentities=$blockUserIdentities
         ${
-                dataPoints.entries.joinToString("\n") { (key, value) ->
-                    "$key\n\t${value?.joinToString("\n\t") { it }}"
-                }
+            dataPoints.entries.joinToString("\n") { (key, value) ->
+                "$key\n\t${value?.joinToString("\n\t") { it }}"
+            }
             }
         """,
         )

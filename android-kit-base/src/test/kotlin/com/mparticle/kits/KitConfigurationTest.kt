@@ -38,8 +38,8 @@ class KitConfigurationTest {
                 val attributeValueFilter = ekConfig.getJSONObject("avf")
                 if (attributeValueFilter.has("i") && attributeValueFilter.has("a") &&
                     attributeValueFilter.has(
-                        "v",
-                    )
+                            "v",
+                        )
                 ) {
                     val shouldIncludeMatches = attributeValueFilter["i"]
                     val hashedAttribute = attributeValueFilter["a"]

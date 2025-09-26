@@ -50,6 +50,6 @@ object AccessUtils {
         return (
             (certificate1.certificate === certificate2.certificate || certificate1.certificate == certificate2.certificate) &&
                 (certificate1.alias === certificate2.alias || certificate1.alias == certificate2.alias)
-        )
+            )
     }
 }

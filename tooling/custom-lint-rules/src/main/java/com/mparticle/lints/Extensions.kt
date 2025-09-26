@@ -252,7 +252,7 @@ internal fun Pair<*, *>.resolveToEnum(): Enum<*> {
     val className =
         when (first) {
             is ClassId -> "${(first as ClassId).packageFqName}.${
-                (first as ClassId).relativeClassName.asString().replace(".", "$")
+            (first as ClassId).relativeClassName.asString().replace(".", "$")
             }"
             is String -> first as String
             else -> null

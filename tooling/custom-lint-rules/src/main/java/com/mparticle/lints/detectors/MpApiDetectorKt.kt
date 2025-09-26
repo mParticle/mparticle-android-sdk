@@ -209,7 +209,7 @@ class MpApiDetectorKt :
                                 val index = text.indexOf(name ?: "")
                                 if (index > 0 &&
                                     " ${
-                                        text.substring(
+                                    text.substring(
                                             0,
                                             index,
                                         )

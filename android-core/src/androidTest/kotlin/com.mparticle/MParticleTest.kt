@@ -30,8 +30,21 @@ import java.util.concurrent.CountDownLatch
 import kotlin.test.assertTrue
 
 class MParticleTest : BaseCleanStartedEachTest() {
-    private val configResponse =
-        "{\"dt\":\"ac\", \"id\":\"fddf1f96-560e-41f6-8f9b-ddd070be0765\", \"ct\":1434392412994, \"dbg\":false, \"cue\":\"appdefined\", \"pmk\":[\"mp_message\", \"com.urbanairship.push.ALERT\", \"alert\", \"a\", \"message\"], \"cnp\":\"appdefined\", \"soc\":0, \"oo\":false, \"eks\":[] }, \"pio\":30 }"
+    private val configResponse = """
+        {
+            "dt": "ac",
+            "id": "fddf1f96-560e-41f6-8f9b-ddd070be0765",
+            "ct": 1434392412994,
+            "dbg": false,
+            "cue": "appdefined",
+            "pmk": ["mp_message", "com.urbanairship.push.ALERT", "alert", "a", "message"],
+            "cnp": "appdefined",
+            "soc": 0,
+            "oo": false,
+            "eks": []
+        },
+        "pio": 30
+    """
 
     @Test
     fun testEnsureSessionActive() {
@@ -488,7 +501,7 @@ class MParticleTest : BaseCleanStartedEachTest() {
                     .getConfigManager()
                     .getMpids()
                     ?.size ?: 0
-            ),
+                ),
         )
 
         // Set strict mode, so if we get any warning or error messages during the reset/restart phase,
