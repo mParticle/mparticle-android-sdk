@@ -15,11 +15,11 @@ open class UserAttributeListenerTestKit :
     var onSetUserTag: ((key: String?, user: FilteredMParticleUser?) -> Unit)? = null
     var onSetUserAttributeList: ((attributeKey: String?, attributeValueList: List<String?>?, user: FilteredMParticleUser?) -> Unit)? =
         null
-    var onSetAllUserAttributes: (
+    var onSetAllUserAttributes: ((
         userAttributes: Map<String?, String?>?,
         userAttributeLists: Map<String?, List<String?>?>?,
         user: FilteredMParticleUser?,
-    ) -> Unit? = null
+    ) -> Unit)? = null
     var supportsAttributeLists: (() -> Boolean)? = null
     var onConsentStateUpdated: ((oldState: ConsentState?, newState: ConsentState?, user: FilteredMParticleUser?) -> Unit)? =
         null
