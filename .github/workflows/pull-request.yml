@@ -131,9 +131,9 @@ jobs:
             adb shell settings put global animator_duration_scale 0.0
 
             for pkg in com.mparticle.kittests com.mparticle.kits.test com.mparticle.legacyTest com.mparticle.test; do
-            if adb shell pm list packages | grep -q "$pkg"; then
-            adb uninstall "$pkg"
-            fi
+              if adb shell pm list packages | grep -q "$pkg"; then
+              adb uninstall "$pkg"
+              fi
             done
 
             ./gradlew connectedCheck --stacktrace
