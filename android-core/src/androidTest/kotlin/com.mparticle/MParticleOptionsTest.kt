@@ -571,14 +571,14 @@ class MParticleOptionsTest : BaseAbstractTest() {
     @Test
     fun testAndroidIdLogMessage() {
         val infoLogs = ArrayList<String?>()
-        Logger.setLogHandler(object : DefaultLogHandler() {
+        Logger.logHandler = object : DefaultLogHandler() {
             override fun log(priority: MParticle.LogLevel, error: Throwable?, messages: String) {
                 super.log(priority, error, messages)
                 if (priority == MParticle.LogLevel.INFO) {
                     infoLogs.add(messages)
                 }
             }
-        })
+        }
         MParticleOptions.builder(mContext)
             .credentials("this", "that")
             .androidIdDisabled(true)
