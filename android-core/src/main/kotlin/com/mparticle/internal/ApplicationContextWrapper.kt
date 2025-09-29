@@ -130,7 +130,11 @@ open class ApplicationContextWrapper(
 
     override fun hashCode(): Int = mBaseApplication.hashCode()
 
-    override fun equals(obj: Any?): Boolean = mBaseApplication == obj
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is ApplicationContextWrapper) return false
+        return mBaseApplication == other.mBaseApplication
+    }
 
     override fun toString(): String = mBaseApplication.toString()
 
