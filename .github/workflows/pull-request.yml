@@ -57,11 +57,12 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: |
-            # Disable benchmark tests as they do not work on emulators
-            adb uninstall com.mparticle.kittests || true
-            adb uninstall com.mparticle.kits.test || true
-            adb uninstall com.mparticle.legacyTest || true
-            adb uninstall com.mparticle.test || true
+            # Safely uninstall old test packages if they exist
+             for pkg in com.mparticle.kittests com.mparticle.kits.test com.mparticle.legacyTest com.mparticle.test; do
+               if adb shell pm list packages | grep -q "$pkg"; then
+                 adb uninstall "$pkg"
+               fi
+             done
 
             ./gradlew connectedCheck --info --stacktrace
 
@@ -112,10 +113,12 @@ jobs:
           disable-animations: true
           script: |
             # Disable benchmark tests as they do not work on emulators
-            adb uninstall com.mparticle.kittests || true
-            adb uninstall com.mparticle.kits.test || true
-            adb uninstall com.mparticle.legacyTest || true
-            adb uninstall com.mparticle.test || true
+            # Safely uninstall old test packages if they exist
+            for pkg in com.mparticle.kittests com.mparticle.kits.test com.mparticle.legacyTest com.mparticle.test; do
+              if adb shell pm list packages | grep -q "$pkg"; then
+                adb uninstall "$pkg"
+              fi
+            done
 
             ./gradlew connectedCheck --stacktrace
             ./gradlew -Porchestrator=true :android-core:cAT -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=none
