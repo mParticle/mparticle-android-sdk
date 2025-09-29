@@ -36,9 +36,10 @@ class KitConfigurationTest {
             val configuration = MockKitConfiguration.createKitConfiguration(ekConfig)
             if (ekConfig.has("avf")) {
                 val attributeValueFilter = ekConfig.getJSONObject("avf")
-                if (attributeValueFilter.has("i") && attributeValueFilter.has("a") && attributeValueFilter.has(
-                        "v"
-                    )
+                if (attributeValueFilter.has("i") && attributeValueFilter.has("a") &&
+                    attributeValueFilter.has(
+                            "v",
+                        )
                 ) {
                     val shouldIncludeMatches = attributeValueFilter["i"]
                     val hashedAttribute = attributeValueFilter["a"]
@@ -47,15 +48,15 @@ class KitConfigurationTest {
                         Assert.assertTrue(configuration.isAttributeValueFilteringActive)
                         Assert.assertEquals(
                             attributeValueFilter.getBoolean("i"),
-                            configuration.isAvfShouldIncludeMatches
+                            configuration.isAvfShouldIncludeMatches,
                         )
                         Assert.assertEquals(
                             attributeValueFilter.getInt("a").toLong(),
-                            configuration.avfHashedAttribute.toLong()
+                            configuration.avfHashedAttribute.toLong(),
                         )
                         Assert.assertEquals(
                             attributeValueFilter.getInt("v").toLong(),
-                            configuration.avfHashedValue.toLong()
+                            configuration.avfHashedValue.toLong(),
                         )
                     } else {
                         Assert.assertFalse(configuration.isAttributeValueFilteringActive)
@@ -67,62 +68,62 @@ class KitConfigurationTest {
                 if (filters.has("et")) {
                     Assert.assertEquals(
                         filters.getJSONObject("et").length().toLong(),
-                        configuration.eventTypeFilters.size().toLong()
+                        configuration.eventTypeFilters.size().toLong(),
                     )
                 }
                 if (filters.has("ec")) {
                     Assert.assertEquals(
                         filters.getJSONObject("ec").length().toLong(),
-                        configuration.eventNameFilters.size().toLong()
+                        configuration.eventNameFilters.size().toLong(),
                     )
                 }
                 if (filters.has("ea")) {
                     Assert.assertEquals(
                         filters.getJSONObject("ea").length().toLong(),
-                        configuration.eventAttributeFilters.size().toLong()
+                        configuration.eventAttributeFilters.size().toLong(),
                     )
                 }
                 if (filters.has("svec")) {
                     Assert.assertEquals(
                         filters.getJSONObject("svec").length().toLong(),
-                        configuration.screenNameFilters.size().toLong()
+                        configuration.screenNameFilters.size().toLong(),
                     )
                 }
                 if (filters.has("svea")) {
                     Assert.assertEquals(
                         filters.getJSONObject("svea").length().toLong(),
-                        configuration.screenAttributeFilters.size().toLong()
+                        configuration.screenAttributeFilters.size().toLong(),
                     )
                 }
                 if (filters.has("uid")) {
                     Assert.assertEquals(
                         filters.getJSONObject("uid").length().toLong(),
-                        configuration.userIdentityFilters.size().toLong()
+                        configuration.userIdentityFilters.size().toLong(),
                     )
                 }
                 if (filters.has("ua")) {
                     Assert.assertEquals(
                         filters.getJSONObject("ua").length().toLong(),
-                        configuration.userAttributeFilters.size().toLong()
+                        configuration.userAttributeFilters.size().toLong(),
                     )
                 }
                 if (filters.has("cea")) {
                     Assert.assertEquals(
                         filters.getJSONObject("cea").length().toLong(),
-                        configuration.commerceAttributeFilters.size().toLong()
+                        configuration.commerceAttributeFilters.size().toLong(),
                     )
                 }
                 if (filters.has("ent")) {
                     Assert.assertEquals(
                         filters.getJSONObject("ent").length().toLong(),
-                        configuration.commerceEntityFilters.size().toLong()
+                        configuration.commerceEntityFilters.size().toLong(),
                     )
                 }
                 if (filters.has("afa")) {
                     val entityAttFilters = filters.getJSONObject("afa")
                     Assert.assertEquals(
                         entityAttFilters.length().toLong(),
-                        configuration.commerceEntityAttributeFilters.size.toLong()
+                        configuration.commerceEntityAttributeFilters.size.toLong(),
                     )
                     val keys: MutableIterator<Any?> = entityAttFilters.keys()
                     while (keys.hasNext()) {
@@ -130,7 +131,8 @@ class KitConfigurationTest {
                         Assert.assertEquals(
                             entityAttFilters.getJSONObject(key).length().toLong(),
                             configuration.commerceEntityAttributeFilters[key.toInt()]
-                                ?.size()?.toLong()
+                                ?.size()
+                                ?.toLong(),
                         )
                     }
                 }
@@ -139,11 +141,11 @@ class KitConfigurationTest {
                 val bracketing = ekConfig.getJSONObject("bk")
                 Assert.assertEquals(
                     bracketing.optInt("lo").toLong(),
-                    configuration.lowBracket.toLong()
+                    configuration.lowBracket.toLong(),
                 )
                 Assert.assertEquals(
                     bracketing.optInt("hi").toLong(),
-                    configuration.highBracket.toLong()
+                    configuration.highBracket.toLong(),
                 )
             } else {
                 Assert.assertEquals(0, configuration.lowBracket.toLong())
@@ -155,7 +157,7 @@ class KitConfigurationTest {
                     Assert.assertNotNull(configuration.defaultEventProjection)
                     Assert.assertEquals(
                         projections.length().toLong(),
-                        (configuration.customMappingList.size + 1).toLong()
+                        (configuration.customMappingList.size + 1).toLong(),
                     )
                 }
             }
@@ -176,41 +178,52 @@ class KitConfigurationTest {
         val attributes: MutableMap<String, String> = HashMap()
         attributes["my custom attribute"] = "whatever"
         var event =
-            CommerceEvent.Builder(Product.ADD_TO_CART, Product.Builder("name", "sku", 2.0).build())
-                .customAttributes(attributes).build()
+            CommerceEvent
+                .Builder(Product.ADD_TO_CART, Product.Builder("name", "sku", 2.0).build())
+                .customAttributes(attributes)
+                .build()
         Assert.assertEquals("whatever", event.customAttributeStrings?.get("my custom attribute"))
         val filteredEvent = configuration.filterCommerceEvent(event)
         Assert.assertNull(filteredEvent.customAttributeStrings?.get("my custom attribute"))
 
         // make sure we're only doing it for ADD_TO_CART
         var event2 =
-            CommerceEvent.Builder(Product.PURCHASE, Product.Builder("name", "sku", 2.0).build())
+            CommerceEvent
+                .Builder(Product.PURCHASE, Product.Builder("name", "sku", 2.0).build())
                 .customAttributes(attributes)
-                .transactionAttributes(TransactionAttributes().setId("some id")).build()
+                .transactionAttributes(TransactionAttributes().setId("some id"))
+                .build()
         Assert.assertEquals(
             "whatever",
-            event2.customAttributeStrings?.get("my custom attribute")
+            event2.customAttributeStrings?.get("my custom attribute"),
         )
         var filteredEvent2 = configuration.filterCommerceEvent(event2)
         Assert.assertEquals(
             "whatever",
-            filteredEvent2.customAttributeStrings?.get("my custom attribute")
+            filteredEvent2.customAttributeStrings?.get("my custom attribute"),
         )
-        event = CommerceEvent.Builder(Product.CHECKOUT, Product.Builder("name", "sku", 2.0).build())
-            .checkoutOptions("cool options").build()
+        event =
+            CommerceEvent
+                .Builder(Product.CHECKOUT, Product.Builder("name", "sku", 2.0).build())
+                .checkoutOptions("cool options")
+                .build()
         Assert.assertEquals("cool options", event.checkoutOptions)
         filteredEvent2 = configuration.filterCommerceEvent(event)
         Assert.assertNull(filteredEvent2.checkoutOptions)
         event =
-            CommerceEvent.Builder(Product.ADD_TO_CART, Product.Builder("name", "sku", 2.0).build())
-                .checkoutOptions("cool options").build()
+            CommerceEvent
+                .Builder(Product.ADD_TO_CART, Product.Builder("name", "sku", 2.0).build())
+                .checkoutOptions("cool options")
+                .build()
         Assert.assertEquals("cool options", event.checkoutOptions)
         filteredEvent2 = configuration.filterCommerceEvent(event)
         Assert.assertEquals("cool options", filteredEvent2.checkoutOptions)
         event2 =
-            CommerceEvent.Builder(Product.PURCHASE, Product.Builder("name", "sku", 2.0).build())
-                .customAttributes(attributes).transactionAttributes(
-                    TransactionAttributes().setId("some id").setAffiliation("cool affiliation")
+            CommerceEvent
+                .Builder(Product.PURCHASE, Product.Builder("name", "sku", 2.0).build())
+                .customAttributes(attributes)
+                .transactionAttributes(
+                    TransactionAttributes().setId("some id").setAffiliation("cool affiliation"),
                 ).build()
         Assert.assertEquals("cool affiliation", event2.transactionAttributes?.affiliation)
         filteredEvent2 = configuration.filterCommerceEvent(event2)
@@ -220,15 +233,18 @@ class KitConfigurationTest {
     @Test
     @Throws(Exception::class)
     fun testFilterCommerceEntity() {
-        var configuration = MockKitConfiguration.createKitConfiguration(
-            JSONObject(
-                COMMERCE_FILTERS
+        var configuration =
+            MockKitConfiguration.createKitConfiguration(
+                JSONObject(
+                    COMMERCE_FILTERS,
+                ),
             )
-        )
         val impression = Impression("Cool list name", Product.Builder("name2", "sku", 2.0).build())
         var event =
-            CommerceEvent.Builder(Product.ADD_TO_CART, Product.Builder("name", "sku", 2.0).build())
-                .addImpression(impression).build()
+            CommerceEvent
+                .Builder(Product.ADD_TO_CART, Product.Builder("name", "sku", 2.0).build())
+                .addImpression(impression)
+                .build()
         var impressionList = event.impressions
         if (impressionList != null) {
             for (imp in impressionList) {
@@ -250,8 +266,10 @@ class KitConfigurationTest {
         config.getJSONObject("hs").getJSONObject("ent").put("1", 1)
         configuration = MockKitConfiguration.createKitConfiguration(config)
         event =
-            CommerceEvent.Builder(Product.ADD_TO_CART, Product.Builder("name", "sku", 2.0).build())
-                .addImpression(impression).build()
+            CommerceEvent
+                .Builder(Product.ADD_TO_CART, Product.Builder("name", "sku", 2.0).build())
+                .addImpression(impression)
+                .build()
         impressionList = event.impressions
         if (impressionList != null) {
             for (imp in impressionList) {
@@ -273,36 +291,50 @@ class KitConfigurationTest {
     @Test
     @Throws(Exception::class)
     fun testFilterCommerceEntityAttribute() {
-        var event = CommerceEvent.Builder(
-            Promotion.VIEW,
-            Promotion().setId("promo id").setCreative("the creative").setName("promotion name")
-        ).build()
-        var configuration = MockKitConfiguration.createKitConfiguration(
-            JSONObject(
-                COMMERCE_FILTERS
+        var event =
+            CommerceEvent
+                .Builder(
+                    Promotion.VIEW,
+                    Promotion().setId("promo id").setCreative("the creative").setName("promotion name"),
+                ).build()
+        var configuration =
+            MockKitConfiguration.createKitConfiguration(
+                JSONObject(
+                    COMMERCE_FILTERS,
+                ),
             )
-        )
         Assert.assertEquals("the creative", event.promotions?.get(0)?.creative)
         var filteredEvent = configuration.filterCommerceEvent(event)
         Assert.assertNull(filteredEvent.promotions?.get(0)?.creative)
         Assert.assertEquals("promotion name", filteredEvent.promotions?.get(0)?.name)
         val attributes: MutableMap<String, String> = HashMap()
         attributes["my custom product attribute"] = "whatever"
-        event = CommerceEvent.Builder(
-            Product.CHECKOUT,
-            Product.Builder("name", "sku", 5.0)
-                .customAttributes(attributes)
-                .brand("cool brand").build()
-        )
-            .build()
+        event =
+            CommerceEvent
+                .Builder(
+                    Product.CHECKOUT,
+                    Product
+                        .Builder("name", "sku", 5.0)
+                        .customAttributes(attributes)
+                        .brand("cool brand")
+                        .build(),
+                ).build()
         Assert.assertEquals(
             "whatever",
-            event.products?.get(0)?.customAttributes?.get("my custom product attribute")
+            event.products
+                ?.get(0)
+                ?.customAttributes
+                ?.get("my custom product attribute"),
         )
         Assert.assertEquals("cool brand", event.products?.get(0)?.brand)
         configuration = MockKitConfiguration.createKitConfiguration(JSONObject(COMMERCE_FILTERS_2))
         filteredEvent = configuration.filterCommerceEvent(event)
-        Assert.assertNull(filteredEvent.products?.get(0)?.customAttributes?.get("my custom product attribute"))
+        Assert.assertNull(
+            filteredEvent.products
+                ?.get(0)
+                ?.customAttributes
+                ?.get("my custom product attribute"),
+        )
         Assert.assertNull(filteredEvent.products?.get(0)?.brand)
     }
 
@@ -313,13 +345,16 @@ class KitConfigurationTest {
         val configuration =
             MockKitConfiguration.createKitConfiguration(JSONObject(COMMERCE_FILTERS))
         val event =
-            CommerceEvent.Builder(Product.ADD_TO_CART, Product.Builder("name", "sku", 2.0).build())
+            CommerceEvent
+                .Builder(Product.ADD_TO_CART, Product.Builder("name", "sku", 2.0).build())
                 .build()
         Assert.assertNotNull(configuration.filterCommerceEvent(event))
-        val event2 = CommerceEvent.Builder(
-            Product.REMOVE_FROM_CART,
-            Product.Builder("name", "sku", 2.0).build()
-        ).build()
+        val event2 =
+            CommerceEvent
+                .Builder(
+                    Product.REMOVE_FROM_CART,
+                    Product.Builder("name", "sku", 2.0).build(),
+                ).build()
         Assert.assertNull(configuration.filterCommerceEvent(event2))
     }
 
@@ -337,16 +372,18 @@ class KitConfigurationTest {
             halfMatchingAttributes["key1"] = "valWrong"
             nonMatchingAttributes.put("keyWrong", "valWrong")
         }
-        val includeTrueConfiguration = MockKitConfiguration.createKitConfiguration(
-            JSONObject(
-                ATTRIBUTE_VALUE_FILTERING_INCLUDE_TRUE
+        val includeTrueConfiguration =
+            MockKitConfiguration.createKitConfiguration(
+                JSONObject(
+                    ATTRIBUTE_VALUE_FILTERING_INCLUDE_TRUE,
+                ),
             )
-        )
-        val includeFalseConfiguration = MockKitConfiguration.createKitConfiguration(
-            JSONObject(
-                ATTRIBUTE_VALUE_FILTERING_INCLUDE_FALSE
+        val includeFalseConfiguration =
+            MockKitConfiguration.createKitConfiguration(
+                JSONObject(
+                    ATTRIBUTE_VALUE_FILTERING_INCLUDE_FALSE,
+                ),
             )
-        )
         var result: Boolean =
             includeTrueConfiguration.shouldIncludeFromAttributeValueFiltering(matchingAttributes)
         Assert.assertTrue(result)
@@ -359,9 +396,10 @@ class KitConfigurationTest {
         result =
             includeFalseConfiguration.shouldIncludeFromAttributeValueFiltering(matchingAttributes)
         Assert.assertFalse(result)
-        result = includeFalseConfiguration.shouldIncludeFromAttributeValueFiltering(
-            halfMatchingAttributes
-        )
+        result =
+            includeFalseConfiguration.shouldIncludeFromAttributeValueFiltering(
+                halfMatchingAttributes,
+            )
         Assert.assertTrue(result)
         result =
             includeFalseConfiguration.shouldIncludeFromAttributeValueFiltering(nonMatchingAttributes)
@@ -372,24 +410,28 @@ class KitConfigurationTest {
     @Throws(Exception::class)
     fun testUserAttributeFiltering() {
         val configuration =
-            MockKitConfiguration.createKitConfiguration(JSONObject(" {\"id\":56, \"as\":{\"secretKey\":\"testappkey\", \"eventList\":\"[\\\"test1\\\",\\\"test2\\\",\\\"test3\\\"]\", \"sendTransactionData\":\"True\", \"eventAttributeList\":null }, \"hs\":{\"ua\":{\"-430909305\":0, \"1510554026\":1, \"341203229\":0, \"96511\":0, \"3373707\":0, \"1193085\":0, \"635848677\":0, \"-564885382\":0, \"1168987\":0, \"102865796\":0, \"3552215\":0, \"3648196\":0, \"-892481550\":0, \"405645589\":0, \"405645588\":0, \"405645591\":0, \"405645590\":0, \"405645592\":0, \"3492908\":0 } }, }"))
+            MockKitConfiguration.createKitConfiguration(
+                JSONObject(
+                    " {\"id\":56, \"as\":{\"secretKey\":\"testappkey\", \"eventList\":\"[\\\"test1\\\",\\\"test2\\\",\\\"test3\\\"]\", \"sendTransactionData\":\"True\", \"eventAttributeList\":null }, \"hs\":{\"ua\":{\"-430909305\":0, \"1510554026\":1, \"341203229\":0, \"96511\":0, \"3373707\":0, \"1193085\":0, \"635848677\":0, \"-564885382\":0, \"1168987\":0, \"102865796\":0, \"3552215\":0, \"3648196\":0, \"-892481550\":0, \"405645589\":0, \"405645588\":0, \"405645591\":0, \"405645590\":0, \"405645592\":0, \"3492908\":0 } }, }",
+                ),
+            )
         Assert.assertFalse(
             KitConfiguration.shouldForwardAttribute(
                 configuration.userAttributeFilters,
-                "test key in config as false"
-            )
+                "test key in config as false",
+            ),
         )
         Assert.assertTrue(
             KitConfiguration.shouldForwardAttribute(
                 configuration.userAttributeFilters,
-                "test key in config as true"
-            )
+                "test key in config as true",
+            ),
         )
         Assert.assertTrue(
             KitConfiguration.shouldForwardAttribute(
                 configuration.userAttributeFilters,
-                "test key not in config"
-            )
+                "test key not in config",
+            ),
         )
     }
 
@@ -397,42 +439,50 @@ class KitConfigurationTest {
     @Throws(Exception::class)
     fun testScreenAttributeFiltering() {
         val configuration =
-            MockKitConfiguration.createKitConfiguration(JSONObject(" {\"id\":56, \"as\":{\"secretKey\":\"testappkey\", \"eventList\":\"[\\\"test1\\\",\\\"test2\\\",\\\"test3\\\"]\", \"sendTransactionData\":\"True\", \"eventAttributeList\":null }, \"hs\":{\"svea\":{\"1689004688\":0, \"1198002448\":1 } }, }"))
-        val testAttributes = mapOf(
-            "screen attribute should not forward" to "testVal",
-            "screen attribute should forward" to "testVal",
-            "screen attribute should also forward" to "testVal"
-        )
-        val filterdScreenAttributes = KitConfiguration.filterEventAttributes(
-            null,
-            "testScreenView",
-            configuration.screenAttributeFilters,
-            testAttributes
-        )
+            MockKitConfiguration.createKitConfiguration(
+                JSONObject(
+                    " {\"id\":56, \"as\":{\"secretKey\":\"testappkey\", \"eventList\":\"[\\\"test1\\\",\\\"test2\\\",\\\"test3\\\"]\", \"sendTransactionData\":\"True\", \"eventAttributeList\":null }, \"hs\":{\"svea\":{\"1689004688\":0, \"1198002448\":1 } }, }",
+                ),
+            )
+        val testAttributes =
+            mapOf(
+                "screen attribute should not forward" to "testVal",
+                "screen attribute should forward" to "testVal",
+                "screen attribute should also forward" to "testVal",
+            )
+        val filterdScreenAttributes =
+            KitConfiguration.filterEventAttributes(
+                null,
+                "testScreenView",
+                configuration.screenAttributeFilters,
+                testAttributes,
+            )
         Assert.assertFalse(
-            filterdScreenAttributes.containsKey("screen attribute should not forward")
+            filterdScreenAttributes.containsKey("screen attribute should not forward"),
         )
         Assert.assertTrue(
-            filterdScreenAttributes.containsKey("screen attribute should forward")
+            filterdScreenAttributes.containsKey("screen attribute should forward"),
         )
         Assert.assertTrue(
-            filterdScreenAttributes.containsKey("screen attribute should also forward")
+            filterdScreenAttributes.containsKey("screen attribute should also forward"),
         )
     }
 
     @Test
     @Throws(Exception::class)
     fun testConsentForwardingRules() {
-        var configuration = MockKitConfiguration.createKitConfiguration(
-            JSONObject("{\"id\":56,\"crvf\":{\"i\": true, \"v\":[{\"c\":true, \"h\":123}, {\"c\":false, \"h\":456}]}}")
-        )
+        var configuration =
+            MockKitConfiguration.createKitConfiguration(
+                JSONObject("{\"id\":56,\"crvf\":{\"i\": true, \"v\":[{\"c\":true, \"h\":123}, {\"c\":false, \"h\":456}]}}"),
+            )
         Assert.assertEquals(2, configuration.mConsentForwardingRules.size.toLong())
         Assert.assertEquals(true, configuration.consentForwardingIncludeMatches)
         Assert.assertEquals(true, configuration.mConsentForwardingRules[123])
         Assert.assertEquals(false, configuration.mConsentForwardingRules[456])
-        configuration = configuration.parseConfiguration(
-            JSONObject("{\"id\":56,\"crvf\":{\"i\": false, \"v\":[{\"c\":false, \"h\":123}, {\"c\":true, \"h\":456}]}}")
-        )
+        configuration =
+            configuration.parseConfiguration(
+                JSONObject("{\"id\":56,\"crvf\":{\"i\": false, \"v\":[{\"c\":false, \"h\":123}, {\"c\":true, \"h\":456}]}}"),
+            )
         Assert.assertEquals(2, configuration.mConsentForwardingRules.size.toLong())
         Assert.assertEquals(false, configuration.consentForwardingIncludeMatches)
         Assert.assertEquals(false, configuration.mConsentForwardingRules[123])
@@ -454,9 +504,10 @@ class KitConfigurationTest {
         ruleArray.put(rule1)
         rule1.put("h", KitUtils.hashForFiltering("1" + "foo purpose"))
         rule1.put("c", false)
-        val configuration = MockKitConfiguration.createKitConfiguration(
-            JSONObject("{\"id\":56,\"crvf\":{\"i\": true, \"v\":[{\"c\":true, \"h\":123}, {\"c\":false, \"h\":456}]}}")
-        )
+        val configuration =
+            MockKitConfiguration.createKitConfiguration(
+                JSONObject("{\"id\":56,\"crvf\":{\"i\": true, \"v\":[{\"c\":true, \"h\":123}, {\"c\":false, \"h\":456}]}}"),
+            )
         Assert.assertFalse(configuration.isConsentStateFilterMatch(ConsentState.builder().build()))
     }
 
@@ -484,81 +535,71 @@ class KitConfigurationTest {
         val configuration = MockKitConfiguration.createKitConfiguration(jsonConfiguration)
         Assert.assertTrue(
             configuration.isConsentStateFilterMatch(
-                ConsentState.builder()
+                ConsentState
+                    .builder()
                     .addGDPRConsentState(
                         "foo purpose 1",
-                        GDPRConsent.builder(false).build()
-                    )
-                    .addGDPRConsentState(
+                        GDPRConsent.builder(false).build(),
+                    ).addGDPRConsentState(
                         "foo purpose 2",
-                        GDPRConsent.builder(true).build()
-                    )
-                    .addGDPRConsentState(
+                        GDPRConsent.builder(true).build(),
+                    ).addGDPRConsentState(
                         "foo purpose 3",
-                        GDPRConsent.builder(true).build()
-                    )
-                    .build()
-            )
+                        GDPRConsent.builder(true).build(),
+                    ).build(),
+            ),
         )
         Assert.assertTrue(
             configuration.isConsentStateFilterMatch(
-                ConsentState.builder()
+                ConsentState
+                    .builder()
                     .addGDPRConsentState(
                         "foo purpose 1",
-                        GDPRConsent.builder(true).build()
-                    )
-                    .addGDPRConsentState(
+                        GDPRConsent.builder(true).build(),
+                    ).addGDPRConsentState(
                         "foo purpose 2",
-                        GDPRConsent.builder(false).build()
-                    )
-                    .addGDPRConsentState(
+                        GDPRConsent.builder(false).build(),
+                    ).addGDPRConsentState(
                         "foo purpose 3",
-                        GDPRConsent.builder(true).build()
-                    )
-                    .build()
-            )
+                        GDPRConsent.builder(true).build(),
+                    ).build(),
+            ),
         )
         Assert.assertTrue(
             configuration.isConsentStateFilterMatch(
-                ConsentState.builder()
+                ConsentState
+                    .builder()
                     .addGDPRConsentState(
                         "foo purpose 1",
-                        GDPRConsent.builder(true).build()
-                    )
-                    .addGDPRConsentState(
+                        GDPRConsent.builder(true).build(),
+                    ).addGDPRConsentState(
                         "foo purpose 2",
-                        GDPRConsent.builder(true).build()
-                    )
-                    .addGDPRConsentState(
+                        GDPRConsent.builder(true).build(),
+                    ).addGDPRConsentState(
                         "foo purpose 3",
-                        GDPRConsent.builder(false).build()
-                    )
-                    .setCCPAConsentState(
-                        CCPAConsent.builder(false).build()
-                    )
-                    .build()
-            )
+                        GDPRConsent.builder(false).build(),
+                    ).setCCPAConsentState(
+                        CCPAConsent.builder(false).build(),
+                    ).build(),
+            ),
         )
         Assert.assertTrue(
             configuration.isConsentStateFilterMatch(
-                ConsentState.builder()
+                ConsentState
+                    .builder()
                     .addGDPRConsentState(
                         "foo purpose 1",
-                        GDPRConsent.builder(false).build()
-                    )
-                    .addGDPRConsentState(
+                        GDPRConsent.builder(false).build(),
+                    ).addGDPRConsentState(
                         "foo purpose 2",
-                        GDPRConsent.builder(false).build()
-                    )
-                    .addGDPRConsentState(
+                        GDPRConsent.builder(false).build(),
+                    ).addGDPRConsentState(
                         "foo purpose 3",
-                        GDPRConsent.builder(false).build()
-                    )
-                    .setCCPAConsentState(
-                        CCPAConsent.builder(true).build()
-                    )
-                    .build()
-            )
+                        GDPRConsent.builder(false).build(),
+                    ).setCCPAConsentState(
+                        CCPAConsent.builder(true).build(),
+                    ).build(),
+            ),
         )
     }
 
@@ -578,45 +619,45 @@ class KitConfigurationTest {
         val configuration = MockKitConfiguration.createKitConfiguration(jsonConfiguration)
         Assert.assertTrue(
             configuration.isConsentStateFilterMatch(
-                ConsentState.builder()
+                ConsentState
+                    .builder()
                     .addGDPRConsentState(
                         "foo purpose",
-                        GDPRConsent.builder(false).build()
-                    )
-                    .build()
-            )
+                        GDPRConsent.builder(false).build(),
+                    ).build(),
+            ),
         )
         Assert.assertFalse(
             configuration.isConsentStateFilterMatch(
-                ConsentState.builder()
+                ConsentState
+                    .builder()
                     .addGDPRConsentState(
                         "foo purpose",
-                        GDPRConsent.builder(true).build()
-                    )
-                    .build()
-            )
+                        GDPRConsent.builder(true).build(),
+                    ).build(),
+            ),
         )
         ruleArray.getJSONObject(0).put("c", true)
         configuration.parseConfiguration(jsonConfiguration)
         Assert.assertTrue(
             configuration.isConsentStateFilterMatch(
-                ConsentState.builder()
+                ConsentState
+                    .builder()
                     .addGDPRConsentState(
                         "foo purpose",
-                        GDPRConsent.builder(true).build()
-                    )
-                    .build()
-            )
+                        GDPRConsent.builder(true).build(),
+                    ).build(),
+            ),
         )
         Assert.assertFalse(
             configuration.isConsentStateFilterMatch(
-                ConsentState.builder()
+                ConsentState
+                    .builder()
                     .addGDPRConsentState(
                         "foo purpose",
-                        GDPRConsent.builder(false).build()
-                    )
-                    .build()
-            )
+                        GDPRConsent.builder(false).build(),
+                    ).build(),
+            ),
         )
     }
 
@@ -636,67 +677,72 @@ class KitConfigurationTest {
         val configuration = MockKitConfiguration.createKitConfiguration(jsonConfiguration)
         Assert.assertTrue(
             configuration.isConsentStateFilterMatch(
-                ConsentState.builder()
+                ConsentState
+                    .builder()
                     .setCCPAConsentState(
-                        CCPAConsent.builder(false)
-                            .build()
-                    )
-                    .build()
-            )
+                        CCPAConsent
+                            .builder(false)
+                            .build(),
+                    ).build(),
+            ),
         )
         Assert.assertFalse(
             configuration.isConsentStateFilterMatch(
-                ConsentState.builder()
+                ConsentState
+                    .builder()
                     .setCCPAConsentState(
-                        CCPAConsent.builder(true)
-                            .build()
-                    )
-                    .build()
-            )
+                        CCPAConsent
+                            .builder(true)
+                            .build(),
+                    ).build(),
+            ),
         )
         ruleArray.getJSONObject(0).put("c", true)
         configuration.parseConfiguration(jsonConfiguration)
         Assert.assertTrue(
             configuration.isConsentStateFilterMatch(
-                ConsentState.builder()
+                ConsentState
+                    .builder()
                     .setCCPAConsentState(
-                        CCPAConsent.builder(true)
-                            .build()
-                    )
-                    .build()
-            )
+                        CCPAConsent
+                            .builder(true)
+                            .build(),
+                    ).build(),
+            ),
         )
         Assert.assertFalse(
             configuration.isConsentStateFilterMatch(
-                ConsentState.builder()
+                ConsentState
+                    .builder()
                     .setCCPAConsentState(
-                        CCPAConsent.builder(false)
-                            .build()
-                    )
-                    .build()
-            )
+                        CCPAConsent
+                            .builder(false)
+                            .build(),
+                    ).build(),
+            ),
         )
     }
 
     @Test
     fun testConvertToSparseArray() {
         val kitConfiguration = MockKitConfiguration()
-        val jsonData = """   
-        {
-           "7456529": 0,
-          "10887805": 0,
-          "13992010": 0,
-          "15360852": 0,
-          "17455322": 0,
-          "18683141": 0,
-          "23029959": 0,
-          "41851400": 0,
-          "47355425": 0,
-          "54925556": 0,
-          "56409892": 0,
-          "66701264": 0
-         }
-        """.trimIndent()
+        val jsonData =
+            """
+            {
+               "7456529": 0,
+              "10887805": 0,
+              "13992010": 0,
+              "15360852": 0,
+              "17455322": 0,
+              "18683141": 0,
+              "23029959": 0,
+              "41851400": 0,
+              "47355425": 0,
+              "54925556": 0,
+              "56409892": 0,
+              "66701264": 0
+             }
+            """.trimIndent()
         val jsonConfiguration = JSONObject(jsonData)
         val method: Method = MockKitConfiguration::class.java.getDeclaredMethod("convertToSparseArray", JSONObject::class.java)
         method.isAccessible = true
@@ -733,22 +779,23 @@ class KitConfigurationTest {
     @Test
     fun testConvertToSparseArray_When_JSON_Data_IS_INVALID() {
         val kitConfiguration = MockKitConfiguration()
-        val jsn = """   
-        {
-           "7456529": 0,
-          "10887805": 0,
-          "-36!037962": 0,
-          "15360852": 0,
-          "17455322": 0,
-          "18683141": 0,
-          "23029959": 0,
-          "41851400": 0,
-          "47355425": 0,
-          "54925556": 0,
-          "56409892": 0,
-          "66701264": 0
-         }
-        """.trimIndent()
+        val jsn =
+            """
+            {
+               "7456529": 0,
+              "10887805": 0,
+              "-36!037962": 0,
+              "15360852": 0,
+              "17455322": 0,
+              "18683141": 0,
+              "23029959": 0,
+              "41851400": 0,
+              "47355425": 0,
+              "54925556": 0,
+              "56409892": 0,
+              "66701264": 0
+             }
+            """.trimIndent()
         val jsonConfiguration = JSONObject(jsn)
         val method: Method = MockKitConfiguration::class.java.getDeclaredMethod("convertToSparseArray", JSONObject::class.java)
         method.isAccessible = true
@@ -760,18 +807,20 @@ class KitConfigurationTest {
     @Test
     fun testConvertToSparseArray_When_JSON_OBJECT_IS_INVALID() {
         val kitConfiguration = MockKitConfiguration()
-        val jsn = """   
-        {
-            "name": "John",
-             "age": "30",
-             "18683141": 0
-        }
-        """.trimIndent()
+        val jsn =
+            """
+            {
+                "name": "John",
+                 "age": "30",
+                 "18683141": 0
+            }
+            """.trimIndent()
         val jsonConfiguration = JSONObject(jsn)
-        val method: Method = MockKitConfiguration::class.java.getDeclaredMethod(
-            "convertToSparseArray",
-            JSONObject::class.java
-        )
+        val method: Method =
+            MockKitConfiguration::class.java.getDeclaredMethod(
+                "convertToSparseArray",
+                JSONObject::class.java,
+            )
         method.isAccessible = true
 
         val result = method.invoke(kitConfiguration, jsonConfiguration) as SparseBooleanArray
@@ -800,27 +849,26 @@ class KitConfigurationTest {
     @Test
     @Throws(JSONException::class)
     fun testAttributeToUser() {
-        var kitConfig = JSONObject()
-            .put("id", 10)
-            .put(
-                "hs",
-                JSONObject()
-                    .put(
-                        "eaa",
-                        JSONObject()
-                            .put("-1107245616", "add-item")
-                    )
-                    .put(
-                        "ear",
-                        JSONObject()
-                            .put("238178128", "remove-item")
-                    )
-                    .put(
-                        "eas",
-                        JSONObject()
-                            .put("1784066270", "single-item")
-                    )
-            )
+        var kitConfig =
+            JSONObject()
+                .put("id", 10)
+                .put(
+                    "hs",
+                    JSONObject()
+                        .put(
+                            "eaa",
+                            JSONObject()
+                                .put("-1107245616", "add-item"),
+                        ).put(
+                            "ear",
+                            JSONObject()
+                                .put("238178128", "remove-item"),
+                        ).put(
+                            "eas",
+                            JSONObject()
+                                .put("1784066270", "single-item"),
+                        ),
+                )
         var kitConfiguration = MockKitConfiguration.createKitConfiguration(kitConfig)
         val addMap = kitConfiguration.eventAttributesAddToUser
         Assert.assertEquals(1, addMap.size.toLong())
@@ -834,9 +882,10 @@ class KitConfigurationTest {
         Assert.assertEquals(1, singleMap.size.toLong())
         Assert.assertTrue(singleMap.containsKey(1784066270))
         Assert.assertEquals("single-item", singleMap[1784066270])
-        kitConfig = JSONObject()
-            .put("id", 10)
-            .put("hs", JSONObject())
+        kitConfig =
+            JSONObject()
+                .put("id", 10)
+                .put("hs", JSONObject())
         kitConfiguration = MockKitConfiguration.createKitConfiguration(kitConfig)
         Assert.assertEquals(0, kitConfiguration.eventAttributesAddToUser.size.toLong())
         Assert.assertEquals(0, kitConfiguration.eventAttributesRemoveFromUser.size.toLong())

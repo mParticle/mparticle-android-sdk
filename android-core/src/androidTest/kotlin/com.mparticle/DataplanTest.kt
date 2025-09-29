@@ -21,8 +21,9 @@ class DataplanTest : BaseCleanInstallEachTest() {
     @Throws(InterruptedException::class)
     fun noDataPlanTest() {
         startMParticle(
-            MParticleOptions.builder(mContext)
-                .dataplan(null, null)
+            MParticleOptions
+                .builder(mContext)
+                .dataplan(null, null),
         )
         val messageCount = AndroidUtils.Mutable(0)
         val latch = MPLatch(1)
@@ -39,9 +40,9 @@ class DataplanTest : BaseCleanInstallEachTest() {
                     } catch (_: JSONException) {
                     }
                     false
-                }
+                },
             ),
-            latch
+            latch,
         )
         MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
         MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
@@ -55,8 +56,9 @@ class DataplanTest : BaseCleanInstallEachTest() {
     @Throws(InterruptedException::class)
     fun dataplanPartialTest() {
         startMParticle(
-            MParticleOptions.builder(mContext)
-                .dataplan("plan1", null)
+            MParticleOptions
+                .builder(mContext)
+                .dataplan("plan1", null),
         )
         val messageCount = AndroidUtils.Mutable(0)
         val latch = MPLatch(1)
@@ -71,13 +73,13 @@ class DataplanTest : BaseCleanInstallEachTest() {
                             dataplanContext.getJSONObject(Constants.MessageKey.DATA_PLAN_KEY)
                         Assert.assertEquals(
                             "plan1",
-                            dataplanJSON.getString(Constants.MessageKey.DATA_PLAN_ID)
+                            dataplanJSON.getString(Constants.MessageKey.DATA_PLAN_ID),
                         )
                         TestCase.assertNull(
                             dataplanJSON.optString(
                                 Constants.MessageKey.DATA_PLAN_VERSION,
-                                null
-                            )
+                                null,
+                            ),
                         )
                         messageCount.value += getMessageCount(bodyJson)
                         if (messageCount.value == 3) {
@@ -87,9 +89,9 @@ class DataplanTest : BaseCleanInstallEachTest() {
                     } catch (_: JSONException) {
                     }
                     false
-                }
+                },
             ),
-            latch
+            latch,
         )
         MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
         MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
@@ -103,8 +105,9 @@ class DataplanTest : BaseCleanInstallEachTest() {
     @Throws(InterruptedException::class)
     fun noDataPlanIdTest() {
         startMParticle(
-            MParticleOptions.builder(mContext)
-                .dataplan(null, 1)
+            MParticleOptions
+                .builder(mContext)
+                .dataplan(null, 1),
         )
         val messageCount = AndroidUtils.Mutable(0)
         val latch = MPLatch(1)
@@ -121,9 +124,9 @@ class DataplanTest : BaseCleanInstallEachTest() {
                     } catch (_: JSONException) {
                     }
                     false
-                }
+                },
             ),
-            latch
+            latch,
         )
         MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
         MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
@@ -137,8 +140,9 @@ class DataplanTest : BaseCleanInstallEachTest() {
     @Throws(InterruptedException::class)
     fun dataPlanSetTest() {
         startMParticle(
-            MParticleOptions.builder(mContext)
-                .dataplan("dataplan1", 1)
+            MParticleOptions
+                .builder(mContext)
+                .dataplan("dataplan1", 1),
         )
         val messageCount = AndroidUtils.Mutable(0)
         val latch = MPLatch(1)
@@ -153,11 +157,11 @@ class DataplanTest : BaseCleanInstallEachTest() {
                             dataplanContext.getJSONObject(Constants.MessageKey.DATA_PLAN_KEY)
                         Assert.assertEquals(
                             "dataplan1",
-                            dataplanJSON.getString(Constants.MessageKey.DATA_PLAN_ID)
+                            dataplanJSON.getString(Constants.MessageKey.DATA_PLAN_ID),
                         )
                         Assert.assertEquals(
                             "1",
-                            dataplanJSON.optString(Constants.MessageKey.DATA_PLAN_VERSION, "")
+                            dataplanJSON.optString(Constants.MessageKey.DATA_PLAN_VERSION, ""),
                         )
                         messageCount.value += getMessageCount(bodyJson)
                         if (messageCount.value == 3) {
@@ -168,9 +172,9 @@ class DataplanTest : BaseCleanInstallEachTest() {
                         Assert.fail(ex.toString())
                     }
                     false
-                }
+                },
             ),
-            latch
+            latch,
         )
         MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
         MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
@@ -184,14 +188,16 @@ class DataplanTest : BaseCleanInstallEachTest() {
     @Throws(InterruptedException::class)
     fun dataplanChanged() {
         startMParticle(
-            MParticleOptions.builder(mContext)
-                .dataplan("dataplan1", 1)
+            MParticleOptions
+                .builder(mContext)
+                .dataplan("dataplan1", 1),
         )
         val totalMessageCount = AndroidUtils.Mutable(0)
         val dataplan1MessageCount = AndroidUtils.Mutable(0)
         val dataplan2MessageCount = AndroidUtils.Mutable(0)
         val latch = MPLatch(1)
-        MockServer.getInstance()
+        MockServer
+            .getInstance()
             .waitForVerify(
                 Matcher(mServer.Endpoints().eventsUrl).bodyMatch { bodyJson ->
                     try {
@@ -221,15 +227,16 @@ class DataplanTest : BaseCleanInstallEachTest() {
                     }
                     false
                 },
-                latch
+                latch,
             )
         MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
         MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
         MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
         MParticle.setInstance(null)
         startMParticle(
-            MParticleOptions.builder(mContext)
-                .dataplan("dataplan1", 2)
+            MParticleOptions
+                .builder(mContext)
+                .dataplan("dataplan1", 2),
         )
         MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)
         MParticle.getInstance()?.logEvent(testingUtils.randomMPEventRich)

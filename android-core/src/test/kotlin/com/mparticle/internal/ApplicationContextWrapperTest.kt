@@ -21,6 +21,7 @@ import java.util.LinkedList
 /**
  * Created by wpassidomo on 2/21/17.
  */
+
 /**
  * Test that if you add a bunch on mock activiies that it will play back in the same order.
  * Test that it won't crash if there aren't anuy activiies added.
@@ -35,19 +36,21 @@ class ApplicationContextWrapperTest {
     var activity2 = Mockito.mock(Activity::class.java)
     var activity3 = Mockito.mock(Activity::class.java)
     private lateinit var activityLifecycleCallbackRecorder: ActivityLifecycleCallbackRecorder
-    var applicationContextWrapper = MockApplicationContextWrapper(
-        Mockito.mock(
-            Application::class.java
+    var applicationContextWrapper =
+        MockApplicationContextWrapper(
+            Mockito.mock(
+                Application::class.java,
+            ),
         )
-    )
     var activity1Ref = WeakReference(activity1)
     var activity2Ref = WeakReference(activity2)
     var activity3Ref = WeakReference(activity3)
     var bundle1 = Mockito.mock(Bundle::class.java)
     var bundle2 = Mockito.mock(Bundle::class.java)
 
-    inner class MockApplicationContextWrapper internal constructor(application: Application?) :
-        ApplicationContextWrapper(application!!) {
+    inner class MockApplicationContextWrapper internal constructor(
+        application: Application?,
+    ) : ApplicationContextWrapper(application!!) {
         override fun attachBaseContext(base: Context) {}
     }
 
@@ -139,20 +142,20 @@ class ApplicationContextWrapperTest {
                 applicationContextWrapper.getLifeCycleEventInstance(
                     ApplicationContextWrapper.MethodType.ON_CREATED,
                     WeakReference(activity2),
-                    bundle2
-                )
+                    bundle2,
+                ),
             )
             testList.addLast(
                 applicationContextWrapper.getLifeCycleEventInstance(
                     ApplicationContextWrapper.MethodType.ON_STARTED,
-                    WeakReference(activity2)
-                )
+                    WeakReference(activity2),
+                ),
             )
             testList.addLast(
                 applicationContextWrapper.getLifeCycleEventInstance(
                     ApplicationContextWrapper.MethodType.ON_RESUMED,
-                    WeakReference(activity2)
-                )
+                    WeakReference(activity2),
+                ),
             )
             return testList
         }
@@ -163,50 +166,53 @@ class ApplicationContextWrapperTest {
                 applicationContextWrapper.getLifeCycleEventInstance(
                     ApplicationContextWrapper.MethodType.ON_CREATED,
                     WeakReference(activity1),
-                    bundle1
-                )
+                    bundle1,
+                ),
             )
             testList.addLast(
                 applicationContextWrapper.getLifeCycleEventInstance(
                     ApplicationContextWrapper.MethodType.ON_STARTED,
-                    WeakReference(activity1)
-                )
+                    WeakReference(activity1),
+                ),
             )
             testList.addLast(
                 applicationContextWrapper.getLifeCycleEventInstance(
                     ApplicationContextWrapper.MethodType.ON_RESUMED,
-                    WeakReference(activity1)
-                )
+                    WeakReference(activity1),
+                ),
             )
             testList.addLast(
                 applicationContextWrapper.getLifeCycleEventInstance(
                     ApplicationContextWrapper.MethodType.ON_PAUSED,
-                    WeakReference(activity1)
-                )
+                    WeakReference(activity1),
+                ),
             )
             testList.addLast(
                 applicationContextWrapper.getLifeCycleEventInstance(
                     ApplicationContextWrapper.MethodType.ON_SAVE_INSTANCE_STATE,
                     WeakReference(activity1),
-                    bundle1
-                )
+                    bundle1,
+                ),
             )
             testList.addLast(
                 applicationContextWrapper.getLifeCycleEventInstance(
                     ApplicationContextWrapper.MethodType.ON_STOPPED,
-                    WeakReference(activity1)
-                )
+                    WeakReference(activity1),
+                ),
             )
             testList.addLast(
                 applicationContextWrapper.getLifeCycleEventInstance(
                     ApplicationContextWrapper.MethodType.ON_DESTROYED,
-                    WeakReference(activity1)
-                )
+                    WeakReference(activity1),
+                ),
             )
             return testList
         }
 
-    private fun assertListEquals(list1: List<Any?>, list2: List<Any?>) {
+    private fun assertListEquals(
+        list1: List<Any?>,
+        list2: List<Any?>,
+    ) {
         Assert.assertEquals(list1.size.toLong(), list2.size.toLong())
         for (i in list1.indices) {
             Assert.assertTrue(list1[i] == list2[i])
@@ -217,13 +223,17 @@ class ApplicationContextWrapperTest {
     internal inner class ActivityLifecycleCallbackRecordTester : ActivityLifecycleCallbacks {
         var lifeCycleEvents = LinkedList<LifeCycleEvent>()
         var MAX_LIST_SIZE = 10
-        override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+
+        override fun onActivityCreated(
+            activity: Activity,
+            savedInstanceState: Bundle?,
+        ) {
             recordedLifecycleList.addLast(
                 applicationContextWrapper.getLifeCycleEventInstance(
                     ApplicationContextWrapper.MethodType.ON_CREATED,
                     WeakReference(activity),
-                    savedInstanceState
-                )
+                    savedInstanceState,
+                ),
             )
         }
 
@@ -231,8 +241,8 @@ class ApplicationContextWrapperTest {
             recordedLifecycleList.addLast(
                 applicationContextWrapper.getLifeCycleEventInstance(
                     ApplicationContextWrapper.MethodType.ON_STARTED,
-                    WeakReference(activity)
-                )
+                    WeakReference(activity),
+                ),
             )
         }
 
@@ -240,8 +250,8 @@ class ApplicationContextWrapperTest {
             recordedLifecycleList.addLast(
                 applicationContextWrapper.getLifeCycleEventInstance(
                     ApplicationContextWrapper.MethodType.ON_RESUMED,
-                    WeakReference(activity)
-                )
+                    WeakReference(activity),
+                ),
             )
         }
 
@@ -249,8 +259,8 @@ class ApplicationContextWrapperTest {
             recordedLifecycleList.addLast(
                 applicationContextWrapper.getLifeCycleEventInstance(
                     ApplicationContextWrapper.MethodType.ON_PAUSED,
-                    WeakReference(activity)
-                )
+                    WeakReference(activity),
+                ),
             )
         }
 
@@ -258,18 +268,21 @@ class ApplicationContextWrapperTest {
             recordedLifecycleList.addLast(
                 applicationContextWrapper.getLifeCycleEventInstance(
                     ApplicationContextWrapper.MethodType.ON_STOPPED,
-                    WeakReference(activity)
-                )
+                    WeakReference(activity),
+                ),
             )
         }
 
-        override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
+        override fun onActivitySaveInstanceState(
+            activity: Activity,
+            outState: Bundle,
+        ) {
             recordedLifecycleList.addLast(
                 applicationContextWrapper.getLifeCycleEventInstance(
                     ApplicationContextWrapper.MethodType.ON_SAVE_INSTANCE_STATE,
                     WeakReference(activity),
-                    outState
-                )
+                    outState,
+                ),
             )
         }
 
@@ -277,8 +290,8 @@ class ApplicationContextWrapperTest {
             recordedLifecycleList.addLast(
                 applicationContextWrapper.getLifeCycleEventInstance(
                     ApplicationContextWrapper.MethodType.ON_DESTROYED,
-                    WeakReference(activity)
-                )
+                    WeakReference(activity),
+                ),
             )
         }
 

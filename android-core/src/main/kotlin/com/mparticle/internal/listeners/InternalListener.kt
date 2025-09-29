@@ -28,7 +28,11 @@ interface InternalListener {
      * @param used    whether the Kit's method returned ReportingMessages, or null if return type is void
      * @param objects the arguments supplied to the Kit
      */
-    fun onKitApiCalled(kitId: Int, used: Boolean, vararg objects: Any)
+    fun onKitApiCalled(
+        kitId: Int,
+        used: Boolean,
+        vararg objects: Any,
+    )
 
     /**
      * to be called when a Kit's API method is invoked, and the name of the Kit's method is different
@@ -39,7 +43,12 @@ interface InternalListener {
      * @param used       whether the Kit's method returned ReportingMessages, or null if return type is void
      * @param objects    the arguments supplied to the Kit
      */
-    fun onKitApiCalled(methodName: String, kitId: Int, used: Boolean, vararg objects: Any)
+    fun onKitApiCalled(
+        methodName: String,
+        kitId: Int,
+        used: Boolean,
+        vararg objects: Any,
+    )
 
     /**
      * establishes a child-parent relationship between two objects. It is not necessary to call this
@@ -48,7 +57,10 @@ interface InternalListener {
      * @param child  the child object
      * @param parent the parent object
      */
-    fun onCompositeObjects(child: Any?, parent: Any?)
+    fun onCompositeObjects(
+        child: Any?,
+        parent: Any?,
+    )
 
     /**
      * denotes that an object is going to be passed to a new Thread, and is a candidate to be a "composite"
@@ -58,7 +70,11 @@ interface InternalListener {
      * @param handlerName the Name of the Handler class, for example "com.mparticle.internal.MessageHandler"
      * @param msg         the Message object
      */
-    fun onThreadMessage(handlerName: String, msg: Message, onNewThread: Boolean)
+    fun onThreadMessage(
+        handlerName: String,
+        msg: Message,
+        onNewThread: Boolean,
+    )
 
     /**
      * indicates that an entry has been stored in the Database
@@ -68,7 +84,11 @@ interface InternalListener {
      * @param contentValues the ContentValues object to be inserted
      */
     @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
-    fun onEntityStored(rowId: Long, tableName: String, contentValues: ContentValues?)
+    fun onEntityStored(
+        rowId: Long,
+        tableName: String,
+        contentValues: ContentValues?,
+    )
 
     /**
      * indicates that a Network Request has been started
@@ -82,7 +102,7 @@ interface InternalListener {
         type: SdkListener.Endpoint,
         url: String,
         body: JSONObject?,
-        vararg objects: Any
+        vararg objects: Any,
     )
 
     /**
@@ -96,7 +116,7 @@ interface InternalListener {
         type: SdkListener.Endpoint,
         url: String,
         response: JSONObject?,
-        responseCode: Int
+        responseCode: Int,
     )
 
     /**
@@ -120,7 +140,10 @@ interface InternalListener {
      * @param kitId
      * @param configuration
      */
-    fun onKitConfigReceived(kitId: Int, configuration: String?)
+    fun onKitConfigReceived(
+        kitId: Int,
+        configuration: String?,
+    )
 
     /**
      * indicates that a Kit was present, and a configuration was received for it, but it was not started,
@@ -130,7 +153,10 @@ interface InternalListener {
      * @param kitId
      * @param reason
      */
-    fun onKitExcluded(kitId: Int, reason: String?)
+    fun onKitExcluded(
+        kitId: Int,
+        reason: String?,
+    )
 
     /**
      * indicates that a Kit successfully executed it's onKitCreate() method
@@ -143,75 +169,85 @@ interface InternalListener {
 
     companion object {
         @JvmField
-        val EMPTY: InternalListener = object : InternalListener {
-            override fun onApiCalled(vararg objects: Any) { /* stub */
-            }
+        val EMPTY: InternalListener =
+            object : InternalListener {
+                override fun onApiCalled(vararg objects: Any) { // stub
+                }
 
-            override fun onKitApiCalled(
-                kitId: Int,
-                used: Boolean,
-                vararg objects: Any
-            ) { /* stub */
-            }
+                override fun onKitApiCalled(
+                    kitId: Int,
+                    used: Boolean,
+                    vararg objects: Any,
+                ) { // stub
+                }
 
-            override fun onKitApiCalled(
-                methodName: String,
-                kitId: Int,
-                used: Boolean,
-                vararg objects: Any
-            ) { /* stub */
-            }
+                override fun onKitApiCalled(
+                    methodName: String,
+                    kitId: Int,
+                    used: Boolean,
+                    vararg objects: Any,
+                ) { // stub
+                }
 
-            override fun onEntityStored(
-                rowId: Long,
-                tableName: String,
-                contentValues: ContentValues?
-            ) { /* stub */
-            }
+                override fun onEntityStored(
+                    rowId: Long,
+                    tableName: String,
+                    contentValues: ContentValues?,
+                ) { // stub
+                }
 
-            override fun onNetworkRequestStarted(
-                type: SdkListener.Endpoint,
-                url: String,
-                body: JSONObject?,
-                vararg objects: Any
-            ) { /* stub */
-            }
+                override fun onNetworkRequestStarted(
+                    type: SdkListener.Endpoint,
+                    url: String,
+                    body: JSONObject?,
+                    vararg objects: Any,
+                ) { // stub
+                }
 
-            override fun onNetworkRequestFinished(
-                type: SdkListener.Endpoint,
-                url: String,
-                response: JSONObject?,
-                responseCode: Int
-            ) { /* stub */
-            }
+                override fun onNetworkRequestFinished(
+                    type: SdkListener.Endpoint,
+                    url: String,
+                    response: JSONObject?,
+                    responseCode: Int,
+                ) { // stub
+                }
 
-            override fun onSessionUpdated(internalSession: InternalSession) { /* stub */
-            }
+                override fun onSessionUpdated(internalSession: InternalSession) { // stub
+                }
 
-            override fun onKitDetected(kitId: Int) { /* stub */
-            }
+                override fun onKitDetected(kitId: Int) { // stub
+                }
 
-            override fun onKitConfigReceived(kitId: Int, configuration: String?) { /* stub */
-            }
+                override fun onKitConfigReceived(
+                    kitId: Int,
+                    configuration: String?,
+                ) { // stub
+                }
 
-            override fun onKitExcluded(kitId: Int, reason: String?) { /* stub */
-            }
+                override fun onKitExcluded(
+                    kitId: Int,
+                    reason: String?,
+                ) { // stub
+                }
 
-            override fun onKitStarted(kitId: Int) { /* stub */
-            }
+                override fun onKitStarted(kitId: Int) { // stub
+                }
 
-            override fun onAliasRequestFinished(aliasResponse: AliasResponse?) { /* stub */
-            }
+                override fun onAliasRequestFinished(aliasResponse: AliasResponse?) { // stub
+                }
 
-            override fun onCompositeObjects(child: Any?, parent: Any?) { /* stub */
-            }
+                override fun onCompositeObjects(
+                    child: Any?,
+                    parent: Any?,
+                ) { // stub
+                }
 
-            override fun onThreadMessage(
-                handlerName: String,
-                msg: Message,
-                onNewThread: Boolean
-            ) { /* stub */
+                override fun onThreadMessage(
+                    handlerName: String,
+                    msg: Message,
+                    onNewThread: Boolean,
+                ) { // stub
+                }
             }
-        }
     }
 }

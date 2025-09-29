@@ -312,9 +312,9 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
     public void testLogEvent() throws Exception {
         final JSONObject customAttributes = MPUtility.mapToJson(mRandomUtils.getRandomAttributes(10));
         final JSONObject customFlagsJSON = MPUtility.mapToJson(getCustomFlags());
-        String testJavascript = String.format("mParticle.logEvent('Play Movie Tapped',\n" +
-                "                         mParticle.EventType.Navigation,\n" +
-                "                         %s,\n" +
+        String testJavascript = String.format("mParticle.logEvent('Play Movie Tapped'," +
+                "                         mParticle.EventType.Navigation," +
+                "                         %s," +
                 "                         %s);", customAttributes.toString(4), customFlagsJSON.toString(4));
         final MutableBoolean called = new MutableBoolean(false);
         final CountDownLatch latch = new MPLatch(2);

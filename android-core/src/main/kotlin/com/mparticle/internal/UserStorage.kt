@@ -11,16 +11,25 @@ import org.json.JSONObject
 import java.util.TreeSet
 import java.util.UUID
 
-class UserStorage private constructor(private val mContext: Context, val mpid: Long) {
+class UserStorage private constructor(
+    private val mContext: Context,
+    val mpid: Long,
+) {
     private val mPreferences: SharedPreferences
 
     var messageManagerSharedPreferences: SharedPreferences
 
-    fun deleteUserConfig(context: Context, mpId: Long): Boolean {
+    fun deleteUserConfig(
+        context: Context,
+        mpId: Long,
+    ): Boolean {
         if (Build.VERSION.SDK_INT >= 24) {
             context.deleteSharedPreferences(getFileName(mpId))
         } else {
-            context.getSharedPreferences(getFileName(mpId), Context.MODE_PRIVATE).edit().clear()
+            context
+                .getSharedPreferences(getFileName(mpId), Context.MODE_PRIVATE)
+                .edit()
+                .clear()
                 .apply()
         }
         return removeMpId(context, mpId)
@@ -43,13 +52,9 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
             mPreferences.edit().putInt(SESSION_COUNTER, sessionCounter).apply()
         }
 
-    fun getCurrentSessionCounter(defaultValue: Int): Int {
-        return mPreferences.getInt(SESSION_COUNTER, defaultValue)
-    }
+    fun getCurrentSessionCounter(defaultValue: Int): Int = mPreferences.getInt(SESSION_COUNTER, defaultValue)
 
-    private fun hasCurrentSessionCounter(): Boolean {
-        return mPreferences.contains(SESSION_COUNTER)
-    }
+    private fun hasCurrentSessionCounter(): Boolean = mPreferences.contains(SESSION_COUNTER)
 
     fun incrementSessionCounter() {
         var nextCount = currentSessionCounter + 1
@@ -58,7 +63,6 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
         }
         mPreferences.edit().putInt(SESSION_COUNTER, nextCount).apply()
     }
-
 
     var deletedUserAttributes: String?
         get() = mPreferences.getString(DELETED_USER_ATTRS, null)
@@ -70,9 +74,7 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
         mPreferences.edit().putString(DELETED_USER_ATTRS, null).apply()
     }
 
-    private fun hasDeletedUserAttributes(): Boolean {
-        return mPreferences.contains(DELETED_USER_ATTRS)
-    }
+    private fun hasDeletedUserAttributes(): Boolean = mPreferences.contains(DELETED_USER_ATTRS)
 
     var breadcrumbLimit: Int
         get() {
@@ -85,9 +87,7 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
             mPreferences.edit().putInt(BREADCRUMB_LIMIT, newLimit).apply()
         }
 
-    private fun hasBreadcrumbLimit(): Boolean {
-        return mPreferences.contains(BREADCRUMB_LIMIT)
-    }
+    private fun hasBreadcrumbLimit(): Boolean = mPreferences.contains(BREADCRUMB_LIMIT)
 
     var lastUseDate: Long
         get() = getLastUseDate(0)
@@ -95,20 +95,14 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
             mPreferences.edit().putLong(LAST_USE, lastUseDate).apply()
         }
 
-    fun getLastUseDate(defaultValue: Long): Long {
-        return mPreferences.getLong(LAST_USE, defaultValue)
-    }
+    fun getLastUseDate(defaultValue: Long): Long = mPreferences.getLong(LAST_USE, defaultValue)
 
-    private fun hasLastUserDate(): Boolean {
-        return mPreferences.contains(LAST_USE)
-    }
+    private fun hasLastUserDate(): Boolean = mPreferences.contains(LAST_USE)
 
     val previousSessionForegound: Long
         get() = getPreviousSessionForegound(-1)
 
-    fun getPreviousSessionForegound(defaultValue: Long): Long {
-        return mPreferences.getLong(PREVIOUS_SESSION_FOREGROUND, defaultValue)
-    }
+    fun getPreviousSessionForegound(defaultValue: Long): Long = mPreferences.getLong(PREVIOUS_SESSION_FOREGROUND, defaultValue)
 
     fun clearPreviousTimeInForeground() {
         mPreferences.edit().putLong(PREVIOUS_SESSION_FOREGROUND, -1).apply()
@@ -118,9 +112,7 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
         mPreferences.edit().putLong(PREVIOUS_SESSION_FOREGROUND, previousTimeInForeground).apply()
     }
 
-    private fun hasPreviousSessionForegound(): Boolean {
-        return mPreferences.contains(PREVIOUS_SESSION_FOREGROUND)
-    }
+    private fun hasPreviousSessionForegound(): Boolean = mPreferences.contains(PREVIOUS_SESSION_FOREGROUND)
 
     var previousSessionId: String?
         get() = getPreviousSessionId("")
@@ -128,25 +120,17 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
             mPreferences.edit().putString(PREVIOUS_SESSION_ID, previousSessionId).apply()
         }
 
-    fun getPreviousSessionId(defaultValue: String?): String? {
-        return mPreferences.getString(PREVIOUS_SESSION_ID, defaultValue)
-    }
+    fun getPreviousSessionId(defaultValue: String?): String? = mPreferences.getString(PREVIOUS_SESSION_ID, defaultValue)
 
-    private fun hasPreviousSessionId(): Boolean {
-        return mPreferences.contains(PREVIOUS_SESSION_ID)
-    }
+    private fun hasPreviousSessionId(): Boolean = mPreferences.contains(PREVIOUS_SESSION_ID)
 
-    fun getPreviousSessionStart(defaultValue: Long): Long {
-        return mPreferences.getLong(PREVIOUS_SESSION_START, defaultValue)
-    }
+    fun getPreviousSessionStart(defaultValue: Long): Long = mPreferences.getLong(PREVIOUS_SESSION_START, defaultValue)
 
     fun setPreviousSessionStart(previousSessionStart: Long) {
         mPreferences.edit().putLong(PREVIOUS_SESSION_START, previousSessionStart).apply()
     }
 
-    private fun hasPreviousSessionStart(): Boolean {
-        return mPreferences.contains(PREVIOUS_SESSION_START)
-    }
+    private fun hasPreviousSessionStart(): Boolean = mPreferences.contains(PREVIOUS_SESSION_START)
 
     var ltv: String?
         get() = mPreferences.getString(LTV, "0")
@@ -154,21 +138,15 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
             mPreferences.edit().putString(LTV, ltv).apply()
         }
 
-    private fun hasLtv(): Boolean {
-        return mPreferences.contains(LTV)
-    }
+    private fun hasLtv(): Boolean = mPreferences.contains(LTV)
 
-    fun getTotalRuns(defaultValue: Int): Int {
-        return mPreferences.getInt(TOTAL_RUNS, defaultValue)
-    }
+    fun getTotalRuns(defaultValue: Int): Int = mPreferences.getInt(TOTAL_RUNS, defaultValue)
 
     fun setTotalRuns(totalRuns: Int) {
         mPreferences.edit().putInt(TOTAL_RUNS, totalRuns).apply()
     }
 
-    private fun hasTotalRuns(): Boolean {
-        return mPreferences.contains(TOTAL_RUNS)
-    }
+    private fun hasTotalRuns(): Boolean = mPreferences.contains(TOTAL_RUNS)
 
     var cookies: String?
         get() = mPreferences.getString(COOKIES, "")
@@ -176,9 +154,7 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
             mPreferences.edit().putString(COOKIES, cookies).apply()
         }
 
-    private fun hasCookies(): Boolean {
-        return mPreferences.contains(COOKIES)
-    }
+    private fun hasCookies(): Boolean = mPreferences.contains(COOKIES)
 
     var launchesSinceUpgrade: Int
         get() = mPreferences.getInt(TOTAL_SINCE_UPGRADE, 0)
@@ -186,9 +162,7 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
             mPreferences.edit().putInt(TOTAL_SINCE_UPGRADE, launchesSinceUpgrade).apply()
         }
 
-    private fun hasLaunchesSinceUpgrade(): Boolean {
-        return mPreferences.contains(TOTAL_SINCE_UPGRADE)
-    }
+    private fun hasLaunchesSinceUpgrade(): Boolean = mPreferences.contains(TOTAL_SINCE_UPGRADE)
 
     var userIdentities: String?
         get() = mPreferences.getString(USER_IDENTITIES, "")
@@ -202,9 +176,7 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
             mPreferences.edit().putString(CONSENT_STATE, consentState).apply()
         }
 
-    private fun hasConsent(): Boolean {
-        return mPreferences.contains(CONSENT_STATE)
-    }
+    private fun hasConsent(): Boolean = mPreferences.contains(CONSENT_STATE)
 
     val isLoggedIn: Boolean
         get() = mPreferences.getBoolean(KNOWN_USER, false)
@@ -212,11 +184,15 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
     var firstSeenTime: Long?
         get() {
             if (!mPreferences.contains(FIRST_SEEN_TIME)) {
-                mPreferences.edit().putLong(
-                    FIRST_SEEN_TIME, messageManagerSharedPreferences.getLong(
-                        Constants.PrefKeys.INSTALL_TIME, defaultSeenTime
-                    )
-                ).apply()
+                mPreferences
+                    .edit()
+                    .putLong(
+                        FIRST_SEEN_TIME,
+                        messageManagerSharedPreferences.getLong(
+                            Constants.PrefKeys.INSTALL_TIME,
+                            defaultSeenTime,
+                        ),
+                    ).apply()
             }
             return mPreferences.getLong(FIRST_SEEN_TIME, defaultSeenTime)
         }
@@ -237,8 +213,8 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
             time?.let { mPreferences.edit().putLong(LAST_SEEN_TIME, it).apply() }
         }
 
-    //Set a default "lastSeenTime" for migration to SDK versions with MParticleUser.getLastSeenTime(),
-    //where some users will not have a value for the field.
+    // Set a default "lastSeenTime" for migration to SDK versions with MParticleUser.getLastSeenTime(),
+    // where some users will not have a value for the field.
     private fun setDefaultSeenTime() {
         val preferences = getMParticleSharedPrefs(mContext)
         if (!preferences.contains(DEFAULT_SEEN_TIME)) {
@@ -247,10 +223,11 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
     }
 
     private val defaultSeenTime: Long
-        get() = getMParticleSharedPrefs(mContext).getLong(
-            DEFAULT_SEEN_TIME,
-            System.currentTimeMillis()
-        )
+        get() =
+            getMParticleSharedPrefs(mContext).getLong(
+                DEFAULT_SEEN_TIME,
+                System.currentTimeMillis(),
+            )
 
     fun getLastUploadSettings(): UploadSettings? {
         val lastUploadSettingsJson = mPreferences.getString(LAST_UPLOAD_SETTINGS, null)
@@ -271,9 +248,7 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
         mPreferences.edit().putBoolean(KNOWN_USER, knownUser).apply()
     }
 
-    private fun hasUserIdentities(): Boolean {
-        return mPreferences.contains(USER_IDENTITIES)
-    }
+    private fun hasUserIdentities(): Boolean = mPreferences.contains(USER_IDENTITIES)
 
     private fun getPreferenceFile(mpId: Long): SharedPreferences {
         val mpIds = getMpIdSet(mContext)
@@ -341,7 +316,9 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
      * process will associate all current values covered by UserStorage to the current MPID, which should
      * be passed into the parameter "currentMpId".
      */
-    private class SharedPreferencesMigrator(context: Context) {
+    private class SharedPreferencesMigrator(
+        context: Context,
+    ) {
         private val messageManagerSharedPreferences: SharedPreferences =
             context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE)
         private val configManagerSharedPreferences: SharedPreferences =
@@ -403,7 +380,7 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
                     userStorage.setTotalRuns(totalRuns)
                 }
 
-                //migrate both cookies and device application stamp
+                // migrate both cookies and device application stamp
                 val cookies: String? = cookies
                 var das: String? = null
                 if (cookies != null) {
@@ -432,75 +409,85 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
                     userStorage.userIdentities = userIdentities
                 }
             } catch (ex: Exception) {
-                //do nothing
+                // do nothing
             }
         }
 
         val currentSessionCounter: Int
-            get() = messageManagerSharedPreferences.getInt(
-                LegacySharedPreferencesKeys.SESSION_COUNTER,
-                0
-            )
+            get() =
+                messageManagerSharedPreferences.getInt(
+                    LegacySharedPreferencesKeys.SESSION_COUNTER,
+                    0,
+                )
 
         val getDeletedUserAttributes: String?
-            get() = messageManagerSharedPreferences.getString(
-                LegacySharedPreferencesKeys.DELETED_USER_ATTRS + apiKey,
-                null
-            )
+            get() =
+                messageManagerSharedPreferences.getString(
+                    LegacySharedPreferencesKeys.DELETED_USER_ATTRS + apiKey,
+                    null,
+                )
 
         val breadcrumbLimit: Int
-            get() = configManagerSharedPreferences.getInt(
-                LegacySharedPreferencesKeys.BREADCRUMB_LIMIT,
-                0
-            )
+            get() =
+                configManagerSharedPreferences.getInt(
+                    LegacySharedPreferencesKeys.BREADCRUMB_LIMIT,
+                    0,
+                )
 
         val lastUseDate: Long
             get() = messageManagerSharedPreferences.getLong(LegacySharedPreferencesKeys.LAST_USE, 0)
 
         val previousTimeInForeground: Long
-            get() = messageManagerSharedPreferences.getLong(
-                LegacySharedPreferencesKeys.PREVIOUS_SESSION_FOREGROUND,
-                0
-            )
+            get() =
+                messageManagerSharedPreferences.getLong(
+                    LegacySharedPreferencesKeys.PREVIOUS_SESSION_FOREGROUND,
+                    0,
+                )
 
         val previousSessionId: String?
-            get() = messageManagerSharedPreferences.getString(
-                LegacySharedPreferencesKeys.PREVIOUS_SESSION_ID,
-                null
-            )
+            get() =
+                messageManagerSharedPreferences.getString(
+                    LegacySharedPreferencesKeys.PREVIOUS_SESSION_ID,
+                    null,
+                )
 
         val previousSessionStart: Long
-            get() = messageManagerSharedPreferences.getLong(
-                LegacySharedPreferencesKeys.PREVIOUS_SESSION_START,
-                0
-            )
+            get() =
+                messageManagerSharedPreferences.getLong(
+                    LegacySharedPreferencesKeys.PREVIOUS_SESSION_START,
+                    0,
+                )
 
         val ltv: String?
             get() = messageManagerSharedPreferences.getString(LegacySharedPreferencesKeys.LTV, null)
 
         val totalRuns: Int
-            get() = messageManagerSharedPreferences.getInt(
-                LegacySharedPreferencesKeys.TOTAL_RUNS,
-                0
-            )
+            get() =
+                messageManagerSharedPreferences.getInt(
+                    LegacySharedPreferencesKeys.TOTAL_RUNS,
+                    0,
+                )
 
         val cookies: String?
-            get() = configManagerSharedPreferences.getString(
-                LegacySharedPreferencesKeys.COOKIES,
-                null
-            )
+            get() =
+                configManagerSharedPreferences.getString(
+                    LegacySharedPreferencesKeys.COOKIES,
+                    null,
+                )
 
         val launchesSinceUpgrade: Int
-            get() = messageManagerSharedPreferences.getInt(
-                LegacySharedPreferencesKeys.TOTAL_SINCE_UPGRADE,
-                0
-            )
+            get() =
+                messageManagerSharedPreferences.getInt(
+                    LegacySharedPreferencesKeys.TOTAL_SINCE_UPGRADE,
+                    0,
+                )
 
         val userIdentites: String?
-            get() = configManagerSharedPreferences.getString(
-                LegacySharedPreferencesKeys.USER_IDENTITIES + apiKey,
-                null
-            )
+            get() =
+                configManagerSharedPreferences.getString(
+                    LegacySharedPreferencesKeys.USER_IDENTITIES + apiKey,
+                    null,
+                )
 
         companion object {
             private const val NEEDS_TO_MIGRATE_TO_MPID_DEPENDENT =
@@ -513,16 +500,22 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
              * @param context
              * @return
              */
-            fun needsToMigrate(context: Context): Boolean {
-                return getMParticleSharedPrefs(context).getBoolean(
-                    NEEDS_TO_MIGRATE_TO_MPID_DEPENDENT, false
+            fun needsToMigrate(context: Context): Boolean =
+                getMParticleSharedPrefs(context).getBoolean(
+                    NEEDS_TO_MIGRATE_TO_MPID_DEPENDENT,
+                    false,
                 )
-            }
 
-            fun setNeedsToMigrate(context: Context, needsToMigrate: Boolean) {
-                getMParticleSharedPrefs(context).edit().putBoolean(
-                    NEEDS_TO_MIGRATE_TO_MPID_DEPENDENT, needsToMigrate
-                ).apply()
+            fun setNeedsToMigrate(
+                context: Context,
+                needsToMigrate: Boolean,
+            ) {
+                getMParticleSharedPrefs(context)
+                    .edit()
+                    .putBoolean(
+                        NEEDS_TO_MIGRATE_TO_MPID_DEPENDENT,
+                        needsToMigrate,
+                    ).apply()
             }
         }
     }
@@ -561,16 +554,23 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
         }
 
         @JvmStatic
-        fun create(context: Context, mpid: Long): UserStorage {
-            return UserStorage(context, mpid)
-        }
+        fun create(
+            context: Context,
+            mpid: Long,
+        ): UserStorage = UserStorage(context, mpid)
 
         @JvmStatic
-        fun setNeedsToMigrate(context: Context, needsToMigrate: Boolean) {
+        fun setNeedsToMigrate(
+            context: Context,
+            needsToMigrate: Boolean,
+        ) {
             SharedPreferencesMigrator.setNeedsToMigrate(context, needsToMigrate)
         }
 
-        private fun removeMpId(context: Context, mpid: Long): Boolean {
+        private fun removeMpId(
+            context: Context,
+            mpid: Long,
+        ): Boolean {
             val mpids = getMpIdSet(context)
             val removed = mpids.remove(mpid)
             setMpIds(context, mpids)
@@ -581,11 +581,13 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
         fun getMpIdSet(context: Context): MutableSet<Long> {
             var userConfigs = JSONArray()
             try {
-                userConfigs = JSONArray(
-                    getMParticleSharedPrefs(context).getString(
-                        USER_CONFIG_COLLECTION, JSONArray().toString()
+                userConfigs =
+                    JSONArray(
+                        getMParticleSharedPrefs(context).getString(
+                            USER_CONFIG_COLLECTION,
+                            JSONArray().toString(),
+                        ),
                     )
-                )
             } catch (ignore: JSONException) {
             }
             val mpIds: MutableSet<Long> = TreeSet()
@@ -598,24 +600,26 @@ class UserStorage private constructor(private val mContext: Context, val mpid: L
             return mpIds
         }
 
-        private fun setMpIds(context: Context, mpIds: Set<Long>) {
+        private fun setMpIds(
+            context: Context,
+            mpIds: Set<Long>,
+        ) {
             val jsonArray = JSONArray()
             for (mpId in mpIds) {
                 jsonArray.put(mpId)
             }
-            getMParticleSharedPrefs(context).edit()
-                .putString(USER_CONFIG_COLLECTION, jsonArray.toString()).apply()
+            getMParticleSharedPrefs(context)
+                .edit()
+                .putString(USER_CONFIG_COLLECTION, jsonArray.toString())
+                .apply()
         }
 
-        private fun getFileName(mpId: Long): String {
-            return ConfigManager.PREFERENCES_FILE + ":" + mpId
-        }
+        private fun getFileName(mpId: Long): String = ConfigManager.PREFERENCES_FILE + ":" + mpId
 
-        private fun getMParticleSharedPrefs(context: Context): SharedPreferences {
-            return context.getSharedPreferences(
+        private fun getMParticleSharedPrefs(context: Context): SharedPreferences =
+            context.getSharedPreferences(
                 ConfigManager.PREFERENCES_FILE,
-                Context.MODE_PRIVATE
+                Context.MODE_PRIVATE,
             )
-        }
     }
 }

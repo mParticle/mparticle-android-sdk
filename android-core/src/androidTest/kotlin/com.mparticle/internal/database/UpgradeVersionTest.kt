@@ -54,19 +54,23 @@ class UpgradeVersionTest : BaseTableTest() {
                     helper.onCreate(database)
                 }
 
-                override fun onUpgrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+                override fun onUpgrade(
+                    database: SQLiteDatabase,
+                    oldVersion: Int,
+                    newVersion: Int,
+                ) {
                     helper.onUpgrade(database, oldVersion, newVersion)
                 }
 
                 override fun onDowngrade(
                     database: SQLiteDatabase,
                     oldVersion: Int,
-                    newVersion: Int
+                    newVersion: Int,
                 ) {
                     helper.onDowngrade(database, oldVersion, newVersion)
                 }
             },
-            7
+            7,
         )
         deleteTestingDatabase()
 
@@ -88,10 +92,14 @@ class UpgradeVersionTest : BaseTableTest() {
         ReportingService.insertReportingMessage(
             db,
             TestingUtils.getInstance().getRandomReportingMessage("123"),
-            1L
+            1L,
         )
         SessionService.insertSession(db, message, "key", "", "", 1L)
-        UploadService.insertAliasRequest(db, JSONObject().put("key", "value"), UploadSettings("apiKey", "secret", NetworkOptions.builder().build(), "", ""))
+        UploadService.insertAliasRequest(
+            db,
+            JSONObject().put("key", "value"),
+            UploadSettings("apiKey", "secret", NetworkOptions.builder().build(), "", ""),
+        )
         UserAttributesService.insertAttribute(db, "key", "value", 1L, false, 1L)
 
         // test to make sure there are values in the database
@@ -103,7 +111,7 @@ class UpgradeVersionTest : BaseTableTest() {
             Assert.assertEquals(
                 tableName,
                 1,
-                databaseJSON.getJSONArray(tableName).length().toLong()
+                databaseJSON.getJSONArray(tableName).length().toLong(),
             )
         }
 
@@ -120,7 +128,7 @@ class UpgradeVersionTest : BaseTableTest() {
             Assert.assertEquals(
                 tableName,
                 1,
-                databaseJSON.getJSONArray(tableName).length().toLong()
+                databaseJSON.getJSONArray(tableName).length().toLong(),
             )
         }
 
@@ -139,7 +147,7 @@ class UpgradeVersionTest : BaseTableTest() {
             Assert.assertEquals(
                 tableName,
                 0,
-                databaseJSON.getJSONArray(tableName).length().toLong()
+                databaseJSON.getJSONArray(tableName).length().toLong(),
             )
         }
     }
@@ -147,23 +155,32 @@ class UpgradeVersionTest : BaseTableTest() {
     @Test
     @Throws(InterruptedException::class, JSONException::class)
     fun testAddMpidColumns() {
-        val sqLiteOpenHelperWrapper: SQLiteOpenHelperWrapper = object : SQLiteOpenHelperWrapper {
-            override fun onCreate(db: SQLiteDatabase) {
-                db.execSQL(SessionTableTest.old_CREATE_SESSION_DDL)
-                db.execSQL(MessageTableTest.old_no_mpid_CREATE_MESSAGES_DDL)
-                db.execSQL(BreadcrumbTableTest.old_CREATE_BREADCRUMBS_DDL)
-                db.execSQL(ReportingTableTest.old_CREATE_REPORTING_DDL)
-                db.execSQL(UserAttributeTableTest.old_CREATE_USER_ATTRIBUTES_DDL)
-            }
+        val sqLiteOpenHelperWrapper: SQLiteOpenHelperWrapper =
+            object : SQLiteOpenHelperWrapper {
+                override fun onCreate(db: SQLiteDatabase) {
+                    db.execSQL(SessionTableTest.old_CREATE_SESSION_DDL)
+                    db.execSQL(MessageTableTest.old_no_mpid_CREATE_MESSAGES_DDL)
+                    db.execSQL(BreadcrumbTableTest.old_CREATE_BREADCRUMBS_DDL)
+                    db.execSQL(ReportingTableTest.old_CREATE_REPORTING_DDL)
+                    db.execSQL(UserAttributeTableTest.old_CREATE_USER_ATTRIBUTES_DDL)
+                }
 
-            override fun onUpgrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-                helper.onUpgrade(database, oldVersion, newVersion)
-            }
+                override fun onUpgrade(
+                    database: SQLiteDatabase,
+                    oldVersion: Int,
+                    newVersion: Int,
+                ) {
+                    helper.onUpgrade(database, oldVersion, newVersion)
+                }
 
-            override fun onDowngrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-                helper.onDowngrade(database, oldVersion, newVersion)
+                override fun onDowngrade(
+                    database: SQLiteDatabase,
+                    oldVersion: Int,
+                    newVersion: Int,
+                ) {
+                    helper.onDowngrade(database, oldVersion, newVersion)
+                }
             }
-        }
         var sqLiteOpenHelper = TestSQLiteOpenHelper(sqLiteOpenHelperWrapper, DB_NAME, 6)
         sqLiteOpenHelper.onCreateLatch.await()
         var databaseContents = getDatabaseSchema(sqLiteOpenHelper.writableDatabase)
@@ -183,7 +200,7 @@ class UpgradeVersionTest : BaseTableTest() {
                 Assert.assertTrue(databaseContents.getJSONObject(key).has(MpIdDependentTable.MP_ID))
             } else {
                 Assert.assertFalse(
-                    databaseContents.getJSONObject(key).has(MpIdDependentTable.MP_ID)
+                    databaseContents.getJSONObject(key).has(MpIdDependentTable.MP_ID),
                 )
             }
         }

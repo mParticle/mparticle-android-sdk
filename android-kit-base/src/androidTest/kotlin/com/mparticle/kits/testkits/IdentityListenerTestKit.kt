@@ -4,7 +4,9 @@ import com.mparticle.identity.MParticleUser
 import com.mparticle.kits.FilteredIdentityApiRequest
 import com.mparticle.kits.KitIntegration
 
-open class IdentityListenerTestKit : ListenerTestKit(), KitIntegration.IdentityListener {
+open class IdentityListenerTestKit :
+    ListenerTestKit(),
+    KitIntegration.IdentityListener {
     var onIdentifyCompleted: ((mParticleUser: MParticleUser?, identityApiRequest: FilteredIdentityApiRequest?) -> Unit)? =
         null
     var onLoginCompleted: ((mParticleUser: MParticleUser?, identityApiRequest: FilteredIdentityApiRequest?) -> Unit)? =
@@ -17,7 +19,7 @@ open class IdentityListenerTestKit : ListenerTestKit(), KitIntegration.IdentityL
 
     override fun onLogoutCompleted(
         mParticleUser: MParticleUser?,
-        identityApiRequest: FilteredIdentityApiRequest?
+        identityApiRequest: FilteredIdentityApiRequest?,
     ) {
         onLogoutCompleted?.invoke(mParticleUser, identityApiRequest)
         onUserReceived?.invoke(mParticleUser)
@@ -25,7 +27,7 @@ open class IdentityListenerTestKit : ListenerTestKit(), KitIntegration.IdentityL
 
     override fun onLoginCompleted(
         mParticleUser: MParticleUser?,
-        identityApiRequest: FilteredIdentityApiRequest?
+        identityApiRequest: FilteredIdentityApiRequest?,
     ) {
         onLoginCompleted?.invoke(mParticleUser, identityApiRequest)
         onUserReceived?.invoke(mParticleUser)
@@ -33,7 +35,7 @@ open class IdentityListenerTestKit : ListenerTestKit(), KitIntegration.IdentityL
 
     override fun onIdentifyCompleted(
         mParticleUser: MParticleUser?,
-        identityApiRequest: FilteredIdentityApiRequest?
+        identityApiRequest: FilteredIdentityApiRequest?,
     ) {
         onIdentifyCompleted?.invoke(mParticleUser, identityApiRequest)
         onUserReceived?.invoke(mParticleUser)
@@ -41,7 +43,7 @@ open class IdentityListenerTestKit : ListenerTestKit(), KitIntegration.IdentityL
 
     override fun onModifyCompleted(
         mParticleUser: MParticleUser?,
-        identityApiRequest: FilteredIdentityApiRequest?
+        identityApiRequest: FilteredIdentityApiRequest?,
     ) {
         onModifyCompleted?.invoke(mParticleUser, identityApiRequest)
         onUserReceived?.invoke(mParticleUser)

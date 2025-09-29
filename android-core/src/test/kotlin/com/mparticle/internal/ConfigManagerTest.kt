@@ -29,18 +29,19 @@ class ConfigManagerTest {
     @Throws(Exception::class)
     fun setUp() {
         context = MockContext()
-        manager = ConfigManager(
-            context,
-            MParticle.Environment.Production,
-            "some api key",
-            "some api secret",
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        )
+        manager =
+            ConfigManager(
+                context,
+                MParticle.Environment.Production,
+                "some api key",
+                "some api secret",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+            )
         mockMp = MockMParticle()
         MParticle.setInstance(mockMp)
         manager.updateConfig(JSONObject(sampleConfig))
@@ -48,18 +49,19 @@ class ConfigManagerTest {
 
     @Test
     fun testInitialization() {
-        manager = ConfigManager(
-            context,
-            MParticle.Environment.Production,
-            "key1",
-            "secret1",
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        )
+        manager =
+            ConfigManager(
+                context,
+                MParticle.Environment.Production,
+                "key1",
+                "secret1",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+            )
         Assert.assertEquals("key1", manager.apiKey)
         Assert.assertEquals("secret1", manager.apiSecret)
         Assert.assertEquals(MParticle.Environment.Production, ConfigManager.getEnvironment())
@@ -71,18 +73,19 @@ class ConfigManagerTest {
         Assert.assertEquals(MParticle.Environment.Production, ConfigManager.getEnvironment())
 
         // updates key/secret if one is non-null
-        manager = ConfigManager(
-            context,
-            MParticle.Environment.Development,
-            "key2",
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        )
+        manager =
+            ConfigManager(
+                context,
+                MParticle.Environment.Development,
+                "key2",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+            )
         Assert.assertEquals("key2", manager.apiKey)
         Assert.assertNull(manager.apiSecret)
         Assert.assertEquals(MParticle.Environment.Development, ConfigManager.getEnvironment())
@@ -96,7 +99,8 @@ class ConfigManagerTest {
         json.put("test", "value")
         manager.saveConfigJson(json)
         val `object` =
-            ConfigManager.sPreferences.getString(ConfigManager.CONFIG_JSON, null)
+            ConfigManager.sPreferences
+                .getString(ConfigManager.CONFIG_JSON, null)
                 ?.let { JSONObject(it) }
         Assert.assertNotNull(`object`)
     }
@@ -115,7 +119,8 @@ class ConfigManagerTest {
         Assert.assertEquals(5, ConfigManager.getPushKeys(context).length().toLong())
         manager.updateConfig(JSONObject())
         val `object` =
-            ConfigManager.sPreferences.getString(ConfigManager.CONFIG_JSON, null)
+            ConfigManager.sPreferences
+                .getString(ConfigManager.CONFIG_JSON, null)
                 ?.let { JSONObject(it) }
         if (`object` != null) {
             Assert.assertTrue(!`object`.keys().hasNext())
@@ -128,7 +133,8 @@ class ConfigManagerTest {
         manager.updateConfig(JSONObject(sampleConfig))
         manager.reloadCoreConfig(JSONObject())
         val `object` =
-            ConfigManager.sPreferences.getString(ConfigManager.CONFIG_JSON, null)
+            ConfigManager.sPreferences
+                .getString(ConfigManager.CONFIG_JSON, null)
                 ?.let { JSONObject(it) }
         `object`?.keys()?.hasNext()?.let { Assert.assertTrue(it) }
     }
@@ -143,15 +149,23 @@ class ConfigManagerTest {
         kitStatusMap[5] = KitStatus.STOPPED
         kitStatusMap[4] = KitStatus.ACTIVE
         kitStatusMap[6] = KitStatus.NOT_CONFIGURED
-        Mockito.`when`(
-            MParticle.getInstance()?.Internal()?.kitManager?.kitStatus
-        )
-            .thenReturn(kitStatusMap)
+        Mockito
+            .`when`(
+                MParticle
+                    .getInstance()
+                    ?.Internal()
+                    ?.kitManager
+                    ?.kitStatus,
+            ).thenReturn(kitStatusMap)
         Assert.assertEquals("1,2,4,5", manager.activeModuleIds)
-        Mockito.`when`(
-            MParticle.getInstance()?.Internal()?.kitManager?.kitStatus
-        )
-            .thenReturn(HashMap())
+        Mockito
+            .`when`(
+                MParticle
+                    .getInstance()
+                    ?.Internal()
+                    ?.kitManager
+                    ?.kitStatus,
+            ).thenReturn(HashMap())
         Assert.assertEquals("", manager.activeModuleIds)
     }
 
@@ -304,7 +318,7 @@ class ConfigManagerTest {
     fun testGetBreadcrumbLimit() {
         Assert.assertEquals(
             UserStorage.DEFAULT_BREADCRUMB_LIMIT.toLong(),
-            ConfigManager.getBreadcrumbLimit(context).toLong()
+            ConfigManager.getBreadcrumbLimit(context).toLong(),
         )
     }
 
@@ -346,11 +360,15 @@ class ConfigManagerTest {
     @Test
     @Throws(Exception::class)
     fun testShouldTrigger() {
-        var message = BaseMPMessage.Builder(Constants.MessageType.COMMERCE_EVENT)
-            .build(InternalSession(), null, 1)
+        var message =
+            BaseMPMessage
+                .Builder(Constants.MessageType.COMMERCE_EVENT)
+                .build(InternalSession(), null, 1)
         Assert.assertTrue(manager.shouldTrigger(message))
-        message = BaseMPMessage.Builder(Constants.MessageType.PUSH_RECEIVED)
-            .build(InternalSession(), null, 1)
+        message =
+            BaseMPMessage
+                .Builder(Constants.MessageType.PUSH_RECEIVED)
+                .build(InternalSession(), null, 1)
         Assert.assertTrue(manager.shouldTrigger(message))
     }
 
@@ -383,8 +401,10 @@ class ConfigManagerTest {
         Assert.assertFalse(ConfigManager.sPreferences.contains(ATTRIBUTES))
         manager.setIntegrationAttributes(1, null)
         Assert.assertFalse(ConfigManager.sPreferences.contains(ATTRIBUTES))
-        ConfigManager.sPreferences.edit()
-            .putString(ATTRIBUTES, "{\"1\":{\"test-key\":\"test-value\"}}").apply()
+        ConfigManager.sPreferences
+            .edit()
+            .putString(ATTRIBUTES, "{\"1\":{\"test-key\":\"test-value\"}}")
+            .apply()
         Assert.assertTrue(ConfigManager.sPreferences.contains(ATTRIBUTES))
         manager.setIntegrationAttributes(1, null)
         Assert.assertFalse(ConfigManager.sPreferences.contains(ATTRIBUTES))
@@ -397,8 +417,10 @@ class ConfigManagerTest {
         val attributes: Map<String, String> = HashMap()
         manager.setIntegrationAttributes(1, attributes)
         Assert.assertFalse(ConfigManager.sPreferences.contains(ATTRIBUTES))
-        ConfigManager.sPreferences.edit()
-            .putString(ATTRIBUTES, "{\"1\":{\"test-key\":\"test-value\"}}").apply()
+        ConfigManager.sPreferences
+            .edit()
+            .putString(ATTRIBUTES, "{\"1\":{\"test-key\":\"test-value\"}}")
+            .apply()
         Assert.assertTrue(ConfigManager.sPreferences.contains(ATTRIBUTES))
         manager.setIntegrationAttributes(1, attributes)
         Assert.assertFalse(ConfigManager.sPreferences.contains(ATTRIBUTES))
@@ -417,8 +439,8 @@ class ConfigManagerTest {
             "{\"1\":{\"test-key\":\"value 2\"},\"12\":{\"test-key\":\"value 3\"}}",
             ConfigManager.sPreferences.getString(
                 ATTRIBUTES,
-                null
-            )
+                null,
+            ),
         )
     }
 
@@ -427,17 +449,22 @@ class ConfigManagerTest {
     fun testGetKitIntegrationAttributes() {
         Assert.assertFalse(ConfigManager.sPreferences.contains(ATTRIBUTES))
         Assert.assertEquals(0, manager.getIntegrationAttributes(1).size.toLong())
-        ConfigManager.sPreferences.edit().putString(
-            ATTRIBUTES,
-            "{\"1\":{\"test-key\":\"value 2\"},\"12\":{\"test-key\":\"value 3\"}}"
-        ).apply()
+        ConfigManager.sPreferences
+            .edit()
+            .putString(
+                ATTRIBUTES,
+                "{\"1\":{\"test-key\":\"value 2\"},\"12\":{\"test-key\":\"value 3\"}}",
+            ).apply()
         var attributes = manager.getIntegrationAttributes(1)
         Assert.assertEquals(1, attributes.size.toLong())
         Assert.assertEquals("value 2", attributes["test-key"])
         attributes = manager.getIntegrationAttributes(12)
         Assert.assertEquals(1, attributes.size.toLong())
         Assert.assertEquals("value 3", attributes["test-key"])
-        ConfigManager.sPreferences.edit().remove(ATTRIBUTES).apply()
+        ConfigManager.sPreferences
+            .edit()
+            .remove(ATTRIBUTES)
+            .apply()
         Assert.assertEquals(0, manager.getIntegrationAttributes(1).size.toLong())
         Assert.assertEquals(0, manager.getIntegrationAttributes(12).size.toLong())
     }
@@ -447,15 +474,20 @@ class ConfigManagerTest {
     fun testGetAllIntegrationAttributes() {
         Assert.assertFalse(ConfigManager.sPreferences.contains(ATTRIBUTES))
         Assert.assertNull(manager.integrationAttributes)
-        ConfigManager.sPreferences.edit().putString(
-            ATTRIBUTES,
-            "{\"1\":{\"test-key\":\"value 2\"},\"12\":{\"test-key\":\"value 3\"}}"
-        ).apply()
+        ConfigManager.sPreferences
+            .edit()
+            .putString(
+                ATTRIBUTES,
+                "{\"1\":{\"test-key\":\"value 2\"},\"12\":{\"test-key\":\"value 3\"}}",
+            ).apply()
         val attributes = manager.integrationAttributes
         Assert.assertEquals(2, attributes.length().toLong())
         Assert.assertEquals("value 2", attributes.getJSONObject("1")["test-key"])
         Assert.assertEquals("value 3", attributes.getJSONObject("12")["test-key"])
-        ConfigManager.sPreferences.edit().remove(ATTRIBUTES).apply()
+        ConfigManager.sPreferences
+            .edit()
+            .remove(ATTRIBUTES)
+            .apply()
         Assert.assertNull(manager.integrationAttributes)
     }
 
@@ -472,7 +504,7 @@ class ConfigManagerTest {
         Assert.assertEquals(1, manager.userIdentityJson.length().toLong())
         Assert.assertEquals(
             1473869816521L,
-            manager.userIdentityJson.getJSONObject(0).getLong("dfs")
+            manager.userIdentityJson.getJSONObject(0).getLong("dfs"),
         )
     }
 
@@ -571,13 +603,15 @@ class ConfigManagerTest {
 
         // test set via config
         val maxWindow = ran.nextInt()
-        val jsonObject = JSONObject()
-            .put(ConfigManager.ALIAS_MAX_WINDOW, maxWindow)
+        val jsonObject =
+            JSONObject()
+                .put(ConfigManager.ALIAS_MAX_WINDOW, maxWindow)
         manager.updateConfig(jsonObject)
         Assert.assertEquals(maxWindow.toLong(), manager.aliasMaxWindow.toLong())
     }
 
     private val callbackResult = AndroidUtils.Mutable<Long?>(null)
+
     private fun getCallbackResult(): Long? {
         val result = callbackResult.value
         callbackResult.value = null
@@ -587,18 +621,19 @@ class ConfigManagerTest {
     @Test
     @Throws(JSONException::class)
     fun testETag() {
-        manager = ConfigManager(
-            context,
-            MParticle.Environment.Production,
-            "some api key",
-            "some api secret",
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        )
+        manager =
+            ConfigManager(
+                context,
+                MParticle.Environment.Production,
+                "some api key",
+                "some api secret",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+            )
         val newEtag = RandomUtils().getAlphaString(24)
         // test default value
         Assert.assertNull(manager.etag)
@@ -611,18 +646,19 @@ class ConfigManagerTest {
     @Test
     @Throws(JSONException::class)
     fun testLastModified() {
-        manager = ConfigManager(
-            context,
-            MParticle.Environment.Production,
-            "some api key",
-            "some api secret",
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        )
+        manager =
+            ConfigManager(
+                context,
+                MParticle.Environment.Production,
+                "some api key",
+                "some api secret",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+            )
         val lastModified = abs(ran.nextLong()).toString()
 
         // test default value
@@ -668,7 +704,7 @@ class ConfigManagerTest {
         for (i in 0 until configSize) {
             newConfigJson.put(
                 randomUtils.getAlphaNumericString(8),
-                randomUtils.getAlphaNumericString(12)
+                randomUtils.getAlphaNumericString(12),
             )
         }
 

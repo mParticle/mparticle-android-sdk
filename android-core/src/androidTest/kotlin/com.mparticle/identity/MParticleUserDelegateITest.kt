@@ -71,7 +71,7 @@ class MParticleUserDelegateITest : BaseCleanStartedEachTest() {
             for (j in 0..2) {
                 val key =
                     mRandomUtils.getAlphaNumericString(mRandomUtils.randomInt(1, 55)).uppercase(
-                        Locale.getDefault()
+                        Locale.getDefault(),
                     )
                 val value = mRandomUtils.getAlphaNumericString(mRandomUtils.randomInt(1, 55))
                 Assert.assertTrue(mUserDelegate.setUserAttribute(key, value, mpid, false))
@@ -123,12 +123,21 @@ class MParticleUserDelegateITest : BaseCleanStartedEachTest() {
         mUserDelegate.setConsentState(builder.build(), mpid2)
         builder.setCCPAConsentState(CCPAConsent.builder(false).build())
         mUserDelegate.setConsentState(builder.build(), mpid2)
-        Assert.assertEquals(1, mUserDelegate.getConsentState(mpid).gdprConsentState.size.toLong())
+        Assert.assertEquals(
+            1,
+            mUserDelegate
+                .getConsentState(mpid)
+                .gdprConsentState.size
+                .toLong(),
+        )
         Assert.assertTrue(mUserDelegate.getConsentState(mpid).gdprConsentState.containsKey("foo"))
         Assert.assertNull(mUserDelegate.getConsentState(mpid).ccpaConsentState)
         Assert.assertEquals(
             2,
-            mUserDelegate.getConsentState(mpid2).gdprConsentState.size.toLong()
+            mUserDelegate
+                .getConsentState(mpid2)
+                .gdprConsentState.size
+                .toLong(),
         )
         Assert.assertTrue(mUserDelegate.getConsentState(mpid2).gdprConsentState.containsKey("foo"))
         Assert.assertTrue(mUserDelegate.getConsentState(mpid2).gdprConsentState.containsKey("foo2"))
@@ -147,11 +156,23 @@ class MParticleUserDelegateITest : BaseCleanStartedEachTest() {
         builder.addGDPRConsentState("foo", GDPRConsent.builder(true).build())
         builder.setCCPAConsentState(CCPAConsent.builder(true).build())
         mUserDelegate.setConsentState(builder.build(), mpid)
-        Assert.assertEquals(1, mUserDelegate.getConsentState(mpid).gdprConsentState.size.toLong())
+        Assert.assertEquals(
+            1,
+            mUserDelegate
+                .getConsentState(mpid)
+                .gdprConsentState.size
+                .toLong(),
+        )
         Assert.assertNotNull(mUserDelegate.getConsentState(mpid).ccpaConsentState)
         Assert.assertTrue(mUserDelegate.getConsentState(mpid).gdprConsentState.containsKey("foo"))
         mUserDelegate.setConsentState(null, mpid)
-        Assert.assertEquals(0, mUserDelegate.getConsentState(mpid).gdprConsentState.size.toLong())
+        Assert.assertEquals(
+            0,
+            mUserDelegate
+                .getConsentState(mpid)
+                .gdprConsentState.size
+                .toLong(),
+        )
         Assert.assertNull(mUserDelegate.getConsentState(mpid).ccpaConsentState)
     }
 
@@ -179,7 +200,7 @@ class MParticleUserDelegateITest : BaseCleanStartedEachTest() {
                 userAttributesResults.value = userAttributes
                 userAttributeListResults.value = userAttributeLists
             },
-            mStartingMpid
+            mStartingMpid,
         )
         assertMapEquals(attributeSingles, userAttributesResults.value)
         assertMapEquals(attributeLists, userAttributeListResults.value)
@@ -195,7 +216,7 @@ class MParticleUserDelegateITest : BaseCleanStartedEachTest() {
                     userAttributeListResults.value = userAttributeLists
                     latch.countDown()
                 },
-                mStartingMpid
+                mStartingMpid,
             )
         }
         latch.await()
@@ -203,15 +224,17 @@ class MParticleUserDelegateITest : BaseCleanStartedEachTest() {
         assertMapEquals(attributeLists, userAttributeListResults.value)
     }
 
-    private fun assertMapEquals(map1: Map<*, *>, map2: Map<*, *>?) {
+    private fun assertMapEquals(
+        map1: Map<*, *>,
+        map2: Map<*, *>?,
+    ) {
         Assert.assertEquals(
             """
-    $map1
-    
-    vs$map2
+            $map1
+            vs$map2
             """.trimIndent(),
             map1.size.toLong(),
-            map2?.size?.toLong()
+            map2?.size?.toLong(),
         )
         for (obj in map1.entries) {
             val (key, value) = obj

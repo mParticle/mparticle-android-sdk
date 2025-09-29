@@ -4,7 +4,6 @@ import org.junit.Assert
 import org.junit.Test
 
 class SessionTest {
-
     @Test
     fun equals() {
         var sessionA = Session(null, null)

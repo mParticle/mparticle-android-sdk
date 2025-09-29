@@ -4,7 +4,6 @@ package com.mparticle
  * ### Optional callback events for when the view loads and unloads.
  */
 interface MpRoktEventCallback {
-
     /**
      * onLoad Callback will be triggered immediately when the View displays.
      */
@@ -68,7 +67,9 @@ enum class UnloadReasons {
     /**
      * Catch-all for all issues.
      */
-    UNKNOWN;
+    UNKNOWN,
+
+    ;
 
     companion object {
         /**
@@ -78,12 +79,11 @@ enum class UnloadReasons {
          * @param value the name of the enum constant to look up
          * @return the corresponding UnloadReasons constant or UNKNOWN if no match is found
          */
-        fun from(value: String): UnloadReasons {
-            return try {
+        fun from(value: String): UnloadReasons =
+            try {
                 valueOf(value)
             } catch (e: IllegalArgumentException) {
                 UNKNOWN
             }
-        }
     }
 }

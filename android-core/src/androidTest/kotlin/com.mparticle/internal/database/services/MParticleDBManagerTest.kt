@@ -95,33 +95,32 @@ class MParticleDBManagerTest : BaseCleanInstallEachTest() {
     fun testGetUserAttributesAsync() {
         startMParticle()
         val dbAccessThread = AndroidUtils.Mutable<Thread?>(null)
-        val manager: MParticleDBManager = object : MParticleDBManager() {
-            override fun getUserAttributeSingles(mpId: Long): Map<String, Any>? {
-                dbAccessThread.value = Thread.currentThread()
-                return null
-            }
+        val manager: MParticleDBManager =
+            object : MParticleDBManager() {
+                override fun getUserAttributeSingles(mpId: Long): Map<String, Any>? {
+                    dbAccessThread.value = Thread.currentThread()
+                    return null
+                }
 
-            override fun getUserAttributeLists(mpId: Long): TreeMap<String, List<String>>? {
-                return null
+                override fun getUserAttributeLists(mpId: Long): TreeMap<String, List<String>>? = null
             }
-        }
         val latch = AndroidUtils.Mutable(MPLatch(1))
         val callbackThread = AndroidUtils.Mutable<Thread?>(null)
 
         // when not on the main thread, it should callback on the current thread, and access the DB on the same thread
         Assert.assertNotEquals("main", Thread.currentThread().name)
 
-        val listener: TypedUserAttributeListener = object : TypedUserAttributeListener {
-
-            override fun onUserAttributesReceived(
-                userAttributes: Map<String, Any?>,
-                userAttributeLists: Map<String, List<String?>?>,
-                mpid: Long
-            ) {
-                callbackThread.value = Thread.currentThread()
-                latch.value.countDown()
+        val listener: TypedUserAttributeListener =
+            object : TypedUserAttributeListener {
+                override fun onUserAttributesReceived(
+                    userAttributes: Map<String, Any?>,
+                    userAttributeLists: Map<String, List<String?>?>,
+                    mpid: Long,
+                ) {
+                    callbackThread.value = Thread.currentThread()
+                    latch.value.countDown()
+                }
             }
-        }
         manager.getUserAttributes(UserAttributeListenerWrapper(listener), 1)
         Assert.assertNotNull(callbackThread.value)
         Assert.assertEquals(Thread.currentThread().name, callbackThread.value?.name)
@@ -131,20 +130,21 @@ class MParticleDBManagerTest : BaseCleanInstallEachTest() {
         latch.value = MPLatch(1)
 
         // when run from the main thread, it should be called back on the main thread, but NOT access the DB on the same thread
-        val listener1: TypedUserAttributeListener = object : TypedUserAttributeListener {
-            override fun onUserAttributesReceived(
-                userAttributes: Map<String, Any?>,
-                userAttributeLists: Map<String, List<String?>?>,
-                mpid: Long
-            ) {
-                callbackThread.value = Thread.currentThread()
-                latch.value.countDown()
+        val listener1: TypedUserAttributeListener =
+            object : TypedUserAttributeListener {
+                override fun onUserAttributesReceived(
+                    userAttributes: Map<String, Any?>,
+                    userAttributeLists: Map<String, List<String?>?>,
+                    mpid: Long,
+                ) {
+                    callbackThread.value = Thread.currentThread()
+                    latch.value.countDown()
+                }
             }
-        }
         Handler(Looper.getMainLooper()).post {
             manager.getUserAttributes(
                 UserAttributeListenerWrapper(listener),
-                1
+                1,
             )
         }
         latch.value.await()

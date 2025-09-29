@@ -18,18 +18,19 @@ class MessageBatchTest {
         val mockMp = Mockito.mock(MParticle::class.java)
         Mockito.`when`(mockMp.environment).thenReturn(MParticle.Environment.Development)
         MParticle.setInstance(mockMp)
-        val manager = ConfigManager(
-            MockContext(),
-            MParticle.Environment.Production,
-            "some api key",
-            "some api secret",
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        )
+        val manager =
+            ConfigManager(
+                MockContext(),
+                MParticle.Environment.Production,
+                "some api key",
+                "some api secret",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+            )
         var sessionHistory = true
         val batchId = BatchId(manager.mpid, null, null, null)
         var batch = MessageBatch.create(sessionHistory, manager, JSONObject(), batchId)
@@ -67,18 +68,19 @@ class MessageBatchTest {
         val mockMp = Mockito.mock(MParticle::class.java)
         Mockito.`when`(mockMp.environment).thenReturn(MParticle.Environment.Development)
         MParticle.setInstance(mockMp)
-        val manager = ConfigManager(
-            MockContext(),
-            MParticle.Environment.Production,
-            "some api key",
-            "some api secret",
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        )
+        val manager =
+            ConfigManager(
+                MockContext(),
+                MParticle.Environment.Production,
+                "some api key",
+                "some api secret",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+            )
         val sessionHistory = true
         val batchId = BatchId(manager.mpid, null, null, null)
         val batch = MessageBatch.create(sessionHistory, manager, JSONObject(), batchId)
@@ -87,24 +89,26 @@ class MessageBatchTest {
         var consent = batch.optJSONObject("con")
         Assert.assertNotNull(consent)
         batch.addConsentState(
-            ConsentState.builder().addGDPRConsentState(
-                "foo purpose",
-                GDPRConsent.builder(true)
-                    .timestamp(10L)
-                    .location("foo location")
-                    .hardwareId("foo hardware id")
-                    .document("foo document")
-                    .build()
-            )
-                .setCCPAConsentState(
-                    CCPAConsent.builder(true)
+            ConsentState
+                .builder()
+                .addGDPRConsentState(
+                    "foo purpose",
+                    GDPRConsent
+                        .builder(true)
+                        .timestamp(10L)
+                        .location("foo location")
+                        .hardwareId("foo hardware id")
+                        .document("foo document")
+                        .build(),
+                ).setCCPAConsentState(
+                    CCPAConsent
+                        .builder(true)
                         .timestamp(20L)
                         .location("bar location")
                         .hardwareId("bar hardware id")
                         .document("bar document")
-                        .build()
-                )
-                .build()
+                        .build(),
+                ).build(),
         )
         val consentJSON = batch.optJSONObject(Constants.MessageKey.CONSENT_STATE)
         Assert.assertNotNull(consent)
@@ -116,15 +120,15 @@ class MessageBatchTest {
         Assert.assertEquals(10L, consent?.getLong(Constants.MessageKey.CONSENT_STATE_TIMESTAMP))
         Assert.assertEquals(
             "foo location",
-            consent?.getString(Constants.MessageKey.CONSENT_STATE_LOCATION)
+            consent?.getString(Constants.MessageKey.CONSENT_STATE_LOCATION),
         )
         Assert.assertEquals(
             "foo hardware id",
-            consent?.getString(Constants.MessageKey.CONSENT_STATE_HARDWARE_ID)
+            consent?.getString(Constants.MessageKey.CONSENT_STATE_HARDWARE_ID),
         )
         Assert.assertEquals(
             "foo document",
-            consent?.getString(Constants.MessageKey.CONSENT_STATE_DOCUMENT)
+            consent?.getString(Constants.MessageKey.CONSENT_STATE_DOCUMENT),
         )
         consent = consentJSON?.optJSONObject(Constants.MessageKey.CONSENT_STATE_CCPA)
         Assert.assertNotNull(consent)
@@ -134,15 +138,15 @@ class MessageBatchTest {
         Assert.assertEquals(20L, consent?.getLong(Constants.MessageKey.CONSENT_STATE_TIMESTAMP))
         Assert.assertEquals(
             "bar location",
-            consent?.getString(Constants.MessageKey.CONSENT_STATE_LOCATION)
+            consent?.getString(Constants.MessageKey.CONSENT_STATE_LOCATION),
         )
         Assert.assertEquals(
             "bar hardware id",
-            consent?.getString(Constants.MessageKey.CONSENT_STATE_HARDWARE_ID)
+            consent?.getString(Constants.MessageKey.CONSENT_STATE_HARDWARE_ID),
         )
         Assert.assertEquals(
             "bar document",
-            consent?.getString(Constants.MessageKey.CONSENT_STATE_DOCUMENT)
+            consent?.getString(Constants.MessageKey.CONSENT_STATE_DOCUMENT),
         )
     }
 

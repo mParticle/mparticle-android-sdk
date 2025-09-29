@@ -41,40 +41,42 @@ class CustomMappingTest {
                 val matches = pJson.getJSONArray("matches")
                 Assert.assertEquals(
                     matches.getJSONObject(0).getInt("message_type").toLong(),
-                    customMapping.messageType.toLong()
+                    customMapping.messageType.toLong(),
                 )
                 Assert.assertEquals(
                     matches.getJSONObject(0).getString("event_match_type"),
-                    customMapping.matchList[0].mMatchType
+                    customMapping.matchList[0].mMatchType,
                 )
                 if (customMapping.matchList[0].mMatchType.startsWith(CustomMapping.MATCH_TYPE_HASH)) {
                     Assert.assertEquals(
                         matches.getJSONObject(0).getInt("event").toLong(),
-                        customMapping.matchList[0].mEventHash.toLong()
+                        customMapping.matchList[0].mEventHash.toLong(),
                     )
                 } else {
                     Assert.assertEquals(
                         matches.getJSONObject(0).getString("event"),
-                        customMapping.matchList[0].mEventName
+                        customMapping.matchList[0].mEventName,
                     )
                 }
                 if (matches.getJSONObject(0).has("attribute_key")) {
                     Assert.assertEquals(
                         matches.getJSONObject(0).getString("attribute_key"),
-                        customMapping.matchList[0].mAttributeKey
+                        customMapping.matchList[0].mAttributeKey,
                     )
                     if (matches.getJSONObject(0)["attribute_values"] is JSONArray) {
                         val attributeValues =
                             matches.getJSONObject(0).getJSONArray("attribute_values")
                         Assert.assertEquals(
                             attributeValues.length().toLong(),
-                            customMapping.matchList[0].attributeValues.size.toLong()
+                            customMapping.matchList[0]
+                                .attributeValues.size
+                                .toLong(),
                         )
                     } else {
                         Assert.assertTrue(
                             customMapping.matchList[0].attributeValues.contains(
-                                matches.getJSONObject(0).getString("attribute_values").lowercase()
-                            )
+                                matches.getJSONObject(0).getString("attribute_values").lowercase(),
+                            ),
                         )
                     }
                 }
@@ -83,28 +85,29 @@ class CustomMappingTest {
                     Assert.assertEquals(behaviors.optBoolean("is_default"), customMapping.isDefault)
                     Assert.assertEquals(
                         behaviors.optBoolean("append_unmapped_as_is"),
-                        customMapping.mAppendUnmappedAsIs
+                        customMapping.mAppendUnmappedAsIs,
                     )
                     Assert.assertEquals(
                         behaviors.optInt("max_custom_params", Int.MAX_VALUE).toLong(),
-                        customMapping.mMaxCustomParams.toLong()
+                        customMapping.mMaxCustomParams.toLong(),
                     )
                 }
                 val action = pJson.getJSONObject("action")
                 Assert.assertEquals(
                     customMapping.mProjectedEventName,
-                    action.getString("projected_event_name")
+                    action.getString("projected_event_name"),
                 )
                 val attributes = action.getJSONArray("attribute_maps")
                 val sum =
                     (if (customMapping.mRequiredAttributeMapList == null) 0 else customMapping.mRequiredAttributeMapList.size) +
-                        if (customMapping.mStaticAttributeMapList == null) 0 else customMapping.mStaticAttributeMapList.size
+                        (if (customMapping.mStaticAttributeMapList == null) 0 else customMapping.mStaticAttributeMapList.size)
                 Assert.assertEquals(attributes.length().toLong(), sum.toLong())
                 for (k in 0 until attributes.length()) {
                     val attribute = attributes.getJSONObject(k)
                     val attProj = CustomMapping.AttributeMap(attribute)
                     Assert.assertEquals(attribute.optBoolean("is_required"), attProj.mIsRequired)
-                    if (attribute.getString("match_type")
+                    if (attribute
+                        .getString("match_type")
                         .startsWith(CustomMapping.MATCH_TYPE_STATIC)
                     ) {
                         Assert.assertFalse(customMapping.mRequiredAttributeMapList.contains(attProj))
@@ -130,12 +133,20 @@ class CustomMappingTest {
     @Throws(Exception::class)
     fun testDefault() {
         val defaultCustomMapping =
-            CustomMapping(JSONObject("{ \"id\":89, \"matches\":[{ \"message_type\":4, \"event_match_type\":\"\", \"event\":\"\" }], \"behavior\":{ \"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{ \"projected_event_name\":\"\", \"attribute_maps\":[ ] } }"))
+            CustomMapping(
+                JSONObject(
+                    "{ \"id\":89, \"matches\":[{ \"message_type\":4, \"event_match_type\":\"\", \"event\":\"\" }], \"behavior\":{ \"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{ \"projected_event_name\":\"\", \"attribute_maps\":[ ] } }",
+                ),
+            )
         val info = HashMap<String, String?>()
         info["some key"] = "some value"
         info["another key"] = "another value"
-        val event = MPEvent.Builder("whatever", MParticle.EventType.Other).category("whatever!!")
-            .customAttributes(info).build()
+        val event =
+            MPEvent
+                .Builder("whatever", MParticle.EventType.Other)
+                .category("whatever!!")
+                .customAttributes(info)
+                .build()
         Assert.assertTrue(defaultCustomMapping.isMatch(MPEventWrapper(event)))
         val newEvent = defaultCustomMapping.project(MPEventWrapper(event))[0].mpEvent
         Assert.assertEquals(event, newEvent)
@@ -151,21 +162,23 @@ class CustomMappingTest {
     @Test
     @Throws(Exception::class)
     fun testDefaultProjection2() {
-        val kitConfiguration = MockKitConfiguration.createKitConfiguration(
-            JSONObject(
-                "{\"id\":56, \"as\":{}, \"hs\":{}, \"pr\":[{\"id\":93, \"pmmid\":23, \"matches\":[{\"message_type\":4, \"event_match_type\":\"String\", \"event\":\"Product View\", \"attribute_key\":\"\$MethodName\", \"attribute_values\":\"\$ProductView\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"cool_product_view\"} }, {\"id\":89, \"matches\":[{\"message_type\":4, \"event_match_type\":\"\", \"event\":\"\"}], \"behavior\":{\"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{\"projected_event_name\":\"\", \"attribute_maps\":[] } }, {\"id\":100, \"pmid\":179, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"account - check order status\", \"attribute_maps\":[] } }, {\"id\":92, \"pmid\":182, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"1111995177\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"account - feedback\", \"attribute_maps\":[{\"projected_attribute_name\":\"Feedback Type\", \"match_type\":\"Hash\", \"value\":\"-768380952\", \"data_type\":\"String\"} ] } }, {\"id\":96, \"pmid\":183, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - add to tote\", \"attribute_maps\":[{\"projected_attribute_name\":\"Last Add to Tote Name\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Print\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Category\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Total Amount\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote SKU\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Size\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Quantity\", \"match_type\":\"Static\", \"value\":\"10\", \"data_type\":\"Int\"}, {\"projected_attribute_name\":\"Last Add to Tote Unit Price\", \"match_type\":\"Static\", \"value\":\"1321\", \"data_type\":\"String\"} ] } }, {\"id\":104, \"pmid\":184, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"} ] } }, {\"id\":104, \"pmid\":185, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"987878094\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"689388774\", \"data_type\":\"String\"} ] } }, {\"id\":104, \"pmid\":186, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"-754932241\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"992037090\", \"data_type\":\"String\"} ] } } ] }"
+        val kitConfiguration =
+            MockKitConfiguration.createKitConfiguration(
+                JSONObject(
+                    "{\"id\":56, \"as\":{}, \"hs\":{}, \"pr\":[{\"id\":93, \"pmmid\":23, \"matches\":[{\"message_type\":4, \"event_match_type\":\"String\", \"event\":\"Product View\", \"attribute_key\":\"\$MethodName\", \"attribute_values\":\"\$ProductView\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"cool_product_view\"} }, {\"id\":89, \"matches\":[{\"message_type\":4, \"event_match_type\":\"\", \"event\":\"\"}], \"behavior\":{\"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{\"projected_event_name\":\"\", \"attribute_maps\":[] } }, {\"id\":100, \"pmid\":179, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"account - check order status\", \"attribute_maps\":[] } }, {\"id\":92, \"pmid\":182, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"1111995177\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"account - feedback\", \"attribute_maps\":[{\"projected_attribute_name\":\"Feedback Type\", \"match_type\":\"Hash\", \"value\":\"-768380952\", \"data_type\":\"String\"} ] } }, {\"id\":96, \"pmid\":183, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - add to tote\", \"attribute_maps\":[{\"projected_attribute_name\":\"Last Add to Tote Name\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Print\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Category\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Total Amount\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote SKU\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Size\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Quantity\", \"match_type\":\"Static\", \"value\":\"10\", \"data_type\":\"Int\"}, {\"projected_attribute_name\":\"Last Add to Tote Unit Price\", \"match_type\":\"Static\", \"value\":\"1321\", \"data_type\":\"String\"} ] } }, {\"id\":104, \"pmid\":184, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"} ] } }, {\"id\":104, \"pmid\":185, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"987878094\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"689388774\", \"data_type\":\"String\"} ] } }, {\"id\":104, \"pmid\":186, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"-754932241\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"992037090\", \"data_type\":\"String\"} ] } } ] }",
+                ),
             )
-        )
         val info = HashMap<String, String?>()
         info["some key"] = "some value"
         info["another key"] = "another value"
         val event =
             MPEvent.Builder("whatever", MParticle.EventType.Other).customAttributes(info).build()
-        val list = CustomMapping.projectEvents(
-            event,
-            kitConfiguration.customMappingList,
-            kitConfiguration.defaultEventProjection
-        )
+        val list =
+            CustomMapping.projectEvents(
+                event,
+                kitConfiguration.customMappingList,
+                kitConfiguration.defaultEventProjection,
+            )
         Assert.assertEquals(1, list.size.toLong())
         Assert.assertEquals(list[0].mpEvent, event)
     }
@@ -177,30 +190,33 @@ class CustomMappingTest {
     @Test
     @Throws(Exception::class)
     fun testNoDefaultEventAndDefaultScreen() {
-        val kitConfiguration = MockKitConfiguration.createKitConfiguration(
-            JSONObject(
-                "{\"id\":56, \"as\":{}, \"hs\":{}, \"pr\":[{\"id\":93, \"pmmid\":23, \"matches\":[{\"message_type\":4, \"event_match_type\":\"String\", \"event\":\"Product View\", \"attribute_key\":\"\$MethodName\", \"attribute_values\":\"\$ProductView\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"cool_product_view\"} }, {\"id\":89, \"matches\":[{\"message_type\":3, \"event_match_type\":\"\", \"event\":\"\"}], \"behavior\":{\"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{\"projected_event_name\":\"\", \"attribute_maps\":[] } }, {\"id\":100, \"pmid\":179, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"account - check order status\", \"attribute_maps\":[] } }, {\"id\":92, \"pmid\":182, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"1111995177\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"account - feedback\", \"attribute_maps\":[{\"projected_attribute_name\":\"Feedback Type\", \"match_type\":\"Hash\", \"value\":\"-768380952\", \"data_type\":\"String\"} ] } }, {\"id\":96, \"pmid\":183, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - add to tote\", \"attribute_maps\":[{\"projected_attribute_name\":\"Last Add to Tote Name\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Print\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Category\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Total Amount\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote SKU\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Size\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Quantity\", \"match_type\":\"Static\", \"value\":\"10\", \"data_type\":\"Int\"}, {\"projected_attribute_name\":\"Last Add to Tote Unit Price\", \"match_type\":\"Static\", \"value\":\"1321\", \"data_type\":\"String\"} ] } }, {\"id\":104, \"pmid\":184, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"} ] } }, {\"id\":104, \"pmid\":185, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"987878094\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"689388774\", \"data_type\":\"String\"} ] } }, {\"id\":104, \"pmid\":186, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"-754932241\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"992037090\", \"data_type\":\"String\"} ] } } ] }"
+        val kitConfiguration =
+            MockKitConfiguration.createKitConfiguration(
+                JSONObject(
+                    "{\"id\":56, \"as\":{}, \"hs\":{}, \"pr\":[{\"id\":93, \"pmmid\":23, \"matches\":[{\"message_type\":4, \"event_match_type\":\"String\", \"event\":\"Product View\", \"attribute_key\":\"\$MethodName\", \"attribute_values\":\"\$ProductView\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"cool_product_view\"} }, {\"id\":89, \"matches\":[{\"message_type\":3, \"event_match_type\":\"\", \"event\":\"\"}], \"behavior\":{\"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{\"projected_event_name\":\"\", \"attribute_maps\":[] } }, {\"id\":100, \"pmid\":179, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"account - check order status\", \"attribute_maps\":[] } }, {\"id\":92, \"pmid\":182, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"1111995177\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"account - feedback\", \"attribute_maps\":[{\"projected_attribute_name\":\"Feedback Type\", \"match_type\":\"Hash\", \"value\":\"-768380952\", \"data_type\":\"String\"} ] } }, {\"id\":96, \"pmid\":183, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - add to tote\", \"attribute_maps\":[{\"projected_attribute_name\":\"Last Add to Tote Name\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Print\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Category\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Total Amount\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote SKU\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Size\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Quantity\", \"match_type\":\"Static\", \"value\":\"10\", \"data_type\":\"Int\"}, {\"projected_attribute_name\":\"Last Add to Tote Unit Price\", \"match_type\":\"Static\", \"value\":\"1321\", \"data_type\":\"String\"} ] } }, {\"id\":104, \"pmid\":184, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"} ] } }, {\"id\":104, \"pmid\":185, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"987878094\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"689388774\", \"data_type\":\"String\"} ] } }, {\"id\":104, \"pmid\":186, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"-754932241\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"992037090\", \"data_type\":\"String\"} ] } } ] }",
+                ),
             )
-        )
         val info = HashMap<String, String?>()
         info["some key"] = "some value"
         info["another key"] = "another value"
         val event =
             MPEvent.Builder("whatever", MParticle.EventType.Other).customAttributes(info).build()
-        var list = CustomMapping.projectEvents(
-            event,
-            kitConfiguration.customMappingList,
-            kitConfiguration.defaultEventProjection
-        )
+        var list =
+            CustomMapping.projectEvents(
+                event,
+                kitConfiguration.customMappingList,
+                kitConfiguration.defaultEventProjection,
+            )
         Assert.assertNull(list)
         // but if we say this is a screen event, the default projection should be detected
-        list = CustomMapping.projectEvents(
-            event,
-            true,
-            kitConfiguration.customMappingList,
-            kitConfiguration.defaultEventProjection,
-            kitConfiguration.defaultScreenCustomMapping
-        )
+        list =
+            CustomMapping.projectEvents(
+                event,
+                true,
+                kitConfiguration.customMappingList,
+                kitConfiguration.defaultEventProjection,
+                kitConfiguration.defaultScreenCustomMapping,
+            )
         Assert.assertEquals(1, list.size.toLong())
     }
 
@@ -213,7 +229,11 @@ class CustomMappingTest {
     @Throws(Exception::class)
     fun testDontAppendAsIs() {
         var customMapping =
-            CustomMapping(JSONObject("{ \"id\":89, \"matches\":[{ \"message_type\":4, \"event_match_type\":\"\", \"event\":\"\" }], \"behavior\":{ \"append_unmapped_as_is\":false, \"is_default\":true }, \"action\":{ \"projected_event_name\":\"\", \"attribute_maps\":[ ] } }"))
+            CustomMapping(
+                JSONObject(
+                    "{ \"id\":89, \"matches\":[{ \"message_type\":4, \"event_match_type\":\"\", \"event\":\"\" }], \"behavior\":{ \"append_unmapped_as_is\":false, \"is_default\":true }, \"action\":{ \"projected_event_name\":\"\", \"attribute_maps\":[ ] } }",
+                ),
+            )
         val info = HashMap<String, String?>()
         info["some key"] = "some value"
         info["another key"] = "another value"
@@ -222,7 +242,11 @@ class CustomMappingTest {
         var newEvent = customMapping.project(MPEventWrapper(event))[0]
         Assert.assertTrue(newEvent.mpEvent.customAttributeStrings!!.isEmpty())
         customMapping =
-            CustomMapping(JSONObject("{ \"id\":89, \"matches\":[{ \"message_type\":4, \"event_match_type\":\"\", \"event\":\"\" }], \"behavior\":{ \"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{ \"projected_event_name\":\"\", \"attribute_maps\":[ ] } }"))
+            CustomMapping(
+                JSONObject(
+                    "{ \"id\":89, \"matches\":[{ \"message_type\":4, \"event_match_type\":\"\", \"event\":\"\" }], \"behavior\":{ \"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{ \"projected_event_name\":\"\", \"attribute_maps\":[ ] } }",
+                ),
+            )
         newEvent = customMapping.project(MPEventWrapper(event))[0]
         Assert.assertTrue(newEvent.mpEvent.customAttributeStrings!!.size == 2)
     }
@@ -240,7 +264,11 @@ class CustomMappingTest {
     @Throws(Exception::class)
     fun testMaxParams() {
         var customMapping =
-            CustomMapping(JSONObject("{ \"id\":89, \"matches\":[{ \"message_type\":4, \"event_match_type\":\"\", \"event\":\"\" }], \"behavior\":{ \"append_unmapped_as_is\":true, \"max_custom_params\":5, \"is_default\":true }, \"action\":{ \"projected_event_name\":\"\", \"attribute_maps\":[ ] } }"))
+            CustomMapping(
+                JSONObject(
+                    "{ \"id\":89, \"matches\":[{ \"message_type\":4, \"event_match_type\":\"\", \"event\":\"\" }], \"behavior\":{ \"append_unmapped_as_is\":true, \"max_custom_params\":5, \"is_default\":true }, \"action\":{ \"projected_event_name\":\"\", \"attribute_maps\":[ ] } }",
+                ),
+            )
         val info = HashMap<String, String?>()
         // add them out of order, why not?
         info["key 3"] = "123af4"
@@ -259,7 +287,11 @@ class CustomMappingTest {
         Assert.assertFalse(newEvent.customAttributeStrings!!.containsKey("key 6"))
         // now create the SAME projection, except specify an optional attribute key 6 - it should boot key 5 from the resulting event
         customMapping =
-            CustomMapping(JSONObject("{ \"id\":89, \"matches\":[{ \"message_type\":4, \"event_match_type\":\"\", \"event\":\"\" }], \"behavior\":{ \"append_unmapped_as_is\":true, \"max_custom_params\":5, \"is_default\":true }, \"action\":{ \"projected_event_name\":\"\", \"attribute_maps\":[ { \"projected_attribute_name\":\"\", \"match_type\":\"String\", \"value\":\"key 6\", \"data_type\":\"String\" }] } }"))
+            CustomMapping(
+                JSONObject(
+                    "{ \"id\":89, \"matches\":[{ \"message_type\":4, \"event_match_type\":\"\", \"event\":\"\" }], \"behavior\":{ \"append_unmapped_as_is\":true, \"max_custom_params\":5, \"is_default\":true }, \"action\":{ \"projected_event_name\":\"\", \"attribute_maps\":[ { \"projected_attribute_name\":\"\", \"match_type\":\"String\", \"value\":\"key 6\", \"data_type\":\"String\" }] } }",
+                ),
+            )
         result = customMapping.project(MPEventWrapper(event))[0]
         newEvent = result.mpEvent
         Assert.assertFalse(newEvent.customAttributeStrings!!.containsKey("key 5"))
@@ -268,7 +300,11 @@ class CustomMappingTest {
 
         // test what happens if max isn't even set (everything should be there)
         customMapping =
-            CustomMapping(JSONObject("{ \"id\":89, \"matches\":[{ \"message_type\":4, \"event_match_type\":\"\", \"event\":\"\" }], \"behavior\":{ \"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{ \"projected_event_name\":\"\", \"attribute_maps\":[ { \"projected_attribute_name\":\"\", \"match_type\":\"String\", \"value\":\"key 6\", \"data_type\":\"String\" }] } }"))
+            CustomMapping(
+                JSONObject(
+                    "{ \"id\":89, \"matches\":[{ \"message_type\":4, \"event_match_type\":\"\", \"event\":\"\" }], \"behavior\":{ \"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{ \"projected_event_name\":\"\", \"attribute_maps\":[ { \"projected_attribute_name\":\"\", \"match_type\":\"String\", \"value\":\"key 6\", \"data_type\":\"String\" }] } }",
+                ),
+            )
         result = customMapping.project(MPEventWrapper(event))[0]
         newEvent = result.mpEvent
         Assert.assertTrue(newEvent.customAttributeStrings!!.containsKey("key 5"))
@@ -285,12 +321,16 @@ class CustomMappingTest {
     @Throws(Exception::class)
     fun testFieldName() {
         val customMapping =
-            CustomMapping(JSONObject("{ \"id\":89, \"matches\":[{ \"message_type\":4, \"event_match_type\":\"\", \"event\":\"\" }], \"behavior\":{ \"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{ \"projected_event_name\":\"\", \"attribute_maps\":[ { \"projected_attribute_name\":\"\", \"match_type\":\"String\", \"value\":\"key 6\", \"data_type\":\"String\" },{ \"projected_attribute_name\": \"screen_name_key\", \"match_type\": \"Field\", \"value\": \"ScreenName\", \"data_type\": 1, \"is_required\": true }] } }"))
+            CustomMapping(
+                JSONObject(
+                    "{ \"id\":89, \"matches\":[{ \"message_type\":4, \"event_match_type\":\"\", \"event\":\"\" }], \"behavior\":{ \"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{ \"projected_event_name\":\"\", \"attribute_maps\":[ { \"projected_attribute_name\":\"\", \"match_type\":\"String\", \"value\":\"key 6\", \"data_type\":\"String\" },{ \"projected_attribute_name\": \"screen_name_key\", \"match_type\": \"Field\", \"value\": \"ScreenName\", \"data_type\": 1, \"is_required\": true }] } }",
+                ),
+            )
         val event = MPEvent.Builder("screenname", MParticle.EventType.Other).build()
         val projectedEvent = customMapping.project(MPEventWrapper(event))[0]
         Assert.assertEquals(
             "screenname",
-            projectedEvent.mpEvent.customAttributeStrings!!["screen_name_key"]
+            projectedEvent.mpEvent.customAttributeStrings!!["screen_name_key"],
         )
     }
 
@@ -305,7 +345,9 @@ class CustomMappingTest {
         val info: MutableMap<String?, String?> = HashMap()
         info["key 1"] = "value 1"
         val event =
-            MPEvent.Builder("some event name", MParticle.EventType.Other).customAttributes(info)
+            MPEvent
+                .Builder("some event name", MParticle.EventType.Other)
+                .customAttributes(info)
                 .build()
         val wrapper = MPEventWrapper(event)
 
@@ -317,9 +359,10 @@ class CustomMappingTest {
 
         // make sure event hash is generated correctly
         Assert.assertEquals(
-            KitUtils.hashForFiltering(event.eventType.ordinal.toString() + event.eventName)
+            KitUtils
+                .hashForFiltering(event.eventType.ordinal.toString() + event.eventName)
                 .toLong(),
-            wrapper.eventHash.toLong()
+            wrapper.eventHash.toLong(),
         )
         Assert.assertEquals(4, wrapper.messageType.toLong())
         Assert.assertEquals(event.eventType.ordinal.toLong(), wrapper.eventTypeOrdinal.toLong())
@@ -333,7 +376,9 @@ class CustomMappingTest {
         val info: MutableMap<String?, String?> = HashMap()
         info["key 1"] = "value 1"
         val event =
-            MPEvent.Builder("some event name", MParticle.EventType.Other).customAttributes(info)
+            MPEvent
+                .Builder("some event name", MParticle.EventType.Other)
+                .customAttributes(info)
                 .build()
         val wrapper = MPEventWrapper(event, true)
 
@@ -346,7 +391,7 @@ class CustomMappingTest {
         // make sure event hash is generated correctly
         Assert.assertEquals(
             KitUtils.hashForFiltering(0.toString() + event.eventName).toLong(),
-            wrapper.eventHash.toLong()
+            wrapper.eventHash.toLong(),
         )
         Assert.assertEquals(3, wrapper.messageType.toLong())
         Assert.assertEquals(0, wrapper.eventTypeOrdinal.toLong())
@@ -360,11 +405,12 @@ class CustomMappingTest {
     @Test
     @Throws(Exception::class)
     fun testMultiHashProjections1() {
-        val kitConfiguration = MockKitConfiguration.createKitConfiguration(
-            JSONObject(
-                "{\"id\":56, \"as\":{}, \"hs\":{}, \"pr\":[{\"id\":93, \"pmmid\":23, \"matches\":[{\"message_type\":4, \"event_match_type\":\"String\", \"event\":\"Product View\", \"attribute_key\":\"\$MethodName\", \"attribute_values\":\"\$ProductView\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"cool_product_view\"} }, {\"id\":89, \"matches\":[{\"message_type\":4, \"event_match_type\":\"\", \"event\":\"\"}], \"behavior\":{\"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{\"projected_event_name\":\"\", \"attribute_maps\":[] } }, {\"id\":100, \"pmid\":179, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":10, \"append_unmapped_as_is\":true }, \"action\":{\"projected_event_name\":\"account - check order status\", \"attribute_maps\":[] } }, {\"id\":92, \"pmid\":182, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"1111995177\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"account - feedback\", \"attribute_maps\":[{\"projected_attribute_name\":\"Feedback Type\", \"match_type\":\"Hash\", \"value\":\"-768380952\", \"data_type\":\"String\"} ] } }, {\"id\":96, \"pmid\":183, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - add to tote\", \"attribute_maps\":[{\"projected_attribute_name\":\"Last Add to Tote Name\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Print\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Category\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\", \"is_required\":true }, {\"projected_attribute_name\":\"Last Add to Tote Total Amount\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote SKU\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Size\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Quantity\", \"match_type\":\"Static\", \"value\":\"10\", \"data_type\":\"Int\"}, {\"projected_attribute_name\":\"Last Add to Tote Unit Price\", \"match_type\":\"Static\", \"value\":\"1321\", \"data_type\":\"String\"} ] } }, {\"id\":104, \"pmid\":184, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Complete the Look Product Name 2\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\", \"is_required\":true } ] } }, {\"id\":104, \"pmid\":185, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"987878094\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"689388774\", \"data_type\":\"String\"} ] } }, {\"id\":104, \"pmid\":186, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"-754932241\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"992037090\", \"data_type\":\"String\"} ] } } ] }"
+        val kitConfiguration =
+            MockKitConfiguration.createKitConfiguration(
+                JSONObject(
+                    "{\"id\":56, \"as\":{}, \"hs\":{}, \"pr\":[{\"id\":93, \"pmmid\":23, \"matches\":[{\"message_type\":4, \"event_match_type\":\"String\", \"event\":\"Product View\", \"attribute_key\":\"\$MethodName\", \"attribute_values\":\"\$ProductView\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"cool_product_view\"} }, {\"id\":89, \"matches\":[{\"message_type\":4, \"event_match_type\":\"\", \"event\":\"\"}], \"behavior\":{\"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{\"projected_event_name\":\"\", \"attribute_maps\":[] } }, {\"id\":100, \"pmid\":179, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":10, \"append_unmapped_as_is\":true }, \"action\":{\"projected_event_name\":\"account - check order status\", \"attribute_maps\":[] } }, {\"id\":92, \"pmid\":182, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"1111995177\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"account - feedback\", \"attribute_maps\":[{\"projected_attribute_name\":\"Feedback Type\", \"match_type\":\"Hash\", \"value\":\"-768380952\", \"data_type\":\"String\"} ] } }, {\"id\":96, \"pmid\":183, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - add to tote\", \"attribute_maps\":[{\"projected_attribute_name\":\"Last Add to Tote Name\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Print\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Category\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\", \"is_required\":true }, {\"projected_attribute_name\":\"Last Add to Tote Total Amount\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote SKU\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Size\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Quantity\", \"match_type\":\"Static\", \"value\":\"10\", \"data_type\":\"Int\"}, {\"projected_attribute_name\":\"Last Add to Tote Unit Price\", \"match_type\":\"Static\", \"value\":\"1321\", \"data_type\":\"String\"} ] } }, {\"id\":104, \"pmid\":184, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Complete the Look Product Name 2\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\", \"is_required\":true } ] } }, {\"id\":104, \"pmid\":185, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"987878094\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"689388774\", \"data_type\":\"String\"} ] } }, {\"id\":104, \"pmid\":186, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"-754932241\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"992037090\", \"data_type\":\"String\"} ] } } ] }",
+                ),
             )
-        )
 
         /**
          * Test 1
@@ -375,17 +421,18 @@ class CustomMappingTest {
         val attributes: MutableMap<String, String?> = HashMap()
         attributes["attribute we don't care about"] = "some value"
         builder.customAttributes(attributes)
-        val eventList = CustomMapping.projectEvents(
-            builder.build(),
-            kitConfiguration.customMappingList,
-            kitConfiguration.defaultEventProjection
-        )
+        val eventList =
+            CustomMapping.projectEvents(
+                builder.build(),
+                kitConfiguration.customMappingList,
+                kitConfiguration.defaultEventProjection,
+            )
         Assert.assertEquals(1, eventList.size.toLong())
         val projEvent1 = eventList[0].mpEvent
         Assert.assertEquals("account - check order status", projEvent1.eventName)
         Assert.assertEquals(
             "some value",
-            projEvent1.customAttributeStrings!!["attribute we don't care about"]
+            projEvent1.customAttributeStrings!!["attribute we don't care about"],
         )
     }
 
@@ -398,11 +445,12 @@ class CustomMappingTest {
     @Test
     @Throws(Exception::class)
     fun testMultiHashProjections2() {
-        val kitConfiguration = MockKitConfiguration.createKitConfiguration(
-            JSONObject(
-                "{\"id\":56, \"as\":{}, \"hs\":{}, \"pr\":[{\"id\":93, \"pmmid\":23, \"matches\":[{\"message_type\":4, \"event_match_type\":\"String\", \"event\":\"Product View\", \"attribute_key\":\"\$MethodName\", \"attribute_values\":\"\$ProductView\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"cool_product_view\"} }, {\"id\":89, \"matches\":[{\"message_type\":4, \"event_match_type\":\"\", \"event\":\"\"}], \"behavior\":{\"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{\"projected_event_name\":\"\", \"attribute_maps\":[] } }, {\"id\":100, \"pmid\":179, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":10, \"append_unmapped_as_is\":true }, \"action\":{\"projected_event_name\":\"account - check order status\", \"attribute_maps\":[] } }, {\"id\":92, \"pmid\":182, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"1111995177\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"account - feedback\", \"attribute_maps\":[{\"projected_attribute_name\":\"Feedback Type\", \"match_type\":\"Hash\", \"value\":\"-768380952\", \"data_type\":\"String\"} ] } }, {\"id\":96, \"pmid\":183, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - add to tote\", \"attribute_maps\":[{\"projected_attribute_name\":\"Last Add to Tote Name\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Print\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Category\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\", \"is_required\":true }, {\"projected_attribute_name\":\"Last Add to Tote Total Amount\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote SKU\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Size\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Quantity\", \"match_type\":\"Static\", \"value\":\"10\", \"data_type\":\"Int\"}, {\"projected_attribute_name\":\"Last Add to Tote Unit Price\", \"match_type\":\"Static\", \"value\":\"1321\", \"data_type\":\"String\"} ] } }, {\"id\":104, \"pmid\":184, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Complete the Look Product Name 2\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\", \"is_required\":true } ] } }, {\"id\":104, \"pmid\":185, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"987878094\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"689388774\", \"data_type\":\"String\"} ] } }, {\"id\":104, \"pmid\":186, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"-754932241\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"992037090\", \"data_type\":\"String\"} ] } } ] }"
+        val kitConfiguration =
+            MockKitConfiguration.createKitConfiguration(
+                JSONObject(
+                    "{\"id\":56, \"as\":{}, \"hs\":{}, \"pr\":[{\"id\":93, \"pmmid\":23, \"matches\":[{\"message_type\":4, \"event_match_type\":\"String\", \"event\":\"Product View\", \"attribute_key\":\"\$MethodName\", \"attribute_values\":\"\$ProductView\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"cool_product_view\"} }, {\"id\":89, \"matches\":[{\"message_type\":4, \"event_match_type\":\"\", \"event\":\"\"}], \"behavior\":{\"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{\"projected_event_name\":\"\", \"attribute_maps\":[] } }, {\"id\":100, \"pmid\":179, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":10, \"append_unmapped_as_is\":true }, \"action\":{\"projected_event_name\":\"account - check order status\", \"attribute_maps\":[] } }, {\"id\":92, \"pmid\":182, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"1111995177\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"account - feedback\", \"attribute_maps\":[{\"projected_attribute_name\":\"Feedback Type\", \"match_type\":\"Hash\", \"value\":\"-768380952\", \"data_type\":\"String\"} ] } }, {\"id\":96, \"pmid\":183, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - add to tote\", \"attribute_maps\":[{\"projected_attribute_name\":\"Last Add to Tote Name\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Print\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Category\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\", \"is_required\":true }, {\"projected_attribute_name\":\"Last Add to Tote Total Amount\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote SKU\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Size\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Quantity\", \"match_type\":\"Static\", \"value\":\"10\", \"data_type\":\"Int\"}, {\"projected_attribute_name\":\"Last Add to Tote Unit Price\", \"match_type\":\"Static\", \"value\":\"1321\", \"data_type\":\"String\"} ] } }, {\"id\":104, \"pmid\":184, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Complete the Look Product Name 2\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\", \"is_required\":true } ] } }, {\"id\":104, \"pmid\":185, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"987878094\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"689388774\", \"data_type\":\"String\"} ] } }, {\"id\":104, \"pmid\":186, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"-754932241\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"992037090\", \"data_type\":\"String\"} ] } } ] }",
+                ),
             )
-        )
         val builder = MPEvent.Builder("sproj 1", MParticle.EventType.UserContent)
         val attributes: MutableMap<String, String?> = HashMap()
         attributes["attribute we don't care about"] = "some value"
@@ -410,18 +458,19 @@ class CustomMappingTest {
 
         // add an attribute that's required by 1 of them, we should end up with 2 triggered projections
         attributes["Value"] = "product name"
-        val eventList = CustomMapping.projectEvents(
-            builder.build(),
-            kitConfiguration.customMappingList,
-            kitConfiguration.defaultEventProjection
-        )
+        val eventList =
+            CustomMapping.projectEvents(
+                builder.build(),
+                kitConfiguration.customMappingList,
+                kitConfiguration.defaultEventProjection,
+            )
         Assert.assertEquals(2, eventList.size.toLong())
         var projEvent1 = eventList[0].mpEvent
         // same as test 1, but verify for the fun of it.
         Assert.assertEquals("account - check order status", projEvent1.eventName)
         Assert.assertEquals(
             "some value",
-            projEvent1.customAttributeStrings!!["attribute we don't care about"]
+            projEvent1.customAttributeStrings!!["attribute we don't care about"],
         )
 
         // this is the new projection which requires the Value attribute
@@ -430,23 +479,23 @@ class CustomMappingTest {
         // required attribute
         Assert.assertEquals(
             "product name",
-            projEvent1.customAttributeStrings!!["Last Add to Tote Category"]
+            projEvent1.customAttributeStrings!!["Last Add to Tote Category"],
         ) // the required attribute has been renamed
         // non-required attributes which define the same hash as the required one.
         Assert.assertEquals(
             "product name",
-            projEvent1.customAttributeStrings!!["Last Add to Tote Total Amount"]
+            projEvent1.customAttributeStrings!!["Last Add to Tote Total Amount"],
         )
         Assert.assertEquals(
             "product name",
-            projEvent1.customAttributeStrings!!["Last Add to Tote SKU"]
+            projEvent1.customAttributeStrings!!["Last Add to Tote SKU"],
         )
 
         // static attributes are in this projection as well.
         Assert.assertEquals("10", projEvent1.customAttributeStrings!!["Last Add to Tote Quantity"])
         Assert.assertEquals(
             "1321",
-            projEvent1.customAttributeStrings!!["Last Add to Tote Unit Price"]
+            projEvent1.customAttributeStrings!!["Last Add to Tote Unit Price"],
         )
     }
 
@@ -460,11 +509,12 @@ class CustomMappingTest {
     @Test
     @Throws(Exception::class)
     fun testMultiHashProjections3() {
-        val kitConfiguration = MockKitConfiguration.createKitConfiguration(
-            JSONObject(
-                "{\"id\":56, \"as\":{}, \"hs\":{}, \"pr\":[{\"id\":93, \"pmmid\":23, \"matches\":[{\"message_type\":4, \"event_match_type\":\"String\", \"event\":\"Product View\", \"attribute_key\":\"\$MethodName\", \"attribute_values\":\"\$ProductView\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"cool_product_view\"} }, {\"id\":89, \"matches\":[{\"message_type\":4, \"event_match_type\":\"\", \"event\":\"\"}], \"behavior\":{\"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{\"projected_event_name\":\"\", \"attribute_maps\":[] } }, {\"id\":100, \"pmid\":179, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":10, \"append_unmapped_as_is\":true }, \"action\":{\"projected_event_name\":\"account - check order status\", \"attribute_maps\":[] } }, {\"id\":92, \"pmid\":182, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"1111995177\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"account - feedback\", \"attribute_maps\":[{\"projected_attribute_name\":\"Feedback Type\", \"match_type\":\"Hash\", \"value\":\"-768380952\", \"data_type\":\"String\"} ] } }, {\"id\":96, \"pmid\":183, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - add to tote\", \"attribute_maps\":[{\"projected_attribute_name\":\"Last Add to Tote Name\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Print\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Category\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\", \"is_required\":true }, {\"projected_attribute_name\":\"Last Add to Tote Total Amount\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote SKU\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Size\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Quantity\", \"match_type\":\"Static\", \"value\":\"10\", \"data_type\":\"Int\"}, {\"projected_attribute_name\":\"Last Add to Tote Unit Price\", \"match_type\":\"Static\", \"value\":\"1321\", \"data_type\":\"String\"} ] } }, {\"id\":104, \"pmid\":184, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Complete the Look Product Name 2\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\", \"is_required\":true } ] } }, {\"id\":104, \"pmid\":185, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"987878094\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"689388774\", \"data_type\":\"String\"} ] } }, {\"id\":104, \"pmid\":186, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"-754932241\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"992037090\", \"data_type\":\"String\"} ] } } ] }"
+        val kitConfiguration =
+            MockKitConfiguration.createKitConfiguration(
+                JSONObject(
+                    "{\"id\":56, \"as\":{}, \"hs\":{}, \"pr\":[{\"id\":93, \"pmmid\":23, \"matches\":[{\"message_type\":4, \"event_match_type\":\"String\", \"event\":\"Product View\", \"attribute_key\":\"\$MethodName\", \"attribute_values\":\"\$ProductView\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"cool_product_view\"} }, {\"id\":89, \"matches\":[{\"message_type\":4, \"event_match_type\":\"\", \"event\":\"\"}], \"behavior\":{\"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{\"projected_event_name\":\"\", \"attribute_maps\":[] } }, {\"id\":100, \"pmid\":179, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":10, \"append_unmapped_as_is\":true }, \"action\":{\"projected_event_name\":\"account - check order status\", \"attribute_maps\":[] } }, {\"id\":92, \"pmid\":182, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"1111995177\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"account - feedback\", \"attribute_maps\":[{\"projected_attribute_name\":\"Feedback Type\", \"match_type\":\"Hash\", \"value\":\"-768380952\", \"data_type\":\"String\"} ] } }, {\"id\":96, \"pmid\":183, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - add to tote\", \"attribute_maps\":[{\"projected_attribute_name\":\"Last Add to Tote Name\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Print\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Category\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\", \"is_required\":true }, {\"projected_attribute_name\":\"Last Add to Tote Total Amount\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote SKU\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Size\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Last Add to Tote Quantity\", \"match_type\":\"Static\", \"value\":\"10\", \"data_type\":\"Int\"}, {\"projected_attribute_name\":\"Last Add to Tote Unit Price\", \"match_type\":\"Static\", \"value\":\"1321\", \"data_type\":\"String\"} ] } }, {\"id\":104, \"pmid\":184, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"178531468\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"111828069\", \"data_type\":\"String\"}, {\"projected_attribute_name\":\"Complete the Look Product Name 2\", \"match_type\":\"Hash\", \"value\":\"102582760\", \"data_type\":\"String\", \"is_required\":true } ] } }, {\"id\":104, \"pmid\":185, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"987878094\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"689388774\", \"data_type\":\"String\"} ] } }, {\"id\":104, \"pmid\":186, \"matches\":[{\"message_type\":4, \"event_match_type\":\"Hash\", \"event\":\"-754932241\"}], \"behavior\":{\"max_custom_params\":0 }, \"action\":{\"projected_event_name\":\"pdp - complete the look\", \"attribute_maps\":[{\"projected_attribute_name\":\"Complete the Look Product Name\", \"match_type\":\"Hash\", \"value\":\"992037090\", \"data_type\":\"String\"} ] } } ] }",
+                ),
             )
-        )
         val builder = MPEvent.Builder("sproj 1", MParticle.EventType.UserContent)
         val attributes: MutableMap<String, String?> = HashMap()
         attributes["attribute we don't care about"] = "some value"
@@ -478,46 +528,47 @@ class CustomMappingTest {
          * defines that attribute as non-required.
          */
         attributes["Label"] = "product label"
-        val eventList = CustomMapping.projectEvents(
-            builder.build(),
-            kitConfiguration.customMappingList,
-            kitConfiguration.defaultEventProjection
-        )
+        val eventList =
+            CustomMapping.projectEvents(
+                builder.build(),
+                kitConfiguration.customMappingList,
+                kitConfiguration.defaultEventProjection,
+            )
         Assert.assertEquals(3, eventList.size.toLong())
         var projEvent1 = eventList[0].mpEvent
         Assert.assertEquals("account - check order status", projEvent1.eventName)
         Assert.assertEquals(
             "some value",
-            projEvent1.customAttributeStrings!!["attribute we don't care about"]
+            projEvent1.customAttributeStrings!!["attribute we don't care about"],
         )
         projEvent1 = eventList[1].mpEvent
         Assert.assertEquals("pdp - add to tote", projEvent1.eventName)
         Assert.assertEquals(
             "product name",
-            projEvent1.customAttributeStrings!!["Last Add to Tote Category"]
+            projEvent1.customAttributeStrings!!["Last Add to Tote Category"],
         )
         Assert.assertEquals(
             "product name",
-            projEvent1.customAttributeStrings!!["Last Add to Tote Total Amount"]
+            projEvent1.customAttributeStrings!!["Last Add to Tote Total Amount"],
         )
         Assert.assertEquals(
             "product name",
-            projEvent1.customAttributeStrings!!["Last Add to Tote SKU"]
+            projEvent1.customAttributeStrings!!["Last Add to Tote SKU"],
         )
         Assert.assertEquals("10", projEvent1.customAttributeStrings!!["Last Add to Tote Quantity"])
         Assert.assertEquals(
             "1321",
-            projEvent1.customAttributeStrings!!["Last Add to Tote Unit Price"]
+            projEvent1.customAttributeStrings!!["Last Add to Tote Unit Price"],
         )
 
         // these are new for the 2nd projection, as they match the Hash for the new  "Label" attribute
         Assert.assertEquals(
             "product label",
-            projEvent1.customAttributeStrings!!["Last Add to Tote Name"]
+            projEvent1.customAttributeStrings!!["Last Add to Tote Name"],
         )
         Assert.assertEquals(
             "product label",
-            projEvent1.customAttributeStrings!!["Last Add to Tote Print"]
+            projEvent1.customAttributeStrings!!["Last Add to Tote Print"],
         )
 
         // and here's our 3rd projection, which defines both the original "Value" attribute hash as well as "Label"
@@ -525,11 +576,11 @@ class CustomMappingTest {
         Assert.assertEquals("pdp - complete the look", projEvent1.eventName)
         Assert.assertEquals(
             "product name",
-            projEvent1.customAttributeStrings!!["Complete the Look Product Name"]
+            projEvent1.customAttributeStrings!!["Complete the Look Product Name"],
         )
         Assert.assertEquals(
             "product label",
-            projEvent1.customAttributeStrings!!["Complete the Look Product Name 2"]
+            projEvent1.customAttributeStrings!!["Complete the Look Product Name 2"],
         )
     }
 
@@ -550,15 +601,22 @@ class CustomMappingTest {
             "{\"id\":93, \"pmid\":220, \"matches\":[{\"message_type\":16, \"event_match_type\":\"Hash\", \"event\":\"1572\"}], \"behavior\":{\"max_custom_params\":0, \"selector\":\"foreach\"}, \"action\":{\"projected_event_name\":\"pdp - product view\", \"attribute_maps\":[{\"projected_attribute_name\":\"Last Product View Category\", \"match_type\":\"Hash\", \"value\":\"2000445218\", \"data_type\":\"String\", \"property\":\"ProductField\"}, {\"projected_attribute_name\":\"Last Product View Currency\", \"match_type\":\"Hash\", \"value\":\"881337592\", \"data_type\":\"String\", \"property\":\"EventField\"}, {\"projected_attribute_name\":\"Last Product View SKU\", \"match_type\":\"Hash\", \"value\":\"1514047\", \"data_type\":\"String\", \"property\":\"ProductField\"}, {\"projected_attribute_name\":\"Last Product View Name\", \"match_type\":\"Hash\", \"value\":\"1455148719\", \"data_type\":\"String\", \"property\":\"ProductField\"}, {\"projected_attribute_name\":\"Last Product View Quantity\", \"match_type\":\"Hash\", \"value\":\"664929967\", \"data_type\":\"Int\", \"property\":\"ProductField\"}, {\"projected_attribute_name\":\"Last Product View Total Amount\", \"match_type\":\"Hash\", \"value\":\"1647761705\", \"data_type\":\"String\", \"property\":\"ProductField\"} ], \"outbound_message_type\":4 } }"
         val customMapping = CustomMapping(JSONObject(config))
         val productBuilder =
-            Product.Builder("product name 0", "product id 0", 1.0).category("product category 0")
+            Product
+                .Builder("product name 0", "product id 0", 1.0)
+                .category("product category 0")
                 .quantity(1.0)
         val commerceEventBuilder =
             CommerceEvent.Builder(Product.DETAIL, productBuilder.build()).currency("dollar bills")
         for (i in 1..4) {
             commerceEventBuilder.addProduct(
-                productBuilder.name("product name $i").sku("product id $i").category(
-                    "product category $i"
-                ).quantity((i + 1).toDouble()).unitPrice((i + 1).toDouble()).build()
+                productBuilder
+                    .name("product name $i")
+                    .sku("product id $i")
+                    .category(
+                        "product category $i",
+                    ).quantity((i + 1).toDouble())
+                    .unitPrice((i + 1).toDouble())
+                    .build(),
             )
         }
         val commerceEvent = commerceEventBuilder.build()
@@ -576,11 +634,11 @@ class CustomMappingTest {
             Assert.assertEquals("product name $i", attributes["Last Product View Name"])
             Assert.assertEquals(
                 i.plus(1).toString() + ".0",
-                attributes["Last Product View Quantity"]
+                attributes["Last Product View Quantity"],
             )
             Assert.assertEquals(
                 ((i + 1) * (i + 1)).toString() + ".0",
-                attributes["Last Product View Total Amount"]
+                attributes["Last Product View Total Amount"],
             )
             Assert.assertEquals("pdp - product view", event.eventName)
         }
@@ -591,108 +649,149 @@ class CustomMappingTest {
     fun testMatchCommerceEventType() {
         val product = Product.Builder("name", "sku", 0.0).build()
         val config =
-            JSONObject("{\"id\":99, \"pmid\":229, \"matches\":[{\"message_type\":16, \"event_match_type\":\"Hash\", \"event\":\"1569\", }], \"behavior\":{\"max_custom_params\":0, \"selector\":\"last\"}, \"action\":{\"projected_event_name\":\"checkout - place order\", \"attribute_maps\":[{\"projected_attribute_name\":\"Last Place Order Category\", \"match_type\":\"Hash\", \"value\":\"-1167125985\", \"data_type\":\"String\", \"property\":\"ProductField\"} ], \"outbound_message_type\":16 } }")
-        var event = CommerceEvent.Builder(Product.DETAIL, product)
-            .transactionAttributes(TransactionAttributes().setId("id")).build()
+            JSONObject(
+                "{\"id\":99, \"pmid\":229, \"matches\":[{\"message_type\":16, \"event_match_type\":\"Hash\", \"event\":\"1569\", }], \"behavior\":{\"max_custom_params\":0, \"selector\":\"last\"}, \"action\":{\"projected_event_name\":\"checkout - place order\", \"attribute_maps\":[{\"projected_attribute_name\":\"Last Place Order Category\", \"match_type\":\"Hash\", \"value\":\"-1167125985\", \"data_type\":\"String\", \"property\":\"ProductField\"} ], \"outbound_message_type\":16 } }",
+            )
+        var event =
+            CommerceEvent
+                .Builder(Product.DETAIL, product)
+                .transactionAttributes(TransactionAttributes().setId("id"))
+                .build()
         config.getJSONArray("matches").getJSONObject(0).put(
             "event",
-            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event))
+            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event)),
         )
         var customMapping = CustomMapping(config)
         Assert.assertTrue(customMapping.isMatch(CommerceEventWrapper(event)))
-        event = CommerceEvent.Builder(Product.ADD_TO_CART, product)
-            .transactionAttributes(TransactionAttributes().setId("id")).build()
+        event =
+            CommerceEvent
+                .Builder(Product.ADD_TO_CART, product)
+                .transactionAttributes(TransactionAttributes().setId("id"))
+                .build()
         config.getJSONArray("matches").getJSONObject(0).put(
             "event",
-            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event))
+            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event)),
         )
         customMapping = CustomMapping(config)
         Assert.assertTrue(customMapping.isMatch(CommerceEventWrapper(event)))
-        event = CommerceEvent.Builder(Product.PURCHASE, product)
-            .transactionAttributes(TransactionAttributes().setId("id")).build()
+        event =
+            CommerceEvent
+                .Builder(Product.PURCHASE, product)
+                .transactionAttributes(TransactionAttributes().setId("id"))
+                .build()
         config.getJSONArray("matches").getJSONObject(0).put(
             "event",
-            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event))
+            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event)),
         )
         customMapping = CustomMapping(config)
         Assert.assertTrue(customMapping.isMatch(CommerceEventWrapper(event)))
-        event = CommerceEvent.Builder(Product.ADD_TO_WISHLIST, product)
-            .transactionAttributes(TransactionAttributes().setId("id")).build()
+        event =
+            CommerceEvent
+                .Builder(Product.ADD_TO_WISHLIST, product)
+                .transactionAttributes(TransactionAttributes().setId("id"))
+                .build()
         config.getJSONArray("matches").getJSONObject(0).put(
             "event",
-            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event))
+            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event)),
         )
         customMapping = CustomMapping(config)
         Assert.assertTrue(customMapping.isMatch(CommerceEventWrapper(event)))
-        event = CommerceEvent.Builder(Product.CHECKOUT, product)
-            .transactionAttributes(TransactionAttributes().setId("id")).build()
+        event =
+            CommerceEvent
+                .Builder(Product.CHECKOUT, product)
+                .transactionAttributes(TransactionAttributes().setId("id"))
+                .build()
         config.getJSONArray("matches").getJSONObject(0).put(
             "event",
-            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event))
+            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event)),
         )
         customMapping = CustomMapping(config)
         Assert.assertTrue(customMapping.isMatch(CommerceEventWrapper(event)))
-        event = CommerceEvent.Builder(Product.CHECKOUT_OPTION, product)
-            .transactionAttributes(TransactionAttributes().setId("id")).build()
+        event =
+            CommerceEvent
+                .Builder(Product.CHECKOUT_OPTION, product)
+                .transactionAttributes(TransactionAttributes().setId("id"))
+                .build()
         config.getJSONArray("matches").getJSONObject(0).put(
             "event",
-            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event))
+            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event)),
         )
         customMapping = CustomMapping(config)
         Assert.assertTrue(customMapping.isMatch(CommerceEventWrapper(event)))
-        event = CommerceEvent.Builder(Product.CLICK, product)
-            .transactionAttributes(TransactionAttributes().setId("id")).build()
+        event =
+            CommerceEvent
+                .Builder(Product.CLICK, product)
+                .transactionAttributes(TransactionAttributes().setId("id"))
+                .build()
         config.getJSONArray("matches").getJSONObject(0).put(
             "event",
-            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event))
+            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event)),
         )
         customMapping = CustomMapping(config)
         Assert.assertTrue(customMapping.isMatch(CommerceEventWrapper(event)))
-        event = CommerceEvent.Builder(Product.REFUND, product)
-            .transactionAttributes(TransactionAttributes().setId("id")).build()
+        event =
+            CommerceEvent
+                .Builder(Product.REFUND, product)
+                .transactionAttributes(TransactionAttributes().setId("id"))
+                .build()
         config.getJSONArray("matches").getJSONObject(0).put(
             "event",
-            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event))
+            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event)),
         )
         customMapping = CustomMapping(config)
         Assert.assertTrue(customMapping.isMatch(CommerceEventWrapper(event)))
-        event = CommerceEvent.Builder(Product.REMOVE_FROM_CART, product)
-            .transactionAttributes(TransactionAttributes().setId("id")).build()
+        event =
+            CommerceEvent
+                .Builder(Product.REMOVE_FROM_CART, product)
+                .transactionAttributes(TransactionAttributes().setId("id"))
+                .build()
         config.getJSONArray("matches").getJSONObject(0).put(
             "event",
-            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event))
+            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event)),
         )
         customMapping = CustomMapping(config)
         Assert.assertTrue(customMapping.isMatch(CommerceEventWrapper(event)))
-        event = CommerceEvent.Builder(Product.REMOVE_FROM_WISHLIST, product)
-            .transactionAttributes(TransactionAttributes().setId("id")).build()
+        event =
+            CommerceEvent
+                .Builder(Product.REMOVE_FROM_WISHLIST, product)
+                .transactionAttributes(TransactionAttributes().setId("id"))
+                .build()
         config.getJSONArray("matches").getJSONObject(0).put(
             "event",
-            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event))
+            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event)),
         )
         customMapping = CustomMapping(config)
         Assert.assertTrue(customMapping.isMatch(CommerceEventWrapper(event)))
-        event = CommerceEvent.Builder(Impression("list name", product))
-            .transactionAttributes(TransactionAttributes().setId("id")).build()
+        event =
+            CommerceEvent
+                .Builder(Impression("list name", product))
+                .transactionAttributes(TransactionAttributes().setId("id"))
+                .build()
         config.getJSONArray("matches").getJSONObject(0).put(
             "event",
-            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event))
+            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event)),
         )
         customMapping = CustomMapping(config)
         Assert.assertTrue(customMapping.isMatch(CommerceEventWrapper(event)))
-        event = CommerceEvent.Builder(Promotion.VIEW, Promotion().setId("id"))
-            .transactionAttributes(TransactionAttributes().setId("id")).build()
+        event =
+            CommerceEvent
+                .Builder(Promotion.VIEW, Promotion().setId("id"))
+                .transactionAttributes(TransactionAttributes().setId("id"))
+                .build()
         config.getJSONArray("matches").getJSONObject(0).put(
             "event",
-            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event))
+            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event)),
         )
         customMapping = CustomMapping(config)
         Assert.assertTrue(customMapping.isMatch(CommerceEventWrapper(event)))
-        event = CommerceEvent.Builder(Promotion.CLICK, Promotion().setId("id"))
-            .transactionAttributes(TransactionAttributes().setId("id")).build()
+        event =
+            CommerceEvent
+                .Builder(Promotion.CLICK, Promotion().setId("id"))
+                .transactionAttributes(TransactionAttributes().setId("id"))
+                .build()
         config.getJSONArray("matches").getJSONObject(0).put(
             "event",
-            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event))
+            "" + KitUtils.hashForFiltering("" + CommerceEventUtils.getEventType(event)),
         )
         customMapping = CustomMapping(config)
         Assert.assertTrue(customMapping.isMatch(CommerceEventWrapper(event)))
@@ -713,7 +812,9 @@ class CustomMappingTest {
     @Throws(Exception::class)
     fun testMatchCommerceEventProperty() {
         val config =
-            JSONObject("{\"id\":99, \"pmid\":229, \"matches\":[{\"message_type\":16, \"event_match_type\":\"Hash\", \"event\":\"1569\", \"property\":\"EventField\", \"property_name\":\"-601244443\", \"property_values\":[\"5\"]}], \"behavior\":{\"max_custom_params\":0, \"selector\":\"last\"}, \"action\":{\"projected_event_name\":\"checkout - place order\", \"attribute_maps\":[{\"projected_attribute_name\":\"Last Place Order Category\", \"match_type\":\"Hash\", \"value\":\"-1167125985\", \"data_type\":\"String\", \"property\":\"ProductField\"} ], \"outbound_message_type\":16 } }")
+            JSONObject(
+                "{\"id\":99, \"pmid\":229, \"matches\":[{\"message_type\":16, \"event_match_type\":\"Hash\", \"event\":\"1569\", \"property\":\"EventField\", \"property_name\":\"-601244443\", \"property_values\":[\"5\"]}], \"behavior\":{\"max_custom_params\":0, \"selector\":\"last\"}, \"action\":{\"projected_event_name\":\"checkout - place order\", \"attribute_maps\":[{\"projected_attribute_name\":\"Last Place Order Category\", \"match_type\":\"Hash\", \"value\":\"-1167125985\", \"data_type\":\"String\", \"property\":\"ProductField\"} ], \"outbound_message_type\":16 } }",
+            )
         var customMapping = CustomMapping(config)
         val product = Product.Builder("name", "sku", 0.0).build()
         var commerceEvent = CommerceEvent.Builder(Product.CHECKOUT, product).checkoutStep(4).build()
@@ -731,48 +832,73 @@ class CustomMappingTest {
         config.getJSONArray("matches").getJSONObject(0).put("property", "ProductAttribute")
         customMapping = CustomMapping(config)
         Assert.assertFalse(customMapping.isMatch(CommerceEventWrapper(commerceEvent)))
-        commerceEvent = CommerceEvent.Builder(Product.CHECKOUT, product)
-            .addProduct(Product.Builder("name 2", "sku", 0.0).customAttributes(attributes).build())
-            .build()
+        commerceEvent =
+            CommerceEvent
+                .Builder(Product.CHECKOUT, product)
+                .addProduct(Product.Builder("name 2", "sku", 0.0).customAttributes(attributes).build())
+                .build()
         var wrapper = CommerceEventWrapper(commerceEvent)
         Assert.assertTrue(customMapping.isMatch(wrapper))
         // only 1 product has the required attribute so there should only be 1 product after the matching step
-        Assert.assertEquals(1, wrapper.event.products!!.size.toLong())
+        Assert.assertEquals(
+            1,
+            wrapper.event.products!!
+                .size
+                .toLong(),
+        )
         Assert.assertEquals("name 2", wrapper.event.products!![0].name)
         config.getJSONArray("matches").getJSONObject(0).put("property", "ProductField")
-        config.getJSONArray("matches").getJSONObject(0)
+        config
+            .getJSONArray("matches")
+            .getJSONObject(0)
             .put("property_name", "-1167125985") // checkout + category hash
         var values = JSONArray()
         values.put("some product cat")
         config.getJSONArray("matches").getJSONObject(0).put("property_values", values)
         customMapping = CustomMapping(config)
         Assert.assertFalse(customMapping.isMatch(CommerceEventWrapper(commerceEvent)))
-        commerceEvent = CommerceEvent.Builder(Product.CHECKOUT, product)
-            .addProduct(Product.Builder("name 2", "sku", 0.0).category("some product cat").build())
-            .build()
+        commerceEvent =
+            CommerceEvent
+                .Builder(Product.CHECKOUT, product)
+                .addProduct(Product.Builder("name 2", "sku", 0.0).category("some product cat").build())
+                .build()
         wrapper = CommerceEventWrapper(commerceEvent)
         Assert.assertTrue(customMapping.isMatch(wrapper))
         // only 1 product has the required attribute so there should only be 1 product after the matching step
-        Assert.assertEquals(1, wrapper.event.products!!.size.toLong())
+        Assert.assertEquals(
+            1,
+            wrapper.event.products!!
+                .size
+                .toLong(),
+        )
         Assert.assertEquals("some product cat", wrapper.event.products!![0].category)
         config.getJSONArray("matches").getJSONObject(0).put("property", "PromotionField")
-        config.getJSONArray("matches").getJSONObject(0)
+        config
+            .getJSONArray("matches")
+            .getJSONObject(0)
             .put("property_name", "835505623") // click + creative hash
         values = JSONArray()
         values.put("some promotion creative")
         config.getJSONArray("matches").getJSONObject(0).put("property_values", values)
         customMapping = CustomMapping(config)
         Assert.assertFalse(customMapping.isMatch(CommerceEventWrapper(commerceEvent)))
-        commerceEvent = CommerceEvent.Builder(
-            Promotion.CLICK,
-            Promotion().setCreative("some promotion creative")
-        ).addPromotion(
-            Promotion().setCreative("some other creative")
-        ).build()
+        commerceEvent =
+            CommerceEvent
+                .Builder(
+                    Promotion.CLICK,
+                    Promotion().setCreative("some promotion creative"),
+                ).addPromotion(
+                    Promotion().setCreative("some other creative"),
+                ).build()
         wrapper = CommerceEventWrapper(commerceEvent)
         Assert.assertTrue(customMapping.isMatch(wrapper))
         // only 1 promotion has the required attribute so there should only be 1 promotion after the matching step
-        Assert.assertEquals(1, wrapper.event.promotions!!.size.toLong())
+        Assert.assertEquals(
+            1,
+            wrapper.event.promotions!!
+                .size
+                .toLong(),
+        )
         Assert.assertEquals("some promotion creative", wrapper.event.promotions!![0].creative)
     }
 
@@ -791,59 +917,81 @@ class CustomMappingTest {
     @Test
     @Throws(Exception::class)
     fun testCommerceEventToCommerceEvent() {
-        val config = JSONObject(
-            "{\"id\":99, \"pmid\":229, \"matches\":[{\"message_type\":16, \"event_match_type\":\"Hash\", \"event\":\"1569\", \"property\":\"EventField\", \"property_name\":\"-601244443\", \"property_values\":[\"5\", \"7\"]}], \"behavior\":{\"max_custom_params\":0, \"selector\":\"last\"}, \"action\":{\"projected_event_name\":\"checkout - place order\", \"attribute_maps\":[{\"projected_attribute_name\":\"Last Place Order Category\", \"match_type\":\"Hash\", \"value\":\"-1167125985\", \"data_type\":\"String\", \"property\":\"ProductField\"}, {\"projected_attribute_name\":\"Projected sample custom attribute\", \"match_type\":\"Hash\", \"value\":\"153565474\", \"data_type\":\"String\", \"property\":\"ProductAttribute\"}, {\"projected_attribute_name\":\"Projected list source\", \"match_type\":\"Hash\", \"value\":\"-882952085\", \"data_type\":\"String\", \"property\":\"EventField\"}, {\"projected_attribute_name\":\"Projected sample event attribute\", \"match_type\":\"Hash\", \"value\":\"1957440897\", \"data_type\":\"String\", \"property\":\"EventAttribute\"} ], \"outbound_message_type\":16 } }"
-        )
+        val config =
+            JSONObject(
+                "{\"id\":99, \"pmid\":229, \"matches\":[{\"message_type\":16, \"event_match_type\":\"Hash\", \"event\":\"1569\", \"property\":\"EventField\", \"property_name\":\"-601244443\", \"property_values\":[\"5\", \"7\"]}], \"behavior\":{\"max_custom_params\":0, \"selector\":\"last\"}, \"action\":{\"projected_event_name\":\"checkout - place order\", \"attribute_maps\":[{\"projected_attribute_name\":\"Last Place Order Category\", \"match_type\":\"Hash\", \"value\":\"-1167125985\", \"data_type\":\"String\", \"property\":\"ProductField\"}, {\"projected_attribute_name\":\"Projected sample custom attribute\", \"match_type\":\"Hash\", \"value\":\"153565474\", \"data_type\":\"String\", \"property\":\"ProductAttribute\"}, {\"projected_attribute_name\":\"Projected list source\", \"match_type\":\"Hash\", \"value\":\"-882952085\", \"data_type\":\"String\", \"property\":\"EventField\"}, {\"projected_attribute_name\":\"Projected sample event attribute\", \"match_type\":\"Hash\", \"value\":\"1957440897\", \"data_type\":\"String\", \"property\":\"EventAttribute\"} ], \"outbound_message_type\":16 } }",
+            )
         val customMapping = CustomMapping(config)
         val product = Product.Builder("name", "sku", 0.0).category("category 0").build()
         val productAttributes: MutableMap<String, String> = HashMap()
         productAttributes["sample custom attribute"] = "sample custom product attribute value"
         val eventAttributes: MutableMap<String, String> = HashMap()
         eventAttributes["sample event attribute"] = "sample custom event value"
-        var commerceEvent = CommerceEvent.Builder(Product.CHECKOUT, product)
-            .addProduct(
-                Product.Builder("name 1", "sku", 0.0).category("category 1")
-                    .customAttributes(productAttributes).build()
-            )
-            .addProduct(
-                Product.Builder("name 2", "sku", 0.0).category("category 2")
-                    .customAttributes(productAttributes).build()
-            )
-            .addProduct(Product.Builder("name 3", "sku", 0.0).category("category 3").build())
-            .addProduct(Product.Builder("name 4", "sku", 0.0).category("category 4").build())
-            .productListSource("some product list source")
-            .customAttributes(eventAttributes)
-            .checkoutStep(4).build()
+        var commerceEvent =
+            CommerceEvent
+                .Builder(Product.CHECKOUT, product)
+                .addProduct(
+                    Product
+                        .Builder("name 1", "sku", 0.0)
+                        .category("category 1")
+                        .customAttributes(productAttributes)
+                        .build(),
+                ).addProduct(
+                    Product
+                        .Builder("name 2", "sku", 0.0)
+                        .category("category 2")
+                        .customAttributes(productAttributes)
+                        .build(),
+                ).addProduct(Product.Builder("name 3", "sku", 0.0).category("category 3").build())
+                .addProduct(Product.Builder("name 4", "sku", 0.0).category("category 4").build())
+                .productListSource("some product list source")
+                .customAttributes(eventAttributes)
+                .checkoutStep(4)
+                .build()
         Assert.assertFalse(customMapping.isMatch(CommerceEventWrapper(commerceEvent)))
-        commerceEvent = CommerceEvent.Builder(Product.CHECKOUT, product)
-            .addProduct(
-                Product.Builder("name 1", "sku", 0.0).category("category 1")
-                    .customAttributes(productAttributes).build()
-            )
-            .addProduct(
-                Product.Builder("name 2", "sku", 0.0).category("category 2")
-                    .customAttributes(productAttributes).build()
-            )
-            .addProduct(Product.Builder("name 3", "sku", 0.0).category("category 3").build())
-            .addProduct(Product.Builder("name 4", "sku", 0.0).category("category 4").build())
-            .productListSource("some product list source")
-            .customAttributes(eventAttributes)
-            .checkoutStep(5).build()
+        commerceEvent =
+            CommerceEvent
+                .Builder(Product.CHECKOUT, product)
+                .addProduct(
+                    Product
+                        .Builder("name 1", "sku", 0.0)
+                        .category("category 1")
+                        .customAttributes(productAttributes)
+                        .build(),
+                ).addProduct(
+                    Product
+                        .Builder("name 2", "sku", 0.0)
+                        .category("category 2")
+                        .customAttributes(productAttributes)
+                        .build(),
+                ).addProduct(Product.Builder("name 3", "sku", 0.0).category("category 3").build())
+                .addProduct(Product.Builder("name 4", "sku", 0.0).category("category 4").build())
+                .productListSource("some product list source")
+                .customAttributes(eventAttributes)
+                .checkoutStep(5)
+                .build()
         Assert.assertTrue(customMapping.isMatch(CommerceEventWrapper(commerceEvent)))
-        commerceEvent = CommerceEvent.Builder(Product.CHECKOUT, product)
-            .addProduct(
-                Product.Builder("name 1", "sku", 0.0).category("category 1")
-                    .customAttributes(productAttributes).build()
-            )
-            .addProduct(
-                Product.Builder("name 2", "sku", 0.0).category("category 2")
-                    .customAttributes(productAttributes).build()
-            )
-            .addProduct(Product.Builder("name 3", "sku", 0.0).category("category 3").build())
-            .addProduct(Product.Builder("name 4", "sku", 0.0).category("category 4").build())
-            .productListSource("some product list source")
-            .customAttributes(eventAttributes)
-            .checkoutStep(7).build()
+        commerceEvent =
+            CommerceEvent
+                .Builder(Product.CHECKOUT, product)
+                .addProduct(
+                    Product
+                        .Builder("name 1", "sku", 0.0)
+                        .category("category 1")
+                        .customAttributes(productAttributes)
+                        .build(),
+                ).addProduct(
+                    Product
+                        .Builder("name 2", "sku", 0.0)
+                        .category("category 2")
+                        .customAttributes(productAttributes)
+                        .build(),
+                ).addProduct(Product.Builder("name 3", "sku", 0.0).category("category 3").build())
+                .addProduct(Product.Builder("name 4", "sku", 0.0).category("category 4").build())
+                .productListSource("some product list source")
+                .customAttributes(eventAttributes)
+                .checkoutStep(7)
+                .build()
         Assert.assertTrue(customMapping.isMatch(CommerceEventWrapper(commerceEvent)))
         var result = customMapping.project(CommerceEventWrapper(commerceEvent))
         Assert.assertEquals(1, result.size.toLong())
@@ -854,15 +1002,15 @@ class CustomMappingTest {
         Assert.assertEquals(5, event.products!!.size.toLong())
         Assert.assertEquals(
             "category 4",
-            event.customAttributeStrings!!["Last Place Order Category"]
+            event.customAttributeStrings!!["Last Place Order Category"],
         )
         Assert.assertEquals(
             "some product list source",
-            event.customAttributeStrings!!["Projected list source"]
+            event.customAttributeStrings!!["Projected list source"],
         )
         Assert.assertEquals(
             "sample custom event value",
-            event.customAttributeStrings!!["Projected sample event attribute"]
+            event.customAttributeStrings!!["Projected sample event attribute"],
         )
         config.getJSONObject("behavior").put("selector", "foreach")
         result = CustomMapping(config).project(CommerceEventWrapper(commerceEvent))
@@ -874,27 +1022,30 @@ class CustomMappingTest {
             Assert.assertEquals(1, event1.products!!.size.toLong())
             Assert.assertEquals(
                 "some product list source",
-                event1.customAttributeStrings!!["Projected list source"]
+                event1.customAttributeStrings!!["Projected list source"],
             )
             Assert.assertEquals(
                 "sample custom event value",
-                event1.customAttributeStrings!!["Projected sample event attribute"]
+                event1.customAttributeStrings!!["Projected sample event attribute"],
             )
             if (i == 1 || i == 2) {
                 Assert.assertEquals(
                     "sample custom product attribute value",
-                    event1.customAttributeStrings!!["Projected sample custom attribute"]
+                    event1.customAttributeStrings!!["Projected sample custom attribute"],
                 )
             }
             Assert.assertNotNull(event1)
             Assert.assertEquals(
                 "category $i",
-                event1.customAttributeStrings!!["Last Place Order Category"]
+                event1.customAttributeStrings!!["Last Place Order Category"],
             )
         }
 
         // make the ProductAttribute mapping required, should limit down the results to 2 products
-        config.getJSONObject("action").getJSONArray("attribute_maps").getJSONObject(1)
+        config
+            .getJSONObject("action")
+            .getJSONArray("attribute_maps")
+            .getJSONObject(1)
             .put("is_required", "true")
         result = CustomMapping(config).project(CommerceEventWrapper(commerceEvent))
         Assert.assertEquals(2, result.size.toLong())
@@ -918,16 +1069,21 @@ class CustomMappingTest {
         val name = "product_1"
         val sku = "sku_12345"
         val quantity = 3f
-        val kitConfiguration = MockKitConfiguration.createKitConfiguration(
-            JSONObject(
-                "{ \"id\":92, \"as\":{ \"devKey\":\"HXpL4jHPTkUzwmcrJJFV9k\", \"appleAppId\":null }, \"hs\":{ }, \"pr\":[ { \"id\":166, \"behavior\":{ \"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{ \"projected_event_name\":\"\", \"attribute_maps\":[ ], \"outbound_message_type\":4 }, \"matches\":[ { \"message_type\":4, \"event_match_type\":\"\", \"event\":\"\" } ] }, { \"id\":157, \"pmid\":540, \"behavior\":{ \"append_unmapped_as_is\":true }, \"action\":{ \"projected_event_name\":\"$cmEventName\", \"attribute_maps\":[ { \"projected_attribute_name\":\"$cmProductName\", \"match_type\":\"Hash\", \"value\":\"1455148719\", \"data_type\":\"String\", \"property\":\"ProductField\" }, { \"projected_attribute_name\":\"$cmQuantityName\", \"match_type\":\"Hash\", \"value\":\"1817448224\", \"data_type\":\"Float\", \"property\":\"ProductField\" }, { \"projected_attribute_name\":\"$cmCurrencyName\", \"match_type\":\"Static\", \"value\":\"$cmStaticCurrency\", \"data_type\":\"String\" } ], \"outbound_message_type\":4 }, \"matches\":[ { \"message_type\":16, \"event_match_type\":\"Hash\", \"event\":\"1572\" } ] } ] }"
+        val kitConfiguration =
+            MockKitConfiguration.createKitConfiguration(
+                JSONObject(
+                    "{ \"id\":92, \"as\":{ \"devKey\":\"HXpL4jHPTkUzwmcrJJFV9k\", \"appleAppId\":null }, \"hs\":{ }, \"pr\":[ { \"id\":166, \"behavior\":{ \"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{ \"projected_event_name\":\"\", \"attribute_maps\":[ ], \"outbound_message_type\":4 }, \"matches\":[ { \"message_type\":4, \"event_match_type\":\"\", \"event\":\"\" } ] }, { \"id\":157, \"pmid\":540, \"behavior\":{ \"append_unmapped_as_is\":true }, \"action\":{ \"projected_event_name\":\"$cmEventName\", \"attribute_maps\":[ { \"projected_attribute_name\":\"$cmProductName\", \"match_type\":\"Hash\", \"value\":\"1455148719\", \"data_type\":\"String\", \"property\":\"ProductField\" }, { \"projected_attribute_name\":\"$cmQuantityName\", \"match_type\":\"Hash\", \"value\":\"1817448224\", \"data_type\":\"Float\", \"property\":\"ProductField\" }, { \"projected_attribute_name\":\"$cmCurrencyName\", \"match_type\":\"Static\", \"value\":\"$cmStaticCurrency\", \"data_type\":\"String\" } ], \"outbound_message_type\":4 }, \"matches\":[ { \"message_type\":16, \"event_match_type\":\"Hash\", \"event\":\"1572\" } ] } ] }",
+                ),
             )
-        )
-        val product = Product.Builder(name, sku, quantity.toDouble())
-            .build()
-        val commerceEvent = CommerceEvent.Builder(Product.DETAIL, product)
-            .customAttributes(customAttributes)
-            .build()
+        val product =
+            Product
+                .Builder(name, sku, quantity.toDouble())
+                .build()
+        val commerceEvent =
+            CommerceEvent
+                .Builder(Product.DETAIL, product)
+                .customAttributes(customAttributes)
+                .build()
         val results =
             CustomMapping.projectEvents(commerceEvent, kitConfiguration.customMappingList, null)
         val expectedInfo: MutableMap<String, String?> = HashMap()
@@ -935,15 +1091,19 @@ class CustomMappingTest {
         expectedInfo[cmProductName] = name
         expectedInfo[cmCurrencyName] = cmStaticCurrency
         expectedInfo.putAll(customAttributes)
-        val expectedMappedEvent = MPEvent.Builder(cmEventName)
-            .customAttributes(expectedInfo)
-            .build()
+        val expectedMappedEvent =
+            MPEvent
+                .Builder(cmEventName)
+                .customAttributes(expectedInfo)
+                .build()
         Assert.assertEquals(1, results.size.toLong())
         val result = results[0].mpEvent
         Assert.assertEquals(expectedMappedEvent.eventName, result.eventName)
         Assert.assertEquals(
-            expectedMappedEvent.customAttributeStrings!!.keys.size.toLong(),
-            result.customAttributeStrings!!.size.toLong()
+            expectedMappedEvent.customAttributeStrings!!
+                .keys.size
+                .toLong(),
+            result.customAttributeStrings!!.size.toLong(),
         )
         for (key in expectedMappedEvent.customAttributeStrings!!.keys) {
             val `val` = result.customAttributeStrings!![key]
@@ -956,7 +1116,9 @@ class CustomMappingTest {
     @Throws(Exception::class)
     fun testSingleBasicMatch() {
         val config =
-            JSONObject("{ \"id\":144, \"pmmid\":24, \"behavior\":{ \"append_unmapped_as_is\":true }, \"action\":{ \"projected_event_name\":\"new_premium_subscriber\", \"attribute_maps\":[ ], \"outbound_message_type\":4 }, \"matches\":[ { \"message_type\":4, \"event_match_type\":\"String\", \"event\":\"subscription_success\", \"attribute_key\":\"plan\", \"attribute_values\":[ \"premium\" ] } ] }")
+            JSONObject(
+                "{ \"id\":144, \"pmmid\":24, \"behavior\":{ \"append_unmapped_as_is\":true }, \"action\":{ \"projected_event_name\":\"new_premium_subscriber\", \"attribute_maps\":[ ], \"outbound_message_type\":4 }, \"matches\":[ { \"message_type\":4, \"event_match_type\":\"String\", \"event\":\"subscription_success\", \"attribute_key\":\"plan\", \"attribute_values\":[ \"premium\" ] } ] }",
+            )
         val mapping = CustomMapping(config)
         val info: MutableMap<String, String?> = HashMap()
         info["plan"] = "premium"
@@ -977,7 +1139,9 @@ class CustomMappingTest {
     @Throws(Exception::class)
     fun testORingAttributeValues() {
         val config =
-            JSONObject("{ \"id\":167, \"pmmid\":26, \"behavior\":{ \"append_unmapped_as_is\":true }, \"action\":{ \"projected_event_name\":\"X_FIRST_APP_OPEN\", \"attribute_maps\":[ ], \"outbound_message_type\":4 }, \"matches\":[ { \"message_type\":4, \"event_match_type\":\"String\", \"event\":\"APPLICATION_START\", \"attribute_key\":\"has_launched_before\", \"attribute_values\":[ \"false\", \"N\" ] } ] }")
+            JSONObject(
+                "{ \"id\":167, \"pmmid\":26, \"behavior\":{ \"append_unmapped_as_is\":true }, \"action\":{ \"projected_event_name\":\"X_FIRST_APP_OPEN\", \"attribute_maps\":[ ], \"outbound_message_type\":4 }, \"matches\":[ { \"message_type\":4, \"event_match_type\":\"String\", \"event\":\"APPLICATION_START\", \"attribute_key\":\"has_launched_before\", \"attribute_values\":[ \"false\", \"N\" ] } ] }",
+            )
         val mapping = CustomMapping(config)
         val info: MutableMap<String, String?> = HashMap()
         info["has_launched_before"] = "Y"
@@ -990,7 +1154,7 @@ class CustomMappingTest {
         event = MPEvent.Builder("APPLICATION_START").customAttributes(info).build()
         Assert.assertTrue(
             mapping.matchList[0].attributeValues.toString(),
-            mapping.isMatch(MPEventWrapper(event))
+            mapping.isMatch(MPEventWrapper(event)),
         )
     }
 
@@ -998,7 +1162,9 @@ class CustomMappingTest {
     @Throws(Exception::class)
     fun testANDingMatchedeMatches() {
         val config =
-            JSONObject("{ \"id\":171, \"pmmid\":30, \"behavior\":{ \"append_unmapped_as_is\":true }, \"action\":{ \"projected_event_name\":\"X_NEW_NOAH_SUBSCRIPTION\", \"attribute_maps\":[ ], \"outbound_message_type\":4 }, \"matches\":[ { \"message_type\":4, \"event_match_type\":\"String\", \"event\":\"SUBSCRIPTION_END\", \"attribute_key\":\"outcome\", \"attribute_values\":[ \"new_subscription\" ] }, { \"message_type\":4, \"event_match_type\":\"String\", \"event\":\"SUBSCRIPTION_END\", \"attribute_key\":\"plan_id\", \"attribute_values\":[ \"3\", \"8\" ] } ] }")
+            JSONObject(
+                "{ \"id\":171, \"pmmid\":30, \"behavior\":{ \"append_unmapped_as_is\":true }, \"action\":{ \"projected_event_name\":\"X_NEW_NOAH_SUBSCRIPTION\", \"attribute_maps\":[ ], \"outbound_message_type\":4 }, \"matches\":[ { \"message_type\":4, \"event_match_type\":\"String\", \"event\":\"SUBSCRIPTION_END\", \"attribute_key\":\"outcome\", \"attribute_values\":[ \"new_subscription\" ] }, { \"message_type\":4, \"event_match_type\":\"String\", \"event\":\"SUBSCRIPTION_END\", \"attribute_key\":\"plan_id\", \"attribute_values\":[ \"3\", \"8\" ] } ] }",
+            )
         val mapping = CustomMapping(config)
         val info: MutableMap<String, String?> = HashMap()
         info["outcome"] = "new_subscription"

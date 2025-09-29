@@ -12,7 +12,6 @@ class AudienceResponse {
     constructor(httpCode: Int, errorMsg: String) {
         code = httpCode
         error = errorMsg
-
     }
 
     constructor(httpCode: Int, jsonObject: JSONObject) {
@@ -21,13 +20,9 @@ class AudienceResponse {
         parseJsonObject(jsonObject)
     }
 
-    fun getAudienceResult(): ArrayList<Audience> {
-        return audienceList
-    }
+    fun getAudienceResult(): ArrayList<Audience> = audienceList
 
-    fun getError(): String? {
-        return error
-    }
+    fun getError(): String? = error
 
     private fun parseJsonObject(jsonObject: JSONObject) {
         try {

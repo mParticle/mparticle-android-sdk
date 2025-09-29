@@ -4,7 +4,9 @@ import com.mparticle.MParticle
 import com.mparticle.kits.KitIntegration
 import com.mparticle.kits.ReportingMessage
 
-open class AttributeListenerTestKit : ListenerTestKit(), KitIntegration.AttributeListener {
+open class AttributeListenerTestKit :
+    ListenerTestKit(),
+    KitIntegration.AttributeListener {
     var setUserAttribute: ((attributeKey: String?, attributeValue: String?) -> Unit)? = null
     var setUserAttributeList: ((attributeKey: String?, attributeValueList: List<String?>?) -> Unit)? =
         null
@@ -21,7 +23,7 @@ open class AttributeListenerTestKit : ListenerTestKit(), KitIntegration.Attribut
 
     override fun setUserAttributeList(
         attributeKey: String,
-        attributeValueList: MutableList<String>
+        attributeValueList: MutableList<String>,
     ) {
         setUserAttributeList?.invoke(attributeKey, attributeValueList)
         onAttributeReceived?.invoke(attributeKey, attributeValueList)
@@ -29,19 +31,25 @@ open class AttributeListenerTestKit : ListenerTestKit(), KitIntegration.Attribut
 
     override fun setAllUserAttributes(
         userAttributes: Map<String, String>,
-        userAttributeLists: Map<String, MutableList<String>>
+        userAttributeLists: Map<String, MutableList<String>>,
     ) {
         setAllUserAttributes?.invoke(userAttributes, userAttributeLists)
         userAttributes.forEach { onAttributeReceived?.invoke(it.key, it.value) }
         userAttributeLists.forEach { onAttributeReceived?.invoke(it.key, it.value) }
     }
 
-    override fun setUserAttribute(attributeKey: String, attributeValue: String?) {
+    override fun setUserAttribute(
+        attributeKey: String,
+        attributeValue: String?,
+    ) {
         setUserAttribute?.invoke(attributeKey, attributeValue)
         onAttributeReceived?.invoke(attributeKey, attributeValue)
     }
 
-    override fun setUserIdentity(identityType: MParticle.IdentityType, identity: String?) {
+    override fun setUserIdentity(
+        identityType: MParticle.IdentityType,
+        identity: String?,
+    ) {
         setUserIdentity?.invoke(identityType, identity)
         onIdentityReceived?.invoke(identityType, identity)
     }
@@ -56,7 +64,5 @@ open class AttributeListenerTestKit : ListenerTestKit(), KitIntegration.Attribut
         onAttributeReceived?.invoke(key, null)
     }
 
-    override fun logout(): List<ReportingMessage> {
-        return logout?.invoke() ?: listOf()
-    }
+    override fun logout(): List<ReportingMessage> = logout?.invoke() ?: listOf()
 }

@@ -22,7 +22,6 @@ import java.util.Collections
 import java.util.UUID
 
 class MPUtilityTest {
-
     @Mock
     private lateinit var mockContext: Context
 
@@ -62,11 +61,11 @@ class MPUtilityTest {
         UUID.fromString(MPUtility.getBuildUUID(null))
         Assert.assertTrue(
             "UUIDs should have been the same",
-            MPUtility.getBuildUUID("12345678") == MPUtility.getBuildUUID("12345678")
+            MPUtility.getBuildUUID("12345678") == MPUtility.getBuildUUID("12345678"),
         )
         Assert.assertFalse(
             "UUIDs should have been different",
-            MPUtility.getBuildUUID("1234567") == MPUtility.getBuildUUID("12345678")
+            MPUtility.getBuildUUID("1234567") == MPUtility.getBuildUUID("12345678"),
         )
     }
 
@@ -105,12 +104,14 @@ class MPUtilityTest {
     @Test
     @Throws(Exception::class)
     fun testIsAppDebuggableTrue() {
-        val context = Mockito.mock(
-            Context::class.java
-        )
-        val applicationInfo = Mockito.mock(
-            ApplicationInfo::class.java
-        )
+        val context =
+            Mockito.mock(
+                Context::class.java,
+            )
+        val applicationInfo =
+            Mockito.mock(
+                ApplicationInfo::class.java,
+            )
         applicationInfo.flags = ApplicationInfo.FLAG_DEBUGGABLE
         Mockito.`when`(context.applicationInfo).thenReturn(applicationInfo)
         Assert.assertTrue(MPUtility.isAppDebuggable(context))
@@ -119,12 +120,14 @@ class MPUtilityTest {
     @Test
     @Throws(Exception::class)
     fun testIsAppDebuggableFalse() {
-        val context = Mockito.mock(
-            Context::class.java
-        )
-        val applicationInfo = Mockito.mock(
-            ApplicationInfo::class.java
-        )
+        val context =
+            Mockito.mock(
+                Context::class.java,
+            )
+        val applicationInfo =
+            Mockito.mock(
+                ApplicationInfo::class.java,
+            )
         applicationInfo.flags = 0
         Mockito.`when`(context.applicationInfo).thenReturn(applicationInfo)
         Assert.assertFalse(MPUtility.isAppDebuggable(context))
@@ -133,9 +136,10 @@ class MPUtilityTest {
     @Test
     @Throws(Exception::class)
     fun testIsAppDebuggableDoesNotModify() {
-        val context = Mockito.mock(
-            Context::class.java
-        )
+        val context =
+            Mockito.mock(
+                Context::class.java,
+            )
         val applicationInfo = ApplicationInfo()
         applicationInfo.flags = 5
         Mockito.`when`(context.applicationInfo).thenReturn(applicationInfo)
@@ -146,12 +150,14 @@ class MPUtilityTest {
     @Test
     @Throws(Exception::class)
     fun testGetNetworkType() {
-        val context = Mockito.mock(
-            Context::class.java
-        )
-        val telephonyManager = Mockito.mock(
-            TelephonyManager::class.java
-        )
+        val context =
+            Mockito.mock(
+                Context::class.java,
+            )
+        val telephonyManager =
+            Mockito.mock(
+                TelephonyManager::class.java,
+            )
         var result = MPUtility.getNetworkType(context, telephonyManager)
         Assert.assertEquals(0, result)
         result = MPUtility.getNetworkType(context, null)
@@ -200,7 +206,10 @@ class MPUtilityTest {
         }
     }
 
-    private fun assertUnorderedJsonEqual(object1: JSONObject, object2: JSONObject) {
+    private fun assertUnorderedJsonEqual(
+        object1: JSONObject,
+        object2: JSONObject,
+    ) {
         if (object1 === object2) {
             return
         }
@@ -225,7 +234,10 @@ class MPUtilityTest {
         }
     }
 
-    private fun assertUnorderedJsonEqual(object1: JSONArray, object2: JSONArray) {
+    private fun assertUnorderedJsonEqual(
+        object1: JSONArray,
+        object2: JSONArray,
+    ) {
         if (object1 === object2) {
             return
         }
@@ -262,11 +274,11 @@ class MPUtilityTest {
         // too big for a Long, should return a String
         Assert.assertEquals(
             3.245987293478593E47,
-            MPUtility.toNumberOrString("324598729347859283749857293487598237459872398475")
+            MPUtility.toNumberOrString("324598729347859283749857293487598237459872398475"),
         )
         Assert.assertEquals(
             3.245987293478593E46,
-            MPUtility.toNumberOrString("32459872934785928374985729348759823745987239847.5")
+            MPUtility.toNumberOrString("32459872934785928374985729348759823745987239847.5"),
         )
         Assert.assertEquals("asdvasd", MPUtility.toNumberOrString("asdvasd"))
         Assert.assertEquals("234sdvsda", MPUtility.toNumberOrString("234sdvsda"))
@@ -275,15 +287,18 @@ class MPUtilityTest {
 
     @Test
     fun testGetOrientation() {
-        val mockResources = Mockito.mock(
-            Resources::class.java
-        )
-        val context = Mockito.mock(
-            Context::class.java
-        )
-        val displayMetrics = Mockito.mock(
-            DisplayMetrics::class.java
-        )
+        val mockResources =
+            Mockito.mock(
+                Resources::class.java,
+            )
+        val context =
+            Mockito.mock(
+                Context::class.java,
+            )
+        val displayMetrics =
+            Mockito.mock(
+                DisplayMetrics::class.java,
+            )
         `when`(context.getResources()).thenReturn(mockResources)
         `when`(mockResources.getDisplayMetrics()).thenReturn(displayMetrics)
         displayMetrics.widthPixels = 1080
@@ -294,15 +309,18 @@ class MPUtilityTest {
 
     @Test
     fun testGetOrientation_When_ORIENTATION_LANDSCAPE() {
-        val mockResources = Mockito.mock(
-            Resources::class.java
-        )
-        val context = Mockito.mock(
-            Context::class.java
-        )
-        val displayMetrics = Mockito.mock(
-            DisplayMetrics::class.java
-        )
+        val mockResources =
+            Mockito.mock(
+                Resources::class.java,
+            )
+        val context =
+            Mockito.mock(
+                Context::class.java,
+            )
+        val displayMetrics =
+            Mockito.mock(
+                DisplayMetrics::class.java,
+            )
         `when`(context.getResources()).thenReturn(mockResources)
         `when`(mockResources.getDisplayMetrics()).thenReturn(displayMetrics)
         displayMetrics.widthPixels = 1953
@@ -313,15 +331,18 @@ class MPUtilityTest {
 
     @Test
     fun testGetOrientation_When_ORIENTATION_SQUARE() {
-        val mockResources = Mockito.mock(
-            Resources::class.java
-        )
-        val context = Mockito.mock(
-            Context::class.java
-        )
-        val displayMetrics = Mockito.mock(
-            DisplayMetrics::class.java
-        )
+        val mockResources =
+            Mockito.mock(
+                Resources::class.java,
+            )
+        val context =
+            Mockito.mock(
+                Context::class.java,
+            )
+        val displayMetrics =
+            Mockito.mock(
+                DisplayMetrics::class.java,
+            )
         `when`(context.getResources()).thenReturn(mockResources)
         `when`(mockResources.getDisplayMetrics()).thenReturn(displayMetrics)
         displayMetrics.widthPixels = 850

@@ -34,11 +34,7 @@ class BatchId {
         return true
     }
 
-    override fun hashCode(): Int {
-        return fields().contentHashCode()
-    }
+    override fun hashCode(): Int = fields().contentHashCode()
 
-    private fun fields(): Array<Any?> {
-        return arrayOf(mpid, sessionId, dataplanId, dataplanVersion)
-    }
+    private fun fields(): Array<Any?> = arrayOf(mpid, sessionId, dataplanId, dataplanVersion)
 }

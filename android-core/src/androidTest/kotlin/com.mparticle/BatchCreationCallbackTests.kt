@@ -12,28 +12,31 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class BatchCreationCallbackTests : BaseCleanInstallEachTest() {
-
     @Test
     fun testListenerNoChange() {
         var receivedBatch: JSONObject? = null
-        val options = MParticleOptions.builder(mContext)
-            .batchCreationListener {
-                receivedBatch = JSONObject(it.toString())
-                it
-            }
+        val options =
+            MParticleOptions
+                .builder(mContext)
+                .batchCreationListener {
+                    receivedBatch = JSONObject(it.toString())
+                    it
+                }
         startMParticle(options)
 
         MParticle.getInstance()?.apply {
             logEvent(
-                MPEvent.Builder("test event")
-                    .build()
+                MPEvent
+                    .Builder("test event")
+                    .build(),
             )
             upload()
         }
 
         mServer.waitForVerify(
             Matcher(mServer.Endpoints().eventsUrl).bodyMatch {
-                it.optJSONArray("msgs")
+                it
+                    .optJSONArray("msgs")
                     ?.toList()
                     ?.filterIsInstance<JSONObject>()
                     ?.any { it.optString("n") == "test event" }
@@ -47,7 +50,7 @@ class BatchCreationCallbackTests : BaseCleanInstallEachTest() {
                             assertJsonEqual(it, receivedBatch)
                         }
                     } ?: false
-            }
+            },
         )
     }
 
@@ -55,8 +58,10 @@ class BatchCreationCallbackTests : BaseCleanInstallEachTest() {
     fun testNullBatchCreationSENDwithoutModify() {
         val targetEventName = "should send without modified"
 
-        val options = MParticleOptions.builder(mContext)
-            .batchCreationListener(null)
+        val options =
+            MParticleOptions
+                .builder(mContext)
+                .batchCreationListener(null)
         startMParticle(options)
 
         MParticle.getInstance()?.apply {
@@ -66,32 +71,39 @@ class BatchCreationCallbackTests : BaseCleanInstallEachTest() {
 
         mServer.waitForVerify(
             Matcher(mServer.Endpoints().eventsUrl).bodyMatch {
-                it.optJSONArray("msgs")
+                it
+                    .optJSONArray("msgs")
                     ?.toList()
                     ?.filterIsInstance<JSONObject>()
                     ?.any {
                         it.optString("n") == targetEventName && it.optString("mb").isNullOrEmpty()
                     } ?: false
-            }
+            },
         )
 
-        mServer.Requests().events.any {
-            it.bodyJson.optJSONArray("msgs")
-                ?.toList()
-                ?.filterIsInstance<JSONObject>()
-                ?.any { it.optString("n") == targetEventName && it.optString("mb").isNullOrEmpty() }
-                ?: false
-        }.let {
-            assertTrue { it }
-        }
+        mServer
+            .Requests()
+            .events
+            .any {
+                it.bodyJson
+                    .optJSONArray("msgs")
+                    ?.toList()
+                    ?.filterIsInstance<JSONObject>()
+                    ?.any { it.optString("n") == targetEventName && it.optString("mb").isNullOrEmpty() }
+                    ?: false
+            }.let {
+                assertTrue { it }
+            }
     }
 
     @Test
     fun testNullOnBatchCreatedShouldNOTsend() {
         val targetEventName = "should not send"
 
-        val options = MParticleOptions.builder(mContext)
-            .batchCreationListener { null }
+        val options =
+            MParticleOptions
+                .builder(mContext)
+                .batchCreationListener { null }
         startMParticle(options)
 
         MParticle.getInstance()?.apply {
@@ -101,21 +113,26 @@ class BatchCreationCallbackTests : BaseCleanInstallEachTest() {
 
         mServer.waitForVerify(
             Matcher(mServer.Endpoints().eventsUrl).bodyMatch {
-                it.optJSONArray("msgs")
+                it
+                    .optJSONArray("msgs")
                     ?.toList()
                     ?.filterIsInstance<JSONObject>()
                     ?.any { it.optString("n") == targetEventName } ?: false
-            }
+            },
         )
 
-        mServer.Requests().events.any {
-            it.bodyJson.optJSONArray("msgs")
-                ?.toList()
-                ?.filterIsInstance<JSONObject>()
-                ?.any { it.optString("n") == targetEventName } ?: false
-        }.let {
-            assertFalse { it }
-        }
+        mServer
+            .Requests()
+            .events
+            .any {
+                it.bodyJson
+                    .optJSONArray("msgs")
+                    ?.toList()
+                    ?.filterIsInstance<JSONObject>()
+                    ?.any { it.optString("n") == targetEventName } ?: false
+            }.let {
+                assertFalse { it }
+            }
     }
 
     @Test
@@ -123,26 +140,30 @@ class BatchCreationCallbackTests : BaseCleanInstallEachTest() {
         var newBatch = JSONObject().put("the whole", "batch")
         val targetEventName = "should not send"
 
-        val options = MParticleOptions.builder(mContext)
-            .batchCreationListener {
-                it.optJSONArray("msgs")
-                    ?.toList()
-                    ?.filterIsInstance<JSONObject>()
-                    ?.any { it.optString("n") == targetEventName }
-                    ?.let { result ->
-                        if (result) {
-                            JSONObject(newBatch.toString())
-                        } else {
-                            it
-                        }
-                    } ?: it
-            }
+        val options =
+            MParticleOptions
+                .builder(mContext)
+                .batchCreationListener {
+                    it
+                        .optJSONArray("msgs")
+                        ?.toList()
+                        ?.filterIsInstance<JSONObject>()
+                        ?.any { it.optString("n") == targetEventName }
+                        ?.let { result ->
+                            if (result) {
+                                JSONObject(newBatch.toString())
+                            } else {
+                                it
+                            }
+                        } ?: it
+                }
         startMParticle(options)
 
         MParticle.getInstance()?.apply {
             logEvent(
-                MPEvent.Builder(targetEventName)
-                    .build()
+                MPEvent
+                    .Builder(targetEventName)
+                    .build(),
             )
             upload()
         }
@@ -154,7 +175,7 @@ class BatchCreationCallbackTests : BaseCleanInstallEachTest() {
                     assertTrue(modified.toString().toBooleanStrict())
                 }
                 it.toString() == newBatch.toString()
-            }
+            },
         )
 
         // make sure the upload queue is cleared
@@ -165,40 +186,48 @@ class BatchCreationCallbackTests : BaseCleanInstallEachTest() {
 
         mServer.waitForVerify(
             Matcher(mServer.Endpoints().eventsUrl).bodyMatch {
-                it.optJSONArray("msgs")
+                it
+                    .optJSONArray("msgs")
                     ?.toList()
                     ?.filterIsInstance<JSONObject>()
                     ?.any { it.optString("n") == "test" } ?: false
-            }
+            },
         )
 
-        mServer.Requests().events.any {
-            it.bodyJson.optJSONArray("msgs")
-                ?.toList()
-                ?.filterIsInstance<JSONObject>()
-                ?.any { it.optString("n") == targetEventName } ?: false
-        }.let {
-            assertFalse { it }
-        }
+        mServer
+            .Requests()
+            .events
+            .any {
+                it.bodyJson
+                    .optJSONArray("msgs")
+                    ?.toList()
+                    ?.filterIsInstance<JSONObject>()
+                    ?.any { it.optString("n") == targetEventName } ?: false
+            }.let {
+                assertFalse { it }
+            }
     }
 
     @Test
     fun testListenerCrashes() {
         val targetEventName = "should send"
-        val options = MParticleOptions.builder(mContext)
-            .batchCreationListener {
-                it.optJSONArray("msgs")
-                    ?.toList()
-                    ?.filterIsInstance<JSONObject>()
-                    ?.any { it.optString("n") == targetEventName }
-                    ?.let { result ->
-                        if (result) {
-                            throw RuntimeException()
-                        } else {
-                            it
-                        }
-                    } ?: it
-            }
+        val options =
+            MParticleOptions
+                .builder(mContext)
+                .batchCreationListener {
+                    it
+                        .optJSONArray("msgs")
+                        ?.toList()
+                        ?.filterIsInstance<JSONObject>()
+                        ?.any { it.optString("n") == targetEventName }
+                        ?.let { result ->
+                            if (result) {
+                                throw RuntimeException()
+                            } else {
+                                it
+                            }
+                        } ?: it
+                }
         startMParticle(options)
 
         MParticle.getInstance()?.apply {
@@ -214,21 +243,26 @@ class BatchCreationCallbackTests : BaseCleanInstallEachTest() {
 
         mServer.waitForVerify(
             Matcher(mServer.Endpoints().eventsUrl).bodyMatch {
-                it.optJSONArray("msgs")
+                it
+                    .optJSONArray("msgs")
                     ?.toList()
                     ?.filterIsInstance<JSONObject>()
                     ?.any { it.optString("n") == "test" } ?: false
-            }
+            },
         )
 
-        mServer.Requests().events.any {
-            it.bodyJson.optJSONArray("msgs")
-                ?.toList()
-                ?.filterIsInstance<JSONObject>()
-                ?.any { it.optString("n") == targetEventName } ?: false
-        }.let {
-            assertTrue { it }
-        }
+        mServer
+            .Requests()
+            .events
+            .any {
+                it.bodyJson
+                    .optJSONArray("msgs")
+                    ?.toList()
+                    ?.filterIsInstance<JSONObject>()
+                    ?.any { it.optString("n") == targetEventName } ?: false
+            }.let {
+                assertTrue { it }
+            }
     }
 
     @Test
@@ -241,7 +275,8 @@ class BatchCreationCallbackTests : BaseCleanInstallEachTest() {
 
         mServer.waitForVerify(
             Matcher(mServer.Endpoints().eventsUrl).bodyMatch {
-                it.optJSONArray("msgs")
+                it
+                    .optJSONArray("msgs")
                     ?.toList()
                     ?.filterIsInstance<JSONObject>()
                     ?.any { it.optString("n") == "test" }
@@ -250,7 +285,7 @@ class BatchCreationCallbackTests : BaseCleanInstallEachTest() {
                             assertNull(it.opt(Constants.MessageKey.MODIFIED_BATCH))
                         }
                     } ?: false
-            }
+            },
         )
     }
 }

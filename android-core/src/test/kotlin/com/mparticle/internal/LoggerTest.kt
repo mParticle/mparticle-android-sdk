@@ -50,7 +50,7 @@ class LoggerTest {
             null,
             null,
             null,
-            null
+            null,
         )
         Assert.assertNotNull(Logger.getLogHandler())
         Assert.assertTrue(Logger.getLogHandler() is DefaultLogHandler)
@@ -74,7 +74,10 @@ class LoggerTest {
         Assert.assertTrue(Logger.getLogHandler() is DefaultLogHandler)
     }
 
-    private fun assertTrueUpTo(limit: Int, called: BooleanArray) {
+    private fun assertTrueUpTo(
+        limit: Int,
+        called: BooleanArray,
+    ) {
         for (i in called.indices) {
             if (i < limit) {
                 Assert.assertTrue(called[i])
@@ -84,28 +87,46 @@ class LoggerTest {
         }
     }
 
-    internal inner class LogHandlerTest(private val called: BooleanArray) : AbstractLogHandler() {
-        override fun isADBLoggable(tag: String, logLevel: Int): Boolean {
-            return true
-        }
+    internal inner class LogHandlerTest(
+        private val called: BooleanArray,
+    ) : AbstractLogHandler() {
+        override fun isADBLoggable(
+            tag: String,
+            logLevel: Int,
+        ): Boolean = true
 
-        override fun verbose(error: Throwable?, message: String) {
+        override fun verbose(
+            error: Throwable?,
+            message: String,
+        ) {
             called[0] = true
         }
 
-        override fun info(error: Throwable?, message: String) {
+        override fun info(
+            error: Throwable?,
+            message: String,
+        ) {
             called[1] = true
         }
 
-        override fun debug(error: Throwable?, message: String) {
+        override fun debug(
+            error: Throwable?,
+            message: String,
+        ) {
             called[2] = true
         }
 
-        override fun warning(error: Throwable?, message: String) {
+        override fun warning(
+            error: Throwable?,
+            message: String,
+        ) {
             called[3] = true
         }
 
-        override fun error(error: Throwable?, message: String) {
+        override fun error(
+            error: Throwable?,
+            message: String,
+        ) {
             called[4] = true
         }
     }

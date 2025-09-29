@@ -33,25 +33,28 @@ class MessageHandlerTest {
     @Throws(Exception::class)
     fun setUp() {
         MParticle.setInstance(MockMParticle())
-        val stateManager = Mockito.mock(
-            AppStateManager::class.java
-        )
+        val stateManager =
+            Mockito.mock(
+                AppStateManager::class.java,
+            )
         mConfigManager = MParticle.getInstance()?.Internal()?.configManager!!
         mMessageManager = Mockito.mock(MessageManager::class.java)
         Mockito.`when`(mMessageManager.apiKey).thenReturn("apiKey")
-        Mockito.`when`(mMessageManager.uploadSettings).thenReturn(UploadSettings("apiKey", "secret", NetworkOptions.builder().build(), "", ""))
+        Mockito
+            .`when`(
+                mMessageManager.uploadSettings,
+            ).thenReturn(UploadSettings("apiKey", "secret", NetworkOptions.builder().build(), "", ""))
         mParticleDatabaseManager = Mockito.mock(MParticleDBManager::class.java)
-        handler = object : MessageHandler(
-            mMessageManager,
-            MockContext(),
-            mParticleDatabaseManager,
-            "dataplan1",
-            1
-        ) {
-            public override fun databaseAvailable(): Boolean {
-                return true
+        handler =
+            object : MessageHandler(
+                mMessageManager,
+                MockContext(),
+                mParticleDatabaseManager,
+                "dataplan1",
+                1,
+            ) {
+                public override fun databaseAvailable(): Boolean = true
             }
-        }
     }
 
     @Test
@@ -59,22 +62,25 @@ class MessageHandlerTest {
     fun testInsertAliasRequest() {
         val insertedAliasRequest = AndroidUtils.Mutable<JSONObject?>(null)
         Mockito.`when`(mConfigManager.deviceApplicationStamp).thenReturn("das")
-        val database: MParticleDBManager = object : MParticleDBManager(MockContext()) {
-            override fun insertAliasRequest(request: JSONObject, uploadSettings: UploadSettings) {
-                insertedAliasRequest.value = request
-            }
+        val database: MParticleDBManager =
+            object : MParticleDBManager(MockContext()) {
+                override fun insertAliasRequest(
+                    request: JSONObject,
+                    uploadSettings: UploadSettings,
+                ) {
+                    insertedAliasRequest.value = request
+                }
 
-            override fun getDatabase(): MPDatabase? {
-                return null
+                override fun getDatabase(): MPDatabase? = null
             }
-        }
         handler.mMParticleDBManager = database
         TestCase.assertNull(insertedAliasRequest.value)
         val aliasRequest = TestingUtils.getInstance().randomAliasRequest
         val aliasMessage = MPAliasMessage(aliasRequest, "das", "apiKey")
-        val mockMessage = Mockito.mock(
-            Message::class.java
-        )
+        val mockMessage =
+            Mockito.mock(
+                Message::class.java,
+            )
         mockMessage.what = MessageHandler.STORE_ALIAS_MESSAGE
         mockMessage.obj = aliasMessage
         handler.handleMessageImpl(mockMessage)

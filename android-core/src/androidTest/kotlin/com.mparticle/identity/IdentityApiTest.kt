@@ -61,7 +61,8 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
         MParticle.getInstance()!!.Identity().addIdentityStateListener { user, previousUser ->
             if (user.id == mpid1) {
                 try {
-                    com.mparticle.internal.AccessUtils.awaitMessageHandler()
+                    com.mparticle.internal.AccessUtils
+                        .awaitMessageHandler()
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                 }
@@ -114,15 +115,19 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
             Assert.assertEquals(identityApiResult.user.id, mpid1)
             Assert.assertEquals(identityApiResult.previousUser!!.id, mStartingMpid.toLong())
         }
-        com.mparticle.internal.AccessUtils.awaitUploadHandler()
+        com.mparticle.internal.AccessUtils
+            .awaitUploadHandler()
         request = IdentityApiRequest.withEmptyUser().build()
         result = MParticle.getInstance()!!.Identity().identify(request)
         result.addSuccessListener { identityApiResult ->
             Assert.assertEquals(identityApiResult.user.id, mpid2)
             Assert.assertEquals(
                 identityApiResult.user.id,
-                MParticle.getInstance()!!
-                    .Identity().currentUser!!.id
+                MParticle
+                    .getInstance()!!
+                    .Identity()
+                    .currentUser!!
+                    .id,
             )
             Assert.assertEquals(identityApiResult.previousUser!!.id, mpid1)
             latch.countDown()
@@ -138,16 +143,23 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
     fun testAddMultipleIdentityStateListeners() {
         mServer.addConditionalIdentityResponse(mStartingMpid, mpid1)
         val latch: CountDownLatch = MPLatch(6)
-        MParticle.getInstance()!!.Identity()
+        MParticle
+            .getInstance()!!
+            .Identity()
             .addIdentityStateListener { user, previousUser -> latch.countDown() }
-        MParticle.getInstance()!!.Identity()
+        MParticle
+            .getInstance()!!
+            .Identity()
             .addIdentityStateListener { user, previousUser -> latch.countDown() }
-        MParticle.getInstance()!!.Identity()
+        MParticle
+            .getInstance()!!
+            .Identity()
             .addIdentityStateListener { user, previousUser -> latch.countDown() }
         val request =
             IdentityApiRequest.withUser(MParticle.getInstance()!!.Identity().getUser(mpid1)).build()
         val result = MParticle.getInstance()!!.Identity().identify(request)
-        result.addSuccessListener { latch.countDown() }
+        result
+            .addSuccessListener { latch.countDown() }
             .addSuccessListener { latch.countDown() }
             .addSuccessListener { latch.countDown() }
         latch.await()
@@ -156,33 +168,38 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
     @Test
     @Throws(Exception::class)
     fun testRemoveIdentityStateListeners() {
-        mServer.addConditionalIdentityResponse(mStartingMpid, mpid1)
+        mServer
+            .addConditionalIdentityResponse(mStartingMpid, mpid1)
             .addConditionalIdentityResponse(mpid1, mpid2)
         val mpid1Latch: CountDownLatch = MPLatch(1)
         val mpid2Latch: CountDownLatch = MPLatch(1)
-        val keptIdStateListener = IdentityStateListener { user, previousUser ->
-            if (user.id == mpid1 && previousUser!!.id == mStartingMpid) {
-                mpid1Latch.countDown()
+        val keptIdStateListener =
+            IdentityStateListener { user, previousUser ->
+                if (user.id == mpid1 && previousUser!!.id == mStartingMpid) {
+                    mpid1Latch.countDown()
+                }
+                if (user.id == mpid2 && previousUser!!.id == mpid1) {
+                    mpid2Latch.countDown()
+                }
             }
-            if (user.id == mpid2 && previousUser!!.id == mpid1) {
-                mpid2Latch.countDown()
+        val removeIdStateListener1 =
+            IdentityStateListener { user, previousUser ->
+                if (user.id != mpid1 || previousUser!!.id != mStartingMpid) {
+                    Assert.fail("IdentityStateListener failed to be removed")
+                }
             }
-        }
-        val removeIdStateListener1 = IdentityStateListener { user, previousUser ->
-            if (user.id != mpid1 || previousUser!!.id != mStartingMpid) {
-                Assert.fail("IdentityStateListener failed to be removed")
+        val removeIdStateListener2 =
+            IdentityStateListener { user, previousUser ->
+                if (user.id != mpid1 || previousUser!!.id != mStartingMpid) {
+                    Assert.fail("IdentityStateListener failed to be removed")
+                }
             }
-        }
-        val removeIdStateListener2 = IdentityStateListener { user, previousUser ->
-            if (user.id != mpid1 || previousUser!!.id != mStartingMpid) {
-                Assert.fail("IdentityStateListener failed to be removed")
+        val removeIdStateListener3 =
+            IdentityStateListener { user, previousUser ->
+                if (user.id != mpid1 || previousUser!!.id != mStartingMpid) {
+                    Assert.fail("IdentityStateListener failed to be removed")
+                }
             }
-        }
-        val removeIdStateListener3 = IdentityStateListener { user, previousUser ->
-            if (user.id != mpid1 || previousUser!!.id != mStartingMpid) {
-                Assert.fail("IdentityStateListener failed to be removed")
-            }
-        }
         MParticle.getInstance()!!.Identity().addIdentityStateListener(keptIdStateListener)
         MParticle.getInstance()!!.Identity().addIdentityStateListener(removeIdStateListener1)
         MParticle.getInstance()!!.Identity().addIdentityStateListener(removeIdStateListener2)
@@ -214,13 +231,20 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
                 Assert.assertEquals(Looper.getMainLooper(), Looper.myLooper())
                 Assert.assertEquals(
                     user.id,
-                    MParticle.getInstance()!!.Identity().currentUser!!
-                        .id
+                    MParticle
+                        .getInstance()!!
+                        .Identity()
+                        .currentUser!!
+                        .id,
                 )
                 called.value = true
                 latch.countDown()
             }
-            MParticle.getInstance()!!.Internal().configManager.setMpid(mpid1, ran.nextBoolean())
+            MParticle
+                .getInstance()!!
+                .Internal()
+                .configManager
+                .setMpid(mpid1, ran.nextBoolean())
         }
         latch.await()
         Assert.assertTrue(called.value)
@@ -253,26 +277,35 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
         MParticle.getInstance()!!.Identity().addIdentityStateListener { user, previousUser ->
             Assert.assertEquals(
                 mpid1,
-                MParticle.getInstance()!!
-                    .Identity().currentUser!!.id
+                MParticle
+                    .getInstance()!!
+                    .Identity()
+                    .currentUser!!
+                    .id,
             )
             Assert.assertEquals(mpid1, user.id)
             Assert.assertEquals(mStartingMpid.toLong(), previousUser!!.id)
             called1.value = true
             latch.countDown()
         }
-        MParticle.getInstance()!!.Identity().login()
+        MParticle
+            .getInstance()!!
+            .Identity()
+            .login()
             .addSuccessListener { result ->
                 Assert.assertEquals(
                     mpid1,
-                    MParticle.getInstance()!!
-                        .Identity().currentUser!!.id
+                    MParticle
+                        .getInstance()!!
+                        .Identity()
+                        .currentUser!!
+                        .id,
                 )
                 Assert.assertEquals(mpid1, result.user.id)
                 Assert.assertEquals(
                     mStartingMpid.toLong(),
                     result.previousUser!!
-                        .id
+                        .id,
                 )
                 called2.value = true
                 latch.countDown()
@@ -287,7 +320,7 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
         mpid: Long,
         identityTypes: Map<IdentityType, String>,
         userAttributes: Map<String?, Any>?,
-        isLoggedIn: Boolean
+        isLoggedIn: Boolean,
     ) {
         Assert.assertTrue(dto1!!.id == mpid)
         if (userAttributes != null) {
@@ -316,7 +349,11 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
     fun testGetUser() {
         val identity = MParticle.getInstance()!!.Identity()
         Assert.assertNotNull(identity.currentUser)
-        MParticle.getInstance()!!.Internal().configManager.setMpid(mpid1, true)
+        MParticle
+            .getInstance()!!
+            .Internal()
+            .configManager
+            .setMpid(mpid1, true)
         Assert.assertEquals(identity.currentUser!!.id, mpid1)
         val mpid1UserAttributes: MutableMap<String?, Any> =
             HashMap(mRandomUtils.getRandomAttributes(3))
@@ -325,9 +362,13 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
         AccessUtils.setUserIdentities(
             mpid1UserIdentites,
             identity.currentUser!!
-                .id
+                .id,
         )
-        MParticle.getInstance()!!.Internal().configManager.setMpid(mpid2, false)
+        MParticle
+            .getInstance()!!
+            .Internal()
+            .configManager
+            .setMpid(mpid2, false)
         val mpid2UserAttributes: MutableMap<String?, Any> =
             HashMap(mRandomUtils.getRandomAttributes(3))
         val mpid2UserIdentites = mRandomUtils.getRandomUserIdentities(3)
@@ -335,9 +376,13 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
         AccessUtils.setUserIdentities(
             mpid2UserIdentites,
             identity.currentUser!!
-                .id
+                .id,
         )
-        MParticle.getInstance()!!.Internal().configManager.setMpid(mpid3, true)
+        MParticle
+            .getInstance()!!
+            .Internal()
+            .configManager
+            .setMpid(mpid3, true)
         val mpid3UserAttributes: MutableMap<String?, Any> =
             HashMap(mRandomUtils.getRandomAttributes(3))
         val mpid3UserIdentities = mRandomUtils.getRandomUserIdentities(2)
@@ -345,12 +390,13 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
         AccessUtils.setUserIdentities(
             mpid3UserIdentities,
             identity.currentUser!!
-                .id
+                .id,
         )
         mpid1UserAttributes.remove(null)
         mpid2UserAttributes.remove(null)
         mpid3UserAttributes.remove(null)
-        com.mparticle.internal.AccessUtils.awaitMessageHandler()
+        com.mparticle.internal.AccessUtils
+            .awaitMessageHandler()
 
         // should return null for mpid = 0
         Assert.assertNull(identity.getUser(0L))
@@ -362,21 +408,21 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
             mpid1,
             mpid1UserIdentites,
             mpid1UserAttributes,
-            true
+            true,
         )
         assertMParticleUserEquals(
             identity.getUser(mpid2),
             mpid2,
             mpid2UserIdentites,
             mpid2UserAttributes,
-            false
+            false,
         )
         assertMParticleUserEquals(
             identity.getUser(mpid3),
             mpid3,
             mpid3UserIdentities,
             mpid3UserAttributes,
-            true
+            true,
         )
 
         // should return null for unseen mpid's
@@ -394,34 +440,65 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
     fun testModifyConcurrentCalls() {
         Assert.assertEquals(
             mStartingMpid.toFloat(),
-            MParticle.getInstance()!!
-                .Identity().currentUser!!.id.toFloat(),
-            0f
+            MParticle
+                .getInstance()!!
+                .Identity()
+                .currentUser!!
+                .id
+                .toFloat(),
+            0f,
         )
         val userIdentities = mRandomUtils.randomUserIdentities
         for (identity in userIdentities.keys) {
             AccessUtils.setUserIdentity(userIdentities[identity], identity, mStartingMpid)
         }
-        val request = IdentityApiRequest.withUser(MParticle.getInstance()!!.Identity().currentUser)
-            .customerId(mRandomUtils.getAlphaNumericString(24)).build()
+        val request =
+            IdentityApiRequest
+                .withUser(MParticle.getInstance()!!.Identity().currentUser)
+                .customerId(mRandomUtils.getAlphaNumericString(24))
+                .build()
         val latch: CountDownLatch = MPLatch(1)
         mServer.waitForVerify(Matcher(mServer.Endpoints().getModifyUrl(mStartingMpid))) { request ->
-            Assert.assertEquals(1, request.asIdentityRequest().body.identity_changes.size.toLong())
+            Assert.assertEquals(
+                1,
+                request
+                    .asIdentityRequest()
+                    .body.identity_changes.size
+                    .toLong(),
+            )
             latch.countDown()
         }
         MParticle.getInstance()!!.Identity().modify(request)
         // change the mpid;
         // behind the scenes, this call will take place before the (above) modify request goes out, since
         // the modify request will be passed to a background thread before it is executed
-        MParticle.getInstance()!!.Internal().configManager.setMpid(mpid2, ran.nextBoolean())
+        MParticle
+            .getInstance()!!
+            .Internal()
+            .configManager
+            .setMpid(mpid2, ran.nextBoolean())
         latch.await()
     }
 
     @Test
     fun testGetUsersApi() {
         // test that by default there is only the starting user
-        Assert.assertEquals(MParticle.getInstance()!!.Identity().users.size.toLong(), 1)
-        Assert.assertEquals(MParticle.getInstance()!!.Identity().users[0].id, mStartingMpid)
+        Assert.assertEquals(
+            MParticle
+                .getInstance()!!
+                .Identity()
+                .users.size
+                .toLong(),
+            1,
+        )
+        Assert.assertEquals(
+            MParticle
+                .getInstance()!!
+                .Identity()
+                .users[0]
+                .id,
+            mStartingMpid,
+        )
 
         // add 5 Users
         val mpids: MutableList<Long> = ArrayList()
@@ -430,13 +507,21 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
             mpids.add(ran.nextLong())
         }
         for (mpid in mpids) {
-            MParticle.getInstance()!!.Internal().configManager.setMpid(mpid, ran.nextBoolean())
+            MParticle
+                .getInstance()!!
+                .Internal()
+                .configManager
+                .setMpid(mpid, ran.nextBoolean())
         }
 
         // test that there are now 6 users present in the getUsers() endpoint
         Assert.assertEquals(
-            MParticle.getInstance()!!.Identity().users.size.toLong(),
-            mpids.size.toLong()
+            MParticle
+                .getInstance()!!
+                .Identity()
+                .users.size
+                .toLong(),
+            mpids.size.toLong(),
         )
 
         // test that they are the same users we added before
@@ -446,11 +531,22 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
 
         // remove 2 users
         for (i in 0..1) {
-            MParticle.getInstance()!!.Internal().configManager.deleteUserStorage(mpids.removeAt(i))
+            MParticle
+                .getInstance()!!
+                .Internal()
+                .configManager
+                .deleteUserStorage(mpids.removeAt(i))
         }
 
         // test that there are now 4 remaining users
-        Assert.assertEquals(MParticle.getInstance()!!.Identity().users.size.toLong(), 4)
+        Assert.assertEquals(
+            MParticle
+                .getInstance()!!
+                .Identity()
+                .users.size
+                .toLong(),
+            4,
+        )
 
         // test that they are the correct users
         for (mParticleUser in MParticle.getInstance()!!.Identity().users) {
@@ -468,7 +564,11 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
         for (user in MParticle.getInstance()!!.Identity().users) {
             Assert.assertNotSame(0, user.id)
         }
-        MParticle.getInstance()!!.Internal().configManager.setMpid(0L, ran.nextBoolean())
+        MParticle
+            .getInstance()!!
+            .Internal()
+            .configManager
+            .setMpid(0L, ran.nextBoolean())
         Assert.assertNull(MParticle.getInstance()!!.Identity().getUser(0L))
         for (user in MParticle.getInstance()!!.Identity().users) {
             Assert.assertNotSame(0, user.id)
@@ -495,26 +595,31 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
         val latch: CountDownLatch = MPLatch(1)
         val currentUser = MParticle.getInstance()!!.Identity().currentUser
         val identityApi = MParticle.getInstance()!!.Identity()
-        val modifyRequest = IdentityApiRequest.withUser(currentUser)
-            .pushToken("new push", "old_push")
-            .build()
-        val taskSuccessListener = TaskSuccessListener {
-            identityApi.modify(modifyRequest)
-            mServer.waitForVerify(
-                Matcher(mServer.Endpoints().getModifyUrl(currentUser!!.id))
-            ) { request ->
-                val identityChanges = request.asIdentityRequest().body.identity_changes
-                Assert.assertEquals(1, identityChanges.size.toLong())
-                // make sure the customerId didn't change. it should not be included in the IdentityApiRequest
-                // since the request was built before customerId was set
-                Assert.assertTrue("customerid" != identityChanges[0].optString("identity_type"))
-                Assert.assertTrue("push_token" == identityChanges[0].optString("identity_type"))
-                latch.countDown()
+        val modifyRequest =
+            IdentityApiRequest
+                .withUser(currentUser)
+                .pushToken("new push", "old_push")
+                .build()
+        val taskSuccessListener =
+            TaskSuccessListener {
+                identityApi.modify(modifyRequest)
+                mServer.waitForVerify(
+                    Matcher(mServer.Endpoints().getModifyUrl(currentUser!!.id)),
+                ) { request ->
+                    val identityChanges = request.asIdentityRequest().body.identity_changes
+                    Assert.assertEquals(1, identityChanges.size.toLong())
+                    // make sure the customerId didn't change. it should not be included in the IdentityApiRequest
+                    // since the request was built before customerId was set
+                    Assert.assertTrue("customerid" != identityChanges[0].optString("identity_type"))
+                    Assert.assertTrue("push_token" == identityChanges[0].optString("identity_type"))
+                    latch.countDown()
+                }
             }
-        }
-        val loginRequest = IdentityApiRequest.withUser(currentUser)
-            .customerId("my Id")
-            .build()
+        val loginRequest =
+            IdentityApiRequest
+                .withUser(currentUser)
+                .customerId("my Id")
+                .build()
         identityApi
             .login(loginRequest)
             .addSuccessListener(taskSuccessListener)
@@ -527,26 +632,31 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
         val latch: CountDownLatch = MPLatch(1)
         val currentUser = MParticle.getInstance()!!.Identity().currentUser
         val identityApi = MParticle.getInstance()!!.Identity()
-        val modifyRequest = IdentityApiRequest.withUser(currentUser)
-            .customerId("new customer ID")
-            .build()
-        val taskSuccessListener = TaskSuccessListener {
-            identityApi.modify(modifyRequest)
-            mServer.waitForVerify(
-                Matcher(mServer.Endpoints().getModifyUrl(currentUser!!.id))
-            ) { request ->
-                val identityChanges = request.asIdentityRequest().body.identity_changes
-                Assert.assertEquals(1, identityChanges.size.toLong())
-                // make sure the customerId used the correct "old" value
-                Assert.assertTrue("customerid" == identityChanges[0].optString("identity_type"))
-                Assert.assertEquals("new customer ID", identityChanges[0].optString("new_value"))
-                Assert.assertEquals("old customer ID", identityChanges[0].optString("old_value"))
-                latch.countDown()
+        val modifyRequest =
+            IdentityApiRequest
+                .withUser(currentUser)
+                .customerId("new customer ID")
+                .build()
+        val taskSuccessListener =
+            TaskSuccessListener {
+                identityApi.modify(modifyRequest)
+                mServer.waitForVerify(
+                    Matcher(mServer.Endpoints().getModifyUrl(currentUser!!.id)),
+                ) { request ->
+                    val identityChanges = request.asIdentityRequest().body.identity_changes
+                    Assert.assertEquals(1, identityChanges.size.toLong())
+                    // make sure the customerId used the correct "old" value
+                    Assert.assertTrue("customerid" == identityChanges[0].optString("identity_type"))
+                    Assert.assertEquals("new customer ID", identityChanges[0].optString("new_value"))
+                    Assert.assertEquals("old customer ID", identityChanges[0].optString("old_value"))
+                    latch.countDown()
+                }
             }
-        }
-        val loginRequest = IdentityApiRequest.withUser(currentUser)
-            .customerId("old customer ID")
-            .build()
+        val loginRequest =
+            IdentityApiRequest
+                .withUser(currentUser)
+                .customerId("old customer ID")
+                .build()
         identityApi
             .login(loginRequest)
             .addSuccessListener(taskSuccessListener)
@@ -560,11 +670,13 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
         AccessUtils.setUserIdentity("facebook Id", IdentityType.Facebook, mStartingMpid)
         AccessUtils.setUserIdentity("other Id", IdentityType.Other2, mStartingMpid)
         val latch: CountDownLatch = MPLatch(1)
-        val request = IdentityApiRequest.withUser(MParticle.getInstance()!!.Identity().currentUser)
-            .customerId(null)
-            .userIdentity(IdentityType.Facebook, null)
-            .userIdentity(IdentityType.Other2, null)
-            .build()
+        val request =
+            IdentityApiRequest
+                .withUser(MParticle.getInstance()!!.Identity().currentUser)
+                .customerId(null)
+                .userIdentity(IdentityType.Facebook, null)
+                .userIdentity(IdentityType.Other2, null)
+                .build()
         MParticle.getInstance()!!.Identity().modify(request)
         mServer.waitForVerify(Matcher(mServer.Endpoints().getModifyUrl(mStartingMpid))) { request ->
             val identityChanges = request.asIdentityRequest().body.identity_changes
@@ -572,7 +684,7 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
             identityChanges.sortWith(
                 Comparator { jsonObject, t1 ->
                     jsonObject.optString("identity_type").compareTo(t1.optString("identity_type"))
-                }
+                },
             )
 
             // make sure the existing values were set to null

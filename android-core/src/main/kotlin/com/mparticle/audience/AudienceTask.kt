@@ -1,8 +1,6 @@
 package com.mparticle.audience
 
-
 abstract class AudienceTask<AudienceTaskResult> {
-
     abstract fun isComplete(): Boolean
 
     abstract fun isSuccessful(): Boolean

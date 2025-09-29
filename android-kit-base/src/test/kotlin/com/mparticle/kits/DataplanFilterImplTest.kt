@@ -33,12 +33,15 @@ class DataplanFilterImplTest {
 
     @Test
     fun testParseDataplan() {
-        val dataplan = File("src/test/kotlin/com/mparticle/kits/sample_dataplan.json")
-            .readText()
-            .toJSON()
-        val dataplanOptions = MParticleOptions.DataplanOptions.builder()
-            .dataplanVersion(dataplan)
-            .build()
+        val dataplan =
+            File("src/test/kotlin/com/mparticle/kits/sample_dataplan.json")
+                .readText()
+                .toJSON()
+        val dataplanOptions =
+            MParticleOptions.DataplanOptions
+                .builder()
+                .dataplanVersion(dataplan)
+                .build()
         val dataplanFilter = DataplanFilterImpl(dataplanOptions!!)
         assertEquals(15, dataplanFilter.dataPoints.size)
         dataplanFilter.apply {
@@ -56,11 +59,12 @@ class DataplanFilterImplTest {
                         "attributeEmail",
                         "attributeStringAlpha",
                         "attributeBoolean",
-                        "attributeNumMinMax"
-                    )
+                        "attributeNumMinMax",
+                    ),
                 )
             }
-            dataPoints.getValue("$PRODUCT_ACTION_KEY.add_to_cart.$PRODUCT_IMPRESSION_PRODUCTS")
+            dataPoints
+                .getValue("$PRODUCT_ACTION_KEY.add_to_cart.$PRODUCT_IMPRESSION_PRODUCTS")
                 .also {
                     assertNull(it)
                 }
@@ -79,7 +83,7 @@ class DataplanFilterImplTest {
             dataPoints.getValue(USER_ATTRIBUTES_KEY).also {
                 assertEquals(
                     it,
-                    hashSetOf("a third attribute", "my attribute", "my other attribute")
+                    hashSetOf("a third attribute", "my attribute", "my other attribute"),
                 )
             }
             dataPoints.getValue(USER_IDENTITIES_KEY).also {
@@ -99,12 +103,15 @@ class DataplanFilterImplTest {
 
     @Test
     fun testParseDataplan2() {
-        val dataplan = File("src/test/kotlin/com/mparticle/kits/sample_dataplan2.json")
-            .readText()
-            .toJSON()
-        val dataplanOptions = MParticleOptions.DataplanOptions.builder()
-            .dataplanVersion(dataplan)
-            .build()
+        val dataplan =
+            File("src/test/kotlin/com/mparticle/kits/sample_dataplan2.json")
+                .readText()
+                .toJSON()
+        val dataplanOptions =
+            MParticleOptions.DataplanOptions
+                .builder()
+                .dataplanVersion(dataplan)
+                .build()
         val dataplanFilter = DataplanFilterImpl(dataplanOptions!!)
         assertEquals(20, dataplanFilter.dataPoints.size)
         dataplanFilter.apply {
@@ -121,15 +128,16 @@ class DataplanFilterImplTest {
                         "attributeEmail",
                         "attributeNumEnum",
                         "attributeStringAlpha",
-                        "attributeBoolean"
+                        "attributeBoolean",
                     ),
-                    it
+                    it,
                 )
             }
             dataPoints.getValue("$PRODUCT_ACTION_KEY.add_to_cart.$PRODUCT_ACTION_PRODUCTS").also {
                 assertNull(it)
             }
-            dataPoints.getValue("$PRODUCT_ACTION_KEY.add_to_cart.$PRODUCT_IMPRESSION_PRODUCTS")
+            dataPoints
+                .getValue("$PRODUCT_ACTION_KEY.add_to_cart.$PRODUCT_IMPRESSION_PRODUCTS")
                 .also {
                     assertNull(it)
                 }
@@ -151,7 +159,7 @@ class DataplanFilterImplTest {
             dataPoints.getValue(USER_ATTRIBUTES_KEY).also {
                 assertEquals(
                     hashSetOf("my attribute", "my other attribute", "a third attribute"),
-                    it
+                    it,
                 )
             }
             dataPoints.getValue(USER_IDENTITIES_KEY).also { assertNull(it) }
@@ -194,9 +202,10 @@ class DataplanFilterImplTest {
             dataplanPoints = getRandomDataplanPoints()
             val datapoint = getRandomDataplanEventKey()
             dataplanPoints.remove(datapoint.toString())
-            val event = getRandomEvent(datapoint).apply {
-                customAttributes = randomAttributes()
-            }
+            val event =
+                getRandomEvent(datapoint).apply {
+                    customAttributes = randomAttributes()
+                }
 
             val dataplanFilter =
                 DataplanFilterImpl(dataplanPoints, true, Random.nextBoolean(), false, false)
@@ -211,9 +220,10 @@ class DataplanFilterImplTest {
         while (diversity.size != 0) {
             dataplanPoints = getRandomDataplanPoints()
             val datapoint = getRandomDataplanEventKey()
-            val event = getRandomEvent(datapoint).apply {
-                customAttributes = randomAttributes()
-            }
+            val event =
+                getRandomEvent(datapoint).apply {
+                    customAttributes = randomAttributes()
+                }
 
             dataplanPoints[datapoint.toString()] = null
 
@@ -231,9 +241,10 @@ class DataplanFilterImplTest {
             dataplanPoints = getRandomDataplanPoints()
             val datapoint = getRandomDataplanEventKey()
             dataplanPoints.remove(datapoint.toString())
-            val event = getRandomEvent(datapoint).apply {
-                customAttributes = randomAttributes()
-            }
+            val event =
+                getRandomEvent(datapoint).apply {
+                    customAttributes = randomAttributes()
+                }
 
             val dataplanFilter =
                 DataplanFilterImpl(dataplanPoints, false, Random.nextBoolean(), false, false)
@@ -249,16 +260,17 @@ class DataplanFilterImplTest {
             dataplanPoints = getRandomDataplanPoints()
             val datapoint = getRandomDataplanEventKey()
             val allowedAttributes = randomAttributes()
-            val event = getRandomEvent(datapoint).apply {
-                customAttributes = allowedAttributes
-            }
+            val event =
+                getRandomEvent(datapoint).apply {
+                    customAttributes = allowedAttributes
+                }
 
             dataplanPoints[datapoint.toString()] = allowedAttributes.keys.toHashSet()
             val dataplanFilter =
                 DataplanFilterImpl(dataplanPoints, true, Random.nextBoolean(), false, false)
             assertEquals(
                 allowedAttributes,
-                dataplanFilter.transformEventForEvent(event)?.customAttributeStrings
+                dataplanFilter.transformEventForEvent(event)?.customAttributeStrings,
             )
             diversity.remove(datapoint.type)
         }
@@ -271,9 +283,10 @@ class DataplanFilterImplTest {
             dataplanPoints = getRandomDataplanPoints()
             val datapoint = getRandomDataplanEventKey()
             val allowedAttributes = randomAttributes()
-            val event = getRandomEvent(datapoint).apply {
-                customAttributes = allowedAttributes
-            }
+            val event =
+                getRandomEvent(datapoint).apply {
+                    customAttributes = allowedAttributes
+                }
 
             val dataplanFilter =
                 DataplanFilterImpl(dataplanPoints, false, Random.nextBoolean(), false, false)
@@ -291,16 +304,17 @@ class DataplanFilterImplTest {
             dataplanPoints.remove(datapoint.toString())
             val allowedAttributes = randomAttributes()
             val blockedAttributes = randomAttributes()
-            val event = getRandomEvent(datapoint).apply {
-                customAttributes = allowedAttributes + blockedAttributes
-            }
+            val event =
+                getRandomEvent(datapoint).apply {
+                    customAttributes = allowedAttributes + blockedAttributes
+                }
 
             dataplanPoints[datapoint.toString()] = allowedAttributes.keys.toHashSet()
             val dataplanFilter =
                 DataplanFilterImpl(dataplanPoints, Random.Default.nextBoolean(), true, false, false)
             assertEquals(
                 allowedAttributes,
-                dataplanFilter.transformEventForEvent(event)?.customAttributeStrings
+                dataplanFilter.transformEventForEvent(event)?.customAttributeStrings,
             )
             diversity.remove(datapoint.type)
         }
@@ -321,118 +335,122 @@ class DataplanFilterImplTest {
         }
     }
 
-    private val types = setOf(
-        CUSTOM_EVENT_KEY,
-        PRODUCT_ACTION_KEY,
-        PROMOTION_ACTION_KEY,
-        PRODUCT_IMPRESSION_KEY,
-        SCREEN_EVENT_KEY
-    )
+    private val types =
+        setOf(
+            CUSTOM_EVENT_KEY,
+            PRODUCT_ACTION_KEY,
+            PROMOTION_ACTION_KEY,
+            PRODUCT_IMPRESSION_KEY,
+            SCREEN_EVENT_KEY,
+        )
 
-    fun getRandomEvent(datapoint: DataplanPoint): BaseEvent {
-        return when (datapoint.type) {
-            CUSTOM_EVENT_KEY -> MPEvent.Builder(
-                datapoint.name!!,
-                MParticle.EventType.values().first { it.getEventsApiName() == datapoint.eventType }
-            )
-                .build()
-            SCREEN_EVENT_KEY -> ScreenEventBuilder(datapoint.name!!).build()
-                .also { assertTrue(it.isScreenEvent) }
-            PRODUCT_ACTION_KEY -> CommerceEvent.Builder(
-                datapoint.name!!,
-                Product.Builder("a", "b", 1.0).build()
-            ).build()
+    fun getRandomEvent(datapoint: DataplanPoint): BaseEvent =
+        when (datapoint.type) {
+            CUSTOM_EVENT_KEY ->
+                MPEvent
+                    .Builder(
+                        datapoint.name!!,
+                        MParticle.EventType.values().first { it.getEventsApiName() == datapoint.eventType },
+                    ).build()
+            SCREEN_EVENT_KEY ->
+                ScreenEventBuilder(datapoint.name!!)
+                    .build()
+                    .also { assertTrue(it.isScreenEvent) }
+            PRODUCT_ACTION_KEY ->
+                CommerceEvent
+                    .Builder(
+                        datapoint.name!!,
+                        Product.Builder("a", "b", 1.0).build(),
+                    ).build()
             PROMOTION_ACTION_KEY -> CommerceEvent.Builder(datapoint.name!!, Promotion()).build()
-            PRODUCT_IMPRESSION_KEY -> CommerceEvent.Builder(
-                Impression(
-                    "impressionname",
-                    Product.Builder("a", "b", 1.0).build()
-                )
-            ).build()
+            PRODUCT_IMPRESSION_KEY ->
+                CommerceEvent
+                    .Builder(
+                        Impression(
+                            "impressionname",
+                            Product.Builder("a", "b", 1.0).build(),
+                        ),
+                    ).build()
             else -> throw IllegalArgumentException(datapoint.type + ": messed this implementation up :/")
         }
-    }
 
-    fun getRandomDataplanEventKey(): DataplanPoint {
-        return when (Random.Default.nextInt(0, 5)) {
-            0 -> DataplanPoint(
-                CUSTOM_EVENT_KEY,
-                randomString(5),
-                randomEventType().getEventsApiName()
-            )
+    fun getRandomDataplanEventKey(): DataplanPoint =
+        when (Random.Default.nextInt(0, 5)) {
+            0 ->
+                DataplanPoint(
+                    CUSTOM_EVENT_KEY,
+                    randomString(5),
+                    randomEventType().getEventsApiName(),
+                )
             1 -> DataplanPoint(SCREEN_EVENT_KEY, randomString(8))
             2 -> DataplanPoint(PRODUCT_ACTION_KEY, randomProductAction())
             3 -> DataplanPoint(PROMOTION_ACTION_KEY, randomPromotionAction())
             4 -> DataplanPoint(PRODUCT_IMPRESSION_KEY)
             else -> throw IllegalArgumentException("messed this implementation up :/")
         }
-    }
 
-    fun getRandomDataplanPoints(): MutableMap<String, HashSet<String>?> {
-        return (0..Random.Default.nextInt(0, 10))
+    fun getRandomDataplanPoints(): MutableMap<String, HashSet<String>?> =
+        (0..Random.Default.nextInt(0, 10))
             .associate {
                 getRandomDataplanEventKey().toString() to randomAttributes().keys.toHashSet()
-            }
-            .toMutableMap()
-    }
+            }.toMutableMap()
 
     val chars: List<Char> = ('a'..'z') + ('A'..'Z')
 
-    fun randomAttributes(): Map<String, String> {
-        return (0..Random.Default.nextInt(0, 5)).map {
-            randomString(4) to randomString(8)
-        }.toMap()
-    }
+    fun randomAttributes(): Map<String, String> =
+        (0..Random.Default.nextInt(0, 5))
+            .map {
+                randomString(4) to randomString(8)
+            }.toMap()
 
-    fun randomString(length: Int): String {
-        return (0 until length).map {
-            chars[Random.Default.nextInt(0, chars.size - 1)]
-        }.joinToString("")
-    }
+    fun randomString(length: Int): String =
+        (0 until length)
+            .map {
+                chars[Random.Default.nextInt(0, chars.size - 1)]
+            }.joinToString("")
 
-    fun randomEventType(): MParticle.EventType {
-        return MParticle.EventType.values()[
+    fun randomEventType(): MParticle.EventType =
+        MParticle.EventType.values()[
             Random.Default.nextInt(
                 0,
-                MParticle.EventType.values().size - 1
-            )
+                MParticle.EventType.values().size - 1,
+            ),
         ]
-    }
 
-    fun randomProductAction(): String {
-        return randomConstString(Product::class.java)
-    }
+    fun randomProductAction(): String = randomConstString(Product::class.java)
 
-    fun randomPromotionAction(): String {
-        return randomConstString(Promotion::class.java)
-    }
+    fun randomPromotionAction(): String = randomConstString(Promotion::class.java)
 
-    fun randomConstString(clazz: Class<*>): String {
-        return clazz.fields
+    fun randomConstString(clazz: Class<*>): String =
+        clazz.fields
             .filter { Modifier.isPublic(it.modifiers) && Modifier.isStatic(it.modifiers) }
             .filter { it.name.all { it.isUpperCase() } }
             .filter { it.type == String::class.java }
             .let {
                 it[Random.Default.nextInt(0, it.size - 1)].get(null) as String
             }
-    }
 
     private fun String.toJSON() = JSONObject(this)
 
-    class ScreenEvent(event: MPEvent) : MPEvent(event) {
+    class ScreenEvent(
+        event: MPEvent,
+    ) : MPEvent(event) {
         init {
             isScreenEvent = true
         }
     }
 
-    class ScreenEventBuilder(name: String) : MPEvent.Builder(name, MParticle.EventType.Other) {
-        override fun build(): MPEvent {
-            return ScreenEvent(super.build())
-        }
+    class ScreenEventBuilder(
+        name: String,
+    ) : MPEvent.Builder(name, MParticle.EventType.Other) {
+        override fun build(): MPEvent = ScreenEvent(super.build())
     }
 
-    class DataplanPoint(val type: String, val name: String? = null, val eventType: String? = null) {
-        override fun toString() =
-            "$type${if (name != null) ".$name" else ""}${if (eventType != null) ".$eventType" else ""}"
+    class DataplanPoint(
+        val type: String,
+        val name: String? = null,
+        val eventType: String? = null,
+    ) {
+        override fun toString() = "$type${if (name != null) ".$name" else ""}${if (eventType != null) ".$eventType" else ""}"
     }
 }

@@ -8,10 +8,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-internal class UserAudiencesRetriever(apiClient: MParticleApiClient) {
-
+internal class UserAudiencesRetriever(
+    apiClient: MParticleApiClient,
+) {
     private val mApiClient: MParticleApiClient = apiClient
-    fun fetchAudiences(mpId: Long, featureFlagEnabled: Boolean): AudienceTask<AudienceResponse> {
+
+    fun fetchAudiences(
+        mpId: Long,
+        featureFlagEnabled: Boolean,
+    ): AudienceTask<AudienceResponse> {
         val task = BaseAudienceTask()
         if (featureFlagEnabled) {
             CoroutineScope(Dispatchers.IO).launch {
@@ -21,8 +26,8 @@ internal class UserAudiencesRetriever(apiClient: MParticleApiClient) {
             task.setFailed(
                 AudienceResponse(
                     IdentityApi.UNKNOWN_ERROR,
-                    "Audience API call forbidden: Audience API is not enabled for your account"
-                )
+                    "Audience API call forbidden: Audience API is not enabled for your account",
+                ),
             )
         }
         return task

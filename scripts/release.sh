@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-: ${1?"Version missing - usage: $0 x.y.z"}  # nosemgrep
+: "${1?"Version missing - usage: $0 x.y.z"}" # nosemgrep
 
 #update build.gradle
 sed -i '.bak' "s/version = '.*-SNAPSHOT/version = '$1-SNAPSHOT/g" build.gradle

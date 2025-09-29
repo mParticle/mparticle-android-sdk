@@ -4,7 +4,10 @@ object AccessUtils {
     val defaultNetworkOptions: NetworkOptions
         get() = NetworkOptionsManager.defaultNetworkOptions()
 
-    fun equals(networkOptions1: NetworkOptions, networkOptions2: NetworkOptions): Boolean {
+    fun equals(
+        networkOptions1: NetworkOptions,
+        networkOptions2: NetworkOptions,
+    ): Boolean {
         if (networkOptions1 === networkOptions2) {
             return true
         }
@@ -20,7 +23,10 @@ object AccessUtils {
         return true
     }
 
-    fun equals(domainMapping1: DomainMapping, domainMapping2: DomainMapping): Boolean {
+    fun equals(
+        domainMapping1: DomainMapping,
+        domainMapping2: DomainMapping,
+    ): Boolean {
         if (domainMapping1 === domainMapping2) {
             return true
         }
@@ -34,7 +40,10 @@ object AccessUtils {
         return true
     }
 
-    fun equals(certificate1: Certificate, certificate2: Certificate): Boolean {
+    fun equals(
+        certificate1: Certificate,
+        certificate2: Certificate,
+    ): Boolean {
         if (certificate1 == certificate2) {
             return true
         }

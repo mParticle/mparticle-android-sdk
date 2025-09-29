@@ -38,7 +38,8 @@ object Constants {
     const val LIMIT_MAX_MESSAGE_SIZE: Int = 100 * 1024
     const val LIMIT_MAX_UPLOAD_SIZE: Int = 2 * LIMIT_MAX_MESSAGE_SIZE
 
-    const val GODADDY_CLASS_2_ROOT_CRT: String = "-----BEGIN CERTIFICATE-----\n" +
+    const val GODADDY_CLASS_2_ROOT_CRT: String =
+        "-----BEGIN CERTIFICATE-----\n" +
             "MIIEADCCAuigAwIBAgIBADANBgkqhkiG9w0BAQUFADBjMQswCQYDVQQGEwJVUzEh\n" +
             "MB8GA1UEChMYVGhlIEdvIERhZGR5IEdyb3VwLCBJbmMuMTEwLwYDVQQLEyhHbyBE\n" +
             "YWRkeSBDbGFzcyAyIENlcnRpZmljYXRpb24gQXV0aG9yaXR5MB4XDTA0MDYyOTE3\n" +
@@ -63,7 +64,8 @@ object Constants {
             "ReYNnyicsbkqWletNw+vHX/bvZ8=\n" +
             "-----END CERTIFICATE-----"
 
-    const val GODADDY_ROOT_G2_CRT: String = "-----BEGIN CERTIFICATE-----\n" +
+    const val GODADDY_ROOT_G2_CRT: String =
+        "-----BEGIN CERTIFICATE-----\n" +
             "MIIDxTCCAq2gAwIBAgIBADANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UEBhMCVVMx\n" +
             "EDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAYBgNVBAoT\n" +
             "EUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290IENlcnRp\n" +
@@ -87,7 +89,8 @@ object Constants {
             "4uJEvlz36hz1\n" +
             "-----END CERTIFICATE-----"
 
-    const val LETS_ENCRYPTS_ROOT_X1_CRT: String = "-----BEGIN CERTIFICATE-----\n" +
+    const val LETS_ENCRYPTS_ROOT_X1_CRT: String =
+        "-----BEGIN CERTIFICATE-----\n" +
             "MIIFazCCA1OgAwIBAgIRAIIQz7DSQONZRGPgu2OCiwAwDQYJKoZIhvcNAQELBQAw\n" +
             "TzELMAkGA1UEBhMCVVMxKTAnBgNVBAoTIEludGVybmV0IFNlY3VyaXR5IFJlc2Vh\n" +
             "cmNoIEdyb3VwMRUwEwYDVQQDEwxJU1JHIFJvb3QgWDEwHhcNMTUwNjA0MTEwNDM4\n" +
@@ -119,7 +122,8 @@ object Constants {
             "emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=\n" +
             "-----END CERTIFICATE-----"
 
-    const val LETS_ENCRYPTS_ROOT_X2_SELF_SIGN_CRT: String = "-----BEGIN CERTIFICATE-----\n" +
+    const val LETS_ENCRYPTS_ROOT_X2_SELF_SIGN_CRT: String =
+        "-----BEGIN CERTIFICATE-----\n" +
             "MIICGzCCAaGgAwIBAgIQQdKd0XLq7qeAwSxs6S+HUjAKBggqhkjOPQQDAzBPMQsw\n" +
             "CQYDVQQGEwJVUzEpMCcGA1UEChMgSW50ZXJuZXQgU2VjdXJpdHkgUmVzZWFyY2gg\n" +
             "R3JvdXAxFTATBgNVBAMTDElTUkcgUm9vdCBYMjAeFw0yMDA5MDQwMDAwMDBaFw00\n" +
@@ -134,7 +138,8 @@ object Constants {
             "/q4AaOeMSQ+2b1tbFfLn\n" +
             "-----END CERTIFICATE-----"
 
-    const val LETS_ENCRYPTS_ROOT_X2_CROSS_SIGN_CRT: String = "-----BEGIN CERTIFICATE-----\n" +
+    const val LETS_ENCRYPTS_ROOT_X2_CROSS_SIGN_CRT: String =
+        "-----BEGIN CERTIFICATE-----\n" +
             "MIIEYDCCAkigAwIBAgIQB55JKIY3b9QISMI/xjHkYzANBgkqhkiG9w0BAQsFADBP\n" +
             "MQswCQYDVQQGEwJVUzEpMCcGA1UEChMgSW50ZXJuZXQgU2VjdXJpdHkgUmVzZWFy\n" +
             "Y2ggR3JvdXAxFTATBgNVBAMTDElTUkcgUm9vdCBYMTAeFw0yMDA5MDQwMDAwMDBa\n" +
@@ -161,11 +166,11 @@ object Constants {
             "EcrmzTFYeYXmchynn9NM0GbQp7s=\n" +
             "-----END CERTIFICATE-----"
 
-    //wait 5 seconds to trigger an immediate upload in the case where multiple trigger-messages are logged
-    //in quick succession.
+    // wait 5 seconds to trigger an immediate upload in the case where multiple trigger-messages are logged
+    // in quick succession.
     const val TRIGGER_MESSAGE_DELAY: Long = 5000
 
-    //special session id for messages logged without a session
+    // special session id for messages logged without a session
     const val NO_SESSION_ID: String = "NO-SESSION"
     const val REFERRER: String = "referrer"
     const val GOOGLE_GCM: String = "google"
@@ -329,7 +334,7 @@ object Constants {
             const val STATE_INFO_MEMORY_LOW: String = "sml"
             const val STATE_INFO_MEMORY_THRESHOLD: String = "smt"
 
-            //app init message special keys
+            // app init message special keys
             const val APP_INIT_CRASHED: String = "sc"
             const val APP_INIT_FIRST_RUN: String = "ifr"
             const val APP_INIT_UPGRADE: String = "iu"
@@ -368,7 +373,7 @@ object Constants {
             const val PUSH_REGISTER_FLAG: String = "r"
             const val APP_STATE: String = "as"
 
-            //state transition
+            // state transition
             const val STATE_TRANSITION_TYPE: String = "t"
             const val CURRENT_ACTIVITY: String = "cn"
             const val PAYLOAD: String = "pay"
@@ -378,7 +383,6 @@ object Constants {
             const val PUSH_ACTION_NAME: String = "an"
             const val CONTENT_ID: String = "content_id"
 
-
             const val ST_LAUNCH_REFERRER: String = "lr"
             const val ST_LAUNCH_PARAMS: String = "lpr"
             const val ST_LAUNCH_SOURCE_PACKAGE: String = "srp"
@@ -386,14 +390,14 @@ object Constants {
             const val ST_LAUNCH_TIME_SUSPENDED: String = "tls"
             const val ST_INTERRUPTIONS: String = "nsi"
 
-            //screen view
+            // screen view
             const val SCREEN_STARTED: String = "t"
             const val BREADCRUMB_SESSION_COUNTER: String = "sn"
             const val BREADCRUMB_LABEL: String = "l"
             const val PROVIDER_PERSISTENCE: String = "cms"
             const val RELEASE_VERSION: String = "vr"
 
-            //network performance monitoring
+            // network performance monitoring
             const val NPE_METHOD: String = "v"
             const val NPE_URL: String = "url"
             const val NPE_LENGTH: String = "te"
@@ -403,16 +407,16 @@ object Constants {
             const val CONFIG_SESSION_TIMEOUT: String = "stl"
             const val CONFIG_UPLOAD_INTERVAL: String = "uitl"
 
-            //events
+            // events
             const val EVENT_COUNTER: String = "en"
             const val EVENT_CATEGORY: String = "\$Category"
 
-            //session start
+            // session start
             const val PREVIOUS_SESSION_ID: String = "pid"
             const val PREVIOUS_SESSION_START: String = "pss"
 
             // https://go.mparticle.com/work/SQDSDKS-6814
-            //sandbox mode is deprecated as of > 1.6.3
+            // sandbox mode is deprecated as of > 1.6.3
             const val SANDBOX: String = "dbg"
             const val ENVIRONMENT: String = "env"
             const val RESERVED_KEY_LTV: String = "\$Amount"
@@ -423,7 +427,7 @@ object Constants {
             const val PUSH_CAMPAIGN_HISTORY_TIMESTAMP: String = "ts"
             const val STATE_INFO_NETWORK_TYPE: String = "ant"
 
-            //identity
+            // identity
             const val MPID: String = "mpid"
             const val EVENT_FLAGS: String = "flags"
             const val INTEGRATION_ATTRIBUTES: String = "ia"
@@ -437,7 +441,7 @@ object Constants {
             const val DEVICE_IS_IN_DST: String = "idst"
             const val DEVICE_APPLICATION_STAMP: String = "das"
 
-            //consent state
+            // consent state
             const val CONSENT_STATE: String = "con"
             const val CONSENT_STATE_GDPR: String = "gdpr"
             const val CONSENT_STATE_CCPA: String = "ccpa"
@@ -448,7 +452,7 @@ object Constants {
             const val CONSENT_STATE_HARDWARE_ID: String = "h"
             const val CCPA_CONSENT_KEY: String = "data_sale_opt_out"
 
-            //alias request
+            // alias request
             const val SOURCE_MPID: String = "source_mpid"
             const val DESTINATION_MPID: String = "destination_mpid"
             const val START_TIME: String = "start_unixtime_ms"
@@ -461,10 +465,10 @@ object Constants {
             const val DATA: String = "data"
             const val ALIAS_REQUEST_TYPE: String = "alias"
 
-            //batch was mutated
+            // batch was mutated
             const val MODIFIED_BATCH: String = "mb"
 
-            //Sandbox mode for Rokt
+            // Sandbox mode for Rokt
             const val SANDBOX_MODE_ROKT: String = "sandbox"
         }
     }

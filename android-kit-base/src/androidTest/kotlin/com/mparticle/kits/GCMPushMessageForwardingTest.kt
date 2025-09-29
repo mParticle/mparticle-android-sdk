@@ -12,24 +12,25 @@ import org.junit.Assert.assertNotNull
 import org.junit.Test
 
 class GCMPushMessageForwardingTest : BaseKitOptionsTest() {
-
     @Test
     fun testPushForwardedAfterSDKStarted() {
         var receivedIntent: Intent? = null
 
-        MParticleOptions.builder(mContext)
+        MParticleOptions
+            .builder(mContext)
             .credentials("key", "secret")
             .configuration(KitOptions().addKit(1, PushListenerTestKit::class.java))
             .let {
                 startMParticle(it)
             }
 
-        val intent = Intent()
-            .apply {
-                action = "com.google.android.c2dm.intent.RECEIVE"
-                data = Uri.EMPTY
-                putExtras(Bundle())
-            }
+        val intent =
+            Intent()
+                .apply {
+                    action = "com.google.android.c2dm.intent.RECEIVE"
+                    data = Uri.EMPTY
+                    putExtras(Bundle())
+                }
         (MParticle.getInstance()?.getKitInstance(1) as PushListenerTestKit).onPushMessageReceived =
             { context, intent ->
                 receivedIntent = intent

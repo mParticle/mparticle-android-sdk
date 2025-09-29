@@ -8,7 +8,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class RoktOptionsTest {
-
     @Test
     fun testDefaultConstructor_shouldCreateEmptyOptions() {
         val roktOptions = RoktOptions()
@@ -19,10 +18,11 @@ class RoktOptionsTest {
 
     @Test
     fun testConstructorWithFontFilePathMap_shouldSetCorrectValues() {
-        val fontMap = mapOf(
-            "font1" to "/path/to/font1.ttf",
-            "font2" to "/path/to/font2.otf"
-        )
+        val fontMap =
+            mapOf(
+                "font1" to "/path/to/font1.ttf",
+                "font2" to "/path/to/font2.otf",
+            )
 
         val roktOptions = RoktOptions(fontFilePathMap = fontMap)
 
@@ -35,11 +35,12 @@ class RoktOptionsTest {
 
     @Test
     fun testConstructorWithFontPostScriptNames_shouldSetCorrectValues() {
-        val fontNames = setOf(
-            "Arial-Bold",
-            "Helvetica-Light",
-            "CustomFont-Regular"
-        )
+        val fontNames =
+            setOf(
+                "Arial-Bold",
+                "Helvetica-Light",
+                "CustomFont-Regular",
+            )
 
         val roktOptions = RoktOptions(fontPostScriptNames = fontNames)
 
@@ -56,10 +57,11 @@ class RoktOptionsTest {
         val fontMap = mapOf("font1" to "/path/to/font1.ttf")
         val fontNames = setOf("Arial-Bold")
 
-        val roktOptions = RoktOptions(
-            fontFilePathMap = fontMap,
-            fontPostScriptNames = fontNames
-        )
+        val roktOptions =
+            RoktOptions(
+                fontFilePathMap = fontMap,
+                fontPostScriptNames = fontNames,
+            )
 
         assertEquals("fontFilePathMap should match", fontMap, roktOptions.fontFilePathMap)
         assertEquals("fontPostScriptNames should match", fontNames, roktOptions.fontPostScriptNames)
@@ -69,10 +71,11 @@ class RoktOptionsTest {
 
     @Test
     fun testConstructorWithEmptyCollections_shouldCreateEmptyOptions() {
-        val roktOptions = RoktOptions(
-            fontFilePathMap = emptyMap(),
-            fontPostScriptNames = emptySet()
-        )
+        val roktOptions =
+            RoktOptions(
+                fontFilePathMap = emptyMap(),
+                fontPostScriptNames = emptySet(),
+            )
 
         assertTrue("fontFilePathMap should be empty", roktOptions.fontFilePathMap.isEmpty())
         assertTrue("fontPostScriptNames should be empty", roktOptions.fontPostScriptNames.isEmpty())
@@ -124,10 +127,11 @@ class RoktOptionsTest {
         val largeFontMap = (1..100).associate { "font$it" to "/path/to/font$it.ttf" }
         val largeFontNames = (1..100).map { "Font-$it" }.toSet()
 
-        val roktOptions = RoktOptions(
-            fontFilePathMap = largeFontMap,
-            fontPostScriptNames = largeFontNames
-        )
+        val roktOptions =
+            RoktOptions(
+                fontFilePathMap = largeFontMap,
+                fontPostScriptNames = largeFontNames,
+            )
 
         assertEquals("Should have 100 font files", 100, roktOptions.fontFilePathMap.size)
         assertEquals("Should have 100 font names", 100, roktOptions.fontPostScriptNames.size)
@@ -153,30 +157,36 @@ class RoktOptionsTest {
 
     @Test
     fun testSpecialCharactersInPaths_shouldHandleCorrectly() {
-        val fontMap = mapOf(
-            "font with spaces" to "/path with spaces/font file.ttf",
-            "font-with-dashes" to "/path-with-dashes/font-file.ttf",
-            "font_with_underscores" to "/path_with_underscores/font_file.ttf",
-            "fontWithUnicode" to "/path/with/unicode/字体.ttf"
-        )
+        val fontMap =
+            mapOf(
+                "font with spaces" to "/path with spaces/font file.ttf",
+                "font-with-dashes" to "/path-with-dashes/font-file.ttf",
+                "font_with_underscores" to "/path_with_underscores/font_file.ttf",
+                "fontWithUnicode" to "/path/with/unicode/字体.ttf",
+            )
 
         val roktOptions = RoktOptions(fontFilePathMap = fontMap)
 
         assertEquals("Should handle spaces", "/path with spaces/font file.ttf", roktOptions.fontFilePathMap["font with spaces"])
         assertEquals("Should handle dashes", "/path-with-dashes/font-file.ttf", roktOptions.fontFilePathMap["font-with-dashes"])
-        assertEquals("Should handle underscores", "/path_with_underscores/font_file.ttf", roktOptions.fontFilePathMap["font_with_underscores"])
+        assertEquals(
+            "Should handle underscores",
+            "/path_with_underscores/font_file.ttf",
+            roktOptions.fontFilePathMap["font_with_underscores"],
+        )
         assertEquals("Should handle unicode", "/path/with/unicode/字体.ttf", roktOptions.fontFilePathMap["fontWithUnicode"])
     }
 
     @Test
     fun testSpecialCharactersInFontNames_shouldHandleCorrectly() {
-        val fontNames = setOf(
-            "Arial-Bold",
-            "Helvetica_Light",
-            "Font With Spaces",
-            "Font.With.Dots",
-            "字体名称" // Unicode font name
-        )
+        val fontNames =
+            setOf(
+                "Arial-Bold",
+                "Helvetica_Light",
+                "Font With Spaces",
+                "Font.With.Dots",
+                "字体名称", // Unicode font name
+            )
 
         val roktOptions = RoktOptions(fontPostScriptNames = fontNames)
 

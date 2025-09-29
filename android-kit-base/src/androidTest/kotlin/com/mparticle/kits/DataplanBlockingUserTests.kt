@@ -32,13 +32,14 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
 
     @Before
     fun beforeTests() {
-        MParticleOptions.builder(mContext)
+        MParticleOptions
+            .builder(mContext)
             .configuration(
                 KitOptions {
                     addKit(-1, AttributeListenerTestKit::class.java)
                     addKit(-2, IdentityListenerTestKit::class.java)
                     addKit(-3, UserAttributeListenerTestKit::class.java)
-                }
+                },
             ).let {
                 startMParticle(it)
             }
@@ -68,8 +69,8 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
                 Random.nextBoolean(),
                 Random.nextBoolean(),
                 true,
-                Random.nextBoolean()
-            )
+                Random.nextBoolean(),
+            ),
         )
 
         userAttributeListenerKitKit.onSetUserAttribute = { key, _, _ ->
@@ -80,7 +81,11 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
             assertTrue(allowedAttributes.containsKey(key))
             assertFalse(blockedAttributes.containsKey(key))
         }
-        MParticle.getInstance()?.Identity()?.currentUser?.userAttributes =
+        MParticle
+            .getInstance()
+            ?.Identity()
+            ?.currentUser
+            ?.userAttributes =
             allowedAttributes + blockedAttributes
         AccessUtils.awaitMessageHandler()
 
@@ -90,7 +95,11 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         // sanity check to make sure the non-filtered User has the blocked identities
         assertEquals(
             allowedAttributes + blockedAttributes,
-            MParticle.getInstance()?.Identity()?.currentUser?.userAttributes
+            MParticle
+                .getInstance()
+                ?.Identity()
+                ?.currentUser
+                ?.userAttributes,
         )
     }
 
@@ -108,8 +117,8 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
                 Random.nextBoolean(),
                 Random.nextBoolean(),
                 blockUserAttributes = true,
-                blockUserIdentities = false
-            )
+                blockUserIdentities = false,
+            ),
         )
 
         kitIntegrationTestKits.forEach { kit ->
@@ -119,7 +128,11 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
             }
         }
         (allowedAttributes + blockedAttributes).entries.forEach {
-            MParticle.getInstance()?.Identity()?.currentUser?.setUserAttribute(it.key, it.value)
+            MParticle
+                .getInstance()
+                ?.Identity()
+                ?.currentUser
+                ?.setUserAttribute(it.key, it.value)
         }
         AccessUtils.awaitMessageHandler()
 
@@ -145,10 +158,18 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
             count++
         }
         (allowedAttributes + blockedAttributes).keys.forEach {
-            MParticle.getInstance()?.Identity()?.currentUser?.removeUserAttribute(it)
+            MParticle
+                .getInstance()
+                ?.Identity()
+                ?.currentUser
+                ?.removeUserAttribute(it)
         }
 
-        MParticle.getInstance()?.Identity()?.currentUser?.userAttributes = mapOf()
+        MParticle
+            .getInstance()
+            ?.Identity()
+            ?.currentUser
+            ?.userAttributes = mapOf()
         AccessUtils.awaitMessageHandler()
         assertEquals(count, allowedAttributes.size * 4)
 
@@ -156,7 +177,15 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
             assertEquals(0, it.allUserAttributes.size)
         }
         // sanity check to make sure the non-filtered User has the blocked identities
-        assertEquals(0, MParticle.getInstance()?.Identity()?.currentUser?.userAttributes?.size)
+        assertEquals(
+            0,
+            MParticle
+                .getInstance()
+                ?.Identity()
+                ?.currentUser
+                ?.userAttributes
+                ?.size,
+        )
     }
 
     @Test
@@ -166,8 +195,11 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
 
         val datapoints = getRandomDataplanPoints()
         val allowedAttributes = randomAttributes().map { it.key to listOf(it.value) }.toMap()
-        val blockedAttributes = randomAttributes().map { it.key to listOf(it.value) }.toMap()
-            .filterKeys { !allowedAttributes.containsKey(it) }
+        val blockedAttributes =
+            randomAttributes()
+                .map { it.key to listOf(it.value) }
+                .toMap()
+                .filterKeys { !allowedAttributes.containsKey(it) }
         assertTrue(blockedAttributes.isNotEmpty())
 
         datapoints[DataplanFilterImpl.USER_ATTRIBUTES_KEY] = allowedAttributes.keys.toHashSet()
@@ -177,8 +209,8 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
                 Random.nextBoolean(),
                 Random.nextBoolean(),
                 true,
-                Random.nextBoolean()
-            )
+                Random.nextBoolean(),
+            ),
         )
 
         var count = 0
@@ -199,7 +231,11 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
             assertFalse(blockedAttributes.containsKey(key))
             count++
         }
-        MParticle.getInstance()?.Identity()?.currentUser?.userAttributes =
+        MParticle
+            .getInstance()
+            ?.Identity()
+            ?.currentUser
+            ?.userAttributes =
             allowedAttributes + blockedAttributes
         AccessUtils.awaitMessageHandler()
 
@@ -211,7 +247,11 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         // sanity check to make sure the non-filtered User has the blocked attributes
         assertEquals(
             allowedAttributes + blockedAttributes,
-            MParticle.getInstance()?.Identity()?.currentUser?.userAttributes
+            MParticle
+                .getInstance()
+                ?.Identity()
+                ?.currentUser
+                ?.userAttributes,
         )
     }
 
@@ -229,14 +269,15 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
                 Random.nextBoolean(),
                 Random.nextBoolean(),
                 Random.nextBoolean(),
-                true
-            )
+                true,
+            ),
         )
 
         MParticle.getInstance()?.Identity()?.login(
-            IdentityApiRequest.withEmptyUser()
+            IdentityApiRequest
+                .withEmptyUser()
                 .userIdentities(blockIdentities + allowedIdentities)
-                .build()
+                .build(),
         )
         val latch = MPLatch(1)
         kitIntegrationTestKits.forEach { kit ->
@@ -256,7 +297,11 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         // sanity check to make sure the non-filtered User has the blocked identities
         assertEquals(
             allowedIdentities + blockIdentities,
-            MParticle.getInstance()?.Identity()?.currentUser?.userIdentities
+            MParticle
+                .getInstance()
+                ?.Identity()
+                ?.currentUser
+                ?.userIdentities,
         )
     }
 
@@ -293,32 +338,32 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
 //        assertEquals(allowedIdentities + blockedIdentities, MParticle.getInstance()?.Identity()?.currentUser?.userIdentities)
 //    }
 
-    private fun getRandomDataplanEventKey(): DataplanFilterImpl.DataPoint {
-        return when (Random.Default.nextInt(0, 5)) {
-            0 -> DataplanFilterImpl.DataPoint(
-                DataplanFilterImpl.CUSTOM_EVENT_KEY,
-                randomString(5),
-                randomEventType().ordinal.toString()
-            )
+    private fun getRandomDataplanEventKey(): DataplanFilterImpl.DataPoint =
+        when (Random.Default.nextInt(0, 5)) {
+            0 ->
+                DataplanFilterImpl.DataPoint(
+                    DataplanFilterImpl.CUSTOM_EVENT_KEY,
+                    randomString(5),
+                    randomEventType().ordinal.toString(),
+                )
             1 -> DataplanFilterImpl.DataPoint(DataplanFilterImpl.SCREEN_EVENT_KEY, randomString(8))
-            2 -> DataplanFilterImpl.DataPoint(
-                DataplanFilterImpl.PRODUCT_ACTION_KEY,
-                randomProductAction()
-            )
-            3 -> DataplanFilterImpl.DataPoint(
-                DataplanFilterImpl.PROMOTION_ACTION_KEY,
-                randomPromotionAction()
-            )
+            2 ->
+                DataplanFilterImpl.DataPoint(
+                    DataplanFilterImpl.PRODUCT_ACTION_KEY,
+                    randomProductAction(),
+                )
+            3 ->
+                DataplanFilterImpl.DataPoint(
+                    DataplanFilterImpl.PROMOTION_ACTION_KEY,
+                    randomPromotionAction(),
+                )
             4 -> DataplanFilterImpl.DataPoint(DataplanFilterImpl.PRODUCT_IMPRESSION_KEY)
             else -> throw IllegalArgumentException("messed this implementation up :/")
         }
-    }
 
-    private fun getRandomDataplanPoints(): MutableMap<String, HashSet<String>> {
-        return (0..Random.Default.nextInt(0, 10))
+    private fun getRandomDataplanPoints(): MutableMap<String, HashSet<String>> =
+        (0..Random.Default.nextInt(0, 10))
             .associate {
                 getRandomDataplanEventKey().toString() to randomAttributes().keys.toHashSet()
-            }
-            .toMutableMap()
-    }
+            }.toMutableMap()
 }

@@ -26,56 +26,89 @@ class ConfigManagerInstrumentedTest : BaseAbstractTest() {
         val configManager = MParticle.getInstance()?.Internal()?.configManager
         TestCase.assertEquals(
             mStartingMpid.toLong(),
-            MParticle.getInstance()
-                ?.Identity()?.currentUser?.id
+            MParticle
+                .getInstance()
+                ?.Identity()
+                ?.currentUser
+                ?.id,
         )
         TestCase.assertEquals(mStartingMpid.toLong(), configManager?.mpid)
         configManager?.setMpid(mpid1, ran.nextBoolean())
         TestCase.assertEquals(
             mpid1,
-            MParticle.getInstance()
-                ?.Identity()?.currentUser?.id
+            MParticle
+                .getInstance()
+                ?.Identity()
+                ?.currentUser
+                ?.id,
         )
-        val newIsLoggedIn = !MParticle.getInstance()
-            ?.Identity()?.currentUser?.isLoggedIn!!
+        val newIsLoggedIn =
+            !MParticle
+                .getInstance()
+                ?.Identity()
+                ?.currentUser
+                ?.isLoggedIn!!
         configManager?.setMpid(mpid1, newIsLoggedIn)
         TestCase.assertEquals(
             mpid1,
-            MParticle.getInstance()
-                ?.Identity()?.currentUser?.id
+            MParticle
+                .getInstance()
+                ?.Identity()
+                ?.currentUser
+                ?.id,
         )
         TestCase.assertEquals(
             newIsLoggedIn,
-            MParticle.getInstance()
-                ?.Identity()?.currentUser?.isLoggedIn
+            MParticle
+                .getInstance()
+                ?.Identity()
+                ?.currentUser
+                ?.isLoggedIn,
         )
         configManager?.setMpid(mpid2, false)
         TestCase.assertEquals(
             mpid2,
-            MParticle.getInstance()
-                ?.Identity()?.currentUser?.id
+            MParticle
+                .getInstance()
+                ?.Identity()
+                ?.currentUser
+                ?.id,
         )
         MParticle.getInstance()?.Identity()?.currentUser?.isLoggedIn?.let {
             TestCase.assertFalse(
-                it
+                it,
             )
         }
         configManager?.setMpid(mpid2, true)
         TestCase.assertEquals(
             mpid2,
-            MParticle.getInstance()
-                ?.Identity()?.currentUser?.id
+            MParticle
+                .getInstance()
+                ?.Identity()
+                ?.currentUser
+                ?.id,
         )
-        MParticle.getInstance()
-            ?.Identity()?.currentUser?.isLoggedIn?.let { TestCase.assertTrue(it) }
+        MParticle
+            .getInstance()
+            ?.Identity()
+            ?.currentUser
+            ?.isLoggedIn
+            ?.let { TestCase.assertTrue(it) }
         configManager?.setMpid(mpid3, true)
         TestCase.assertEquals(
             mpid3,
-            MParticle.getInstance()
-                ?.Identity()?.currentUser?.id
+            MParticle
+                .getInstance()
+                ?.Identity()
+                ?.currentUser
+                ?.id,
         )
-        MParticle.getInstance()
-            ?.Identity()?.currentUser?.isLoggedIn?.let { TestCase.assertTrue(it) }
+        MParticle
+            .getInstance()
+            ?.Identity()
+            ?.currentUser
+            ?.isLoggedIn
+            ?.let { TestCase.assertTrue(it) }
     }
 
     @Test
@@ -83,24 +116,34 @@ class ConfigManagerInstrumentedTest : BaseAbstractTest() {
     fun testConfigResponseParsing() {
         val token = mRandomUtils.getAlphaNumericString(20)
         val aliasMaxWindow = ran.nextInt()
-        val config = JSONObject()
-            .put("wst", token)
-            .put(ConfigManager.ALIAS_MAX_WINDOW, aliasMaxWindow)
+        val config =
+            JSONObject()
+                .put("wst", token)
+                .put(ConfigManager.ALIAS_MAX_WINDOW, aliasMaxWindow)
         mServer.setupConfigResponse(config.toString())
         var configLoadedListener = BothConfigsLoadedListener()
         var latch = configLoadedListener.latch
         startMParticle(
-            MParticleOptions.builder(mContext)
-                .configuration(AddConfigListener(configLoadedListener))
+            MParticleOptions
+                .builder(mContext)
+                .configuration(AddConfigListener(configLoadedListener)),
         )
         latch.await()
         TestCase.assertEquals(
             token,
-            MParticle.getInstance()?.Internal()?.configManager?.workspaceToken
+            MParticle
+                .getInstance()
+                ?.Internal()
+                ?.configManager
+                ?.workspaceToken,
         )
         TestCase.assertEquals(
             aliasMaxWindow,
-            MParticle.getInstance()?.Internal()?.configManager?.aliasMaxWindow
+            MParticle
+                .getInstance()
+                ?.Internal()
+                ?.configManager
+                ?.aliasMaxWindow,
         )
 
         // test set defaults when fields are not present
@@ -109,17 +152,26 @@ class ConfigManagerInstrumentedTest : BaseAbstractTest() {
         configLoadedListener = BothConfigsLoadedListener()
         latch = configLoadedListener.latch
         startMParticle(
-            MParticleOptions.builder(mContext)
-                .configuration(AddConfigListener(configLoadedListener))
+            MParticleOptions
+                .builder(mContext)
+                .configuration(AddConfigListener(configLoadedListener)),
         )
         latch.await()
         TestCase.assertEquals(
             "",
-            MParticle.getInstance()?.Internal()?.configManager?.workspaceToken
+            MParticle
+                .getInstance()
+                ?.Internal()
+                ?.configManager
+                ?.workspaceToken,
         )
         TestCase.assertEquals(
             90,
-            MParticle.getInstance()?.Internal()?.configManager?.aliasMaxWindow
+            MParticle
+                .getInstance()
+                ?.Internal()
+                ?.configManager
+                ?.aliasMaxWindow,
         )
     }
 
@@ -131,40 +183,44 @@ class ConfigManagerInstrumentedTest : BaseAbstractTest() {
         val loadedKitLocal = AndroidUtils.Mutable(false)
         setCachedConfig(simpleConfigWithKits)
         mServer.setupConfigDeferred()
-        val configLoadedListener = ConfigLoadedListener { configType, isNew ->
-            if (!isNew) {
-                when (configType) {
-                    ConfigType.CORE -> {
-                        if (loadedCoreLocal.value) {
-                            Assert.fail("core config already loaded")
-                        } else {
-                            Logger.error("LOADED CACHED Core")
-                            loadedCoreLocal.value = true
+        val configLoadedListener =
+            ConfigLoadedListener { configType, isNew ->
+                if (!isNew) {
+                    when (configType) {
+                        ConfigType.CORE -> {
+                            if (loadedCoreLocal.value) {
+                                Assert.fail("core config already loaded")
+                            } else {
+                                Logger.error("LOADED CACHED Core")
+                                loadedCoreLocal.value = true
+                            }
+                            if (loadedKitLocal.value) {
+                                Assert.fail("kit config already loaded")
+                            } else {
+                                Logger.error("LOADED CACHED Kit")
+                                loadedKitLocal.value = true
+                            }
                         }
-                        if (loadedKitLocal.value) {
-                            Assert.fail("kit config already loaded")
-                        } else {
-                            Logger.error("LOADED CACHED Kit")
-                            loadedKitLocal.value = true
-                        }
-                    }
-                    ConfigType.KIT -> if (loadedKitLocal.value) {
-                        Assert.fail("kit config already loaded")
-                    } else {
-                        Logger.error("LOADED CACHED Kit")
-                        loadedKitLocal.value = true
+                        ConfigType.KIT ->
+                            if (loadedKitLocal.value) {
+                                Assert.fail("kit config already loaded")
+                            } else {
+                                Logger.error("LOADED CACHED Kit")
+                                loadedKitLocal.value = true
+                            }
                     }
                 }
+                if (loadedCoreLocal.value && loadedKitLocal.value) {
+                    latch.countDown()
+                }
+                Logger.error("KIT = " + loadedKitLocal.value + " Core: " + loadedCoreLocal.value)
             }
-            if (loadedCoreLocal.value && loadedKitLocal.value) {
-                latch.countDown()
-            }
-            Logger.error("KIT = " + loadedKitLocal.value + " Core: " + loadedCoreLocal.value)
-        }
-        val options = MParticleOptions.builder(mContext)
-            .credentials("key", "secret")
-            .configuration(AddConfigListener(configLoadedListener))
-            .build()
+        val options =
+            MParticleOptions
+                .builder(mContext)
+                .credentials("key", "secret")
+                .configuration(AddConfigListener(configLoadedListener))
+                .build()
         MParticle.start(options)
 
         // wait until both local configs are loaded
@@ -183,13 +239,14 @@ class ConfigManagerInstrumentedTest : BaseAbstractTest() {
         val bothConfigsLoadedListener = BothConfigsLoadedListener()
         val reloadLatch = bothConfigsLoadedListener.latch
         MParticle.getInstance()?.Internal()?.configManager?.addConfigUpdatedListener(
-            bothConfigsLoadedListener
+            bothConfigsLoadedListener,
         )
         reloadLatch.await()
     }
 
-    internal inner class BothConfigsLoadedListener(vararg configTypes: ConfigType) :
-        ConfigLoadedListener {
+    internal inner class BothConfigsLoadedListener(
+        vararg configTypes: ConfigType,
+    ) : ConfigLoadedListener {
         private var types: MutableSet<ConfigType>
         var latch = MPLatch(1)
 
@@ -201,7 +258,10 @@ class ConfigManagerInstrumentedTest : BaseAbstractTest() {
             types = HashSet(listOf(*configTypes))
         }
 
-        override fun onConfigUpdated(configType: ConfigType, isNew: Boolean) {
+        override fun onConfigUpdated(
+            configType: ConfigType,
+            isNew: Boolean,
+        ) {
             if (isNew) {
                 types.remove(configType)
             }
@@ -211,11 +271,10 @@ class ConfigManagerInstrumentedTest : BaseAbstractTest() {
         }
     }
 
-    internal inner class AddConfigListener(private var configLoadedListener: ConfigLoadedListener) :
-        Configuration<ConfigManager> {
-        override fun configures(): Class<ConfigManager> {
-            return ConfigManager::class.java
-        }
+    internal inner class AddConfigListener(
+        private var configLoadedListener: ConfigLoadedListener,
+    ) : Configuration<ConfigManager> {
+        override fun configures(): Class<ConfigManager> = ConfigManager::class.java
 
         override fun apply(configManager: ConfigManager?) {
             configManager?.addConfigUpdatedListener(configLoadedListener)

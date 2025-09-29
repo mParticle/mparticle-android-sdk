@@ -16,8 +16,8 @@ class MParticleIdentityClientImplTest {
             Assert.assertEquals(
                 type,
                 MParticleIdentityClientImpl.getIdentityType(
-                    MParticleIdentityClientImpl.getStringValue(type)
-                )
+                    MParticleIdentityClientImpl.getStringValue(type),
+                ),
             )
         }
     }
@@ -29,15 +29,16 @@ class MParticleIdentityClientImplTest {
         // to update this method
         val osStringValues = HashSet<String>()
         for (operatingSystem in MParticle.OperatingSystem.values()) {
-            val osString = MParticleIdentityClientImpl(
-                Mockito.mock(
-                    Context::class.java
-                ),
-                Mockito.mock(
-                    ConfigManager::class.java
-                ),
-                operatingSystem
-            ).operatingSystemString
+            val osString =
+                MParticleIdentityClientImpl(
+                    Mockito.mock(
+                        Context::class.java,
+                    ),
+                    Mockito.mock(
+                        ConfigManager::class.java,
+                    ),
+                    operatingSystem,
+                ).operatingSystemString
             Assert.assertFalse(osStringValues.contains(osString))
             osStringValues.add(osString)
         }

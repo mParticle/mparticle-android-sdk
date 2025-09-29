@@ -39,15 +39,17 @@ class ProductTest {
     @Test
     fun testSerializationDeserialization() {
         Product.setEqualityComparator { product1, product2 -> product1.toString() == product2.toString() }
-        val product = Product.Builder("product name", "product sku", 301.45)
-            .brand("product brand")
-            .category("product category")
-            .couponCode("product coupon code")
-            .name("product name")
-            .position(4)
-            .variant("product variant")
-            .quantity(12.1)
-            .build()
+        val product =
+            Product
+                .Builder("product name", "product sku", 301.45)
+                .brand("product brand")
+                .category("product category")
+                .couponCode("product coupon code")
+                .name("product name")
+                .position(4)
+                .variant("product variant")
+                .quantity(12.1)
+                .build()
         val productJson = product.toJson()
         val product2 = Product.fromJson(productJson)
         Assert.assertEquals(product, product2)

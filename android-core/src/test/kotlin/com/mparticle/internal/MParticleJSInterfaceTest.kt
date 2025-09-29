@@ -18,7 +18,6 @@ import org.mockito.Mockito
 import java.util.TreeMap
 
 class MParticleJSInterfaceTest : MParticleJSInterface() {
-
     private lateinit var mProduct1: Product
     private lateinit var mProduct2: Product
     private lateinit var jsInterfaceInstance: MParticleJSInterface
@@ -62,8 +61,8 @@ class MParticleJSInterfaceTest : MParticleJSInterface() {
         val mockMp = Mockito.mock(MParticle::class.java)
         Mockito.`when`(mockMp.Internal()).thenReturn(
             Mockito.mock(
-                MParticle.Internal::class.java
-            )
+                MParticle.Internal::class.java,
+            ),
         )
         Mockito.`when`(mockMp.Internal().configManager).thenReturn(ConfigManager(MockContext()))
         val mockCurrentUser = Mockito.mock(MParticleUser::class.java)
@@ -73,22 +72,27 @@ class MParticleJSInterfaceTest : MParticleJSInterface() {
         Mockito.`when`(mockMp.environment).thenReturn(MParticle.Environment.Development)
         MParticle.setInstance(mockMp)
         jsInterfaceInstance = MParticleJSInterface()
-        Mockito.`when`(MParticle.getInstance()?.environment)
+        Mockito
+            .`when`(MParticle.getInstance()?.environment)
             .thenReturn(MParticle.Environment.Development)
-        mProduct1 = Product.Builder("iPhone", "12345", 400.0)
-            .quantity(1.0)
-            .build()
+        mProduct1 =
+            Product
+                .Builder("iPhone", "12345", 400.0)
+                .quantity(1.0)
+                .build()
         val customAttributes: MutableMap<String, String> = TreeMap()
         customAttributes["customkey"] = "customvalue"
-        mProduct2 = Product.Builder("Android", "98765", 600.0)
-            .quantity(4.0)
-            .couponCode("my-coupon-code-2")
-            .variant("SuperDuper")
-            .brand("Samsung")
-            .position(2)
-            .category("CellPhones")
-            .customAttributes(customAttributes)
-            .build()
+        mProduct2 =
+            Product
+                .Builder("Android", "98765", 600.0)
+                .quantity(4.0)
+                .couponCode("my-coupon-code-2")
+                .variant("SuperDuper")
+                .brand("Samsung")
+                .position(2)
+                .category("CellPhones")
+                .customAttributes(customAttributes)
+                .build()
     }
 
     @Test
@@ -121,7 +125,11 @@ class MParticleJSInterfaceTest : MParticleJSInterface() {
             Assert.assertEquals(product.name, mProduct2.name)
             Assert.assertEquals(product.sku, mProduct2.sku)
             Assert.assertEquals(product.customAttributes?.size, 1)
-            val key = product.customAttributes?.keys?.toTypedArray()?.get(0) as String
+            val key =
+                product.customAttributes
+                    ?.keys
+                    ?.toTypedArray()
+                    ?.get(0) as String
             Assert.assertEquals(key, "customkey")
             Assert.assertEquals(product.customAttributes?.get(key), "customvalue")
             Assert.assertEquals(product.couponCode, mProduct2.couponCode)
@@ -263,16 +271,17 @@ class MParticleJSInterfaceTest : MParticleJSInterface() {
             identityArray.put(
                 JSONObject()
                     .put(TYPE, entry.key.name)
-                    .put(IDENTITY, entry.value)
+                    .put(IDENTITY, entry.value),
             )
         }
-        val jsonObject = JSONObject()
-            .put(USER_IDENTITIES, identityArray)
+        val jsonObject =
+            JSONObject()
+                .put(USER_IDENTITIES, identityArray)
         login(jsonObject.toString())
         Mockito.verify(MParticle.getInstance()?.Identity(), Mockito.times(1))?.login(
             Mockito.any(
-                IdentityApiRequest::class.java
-            )
+                IdentityApiRequest::class.java,
+            ),
         )
     }
 
@@ -285,16 +294,17 @@ class MParticleJSInterfaceTest : MParticleJSInterface() {
             identityArray.put(
                 JSONObject()
                     .put(TYPE, entry.key.name)
-                    .put(IDENTITY, entry.value)
+                    .put(IDENTITY, entry.value),
             )
         }
-        val jsonObject = JSONObject()
-            .put(USER_IDENTITIES, identityArray)
+        val jsonObject =
+            JSONObject()
+                .put(USER_IDENTITIES, identityArray)
         logout(jsonObject.toString())
         Mockito.verify(MParticle.getInstance()?.Identity(), Mockito.times(1))?.logout(
             Mockito.any(
-                IdentityApiRequest::class.java
-            )
+                IdentityApiRequest::class.java,
+            ),
         )
     }
 
@@ -307,16 +317,17 @@ class MParticleJSInterfaceTest : MParticleJSInterface() {
             identityArray.put(
                 JSONObject()
                     .put(TYPE, entry.key.name)
-                    .put(IDENTITY, entry.value)
+                    .put(IDENTITY, entry.value),
             )
         }
-        val jsonObject = JSONObject()
-            .put(USER_IDENTITIES, identityArray)
+        val jsonObject =
+            JSONObject()
+                .put(USER_IDENTITIES, identityArray)
         modify(jsonObject.toString())
         Mockito.verify(MParticle.getInstance()?.Identity(), Mockito.times(1))?.modify(
             Mockito.any(
-                IdentityApiRequest::class.java
-            )
+                IdentityApiRequest::class.java,
+            ),
         )
     }
 
@@ -335,13 +346,16 @@ class MParticleJSInterfaceTest : MParticleJSInterface() {
             Assert.assertEquals(
                 i.toString() + "",
                 MParticle.EventType.values()[i],
-                jsInterfaceInstance.convertEventType(i)
+                jsInterfaceInstance.convertEventType(i),
             )
         }
     }
 
-    fun isEqual(product1: Product, product2: Product?): Boolean {
-        return try {
+    fun isEqual(
+        product1: Product,
+        product2: Product?,
+    ): Boolean =
+        try {
             val object1 = JSONObject(product1.toString())
             val object2 = JSONObject(product2.toString())
             object1.remove("act")
@@ -350,5 +364,4 @@ class MParticleJSInterfaceTest : MParticleJSInterface() {
         } catch (ignore: JSONException) {
             false
         }
-    }
 }

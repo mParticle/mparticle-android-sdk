@@ -69,26 +69,26 @@ class BreadcrumbServiceTest : BaseMPServiceTest() {
         }
         Assert.assertEquals(
             BreadcrumbService.getBreadcrumbs(database, mContext, 1L).length().toLong(),
-            expectedCount.toLong()
+            expectedCount.toLong(),
         )
         Assert.assertEquals(
             BreadcrumbService.getBreadcrumbs(database, mContext, 2L).length().toLong(),
-            0
+            0,
         )
         for (i in 0 until expectedCount - 1) {
             BreadcrumbService.insertBreadcrumb(database, mContext, message, "apiKey", 2L)
         }
         Assert.assertEquals(
             BreadcrumbService.getBreadcrumbs(database, mContext, 1L).length().toLong(),
-            expectedCount.toLong()
+            expectedCount.toLong(),
         )
         Assert.assertEquals(
             BreadcrumbService.getBreadcrumbs(database, mContext, 2L).length().toLong(),
-            (expectedCount - 1).toLong()
+            (expectedCount - 1).toLong(),
         )
         Assert.assertEquals(
             BreadcrumbService.getBreadcrumbs(database, mContext, 3L).length().toLong(),
-            0
+            0,
         )
     }
 
@@ -103,8 +103,8 @@ class BreadcrumbServiceTest : BaseMPServiceTest() {
                     mContext,
                     message,
                     "apiKey",
-                    10L
-                )
+                    10L,
+                ),
             )
         }
 
@@ -113,7 +113,7 @@ class BreadcrumbServiceTest : BaseMPServiceTest() {
         Assert.assertEquals(deleted.size, 10)
         Assert.assertEquals(
             BreadcrumbService.getBreadcrumbs(database, mContext, 10L).length(),
-            breadCrumbLimit
+            breadCrumbLimit,
         )
     }
 

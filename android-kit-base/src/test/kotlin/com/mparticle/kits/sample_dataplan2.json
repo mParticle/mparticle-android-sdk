@@ -34,15 +34,11 @@
                         "type": "string"
                       }
                     },
-                    "required": [
-                    ],
+                    "required": [],
                     "type": "object"
                   }
                 },
-                "required": [
-                  "custom_event_type",
-                  "event_name"
-                ],
+                "required": ["custom_event_type", "event_name"],
                 "type": "object"
               }
             }
@@ -79,11 +75,7 @@
                     "properties": {
                       "foo": {
                         "description": "",
-                        "enum": [
-                          "bar",
-                          "barr",
-                          "bar bar"
-                        ],
+                        "enum": ["bar", "barr", "bar bar"],
                         "type": "string"
                       },
                       "foo foo": {
@@ -94,23 +86,15 @@
                       },
                       "foo number": {
                         "description": "",
-                        "enum": [
-                          "10",
-                          "20",
-                          "30"
-                        ],
+                        "enum": ["10", "20", "30"],
                         "type": "number"
                       }
                     },
-                    "required": [
-                    ],
+                    "required": [],
                     "type": "object"
                   }
                 },
-                "required": [
-                  "custom_event_type",
-                  "event_name"
-                ],
+                "required": ["custom_event_type", "event_name"],
                 "type": "object"
               }
             }
@@ -134,11 +118,7 @@
                 "properties": {
                   "currency_code": {
                     "description": "",
-                    "enum": [
-                      "USD",
-                      "CAD",
-                      "AUS"
-                    ],
+                    "enum": ["USD", "CAD", "AUS"],
                     "type": "string"
                   },
                   "custom_attributes": {
@@ -158,11 +138,7 @@
                       },
                       "attributeNumEnum": {
                         "description": "",
-                        "enum": [
-                          "2",
-                          "7",
-                          "9"
-                        ],
+                        "enum": ["2", "7", "9"],
                         "type": "number"
                       },
                       "attributeStringAlpha": {
@@ -175,8 +151,7 @@
                         "type": "boolean"
                       }
                     },
-                    "required": [
-                    ],
+                    "required": [],
                     "type": "object"
                   },
                   "product_action": {
@@ -202,25 +177,21 @@
                                   "type": "string"
                                 }
                               },
-                              "required": [
-                              ],
+                              "required": [],
                               "type": "object"
                             }
                           },
-                          "required": [
-                          ],
+                          "required": [],
                           "type": "object"
                         },
                         "type": "array"
                       }
                     },
-                    "required": [
-                    ],
+                    "required": [],
                     "type": "object"
                   }
                 },
-                "required": [
-                ],
+                "required": [],
                 "type": "object"
               }
             }
@@ -255,15 +226,11 @@
                         "type": "string"
                       }
                     },
-                    "required": [
-                      "required"
-                    ],
+                    "required": ["required"],
                     "type": "object"
                   }
                 },
-                "required": [
-                  "custom_attributes"
-                ],
+                "required": ["custom_attributes"],
                 "type": "object"
               }
             }
@@ -288,15 +255,11 @@
                 "properties": {
                   "canonical_name": {
                     "description": "",
-                    "enum": [
-                      "This",
-                      "That"
-                    ],
+                    "enum": ["This", "That"],
                     "type": "string"
                   }
                 },
-                "required": [
-                ],
+                "required": [],
                 "type": "object"
               }
             }
@@ -307,8 +270,7 @@
         "description": "",
         "match": {
           "type": "product_impression",
-          "criteria": {
-          }
+          "criteria": {}
         },
         "validator": {
           "type": "json_schema",
@@ -326,8 +288,7 @@
                         "type": "boolean"
                       }
                     },
-                    "required": [
-                    ],
+                    "required": [],
                     "type": "object"
                   },
                   "custom_attributes": {
@@ -339,15 +300,11 @@
                         "type": "string"
                       }
                     },
-                    "required": [
-                      "thing1"
-                    ],
+                    "required": ["thing1"],
                     "type": "object"
                   }
                 },
-                "required": [
-                  "custom_attributes"
-                ],
+                "required": ["custom_attributes"],
                 "type": "object"
               }
             }
@@ -375,8 +332,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                ],
+                "required": [],
                 "type": "object"
               }
             }
@@ -411,13 +367,11 @@
                         "type": "string"
                       }
                     },
-                    "required": [
-                    ],
+                    "required": [],
                     "type": "object"
                   }
                 },
-                "required": [
-                ],
+                "required": [],
                 "type": "object"
               }
             }
@@ -446,8 +400,7 @@
                     "type": "object"
                   }
                 },
-                "required": [
-                ],
+                "required": [],
                 "type": "object"
               }
             }
@@ -458,8 +411,7 @@
         "description": "User Attributes",
         "match": {
           "type": "user_attributes",
-          "criteria": {
-          }
+          "criteria": {}
         },
         "validator": {
           "type": "json_schema",
@@ -479,20 +431,16 @@
                 "type": "string"
               }
             },
-            "required": [
-              "my other attribute"
-            ]
+            "required": ["my other attribute"]
           }
         },
-        "active_transformation_ids": [
-        ]
+        "active_transformation_ids": []
       },
       {
         "description": "User Identities",
         "match": {
           "type": "user_identities",
-          "criteria": {
-          }
+          "criteria": {}
         },
         "validator": {
           "type": "json_schema",
@@ -512,9 +460,7 @@
                 "type": "string"
               }
             },
-            "required": [
-              "email"
-            ],
+            "required": ["email"],
             "type": "object"
           }
         }
@@ -541,8 +487,7 @@
                     "type": "object"
                   }
                 },
-                "required": [
-                ],
+                "required": [],
                 "type": "object"
               }
             }
@@ -587,8 +532,7 @@
                                   "type": "string"
                                 }
                               },
-                              "required": [
-                              ],
+                              "required": [],
                               "type": "object"
                             },
                             "position": {
@@ -600,15 +544,13 @@
                               "type": "string"
                             }
                           },
-                          "required": [
-                          ],
+                          "required": [],
                           "type": "object"
                         },
                         "type": "array"
                       }
                     },
-                    "required": [
-                    ],
+                    "required": [],
                     "type": "object"
                   },
                   "custom_attributes": {
@@ -624,13 +566,11 @@
                         "type": "string"
                       }
                     },
-                    "required": [
-                    ],
+                    "required": [],
                     "type": "object"
                   }
                 },
-                "required": [
-                ],
+                "required": [],
                 "type": "object"
               }
             }
@@ -666,8 +606,7 @@
                         "type": "array"
                       }
                     },
-                    "required": [
-                    ],
+                    "required": [],
                     "type": "object"
                   },
                   "custom_attributes": {
@@ -683,13 +622,11 @@
                         "type": "string"
                       }
                     },
-                    "required": [
-                    ],
+                    "required": [],
                     "type": "object"
                   }
                 },
-                "required": [
-                ],
+                "required": [],
                 "type": "object"
               }
             }

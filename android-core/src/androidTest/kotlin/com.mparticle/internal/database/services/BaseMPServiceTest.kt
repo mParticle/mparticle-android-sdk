@@ -16,10 +16,11 @@ abstract class BaseMPServiceTest : BaseCleanInstallEachTest() {
     @Before
     @Throws(Exception::class)
     fun beforeBaseMPService() {
-        val openHelper: SQLiteOpenHelper = TestSQLiteOpenHelper(
-            MParticleDatabaseHelper(mContext),
-            MParticleDatabaseHelper.getDbName()
-        )
+        val openHelper: SQLiteOpenHelper =
+            TestSQLiteOpenHelper(
+                MParticleDatabaseHelper(mContext),
+                MParticleDatabaseHelper.getDbName(),
+            )
         database = MPDatabaseImpl(openHelper.writableDatabase)
     }
 
@@ -28,26 +29,28 @@ abstract class BaseMPServiceTest : BaseCleanInstallEachTest() {
         get() = getMpMessage(UUID.randomUUID().toString())
 
     @Throws(JSONException::class)
-    fun getMpMessage(sessionId: String?): BaseMPMessage {
-        return getMpMessage(sessionId, mRandomUtils.randomLong(Long.MIN_VALUE, Long.MAX_VALUE))
-    }
+    fun getMpMessage(sessionId: String?): BaseMPMessage = getMpMessage(sessionId, mRandomUtils.randomLong(Long.MIN_VALUE, Long.MAX_VALUE))
 
     @Throws(JSONException::class)
-    fun getMpMessage(sessionId: String?, mpid: Long): BaseMPMessage {
+    fun getMpMessage(
+        sessionId: String?,
+        mpid: Long,
+    ): BaseMPMessage {
         val session = InternalSession()
         session.mSessionID = sessionId
-        return BaseMPMessage.Builder(
-            mRandomUtils.getAlphaNumericString(
-                mRandomUtils.randomInt(
-                    20,
-                    48
-                )
+        return BaseMPMessage
+            .Builder(
+                mRandomUtils.getAlphaNumericString(
+                    mRandomUtils.randomInt(
+                        20,
+                        48,
+                    ),
+                ),
+            ).build(
+                session,
+                Location(mRandomUtils.getAlphaNumericString(mRandomUtils.randomInt(1, 55))),
+                mpid,
             )
-        ).build(
-            session,
-            Location(mRandomUtils.getAlphaNumericString(mRandomUtils.randomInt(1, 55))),
-            mpid
-        )
     }
 
     companion object {

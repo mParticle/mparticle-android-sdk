@@ -1,3 +1,5 @@
+# mParticle Android SDK Onboarding Guide
+
 ## Getting Started
 
 ### Core SDK
@@ -50,14 +52,14 @@ To set JAVA_HOME, do the following:
 
 In Windows:
 Right click My Computer and select Properties. On the Advanced tab, select Environment Variables,
-and then edit *JAVA_HOME* to point to where the JDK software is located, for example, C:\Program
+and then edit _JAVA_HOME_ to point to where the JDK software is located, for example, C:\Program
 Files\Java\jdk1.6.0_02
 
 In Mac: Open the `.bash_profile` file and add the following
-line: `export PATH="{PATH_TO_MY_JAVA}:$PATH"`, where *PATH_TO_MY_JAVA* is the file path for you JDK
+line: `export PATH="{PATH_TO_MY_JAVA}:$PATH"`, where _PATH_TO_MY_JAVA_ is the file path for you JDK
 installation, for example, /usr/libexec/java_home
 
-Lastly, edit the **Path** system variable and add a new variable *%JAVA_Home%\bin*.
+Lastly, edit the **Path** system variable and add a new variable _%JAVA_Home%\bin_.
 
 Additionally If you have multiple JDKs downloaded make sure that your Gradle JDK matches Java Home.
 You can do this by going in Android Studio to:  
@@ -139,6 +141,6 @@ You can now work on the specific kits you need, test them and even contribute th
 
 ## Read More
 
-* [Official Oracle JDK download Website](https://www.oracle.com/java/technologies/downloads/)
-* [Adding a new SSH key to your Github account](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account)
-* [Adding a new GPG key to your Github account](https://docs.github.com/en/authentication/managing-commit-signature-verification/adding-a-new-gpg-key-to-your-github-account)
+- [Official Oracle JDK download Website](https://www.oracle.com/java/technologies/downloads/)
+- [Adding a new SSH key to your Github account](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account)
+- [Adding a new GPG key to your Github account](https://docs.github.com/en/authentication/managing-commit-signature-verification/adding-a-new-gpg-key-to-your-github-account)

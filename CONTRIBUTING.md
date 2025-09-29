@@ -2,7 +2,6 @@
 
 Thanks for contributing! Please read this document to follow our conventions for contributing to the mParticle SDK.
 
-
 ## Setting Up
 
 1. Fork the repository and then clone down your fork
@@ -10,23 +9,21 @@ Thanks for contributing! Please read this document to follow our conventions for
 3. Your PR title will be checked automatically against the below convention (view the commit history to see examples of a proper commit/PR title). If it fails, you must update your title
 4. Our engineers will work with you to get your code change implemented once a PR is up
 
-
 ## Development Process
 
 1. Create your branch from `main`
 2. Make your changes
 3. Add tests for any new functionality
 4. Run the test suite to ensure tests (both new and old) all pass
-6. Update the documentation
-7. Create a Pull Request
-
+5. Update the documentation
+6. Create a Pull Request
 
 ### Pull Requests
 
-* Fill in the required template
-* Follow the [Android style guide](https://developer.android.com/kotlin/style-guide)
-* Include screenshots and animated GIFs in your pull request whenever possible
-* End all files with a newline
+- Fill in the required template
+- Follow the [Android style guide](https://developer.android.com/kotlin/style-guide)
+- Include screenshots and animated GIFs in your pull request whenever possible
+- End all files with a newline
 
 ### PR Title and Commit Convention
 
@@ -61,22 +58,24 @@ The following lists the different types allowed in the commit message:
 We use JUnit and Mockito for our testing framework. Please write tests for new code you create. Before submitting your PR, ensure all tests pass by running:
 
 #### Lint Checks
+
 ```bash
 ./gradlew lint
 ```
 
 #### Unit Tests
+
 ```bash
 ./gradlew test
 ```
 
 #### Instrumented Tests
+
 ```bash
 ./gradlew :android-core:cAT :android-kit-base:cAT --stacktrace
 ```
 
 Make sure all tests pass successfully before submitting your PR. If you encounter any test failures, investigate and fix the issues before proceeding.
-
 
 ### Reporting Bugs
 
@@ -86,14 +85,13 @@ To notify our team about an issue, please submit a ticket through our [mParticle
 
 **When you are creating a ticket, please include as many details as possible:**
 
-* Use a clear and descriptive title
-* Describe the exact steps which reproduce the problem
-* Provide specific examples to demonstrate the steps
-* Describe the behavior you observed after following the steps
-* Explain which behavior you expected to see instead and why
-* Include logcat output and stack traces if applicable
-* Include your SDK version and Android OS version
-
+- Use a clear and descriptive title
+- Describe the exact steps which reproduce the problem
+- Provide specific examples to demonstrate the steps
+- Describe the behavior you observed after following the steps
+- Explain which behavior you expected to see instead and why
+- Include logcat output and stack traces if applicable
+- Include your SDK version and Android OS version
 
 ## License
 

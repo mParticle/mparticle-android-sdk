@@ -12,7 +12,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class ConfigRequestTests : BaseCleanInstallEachTest() {
-
     @Test
     fun testConfigRequestWithDataplanIdAndVersion() {
         MParticleOptions
@@ -94,7 +93,10 @@ class ConfigRequestTests : BaseCleanInstallEachTest() {
         mServer.waitForVerify(Matcher(mServer.Endpoints().configUrl)) { request ->
             assertTrue {
                 MPUtility.isEmpty(
-                    MParticle.getInstance()!!.Internal().configManager.latestKitConfiguration
+                    MParticle
+                        .getInstance()!!
+                        .Internal()
+                        .configManager.latestKitConfiguration,
                 )
             }
             latch.countDown()
@@ -103,7 +105,12 @@ class ConfigRequestTests : BaseCleanInstallEachTest() {
         latch.await()
         assertEquals(
             simpleConfigWithKits[ConfigManager.KEY_EMBEDDED_KITS].toString(),
-            MParticle.getInstance()?.Internal()?.configManager?.latestKitConfiguration.toString()
+            MParticle
+                .getInstance()
+                ?.Internal()
+                ?.configManager
+                ?.latestKitConfiguration
+                .toString(),
         )
     }
 }

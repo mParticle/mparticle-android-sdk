@@ -11,17 +11,17 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class UpdateAdIdIdentityTest : BaseCleanInstallEachTest() {
-
     @Test
     fun testAdIdModifyNoUser() {
         // setup mock server so initial identity request will not set mpid
         mServer.setupHappyIdentify(0)
         val latch = MPLatch(1)
         MParticle.start(
-            MParticleOptions.builder(mContext)
+            MParticleOptions
+                .builder(mContext)
                 .credentials("key", "secret")
                 .identifyTask(BaseIdentityTask().addSuccessListener { latch.countDown() })
-                .build()
+                .build(),
         )
 
         // execute CheckAdIdRunnable without a current user
@@ -35,21 +35,26 @@ class UpdateAdIdIdentityTest : BaseCleanInstallEachTest() {
 
         // force a modify request to ensure that the modify request from the CheckAdIdRunnable is completed
         val latch2 = MPLatch(1)
-        MParticle.getInstance()!!.Identity()
+        MParticle
+            .getInstance()!!
+            .Identity()
             .modify(IdentityApiRequest.withEmptyUser().customerId("someId").build())
             .addSuccessListener { latch2.countDown() }
         latch2.await()
 
         // check that modify request from CheckAdIdRunnable executed when current user was set
-        mServer.Requests().modify.count { request ->
-            request.asIdentityRequest().body.identity_changes.let {
-                it.size == 1 &&
-                    it[0].let { identityChange ->
-                        identityChange["new_value"] == "someId"
-                    }
+        mServer
+            .Requests()
+            .modify
+            .count { request ->
+                request.asIdentityRequest().body.identity_changes.let {
+                    it.size == 1 &&
+                        it[0].let { identityChange ->
+                            identityChange["new_value"] == "someId"
+                        }
+                }
+            }.let {
+                assertEquals(1, it)
             }
-        }.let {
-            assertEquals(1, it)
-        }
     }
 }

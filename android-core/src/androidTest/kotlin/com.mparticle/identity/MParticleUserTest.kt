@@ -17,7 +17,7 @@ class MParticleUserTest : BaseCleanStartedEachTest() {
             Assert.assertEquals(
                 it.toFloat(),
                 System.currentTimeMillis().toFloat(),
-                10f
+                10f,
             )
         }
         if (user != null) {
@@ -26,7 +26,10 @@ class MParticleUserTest : BaseCleanStartedEachTest() {
         val newMpid = ran.nextLong()
         mServer.addConditionalLoginResponse(mStartingMpid, newMpid)
         val latch = MPLatch(1)
-        MParticle.getInstance()?.Identity()?.login()
+        MParticle
+            .getInstance()
+            ?.Identity()
+            ?.login()
             ?.addFailureListener { Assert.fail("Identity Request Failed") }
             ?.addSuccessListener { latch.countDown() }
         latch.await()
@@ -40,7 +43,7 @@ class MParticleUserTest : BaseCleanStartedEachTest() {
             Assert.assertEquals(
                 user1.lastSeenTime.toFloat(),
                 System.currentTimeMillis().toFloat(),
-                10f
+                10f,
             )
         }
         Assert.assertEquals(userFirstSeen, user?.firstSeenTime)
