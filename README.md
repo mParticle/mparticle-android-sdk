@@ -1,6 +1,6 @@
 <img src="https://static.mparticle.com/sdk/mp_logo_black.svg" width="280">
 
-# Android SDK
+# Android SDK - test
 
 [![Maven Central Status](https://maven-badges.herokuapp.com/maven-central/com.mparticle/android-core/badge.svg?style=flat-square)](https://search.maven.org/#search%7Cga%7C1%7Cmparticle)
 
