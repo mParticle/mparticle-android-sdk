@@ -216,6 +216,8 @@
     @androidx.annotation.Nullable *;
 }
 
+# Prevent the Rokt class from being obfuscated - needed to allow binding generation in Maui
+-keep class com.mparticle.Rokt { *; }
 # Preserve all method signatures in the Rokt class to prevent overload resolution issues
 -keepclassmembers class com.mparticle.Rokt {
     *;
