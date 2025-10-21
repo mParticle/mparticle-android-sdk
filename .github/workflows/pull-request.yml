@@ -199,7 +199,7 @@ jobs:
     name: "Security Lint Checks"
     uses: mparticle/mparticle-workflows/.github/workflows/security-checks.yml@main
     with:
-      base_branch: "development"
+      base_branch: main
 
   kit-compatibility-test:
     name: "Kit Compatibility Test"
