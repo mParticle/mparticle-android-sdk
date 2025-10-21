@@ -15,7 +15,7 @@ on:
       branch_name:
         description: "branch name to run tests on"
         required: false
-        default: "development"
+        default: main
         type: string
 
 jobs:

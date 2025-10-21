@@ -25,12 +25,12 @@ jobs:
       GIT_COMMITTER_NAME: mparticle-automation
       GIT_COMMITTER_EMAIL: developers@mparticle.com
     steps:
-      - name: "Checkout development branch"
+      - name: Checkout main branch
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
           repository: mparticle/mparticle-android-sdk
-          ref: development
+          ref: main
           submodules: recursive
       - name: "Import GPG Key"
         uses: crazy-max/ghaction-import-gpg@82a020f1f7f605c65dd2449b392a52c3fcfef7ef #v6.0
@@ -54,7 +54,7 @@ jobs:
   regression-check:
     needs: create-release-branch
     name: "Run regression"
-    uses: mParticle/mparticle-android-sdk/.github/workflows/daily.yml@development
+    uses: mParticle/mparticle-android-sdk/.github/workflows/daily.yml@main
     with:
       dryRun: ${{ github.event.inputs.dryRun }}
       branch_name: release/${{ github.run_number }}
@@ -166,7 +166,6 @@ jobs:
         if: ${{ github.event.inputs.dryRun == 'false'}}
         run: |
           git push origin HEAD:main
-          git push origin HEAD:development
           git push -f origin HEAD:chore/dependabot
       - name: "Delete release branch"
         if: ${{ github.event.inputs.dryRun == 'false' }}
