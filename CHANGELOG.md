@@ -1,3 +1,16 @@
+## [5.74.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.74.0...v5.74.1) (2025-10-21)
+
+
+### Bug Fixes
+
+* Add proguard rules to prevent stripping of Rokt class ([#607](https://github.com/mParticle/mparticle-android-sdk/issues/607)) ([18ef17b](https://github.com/mParticle/mparticle-android-sdk/commit/18ef17bdf23e388f736814b5d9f579af3258229c))
+
+
+### Updates & Maintenance
+
+* Change release to use main branch ([#609](https://github.com/mParticle/mparticle-android-sdk/issues/609)) ([7d41cc3](https://github.com/mParticle/mparticle-android-sdk/commit/7d41cc3230ea4df8f6d4b639414e5afa66705828))
+* Update submodules ([e233046](https://github.com/mParticle/mparticle-android-sdk/commit/e233046a09d4de845d4cf4a7bf75d03dcb12aa3b))
+
 ## [5.74.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.73.2...v5.74.0) (2025-09-23)
 
 
