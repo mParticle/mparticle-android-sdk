@@ -12,3 +12,12 @@ updates:
         - dependency-name: "com.google.firebase:firebase-messaging"
       commit-message:
         prefix: "chore"
+    - package-ecosystem: github-actions
+      directory: /
+      schedule:
+        interval: weekly
+      open-pull-requests-limit: 4
+      labels:
+        - dependabot
+      commit-message:
+        prefix: "chore"
