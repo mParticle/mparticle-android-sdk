@@ -26,7 +26,7 @@ jobs:
     steps:
       - name: "Cancel workflow"
         if: ${{ github.repository != 'mParticle/mparticle-android-sdk' }}
-        uses: andymckay/cancel-action@435124153eb37d6a62a29d053a7e449652f89d51
+        uses: andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1
 
   create-regression-branch:
     name: "Create Regression Branch"
