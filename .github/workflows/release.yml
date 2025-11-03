@@ -146,6 +146,18 @@ jobs:
           ./gradlew -PisRelease=true publishReleasePublicationToMavenLocal
           ./gradlew -PisRelease=true publishReleasePublicationToMavenRepository -c settings-kits.gradle --stacktrace
 
+      # Temporary workaround: https://central.sonatype.org/publish/publish-portal-ossrh-staging-api/#ensuring-deployment-visibility-in-the-central-publisher-portal
+      - name: Ensuring Deployment Visibility In The Central Publisher Portal
+        if: ${{ github.event.inputs.dryRun == 'false'}}
+        env:
+          USER: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+          PASS: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+        run: |
+          curl -f -u "$USER:$PASS" -X POST \
+            "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/com.mparticle?publishing_type=user_managed" \
+            -H "Content-Type: application/json" -d '{}' \
+            && echo "Success"
+
   sync-repository:
     name: "Sync Repository"
     needs: sonatype-release
