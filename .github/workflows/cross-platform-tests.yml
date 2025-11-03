@@ -65,7 +65,7 @@ jobs:
             ./gradlew runAndroid
       - name: "Archive Test Results"
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: "test-results"
           path: Tests/build/reports/androidTests/connected/**
