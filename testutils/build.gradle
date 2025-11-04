@@ -52,7 +52,7 @@ dependencies {
     compileOnly project(':android-kit-base')
     compileOnly 'org.mockito:mockito-android:4.9.0'
 
-    api 'androidx.annotation:annotation:1.5.0'
+    api 'androidx.annotation:annotation:1.9.1'
     api 'androidx.test.ext:junit:1.1.4'
     api 'androidx.test:rules:1.5.0'
 
