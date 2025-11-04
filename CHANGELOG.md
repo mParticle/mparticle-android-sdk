@@ -1,3 +1,18 @@
+## [5.74.3](https://github.com/mParticle/mparticle-android-sdk/compare/v5.74.2...v5.74.3) (2025-11-04)
+
+
+### Updates & Maintenance
+
+* Add step to ensure deployment visibility ([#611](https://github.com/mParticle/mparticle-android-sdk/issues/611)) ([9b5af9e](https://github.com/mParticle/mparticle-android-sdk/commit/9b5af9e2ddc761dfe8552d5801fe1bac38df2a8e))
+* bump actions/cache from 3 to 4 ([#622](https://github.com/mParticle/mparticle-android-sdk/issues/622)) ([7c46e93](https://github.com/mParticle/mparticle-android-sdk/commit/7c46e9320bc94f1ce72c9786fdcca0ddd89dd661))
+* bump actions/checkout from 3 to 5 ([#617](https://github.com/mParticle/mparticle-android-sdk/issues/617)) ([59fd344](https://github.com/mParticle/mparticle-android-sdk/commit/59fd34423643f25aea5b0e5aac35256d789e7c86))
+* bump actions/upload-artifact from 4 to 5 ([#614](https://github.com/mParticle/mparticle-android-sdk/issues/614)) ([d4f7882](https://github.com/mParticle/mparticle-android-sdk/commit/d4f788229a363fd150a9f43895d8e32425db0f64))
+* bump crazy-max/ghaction-import-gpg from 6.0.0 to 6.3.0 ([#615](https://github.com/mParticle/mparticle-android-sdk/issues/615)) ([8881009](https://github.com/mParticle/mparticle-android-sdk/commit/88810095bd87f945d8476c66999b54aead05c758))
+* bump reactivecircus/android-emulator-runner from 2.33.0 to 2.34.0 ([#623](https://github.com/mParticle/mparticle-android-sdk/issues/623)) ([15a16a8](https://github.com/mParticle/mparticle-android-sdk/commit/15a16a8275f29bb0f4e7a6239bed5d88d7c969f5))
+* Enable Dependabot for Github Actions ([#608](https://github.com/mParticle/mparticle-android-sdk/issues/608)) ([0174ff2](https://github.com/mParticle/mparticle-android-sdk/commit/0174ff2483636bd519f2f597aefc2d19f4db9d5c))
+* Remove target branch check ([#610](https://github.com/mParticle/mparticle-android-sdk/issues/610)) ([ac69641](https://github.com/mParticle/mparticle-android-sdk/commit/ac696417774da8c1f30593bc8c1b5d0e01f0c18a))
+* Update submodules ([ec57498](https://github.com/mParticle/mparticle-android-sdk/commit/ec57498a5fc007a2f99f3183046093452d8d461e))
+
 ## [5.74.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.74.1...v5.74.2) (2025-10-28)
 
 
