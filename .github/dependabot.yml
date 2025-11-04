@@ -1,14 +1,23 @@
 version: 2
 updates:
-  - package-ecosystem: gradle
-    directory: "/"
-    schedule:
-      interval: daily
-    target-branch: "chore/dependabot"
-    labels: ["dependabot"]
-    open-pull-requests-limit: 10
-    ignore:
-      - dependency-name: "com.mparticle:android-core"
-      - dependency-name: "com.google.firebase:firebase-messaging"
-    commit-message:
-      prefix: "chore"
+    - package-ecosystem: gradle
+      directory: "/"
+      schedule:
+          interval: daily
+      target-branch: "chore/dependabot"
+      labels: ["dependabot"]
+      open-pull-requests-limit: 10
+      ignore:
+        - dependency-name: "com.mparticle:android-core"
+        - dependency-name: "com.google.firebase:firebase-messaging"
+      commit-message:
+        prefix: "chore"
+    - package-ecosystem: github-actions
+      directory: /
+      schedule:
+        interval: weekly
+      open-pull-requests-limit: 4
+      labels:
+        - dependabot
+      commit-message:
+        prefix: "chore"

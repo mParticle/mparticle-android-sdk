@@ -10,12 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout Cross Platform Tests Repo"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: mParticle/crossplatform-sdk-tests
 
       - name: "Checkout Android SDK Branch"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: ${{github.event.pull_request.head.repo.full_name}}
           ref: ${{github.head_ref}}
@@ -35,7 +35,7 @@ jobs:
 
       - name: create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
-        uses: reactivecircus/android-emulator-runner@62dbb605bba737720e10b196cb4220d374026a6d #v2.33.0
+        uses: reactivecircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed #v2.34.0
         with:
           api-level: 29
           force-avd-creation: false
@@ -53,7 +53,7 @@ jobs:
           distribution: "zulu"
           java-version: "17"
       - name: "Run Crossplatform Tests"
-        uses: reactivecircus/android-emulator-runner@62dbb605bba737720e10b196cb4220d374026a6d #v2.33.0
+        uses: reactivecircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed #v2.34.0
         with:
           api-level: 29
           force-avd-creation: false
@@ -68,7 +68,7 @@ jobs:
             ./gradlew runAndroid
       - name: "Archive Test Results"
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: "test-results"
           path: Tests/build/reports/androidTests/connected/**

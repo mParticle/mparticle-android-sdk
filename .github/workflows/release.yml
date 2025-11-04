@@ -31,15 +31,15 @@ jobs:
       GIT_COMMITTER_NAME: mparticle-automation
       GIT_COMMITTER_EMAIL: developers@mparticle.com
     steps:
-      - name: "Checkout development branch"
-        uses: actions/checkout@v4
+      - name: Checkout main branch
+        uses: actions/checkout@v5
         with:
           token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
           repository: mparticle/mparticle-android-sdk
-          ref: development
+          ref: main
           submodules: recursive
       - name: "Import GPG Key"
-        uses: crazy-max/ghaction-import-gpg@82a020f1f7f605c65dd2449b392a52c3fcfef7ef #v6.0
+        uses: crazy-max/ghaction-import-gpg@e89d40939c28e39f97cf32126055eeae86ba74ec #v6.0
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
@@ -60,7 +60,7 @@ jobs:
   regression-check:
     needs: create-release-branch
     name: "Run regression"
-    uses: mParticle/mparticle-android-sdk/.github/workflows/daily.yml@development
+    uses: mParticle/mparticle-android-sdk/.github/workflows/daily.yml@main
     with:
       dryRun: ${{ github.event.inputs.dryRun }}
       branch_name: release/${{ github.run_number }}
@@ -78,13 +78,13 @@ jobs:
       GIT_COMMITTER_EMAIL: developers@mparticle.com
     steps:
       - name: "Checkout public main branch"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
           fetch-depth: 0
           ref: main
       - name: "Import GPG Key"
-        uses: crazy-max/ghaction-import-gpg@82a020f1f7f605c65dd2449b392a52c3fcfef7ef #v6.0
+        uses: crazy-max/ghaction-import-gpg@e89d40939c28e39f97cf32126055eeae86ba74ec #v6.0
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
@@ -131,7 +131,7 @@ jobs:
       mavenSigningKeyPassword: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_PASSWORD }}
     steps:
       - name: "Checkout release branch"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: mparticle/mparticle-android-sdk
           ref: release/${{ github.run_number }}
@@ -152,13 +152,25 @@ jobs:
           ./gradlew -PisRelease=true publishReleasePublicationToMavenLocal
           ./gradlew -PisRelease=true publishReleasePublicationToMavenRepository -c settings-kits.gradle --stacktrace
 
+      # Temporary workaround: https://central.sonatype.org/publish/publish-portal-ossrh-staging-api/#ensuring-deployment-visibility-in-the-central-publisher-portal
+      - name: Ensuring Deployment Visibility In The Central Publisher Portal
+        if: ${{ github.event.inputs.dryRun == 'false'}}
+        env:
+          USER: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+          PASS: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+        run: |
+          curl -f -u "$USER:$PASS" -X POST \
+            "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/com.mparticle?publishing_type=user_managed" \
+            -H "Content-Type: application/json" -d '{}' \
+            && echo "Success"
+
   sync-repository:
     name: "Sync Repository"
     needs: sonatype-release
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout main branch"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           repository: ${{ github.repository }}
@@ -172,7 +184,6 @@ jobs:
         if: ${{ github.event.inputs.dryRun == 'false'}}
         run: |
           git push origin HEAD:main
-          git push origin HEAD:development
           git push -f origin HEAD:chore/dependabot
       - name: "Delete release branch"
         if: ${{ github.event.inputs.dryRun == 'false' }}

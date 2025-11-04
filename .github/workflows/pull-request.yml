@@ -13,13 +13,23 @@ permissions:
   id-token: write
 
 jobs:
+  pr-check-hadcoded-secrets:
+    name: "Check PR for hardcoded secrets"
+    uses: mParticle/mparticle-workflows/.github/workflows/security-hardcoded-secrets.yml@main
+  pr-branch-check-name:
+    name: "Check PR for semantic branch name"
+    uses: mParticle/mparticle-workflows/.github/workflows/pr-branch-check-name.yml@main
+  pr-title-check:
+    name: "Check PR for semantic title"
+    uses: mParticle/mparticle-workflows/.github/workflows/pr-title-check.yml@main
+
   instrumented-tests:
     name: "Instrumented Tests"
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: "Install JDK 17"
         uses: actions/setup-java@v4
         with:
@@ -37,7 +47,7 @@ jobs:
           key: avd-29
       - name: create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
-        uses: reactivecircus/android-emulator-runner@62dbb605bba737720e10b196cb4220d374026a6d #v2.33.0
+        uses: reactivecircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed #v2.34.0
         with:
           api-level: 28
           force-avd-creation: false
@@ -50,7 +60,7 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
       - name: "Run Instrumented Tests"
-        uses: reactivecircus/android-emulator-runner@62dbb605bba737720e10b196cb4220d374026a6d #v2.33.0
+        uses: reactivecircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed #v2.34.0
         with:
           api-level: 28
           force-avd-creation: false
@@ -68,7 +78,7 @@ jobs:
             ./gradlew :android-core:cAT -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=none --info
             ./gradlew :android-kit-base:cAT -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=none --info
       - name: "Archive Instrumented Tests Results"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: "instrumented-tests-results"
@@ -80,7 +90,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: "Install JDK 17"
         uses: actions/setup-java@v4
         with:
@@ -99,7 +109,7 @@ jobs:
 
       - name: create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
-        uses: reactivecircus/android-emulator-runner@62dbb605bba737720e10b196cb4220d374026a6d #v2.33.0
+        uses: reactivecircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed #v2.34.0
         with:
           api-level: 28
           force-avd-creation: false
@@ -112,7 +122,7 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
       - name: "Run Instrumented Orchestrator Tests"
-        uses: reactivecircus/android-emulator-runner@62dbb605bba737720e10b196cb4220d374026a6d #v2.33.0
+        uses: reactivecircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed #v2.34.0
         with:
           api-level: 28
           force-avd-creation: false
@@ -129,7 +139,7 @@ jobs:
             ./gradlew connectedCheck --stacktrace
             ./gradlew -Porchestrator=true :android-core:cAT -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=none
       - name: "Archive Instrumented Orchestrator Tests Results"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: "instrumented-orchestrator-tests-results"
@@ -140,7 +150,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: "Install JDK 17"
         uses: actions/setup-java@v4
         with:
@@ -152,7 +162,7 @@ jobs:
         uses: asadmansr/android-test-report-action@384cd31388782f4106dc4a1b37eea2ff02e0aad7 #v1.2.0
         if: always()
       - name: "Archive Unit Test Results"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: "unit-tests-results"
@@ -164,7 +174,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: recursive
       - name: "Install JDK 17"
@@ -175,7 +185,7 @@ jobs:
       - name: "Run Android Core SDK Lint"
         run: ./gradlew lint
       - name: "Archive Lint Test Results"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: "lint-results"
@@ -187,7 +197,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: recursive
       - name: "Install JDK 17"
@@ -198,7 +208,7 @@ jobs:
       - name: "Run Android Core SDK Kotlin Lint"
         run: ./gradlew ktlintCheck
       - name: "Archive Kotlin Lint Test Results"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: "kotlin-lint-results"
@@ -208,7 +218,7 @@ jobs:
     name: "Security Lint Checks"
     uses: mparticle/mparticle-workflows/.github/workflows/security-checks.yml@main
     with:
-      base_branch: "development"
+      base_branch: main
 
   kit-compatibility-test:
     name: "Kit Compatibility Test"
@@ -216,7 +226,7 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: recursive
           fetch-depth: 0
