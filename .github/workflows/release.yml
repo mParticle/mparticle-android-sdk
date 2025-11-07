@@ -1,5 +1,6 @@
 name: "Release SDK"
 
+# checkov:skip=CKV_GHA_7: This workflow requires dryRun parameter for release control
 on:
   workflow_dispatch:
     inputs:
@@ -7,6 +8,11 @@ on:
         description: "Do a dry run to preview instead of a real release [true/false]"
         required: true
         default: "true"
+
+permissions:
+  contents: read
+  pull-requests: read
+  checks: write
 
 jobs:
   # SDK release is done from public main branch.
@@ -131,7 +137,7 @@ jobs:
           ref: release/${{ github.run_number }}
           submodules: recursive
       - name: "Install JDK 17"
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: "zulu"
           java-version: "17"

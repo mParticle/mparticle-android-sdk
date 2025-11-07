@@ -4,11 +4,15 @@ import com.mparticle.tooling.Utils.executeCLI
 import java.io.File
 import java.io.IOException
 
-enum class DataPlanError(val message: String) {
-    VersionInvalid("Error: Data Plan Version is Invalid");
+enum class DataPlanError(
+    val message: String,
+) {
+    VersionInvalid("Error: Data Plan Version is Invalid"),
 }
 
-class DataPlanningNodeApp(val config: Config) {
+class DataPlanningNodeApp(
+    val config: Config,
+) {
     var path = System.getenv("PATH")
 
     init {
@@ -25,35 +29,38 @@ class DataPlanningNodeApp(val config: Config) {
     fun validate(
         dataplan: String,
         message: String,
-        version: String?
+        version: String?,
     ): NodeAppResult<List<ValidationResult>> {
         try {
             val mpCommand = config.internalConfig.mpPath ?: "mp"
-            val args = if (version == null) {
-                mutableListOf(
-                    mpCommand,
-                    "planning:events:validate",
-                    "--dataPlanVersion",
-                    dataplan,
-                    "--translateEvents",
-                    "--event",
-                    message
-                )
-            } else {
-                mutableListOf(
-                    mpCommand,
-                    "planning:events:validate",
-                    "--dataPlan",
-                    dataplan,
-                    "--translateEvents",
-                    "--event",
-                    message,
-                    "--versionNumber",
-                    version
-                )
-            }
-            val results = args.toTypedArray()
-                .executeCLI(path, workingDirectory = config.credentialsFilePath ?: ".")
+            val args =
+                if (version == null) {
+                    mutableListOf(
+                        mpCommand,
+                        "planning:events:validate",
+                        "--dataPlanVersion",
+                        dataplan,
+                        "--translateEvents",
+                        "--event",
+                        message,
+                    )
+                } else {
+                    mutableListOf(
+                        mpCommand,
+                        "planning:events:validate",
+                        "--dataPlan",
+                        dataplan,
+                        "--translateEvents",
+                        "--event",
+                        message,
+                        "--versionNumber",
+                        version,
+                    )
+                }
+            val results =
+                args
+                    .toTypedArray()
+                    .executeCLI(path, workingDirectory = config.credentialsFilePath ?: ".")
             val error = DataPlanError.values().firstOrNull { results.contains(it.message) }
             if (error != null) {
                 return NodeAppResult(listOf(ValidationResult(error = error, arguments = args)))
@@ -63,22 +70,27 @@ class DataPlanningNodeApp(val config: Config) {
             return NodeAppResult(
                 ValidationResult.from(
                     "",
-                    listOf("${ioe.message}\n${ioe.stackTrace.joinToString("\n")}")
-                )
+                    listOf("${ioe.message}\n${ioe.stackTrace.joinToString("\n")}"),
+                ),
             )
         }
     }
 
-    fun fetchDataPlan(accountId: String, planId: String, version: String?): NodeAppResult<String?> {
+    fun fetchDataPlan(
+        accountId: String,
+        planId: String,
+        version: String?,
+    ): NodeAppResult<String?> {
         try {
-            val arguments = mutableListOf(
-                "mp",
-                "data-plan:fetch",
-                "--accountId",
-                accountId,
-                "--dataPlanId",
-                planId
-            )
+            val arguments =
+                mutableListOf(
+                    "mp",
+                    "data-plan:fetch",
+                    "--accountId",
+                    accountId,
+                    "--dataPlanId",
+                    planId,
+                )
             if (version != null) {
                 arguments.add("--version")
                 arguments.add(version)
@@ -151,15 +163,16 @@ class DataPlanningNodeApp(val config: Config) {
             }
         }
 
-        fun fromJS(jsFileBlob: String): DataPlanningNodeApp? {
-            return Utils.getFileLocation(tempNodeFileName)?.let { nodeFile ->
+        fun fromJS(jsFileBlob: String): DataPlanningNodeApp? =
+            Utils.getFileLocation(tempNodeFileName)?.let { nodeFile ->
                 val nodeFile = File(nodeFile)
                 nodeFile.createNewFile()
                 nodeFile.writeText(jsFileBlob)
                 DataPlanningNodeApp(Config())
             }
-        }
     }
 
-    class NodeAppResult<T>(val response: T? = null)
+    class NodeAppResult<T>(
+        val response: T? = null,
+    )
 }

@@ -1,0 +1,36 @@
+# Top-most EditorConfig file
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+insert_final_newline = true
+# don't set end_of_line; let correct git setting checkout the appropriate one for OS
+charset = utf-8
+
+[*.{json,yml,yaml,html,tf}]
+indent_size = 2
+ij_json_array_wrapping = normal
+
+[*.{kt,kts}]
+ktlint_code_style = intellij_idea
+max_line_length = 150
+ij_kotlin_allow_trailing_comma = true
+ij_kotlin_allow_trailing_comma_on_call_site = true
+
+[tooling/**/*.kt]
+max_line_length = 200
+
+# IntelliJ/Android Studio specific (ktlint respects these too)
+ij_kotlin_continuation_indent_size = 4
+ij_kotlin_align_multiline_parameters = false
+ij_kotlin_align_multiline_parameters_in_calls = false
+ij_kotlin_call_parameters_new_line_after_left_paren = true
+ij_kotlin_call_parameters_right_paren_on_new_line = true
+
+[**/test/**/*.kt]
+max_line_length = off
+
+[**/androidTest/**/*.kt]
+max_line_length = off

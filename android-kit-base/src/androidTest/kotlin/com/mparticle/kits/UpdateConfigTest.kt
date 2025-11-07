@@ -14,11 +14,11 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class UpdateConfigTest : BaseKitOptionsTest() {
-
     @Test
     fun testKitsLoadFromRemoteConfig() {
         setCachedConfig(null)
-        MParticleOptions.builder(mContext)
+        MParticleOptions
+            .builder(mContext)
             .configuration(
                 ConfiguredKitOptions {
                     addKit(1, BaseTestKit::class.java)
@@ -26,7 +26,7 @@ class UpdateConfigTest : BaseKitOptionsTest() {
                     addKit(3, BaseTestKit::class.java)
                     addKit(4, BaseTestKit::class.java, null)
                     addKit(5, BaseTestKit::class.java)
-                }
+                },
             ).let {
                 startMParticle(it)
             }
@@ -45,12 +45,13 @@ class UpdateConfigTest : BaseKitOptionsTest() {
     @Test
     fun testStartKitWithNewRemoteConfig() {
         setCachedConfig(null)
-        MParticleOptions.builder(mContext)
+        MParticleOptions
+            .builder(mContext)
             .configuration(
                 ConfiguredKitOptions {
                     addKit(1, BaseTestKit::class.java)
                     addKit(2, BaseTestKit::class.java, null)
-                }
+                },
             ).let {
                 startMParticle(it)
             }
@@ -63,8 +64,8 @@ class UpdateConfigTest : BaseKitOptionsTest() {
                     "eks",
                     JSONArray()
                         .put(JSONObject().put("id", 1))
-                        .put(JSONObject().put("id", 2))
-                ).toString()
+                        .put(JSONObject().put("id", 2)),
+                ).toString(),
         )
 
         AccessUtils.getKitManager().addKitsLoadedListener { kits, previousKits, kitConfigs ->
@@ -79,12 +80,13 @@ class UpdateConfigTest : BaseKitOptionsTest() {
     @Test
     fun testShutdownKitWithNewRemoteConfig() {
         setCachedConfig(null)
-        MParticleOptions.builder(mContext)
+        MParticleOptions
+            .builder(mContext)
             .configuration(
                 ConfiguredKitOptions {
                     addKit(1, BaseTestKit::class.java)
                     addKit(2, BaseTestKit::class.java)
-                }
+                },
             ).let {
                 startMParticle(it)
             }
@@ -94,8 +96,8 @@ class UpdateConfigTest : BaseKitOptionsTest() {
                 .put(
                     "eks",
                     JSONArray()
-                        .put(JSONObject().put("id", 1))
-                ).toString()
+                        .put(JSONObject().put("id", 1)),
+                ).toString(),
         )
 
         val latch = MPLatch(1)

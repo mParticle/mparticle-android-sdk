@@ -46,10 +46,7 @@
                     "type": "object"
                   }
                 },
-                "required": [
-                  "custom_event_type",
-                  "event_name"
-                ],
+                "required": ["custom_event_type", "event_name"],
                 "type": "object"
               }
             }
@@ -87,11 +84,7 @@
                     "properties": {
                       "foo": {
                         "description": "",
-                        "enum": [
-                          "bar",
-                          "barr",
-                          "bar bar"
-                        ],
+                        "enum": ["bar", "barr", "bar bar"],
                         "type": "string"
                       },
                       "foo foo": {
@@ -102,11 +95,7 @@
                       },
                       "foo number": {
                         "description": "",
-                        "enum": [
-                          "10",
-                          "20",
-                          "30"
-                        ],
+                        "enum": ["10", "20", "30"],
                         "type": "number"
                       }
                     },
@@ -114,10 +103,7 @@
                     "type": "object"
                   }
                 },
-                "required": [
-                  "custom_event_type",
-                  "event_name"
-                ],
+                "required": ["custom_event_type", "event_name"],
                 "type": "object"
               }
             }
@@ -142,11 +128,7 @@
                 "properties": {
                   "currency_code": {
                     "description": "",
-                    "enum": [
-                      "USD",
-                      "CAD",
-                      "AUS"
-                    ],
+                    "enum": ["USD", "CAD", "AUS"],
                     "type": "string"
                   },
                   "custom_attributes": {
@@ -166,11 +148,7 @@
                       },
                       "attributeNumEnum": {
                         "description": "",
-                        "enum": [
-                          "2",
-                          "7",
-                          "9"
-                        ],
+                        "enum": ["2", "7", "9"],
                         "type": "number"
                       },
                       "attributeStringAlpha": {
@@ -223,15 +201,11 @@
                         "type": "string"
                       }
                     },
-                    "required": [
-                      "required"
-                    ],
+                    "required": ["required"],
                     "type": "object"
                   }
                 },
-                "required": [
-                  "custom_attributes"
-                ],
+                "required": ["custom_attributes"],
                 "type": "object"
               }
             }
@@ -257,10 +231,7 @@
                 "properties": {
                   "canonical_name": {
                     "description": "",
-                    "enum": [
-                      "This",
-                      "That"
-                    ],
+                    "enum": ["This", "That"],
                     "type": "string"
                   }
                 },
@@ -395,9 +366,7 @@
                 "type": "string"
               }
             },
-            "required": [
-              "my other attribute"
-            ]
+            "required": ["my other attribute"]
           }
         },
         "active_transformation_ids": null
@@ -426,9 +395,7 @@
                 "type": "string"
               }
             },
-            "required": [
-              "email"
-            ],
+            "required": ["email"],
             "type": "object"
           }
         },

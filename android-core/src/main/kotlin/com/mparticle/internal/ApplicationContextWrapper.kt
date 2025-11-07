@@ -16,13 +16,21 @@ import java.lang.ref.WeakReference
 import java.util.Collections
 import java.util.LinkedList
 
-open class ApplicationContextWrapper(private val mBaseApplication: Application) : Application() {
+open class ApplicationContextWrapper(
+    private val mBaseApplication: Application,
+) : Application() {
     var isReplayActivityLifecycle: Boolean = true
     private var mRecord = true
     private var mActivityLifecycleCallbackRecorder: ActivityLifecycleCallbackRecorder?
 
     enum class MethodType {
-        ON_CREATED, ON_STARTED, ON_RESUMED, ON_PAUSED, ON_STOPPED, ON_SAVE_INSTANCE_STATE, ON_DESTROYED
+        ON_CREATED,
+        ON_STARTED,
+        ON_RESUMED,
+        ON_PAUSED,
+        ON_STOPPED,
+        ON_SAVE_INSTANCE_STATE,
+        ON_DESTROYED,
     }
 
     init {
@@ -89,7 +97,7 @@ open class ApplicationContextWrapper(private val mBaseApplication: Application) 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     fun registerActivityLifecycleCallbacks(
         callback: ActivityLifecycleCallbacks,
-        unitTesting: Boolean
+        unitTesting: Boolean,
     ) {
         mBaseApplication.registerActivityLifecycleCallbacks(callback)
         val runnable = ReplayLifecycleCallbacksRunnable(callback)
@@ -103,9 +111,7 @@ open class ApplicationContextWrapper(private val mBaseApplication: Application) 
         }
     }
 
-    override fun getApplicationContext(): Context {
-        return this
-    }
+    override fun getApplicationContext(): Context = this
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     override fun unregisterActivityLifecycleCallbacks(callback: ActivityLifecycleCallbacks) {
@@ -122,17 +128,15 @@ open class ApplicationContextWrapper(private val mBaseApplication: Application) 
         mBaseApplication.unregisterOnProvideAssistDataListener(callback)
     }
 
-    override fun hashCode(): Int {
-        return mBaseApplication.hashCode()
+    override fun hashCode(): Int = mBaseApplication.hashCode()
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is ApplicationContextWrapper) return false
+        return mBaseApplication == other.mBaseApplication
     }
 
-    override fun equals(obj: Any?): Boolean {
-        return mBaseApplication == obj
-    }
-
-    override fun toString(): String {
-        return mBaseApplication.toString()
-    }
+    override fun toString(): String = mBaseApplication.toString()
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     private fun startRecordLifecycles() {
@@ -150,18 +154,14 @@ open class ApplicationContextWrapper(private val mBaseApplication: Application) 
 
     fun getLifeCycleEventInstance(
         methodType: MethodType,
-        activityRef: WeakReference<Activity>?
-    ): LifeCycleEvent {
-        return LifeCycleEvent(methodType, activityRef)
-    }
+        activityRef: WeakReference<Activity>?,
+    ): LifeCycleEvent = LifeCycleEvent(methodType, activityRef)
 
     fun getLifeCycleEventInstance(
         methodType: MethodType,
         activityRef: WeakReference<Activity>?,
-        bundle: Bundle?
-    ): LifeCycleEvent {
-        return LifeCycleEvent(methodType, activityRef, bundle)
-    }
+        bundle: Bundle?,
+    ): LifeCycleEvent = LifeCycleEvent(methodType, activityRef, bundle)
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     inner class ActivityLifecycleCallbackRecorder : ActivityLifecycleCallbacks {
@@ -169,13 +169,16 @@ open class ApplicationContextWrapper(private val mBaseApplication: Application) 
             Collections.synchronizedList(LinkedList())
         val MAX_LIST_SIZE: Int = 10
 
-        override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+        override fun onActivityCreated(
+            activity: Activity,
+            savedInstanceState: Bundle?,
+        ) {
             recordedLifecycleList.add(
                 LifeCycleEvent(
                     MethodType.ON_CREATED,
                     WeakReference(activity),
-                    savedInstanceState
-                )
+                    savedInstanceState,
+                ),
             )
         }
 
@@ -183,8 +186,8 @@ open class ApplicationContextWrapper(private val mBaseApplication: Application) 
             recordedLifecycleList.add(
                 LifeCycleEvent(
                     MethodType.ON_STARTED,
-                    WeakReference(activity)
-                )
+                    WeakReference(activity),
+                ),
             )
         }
 
@@ -192,8 +195,8 @@ open class ApplicationContextWrapper(private val mBaseApplication: Application) 
             recordedLifecycleList.add(
                 LifeCycleEvent(
                     MethodType.ON_RESUMED,
-                    WeakReference(activity)
-                )
+                    WeakReference(activity),
+                ),
             )
         }
 
@@ -205,18 +208,21 @@ open class ApplicationContextWrapper(private val mBaseApplication: Application) 
             recordedLifecycleList.add(
                 LifeCycleEvent(
                     MethodType.ON_STOPPED,
-                    WeakReference(activity)
-                )
+                    WeakReference(activity),
+                ),
             )
         }
 
-        override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
+        override fun onActivitySaveInstanceState(
+            activity: Activity,
+            outState: Bundle,
+        ) {
             recordedLifecycleList.add(
                 LifeCycleEvent(
                     MethodType.ON_SAVE_INSTANCE_STATE,
                     WeakReference(activity),
-                    outState
-                )
+                    outState,
+                ),
             )
         }
 
@@ -224,8 +230,8 @@ open class ApplicationContextWrapper(private val mBaseApplication: Application) 
             recordedLifecycleList.add(
                 LifeCycleEvent(
                     MethodType.ON_DESTROYED,
-                    WeakReference(activity)
-                )
+                    WeakReference(activity),
+                ),
             )
         }
 
@@ -251,11 +257,11 @@ open class ApplicationContextWrapper(private val mBaseApplication: Application) 
     inner class LifeCycleEvent(
         val methodType: MethodType,
         val activityRef: WeakReference<Activity>?,
-        val bundle: Bundle?
+        val bundle: Bundle?,
     ) {
         constructor(
             methodType: MethodType,
-            activityRef: WeakReference<Activity>?
+            activityRef: WeakReference<Activity>?,
         ) : this(methodType, activityRef, null)
 
         override fun equals(o: Any?): Boolean {
@@ -273,17 +279,22 @@ open class ApplicationContextWrapper(private val mBaseApplication: Application) 
         }
     }
 
-    internal inner class ReplayLifecycleCallbacksRunnable(var callback: ActivityLifecycleCallbacks) :
-        Runnable {
+    internal inner class ReplayLifecycleCallbacksRunnable(
+        var callback: ActivityLifecycleCallbacks,
+    ) : Runnable {
         @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
         override fun run() {
             if (callback != null && mActivityLifecycleCallbackRecorder != null && isReplayActivityLifecycle) {
-                val reference = if (MParticle.getInstance()?.Internal()?.kitManager == null
-                ) {
-                    null
-                } else {
-                    MParticle.getInstance()?.Internal()?.kitManager?.currentActivity
-                }
+                val reference =
+                    if (MParticle.getInstance()?.Internal()?.kitManager == null) {
+                        null
+                    } else {
+                        MParticle
+                            .getInstance()
+                            ?.Internal()
+                            ?.kitManager
+                            ?.currentActivity
+                    }
                 if (reference != null) {
                     val currentActivity = reference.get()
                     if (currentActivity != null) {
@@ -301,7 +312,7 @@ open class ApplicationContextWrapper(private val mBaseApplication: Application) 
                                                 Logger.debug("Forwarding OnCreate")
                                                 callback.onActivityCreated(
                                                     recordedActivity,
-                                                    lifeCycleEvent.bundle
+                                                    lifeCycleEvent.bundle,
                                                 )
                                             }
 
@@ -325,7 +336,7 @@ open class ApplicationContextWrapper(private val mBaseApplication: Application) 
                                                 lifeCycleEvent.bundle?.let {
                                                     callback.onActivitySaveInstanceState(
                                                         recordedActivity,
-                                                        it
+                                                        it,
                                                     )
                                                 }
                                             }

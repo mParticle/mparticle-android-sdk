@@ -11,35 +11,34 @@ class KnownUserKitsLifecycleTest : BaseKitOptionsTest() {
     @Before
     @Throws(JSONException::class)
     fun before() {
-        val builder = MParticleOptions.builder(mContext)
-            .configuration(
-                ConfiguredKitOptions()
-                    .addKit(-1, TestKit1::class.java, JSONObject().put("eau", true))
-                    .addKit(-2, TestKit2::class.java, JSONObject().put("eau", false))
-                    .addKit(-3, TestKit3::class.java, JSONObject().put("eau", true))
-            )
+        val builder =
+            MParticleOptions
+                .builder(mContext)
+                .configuration(
+                    ConfiguredKitOptions()
+                        .addKit(-1, TestKit1::class.java, JSONObject().put("eau", true))
+                        .addKit(-2, TestKit2::class.java, JSONObject().put("eau", false))
+                        .addKit(-3, TestKit3::class.java, JSONObject().put("eau", true)),
+                )
         startMParticle(builder)
     }
 
     class TestKit1 : TestKit()
+
     class TestKit2 : TestKit()
+
     class TestKit3 : TestKit()
+
     open class TestKit : ListenerTestKit() {
-        override fun getName(): String {
-            return "test kit" + i++
-        }
+        override fun getName(): String = "test kit" + i++
 
         @Throws(IllegalArgumentException::class)
         override fun onKitCreate(
             settings: Map<String, String>?,
-            context: Context
-        ): List<ReportingMessage> {
-            return emptyList()
-        }
+            context: Context,
+        ): List<ReportingMessage> = emptyList()
 
-        override fun setOptOut(optedOut: Boolean): List<ReportingMessage> {
-            return emptyList()
-        }
+        override fun setOptOut(optedOut: Boolean): List<ReportingMessage> = emptyList()
 
         companion object {
             var i = 0

@@ -9,14 +9,25 @@ class BreadcrumbTableTest : BaseTableTest() {
     @Test
     @Throws(InterruptedException::class)
     fun createTableTest() {
-        runTest(object : SQLiteOpenHelperWrapper {
-            override fun onCreate(database: SQLiteDatabase) {
-                database.execSQL(BreadcrumbTable.CREATE_BREADCRUMBS_DDL)
-            }
+        runTest(
+            object : SQLiteOpenHelperWrapper {
+                override fun onCreate(database: SQLiteDatabase) {
+                    database.execSQL(BreadcrumbTable.CREATE_BREADCRUMBS_DDL)
+                }
 
-            override fun onUpgrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {}
-            override fun onDowngrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {}
-        })
+                override fun onUpgrade(
+                    database: SQLiteDatabase,
+                    oldVersion: Int,
+                    newVersion: Int,
+                ) {}
+
+                override fun onDowngrade(
+                    database: SQLiteDatabase,
+                    oldVersion: Int,
+                    newVersion: Int,
+                ) {}
+            },
+        )
     }
 
     companion object {

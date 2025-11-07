@@ -17,7 +17,7 @@ object JellybeanHelper {
                 return stat.availableBlocksLong * stat.blockSizeLong
             }
         } catch (e: Exception) {
-            //For some reason, it appears some devices even in jelly bean don't have this method.
+            // For some reason, it appears some devices even in jelly bean don't have this method.
         }
 
         return 0

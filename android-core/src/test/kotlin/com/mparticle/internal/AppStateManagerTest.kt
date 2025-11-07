@@ -27,9 +27,10 @@ import org.powermock.modules.junit4.PowerMockRunner
 class AppStateManagerTest {
     lateinit var manager: AppStateManager
     private var mockContext: MockApplication? = null
-    private val activity = Mockito.mock(
-        Activity::class.java
-    )
+    private val activity =
+        Mockito.mock(
+            Activity::class.java,
+        )
     private var prefs: MockSharedPreferences? = null
     private var messageManager: MessageManager? = null
 
@@ -68,7 +69,8 @@ class AppStateManagerTest {
     fun testOnActivityStarted() {
         Assert.assertEquals(true, manager.isBackgrounded())
         manager.onActivityStarted(activity)
-        Mockito.verify(MParticle.getInstance()!!.Internal().kitManager, Mockito.times(1))
+        Mockito
+            .verify(MParticle.getInstance()!!.Internal().kitManager, Mockito.times(1))
             .onActivityStarted(activity)
     }
 
@@ -87,14 +89,16 @@ class AppStateManagerTest {
     fun testIntentParameterParsing() {
         var mockIntent = Mockito.mock(Intent::class.java)
         Mockito.`when`(mockIntent.dataString).thenReturn("this is data string 1")
-        var mockCallingActivity = Mockito.mock(
-            ComponentName::class.java
-        )
+        var mockCallingActivity =
+            Mockito.mock(
+                ComponentName::class.java,
+            )
         Mockito.`when`(mockCallingActivity.packageName).thenReturn("package name 1")
         Mockito.`when`(activity.callingActivity).thenReturn(mockCallingActivity)
         Mockito.`when`(activity.intent).thenReturn(mockIntent)
         manager.onActivityResumed(activity)
-        Mockito.verify(messageManager, Mockito.times(1))
+        Mockito
+            .verify(messageManager, Mockito.times(1))
             ?.logStateTransition(
                 Mockito.anyString(),
                 Mockito.anyString(),
@@ -103,7 +107,7 @@ class AppStateManagerTest {
                 Mockito.eq("package name 1"),
                 Mockito.anyLong(),
                 Mockito.anyLong(),
-                Mockito.anyInt()
+                Mockito.anyInt(),
             )
         mockIntent = Mockito.mock(Intent::class.java)
         Mockito.`when`(mockIntent.dataString).thenReturn("this is data string 2")
@@ -114,7 +118,8 @@ class AppStateManagerTest {
         manager.onActivityPaused(activity)
         Thread.sleep(1000)
         manager.onActivityResumed(activity)
-        Mockito.verify(messageManager, Mockito.times(1))
+        Mockito
+            .verify(messageManager, Mockito.times(1))
             ?.logStateTransition(
                 Mockito.anyString(),
                 Mockito.anyString(),
@@ -123,7 +128,7 @@ class AppStateManagerTest {
                 Mockito.eq("package name 2"),
                 Mockito.anyLong(),
                 Mockito.anyLong(),
-                Mockito.anyInt()
+                Mockito.anyInt(),
             )
     }
 
@@ -134,25 +139,28 @@ class AppStateManagerTest {
      */
     @Test
     @Throws(Exception::class)
-    fun testSecondActivityStart() = runTest(StandardTestDispatcher()) {
-        manager.onActivityPaused(activity)
-        Thread.sleep(1000)
-        Assert.assertEquals(true, manager.isBackgrounded())
-        manager.onActivityResumed(activity)
-        val activity2 = Mockito.mock(
-            Activity::class.java
-        )
-        val activity3 = Mockito.mock(
-            Activity::class.java
-        )
-        manager.onActivityPaused(activity2)
-        manager.onActivityPaused(activity3)
-        Thread.sleep(1000)
-        Assert.assertEquals(false, manager.isBackgrounded())
-        manager.onActivityPaused(activity)
-        Thread.sleep(1000)
-        Assert.assertEquals(true, manager.isBackgrounded())
-    }
+    fun testSecondActivityStart() =
+        runTest(StandardTestDispatcher()) {
+            manager.onActivityPaused(activity)
+            Thread.sleep(1000)
+            Assert.assertEquals(true, manager.isBackgrounded())
+            manager.onActivityResumed(activity)
+            val activity2 =
+                Mockito.mock(
+                    Activity::class.java,
+                )
+            val activity3 =
+                Mockito.mock(
+                    Activity::class.java,
+                )
+            manager.onActivityPaused(activity2)
+            manager.onActivityPaused(activity3)
+            Thread.sleep(1000)
+            Assert.assertEquals(false, manager.isBackgrounded())
+            manager.onActivityPaused(activity)
+            Thread.sleep(1000)
+            Assert.assertEquals(true, manager.isBackgrounded())
+        }
 
     @Test
     @Throws(Exception::class)
@@ -167,7 +175,7 @@ class AppStateManagerTest {
         manager.onActivityResumed(activity)
         Assert.assertTrue(
             manager.session.backgroundTime.toString() + " ms",
-            manager.session.backgroundTime in 1000..1199
+            manager.session.backgroundTime in 1000..1199,
         )
     }
 
@@ -192,21 +200,19 @@ class AppStateManagerTest {
     fun testShouldEndSession() {
         val isTimedOut = AndroidUtils.Mutable(false)
         val isBackground = AndroidUtils.Mutable(false)
-        val session = AndroidUtils.Mutable<InternalSession?>(object : InternalSession() {
-            override fun isTimedOut(sessionTimeout: Int): Boolean {
-                return isTimedOut.value
-            }
-        })
+        val session =
+            AndroidUtils.Mutable<InternalSession?>(
+                object : InternalSession() {
+                    override fun isTimedOut(sessionTimeout: Int): Boolean = isTimedOut.value
+                },
+            )
         session.value?.mSessionStartTime = 1
-        manager = object : AppStateManager(MockContext(), true) {
-            override fun isBackgrounded(): Boolean {
-                return isBackground.value
-            }
+        manager =
+            object : AppStateManager(MockContext(), true) {
+                override fun isBackgrounded(): Boolean = isBackground.value
 
-            override fun fetchSession(): InternalSession {
-                return session.value!!
+                override fun fetchSession(): InternalSession = session.value!!
             }
-        }
         manager.session = session.value!!
         val configManager = Mockito.mock(ConfigManager::class.java)
         manager.setConfigManager(configManager)

@@ -28,8 +28,9 @@ import org.jetbrains.uast.getContainingUClass
 import org.jetbrains.uast.getParentOfType
 import org.jetbrains.uast.resolveToUElement
 
-class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
-
+class MpApiDetectorKt :
+    BaseDetector(),
+    Detector.UastScanner {
     companion object {
         val MESSAGE_MULTIPLE_START_CALLS = "Duplicate call to MParticle.start"
         val MESSAGE_NO_START_CALL_IN_ON_CREATE = "This Method should call MParticle.start()"
@@ -39,15 +40,16 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
             "In order to Initialize MParticle, you need to extend android.app.Application, and call MParticle.start() in it's onCreate() method"
 
         @JvmStatic
-        val ISSUE = Issue.create(
-            "MParticleInitialization",
-            "mParticle is being started improperly",
-            "MParticle.start() is not called in the onCreate method of the Application class",
-            Category.MESSAGES,
-            7,
-            Severity.WARNING,
-            Implementation(MpApiDetectorKt::class.java, Scope.JAVA_FILE_SCOPE)
-        )
+        val ISSUE =
+            Issue.create(
+                "MParticleInitialization",
+                "mParticle is being started improperly",
+                "MParticle.start() is not called in the onCreate method of the Application class",
+                Category.MESSAGES,
+                7,
+                Severity.WARNING,
+                Implementation(MpApiDetectorKt::class.java, Scope.JAVA_FILE_SCOPE),
+            )
 
         private val TARGET_METHOD_QUALIFIED_NAME = "com.mparticle.MParticle.start"
 
@@ -83,7 +85,7 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
                 context.report(
                     ISSUE,
                     applicationOnCreateCall!!.location,
-                    MESSAGE_NO_START_CALL_IN_ON_CREATE
+                    MESSAGE_NO_START_CALL_IN_ON_CREATE,
                 )
             } else {
                 context.report(ISSUE, Location.create(context.file), MESSAGE_NO_START_CALL_AT_ALL)
@@ -107,8 +109,8 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
      * including the same call made through different code paths, these are "Duplicate calls". Any method we find outside of a code path originating
      * in Application.onCreate() is a "Wrong place call"
      */
-    override fun createUastHandler(context: JavaContext): UElementHandler {
-        return object : UElementHandler() {
+    override fun createUastHandler(context: JavaContext): UElementHandler =
+        object : UElementHandler() {
             override fun visitMethod(node: UMethod) {
                 try {
                     this@MpApiDetectorKt.context = context
@@ -124,9 +126,9 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
                                             extraProperMethodCalls.add(
                                                 LocationWrapper(
                                                     context.getLocation(
-                                                        methodCall
-                                                    )
-                                                )
+                                                        methodCall,
+                                                    ),
+                                                ),
                                             )
                                         }
                                     }
@@ -137,15 +139,15 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
                         findMethodCall(
                             node,
                             TARGET_METHOD_QUALIFIED_NAME,
-                            1
+                            1,
                         ).forEach { methodCall ->
                             if (isTargetMethod(TARGET_METHOD_QUALIFIED_NAME, methodCall)) {
                                 wrongPlaceMethodCalls.add(
                                     LocationWrapper(
                                         context.getLocation(
-                                            methodCall
-                                        )
-                                    )
+                                            methodCall,
+                                        ),
+                                    ),
                                 )
                             }
                         }
@@ -155,14 +157,16 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
                 }
             }
         }
-    }
 
     private fun findMethodCall(
         method: UMethod,
         targetMethodName: String,
-        depth: Int
+        depth: Int,
     ): List<UCallExpression> {
-        fun findMethodCall(element: UElement?, depth: Int): List<UCallExpression> {
+        fun findMethodCall(
+            element: UElement?,
+            depth: Int,
+        ): List<UCallExpression> {
             var callExpressions = mutableListOf<UCallExpression>()
             if (depth == 0) {
                 return callExpressions
@@ -183,10 +187,11 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
                     }
                 }
                 // Test this, but I think this just applies to kotlin extension blocks, like apply, let, also, etc
-                is UBlockExpression -> element.expressions.forEach { e ->
-                    // increment depth here, because we are essentially diving into the expression
-                    callExpressions.addAll(findMethodCall(e, depth))
-                }
+                is UBlockExpression ->
+                    element.expressions.forEach { e ->
+                        // increment depth here, because we are essentially diving into the expression
+                        callExpressions.addAll(findMethodCall(e, depth))
+                    }
                 is UDeclarationsExpression ->
                     // This covers the case if there is a method being used to initialize a variable..
                     // i.e int a = random();
@@ -202,10 +207,11 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
                                     return@apply
                                 }
                                 val index = text.indexOf(name ?: "")
-                                if (index > 0 && " ${
+                                if (index > 0 &&
+                                    " ${
                                     text.substring(
                                             0,
-                                            index
+                                            index,
                                         )
                                     } ".contains(" fun ")
                                 ) {
@@ -245,10 +251,9 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
      * Especially with local functions, introduced in kotlin, we have to check both whether is method
      * call refers to a local function, or a class level function,
      */
-    private fun getMethod(callExpression: UCallExpression): UExpression? {
-        return getLocalMethodImplmentation(callExpression)
+    private fun getMethod(callExpression: UCallExpression): UExpression? =
+        getLocalMethodImplmentation(callExpression)
             ?: getMethodImplementation(callExpression)
-    }
 
     private fun getLocalMethodImplmentation(callExpression: UCallExpression): UExpression? {
         (callExpression.uastParent as? UBlockExpression)
@@ -278,11 +283,13 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
     /**
      *
      */
-    private fun getMethodImplementation(callExpression: UCallExpression): UExpression? {
-        return (callExpression.tryResolveUDeclaration() as? UMethod)?.uastBody
-    }
+    private fun getMethodImplementation(callExpression: UCallExpression): UExpression? =
+        (callExpression.tryResolveUDeclaration() as? UMethod)?.uastBody
 
-    private fun isTargetMethod(targetMethodName: String, element: UCallExpression): Boolean {
+    private fun isTargetMethod(
+        targetMethodName: String,
+        element: UCallExpression,
+    ): Boolean {
         // before we resolve the method, do a quick check to see if the name matches
         if (targetMethodName.endsWith(element.methodName ?: "")) {
             // if the name matches, do the more expensive operation of resolving the method implementation,
@@ -294,13 +301,18 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
         return false
     }
 
-    private fun isApplicationSubClassOnCreate(context: JavaContext, method: UMethod): Boolean {
-        return isApplicationSubClass(context, method) && method.name.equals("onCreate")
-    }
+    private fun isApplicationSubClassOnCreate(
+        context: JavaContext,
+        method: UMethod,
+    ): Boolean = isApplicationSubClass(context, method) && method.name.equals("onCreate")
 
-    private fun isApplicationSubClass(context: JavaContext, method: UMethod): Boolean {
+    private fun isApplicationSubClass(
+        context: JavaContext,
+        method: UMethod,
+    ): Boolean {
         val evaluator = context.evaluator
-        return method.getParentOfType(true, UClass::class.java)
+        return method
+            .getParentOfType(true, UClass::class.java)
             ?.let {
                 var isApplicationSubclass =
                     evaluator.extendsClass(it, "android.app.Application", false)
@@ -315,12 +327,10 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
      * before or not, is to compare their location. The Location object does not have an effective "equals()"
      * method, so this class provides us with a way to compare locations
      */
-    internal class LocationWrapper constructor(val location: Location) :
-        Comparable<LocationWrapper> {
-
-        override fun hashCode(): Int {
-            return toString().hashCode()
-        }
+    internal class LocationWrapper constructor(
+        val location: Location,
+    ) : Comparable<LocationWrapper> {
+        override fun hashCode(): Int = toString().hashCode()
 
         override fun equals(other: Any?): Boolean {
             if (other === this) {
@@ -338,20 +348,19 @@ class MpApiDetectorKt : BaseDetector(), Detector.UastScanner {
             return false
         }
 
-        fun compareLocation(l1: Position?, l2: Position?): Boolean {
-            return l1?.column == l2?.column &&
+        fun compareLocation(
+            l1: Position?,
+            l2: Position?,
+        ): Boolean =
+            l1?.column == l2?.column &&
                 l1?.line == l2?.line &&
                 l1?.offset == l2?.offset
-        }
 
-        override fun toString(): String {
-            return location.file.getAbsolutePath() + "\n" +
-                location.start?.offset + " " + location.start?.line + " " + location.start?.column +
-                location.end?.offset + " " + location.end?.line + " " + location.end?.column
-        }
+        override fun toString(): String =
+            location.file.getAbsolutePath() + "\n" +
+                (location.start?.offset.toString() + " " + location.start?.line + " " + location.start?.column) + "\n" +
+                (location.end?.offset.toString() + " " + location.end?.line + " " + location.end?.column)
 
-        override fun compareTo(other: LocationWrapper): Int {
-            return toString().compareTo(other.toString())
-        }
+        override fun compareTo(other: LocationWrapper): Int = toString().compareTo(other.toString())
     }
 }

@@ -8,8 +8,11 @@ class MPEventTests {
     @Test
     fun testBasicBuilder() {
         val event =
-            MPEvent.Builder("test name", MParticle.EventType.Navigation).category("test category")
-                .duration(1234.0).build()
+            MPEvent
+                .Builder("test name", MParticle.EventType.Navigation)
+                .category("test category")
+                .duration(1234.0)
+                .build()
         Assert.assertTrue(event.eventName == "test name")
         Assert.assertTrue(event.eventType == MParticle.EventType.Navigation)
         Assert.assertTrue(event.category == "test category")
@@ -18,7 +21,12 @@ class MPEventTests {
 
     @Test
     fun testScreenBuilder() {
-        val event = MPEvent.Builder("test name").category("test category").duration(1234.0).build()
+        val event =
+            MPEvent
+                .Builder("test name")
+                .category("test category")
+                .duration(1234.0)
+                .build()
         Assert.assertTrue(event.eventName == "test name")
         Assert.assertTrue(event.eventType == MParticle.EventType.Other)
         Assert.assertTrue(event.category == "test category")
@@ -28,8 +36,11 @@ class MPEventTests {
     @Test
     fun testSerialization() {
         val eventString =
-            MPEvent.Builder("test name", MParticle.EventType.Navigation).category("test category")
-                .duration(1234.0).toString()
+            MPEvent
+                .Builder("test name", MParticle.EventType.Navigation)
+                .category("test category")
+                .duration(1234.0)
+                .toString()
         val event = MPEvent.Builder.parseString(eventString)?.build()
         Assert.assertTrue(event?.eventName == "test name")
         Assert.assertTrue(event?.eventType == MParticle.EventType.Navigation)
@@ -40,7 +51,9 @@ class MPEventTests {
     @Test
     fun testEventLength() {
         val event =
-            MPEvent.Builder("test name", MParticle.EventType.Navigation).category("test category")
+            MPEvent
+                .Builder("test name", MParticle.EventType.Navigation)
+                .category("test category")
                 .build()
         Assert.assertNull(event.length)
     }
@@ -70,7 +83,7 @@ class MPEventTests {
             MPEvent.Builder(nameBuilder.toString(), MParticle.EventType.Navigation).build()
         Assert.assertEquals(
             Constants.LIMIT_ATTR_KEY.toLong(),
-            eventBuilder.eventName.length.toLong()
+            eventBuilder.eventName.length.toLong(),
         )
     }
 
@@ -84,14 +97,16 @@ class MPEventTests {
         val attributes = HashMap<String, String?>()
         attributes["key 1"] = "value 1"
         attributes["key 2"] = "value 2"
-        event = MPEvent.Builder("another name", MParticle.EventType.Social)
-            .category("category")
-            .duration(12345.0)
-            .customAttributes(attributes)
-            .addCustomFlag("cool flag key", "flag 1 value 1")
-            .addCustomFlag("cool flag key", "flag 1 value 2")
-            .addCustomFlag("cool flag key 2", "flag 2 value 1")
-            .build()
+        event =
+            MPEvent
+                .Builder("another name", MParticle.EventType.Social)
+                .category("category")
+                .duration(12345.0)
+                .customAttributes(attributes)
+                .addCustomFlag("cool flag key", "flag 1 value 1")
+                .addCustomFlag("cool flag key", "flag 1 value 2")
+                .addCustomFlag("cool flag key 2", "flag 2 value 1")
+                .build()
         copiedEvent = MPEvent(event)
         Assert.assertEquals("another name", copiedEvent.eventName)
         Assert.assertEquals(MParticle.EventType.Social, copiedEvent.eventType)

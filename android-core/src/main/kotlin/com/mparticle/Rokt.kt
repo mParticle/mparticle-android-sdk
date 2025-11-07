@@ -13,9 +13,8 @@ import java.lang.ref.WeakReference
 @ApiClass
 class Rokt internal constructor(
     private val mConfigManager: ConfigManager,
-    private val mKitManager: KitManager
+    private val mKitManager: KitManager,
 ) {
-
     @JvmOverloads
     fun selectPlacements(
         identifier: String,
@@ -23,22 +22,25 @@ class Rokt internal constructor(
         callbacks: MpRoktEventCallback? = null,
         embeddedViews: Map<String, WeakReference<RoktEmbeddedView>>? = null,
         fontTypefaces: Map<String, WeakReference<Typeface>>? = null,
-        config: RoktConfig? = null
+        config: RoktConfig? = null,
     ) {
         if (mConfigManager.isEnabled) {
             mKitManager.execute(identifier, HashMap(attributes), callbacks, embeddedViews, fontTypefaces, config)
         }
     }
 
-    fun events(identifier: String) : Flow<RoktEvent> {
-        return if (mConfigManager.isEnabled) {
+    fun events(identifier: String): Flow<RoktEvent> =
+        if (mConfigManager.isEnabled) {
             mKitManager.events(identifier)
         } else {
             flowOf()
         }
-    }
 
-    fun purchaseFinalized(placementId: String, catalogItemId: String, status: Boolean) {
+    fun purchaseFinalized(
+        placementId: String,
+        catalogItemId: String,
+        status: Boolean,
+    ) {
         if (mConfigManager.isEnabled) {
             mKitManager.purchaseFinalized(placementId, catalogItemId, status)
         }

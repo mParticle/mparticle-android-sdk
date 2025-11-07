@@ -6,6 +6,11 @@ on:
       - development
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pull-requests: read
+  checks: write
+
 jobs:
   rebase-branch:
     name: "Rebase Development onto Dependabot Branch"

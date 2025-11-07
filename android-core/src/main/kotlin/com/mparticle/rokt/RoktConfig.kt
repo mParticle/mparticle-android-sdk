@@ -11,8 +11,11 @@ class RoktConfig private constructor(
         private var edgeToEdgeDisplay: Boolean = true,
     ) {
         fun colorMode(mode: ColorMode) = apply { this.colorMode = mode }
+
         fun cacheConfig(cacheConfig: CacheConfig) = apply { this.cacheConfig = cacheConfig }
+
         fun edgeToEdgeDisplay(edgeToEdgeDisplay: Boolean) = apply { this.edgeToEdgeDisplay = edgeToEdgeDisplay }
+
         fun build(): RoktConfig = RoktConfig(colorMode, cacheConfig, edgeToEdgeDisplay)
     }
 

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # if there's already an emulator, just exit
 #export PATH=${ANDROID_HOME}:${ANDROID_HOME}/emulator:${TOOLS}:${TOOLS}/bin:${ANDROID_HOME}/platform-tools:${PATH}
 #echo "users file dump:"

@@ -8,7 +8,6 @@ import java.lang.reflect.Field
 import java.lang.reflect.Method
 
 class AudienceResponseTest {
-
     private lateinit var classInstance: AudienceResponse
 
     @Before
@@ -20,10 +19,11 @@ class AudienceResponseTest {
     fun parseJsonObjectTest() {
         val sampleJson =
             "{'dt':'ar','id':'54335128-0b2c-4089-a36d-8b456890dfe8','ct':1713390288601,'audience_memberships':[{'audience_id':13775},{'audience_id':13775}]}"
-        val method: Method = AudienceResponse::class.java.getDeclaredMethod(
-            "parseJsonObject",
-            JSONObject::class.java
-        )
+        val method: Method =
+            AudienceResponse::class.java.getDeclaredMethod(
+                "parseJsonObject",
+                JSONObject::class.java,
+            )
         method.isAccessible = true
         val jsonObject1 = JSONObject(sampleJson)
         method.invoke(classInstance, jsonObject1)
@@ -33,10 +33,11 @@ class AudienceResponseTest {
     @Test
     fun parseJsonObjectTest_whenJSONIsEmpty() {
         val sampleJson = "{}"
-        val method: Method = AudienceResponse::class.java.getDeclaredMethod(
-            "parseJsonObject",
-            JSONObject::class.java
-        )
+        val method: Method =
+            AudienceResponse::class.java.getDeclaredMethod(
+                "parseJsonObject",
+                JSONObject::class.java,
+            )
         method.isAccessible = true
         val jsonObject1 = JSONObject(sampleJson)
         method.invoke(classInstance, jsonObject1)
@@ -47,10 +48,11 @@ class AudienceResponseTest {
     @Test
     fun parseJsonObjectTest_whenObject_Is_NULL() {
         classInstance = AudienceResponse(-1, JSONObject())
-        val method: Method = AudienceResponse::class.java.getDeclaredMethod(
-            "parseJsonObject",
-            JSONObject::class.java
-        )
+        val method: Method =
+            AudienceResponse::class.java.getDeclaredMethod(
+                "parseJsonObject",
+                JSONObject::class.java,
+            )
         method.isAccessible = true
         val jsonObject1 = null
         method.invoke(classInstance, jsonObject1)
@@ -62,10 +64,11 @@ class AudienceResponseTest {
     fun parseJsonObjectTest_when_AudienceMemberships_Field_Is_Not_Available() {
         val sampleJson =
             "{'dt':'ar','id':'54335128-0b2c-4089-a36d-8b456890dfe8','ct':1713390288601}"
-        val method: Method = AudienceResponse::class.java.getDeclaredMethod(
-            "parseJsonObject",
-            JSONObject::class.java
-        )
+        val method: Method =
+            AudienceResponse::class.java.getDeclaredMethod(
+                "parseJsonObject",
+                JSONObject::class.java,
+            )
         method.isAccessible = true
         val jsonObject1 = JSONObject(sampleJson)
         method.invoke(classInstance, jsonObject1)
@@ -77,10 +80,11 @@ class AudienceResponseTest {
     fun parseJsonObjectTest_when_Aaudience_id_Field_Is_Not_Available() {
         val sampleJson =
             "{'dt':'ar','id':'54335128-0b2c-4089-a36d-8b456890dfe8','ct':1713390288601,'audience_memberships':[{}]}"
-        val method: Method = AudienceResponse::class.java.getDeclaredMethod(
-            "parseJsonObject",
-            JSONObject::class.java
-        )
+        val method: Method =
+            AudienceResponse::class.java.getDeclaredMethod(
+                "parseJsonObject",
+                JSONObject::class.java,
+            )
         method.isAccessible = true
         val jsonObject1 = JSONObject(sampleJson)
         method.invoke(classInstance, jsonObject1)

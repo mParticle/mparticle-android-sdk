@@ -18,19 +18,23 @@ class DeviceAttributesTests : BaseCleanInstallEachTest() {
         Assert.assertFalse(attributes.has(Constants.MessageKey.DEVICE_ANID))
         Assert.assertFalse(attributes.has(Constants.MessageKey.DEVICE_OPEN_UDID))
         Assert.assertFalse(attributes.has(Constants.MessageKey.DEVICE_ID))
-        var options = MParticleOptions.builder(context)
-            .androidIdEnabled(false)
-            .credentials("key", "secret")
-            .build()
+        var options =
+            MParticleOptions
+                .builder(context)
+                .androidIdEnabled(false)
+                .credentials("key", "secret")
+                .build()
         MParticle.start(options)
         var newAttributes = JSONObject()
         DeviceAttributes.addAndroidId(newAttributes, context)
         Assert.assertTrue(newAttributes.length() == 0)
         MParticle.setInstance(null)
-        options = MParticleOptions.builder(context)
-            .androidIdEnabled(true)
-            .credentials("key", "secret")
-            .build()
+        options =
+            MParticleOptions
+                .builder(context)
+                .androidIdEnabled(true)
+                .credentials("key", "secret")
+                .build()
         MParticle.start(options)
         newAttributes = JSONObject()
         val androidId = MPUtility.getAndroidID(context)
@@ -38,7 +42,7 @@ class DeviceAttributesTests : BaseCleanInstallEachTest() {
         Assert.assertTrue(newAttributes.length() == 3)
         Assert.assertEquals(newAttributes.getString(Constants.MessageKey.DEVICE_ANID), androidId)
         Assert.assertTrue(
-            newAttributes.getString(Constants.MessageKey.DEVICE_OPEN_UDID).isNotEmpty()
+            newAttributes.getString(Constants.MessageKey.DEVICE_OPEN_UDID).isNotEmpty(),
         )
         Assert.assertEquals(newAttributes.getString(Constants.MessageKey.DEVICE_ID), androidId)
     }

@@ -11,12 +11,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
 class BatchSessionInfoTest : BaseCleanStartedEachTest() {
-
     override fun useInMemoryDatabase() = true
 
-    override fun transformMParticleOptions(builder: MParticleOptions.Builder): MParticleOptions.Builder {
-        return builder.logLevel(MParticle.LogLevel.INFO)
-    }
+    override fun transformMParticleOptions(builder: MParticleOptions.Builder): MParticleOptions.Builder =
+        builder.logLevel(MParticle.LogLevel.INFO)
 
     /**
      * This test is in response to a bug where, when many messages (> 1 batch worth)
@@ -60,7 +58,7 @@ class BatchSessionInfoTest : BaseCleanStartedEachTest() {
                 assertEquals("111", version)
                 MParticle.getInstance()?.upload()
                 messageCount >= 150
-            }
+            },
         )
 
         MParticle.getInstance()?.apply {
@@ -73,7 +71,7 @@ class BatchSessionInfoTest : BaseCleanStartedEachTest() {
                     it.getJSONObject("ai").getString(Constants.MessageKey.INSTALL_REFERRER)
                 assertEquals("222", version)
                 true
-            }
+            },
         )
     }
 }

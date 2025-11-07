@@ -87,8 +87,6 @@ class InternalListenerManagerTest {
             return applicationInfo
         }
 
-        override fun getPackageName(): String {
-            return "test.package.name"
-        }
+        override fun getPackageName(): String = "test.package.name"
     }
 }

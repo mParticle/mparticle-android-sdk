@@ -31,60 +31,69 @@ class UploadMessageTest : BaseCleanStartedEachTest() {
         val numberOfEvents = 3
         val handler = Handler(Looper.getMainLooper())
         val mpid = ran.nextLong()
-        MParticle.getInstance()?.mInternal?.configManager?.setMpid(mpid, ran.nextBoolean())
+        MParticle
+            .getInstance()
+            ?.mInternal
+            ?.configManager
+            ?.setMpid(mpid, ran.nextBoolean())
         val events: MutableMap<String, MPEvent> = HashMap()
         val latch: CountDownLatch = MPLatch(numberOfEvents)
         val matchingJSONEvents: MutableMap<Long, MutableMap<String, JSONObject>> = HashMap()
-        AccessUtils.setMParticleApiClient(object : EmptyMParticleApiClient() {
-            @Throws(IOException::class, MPThrottleException::class, MPRampException::class)
-            override fun sendMessageBatch(message: String, uploadSettings: UploadSettings): Int {
-                handler.post {
-                    try {
-                        val jsonObject = JSONObject(message)
-                        val jsonArray = jsonObject.optJSONArray(Constants.MessageKey.MESSAGES)
-                        val mpid = java.lang.Long.valueOf(jsonObject.getString("mpid"))
-                        var matchingMpidJSONEvents = matchingJSONEvents[mpid]
-                        if (matchingMpidJSONEvents == null) {
-                            matchingJSONEvents[mpid] =
-                                HashMap<String, JSONObject>().also { matchingMpidJSONEvents = it }
-                        }
-                        if (!MPUtility.isEmpty(jsonArray)) {
-                            if (jsonArray != null) {
-                                for (i in 0 until jsonArray.length()) {
-                                    val eventObject = jsonArray.getJSONObject(i)
-                                    if (eventObject.getString("dt") == Constants.MessageType.EVENT) {
-                                        val eventName = eventObject.getString("n")
-                                        val matchingEvent = events[eventName]
-                                        if (matchingEvent != null) {
-                                            val eventType = eventObject.getString("et")
-                                            if (matchingEvent.eventType.toString() == eventType) {
-                                                if (matchingMpidJSONEvents?.containsKey(eventName) == true) {
-                                                    Assert.fail("Duplicate Event Message Sent")
+        AccessUtils.setMParticleApiClient(
+            object : EmptyMParticleApiClient() {
+                @Throws(IOException::class, MPThrottleException::class, MPRampException::class)
+                override fun sendMessageBatch(
+                    message: String,
+                    uploadSettings: UploadSettings,
+                ): Int {
+                    handler.post {
+                        try {
+                            val jsonObject = JSONObject(message)
+                            val jsonArray = jsonObject.optJSONArray(Constants.MessageKey.MESSAGES)
+                            val mpid = java.lang.Long.valueOf(jsonObject.getString("mpid"))
+                            var matchingMpidJSONEvents = matchingJSONEvents[mpid]
+                            if (matchingMpidJSONEvents == null) {
+                                matchingJSONEvents[mpid] =
+                                    HashMap<String, JSONObject>().also { matchingMpidJSONEvents = it }
+                            }
+                            if (!MPUtility.isEmpty(jsonArray)) {
+                                if (jsonArray != null) {
+                                    for (i in 0 until jsonArray.length()) {
+                                        val eventObject = jsonArray.getJSONObject(i)
+                                        if (eventObject.getString("dt") == Constants.MessageType.EVENT) {
+                                            val eventName = eventObject.getString("n")
+                                            val matchingEvent = events[eventName]
+                                            if (matchingEvent != null) {
+                                                val eventType = eventObject.getString("et")
+                                                if (matchingEvent.eventType.toString() == eventType) {
+                                                    if (matchingMpidJSONEvents?.containsKey(eventName) == true) {
+                                                        Assert.fail("Duplicate Event Message Sent")
+                                                    } else {
+                                                        matchingMpidJSONEvents?.set(
+                                                            eventName,
+                                                            eventObject,
+                                                        )
+                                                    }
                                                 } else {
-                                                    matchingMpidJSONEvents?.set(
-                                                        eventName,
-                                                        eventObject
-                                                    )
+                                                    Assert.fail("Unknown Event")
                                                 }
                                             } else {
                                                 Assert.fail("Unknown Event")
                                             }
-                                        } else {
-                                            Assert.fail("Unknown Event")
+                                            latch.countDown()
                                         }
-                                        latch.countDown()
                                     }
                                 }
                             }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            Assert.fail(e.toString())
                         }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        Assert.fail(e.toString())
                     }
+                    return 202
                 }
-                return 202
-            }
-        })
+            },
+        )
         var j = 0
         while (j < 3) {
             val event = TestingUtils.getInstance().randomMPEventRich
@@ -167,7 +176,10 @@ class UploadMessageTest : BaseCleanStartedEachTest() {
 //    }
 
     @Throws(JSONException::class)
-    fun assertEventEquals(mpEvent: MPEvent, jsonObject: JSONObject) {
+    fun assertEventEquals(
+        mpEvent: MPEvent,
+        jsonObject: JSONObject,
+    ) {
         if (jsonObject.optString("n") !== mpEvent.eventName) {
             Assert.assertTrue(mpEvent.eventName == jsonObject.getString("n"))
         }
@@ -210,7 +222,10 @@ class UploadMessageTest : BaseCleanStartedEachTest() {
     }
 
     @Throws(JSONException::class)
-    fun assertArraysEqual(jsonArray: JSONArray, list: MutableList<String>) {
+    fun assertArraysEqual(
+        jsonArray: JSONArray,
+        list: MutableList<String>,
+    ) {
         val jsonArrayList: MutableList<String> = ArrayList()
         for (i in 0 until jsonArray.length()) {
             jsonArrayList.add(jsonArray.getString(i))

@@ -35,10 +35,15 @@ class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
         val handler = Handler()
         handler.postDelayed({ Assert.fail("modify did not complete") }, (10 * 1000).toLong())
         val called = AndroidUtils.Mutable(false)
-        MParticle.getInstance()?.Identity()?.modify(IdentityApiRequest.withEmptyUser().build())
+        MParticle
+            .getInstance()
+            ?.Identity()
+            ?.modify(IdentityApiRequest.withEmptyUser().build())
             ?.addSuccessListener {
                 latch.countDown()
-                MParticle.getInstance()?.Identity()
+                MParticle
+                    .getInstance()
+                    ?.Identity()
                     ?.modify(IdentityApiRequest.withEmptyUser().build())
                     ?.addSuccessListener {
                         val currentModifyRequestCount = mServer.Requests().modify.size
@@ -49,10 +54,8 @@ class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
                         // handler.removeCallbacks(null)
                         called.value = true
                         latch.countDown()
-                    }
-                    ?.addFailureListener { Assert.fail("task failed") }
-            }
-            ?.addFailureListener { Assert.fail("task failed") }
+                    }?.addFailureListener { Assert.fail("task failed") }
+            }?.addFailureListener { Assert.fail("task failed") }
         latch.await()
         Assert.assertTrue(called.value)
     }
@@ -65,43 +68,47 @@ class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
             val userIdentities = mRandomUtils.randomUserIdentities
             val checked = MutableBoolean(false)
             val latch = CountDownLatch(1)
-            setApiClient(object : MockIdentityApiClient {
-                @Throws(IOException::class, JSONException::class)
-                override fun makeUrlRequest(
-                    connection: MPConnection,
-                    payload: String?,
-                    mparticle: Boolean
-                ) {
-                    if (connection.url.toString().contains("/identify")) {
-                        val jsonObject = JSONObject(payload)
-                        val knownIdentities =
-                            jsonObject.getJSONObject(MParticleIdentityClientImpl.KNOWN_IDENTITIES)
-                        Assert.assertNotNull(knownIdentities)
-                        checkStaticsAndRemove(knownIdentities)
-                        if (knownIdentities.length() != userIdentities.size) {
-                            Assert.assertEquals(
-                                knownIdentities.length().toLong(),
-                                userIdentities.size.toLong()
-                            )
-                        }
-                        for ((key, value1) in userIdentities) {
-                            val value = knownIdentities.getString(
-                                MParticleIdentityClientImpl.getStringValue(
-                                    key
+            setApiClient(
+                object : MockIdentityApiClient {
+                    @Throws(IOException::class, JSONException::class)
+                    override fun makeUrlRequest(
+                        connection: MPConnection,
+                        payload: String?,
+                        mparticle: Boolean,
+                    ) {
+                        if (connection.url.toString().contains("/identify")) {
+                            val jsonObject = JSONObject(payload)
+                            val knownIdentities =
+                                jsonObject.getJSONObject(MParticleIdentityClientImpl.KNOWN_IDENTITIES)
+                            Assert.assertNotNull(knownIdentities)
+                            checkStaticsAndRemove(knownIdentities)
+                            if (knownIdentities.length() != userIdentities.size) {
+                                Assert.assertEquals(
+                                    knownIdentities.length().toLong(),
+                                    userIdentities.size.toLong(),
                                 )
-                            )
-                            Assert.assertEquals(value, value1)
+                            }
+                            for ((key, value1) in userIdentities) {
+                                val value =
+                                    knownIdentities.getString(
+                                        MParticleIdentityClientImpl.getStringValue(
+                                            key,
+                                        ),
+                                    )
+                                Assert.assertEquals(value, value1)
+                            }
+                            checked.value = true
+                            setApiClient(null)
+                            latch.countDown()
                         }
-                        checked.value = true
-                        setApiClient(null)
-                        latch.countDown()
                     }
-                }
-            })
+                },
+            )
             mApiClient?.identify(
-                IdentityApiRequest.withEmptyUser()
+                IdentityApiRequest
+                    .withEmptyUser()
                     .userIdentities(userIdentities)
-                    .build()
+                    .build(),
             )
             latch.await()
             Assert.assertTrue(checked.value)
@@ -116,40 +123,44 @@ class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
             val latch: CountDownLatch = MPLatch(1)
             val checked = MutableBoolean(false)
             val userIdentities = mRandomUtils.randomUserIdentities
-            setApiClient(object : MockIdentityApiClient {
-                @Throws(IOException::class, JSONException::class)
-                override fun makeUrlRequest(
-                    connection: MPConnection,
-                    payload: String?,
-                    mparticle: Boolean
-                ) {
-                    if (connection.url.toString().contains("/login")) {
-                        val jsonObject = JSONObject(payload)
-                        val knownIdentities =
-                            jsonObject.getJSONObject(MParticleIdentityClientImpl.KNOWN_IDENTITIES)
-                        Assert.assertNotNull(knownIdentities)
-                        checkStaticsAndRemove(knownIdentities)
-                        Assert.assertEquals(
-                            knownIdentities.length().toLong(),
-                            userIdentities.size.toLong()
-                        )
-                        for ((key, value1) in userIdentities) {
-                            val value = knownIdentities.getString(
-                                MParticleIdentityClientImpl.getStringValue(
-                                    key
-                                )
+            setApiClient(
+                object : MockIdentityApiClient {
+                    @Throws(IOException::class, JSONException::class)
+                    override fun makeUrlRequest(
+                        connection: MPConnection,
+                        payload: String?,
+                        mparticle: Boolean,
+                    ) {
+                        if (connection.url.toString().contains("/login")) {
+                            val jsonObject = JSONObject(payload)
+                            val knownIdentities =
+                                jsonObject.getJSONObject(MParticleIdentityClientImpl.KNOWN_IDENTITIES)
+                            Assert.assertNotNull(knownIdentities)
+                            checkStaticsAndRemove(knownIdentities)
+                            Assert.assertEquals(
+                                knownIdentities.length().toLong(),
+                                userIdentities.size.toLong(),
                             )
-                            Assert.assertEquals(value, value1)
+                            for ((key, value1) in userIdentities) {
+                                val value =
+                                    knownIdentities.getString(
+                                        MParticleIdentityClientImpl.getStringValue(
+                                            key,
+                                        ),
+                                    )
+                                Assert.assertEquals(value, value1)
+                            }
+                            checked.value = true
+                            latch.countDown()
                         }
-                        checked.value = true
-                        latch.countDown()
                     }
-                }
-            })
+                },
+            )
             mApiClient?.login(
-                IdentityApiRequest.withEmptyUser()
+                IdentityApiRequest
+                    .withEmptyUser()
                     .userIdentities(userIdentities)
-                    .build()
+                    .build(),
             )
             latch.await()
             Assert.assertTrue(checked.value)
@@ -164,44 +175,48 @@ class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
             val userIdentities = mRandomUtils.randomUserIdentities
             val latch: CountDownLatch = MPLatch(1)
             val checked = MutableBoolean(false)
-            setApiClient(object : MockIdentityApiClient {
-                @Throws(IOException::class, JSONException::class)
-                override fun makeUrlRequest(
-                    connection: MPConnection,
-                    payload: String?,
-                    mparticle: Boolean
-                ) {
-                    if (connection.url.toString().contains("/logout")) {
-                        val jsonObject = payload?.let { JSONObject(it) }
-                        val knownIdentities =
-                            jsonObject?.getJSONObject(MParticleIdentityClientImpl.KNOWN_IDENTITIES)
-                        Assert.assertNotNull(knownIdentities)
-                        if (knownIdentities != null) {
-                            checkStaticsAndRemove(knownIdentities)
-                        }
-                        if (knownIdentities != null) {
-                            Assert.assertEquals(
-                                knownIdentities.length().toLong(),
-                                userIdentities.size.toLong()
-                            )
-                        }
-                        for ((key, value1) in userIdentities) {
-                            val value = knownIdentities?.getString(
-                                MParticleIdentityClientImpl.getStringValue(
-                                    key
+            setApiClient(
+                object : MockIdentityApiClient {
+                    @Throws(IOException::class, JSONException::class)
+                    override fun makeUrlRequest(
+                        connection: MPConnection,
+                        payload: String?,
+                        mparticle: Boolean,
+                    ) {
+                        if (connection.url.toString().contains("/logout")) {
+                            val jsonObject = payload?.let { JSONObject(it) }
+                            val knownIdentities =
+                                jsonObject?.getJSONObject(MParticleIdentityClientImpl.KNOWN_IDENTITIES)
+                            Assert.assertNotNull(knownIdentities)
+                            if (knownIdentities != null) {
+                                checkStaticsAndRemove(knownIdentities)
+                            }
+                            if (knownIdentities != null) {
+                                Assert.assertEquals(
+                                    knownIdentities.length().toLong(),
+                                    userIdentities.size.toLong(),
                                 )
-                            )
-                            Assert.assertEquals(value, value1)
+                            }
+                            for ((key, value1) in userIdentities) {
+                                val value =
+                                    knownIdentities?.getString(
+                                        MParticleIdentityClientImpl.getStringValue(
+                                            key,
+                                        ),
+                                    )
+                                Assert.assertEquals(value, value1)
+                            }
+                            checked.value = true
+                            latch.countDown()
                         }
-                        checked.value = true
-                        latch.countDown()
                     }
-                }
-            })
+                },
+            )
             mApiClient?.logout(
-                IdentityApiRequest.withEmptyUser()
+                IdentityApiRequest
+                    .withEmptyUser()
                     .userIdentities(userIdentities)
-                    .build()
+                    .build(),
             )
             latch.await()
             Assert.assertTrue(checked.value)
@@ -217,67 +232,74 @@ class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
             val oldUserIdentities = mRandomUtils.randomUserIdentities
             val newUserIdentities = mRandomUtils.randomUserIdentities
             (
-                MParticle.getInstance()
-                    ?.Identity()?.currentUser as MParticleUserImpl?
+                MParticle
+                    .getInstance()
+                    ?.Identity()
+                    ?.currentUser as MParticleUserImpl?
                 )?.userIdentities = oldUserIdentities
             val latch: CountDownLatch = MPLatch(1)
             val checked = MutableBoolean(false)
-            setApiClient(object : MockIdentityApiClient {
-                @Throws(IOException::class, JSONException::class)
-                override fun makeUrlRequest(
-                    connection: MPConnection,
-                    payload: String?,
-                    mparticle: Boolean
-                ) {
-                    if (connection.url.toString()
-                        .contains(MParticleIdentityClientImpl.MODIFY_PATH)
+            setApiClient(
+                object : MockIdentityApiClient {
+                    @Throws(IOException::class, JSONException::class)
+                    override fun makeUrlRequest(
+                        connection: MPConnection,
+                        payload: String?,
+                        mparticle: Boolean,
                     ) {
-                        val jsonObject = payload?.let { JSONObject(it) }
-                        val changedIdentities =
-                            jsonObject?.getJSONArray(MParticleIdentityClientImpl.IDENTITY_CHANGES)
-                        if (changedIdentities != null) {
-                            for (i in 0 until changedIdentities.length()) {
-                                val changeJson = changedIdentities.getJSONObject(i)
-                                val newValue: Any =
-                                    changeJson.getString(MParticleIdentityClientImpl.NEW_VALUE)
-                                val oldValue: Any =
-                                    changeJson.getString(MParticleIdentityClientImpl.OLD_VALUE)
-                                val identityType = MParticleIdentityClientImpl.getIdentityType(
-                                    changeJson.getString(MParticleIdentityClientImpl.IDENTITY_TYPE)
-                                )
-                                val nullString = JSONObject.NULL.toString()
-                                if (oldUserIdentities[identityType] == null) {
-                                    if (oldValue != JSONObject.NULL.toString()) {
-                                        Assert.fail()
+                        if (connection.url
+                            .toString()
+                            .contains(MParticleIdentityClientImpl.MODIFY_PATH)
+                        ) {
+                            val jsonObject = payload?.let { JSONObject(it) }
+                            val changedIdentities =
+                                jsonObject?.getJSONArray(MParticleIdentityClientImpl.IDENTITY_CHANGES)
+                            if (changedIdentities != null) {
+                                for (i in 0 until changedIdentities.length()) {
+                                    val changeJson = changedIdentities.getJSONObject(i)
+                                    val newValue: Any =
+                                        changeJson.getString(MParticleIdentityClientImpl.NEW_VALUE)
+                                    val oldValue: Any =
+                                        changeJson.getString(MParticleIdentityClientImpl.OLD_VALUE)
+                                    val identityType =
+                                        MParticleIdentityClientImpl.getIdentityType(
+                                            changeJson.getString(MParticleIdentityClientImpl.IDENTITY_TYPE),
+                                        )
+                                    val nullString = JSONObject.NULL.toString()
+                                    if (oldUserIdentities[identityType] == null) {
+                                        if (oldValue != JSONObject.NULL.toString()) {
+                                            Assert.fail()
+                                        }
+                                    } else {
+                                        Assert.assertEquals(
+                                            oldValue,
+                                            oldUserIdentities[identityType],
+                                        )
                                     }
-                                } else {
-                                    Assert.assertEquals(
-                                        oldValue,
-                                        oldUserIdentities[identityType]
-                                    )
-                                }
-                                if (newUserIdentities[identityType] == null) {
-                                    if (newValue != nullString) {
-                                        Assert.fail()
+                                    if (newUserIdentities[identityType] == null) {
+                                        if (newValue != nullString) {
+                                            Assert.fail()
+                                        }
+                                    } else {
+                                        Assert.assertEquals(
+                                            newValue,
+                                            newUserIdentities[identityType],
+                                        )
                                     }
-                                } else {
-                                    Assert.assertEquals(
-                                        newValue,
-                                        newUserIdentities[identityType]
-                                    )
                                 }
                             }
+                            setApiClient(null)
+                            checked.value = true
+                            latch.countDown()
                         }
-                        setApiClient(null)
-                        checked.value = true
-                        latch.countDown()
                     }
-                }
-            })
+                },
+            )
             mApiClient?.modify(
-                IdentityApiRequest.withEmptyUser()
+                IdentityApiRequest
+                    .withEmptyUser()
                     .userIdentities(newUserIdentities)
-                    .build()
+                    .build(),
             )
             latch.await()
             Assert.assertTrue(checked.value)
@@ -285,28 +307,29 @@ class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
     }
 
     private fun setApiClient(identityClient: MockIdentityApiClient?) {
-        mApiClient = object : MParticleIdentityClientImpl(
-            mContext,
-            mConfigManager,
-            MParticle.OperatingSystem.ANDROID
-        ) {
-            @Throws(IOException::class)
-            override fun makeUrlRequest(
-                endpoint: Endpoint,
-                connection: MPConnection,
-                payload: String,
-                identity: Boolean
-            ): MPConnection {
-                try {
-                    identityClient?.makeUrlRequest(connection, payload, identity)
-                } catch (e: JSONException) {
-                    e.printStackTrace()
-                    Assert.fail(e.message)
+        mApiClient =
+            object : MParticleIdentityClientImpl(
+                mContext,
+                mConfigManager,
+                MParticle.OperatingSystem.ANDROID,
+            ) {
+                @Throws(IOException::class)
+                override fun makeUrlRequest(
+                    endpoint: Endpoint,
+                    connection: MPConnection,
+                    payload: String,
+                    identity: Boolean,
+                ): MPConnection {
+                    try {
+                        identityClient?.makeUrlRequest(connection, payload, identity)
+                    } catch (e: JSONException) {
+                        e.printStackTrace()
+                        Assert.fail(e.message)
+                    }
+                    (connection as MPConnectionTestImpl).responseCode = 202
+                    return connection
                 }
-                (connection as MPConnectionTestImpl).responseCode = 202
-                return connection
             }
-        }
         MParticle.getInstance()?.Identity()?.apiClient = mApiClient
     }
 
@@ -315,20 +338,21 @@ class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
         if (knowIdentites.has(MParticleIdentityClientImpl.ANDROID_AAID)) {
             Assert.assertEquals(
                 MPUtility.getAdIdInfo(mContext)?.id,
-                knowIdentites.getString(MParticleIdentityClientImpl.ANDROID_AAID)
+                knowIdentites.getString(MParticleIdentityClientImpl.ANDROID_AAID),
             )
             knowIdentites.remove(MParticleIdentityClientImpl.ANDROID_AAID)
         } else {
             Assert.assertTrue(
-                MPUtility.getAdIdInfo(mContext) == null || MPUtility.isEmpty(
-                    MPUtility.getAdIdInfo(mContext)?.id
-                )
+                MPUtility.getAdIdInfo(mContext) == null ||
+                    MPUtility.isEmpty(
+                        MPUtility.getAdIdInfo(mContext)?.id,
+                    ),
             )
         }
         if (knowIdentites.has(MParticleIdentityClientImpl.ANDROID_UUID)) {
             Assert.assertEquals(
                 MPUtility.getAndroidID(mContext),
-                knowIdentites.getString(MParticleIdentityClientImpl.ANDROID_UUID)
+                knowIdentites.getString(MParticleIdentityClientImpl.ANDROID_UUID),
             )
             knowIdentites.remove(MParticleIdentityClientImpl.ANDROID_UUID)
         } else {
@@ -337,7 +361,7 @@ class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
         if (knowIdentites.has(MParticleIdentityClientImpl.PUSH_TOKEN)) {
             Assert.assertEquals(
                 mConfigManager?.pushInstanceId,
-                knowIdentites.getString(MParticleIdentityClientImpl.PUSH_TOKEN)
+                knowIdentites.getString(MParticleIdentityClientImpl.PUSH_TOKEN),
             )
             knowIdentites.remove(MParticleIdentityClientImpl.PUSH_TOKEN)
         } else {
@@ -346,13 +370,17 @@ class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
         Assert.assertTrue(knowIdentites.has(MParticleIdentityClientImpl.DEVICE_APPLICATION_STAMP))
         Assert.assertEquals(
             mConfigManager?.deviceApplicationStamp,
-            knowIdentites[MParticleIdentityClientImpl.DEVICE_APPLICATION_STAMP]
+            knowIdentites[MParticleIdentityClientImpl.DEVICE_APPLICATION_STAMP],
         )
         knowIdentites.remove(MParticleIdentityClientImpl.DEVICE_APPLICATION_STAMP)
     }
 
     internal interface MockIdentityApiClient {
         @Throws(IOException::class, JSONException::class)
-        fun makeUrlRequest(connection: MPConnection, payload: String?, mparticle: Boolean)
+        fun makeUrlRequest(
+            connection: MPConnection,
+            payload: String?,
+            mparticle: Boolean,
+        )
     }
 }

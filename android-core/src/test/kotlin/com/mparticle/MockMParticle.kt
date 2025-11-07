@@ -21,18 +21,21 @@ class MockMParticle : MParticle() {
         mMessageManager = Mockito.mock(MessageManager::class.java)
         mMessaging = Mockito.mock(MPMessagingAPI::class.java)
         mMedia = Mockito.mock(MPMediaAPI::class.java)
-        mIdentityApi = IdentityApi(
-            MockContext(),
-            mAppStateManager,
-            mMessageManager,
-            mInternal.configManager,
-            mKitManager,
-            OperatingSystem.ANDROID
-        )
+        mIdentityApi =
+            IdentityApi(
+                MockContext(),
+                mAppStateManager,
+                mMessageManager,
+                mInternal.configManager,
+                mKitManager,
+                OperatingSystem.ANDROID,
+            )
         Mockito.`when`(mKitManager.updateKits(Mockito.any())).thenReturn(KitsLoadedCallback())
-        val event = MPEvent.Builder("this")
-            .customAttributes(HashMap<String, String?>())
-            .build()
+        val event =
+            MPEvent
+                .Builder("this")
+                .customAttributes(HashMap<String, String?>())
+                .build()
         val attributes = event.customAttributes
     }
 }

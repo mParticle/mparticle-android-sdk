@@ -5,8 +5,10 @@ import com.mparticle.lints.resolve
 import org.jetbrains.uast.UCallExpression
 import java.lang.reflect.Method
 
-class StaticFactory(val methodName: String?, override val node: UCallExpression) :
-    ParameterizedExpression {
+class StaticFactory(
+    val methodName: String?,
+    override val node: UCallExpression,
+) : ParameterizedExpression {
     override val parent = RootParent(node)
     override var arguments: List<Value> = listOf()
 
@@ -15,19 +17,21 @@ class StaticFactory(val methodName: String?, override val node: UCallExpression)
         val methods = HashSet<Method>()
         val clazz = Class.forName(qualifiedClassName)
         methods.addAll(clazz.declaredMethods)
-        var matchingMethods = methods
-            .filter { it.name == methodName }
-            .filter { it.parameterCount == arguments.size }
+        var matchingMethods =
+            methods
+                .filter { it.name == methodName }
+                .filter { it.parameterCount == arguments.size }
         if (matchingMethods.size == 1) {
-            val method = matchingMethods.first {
-                it.parameterTypes.forEachIndexed { i, type ->
-                    val value = if (arguments.size > i) arguments.get(i).value else null
-                    if (type.name != "null" && value != null && type.name != value::class.java.name) {
-                        false
+            val method =
+                matchingMethods.first {
+                    it.parameterTypes.forEachIndexed { i, type ->
+                        val value = if (arguments.size > i) arguments.get(i).value else null
+                        if (type.name != "null" && value != null && type.name != value::class.java.name) {
+                            false
+                        }
                     }
+                    true
                 }
-                true
-            }
             val arguments = arguments.resolve()
             method.isAccessible = true
             return method.invoke(null, *arguments.toTypedArray())

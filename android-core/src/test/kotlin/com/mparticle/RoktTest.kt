@@ -54,30 +54,31 @@ class RoktTest {
 
         val config = RoktConfig.Builder().colorMode(RoktConfig.ColorMode.DARK).build()
 
-        val callbacks = object : MpRoktEventCallback {
-            override fun onLoad() {
-                println("View loaded")
-            }
+        val callbacks =
+            object : MpRoktEventCallback {
+                override fun onLoad() {
+                    println("View loaded")
+                }
 
-            override fun onUnload(reason: UnloadReasons) {
-                println("View unloaded due to: $reason")
-            }
+                override fun onUnload(reason: UnloadReasons) {
+                    println("View unloaded due to: $reason")
+                }
 
-            override fun onShouldShowLoadingIndicator() {
-                println("Show loading indicator")
-            }
+                override fun onShouldShowLoadingIndicator() {
+                    println("Show loading indicator")
+                }
 
-            override fun onShouldHideLoadingIndicator() {
-                println("Hide loading indicator")
+                override fun onShouldHideLoadingIndicator() {
+                    println("Hide loading indicator")
+                }
             }
-        }
         rokt.selectPlacements(
             identifier = "testView",
             attributes = attributes,
             callbacks = callbacks,
             embeddedViews = placeholders,
             fontTypefaces = fonts,
-            config = config
+            config = config,
         )
 
         verify(kitManager)?.execute("testView", attributes, callbacks, placeholders, fonts, config)
@@ -101,7 +102,7 @@ class RoktTest {
 
         rokt.selectPlacements(
             identifier = "basicView",
-            attributes = HashMap()
+            attributes = HashMap(),
         )
 
         verify(kitManager, never()).execute(any(), any(), any(), any(), any(), any())
@@ -113,7 +114,7 @@ class RoktTest {
 
         rokt.selectPlacements(
             identifier = "basicView",
-            attributes = HashMap()
+            attributes = HashMap(),
         )
 
         verify(kitManager, never()).setWrapperSdkVersion(any())

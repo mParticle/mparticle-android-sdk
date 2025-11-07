@@ -36,11 +36,13 @@ class AliasRequestTest {
         val endTime = random.nextLong()
         val sourceMpid = random.nextLong()
         val destinationMpid = random.nextLong()
-        val builder = AliasRequest.builder()
-            .destinationMpid(destinationMpid)
-            .sourceMpid(sourceMpid)
-            .startTime(startTime)
-            .endTime(endTime)
+        val builder =
+            AliasRequest
+                .builder()
+                .destinationMpid(destinationMpid)
+                .sourceMpid(sourceMpid)
+                .startTime(startTime)
+                .endTime(endTime)
         val request = builder.build()
         Assert.assertEquals(sourceMpid, request.sourceMpid)
         Assert.assertEquals(destinationMpid, request.destinationMpid)
@@ -51,8 +53,14 @@ class AliasRequestTest {
     @Test
     fun testMaxWindowEnforcement() {
         MParticle.setInstance(MockMParticle())
-        Mockito.`when`(MParticle.getInstance()?.Internal()?.configManager?.aliasMaxWindow)
-            .thenReturn(1)
+        Mockito
+            .`when`(
+                MParticle
+                    .getInstance()
+                    ?.Internal()
+                    ?.configManager
+                    ?.aliasMaxWindow,
+            ).thenReturn(1)
         val sourceUser = Mockito.mock(MParticleUser::class.java)
         val destinationUser = Mockito.mock(MParticleUser::class.java)
         val earliestLegalStartTime = System.currentTimeMillis() - 24 * 60 * 60 * 1000

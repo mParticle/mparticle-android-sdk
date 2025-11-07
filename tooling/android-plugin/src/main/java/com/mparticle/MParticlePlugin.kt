@@ -13,7 +13,6 @@ import org.json.JSONObject
 import java.io.File
 
 class MParticlePlugin : Plugin<Project> {
-
     companion object {
         val MParticleCliVersion: String? = null
     }
@@ -127,25 +126,27 @@ class MParticlePlugin : Plugin<Project> {
 
     private fun readConfig(extension: MParticleExtension): Config {
         val staticConfigFile = File("./mp.config.json")
-        var config = if (staticConfigFile.exists()) {
-            Logger.verbose("Config File found")
-            val text = staticConfigFile.readText()
-            try {
-                val json = JSONObject(text)
-                Config.from(json)
-            } catch (jse: JSONException) {
-                Logger.warning("Error reading mp.config.json: ${jse.message}")
+        var config =
+            if (staticConfigFile.exists()) {
+                Logger.verbose("Config File found")
+                val text = staticConfigFile.readText()
+                try {
+                    val json = JSONObject(text)
+                    Config.from(json)
+                } catch (jse: JSONException) {
+                    Logger.warning("Error reading mp.config.json: ${jse.message}")
+                    Config()
+                }
+            } else {
+                Logger.verbose("Config File Not Found, using extension values")
                 Config()
             }
-        } else {
-            Logger.verbose("Config File Not Found, using extension values")
-            Config()
-        }
         var credentialsFile = File("mp.config.json")
         if (credentialsFile.exists()) {
-            config.credentialsFilePath = credentialsFile.absolutePath.let {
-                it.substring(0, it.length - "/mp.config.json".length)
-            }
+            config.credentialsFilePath =
+                credentialsFile.absolutePath.let {
+                    it.substring(0, it.length - "/mp.config.json".length)
+                }
         } else {
             Logger.verbose("Credentials File Not Found")
             Config()

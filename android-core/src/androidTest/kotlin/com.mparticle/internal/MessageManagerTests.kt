@@ -71,21 +71,23 @@ class MessageManagerTests : BaseCleanInstallEachTest() {
         session.start(mContext)
         messageManager.startSession(session)
         AccessUtils.awaitMessageHandler()
-        var message = messageManager.mParticleDBManager.getSessionForSessionEndMessage(
-            session.mSessionID,
-            null,
-            session.mpids
-        )
+        var message =
+            messageManager.mParticleDBManager.getSessionForSessionEndMessage(
+                session.mSessionID,
+                null,
+                session.mpids,
+            )
         junit.framework.Assert.assertNotNull(message)
         messageManager.mParticleDBManager.updateSessionStatus(
             session.mSessionID,
-            SessionTable.SessionTableColumns.STATUS
+            SessionTable.SessionTableColumns.STATUS,
         )
-        message = messageManager.mParticleDBManager.getSessionForSessionEndMessage(
-            session.mSessionID,
-            null,
-            session.mpids
-        )
+        message =
+            messageManager.mParticleDBManager.getSessionForSessionEndMessage(
+                session.mSessionID,
+                null,
+                session.mpids,
+            )
         junit.framework.Assert.assertNull(message)
     }
 
@@ -143,17 +145,23 @@ class MessageManagerTests : BaseCleanInstallEachTest() {
      * simulates the install state to settings pre 5.0.9 || pre 4.17.1
      * @param firstRun
      */
-    private fun setFirstRunLegacy(firstRun: Boolean, key: String) {
+    private fun setFirstRunLegacy(
+        firstRun: Boolean,
+        key: String,
+    ) {
         val sharedPreferences =
             mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE)
-        sharedPreferences.edit()
+        sharedPreferences
+            .edit()
             .remove(Constants.PrefKeys.FIRSTRUN_AST + key)
             .remove(Constants.PrefKeys.FIRSTRUN_MESSAGE + key)
             .apply()
         if (firstRun) {
             sharedPreferences.edit().remove(Constants.PrefKeys.FIRSTRUN_OBSELETE + key).apply()
         } else {
-            sharedPreferences.edit().putBoolean(Constants.PrefKeys.FIRSTRUN_OBSELETE + key, false)
+            sharedPreferences
+                .edit()
+                .putBoolean(Constants.PrefKeys.FIRSTRUN_OBSELETE + key, false)
                 .apply()
         }
     }

@@ -10,7 +10,6 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class ApplicationContextWrapperITest {
-
     /**
      * This test specifically addresses a problem we had where a callback was being registered on a
      * new thread which was not initialized as a looper. This setup (not extending BaseAbstractTest)
@@ -19,10 +18,13 @@ class ApplicationContextWrapperITest {
     @OrchestratorOnly
     @Test
     fun testRegisterListenerBackgroundThread() {
-        val applicationContextWrapper = ApplicationContextWrapper(
-            InstrumentationRegistry.getInstrumentation()
-                .getContext().applicationContext as Application
-        )
+        val applicationContextWrapper =
+            ApplicationContextWrapper(
+                InstrumentationRegistry
+                    .getInstrumentation()
+                    .getContext()
+                    .applicationContext as Application,
+            )
         var exception: Exception? = null
         assertNull(Looper.myLooper())
         try {
@@ -37,11 +39,23 @@ class ApplicationContextWrapperITest {
 
     class MockCallbacks : Application.ActivityLifecycleCallbacks {
         override fun onActivityPaused(p0: Activity) {}
+
         override fun onActivityResumed(p0: Activity) {}
+
         override fun onActivityStarted(p0: Activity) {}
+
         override fun onActivityDestroyed(p0: Activity) {}
-        override fun onActivitySaveInstanceState(p0: Activity, p1: Bundle) {}
+
+        override fun onActivitySaveInstanceState(
+            p0: Activity,
+            p1: Bundle,
+        ) {}
+
         override fun onActivityStopped(p0: Activity) {}
-        override fun onActivityCreated(p0: Activity, savedInstanceState: Bundle?) {}
+
+        override fun onActivityCreated(
+            p0: Activity,
+            savedInstanceState: Bundle?,
+        ) {}
     }
 }

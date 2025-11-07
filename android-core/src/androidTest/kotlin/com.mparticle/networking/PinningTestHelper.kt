@@ -18,13 +18,15 @@ import javax.net.ssl.SSLSocketFactory
 class PinningTestHelper internal constructor(
     var context: Context,
     path: String,
-    var mCallback: (Boolean) -> Unit
+    var mCallback: (Boolean) -> Unit,
 ) {
     private fun prepareIdentityApiClient(path: String) {
-        com.mparticle.identity.AccessUtils.setDefaultIdentityApiClient(context)
+        com.mparticle.identity.AccessUtils
+            .setDefaultIdentityApiClient(context)
         //        com.mparticle.identity.AccessUtils.setIdentityApiClientScheme("https");
         val apiClient: MParticleIdentityClient =
-            com.mparticle.identity.AccessUtils.getIdentityApiClient()
+            com.mparticle.identity.AccessUtils
+                .getIdentityApiClient()
         setRequestClient(apiClient, path)
     }
 
@@ -35,10 +37,10 @@ class PinningTestHelper internal constructor(
                     MParticle.getInstance()!!.Internal().configManager,
                     context.getSharedPreferences(
                         Constants.PREFS_FILE,
-                        Context.MODE_PRIVATE
+                        Context.MODE_PRIVATE,
                     ),
-                    context
-                )
+                    context,
+                ),
             )
         } catch (e: MalformedURLException) {
             e.printStackTrace()
@@ -49,32 +51,37 @@ class PinningTestHelper internal constructor(
         setRequestClient(apiClient, path)
     }
 
-    private fun setRequestClient(client: MParticleBaseClient, path: String) {
+    private fun setRequestClient(
+        client: MParticleBaseClient,
+        path: String,
+    ) {
         val requestHandler = client.requestHandler
-        client.requestHandler = object : BaseNetworkConnection(context) {
-            @Throws(IOException::class)
-            override fun makeUrlRequest(
-                endpoint: MParticleBaseClientImpl.Endpoint,
-                connection: MPConnection,
-                payload: String,
-                identity: Boolean
-            ): MPConnection {
-                var connection = connection
-                connection = try {
-                    requestHandler.makeUrlRequest(endpoint, connection, null, identity)
-                } finally {
-                    if (connection.url.toString().contains(path)) {
-                        val finalConnection = connection
-                        Handler(Looper.getMainLooper()).post {
-                            mCallback(
-                                finalConnection.isHttps && finalConnection.sslSocketFactory != null
-                            )
+        client.requestHandler =
+            object : BaseNetworkConnection(context) {
+                @Throws(IOException::class)
+                override fun makeUrlRequest(
+                    endpoint: MParticleBaseClientImpl.Endpoint,
+                    connection: MPConnection,
+                    payload: String,
+                    identity: Boolean,
+                ): MPConnection {
+                    var connection = connection
+                    connection =
+                        try {
+                            requestHandler.makeUrlRequest(endpoint, connection, null, identity)
+                        } finally {
+                            if (connection.url.toString().contains(path)) {
+                                val finalConnection = connection
+                                Handler(Looper.getMainLooper()).post {
+                                    mCallback(
+                                        finalConnection.isHttps && finalConnection.sslSocketFactory != null,
+                                    )
+                                }
+                            }
                         }
-                    }
+                    return connection
                 }
-                return connection
             }
-        }
     }
 
     /**
@@ -84,9 +91,7 @@ class PinningTestHelper internal constructor(
      * best approach, but there is no easier way, without doing some Reflection, which we should
      * eventually do.
      */
-    private fun isPinned(connection: HttpsURLConnection): Boolean {
-        return connection.sslSocketFactory !== SSLSocketFactory.getDefault()
-    }
+    private fun isPinned(connection: HttpsURLConnection): Boolean = connection.sslSocketFactory !== SSLSocketFactory.getDefault()
 
     interface Callback {
         fun onPinningApplied(pinned: Boolean)

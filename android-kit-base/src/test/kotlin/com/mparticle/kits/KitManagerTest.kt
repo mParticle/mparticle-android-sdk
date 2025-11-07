@@ -61,8 +61,8 @@ class KitManagerTest {
                 Pair(37, KitIntegration::class.java),
                 Pair(56, KitIntegration::class.java),
                 Pair(64, KitIntegration::class.java),
-                Pair(68, KitIntegration::class.java)
-            )
+                Pair(68, KitIntegration::class.java),
+            ),
         )
         Assert.assertNotNull(array)
         manager.updateKits(array)
@@ -151,8 +151,8 @@ class KitManagerTest {
                 Pair(37, KitIntegration::class.java),
                 Pair(56, KitIntegration::class.java),
                 Pair(64, KitIntegration::class.java),
-                Pair(68, KitIntegration::class.java)
-            )
+                Pair(68, KitIntegration::class.java),
+            ),
         )
         manager.updateKits(array)
         val kitStatus = manager.kitStatus
@@ -184,24 +184,25 @@ class KitManagerTest {
         val mockConfig = MockKitConfiguration().parseConfiguration(config)
         Mockito.`when`(mockForesee.configuration).thenReturn(mockConfig)
         val uri = Mockito.mock(Uri::class.java)
-        Mockito.`when`(
-            mockForesee.getSurveyUrl(
-                Mockito.any(
-                    MutableMap::class.java
-                ) as MutableMap<String, String>?,
-                Mockito.any(
-                    MutableMap::class.java
-                ) as MutableMap<String, MutableList<String>>?
-            )
-        ).thenReturn(uri)
+        Mockito
+            .`when`(
+                mockForesee.getSurveyUrl(
+                    Mockito.any(
+                        MutableMap::class.java,
+                    ) as MutableMap<String, String>?,
+                    Mockito.any(
+                        MutableMap::class.java,
+                    ) as MutableMap<String, MutableList<String>>?,
+                ),
+            ).thenReturn(uri)
         manager.providers[MParticle.ServiceProviders.FORESEE_ID] = (mockForesee as KitIntegration)
         Assert.assertNull(manager.getSurveyUrl(56, HashMap(), HashMap()))
         Assert.assertTrue(
             manager.getSurveyUrl(
                 MParticle.ServiceProviders.FORESEE_ID,
                 HashMap(),
-                HashMap()
-            ) === uri
+                HashMap(),
+            ) === uri,
         )
     }
 

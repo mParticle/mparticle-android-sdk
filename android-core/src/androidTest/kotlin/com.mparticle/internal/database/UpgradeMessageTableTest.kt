@@ -22,19 +22,23 @@ class UpgradeMessageTableTest : BaseTableTest() {
                     helper.onCreate(database)
                 }
 
-                override fun onUpgrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+                override fun onUpgrade(
+                    database: SQLiteDatabase,
+                    oldVersion: Int,
+                    newVersion: Int,
+                ) {
                     helper.onUpgrade(database, oldVersion, newVersion)
                 }
 
                 override fun onDowngrade(
                     database: SQLiteDatabase,
                     oldVersion: Int,
-                    newVersion: Int
+                    newVersion: Int,
                 ) {
                     helper.onDowngrade(database, oldVersion, newVersion)
                 }
             },
-            9
+            9,
         )
         deleteTestingDatabase()
 
