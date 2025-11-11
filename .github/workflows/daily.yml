@@ -142,7 +142,7 @@ jobs:
   #          repository: mparticle/mparticle-android-sdk
   #          ref: regression/${{ github.run_number }}
   #      - name: "Install JDK 17"
-  #        uses: actions/setup-java@v4
+  #        uses: actions/setup-java@v5
   #        with:
   #          distribution: "zulu"
   #          java-version: "17"
@@ -175,7 +175,7 @@ jobs:
   #          repository: mparticle/mparticle-android-sdk
   #          ref: regression/${{ github.run_number }}
   #      - name: "Install JDK 17"
-  #        uses: actions/setup-java@v4
+  #        uses: actions/setup-java@v5
   #        with:
   #          distribution: "zulu"
   #          java-version: "17"
@@ -204,7 +204,7 @@ jobs:
           repository: mparticle/mparticle-android-sdk
           ref: regression/${{ github.run_number }}
       - name: "Install JDK 17"
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: "zulu"
           java-version: "17"
@@ -233,7 +233,7 @@ jobs:
           ref: regression/${{ github.run_number }}
           submodules: recursive
       - name: "Install JDK 17"
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: "zulu"
           java-version: "17"
@@ -269,7 +269,7 @@ jobs:
           ref: regression/${{ github.run_number }}
           submodules: recursive
       - name: "Install JDK 17"
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: "zulu"
           java-version: "17"
@@ -310,7 +310,7 @@ jobs:
           ref: regression/${{ github.run_number }}
           submodules: recursive
       - name: "Install JDK 17"
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: "zulu"
           java-version: "17"
