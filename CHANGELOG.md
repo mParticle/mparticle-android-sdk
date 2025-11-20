@@ -1,3 +1,10 @@
+## [5.75.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.75.0...v5.75.1) (2025-11-20)
+
+
+### Updates & Maintenance
+
+* restore rokt-kit submodule ([#629](https://github.com/mParticle/mparticle-android-sdk/issues/629)) ([6bd0fba](https://github.com/mParticle/mparticle-android-sdk/commit/6bd0fbae72d1f587deb32fdda60612c0f90c6540))
+
 ## [5.75.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.74.3...v5.75.0) (2025-11-20)
 
 
