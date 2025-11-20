@@ -1,3 +1,18 @@
+## [5.75.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.74.3...v5.75.0) (2025-11-20)
+
+
+### Features
+
+* Implement Trunk tool ([#604](https://github.com/mParticle/mparticle-android-sdk/issues/604)) ([d02a125](https://github.com/mParticle/mparticle-android-sdk/commit/d02a1252ef7d08513cbdb8e53cd759755be2ef5d))
+
+
+### Updates & Maintenance
+
+* add token to checkout step for regression branch pushes ([#627](https://github.com/mParticle/mparticle-android-sdk/issues/627)) ([afe965e](https://github.com/mParticle/mparticle-android-sdk/commit/afe965edd8ec1eda5ca1864e0df0dde535092567))
+* bump andymckay/cancel-action from 435124153eb37d6a62a29d053a7e449652f89d51 to a955d435292c0d409d104b57d8e78435a93a6ef1 ([#624](https://github.com/mParticle/mparticle-android-sdk/issues/624)) ([2f1644a](https://github.com/mParticle/mparticle-android-sdk/commit/2f1644a5a88053f60cb5696ff471fcfd9b1a4321))
+* bump reactivecircus/android-emulator-runner from 2.34.0 to 2.35.0 ([#626](https://github.com/mParticle/mparticle-android-sdk/issues/626)) ([8f4b392](https://github.com/mParticle/mparticle-android-sdk/commit/8f4b3927b63cd8dd80e6ae703f50ad49982de634))
+* update permissions to allow branch push and delete operations ([#628](https://github.com/mParticle/mparticle-android-sdk/issues/628)) ([d66079d](https://github.com/mParticle/mparticle-android-sdk/commit/d66079dc78ad8dbe8ab09415bf9a5af43528b4aa))
+
 ## [5.74.3](https://github.com/mParticle/mparticle-android-sdk/compare/v5.74.2...v5.74.3) (2025-11-04)
 
 
