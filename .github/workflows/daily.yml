@@ -366,6 +366,7 @@ jobs:
       - name: "Checkout repo"
         uses: actions/checkout@v5
         with:
+          token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
           fetch-depth: 0
           repository: ${{ github.repository }}
           ref: ${{ inputs.branch_name }}
