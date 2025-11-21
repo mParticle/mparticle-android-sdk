@@ -5,7 +5,14 @@ android {
     namespace 'com.mparticle.testutils'
     testNamespace 'com.mparticle.legacyTest'
     compileSdk 33
+    compileOptions {
+        sourceCompatibility = JavaVersion.toVersion(JAVA_VERSION)
+        targetCompatibility = JavaVersion.toVersion(JAVA_VERSION)
+    }
 
+    kotlinOptions {
+        jvmTarget = JAVA_VERSION
+    }
     defaultConfig {
         //This is set to 21 to avoid slow multidex.
         minSdk 21
