@@ -39,20 +39,20 @@ class MParticlePlugin : Plugin<Project> {
 
     private val installTask: (Task) -> Unit = {
         if (isInstallTask) {
-            println("installing MParticle ClI")
+            Logger.verbose("installing MParticle ClI")
             val dataPlanningNodeApp = getDataplanningApp()
             if (dataPlanningNodeApp != null) {
                 if (!dataPlanningNodeApp.checkNPMInstalled()) {
-                    println("MParticle requires NPM be installed. Please install NPM")
+                    Logger.verbose("MParticle requires NPM be installed. Please install NPM")
                 } else if (dataPlanningNodeApp.checkMPInstalled()) {
-                    println("MParticle CLI tools aready installed")
+                    Logger.verbose("MParticle CLI tools aready installed")
                 } else {
                     val result = dataPlanningNodeApp.install()
-                    println("MParticle CLI result: \n${result.response}")
+                    Logger.verbose("MParticle CLI result: \n${result.response}")
                     if (result.response == null || result.response?.contains("npm ERR") == true) {
-                        println("MParticle unable to install CLI tools.)")
+                        Logger.verbose("MParticle unable to install CLI tools.)")
                     } else {
-                        println("MParticle CLI installed")
+                        Logger.verbose("MParticle CLI installed")
                     }
                 }
             }
@@ -62,15 +62,15 @@ class MParticlePlugin : Plugin<Project> {
 
     private val uninstallTask: (Task) -> Unit = {
         if (isUninstallTask) {
-            println("uninstalling MParticle CLI")
+            Logger.verbose("uninstalling MParticle CLI")
             val dataPlanningNodeApp = getDataplanningApp()
             if (dataPlanningNodeApp != null) {
                 val result = dataPlanningNodeApp.uninstall()
-                println("MParticle CLI result: \n${result.response}")
+                Logger.verbose("MParticle CLI result: \n${result.response}")
                 if (result.response == null || result.response?.contains("npm ERR") ?: false) {
-                    println("MParticle unable to uninstall CLI tools. To do so manually, run \"npm uninstall @mparticle/cli\"")
+                    Logger.verbose("MParticle unable to uninstall CLI tools. To do so manually, run \"npm uninstall @mparticle/cli\"")
                 } else {
-                    println("MParticle CLI uninstalled")
+                    Logger.verbose("MParticle CLI uninstalled")
                 }
             }
             updateConfig(it.project)
@@ -105,17 +105,17 @@ class MParticlePlugin : Plugin<Project> {
     private fun updateArtifactPaths(config: Config) {
         val dataPlanningNodeApp = getDataplanningApp(true)
         if (dataPlanningNodeApp?.checkNodeInstalled() == false) {
-            println("MParticle Node not installed. Please install to use Dataplanning features")
+            Logger.verbose("MParticle Node not installed. Please install to use Dataplanning features")
         } else {
             val nodeLocation = arrayOf("type", "-p", "node").executeCLI().trim()
             Logger.verbose("node location = $nodeLocation")
             config.internalConfig.nodePath = nodeLocation
         }
         if (dataPlanningNodeApp?.checkNPMInstalled() == false) {
-            println("MParticle NPM not installed. Please install to use Dataplanning features")
+            Logger.verbose("MParticle NPM not installed. Please install to use Dataplanning features")
         }
         if (dataPlanningNodeApp?.checkMPInstalled() == false && !isInstallTask && !isUninstallTask) {
-            println("MParticle CLI tools not installed. run \"./gradlew mpInstall\" to install")
+            Logger.verbose("MParticle CLI tools not installed. run \"./gradlew mpInstall\" to install")
         } else {
             val location = arrayOf("type", "-p", "mp").executeCLI().trim()
             Logger.verbose("mp location = $location")

@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.SparseBooleanArray
 import com.mparticle.MParticle
 import com.mparticle.MParticle.IdentityType
+import com.mparticle.internal.Logger
 import com.mparticle.internal.MPUtility
 import com.mparticle.kits.KitIntegration.AttributeListener
 import com.mparticle.mock.MockMParticle
@@ -55,7 +56,7 @@ class KitIntegrationTest {
             key: Int,
             valueIfKeyNotFound: Boolean,
         ): Boolean {
-            print("SparseArray getting: $key")
+            Logger.verbose("SparseArray getting: $key")
             return if (map.containsKey(key)) {
                 map[key]!!
             } else {
