@@ -2,6 +2,7 @@ package com.mparticle.internal.database.services
 
 import com.mparticle.internal.Constants
 import com.mparticle.internal.JsonReportingMessage
+import com.mparticle.internal.Logger
 import com.mparticle.testutils.TestingUtils
 import org.json.JSONException
 import org.junit.Assert
@@ -213,7 +214,7 @@ class ReportingServiceTest : BaseMPServiceTest() {
                         .getInt("a random Number")
                         .compareTo(o2.msgObject.getInt("a random Number"))
                 } catch (e: JSONException) {
-                    e.printStackTrace()
+                    Logger.error(e)
                 }
                 -1
             },
@@ -227,7 +228,7 @@ class ReportingServiceTest : BaseMPServiceTest() {
                         .getInt("a random Number")
                         .compareTo(o2.toJson().getInt("a random Number"))
                 } catch (e: JSONException) {
-                    e.printStackTrace()
+                    Logger.error(e)
                 }
                 -1
             },

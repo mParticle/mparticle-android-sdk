@@ -57,7 +57,7 @@ class AppStateManagerInstrumentedTest : BaseCleanStartedEachTest() {
                         }
                         checked[0] = true
                     } catch (e: JSONException) {
-                        e.printStackTrace()
+                        Logger.error(e)
                     }
                 }
             },
@@ -97,7 +97,7 @@ class AppStateManagerInstrumentedTest : BaseCleanStartedEachTest() {
                             latch.countDown()
                         }
                     } catch (e: JSONException) {
-                        e.printStackTrace()
+                        Logger.error(e)
                     }
                 }
             },

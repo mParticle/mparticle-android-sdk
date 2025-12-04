@@ -233,7 +233,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                     called.value = true;
                     latch.countDown();
                 } catch (JSONException jse) {
-                    jse.printStackTrace();
+                    Logger.error(jse);
                 }
 
             }
@@ -259,7 +259,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                     called.value = true;
                     latch.countDown();
                 } catch (JSONException jse) {
-                    jse.printStackTrace();
+                    Logger.error(jse);
                 }
             }
         });
@@ -285,7 +285,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                     called.value = true;
                     latch.countDown();
                 } catch (JSONException jse) {
-                    jse.printStackTrace();
+                    Logger.error(jse);
                 }
             }
 
@@ -300,7 +300,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                     called.value = true;
                     latch.countDown();
                 } catch (JSONException jse) {
-                    jse.printStackTrace();
+                    Logger.error(jse);
                 }
             }
         });
@@ -357,7 +357,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                     }
                     Logger.error(new JSONObject(json).toString(4));
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    Logger.error(e);
                 }
             }
         });
@@ -466,7 +466,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                     called.value = true;
                     latch.countDown();
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    Logger.error(e);
                 }
             }
         });
@@ -518,7 +518,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                     called.value = true;
                     latch.countDown();
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    Logger.error(e);
                 }
             }
         });
@@ -570,7 +570,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                     called.value = true;
                     latch.countDown();
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    Logger.error(e);
                 }
             }
         });

@@ -8,6 +8,7 @@ import android.os.Looper;
 
 import androidx.annotation.NonNull;
 
+import com.mparticle.internal.Logger;
 import com.mparticle.messaging.MPMessagingAPI;
 import com.mparticle.messaging.ProviderCloudMessage;
 
@@ -62,7 +63,7 @@ public class MPReceiver extends BroadcastReceiver {
                 try {
                     Class.forName("android.os.AsyncTask");
                 } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
+                    Logger.error(e);
                 }
             }
         });

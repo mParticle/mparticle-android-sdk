@@ -370,7 +370,7 @@ public class ConfigManager {
                 onConfigLoaded(ConfigType.KIT, kitConfig != combined);
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            Logger.error(e);
             throw new RuntimeException(e);
         }
     }
