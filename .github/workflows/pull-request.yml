@@ -23,7 +23,7 @@ jobs:
       - name: Trunk Check
         uses: trunk-io/trunk-action@75699af9e26881e564e9d832ef7dc3af25ec031b # v1.2.4
         with:
-          check-mode: diff
+          check-mode: pull_request
   pr-check-hadcoded-secrets:
     name: "Check PR for hardcoded secrets"
     uses: mParticle/mparticle-workflows/.github/workflows/security-hardcoded-secrets.yml@main
