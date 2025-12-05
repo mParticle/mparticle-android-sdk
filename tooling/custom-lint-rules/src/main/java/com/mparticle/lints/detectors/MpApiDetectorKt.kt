@@ -154,7 +154,7 @@ class MpApiDetectorKt :
                         }
                     }
                 } catch (e: Exception) {
-                    Logger.error(e?.toString() ?: "Unknown Exception")
+                    Logger.error(e.toString())
                 }
             }
         }

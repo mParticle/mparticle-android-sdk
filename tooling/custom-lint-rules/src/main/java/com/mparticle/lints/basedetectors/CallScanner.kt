@@ -58,7 +58,7 @@ abstract class CallScanner :
                     }
                 } catch (e: Exception) {
                     if (config?.verbose == true) {
-                        Logger.error(e?.toString() ?: "Unknown Exception")
+                        Logger.error(e.toString())
                     }
                 }
             }
