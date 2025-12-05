@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 import com.mparticle.MParticle;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.InternalSession;
+import com.mparticle.internal.Logger;
 
 import org.json.JSONException;
 
@@ -26,7 +27,7 @@ public class MPEventMessage extends BaseMPMessage {
             try {
                 put(Constants.MessageKey.EVENT_TYPE, eventType);
             } catch (JSONException e) {
-                e.printStackTrace();
+                Logger.error(e);
             }
             return this;
         }

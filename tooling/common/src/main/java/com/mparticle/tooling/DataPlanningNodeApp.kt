@@ -103,7 +103,7 @@ class DataPlanningNodeApp(
 
     fun install(version: String? = null): NodeAppResult<String> {
         if (checkMPInstalled()) {
-            println("MParticle CLI tools already installed")
+            Logger.verbose("MParticle CLI tools already installed")
         }
         val packageString = "@mparticle/cli" + if (version != null) "@$version" else ""
         try {

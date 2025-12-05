@@ -5,6 +5,7 @@ import android.os.Looper
 import com.mparticle.internal.AccessUtils
 import com.mparticle.internal.AppStateManager
 import com.mparticle.internal.Constants
+import com.mparticle.internal.Logger
 import com.mparticle.networking.Matcher
 import com.mparticle.networking.MockServer.JSONMatch
 import com.mparticle.testutils.AndroidUtils
@@ -61,7 +62,7 @@ sent sessionId = ${eventObject.getString("id")}""",
                             }
                         }
                     } catch (e: Exception) {
-                        e.printStackTrace()
+                        Logger.error(e)
                         Assert.fail(e.message)
                     }
                     false

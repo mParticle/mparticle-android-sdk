@@ -68,7 +68,7 @@ public class MockKitConfiguration extends KitConfiguration {
 
         @Override
         public boolean get(int key, boolean valueIfKeyNotFound) {
-            System.out.print("SparseArray getting: " + key);
+            Logger.debug("SparseArray getting: " + key);
             if (map.containsKey(key)) {
                 return map.get(key);
             } else {

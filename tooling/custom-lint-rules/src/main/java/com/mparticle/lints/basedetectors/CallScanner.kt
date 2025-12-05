@@ -9,6 +9,7 @@ import com.mparticle.lints.dtos.RootParent
 import com.mparticle.lints.getVariableElement
 import com.mparticle.lints.receiverClassName
 import com.mparticle.lints.resolveChainedCalls
+import com.mparticle.tooling.Logger
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UExpression
@@ -57,7 +58,7 @@ abstract class CallScanner :
                     }
                 } catch (e: Exception) {
                     if (config?.verbose == true) {
-                        e.printStackTrace()
+                        Logger.error(e.toString())
                     }
                 }
             }

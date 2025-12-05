@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.InternalSession;
+import com.mparticle.internal.Logger;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,7 +25,7 @@ public class BaseMPMessageBuilder extends JSONObject {
         try {
             put(Constants.MessageKey.TYPE, messageType);
         } catch (JSONException e) {
-            e.printStackTrace();
+            Logger.error(e);
         }
     }
 
@@ -32,7 +33,7 @@ public class BaseMPMessageBuilder extends JSONObject {
         try {
             put(Constants.MessageKey.TIMESTAMP, timestamp);
         } catch (JSONException e) {
-            e.printStackTrace();
+            Logger.error(e);
         }
         return this;
     }
@@ -50,7 +51,7 @@ public class BaseMPMessageBuilder extends JSONObject {
         try {
             put(Constants.MessageKey.NAME, name);
         } catch (JSONException e) {
-            e.printStackTrace();
+            Logger.error(e);
         }
         return this;
     }
@@ -63,7 +64,7 @@ public class BaseMPMessageBuilder extends JSONObject {
                     addEventLengthAttributes(mLength);
                 }
             } catch (JSONException e) {
-                e.printStackTrace();
+                Logger.error(e);
             }
         }
         return this;
@@ -82,7 +83,7 @@ public class BaseMPMessageBuilder extends JSONObject {
             try {
                 put(Constants.MessageKey.STATE_INFO_DATA_CONNECTION, dataConnection);
             } catch (JSONException e) {
-                e.printStackTrace();
+                Logger.error(e);
             }
         }
         return this;
@@ -95,7 +96,7 @@ public class BaseMPMessageBuilder extends JSONObject {
                 put(Constants.MessageKey.EVENT_DURATION, length);
                 addEventLengthAttributes(length);
             } catch (JSONException e) {
-                e.printStackTrace();
+                Logger.error(e);
             }
         }
         return this;
@@ -111,7 +112,7 @@ public class BaseMPMessageBuilder extends JSONObject {
                 getJSONObject(Constants.MessageKey.ATTRIBUTES).put("EventLength", Integer.toString(length.intValue()));
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            Logger.error(e);
         }
     }
 
@@ -127,7 +128,7 @@ public class BaseMPMessageBuilder extends JSONObject {
                 }
                 put(Constants.MessageKey.EVENT_FLAGS, flagsObject);
             } catch (JSONException e) {
-                e.printStackTrace();
+                Logger.error(e);
             }
         }
         return this;

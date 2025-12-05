@@ -6,6 +6,7 @@ import android.os.Looper
 import com.mparticle.MParticle
 import com.mparticle.MParticle.IdentityType
 import com.mparticle.internal.ConfigManager
+import com.mparticle.internal.Logger
 import com.mparticle.networking.Matcher
 import com.mparticle.testutils.AndroidUtils
 import com.mparticle.testutils.BaseCleanStartedEachTest
@@ -64,7 +65,7 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
                     com.mparticle.internal.AccessUtils
                         .awaitMessageHandler()
                 } catch (e: InterruptedException) {
-                    e.printStackTrace()
+                    Logger.error(e)
                 }
                 assertMParticleUserEquals(user, mpid1, identities, null, isLoggedIn)
                 latch.countDown()

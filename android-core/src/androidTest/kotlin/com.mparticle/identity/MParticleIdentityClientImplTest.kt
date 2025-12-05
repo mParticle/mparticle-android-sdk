@@ -4,6 +4,7 @@ import android.os.Handler
 import android.util.MutableBoolean
 import com.mparticle.MParticle
 import com.mparticle.internal.ConfigManager
+import com.mparticle.internal.Logger
 import com.mparticle.internal.MPUtility
 import com.mparticle.networking.MPConnection
 import com.mparticle.networking.MPConnectionTestImpl
@@ -323,7 +324,7 @@ class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
                     try {
                         identityClient?.makeUrlRequest(connection, payload, identity)
                     } catch (e: JSONException) {
-                        e.printStackTrace()
+                        Logger.error(e)
                         Assert.fail(e.message)
                     }
                     (connection as MPConnectionTestImpl).responseCode = 202

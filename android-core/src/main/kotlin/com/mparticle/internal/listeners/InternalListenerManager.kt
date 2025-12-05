@@ -7,6 +7,7 @@ import com.mparticle.SdkListener
 import com.mparticle.identity.AliasResponse
 import com.mparticle.internal.InternalSession
 import com.mparticle.internal.KitFrameworkWrapper
+import com.mparticle.internal.Logger
 import com.mparticle.internal.MPUtility
 import org.json.JSONException
 import org.json.JSONObject
@@ -175,7 +176,7 @@ class InternalListenerManager private constructor(
                         jsonObject.put(key, value)
                     }
                 } catch (e: JSONException) {
-                    e.printStackTrace()
+                    Logger.error(e)
                 }
             }
         }
@@ -359,7 +360,7 @@ class InternalListenerManager private constructor(
                     }
                 }
             } catch (e: ClassNotFoundException) {
-                e.printStackTrace()
+                Logger.error(e)
             }
         }
         return simpleClassName

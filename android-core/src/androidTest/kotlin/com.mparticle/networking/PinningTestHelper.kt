@@ -7,6 +7,7 @@ import com.mparticle.MParticle
 import com.mparticle.identity.MParticleIdentityClient
 import com.mparticle.internal.AccessUtils
 import com.mparticle.internal.Constants
+import com.mparticle.internal.Logger
 import com.mparticle.internal.MParticleApiClient
 import com.mparticle.internal.MParticleApiClientImpl
 import com.mparticle.internal.MParticleApiClientImpl.MPNoConfigException
@@ -43,9 +44,9 @@ class PinningTestHelper internal constructor(
                 ),
             )
         } catch (e: MalformedURLException) {
-            e.printStackTrace()
+            Logger.error(e)
         } catch (e: MPNoConfigException) {
-            e.printStackTrace()
+            Logger.error(e)
         }
         val apiClient: MParticleApiClient = AccessUtils.getApiClient()
         setRequestClient(apiClient, path)

@@ -149,7 +149,7 @@ public class MockServer {
                 try {
                     Thread.sleep(delay);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Logger.error(e);
                 }
             }
         } catch (InterruptedException e) {
@@ -416,7 +416,7 @@ public class MockServer {
         try {
             return getClient().getUrl(endpoint);
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            Logger.error(e);
             throw new RuntimeException(e);
         }
     }
@@ -465,7 +465,7 @@ public class MockServer {
                     .put("is_logged_in", isLoggedIn)
                     .toString();
         } catch (JSONException e) {
-            e.printStackTrace();
+            Logger.error(e);
             throw new RuntimeException(e);
         }
     }
@@ -512,7 +512,7 @@ public class MockServer {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.error(e);
         }
     }
 

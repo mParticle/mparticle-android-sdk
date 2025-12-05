@@ -159,7 +159,7 @@ public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
         try {
             db.execSQL("DROP TABLE IF EXISTS gcm_messages");
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.error(e);
         }
     }
 

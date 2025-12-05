@@ -43,7 +43,7 @@ public final class Certificate {
             String certificate = jsonObject.getString("certificate");
             return new Certificate(alias, certificate);
         } catch (JSONException e) {
-            e.printStackTrace();
+            Logger.error(e);
         }
         return null;
     }

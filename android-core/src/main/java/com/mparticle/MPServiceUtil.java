@@ -45,7 +45,7 @@ public class MPServiceUtil {
                 try {
                     Class.forName("android.os.AsyncTask");
                 } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
+                    Logger.error(e);
                 }
             }
         });
