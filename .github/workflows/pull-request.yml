@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: "Install JDK 17"
         uses: actions/setup-java@v4
         with:
@@ -102,7 +102,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: "Install JDK 17"
         uses: actions/setup-java@v4
         with:
@@ -162,7 +162,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: "Install JDK 17"
         uses: actions/setup-java@v4
         with:
@@ -186,7 +186,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           submodules: recursive
       - name: "Install JDK 17"
@@ -209,7 +209,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           submodules: recursive
       - name: "Install JDK 17"
@@ -238,7 +238,7 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           submodules: recursive
           fetch-depth: 0
