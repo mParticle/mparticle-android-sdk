@@ -35,6 +35,31 @@ lint:
     - shellcheck@0.11.0
     - shfmt@3.6.0
     - trufflehog@3.90.6
+    - mparticle-api-key-check # Custom rule to prevent mParticle API keys from being committed
+  definitions:
+    - name: mparticle-api-key-check
+      files: [ALL]
+      commands:
+        - name: check-mparticle-keys
+          output: pass_fail
+          # ──────────────────────────────────────────────────────────────────────
+          # Matches:
+          #   us2-[32 hex chars]
+          #   us1-...
+          #   us-...
+          #   eu1-...
+          #   Any two lowercase letters + optional digits + hyphen + exactly 32 hex chars
+          # ──────────────────────────────────────────────────────────────────────
+          run: >-
+            sh -c '
+              if grep -E "(?i)[a-z]{2}[0-9]*-[0-9a-f]{32}" "${target}"; then
+                echo "ERROR: Possible mParticle API key detected in ${target}"
+                echo "       Format: xx...-[32 hex chars]  (e.g. us2-, eu1-, us-, au4-, etc.)"
+                echo "API keys should never be committed to version control!"
+                exit 1
+              fi
+            '
+          success_codes: [0, 1]
   disabled:
     - yamllint
   ignore:

@@ -12,7 +12,7 @@ permissions:
   checks: write
   id-token: write
 
-  # Code quality checks
+jobs:
   trunk-check:
     name: Trunk code check
     runs-on: ubuntu-latest
@@ -21,10 +21,7 @@ permissions:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
       - name: Trunk Check
         uses: trunk-io/trunk-action@75699af9e26881e564e9d832ef7dc3af25ec031b # v1.2.4
-        with:
-          check-mode: all
 
-jobs:
   pr-check-hadcoded-secrets:
     name: "Check PR for hardcoded secrets"
     uses: mParticle/mparticle-workflows/.github/workflows/security-hardcoded-secrets.yml@main
