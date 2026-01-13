@@ -97,7 +97,7 @@ jobs:
   #            adb uninstall com.mparticle.kits.test; ./gradlew connectedCheck --stacktrace
   #            ./gradlew :android-core:cAT :android-kit-base:cAT  -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=none
   #      - name: "Archive Instrumented Test Results"
-  #        uses: actions/upload-artifact@v5
+  #        uses: actions/upload-artifact@v6
   #        if: always()
   #        with:
   #          name: instrumented-test-results
@@ -126,7 +126,7 @@ jobs:
   #          api-level: 28
   #          script: ./gradlew -Porchestrator=true :android-core:cAT --stacktrace
   #      - name: "Archive Instrumented Orchestrator Tests Results"
-  #        uses: actions/upload-artifact@v5
+  #        uses: actions/upload-artifact@v6
   #        if: always()
   #        with:
   #          name: "instrumented-orchestrator-tests-results"
@@ -216,7 +216,7 @@ jobs:
         uses: asadmansr/android-test-report-action@384cd31388782f4106dc4a1b37eea2ff02e0aad7 #v1.2.0
         if: always()
       - name: "Archive Unit Test Results"
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: "unit-tests-results"
@@ -246,13 +246,13 @@ jobs:
       - name: "Run Android Kit Lint"
         run: ./gradlew publishReleaseLocal -c settings-kits.gradle lint
       - name: "Archive Test Results"
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: "core-lint-results"
           path: ./**/build/reports/**
       - name: "Archive Test Kit Results"
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: "kit-lint-results"
@@ -282,13 +282,13 @@ jobs:
       - name: "Run Android Kit Kotlin Lint"
         run: ./gradlew publishReleaseLocal -c settings-kits.gradle ktlintCheck
       - name: "Archive Test Results"
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: "core-ktlint-results"
           path: ./**/build/reports/**
       - name: "Archive Test Kit Results"
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: "kit-ktlint-results"
