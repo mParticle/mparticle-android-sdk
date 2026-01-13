@@ -87,7 +87,7 @@ jobs:
             ./gradlew :android-core:cAT -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=none --info
             ./gradlew :android-kit-base:cAT -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=none --info
       - name: "Archive Instrumented Tests Results"
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: "instrumented-tests-results"
@@ -148,7 +148,7 @@ jobs:
             ./gradlew connectedCheck --stacktrace
             ./gradlew -Porchestrator=true :android-core:cAT -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=none
       - name: "Archive Instrumented Orchestrator Tests Results"
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: "instrumented-orchestrator-tests-results"
@@ -171,7 +171,7 @@ jobs:
         uses: asadmansr/android-test-report-action@384cd31388782f4106dc4a1b37eea2ff02e0aad7 #v1.2.0
         if: always()
       - name: "Archive Unit Test Results"
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: "unit-tests-results"
@@ -194,7 +194,7 @@ jobs:
       - name: "Run Android Core SDK Lint"
         run: ./gradlew lint
       - name: "Archive Lint Test Results"
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: "lint-results"
@@ -217,7 +217,7 @@ jobs:
       - name: "Run Android Core SDK Kotlin Lint"
         run: ./gradlew ktlintCheck
       - name: "Archive Kotlin Lint Test Results"
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: "kotlin-lint-results"
