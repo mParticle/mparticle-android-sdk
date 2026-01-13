@@ -158,11 +158,11 @@ class UpgradeVersionTest : BaseTableTest() {
         val sqLiteOpenHelperWrapper: SQLiteOpenHelperWrapper =
             object : SQLiteOpenHelperWrapper {
                 override fun onCreate(db: SQLiteDatabase) {
-                    db.execSQL(SessionTableTest.old_CREATE_SESSION_DDL)
-                    db.execSQL(MessageTableTest.old_no_mpid_CREATE_MESSAGES_DDL)
-                    db.execSQL(BreadcrumbTableTest.old_CREATE_BREADCRUMBS_DDL)
-                    db.execSQL(ReportingTableTest.old_CREATE_REPORTING_DDL)
-                    db.execSQL(UserAttributeTableTest.old_CREATE_USER_ATTRIBUTES_DDL)
+                    db.execSQL(SessionTableTest.OLD_CREATE_SESSION_DDL)
+                    db.execSQL(MessageTableTest.OLD_NO_MPID_CREATE_MESSAGES_DDL)
+                    db.execSQL(BreadcrumbTableTest.OLD_CREATE_BREADCRUMBS_DDL)
+                    db.execSQL(ReportingTableTest.OLD_CREATE_REPORTING_DDL)
+                    db.execSQL(UserAttributeTableTest.OLD_CREATE_USER_ATTRIBUTES_DDL)
                 }
 
                 override fun onUpgrade(

@@ -47,21 +47,16 @@ data class Config(
         }
     }
 
-    data class InternalConfig(
-        var nodePath: String? = null,
-        var mpPath: String? = null,
-    ) {
-        fun toJson(): JSONObject =
-            JSONObject()
-                .putOpt("node-path", nodePath)
-                .putOpt("mp-path", mpPath)
+    data class InternalConfig(var nodePath: String? = null, var mpPath: String? = null) {
+        fun toJson(): JSONObject = JSONObject()
+            .putOpt("node-path", nodePath)
+            .putOpt("mp-path", mpPath)
 
         companion object {
-            fun fromJson(json: JSONObject): InternalConfig =
-                InternalConfig(
-                    nodePath = json.optString("node-path", null),
-                    mpPath = json.optString("mp-path", null),
-                )
+            fun fromJson(json: JSONObject): InternalConfig = InternalConfig(
+                nodePath = json.optString("node-path", null),
+                mpPath = json.optString("mp-path", null),
+            )
         }
     }
 }

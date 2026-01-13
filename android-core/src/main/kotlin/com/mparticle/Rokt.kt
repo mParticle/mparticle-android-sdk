@@ -11,10 +11,7 @@ import kotlinx.coroutines.flow.flowOf
 import java.lang.ref.WeakReference
 
 @ApiClass
-class Rokt internal constructor(
-    private val mConfigManager: ConfigManager,
-    private val mKitManager: KitManager,
-) {
+class Rokt internal constructor(private val mConfigManager: ConfigManager, private val mKitManager: KitManager) {
     @JvmOverloads
     fun selectPlacements(
         identifier: String,
@@ -29,18 +26,13 @@ class Rokt internal constructor(
         }
     }
 
-    fun events(identifier: String): Flow<RoktEvent> =
-        if (mConfigManager.isEnabled) {
-            mKitManager.events(identifier)
-        } else {
-            flowOf()
-        }
+    fun events(identifier: String): Flow<RoktEvent> = if (mConfigManager.isEnabled) {
+        mKitManager.events(identifier)
+    } else {
+        flowOf()
+    }
 
-    fun purchaseFinalized(
-        placementId: String,
-        catalogItemId: String,
-        status: Boolean,
-    ) {
+    fun purchaseFinalized(placementId: String, catalogItemId: String, status: Boolean) {
         if (mConfigManager.isEnabled) {
             mKitManager.purchaseFinalized(placementId, catalogItemId, status)
         }

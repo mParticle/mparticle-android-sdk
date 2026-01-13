@@ -8,15 +8,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-internal class UserAudiencesRetriever(
-    apiClient: MParticleApiClient,
-) {
+internal class UserAudiencesRetriever(apiClient: MParticleApiClient) {
     private val mApiClient: MParticleApiClient = apiClient
 
-    fun fetchAudiences(
-        mpId: Long,
-        featureFlagEnabled: Boolean,
-    ): AudienceTask<AudienceResponse> {
+    fun fetchAudiences(mpId: Long, featureFlagEnabled: Boolean): AudienceTask<AudienceResponse> {
         val task = BaseAudienceTask()
         if (featureFlagEnabled) {
             CoroutineScope(Dispatchers.IO).launch {

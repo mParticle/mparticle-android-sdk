@@ -7,17 +7,17 @@ import com.mparticle.BuildConfig
  *
  */
 object Constants {
-    private var MAX_MESSAGE_PER_BATCH = 100
+    private var maxMessagePerBatchInternal = 100
 
     @JvmStatic
     @set:VisibleForTesting
     var maxMessagePerBatch: Int
-        get() = MAX_MESSAGE_PER_BATCH
+        get() = maxMessagePerBatchInternal
         set(max) {
             if (max > 1) {
-                MAX_MESSAGE_PER_BATCH = max
+                maxMessagePerBatchInternal = max
             } else {
-                MAX_MESSAGE_PER_BATCH = 100
+                maxMessagePerBatchInternal = 100
             }
         }
 

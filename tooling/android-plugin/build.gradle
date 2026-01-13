@@ -1,8 +1,8 @@
 apply plugin: 'groovy'
 apply plugin: 'kotlin'
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = JavaVersion.toVersion(JAVA_VERSION)
+targetCompatibility = JavaVersion.toVersion(JAVA_VERSION)
 
 
 ext {
@@ -26,7 +26,7 @@ configurations {
 
 dependencies {
     fatJar project(':tooling:common')
-    compileOnly configurations.fatJar
+    compileOnly files(configurations.fatJar)
     implementation gradleApi()
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation files('libs/java-json.jar')

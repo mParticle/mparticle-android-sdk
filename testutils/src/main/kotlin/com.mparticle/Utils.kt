@@ -8,23 +8,21 @@ import kotlin.random.Random
 object Utils {
     fun randomPromotionAction(): String = randomConstString(Promotion::class.java)
 
-    fun randomConstString(clazz: Class<*>): String =
-        clazz.fields
-            .filter { Modifier.isPublic(it.modifiers) && Modifier.isStatic(it.modifiers) }
-            .filter { it.name.all { it.isUpperCase() } }
-            .filter { it.type == String::class.java }
-            .let {
-                it[Random.Default.nextInt(0, it.size - 1)].get(null) as String
-            }
+    fun randomConstString(clazz: Class<*>): String = clazz.fields
+        .filter { Modifier.isPublic(it.modifiers) && Modifier.isStatic(it.modifiers) }
+        .filter { it.name.all { it.isUpperCase() } }
+        .filter { it.type == String::class.java }
+        .let {
+            it[Random.Default.nextInt(0, it.size - 1)].get(null) as String
+        }
 
     val chars: List<Char> = ('a'..'z') + ('A'..'Z')
 
-    fun randomAttributes(): MutableMap<String, String> =
-        (0..Random.Default.nextInt(0, 5))
-            .map {
-                randomString(4) to randomString(8)
-            }.toMap()
-            .toMutableMap()
+    fun randomAttributes(): MutableMap<String, String> = (0..Random.Default.nextInt(0, 5))
+        .map {
+            randomString(4) to randomString(8)
+        }.toMap()
+        .toMutableMap()
 
     fun randomIdentities(): MutableMap<MParticle.IdentityType, String> {
         val identities = MParticle.IdentityType.values()
@@ -35,19 +33,17 @@ object Utils {
             .toMutableMap()
     }
 
-    fun randomString(length: Int): String =
-        (0..length - 1)
-            .map {
-                chars[Random.Default.nextInt(0, chars.size - 1)]
-            }.joinToString("")
+    fun randomString(length: Int): String = (0..length - 1)
+        .map {
+            chars[Random.Default.nextInt(0, chars.size - 1)]
+        }.joinToString("")
 
-    fun randomEventType(): MParticle.EventType =
-        MParticle.EventType.values()[
-            Random.Default.nextInt(
-                0,
-                MParticle.EventType.values().size - 1,
-            ),
-        ]
+    fun randomEventType(): MParticle.EventType = MParticle.EventType.values()[
+        Random.Default.nextInt(
+            0,
+            MParticle.EventType.values().size - 1,
+        ),
+    ]
 
     fun randomProductAction(): String = randomConstString(Product::class.java)
 }

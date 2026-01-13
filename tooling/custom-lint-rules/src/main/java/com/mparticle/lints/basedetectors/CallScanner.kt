@@ -27,42 +27,37 @@ import org.jetbrains.uast.util.isConstructorCall
 abstract class CallScanner :
     BaseDetector(),
     Detector.UastScanner {
-    abstract fun onInstanceCollected(
-        context: JavaContext,
-        unresolvedExpression: Expression,
-        reportingNode: UExpression,
-    )
+    abstract fun onInstanceCollected(context: JavaContext, unresolvedExpression: Expression, reportingNode: UExpression)
 
     abstract fun getApplicableClasses(): List<Class<*>>
 
-    override fun createUastHandler(context: JavaContext): UElementHandler? =
-        object : UElementHandler() {
-            override fun visitCallExpression(node: UCallExpression) {
-                try {
-                    if (!disabled && ofInterest(node)) {
-                        var expression = node.resolveChainedCalls(true, RootParent(node))
+    override fun createUastHandler(context: JavaContext): UElementHandler? = object : UElementHandler() {
+        override fun visitCallExpression(node: UCallExpression) {
+            try {
+                if (!disabled && ofInterest(node)) {
+                    var expression = node.resolveChainedCalls(true, RootParent(node))
 
-                        val variable = node.getVariableElement(true, true)
-                        val method = node.getParentOfType<UMethod>(UMethod::class.java)
+                    val variable = node.getVariableElement(true, true)
+                    val method = node.getParentOfType<UMethod>(UMethod::class.java)
 
-                        if (variable != null && method != null) {
-                            VariableCollector(variable, method, expression).getUnresolvedObject(
-                                false,
-                            )
-                        }
-                        if (expression != null) {
-                            node.receiverClassName()?.let { receiverName ->
-                                onInstanceCollected(context, expression, node)
-                            }
+                    if (variable != null && method != null) {
+                        VariableCollector(variable, method, expression).getUnresolvedObject(
+                            false,
+                        )
+                    }
+                    if (expression != null) {
+                        node.receiverClassName()?.let { receiverName ->
+                            onInstanceCollected(context, expression, node)
                         }
                     }
-                } catch (e: Exception) {
-                    if (config?.verbose == true) {
-                        Logger.error(e.toString())
-                    }
+                }
+            } catch (e: Exception) {
+                if (config?.verbose == true) {
+                    Logger.error(e.toString())
                 }
             }
         }
+    }
 
     override fun getApplicableUastTypes(): List<Class<out UElement>>? = listOf(UCallExpression::class.java)
 

@@ -7,28 +7,24 @@ import java.io.File
 import java.io.InputStreamReader
 
 object Utils {
-    fun getCurrentFileLocation(fileName: String): String =
-        javaClass
-            .getResource(fileName)
-            .path
-            .replace(
-                "file:",
-                "",
-            ).split("lint.jar")[0]
+    fun getCurrentFileLocation(fileName: String): String = javaClass
+        .getResource(fileName)
+        .path
+        .replace(
+            "file:",
+            "",
+        ).split("lint.jar")[0]
 
-    fun Array<String>.executeCLI(
-        path: String? = null,
-        workingDirectory: String = ".",
-    ): String {
+    fun Array<String>.executeCLI(path: String? = null, workingDirectory: String = "."): String {
         Logger.verbose(
             "command line operation: ${
-            joinToString(" ") {
-                if (it.contains(" ")) {
-                    "\"$it\""
-                } else {
-                    it
+                joinToString(" ") {
+                    if (it.contains(" ")) {
+                        "\"$it\""
+                    } else {
+                        it
+                    }
                 }
-            }
             }",
         )
         var error = ""
@@ -54,7 +50,7 @@ object Utils {
     }
 
     fun getConfigFile(): Config? {
-        val file = File(getFileLocation(configFileName))
+        val file = File(getFileLocation(CONFIG_FILE_NAME))
         if (file.exists()) {
             val contents = file.readText()
             try {
@@ -67,7 +63,7 @@ object Utils {
     }
 
     fun getConfigFileLastModified(): Long {
-        val file = File(getFileLocation(configFileName))
+        val file = File(getFileLocation(CONFIG_FILE_NAME))
         if (file.exists()) {
             return file.lastModified()
         } else {
@@ -76,19 +72,19 @@ object Utils {
     }
 
     fun setConfigFile(config: Config) {
-        File(getFileLocation(configFileName))
+        File(getFileLocation(CONFIG_FILE_NAME))
             .writeText(config.toJson().toString())
     }
 
     fun removeConfigFile() {
-        val file = File(getFileLocation(configFileName))
+        val file = File(getFileLocation(CONFIG_FILE_NAME))
         if (file.exists()) {
             file.delete()
         }
     }
 
     fun getLocalDataplan(): String? {
-        val file = File(getFileLocation(dataplanFileName))
+        val file = File(getFileLocation(DATAPLAN_FILE_NAME))
         if (file.exists()) {
             return file.readText()
         } else {
@@ -97,14 +93,14 @@ object Utils {
     }
 
     fun removeLocalDataplan() {
-        val file = File(getFileLocation(dataplanFileName))
+        val file = File(getFileLocation(DATAPLAN_FILE_NAME))
         if (file.exists()) {
             file.delete()
         }
     }
 
     fun setLocalDataplan(dataplan: String) {
-        File(getFileLocation(dataplanFileName))
+        File(getFileLocation(DATAPLAN_FILE_NAME))
             .writeText(dataplan)
     }
 
@@ -118,5 +114,5 @@ object Utils {
     }
 }
 
-const val configFileName = "mparticle-config"
-const val dataplanFileName = "mparticle-dataplan"
+const val CONFIG_FILE_NAME = "mparticle-config"
+const val DATAPLAN_FILE_NAME = "mparticle-dataplan"

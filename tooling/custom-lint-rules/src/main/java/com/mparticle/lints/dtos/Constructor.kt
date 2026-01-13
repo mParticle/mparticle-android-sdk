@@ -4,11 +4,7 @@ import com.mparticle.lints.receiverClassName
 import com.mparticle.lints.resolve
 import org.jetbrains.uast.UCallExpression
 
-data class Constructor(
-    override val parent: Expression,
-    val methodName: String?,
-    override val node: UCallExpression,
-) : ParameterizedExpression {
+data class Constructor(override val parent: Expression, val methodName: String?, override val node: UCallExpression) : ParameterizedExpression {
     override var arguments: List<Value> = listOf()
 
     override fun resolve(): Any? {

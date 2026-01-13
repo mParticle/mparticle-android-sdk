@@ -139,28 +139,27 @@ class AppStateManagerTest {
      */
     @Test
     @Throws(Exception::class)
-    fun testSecondActivityStart() =
-        runTest(StandardTestDispatcher()) {
-            manager.onActivityPaused(activity)
-            Thread.sleep(1000)
-            Assert.assertEquals(true, manager.isBackgrounded())
-            manager.onActivityResumed(activity)
-            val activity2 =
-                Mockito.mock(
-                    Activity::class.java,
-                )
-            val activity3 =
-                Mockito.mock(
-                    Activity::class.java,
-                )
-            manager.onActivityPaused(activity2)
-            manager.onActivityPaused(activity3)
-            Thread.sleep(1000)
-            Assert.assertEquals(false, manager.isBackgrounded())
-            manager.onActivityPaused(activity)
-            Thread.sleep(1000)
-            Assert.assertEquals(true, manager.isBackgrounded())
-        }
+    fun testSecondActivityStart() = runTest(StandardTestDispatcher()) {
+        manager.onActivityPaused(activity)
+        Thread.sleep(1000)
+        Assert.assertEquals(true, manager.isBackgrounded())
+        manager.onActivityResumed(activity)
+        val activity2 =
+            Mockito.mock(
+                Activity::class.java,
+            )
+        val activity3 =
+            Mockito.mock(
+                Activity::class.java,
+            )
+        manager.onActivityPaused(activity2)
+        manager.onActivityPaused(activity3)
+        Thread.sleep(1000)
+        Assert.assertEquals(false, manager.isBackgrounded())
+        manager.onActivityPaused(activity)
+        Thread.sleep(1000)
+        Assert.assertEquals(true, manager.isBackgrounded())
+    }
 
     @Test
     @Throws(Exception::class)

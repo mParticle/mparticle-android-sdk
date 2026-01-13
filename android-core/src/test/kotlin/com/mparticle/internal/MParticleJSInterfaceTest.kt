@@ -354,14 +354,13 @@ class MParticleJSInterfaceTest : MParticleJSInterface() {
     fun isEqual(
         product1: Product,
         product2: Product?,
-    ): Boolean =
-        try {
-            val object1 = JSONObject(product1.toString())
-            val object2 = JSONObject(product2.toString())
-            object1.remove("act")
-            object2.remove("act")
-            object1.toString() == object2.toString()
-        } catch (ignore: JSONException) {
-            false
-        }
+    ): Boolean = try {
+        val object1 = JSONObject(product1.toString())
+        val object2 = JSONObject(product2.toString())
+        object1.remove("act")
+        object2.remove("act")
+        object1.toString() == object2.toString()
+    } catch (ignore: JSONException) {
+        false
+    }
 }

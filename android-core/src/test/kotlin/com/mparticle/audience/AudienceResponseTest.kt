@@ -94,21 +94,21 @@ class AudienceResponseTest {
 
     @Test
     fun getErrorTest() {
-        val error_Msg = "Unauthorized"
-        classInstance = AudienceResponse(401, error_Msg)
+        val errorMsg = "Unauthorized"
+        classInstance = AudienceResponse(401, errorMsg)
         val field: Field = AudienceResponse::class.java.getDeclaredField("code")
         field.isAccessible = true
-        Assert.assertEquals(error_Msg, classInstance.getError())
+        Assert.assertEquals(errorMsg, classInstance.getError())
         Assert.assertEquals(401, field.getInt(classInstance))
     }
 
     @Test
     fun getErrorTest_When_Error_Is_Empty() {
-        val error_Msg = ""
-        classInstance = AudienceResponse(-1, error_Msg)
+        val errorMsg = ""
+        classInstance = AudienceResponse(-1, errorMsg)
         val field: Field = AudienceResponse::class.java.getDeclaredField("code")
         field.isAccessible = true
-        Assert.assertEquals(error_Msg, classInstance.getError())
+        Assert.assertEquals(errorMsg, classInstance.getError())
         Assert.assertEquals(-1, field.getInt(classInstance))
     }
 }

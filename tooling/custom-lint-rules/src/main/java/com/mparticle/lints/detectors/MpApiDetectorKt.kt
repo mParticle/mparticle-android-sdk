@@ -110,64 +110,56 @@ class MpApiDetectorKt :
      * including the same call made through different code paths, these are "Duplicate calls". Any method we find outside of a code path originating
      * in Application.onCreate() is a "Wrong place call"
      */
-    override fun createUastHandler(context: JavaContext): UElementHandler =
-        object : UElementHandler() {
-            override fun visitMethod(node: UMethod) {
-                try {
-                    this@MpApiDetectorKt.context = context
-                    if (isApplicationSubClassOnCreate(context, node)) {
-                        findMethodCall(node, TARGET_METHOD_QUALIFIED_NAME, MAX_AST_DEPTH)
-                            .apply {
-                                forEach { methodCall ->
-                                    if (isTargetMethod(TARGET_METHOD_QUALIFIED_NAME, methodCall)) {
-                                        if (properMethodCall == null) {
-                                            properMethodCall =
-                                                LocationWrapper(context.getLocation(methodCall))
-                                        } else {
-                                            extraProperMethodCalls.add(
-                                                LocationWrapper(
-                                                    context.getLocation(
-                                                        methodCall,
-                                                    ),
+    override fun createUastHandler(context: JavaContext): UElementHandler = object : UElementHandler() {
+        override fun visitMethod(node: UMethod) {
+            try {
+                this@MpApiDetectorKt.context = context
+                if (isApplicationSubClassOnCreate(context, node)) {
+                    findMethodCall(node, TARGET_METHOD_QUALIFIED_NAME, MAX_AST_DEPTH)
+                        .apply {
+                            forEach { methodCall ->
+                                if (isTargetMethod(TARGET_METHOD_QUALIFIED_NAME, methodCall)) {
+                                    if (properMethodCall == null) {
+                                        properMethodCall =
+                                            LocationWrapper(context.getLocation(methodCall))
+                                    } else {
+                                        extraProperMethodCalls.add(
+                                            LocationWrapper(
+                                                context.getLocation(
+                                                    methodCall,
                                                 ),
-                                            )
-                                        }
+                                            ),
+                                        )
                                     }
                                 }
                             }
-                        applicationOnCreateCall = LocationWrapper(context.getLocation(node))
-                    } else {
-                        findMethodCall(
-                            node,
-                            TARGET_METHOD_QUALIFIED_NAME,
-                            1,
-                        ).forEach { methodCall ->
-                            if (isTargetMethod(TARGET_METHOD_QUALIFIED_NAME, methodCall)) {
-                                wrongPlaceMethodCalls.add(
-                                    LocationWrapper(
-                                        context.getLocation(
-                                            methodCall,
-                                        ),
+                        }
+                    applicationOnCreateCall = LocationWrapper(context.getLocation(node))
+                } else {
+                    findMethodCall(
+                        node,
+                        TARGET_METHOD_QUALIFIED_NAME,
+                        1,
+                    ).forEach { methodCall ->
+                        if (isTargetMethod(TARGET_METHOD_QUALIFIED_NAME, methodCall)) {
+                            wrongPlaceMethodCalls.add(
+                                LocationWrapper(
+                                    context.getLocation(
+                                        methodCall,
                                     ),
-                                )
-                            }
+                                ),
+                            )
                         }
                     }
-                } catch (e: Exception) {
-                    Logger.error(e.toString())
                 }
+            } catch (e: Exception) {
+                Logger.error(e.toString())
             }
         }
+    }
 
-    private fun findMethodCall(
-        method: UMethod,
-        targetMethodName: String,
-        depth: Int,
-    ): List<UCallExpression> {
-        fun findMethodCall(
-            element: UElement?,
-            depth: Int,
-        ): List<UCallExpression> {
+    private fun findMethodCall(method: UMethod, targetMethodName: String, depth: Int): List<UCallExpression> {
+        fun findMethodCall(element: UElement?, depth: Int): List<UCallExpression> {
             var callExpressions = mutableListOf<UCallExpression>()
             if (depth == 0) {
                 return callExpressions
@@ -210,7 +202,7 @@ class MpApiDetectorKt :
                                 val index = text.indexOf(name ?: "")
                                 if (index > 0 &&
                                     " ${
-                                    text.substring(
+                                        text.substring(
                                             0,
                                             index,
                                         )
@@ -252,9 +244,8 @@ class MpApiDetectorKt :
      * Especially with local functions, introduced in kotlin, we have to check both whether is method
      * call refers to a local function, or a class level function,
      */
-    private fun getMethod(callExpression: UCallExpression): UExpression? =
-        getLocalMethodImplmentation(callExpression)
-            ?: getMethodImplementation(callExpression)
+    private fun getMethod(callExpression: UCallExpression): UExpression? = getLocalMethodImplmentation(callExpression)
+        ?: getMethodImplementation(callExpression)
 
     private fun getLocalMethodImplmentation(callExpression: UCallExpression): UExpression? {
         (callExpression.uastParent as? UBlockExpression)
@@ -284,13 +275,9 @@ class MpApiDetectorKt :
     /**
      *
      */
-    private fun getMethodImplementation(callExpression: UCallExpression): UExpression? =
-        (callExpression.tryResolveUDeclaration() as? UMethod)?.uastBody
+    private fun getMethodImplementation(callExpression: UCallExpression): UExpression? = (callExpression.tryResolveUDeclaration() as? UMethod)?.uastBody
 
-    private fun isTargetMethod(
-        targetMethodName: String,
-        element: UCallExpression,
-    ): Boolean {
+    private fun isTargetMethod(targetMethodName: String, element: UCallExpression): Boolean {
         // before we resolve the method, do a quick check to see if the name matches
         if (targetMethodName.endsWith(element.methodName ?: "")) {
             // if the name matches, do the more expensive operation of resolving the method implementation,
@@ -302,15 +289,9 @@ class MpApiDetectorKt :
         return false
     }
 
-    private fun isApplicationSubClassOnCreate(
-        context: JavaContext,
-        method: UMethod,
-    ): Boolean = isApplicationSubClass(context, method) && method.name.equals("onCreate")
+    private fun isApplicationSubClassOnCreate(context: JavaContext, method: UMethod): Boolean = isApplicationSubClass(context, method) && method.name.equals("onCreate")
 
-    private fun isApplicationSubClass(
-        context: JavaContext,
-        method: UMethod,
-    ): Boolean {
+    private fun isApplicationSubClass(context: JavaContext, method: UMethod): Boolean {
         val evaluator = context.evaluator
         return method
             .getParentOfType(true, UClass::class.java)
@@ -328,9 +309,7 @@ class MpApiDetectorKt :
      * before or not, is to compare their location. The Location object does not have an effective "equals()"
      * method, so this class provides us with a way to compare locations
      */
-    internal class LocationWrapper constructor(
-        val location: Location,
-    ) : Comparable<LocationWrapper> {
+    internal class LocationWrapper constructor(val location: Location) : Comparable<LocationWrapper> {
         override fun hashCode(): Int = toString().hashCode()
 
         override fun equals(other: Any?): Boolean {
@@ -349,18 +328,13 @@ class MpApiDetectorKt :
             return false
         }
 
-        fun compareLocation(
-            l1: Position?,
-            l2: Position?,
-        ): Boolean =
-            l1?.column == l2?.column &&
-                l1?.line == l2?.line &&
-                l1?.offset == l2?.offset
+        fun compareLocation(l1: Position?, l2: Position?): Boolean = l1?.column == l2?.column &&
+            l1?.line == l2?.line &&
+            l1?.offset == l2?.offset
 
-        override fun toString(): String =
-            location.file.getAbsolutePath() + "\n" +
-                (location.start?.offset.toString() + " " + location.start?.line + " " + location.start?.column) + "\n" +
-                (location.end?.offset.toString() + " " + location.end?.line + " " + location.end?.column)
+        override fun toString(): String = location.file.getAbsolutePath() + "\n" +
+            (location.start?.offset.toString() + " " + location.start?.line + " " + location.start?.column) + "\n" +
+            (location.end?.offset.toString() + " " + location.end?.line + " " + location.end?.column)
 
         override fun compareTo(other: LocationWrapper): Int = toString().compareTo(other.toString())
     }

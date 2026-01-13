@@ -79,12 +79,11 @@ class SessionServiceTest : BaseMPServiceTest() {
     internal inner class MockMessageBatch(
         var id: Int,
     ) : MessageBatch() {
-        override fun equals(other: Any?): Boolean =
-            if (other is MockMessageBatch) {
-                id == other.id
-            } else {
-                super.equals(other)
-            }
+        override fun equals(other: Any?): Boolean = if (other is MockMessageBatch) {
+            id == other.id
+        } else {
+            super.equals(other)
+        }
 
         override fun hashCode(): Int = id
     }

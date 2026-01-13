@@ -3,21 +3,16 @@ package com.mparticle.lints.dtos
 import com.mparticle.lints.resolveToEnum
 import org.jetbrains.uast.UExpression
 
-data class Value(
-    override var parent: Expression,
-    val value: Any?,
-    override val node: UExpression,
-) : Expression {
+data class Value(override var parent: Expression, val value: Any?, override val node: UExpression) : Expression {
     override fun toString(): String = "$value"
 
-    override fun resolve(): Any? =
-        when (value) {
-            is Expression -> {
-                value.resolve()
-            }
-            is Pair<*, *> -> value.resolveToEnum()
-            else -> value
+    override fun resolve(): Any? = when (value) {
+        is Expression -> {
+            value.resolve()
         }
+        is Pair<*, *> -> value.resolveToEnum()
+        else -> value
+    }
 
     override fun forEachExpression(predicate: (Expression) -> Unit) {
         predicate(this)

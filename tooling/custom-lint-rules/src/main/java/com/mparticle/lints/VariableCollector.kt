@@ -23,12 +23,7 @@ import org.jetbrains.uast.visitor.AbstractUastVisitor
  * class that will gather all {@link com.mparticle.ling.dtos.Call}s made to the provided PsiVariable instance.
  * After
  */
-internal class VariableCollector(
-    val variable: PsiVariable,
-    private val method: UMethod,
-    val parent: Expression,
-    val includeInitialization: Boolean = false,
-) : AbstractUastVisitor() {
+internal class VariableCollector(val variable: PsiVariable, private val method: UMethod, val parent: Expression, val includeInitialization: Boolean = false) : AbstractUastVisitor() {
     private var expression: Expression? = null
 
     fun getUnresolvedObject(returnValue: Boolean? = null): Expression? {

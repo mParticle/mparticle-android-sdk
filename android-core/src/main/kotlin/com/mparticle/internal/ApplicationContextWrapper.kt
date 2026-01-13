@@ -16,9 +16,7 @@ import java.lang.ref.WeakReference
 import java.util.Collections
 import java.util.LinkedList
 
-open class ApplicationContextWrapper(
-    private val mBaseApplication: Application,
-) : Application() {
+open class ApplicationContextWrapper(private val mBaseApplication: Application) : Application() {
     var isReplayActivityLifecycle: Boolean = true
     private var mRecord = true
     private var mActivityLifecycleCallbackRecorder: ActivityLifecycleCallbackRecorder?
@@ -95,10 +93,7 @@ open class ApplicationContextWrapper(
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    fun registerActivityLifecycleCallbacks(
-        callback: ActivityLifecycleCallbacks,
-        unitTesting: Boolean,
-    ) {
+    fun registerActivityLifecycleCallbacks(callback: ActivityLifecycleCallbacks, unitTesting: Boolean) {
         mBaseApplication.registerActivityLifecycleCallbacks(callback)
         val runnable = ReplayLifecycleCallbacksRunnable(callback)
         if (unitTesting) {
@@ -152,27 +147,19 @@ open class ApplicationContextWrapper(
     val activityLifecycleCallbackRecorderInstance: ActivityLifecycleCallbackRecorder
         get() = ActivityLifecycleCallbackRecorder()
 
-    fun getLifeCycleEventInstance(
-        methodType: MethodType,
-        activityRef: WeakReference<Activity>?,
-    ): LifeCycleEvent = LifeCycleEvent(methodType, activityRef)
+    fun getLifeCycleEventInstance(methodType: MethodType, activityRef: WeakReference<Activity>?): LifeCycleEvent =
+        LifeCycleEvent(methodType, activityRef)
 
-    fun getLifeCycleEventInstance(
-        methodType: MethodType,
-        activityRef: WeakReference<Activity>?,
-        bundle: Bundle?,
-    ): LifeCycleEvent = LifeCycleEvent(methodType, activityRef, bundle)
+    fun getLifeCycleEventInstance(methodType: MethodType, activityRef: WeakReference<Activity>?, bundle: Bundle?): LifeCycleEvent =
+        LifeCycleEvent(methodType, activityRef, bundle)
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     inner class ActivityLifecycleCallbackRecorder : ActivityLifecycleCallbacks {
         var lifeCycleEvents: MutableList<LifeCycleEvent> =
             Collections.synchronizedList(LinkedList())
-        val MAX_LIST_SIZE: Int = 10
+        val maxListSize: Int = 10
 
-        override fun onActivityCreated(
-            activity: Activity,
-            savedInstanceState: Bundle?,
-        ) {
+        override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
             recordedLifecycleList.add(
                 LifeCycleEvent(
                     MethodType.ON_CREATED,
@@ -213,10 +200,7 @@ open class ApplicationContextWrapper(
             )
         }
 
-        override fun onActivitySaveInstanceState(
-            activity: Activity,
-            outState: Bundle,
-        ) {
+        override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
             recordedLifecycleList.add(
                 LifeCycleEvent(
                     MethodType.ON_SAVE_INSTANCE_STATE,
@@ -237,7 +221,7 @@ open class ApplicationContextWrapper(
 
         private val recordedLifecycleList: MutableList<LifeCycleEvent>
             get() {
-                if (lifeCycleEvents.size > MAX_LIST_SIZE) {
+                if (lifeCycleEvents.size > maxListSize) {
                     lifeCycleEvents.removeAt(0)
                     return recordedLifecycleList
                 }
@@ -254,11 +238,7 @@ open class ApplicationContextWrapper(
             }
     }
 
-    inner class LifeCycleEvent(
-        val methodType: MethodType,
-        val activityRef: WeakReference<Activity>?,
-        val bundle: Bundle?,
-    ) {
+    inner class LifeCycleEvent(val methodType: MethodType, val activityRef: WeakReference<Activity>?, val bundle: Bundle?) {
         constructor(
             methodType: MethodType,
             activityRef: WeakReference<Activity>?,
@@ -279,9 +259,7 @@ open class ApplicationContextWrapper(
         }
     }
 
-    internal inner class ReplayLifecycleCallbacksRunnable(
-        var callback: ActivityLifecycleCallbacks,
-    ) : Runnable {
+    internal inner class ReplayLifecycleCallbacksRunnable(var callback: ActivityLifecycleCallbacks) : Runnable {
         @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
         override fun run() {
             if (callback != null && mActivityLifecycleCallbackRecorder != null && isReplayActivityLifecycle) {

@@ -5,10 +5,7 @@ import com.mparticle.lints.resolve
 import org.jetbrains.uast.UCallExpression
 import java.lang.reflect.Method
 
-class StaticFactory(
-    val methodName: String?,
-    override val node: UCallExpression,
-) : ParameterizedExpression {
+class StaticFactory(val methodName: String?, override val node: UCallExpression) : ParameterizedExpression {
     override val parent = RootParent(node)
     override var arguments: List<Value> = listOf()
 

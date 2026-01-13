@@ -1,9 +1,6 @@
 package com.mparticle
 
-enum class WrapperSdk(
-    wrapperSdkId: Int,
-    wrapperSdkName: String,
-) {
+enum class WrapperSdk(wrapperSdkId: Int, wrapperSdkName: String) {
     WrapperNone(0, "None"),
     WrapperSdkUnity(1, "Unity"),
     WrapperSdkReactNative(2, "React Native"),
@@ -18,7 +15,4 @@ enum class WrapperSdk(
  * @param version represents the configured version for the wrapper sdk. Will return null if
  * [WrapperSdk.WrapperNone] is set as the sdk wrapper
  */
-data class WrapperSdkVersion(
-    val sdk: WrapperSdk,
-    val version: String?,
-)
+data class WrapperSdkVersion(val sdk: WrapperSdk, val version: String?)

@@ -14,20 +14,20 @@ object Constants {
     ): String = String.format(ERROR_WARNING_FORMAT, errors, warnings)
 
     @Language("JAVA")
-    const val mparticleStub =
+    const val MPARTICLE_STUB =
         """package com.mparticle;
     public class MParticle {
        public static void start() {}
     }"""
 
     @Language("JAVA")
-    const val applicationStub = """
+    const val APPLICATION_STUB = """
     package android.app; 
     public class Application {
        public void onCreate() {}
        public void onResume() {}
     }"""
 
-    val mParticleStubClass = java(mparticleStub)
-    val mApplicationStubClass = java(applicationStub)
+    val mParticleStubClass = java(MPARTICLE_STUB)
+    val mApplicationStubClass = java(APPLICATION_STUB)
 }

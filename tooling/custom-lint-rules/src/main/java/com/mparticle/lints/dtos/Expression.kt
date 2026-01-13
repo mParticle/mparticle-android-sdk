@@ -15,9 +15,7 @@ interface ParameterizedExpression : Expression {
     var arguments: List<Value>
 }
 
-class RootParent(
-    override val node: UExpression,
-) : Expression {
+class RootParent(override val node: UExpression) : Expression {
     override val parent: Expression = this
 
     override fun resolve() = null

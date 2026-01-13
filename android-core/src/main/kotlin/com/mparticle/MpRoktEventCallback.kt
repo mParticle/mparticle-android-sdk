@@ -79,11 +79,10 @@ enum class UnloadReasons {
          * @param value the name of the enum constant to look up
          * @return the corresponding UnloadReasons constant or UNKNOWN if no match is found
          */
-        fun from(value: String): UnloadReasons =
-            try {
-                valueOf(value)
-            } catch (e: IllegalArgumentException) {
-                UNKNOWN
-            }
+        fun from(value: String): UnloadReasons = try {
+            valueOf(value)
+        } catch (e: IllegalArgumentException) {
+            UNKNOWN
+        }
     }
 }

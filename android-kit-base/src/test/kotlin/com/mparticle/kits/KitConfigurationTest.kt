@@ -36,10 +36,11 @@ class KitConfigurationTest {
             val configuration = MockKitConfiguration.createKitConfiguration(ekConfig)
             if (ekConfig.has("avf")) {
                 val attributeValueFilter = ekConfig.getJSONObject("avf")
-                if (attributeValueFilter.has("i") && attributeValueFilter.has("a") &&
+                if (attributeValueFilter.has("i") &&
+                    attributeValueFilter.has("a") &&
                     attributeValueFilter.has(
-                            "v",
-                        )
+                        "v",
+                    )
                 ) {
                     val shouldIncludeMatches = attributeValueFilter["i"]
                     val hashedAttribute = attributeValueFilter["a"]
@@ -174,7 +175,7 @@ class KitConfigurationTest {
     fun testFilterCommerceAttributes() {
         // CUSTOM ATTRIBUTES
         val configuration =
-            MockKitConfiguration.createKitConfiguration(JSONObject(COMMERCE_FILTERS))
+            MockKitConfiguration.createKitConfiguration(JSONObject(commerceFilters))
         val attributes: MutableMap<String, String> = HashMap()
         attributes["my custom attribute"] = "whatever"
         var event =
@@ -236,7 +237,7 @@ class KitConfigurationTest {
         var configuration =
             MockKitConfiguration.createKitConfiguration(
                 JSONObject(
-                    COMMERCE_FILTERS,
+                    commerceFilters,
                 ),
             )
         val impression = Impression("Cool list name", Product.Builder("name2", "sku", 2.0).build())
@@ -260,7 +261,7 @@ class KitConfigurationTest {
                 Assert.assertEquals(0, imp.products.size.toLong())
             }
         }
-        val config = JSONObject(COMMERCE_FILTERS)
+        val config = JSONObject(commerceFilters)
         // enable product, disable impressions
         config.getJSONObject("hs").getJSONObject("ent").put("2", 0)
         config.getJSONObject("hs").getJSONObject("ent").put("1", 1)
@@ -300,7 +301,7 @@ class KitConfigurationTest {
         var configuration =
             MockKitConfiguration.createKitConfiguration(
                 JSONObject(
-                    COMMERCE_FILTERS,
+                    commerceFilters,
                 ),
             )
         Assert.assertEquals("the creative", event.promotions?.get(0)?.creative)
@@ -327,7 +328,7 @@ class KitConfigurationTest {
                 ?.get("my custom product attribute"),
         )
         Assert.assertEquals("cool brand", event.products?.get(0)?.brand)
-        configuration = MockKitConfiguration.createKitConfiguration(JSONObject(COMMERCE_FILTERS_2))
+        configuration = MockKitConfiguration.createKitConfiguration(JSONObject(commerceFilters2))
         filteredEvent = configuration.filterCommerceEvent(event)
         Assert.assertNull(
             filteredEvent.products
@@ -343,7 +344,7 @@ class KitConfigurationTest {
     fun testFilterCommerceEventType() {
         // CUSTOM ATTRIBUTES
         val configuration =
-            MockKitConfiguration.createKitConfiguration(JSONObject(COMMERCE_FILTERS))
+            MockKitConfiguration.createKitConfiguration(JSONObject(commerceFilters))
         val event =
             CommerceEvent
                 .Builder(Product.ADD_TO_CART, Product.Builder("name", "sku", 2.0).build())
@@ -375,13 +376,13 @@ class KitConfigurationTest {
         val includeTrueConfiguration =
             MockKitConfiguration.createKitConfiguration(
                 JSONObject(
-                    ATTRIBUTE_VALUE_FILTERING_INCLUDE_TRUE,
+                    attributeValueFilteringIncludeTrue,
                 ),
             )
         val includeFalseConfiguration =
             MockKitConfiguration.createKitConfiguration(
                 JSONObject(
-                    ATTRIBUTE_VALUE_FILTERING_INCLUDE_FALSE,
+                    attributeValueFilteringIncludeFalse,
                 ),
             )
         var result: Boolean =
@@ -900,15 +901,15 @@ class KitConfigurationTest {
             MParticle.setInstance(mockMp)
         }
 
-        var COMMERCE_FILTERS =
+        var commerceFilters =
             "{\"id\":28, \"as\":{\"apiKey\":\"2687a8d1-1022-4820-9327-48582e930098\", \"sendPushOpenedWhenAppInForeground\":\"False\", \"push_enabled\":\"True\", \"register_inapp\":\"True\", \"appGroupId\":\"\"}, \"hs\":{\"et\":{\"1568\":0 }, \"cea\":{\"-1015386651\":0, \"-2090340318\":0, \"-1091394645\":0 }, \"ent\":{\"1\":0 }, \"afa\":{\"2\":{\"1820422063\":0 } } }, \"pr\":[] }"
-        var COMMERCE_FILTERS_2 =
+        var commerceFilters2 =
             "{\"id\":28, \"as\":{\"apiKey\":\"1fd18e0e-22cd-4b86-a106-551ccc59175f\", \"sendPushOpenedWhenAppInForeground\":\"False\", \"push_enabled\":\"True\", \"register_inapp\":\"True\", \"appGroupId\":\"a8f63b1f-1bc2-4373-8947-8dacdd113ad4\", \"addEventAttributeList\":\"[{\\\"map\\\":\\\"Value\\\",\\\"value\\\":null,\\\"maptype\\\":\\\"AttributeSelector\\\"}]\", \"removeEventAttributeList\":\"[]\", \"singleItemEventAttributeList\":\"[]\"}, \"hs\":{\"et\":{\"1568\":0, \"1576\":0 }, \"cea\":{\"-1015386651\":0, \"-1091394645\":0, \"-2090340318\":0 }, \"afa\":{\"1\":{\"93997959\":0, \"-870793808\":0 }, \"2\":{\"1820422063\":0 } } }, \"pr\":[] }"
 
         // attribute hash 3288498 matches "key1", value hash 3611952 matches "val1"
-        var ATTRIBUTE_VALUE_FILTERING_INCLUDE_TRUE =
+        var attributeValueFilteringIncludeTrue =
             "{\"id\":28, \"avf\":{\"i\":true, \"a\":3288498, \"v\":3611952}, \"as\":{\"apiKey\":\"2687a8d1-1022-4820-9327-48582e930098\", \"sendPushOpenedWhenAppInForeground\":\"False\", \"push_enabled\":\"True\", \"register_inapp\":\"True\", \"appGroupId\":\"\"}, \"hs\":{\"et\":{\"1568\":0 }, \"cea\":{\"-1015386651\":0, \"-2090340318\":0, \"-1091394645\":0 }, \"ent\":{\"1\":0 }, \"afa\":{\"2\":{\"1820422063\":0 } } }, \"pr\":[] }"
-        var ATTRIBUTE_VALUE_FILTERING_INCLUDE_FALSE =
+        var attributeValueFilteringIncludeFalse =
             "{\"id\":28, \"avf\":{\"i\":false, \"a\":3288498, \"v\":3611952}, \"as\":{\"apiKey\":\"2687a8d1-1022-4820-9327-48582e930098\", \"sendPushOpenedWhenAppInForeground\":\"False\", \"push_enabled\":\"True\", \"register_inapp\":\"True\", \"appGroupId\":\"\"}, \"hs\":{\"et\":{\"1568\":0 }, \"cea\":{\"-1015386651\":0, \"-2090340318\":0, \"-1091394645\":0 }, \"ent\":{\"1\":0 }, \"afa\":{\"2\":{\"1820422063\":0 } } }, \"pr\":[] }"
     }
 }

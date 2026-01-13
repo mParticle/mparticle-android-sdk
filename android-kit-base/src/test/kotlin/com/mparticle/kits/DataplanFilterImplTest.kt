@@ -344,91 +344,84 @@ class DataplanFilterImplTest {
             SCREEN_EVENT_KEY,
         )
 
-    fun getRandomEvent(datapoint: DataplanPoint): BaseEvent =
-        when (datapoint.type) {
-            CUSTOM_EVENT_KEY ->
-                MPEvent
-                    .Builder(
-                        datapoint.name!!,
-                        MParticle.EventType.values().first { it.getEventsApiName() == datapoint.eventType },
-                    ).build()
-            SCREEN_EVENT_KEY ->
-                ScreenEventBuilder(datapoint.name!!)
-                    .build()
-                    .also { assertTrue(it.isScreenEvent) }
-            PRODUCT_ACTION_KEY ->
-                CommerceEvent
-                    .Builder(
-                        datapoint.name!!,
+    fun getRandomEvent(datapoint: DataplanPoint): BaseEvent = when (datapoint.type) {
+        CUSTOM_EVENT_KEY ->
+            MPEvent
+                .Builder(
+                    datapoint.name!!,
+                    MParticle.EventType.values().first { it.getEventsApiName() == datapoint.eventType },
+                ).build()
+        SCREEN_EVENT_KEY ->
+            ScreenEventBuilder(datapoint.name!!)
+                .build()
+                .also { assertTrue(it.isScreenEvent) }
+        PRODUCT_ACTION_KEY ->
+            CommerceEvent
+                .Builder(
+                    datapoint.name!!,
+                    Product.Builder("a", "b", 1.0).build(),
+                ).build()
+        PROMOTION_ACTION_KEY -> CommerceEvent.Builder(datapoint.name!!, Promotion()).build()
+        PRODUCT_IMPRESSION_KEY ->
+            CommerceEvent
+                .Builder(
+                    Impression(
+                        "impressionname",
                         Product.Builder("a", "b", 1.0).build(),
-                    ).build()
-            PROMOTION_ACTION_KEY -> CommerceEvent.Builder(datapoint.name!!, Promotion()).build()
-            PRODUCT_IMPRESSION_KEY ->
-                CommerceEvent
-                    .Builder(
-                        Impression(
-                            "impressionname",
-                            Product.Builder("a", "b", 1.0).build(),
-                        ),
-                    ).build()
-            else -> throw IllegalArgumentException(datapoint.type + ": messed this implementation up :/")
-        }
+                    ),
+                ).build()
+        else -> throw IllegalArgumentException(datapoint.type + ": messed this implementation up :/")
+    }
 
-    fun getRandomDataplanEventKey(): DataplanPoint =
-        when (Random.Default.nextInt(0, 5)) {
-            0 ->
-                DataplanPoint(
-                    CUSTOM_EVENT_KEY,
-                    randomString(5),
-                    randomEventType().getEventsApiName(),
-                )
-            1 -> DataplanPoint(SCREEN_EVENT_KEY, randomString(8))
-            2 -> DataplanPoint(PRODUCT_ACTION_KEY, randomProductAction())
-            3 -> DataplanPoint(PROMOTION_ACTION_KEY, randomPromotionAction())
-            4 -> DataplanPoint(PRODUCT_IMPRESSION_KEY)
-            else -> throw IllegalArgumentException("messed this implementation up :/")
-        }
+    fun getRandomDataplanEventKey(): DataplanPoint = when (Random.Default.nextInt(0, 5)) {
+        0 ->
+            DataplanPoint(
+                CUSTOM_EVENT_KEY,
+                randomString(5),
+                randomEventType().getEventsApiName(),
+            )
+        1 -> DataplanPoint(SCREEN_EVENT_KEY, randomString(8))
+        2 -> DataplanPoint(PRODUCT_ACTION_KEY, randomProductAction())
+        3 -> DataplanPoint(PROMOTION_ACTION_KEY, randomPromotionAction())
+        4 -> DataplanPoint(PRODUCT_IMPRESSION_KEY)
+        else -> throw IllegalArgumentException("messed this implementation up :/")
+    }
 
-    fun getRandomDataplanPoints(): MutableMap<String, HashSet<String>?> =
-        (0..Random.Default.nextInt(0, 10))
-            .associate {
-                getRandomDataplanEventKey().toString() to randomAttributes().keys.toHashSet()
-            }.toMutableMap()
+    fun getRandomDataplanPoints(): MutableMap<String, HashSet<String>?> = (0..Random.Default.nextInt(0, 10))
+        .associate {
+            getRandomDataplanEventKey().toString() to randomAttributes().keys.toHashSet()
+        }.toMutableMap()
 
     val chars: List<Char> = ('a'..'z') + ('A'..'Z')
 
-    fun randomAttributes(): Map<String, String> =
-        (0..Random.Default.nextInt(0, 5))
-            .map {
-                randomString(4) to randomString(8)
-            }.toMap()
+    fun randomAttributes(): Map<String, String> = (0..Random.Default.nextInt(0, 5))
+        .map {
+            randomString(4) to randomString(8)
+        }.toMap()
 
-    fun randomString(length: Int): String =
-        (0 until length)
-            .map {
-                chars[Random.Default.nextInt(0, chars.size - 1)]
-            }.joinToString("")
+    fun randomString(length: Int): String = (0 until length)
+        .map {
+            chars[Random.Default.nextInt(0, chars.size - 1)]
+        }.joinToString("")
 
-    fun randomEventType(): MParticle.EventType =
-        MParticle.EventType.values()[
-            Random.Default.nextInt(
-                0,
-                MParticle.EventType.values().size - 1,
-            ),
-        ]
+    fun randomEventType(): MParticle.EventType = MParticle.EventType.values()[
+        Random.Default.nextInt(
+            0,
+            MParticle.EventType.values().size - 1,
+        ),
+    ]
 
     fun randomProductAction(): String = randomConstString(Product::class.java)
 
     fun randomPromotionAction(): String = randomConstString(Promotion::class.java)
 
-    fun randomConstString(clazz: Class<*>): String =
-        clazz.fields
-            .filter { Modifier.isPublic(it.modifiers) && Modifier.isStatic(it.modifiers) }
-            .filter { it.name.all { it.isUpperCase() } }
-            .filter { it.type == String::class.java }
-            .let {
-                it[Random.Default.nextInt(0, it.size - 1)].get(null) as String
-            }
+    fun randomConstString(clazz: Class<*>): String = clazz.fields
+        .filter { Modifier.isPublic(it.modifiers) && Modifier.isStatic(it.modifiers) }
+        .filter { it.name.all { it.isUpperCase() } }
+        .filter { it.type == String::class.java }
+        .let {
+            it[Random.Default.nextInt(0, it.size - 1)].get(null) as String
+        }
 
     private fun String.toJSON() = JSONObject(this)
 

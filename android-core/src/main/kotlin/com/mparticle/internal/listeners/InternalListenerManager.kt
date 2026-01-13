@@ -14,9 +14,7 @@ import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.Locale
 
-class InternalListenerManager private constructor(
-    private val context: Context,
-) : InternalListener {
+class InternalListenerManager private constructor(private val context: Context) : InternalListener {
     val sdkListeners: MutableList<WeakReference<SdkListener>> = ArrayList()
     val graphListeners: MutableList<WeakReference<GraphListener>> = ArrayList()
     private val thrown = false
@@ -49,11 +47,7 @@ class InternalListenerManager private constructor(
     override fun onApiCalled(vararg objects: Any) {
     }
 
-    override fun onKitApiCalled(
-        kitId: Int,
-        used: Boolean,
-        vararg objects: Any,
-    ) {
+    override fun onKitApiCalled(kitId: Int, used: Boolean, vararg objects: Any) {
         val stackTrace = Thread.currentThread().stackTrace
         var methodName: String? = null
         for (i in stackTrace.indices) {
@@ -65,22 +59,11 @@ class InternalListenerManager private constructor(
         methodName?.let { onKitApiCalled(stackTrace, it, kitId, used, *objects) }
     }
 
-    override fun onKitApiCalled(
-        methodName: String,
-        kitId: Int,
-        used: Boolean,
-        vararg objects: Any,
-    ) {
+    override fun onKitApiCalled(methodName: String, kitId: Int, used: Boolean, vararg objects: Any) {
         onKitApiCalled(Thread.currentThread().stackTrace, methodName, kitId, used, *objects)
     }
 
-    private fun onKitApiCalled(
-        stackTrace: Array<StackTraceElement>,
-        methodName: String,
-        kitId: Int,
-        used: Boolean,
-        vararg objects: Any,
-    ) {
+    private fun onKitApiCalled(stackTrace: Array<StackTraceElement>, methodName: String, kitId: Int, used: Boolean, vararg objects: Any) {
         var invokingApiMethodName: String? = null
         var kitManagerMethodName: String? = null
         var foundInternal = false
@@ -121,10 +104,7 @@ class InternalListenerManager private constructor(
         )
     }
 
-    override fun onCompositeObjects(
-        child: Any?,
-        parent: Any?,
-    ) {
+    override fun onCompositeObjects(child: Any?, parent: Any?) {
         broadcast(
             object : SdkGraphListenerRunnable {
                 override fun run(listener: GraphListener) {
@@ -134,11 +114,7 @@ class InternalListenerManager private constructor(
         )
     }
 
-    override fun onThreadMessage(
-        handlerName: String,
-        msg: Message,
-        onNewThread: Boolean,
-    ) {
+    override fun onThreadMessage(handlerName: String, msg: Message, onNewThread: Boolean) {
         var stackTrace: Array<StackTraceElement?>? = null
         if (!onNewThread) {
             stackTrace = Thread.currentThread().stackTrace
@@ -153,11 +129,7 @@ class InternalListenerManager private constructor(
         )
     }
 
-    override fun onEntityStored(
-        primaryKey: Long,
-        tableName: String,
-        contentValues: ContentValues?,
-    ) {
+    override fun onEntityStored(primaryKey: Long, tableName: String, contentValues: ContentValues?) {
         onCompositeObjects(contentValues, tableName + primaryKey)
         val jsonObject = JSONObject()
         var table: SdkListener.DatabaseTable? = null
@@ -190,12 +162,7 @@ class InternalListenerManager private constructor(
         )
     }
 
-    override fun onNetworkRequestStarted(
-        type: SdkListener.Endpoint,
-        url: String,
-        body: JSONObject?,
-        vararg objects: Any,
-    ) {
+    override fun onNetworkRequestStarted(type: SdkListener.Endpoint, url: String, body: JSONObject?, vararg objects: Any) {
         for (obj in objects) {
             onCompositeObjects(obj, body)
         }
@@ -212,12 +179,7 @@ class InternalListenerManager private constructor(
         )
     }
 
-    override fun onNetworkRequestFinished(
-        type: SdkListener.Endpoint,
-        url: String,
-        response: JSONObject?,
-        responseCode: Int,
-    ) {
+    override fun onNetworkRequestFinished(type: SdkListener.Endpoint, url: String, response: JSONObject?, responseCode: Int) {
         broadcast(
             object : SdkListenerRunnable {
                 override fun run(listener: SdkListener) {
@@ -247,10 +209,7 @@ class InternalListenerManager private constructor(
         )
     }
 
-    override fun onKitConfigReceived(
-        kitId: Int,
-        configuration: String?,
-    ) {
+    override fun onKitConfigReceived(kitId: Int, configuration: String?) {
         var jsonObject = JSONObject()
         try {
             jsonObject = JSONObject(configuration)
@@ -266,10 +225,7 @@ class InternalListenerManager private constructor(
         )
     }
 
-    override fun onKitExcluded(
-        kitId: Int,
-        reason: String?,
-    ) {
+    override fun onKitExcluded(kitId: Int, reason: String?) {
         broadcast(
             object : SdkListenerRunnable {
                 override fun run(listener: SdkListener) {
@@ -334,10 +290,7 @@ class InternalListenerManager private constructor(
         return getApiFormattedName(classNameString, element.methodName)
     }
 
-    private fun getClassName(
-        className: String,
-        methodName: String,
-    ): String {
+    private fun getClassName(className: String, methodName: String): String {
         val packageNames =
             className.split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
         val simpleClassName = packageNames[packageNames.size - 1]
@@ -368,12 +321,13 @@ class InternalListenerManager private constructor(
 
     private fun isObfuscated(className: String): Boolean = Character.isLowerCase(className.toCharArray()[0]) && className.length <= 3
 
-    private fun isExternalApiInvocation(element: StackTraceElement): Boolean =
-        !element.className.startsWith("com.mparticle") || (
+    private fun isExternalApiInvocation(element: StackTraceElement): Boolean = !element.className.startsWith("com.mparticle") ||
+        (
             element.className.startsWith(
                 context.applicationContext.packageName,
-            ) && context.applicationContext.packageName.length > 1
-        )
+            ) &&
+                context.applicationContext.packageName.length > 1
+            )
 
     private fun hasListeners(): Boolean = (instance?.sdkListeners?.size ?: 0) > 0 || (instance?.graphListeners?.size ?: 0) > 0
 
@@ -401,15 +355,11 @@ class InternalListenerManager private constructor(
                     if (isEnabled) it else InternalListener.EMPTY
                 } ?: InternalListener.EMPTY
 
-        fun getApiFormattedName(
-            className: String?,
-            methodName: String?,
-        ): String =
-            StringBuilder()
-                .append(className)
-                .append(".")
-                .append(methodName)
-                .append("()")
-                .toString()
+        fun getApiFormattedName(className: String?, methodName: String?): String = StringBuilder()
+            .append(className)
+            .append(".")
+            .append(methodName)
+            .append("()")
+            .toString()
     }
 }

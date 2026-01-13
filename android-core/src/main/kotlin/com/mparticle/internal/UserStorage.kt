@@ -11,18 +11,12 @@ import org.json.JSONObject
 import java.util.TreeSet
 import java.util.UUID
 
-class UserStorage private constructor(
-    private val mContext: Context,
-    val mpid: Long,
-) {
+class UserStorage private constructor(private val mContext: Context, val mpid: Long) {
     private val mPreferences: SharedPreferences
 
     var messageManagerSharedPreferences: SharedPreferences
 
-    fun deleteUserConfig(
-        context: Context,
-        mpId: Long,
-    ): Boolean {
+    fun deleteUserConfig(context: Context, mpId: Long): Boolean {
         if (Build.VERSION.SDK_INT >= 24) {
             context.deleteSharedPreferences(getFileName(mpId))
         } else {
@@ -316,9 +310,7 @@ class UserStorage private constructor(
      * process will associate all current values covered by UserStorage to the current MPID, which should
      * be passed into the parameter "currentMpId".
      */
-    private class SharedPreferencesMigrator(
-        context: Context,
-    ) {
+    private class SharedPreferencesMigrator(context: Context) {
         private val messageManagerSharedPreferences: SharedPreferences =
             context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE)
         private val configManagerSharedPreferences: SharedPreferences =
@@ -500,16 +492,12 @@ class UserStorage private constructor(
              * @param context
              * @return
              */
-            fun needsToMigrate(context: Context): Boolean =
-                getMParticleSharedPrefs(context).getBoolean(
-                    NEEDS_TO_MIGRATE_TO_MPID_DEPENDENT,
-                    false,
-                )
+            fun needsToMigrate(context: Context): Boolean = getMParticleSharedPrefs(context).getBoolean(
+                NEEDS_TO_MIGRATE_TO_MPID_DEPENDENT,
+                false,
+            )
 
-            fun setNeedsToMigrate(
-                context: Context,
-                needsToMigrate: Boolean,
-            ) {
+            fun setNeedsToMigrate(context: Context, needsToMigrate: Boolean) {
                 getMParticleSharedPrefs(context)
                     .edit()
                     .putBoolean(
@@ -554,23 +542,14 @@ class UserStorage private constructor(
         }
 
         @JvmStatic
-        fun create(
-            context: Context,
-            mpid: Long,
-        ): UserStorage = UserStorage(context, mpid)
+        fun create(context: Context, mpid: Long): UserStorage = UserStorage(context, mpid)
 
         @JvmStatic
-        fun setNeedsToMigrate(
-            context: Context,
-            needsToMigrate: Boolean,
-        ) {
+        fun setNeedsToMigrate(context: Context, needsToMigrate: Boolean) {
             SharedPreferencesMigrator.setNeedsToMigrate(context, needsToMigrate)
         }
 
-        private fun removeMpId(
-            context: Context,
-            mpid: Long,
-        ): Boolean {
+        private fun removeMpId(context: Context, mpid: Long): Boolean {
             val mpids = getMpIdSet(context)
             val removed = mpids.remove(mpid)
             setMpIds(context, mpids)
@@ -600,10 +579,7 @@ class UserStorage private constructor(
             return mpIds
         }
 
-        private fun setMpIds(
-            context: Context,
-            mpIds: Set<Long>,
-        ) {
+        private fun setMpIds(context: Context, mpIds: Set<Long>) {
             val jsonArray = JSONArray()
             for (mpId in mpIds) {
                 jsonArray.put(mpId)
@@ -616,10 +592,9 @@ class UserStorage private constructor(
 
         private fun getFileName(mpId: Long): String = ConfigManager.PREFERENCES_FILE + ":" + mpId
 
-        private fun getMParticleSharedPrefs(context: Context): SharedPreferences =
-            context.getSharedPreferences(
-                ConfigManager.PREFERENCES_FILE,
-                Context.MODE_PRIVATE,
-            )
+        private fun getMParticleSharedPrefs(context: Context): SharedPreferences = context.getSharedPreferences(
+            ConfigManager.PREFERENCES_FILE,
+            Context.MODE_PRIVATE,
+        )
     }
 }

@@ -915,7 +915,7 @@ class KitManagerImplTest {
         field.isAccessible = true
         field.set(mockedKitConfig, settingsMap)
 
-        val mockedProvider = mockProvider(mockedKitConfig)
+        val mockedProvider = MockProvider(mockedKitConfig)
 
         val options =
             MParticleOptions
@@ -988,7 +988,7 @@ class KitManagerImplTest {
         field.isAccessible = true
         field.set(mockedKitConfig, settingsMap)
 
-        val mockedProvider = mockProvider(mockedKitConfig)
+        val mockedProvider = MockProvider(mockedKitConfig)
 
         val options =
             MParticleOptions
@@ -1062,7 +1062,7 @@ class KitManagerImplTest {
         field.isAccessible = true
         field.set(mockedKitConfig, settingsMap)
 
-        val mockedProvider = mockProvider(mockedKitConfig)
+        val mockedProvider = MockProvider(mockedKitConfig)
 
         val options =
             MParticleOptions
@@ -1133,7 +1133,7 @@ class KitManagerImplTest {
         field.isAccessible = true
         field.set(mockedKitConfig, settingsMap)
 
-        val mockedProvider = mockProvider(mockedKitConfig)
+        val mockedProvider = MockProvider(mockedKitConfig)
 
         val options =
             MParticleOptions
@@ -1802,7 +1802,7 @@ class KitManagerImplTest {
         field.isAccessible = true
         field.set(mockedKitConfig, settingsMap)
 
-        val mockedProvider = mockProvider(mockedKitConfig)
+        val mockedProvider = MockProvider(mockedKitConfig)
 
         val options =
             MParticleOptions
@@ -1870,7 +1870,7 @@ class KitManagerImplTest {
         field.isAccessible = true
         field.set(mockedKitConfig, settingsMap)
 
-        val mockedProvider = mockProvider(mockedKitConfig)
+        val mockedProvider = MockProvider(mockedKitConfig)
 
         val options =
             MParticleOptions
@@ -1940,7 +1940,7 @@ class KitManagerImplTest {
         field.isAccessible = true
         field.set(mockedKitConfig, settingsMap)
 
-        val mockedProvider = mockProvider(mockedKitConfig)
+        val mockedProvider = MockProvider(mockedKitConfig)
 
         val options =
             MParticleOptions
@@ -2232,7 +2232,7 @@ class KitManagerImplTest {
         assertEquals(expectedFlow, result)
     }
 
-    internal inner class mockProvider(
+    internal inner class MockProvider(
         val config: KitConfiguration,
     ) : KitIntegration(),
         KitIntegration.RoktListener {

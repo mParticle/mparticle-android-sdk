@@ -4,15 +4,11 @@ import com.mparticle.tooling.Utils.executeCLI
 import java.io.File
 import java.io.IOException
 
-enum class DataPlanError(
-    val message: String,
-) {
+enum class DataPlanError(val message: String) {
     VersionInvalid("Error: Data Plan Version is Invalid"),
 }
 
-class DataPlanningNodeApp(
-    val config: Config,
-) {
+class DataPlanningNodeApp(val config: Config) {
     var path = System.getenv("PATH")
 
     init {
@@ -26,11 +22,7 @@ class DataPlanningNodeApp(
         }
     }
 
-    fun validate(
-        dataplan: String,
-        message: String,
-        version: String?,
-    ): NodeAppResult<List<ValidationResult>> {
+    fun validate(dataplan: String, message: String, version: String?): NodeAppResult<List<ValidationResult>> {
         try {
             val mpCommand = config.internalConfig.mpPath ?: "mp"
             val args =
@@ -76,11 +68,7 @@ class DataPlanningNodeApp(
         }
     }
 
-    fun fetchDataPlan(
-        accountId: String,
-        planId: String,
-        version: String?,
-    ): NodeAppResult<String?> {
+    fun fetchDataPlan(accountId: String, planId: String, version: String?): NodeAppResult<String?> {
         try {
             val arguments =
                 mutableListOf(
@@ -163,16 +151,13 @@ class DataPlanningNodeApp(
             }
         }
 
-        fun fromJS(jsFileBlob: String): DataPlanningNodeApp? =
-            Utils.getFileLocation(tempNodeFileName)?.let { nodeFile ->
-                val nodeFile = File(nodeFile)
-                nodeFile.createNewFile()
-                nodeFile.writeText(jsFileBlob)
-                DataPlanningNodeApp(Config())
-            }
+        fun fromJS(jsFileBlob: String): DataPlanningNodeApp? = Utils.getFileLocation(tempNodeFileName)?.let { nodeFile ->
+            val nodeFile = File(nodeFile)
+            nodeFile.createNewFile()
+            nodeFile.writeText(jsFileBlob)
+            DataPlanningNodeApp(Config())
+        }
     }
 
-    class NodeAppResult<T>(
-        val response: T? = null,
-    )
+    class NodeAppResult<T>(val response: T? = null)
 }

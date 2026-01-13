@@ -31,7 +31,7 @@ class BreadcrumbTableTest : BaseTableTest() {
     }
 
     companion object {
-        const val old_CREATE_BREADCRUMBS_DDL =
+        const val OLD_CREATE_BREADCRUMBS_DDL =
             "CREATE TABLE IF NOT EXISTS " + BreadcrumbTable.BreadcrumbTableColumns.TABLE_NAME + " (" + BaseColumns._ID +
                 " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 BreadcrumbTable.BreadcrumbTableColumns.SESSION_ID + " STRING NOT NULL, " +
