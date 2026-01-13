@@ -124,5 +124,5 @@ afterEvaluate {
 }
 
 //Publishing task aliases for simpler local development
-task publishLocal { dependsOn "publishDebugPublicationToMavenLocal"}
-task publishReleaseLocal { dependsOn "publishReleasePublicationToMavenLocal"}
+task publishLocal { dependsOn "publishDebugPublicationToMavenLocal" }
+task publishReleaseLocal { dependsOn "publishReleasePublicationToMavenLocal" }
