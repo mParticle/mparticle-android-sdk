@@ -5,6 +5,7 @@ import android.os.Looper
 import com.mparticle.internal.AccessUtils
 import com.mparticle.internal.AccessUtils.EmptyMParticleApiClient
 import com.mparticle.internal.Constants
+import com.mparticle.internal.Logger
 import com.mparticle.internal.MPUtility
 import com.mparticle.internal.MParticleApiClientImpl.MPRampException
 import com.mparticle.internal.MParticleApiClientImpl.MPThrottleException
@@ -86,7 +87,7 @@ class UploadMessageTest : BaseCleanStartedEachTest() {
                                 }
                             }
                         } catch (e: Exception) {
-                            e.printStackTrace()
+                            Logger.error(e)
                             Assert.fail(e.toString())
                         }
                     }

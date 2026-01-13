@@ -5,6 +5,8 @@ import static junit.framework.Assert.fail;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.mparticle.internal.Logger;
+
 import junit.framework.AssertionFailedError;
 
 import org.json.JSONException;
@@ -34,7 +36,7 @@ public class StreamAssert<T> {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Logger.error(e);
                 }
             } else {
                 return;

@@ -68,7 +68,7 @@ public class NetworkOptions {
                         .build());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.error(e);
         }
         return builder.build();
     }

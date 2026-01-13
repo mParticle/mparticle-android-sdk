@@ -31,7 +31,7 @@ public class LegacyStartupTest extends BaseStartupTest {
         try {
             mParticleStart = MParticle.class.getMethod("start", Context.class, String.class, String.class);
         } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+            Logger.error(e);
         }
         Assume.assumeNotNull(mParticleStart);
     }

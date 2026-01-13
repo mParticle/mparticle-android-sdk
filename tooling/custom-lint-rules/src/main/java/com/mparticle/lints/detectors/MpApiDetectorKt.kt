@@ -13,6 +13,7 @@ import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.UastLintUtils.Companion.tryResolveUDeclaration
 import com.mparticle.lints.basedetectors.BaseDetector
+import com.mparticle.tooling.Logger
 import org.jetbrains.uast.UBlockExpression
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UClass
@@ -153,7 +154,7 @@ class MpApiDetectorKt :
                         }
                     }
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    Logger.error(e.toString())
                 }
             }
         }

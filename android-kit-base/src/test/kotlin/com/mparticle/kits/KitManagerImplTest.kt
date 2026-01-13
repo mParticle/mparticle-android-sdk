@@ -21,6 +21,7 @@ import com.mparticle.identity.IdentityApi
 import com.mparticle.identity.IdentityApiResult
 import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.CoreCallbacks
+import com.mparticle.internal.Logger
 import com.mparticle.internal.MPUtility
 import com.mparticle.internal.SideloadedKit
 import com.mparticle.kits.KitIntegration.AttributeListener
@@ -2261,11 +2262,11 @@ class KitManagerImplTest {
             user: FilteredMParticleUser?,
             config: RoktConfig?,
         ) {
-            println("Executed with $attributes")
+            Logger.info("Executed with $attributes")
         }
 
         override fun events(identifier: String): Flow<RoktEvent> {
-            println("events called with identfier: $identifier")
+            Logger.info("events called with identfier: $identifier")
             return flowOf()
         }
 
@@ -2273,11 +2274,11 @@ class KitManagerImplTest {
             attributes: MutableMap<String, String>,
             user: FilteredMParticleUser?,
         ) {
-            println("callRoktComposable with $attributes")
+            Logger.info("callRoktComposable with $attributes")
         }
 
         override fun setWrapperSdkVersion(wrapperSdkVersion: WrapperSdkVersion) {
-            println("setWrapperSdkVersion with $wrapperSdkVersion")
+            Logger.info("setWrapperSdkVersion with $wrapperSdkVersion")
         }
 
         override fun purchaseFinalized(
@@ -2285,11 +2286,11 @@ class KitManagerImplTest {
             catalogItemId: String,
             status: Boolean,
         ) {
-            println("purchaseFinalized with placementId: $placementId  catalogItemId : $catalogItemId status : $status ")
+            Logger.info("purchaseFinalized with placementId: $placementId  catalogItemId : $catalogItemId status : $status ")
         }
 
         override fun close() {
-            println("close called")
+            Logger.info("close called")
         }
     }
 

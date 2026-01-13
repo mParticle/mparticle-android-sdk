@@ -218,7 +218,7 @@ open class AppStateManager
                                 logBackgrounded()
                             }
                         } catch (e: Exception) {
-                            e.printStackTrace()
+                            Logger.error(e)
                         }
                     },
                     ACTIVITY_DELAY,

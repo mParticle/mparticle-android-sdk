@@ -811,13 +811,13 @@ public class MPUtility {
             Method get = SystemProperties.getMethod("get", new Class[]{String.class});
             return get.invoke(SystemProperties, new Object[]{key}).toString();
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            Logger.error(e);
         } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+            Logger.error(e);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            Logger.error(e);
         } catch (InvocationTargetException e) {
-            e.printStackTrace();
+            Logger.error(e);
         }
         return null;
     }

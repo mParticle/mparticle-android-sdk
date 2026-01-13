@@ -2,6 +2,7 @@ package com.mparticle
 
 import android.content.Context
 import com.mparticle.internal.ConfigManager
+import com.mparticle.internal.Logger
 import com.mparticle.internal.PushRegistrationHelper
 import com.mparticle.internal.PushRegistrationHelper.PushRegistration
 import com.mparticle.networking.Matcher
@@ -209,7 +210,7 @@ class PushRegistrationTest : BaseCleanStartedEachTest() {
                         try {
                             Thread.sleep(10)
                         } catch (e: InterruptedException) {
-                            e.printStackTrace()
+                            Logger.error(e)
                         }
                     }
                     TestingUtils.setFirebasePresent(false, null)
