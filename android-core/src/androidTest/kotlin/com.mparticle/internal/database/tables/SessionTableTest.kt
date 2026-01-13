@@ -31,7 +31,7 @@ class SessionTableTest : BaseTableTest() {
     }
 
     companion object {
-        const val old_CREATE_SESSION_DDL =
+        const val OLD_CREATE_SESSION_DDL =
             "CREATE TABLE IF NOT EXISTS " + SessionTable.SessionTableColumns.TABLE_NAME + " (" + BaseColumns._ID +
                 " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 SessionTable.SessionTableColumns.SESSION_ID + " STRING NOT NULL, " +

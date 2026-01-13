@@ -222,7 +222,7 @@ class ApplicationContextWrapperTest {
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     internal inner class ActivityLifecycleCallbackRecordTester : ActivityLifecycleCallbacks {
         var lifeCycleEvents = LinkedList<LifeCycleEvent>()
-        var MAX_LIST_SIZE = 10
+        var maxListSize = 10
 
         override fun onActivityCreated(
             activity: Activity,
@@ -297,7 +297,7 @@ class ApplicationContextWrapperTest {
 
         val recordedLifecycleList: LinkedList<LifeCycleEvent>
             get() {
-                if (lifeCycleEvents.size > MAX_LIST_SIZE) {
+                if (lifeCycleEvents.size > maxListSize) {
                     lifeCycleEvents.removeFirst()
                     return recordedLifecycleList
                 }

@@ -4,30 +4,18 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
-data class ValidationResult(
-    val eventType: String? = null,
-    val data: ValidationResultData? = null,
-    val error: DataPlanError? = null,
-    val arguments: List<String>,
-) {
+data class ValidationResult(val eventType: String? = null, val data: ValidationResultData? = null, val error: DataPlanError? = null, val arguments: List<String>) {
     var originalString: String? = null
 
     companion object {
-        fun from(
-            json: String?,
-            arguments: List<String>,
-        ): List<ValidationResult>? =
-            try {
-                val jsonArray = JSONObject(json).getJSONArray("results")
-                from(jsonArray, arguments)
-            } catch (jse: JSONException) {
-                listOf(ValidationResult(arguments = arguments).apply { originalString = json })
-            }
+        fun from(json: String?, arguments: List<String>): List<ValidationResult>? = try {
+            val jsonArray = JSONObject(json).getJSONArray("results")
+            from(jsonArray, arguments)
+        } catch (jse: JSONException) {
+            listOf(ValidationResult(arguments = arguments).apply { originalString = json })
+        }
 
-        fun from(
-            json: JSONArray,
-            arguments: List<String>,
-        ): List<ValidationResult> {
+        fun from(json: JSONArray, arguments: List<String>): List<ValidationResult> {
             val validationResults = ArrayList<ValidationResult>()
             for (i in 0 until json.length()) {
                 val validationResultJson = json.getJSONObject(i)
@@ -76,43 +64,28 @@ data class ValidationResult(
     }
 }
 
-data class ValidationResultData(
-    val match: ValidationResultMatch?,
-    val validationErrors: List<ValidationResultErrors>,
-) {
+data class ValidationResultData(val match: ValidationResultMatch?, val validationErrors: List<ValidationResultErrors>) {
     companion object {
-        fun from(json: JSONObject?): ValidationResultData? =
-            json?.let {
-                ValidationResultData(
-                    ValidationResultMatch.from(it.optJSONObject("match")),
-                    ValidationResultErrors.from(it.optJSONArray("validation_errors")),
-                )
-            }
+        fun from(json: JSONObject?): ValidationResultData? = json?.let {
+            ValidationResultData(
+                ValidationResultMatch.from(it.optJSONObject("match")),
+                ValidationResultErrors.from(it.optJSONArray("validation_errors")),
+            )
+        }
     }
 }
 
-data class ValidationResultMatch(
-    val type: String,
-    val criteria: Map<String, String>,
-) {
+data class ValidationResultMatch(val type: String, val criteria: Map<String, String>) {
     companion object {
-        fun from(json: JSONObject?): ValidationResultMatch? =
-            json?.let {
-                val type = it.optString("type")
-                val criteria = it.optJSONObject("criteria")?.toHashMap() ?: hashMapOf()
-                ValidationResultMatch(type, criteria)
-            }
+        fun from(json: JSONObject?): ValidationResultMatch? = json?.let {
+            val type = it.optString("type")
+            val criteria = it.optJSONObject("criteria")?.toHashMap() ?: hashMapOf()
+            ValidationResultMatch(type, criteria)
+        }
     }
 }
 
-data class ValidationResultErrors(
-    val validationErrorType: ValidationErrorType,
-    val errorPointer: String?,
-    val key: String?,
-    val expected: String?,
-    val actual: String?,
-    val schemaKeyword: String?,
-) {
+data class ValidationResultErrors(val validationErrorType: ValidationErrorType, val errorPointer: String?, val key: String?, val expected: String?, val actual: String?, val schemaKeyword: String?) {
     companion object {
         fun from(json: JSONArray): List<ValidationResultErrors> {
             val validationResultErrors = ArrayList<ValidationResultErrors>()
@@ -141,9 +114,7 @@ data class ValidationResultErrors(
     }
 }
 
-enum class ValidationErrorType(
-    val text: String,
-) {
+enum class ValidationErrorType(val text: String) {
     Unplanned("unplanned"),
     MissingRequied("missing_required"),
     InvalidValue("invalid_value"),

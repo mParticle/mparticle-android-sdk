@@ -19,7 +19,6 @@ class CommerceListenerTestKit :
         valueTotal: BigDecimal?,
         eventName: String?,
         contextInfo: Map<String, String>?,
-    ): List<ReportingMessage> =
-        logLtvIncrease?.invoke(valueIncreased, valueTotal, eventName, contextInfo)
-            ?: listOf()
+    ): List<ReportingMessage> = logLtvIncrease?.invoke(valueIncreased, valueTotal, eventName, contextInfo)
+        ?: listOf()
 }

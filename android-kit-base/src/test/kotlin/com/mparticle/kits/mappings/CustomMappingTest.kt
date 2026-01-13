@@ -107,8 +107,8 @@ class CustomMappingTest {
                     val attProj = CustomMapping.AttributeMap(attribute)
                     Assert.assertEquals(attribute.optBoolean("is_required"), attProj.mIsRequired)
                     if (attribute
-                        .getString("match_type")
-                        .startsWith(CustomMapping.MATCH_TYPE_STATIC)
+                            .getString("match_type")
+                            .startsWith(CustomMapping.MATCH_TYPE_STATIC)
                     ) {
                         Assert.assertFalse(customMapping.mRequiredAttributeMapList.contains(attProj))
                         Assert.assertTrue(customMapping.mStaticAttributeMapList.contains(attProj))

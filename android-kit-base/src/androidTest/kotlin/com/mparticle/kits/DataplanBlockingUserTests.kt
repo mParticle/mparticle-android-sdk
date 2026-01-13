@@ -338,32 +338,30 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
 //        assertEquals(allowedIdentities + blockedIdentities, MParticle.getInstance()?.Identity()?.currentUser?.userIdentities)
 //    }
 
-    private fun getRandomDataplanEventKey(): DataplanFilterImpl.DataPoint =
-        when (Random.Default.nextInt(0, 5)) {
-            0 ->
-                DataplanFilterImpl.DataPoint(
-                    DataplanFilterImpl.CUSTOM_EVENT_KEY,
-                    randomString(5),
-                    randomEventType().ordinal.toString(),
-                )
-            1 -> DataplanFilterImpl.DataPoint(DataplanFilterImpl.SCREEN_EVENT_KEY, randomString(8))
-            2 ->
-                DataplanFilterImpl.DataPoint(
-                    DataplanFilterImpl.PRODUCT_ACTION_KEY,
-                    randomProductAction(),
-                )
-            3 ->
-                DataplanFilterImpl.DataPoint(
-                    DataplanFilterImpl.PROMOTION_ACTION_KEY,
-                    randomPromotionAction(),
-                )
-            4 -> DataplanFilterImpl.DataPoint(DataplanFilterImpl.PRODUCT_IMPRESSION_KEY)
-            else -> throw IllegalArgumentException("messed this implementation up :/")
-        }
+    private fun getRandomDataplanEventKey(): DataplanFilterImpl.DataPoint = when (Random.Default.nextInt(0, 5)) {
+        0 ->
+            DataplanFilterImpl.DataPoint(
+                DataplanFilterImpl.CUSTOM_EVENT_KEY,
+                randomString(5),
+                randomEventType().ordinal.toString(),
+            )
+        1 -> DataplanFilterImpl.DataPoint(DataplanFilterImpl.SCREEN_EVENT_KEY, randomString(8))
+        2 ->
+            DataplanFilterImpl.DataPoint(
+                DataplanFilterImpl.PRODUCT_ACTION_KEY,
+                randomProductAction(),
+            )
+        3 ->
+            DataplanFilterImpl.DataPoint(
+                DataplanFilterImpl.PROMOTION_ACTION_KEY,
+                randomPromotionAction(),
+            )
+        4 -> DataplanFilterImpl.DataPoint(DataplanFilterImpl.PRODUCT_IMPRESSION_KEY)
+        else -> throw IllegalArgumentException("messed this implementation up :/")
+    }
 
-    private fun getRandomDataplanPoints(): MutableMap<String, HashSet<String>> =
-        (0..Random.Default.nextInt(0, 10))
-            .associate {
-                getRandomDataplanEventKey().toString() to randomAttributes().keys.toHashSet()
-            }.toMutableMap()
+    private fun getRandomDataplanPoints(): MutableMap<String, HashSet<String>> = (0..Random.Default.nextInt(0, 10))
+        .associate {
+            getRandomDataplanEventKey().toString() to randomAttributes().keys.toHashSet()
+        }.toMutableMap()
 }

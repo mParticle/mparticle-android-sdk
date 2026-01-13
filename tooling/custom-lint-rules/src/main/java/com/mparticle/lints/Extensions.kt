@@ -39,10 +39,7 @@ import org.jetbrains.uast.util.isConstructorCall
 import org.json.JSONArray
 import org.json.JSONObject
 
-internal fun UCallExpression.resolveExpression(
-    instance: Expression,
-    returnValue: Boolean,
-): Expression {
+internal fun UCallExpression.resolveExpression(instance: Expression, returnValue: Boolean): Expression {
     val expression =
         if (isConstructorCall()) {
             Constructor(instance, methodName, this)
@@ -110,10 +107,7 @@ internal fun UExpression.getUltimateReceiverVariable(): PsiVariable? {
     }
 }
 
-internal fun UExpression.getVariableElement(
-    allowChainedCalls: Boolean,
-    allowFields: Boolean,
-): PsiVariable? {
+internal fun UExpression.getVariableElement(allowChainedCalls: Boolean, allowFields: Boolean): PsiVariable? {
     var parent = skipParenthesizedExprUp(getQualifiedParentOrThis().uastParent)
 
     // Handle some types of chained calls; e.g. you might have
@@ -201,12 +195,11 @@ internal fun UCallExpression.receiverClassName(stripGenerics: Boolean = true): S
     return className
 }
 
-internal fun PsiType.getClassName(): String? =
-    when (this) {
-        is PsiClassReferenceType -> this.reference.qualifiedName
-        is PsiImmediateClassType -> this.resolve()?.qualifiedName
-        else -> null
-    }
+internal fun PsiType.getClassName(): String? = when (this) {
+    is PsiClassReferenceType -> this.reference.qualifiedName
+    is PsiImmediateClassType -> this.resolve()?.qualifiedName
+    else -> null
+}
 
 internal fun PsiClass.getQualifiedName(reflectable: Boolean): String? {
     if (!reflectable) {
@@ -229,10 +222,7 @@ internal fun PsiClass.getQualifiedName(reflectable: Boolean): String? {
     return qualifiedName
 }
 
-internal fun UExpression.resolveChainedCalls(
-    returnValue: Boolean,
-    instance: Expression,
-): Expression {
+internal fun UExpression.resolveChainedCalls(returnValue: Boolean, instance: Expression): Expression {
     val initialInstance = instance
     var calls = (getOutermostQualified() ?: this).getQualifiedChain().toMutableList()
     calls = calls.filter { it is UCallExpression }.toMutableList()
@@ -252,7 +242,7 @@ internal fun Pair<*, *>.resolveToEnum(): Enum<*> {
     val className =
         when (first) {
             is ClassId -> "${(first as ClassId).packageFqName}.${
-            (first as ClassId).relativeClassName.asString().replace(".", "$")
+                (first as ClassId).relativeClassName.asString().replace(".", "$")
             }"
             is String -> first as String
             else -> null

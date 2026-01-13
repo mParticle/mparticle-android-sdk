@@ -48,9 +48,9 @@ Data Plan parsed for Kit Filtering:
     blockUserAttributes=$blockUserAttributes
     blockUserIdentities=$blockUserIdentities
         ${
-            dataPoints.entries.joinToString("\n") { (key, value) ->
-                "$key\n\t${value?.joinToString("\n\t") { it }}"
-            }
+                dataPoints.entries.joinToString("\n") { (key, value) ->
+                    "$key\n\t${value?.joinToString("\n\t") { it }}"
+                }
             }
         """,
         )
@@ -296,10 +296,7 @@ Data Plan parsed for Kit Filtering:
         }
 
         // returns a set of "allowed" keys, or `null` if all keys are allowed
-        private fun getAllowedKeys(
-            datapoint: DataPoint,
-            jsonObject: JSONObject,
-        ): HashSet<String>? {
+        private fun getAllowedKeys(datapoint: DataPoint, jsonObject: JSONObject): HashSet<String>? {
             val definition =
                 jsonObject
                     .optJSONObject("validator")
@@ -427,19 +424,18 @@ Data Plan parsed for Kit Filtering:
 
         fun MParticle.IdentityType.getEventsApiName(): String = MParticleIdentityClientImpl.getStringValue(this)
 
-        fun MParticle.EventType.getEventsApiName(): String =
-            when (this) {
-                MParticle.EventType.Location -> "location"
-                MParticle.EventType.Media -> "media"
-                MParticle.EventType.Navigation -> "navigation"
-                MParticle.EventType.Other -> "other"
-                MParticle.EventType.Search -> "search"
-                MParticle.EventType.Social -> "social"
-                MParticle.EventType.Transaction -> "transaction"
-                MParticle.EventType.UserContent -> "user_content"
-                MParticle.EventType.UserPreference -> "user_preference"
-                else -> "unknown"
-            }
+        fun MParticle.EventType.getEventsApiName(): String = when (this) {
+            MParticle.EventType.Location -> "location"
+            MParticle.EventType.Media -> "media"
+            MParticle.EventType.Navigation -> "navigation"
+            MParticle.EventType.Other -> "other"
+            MParticle.EventType.Search -> "search"
+            MParticle.EventType.Social -> "social"
+            MParticle.EventType.Transaction -> "transaction"
+            MParticle.EventType.UserContent -> "user_content"
+            MParticle.EventType.UserPreference -> "user_preference"
+            else -> "unknown"
+        }
 
         fun <T> Iterator<T>.toHashSet(): HashSet<T> {
             val set = HashSet<T>()
@@ -448,11 +444,7 @@ Data Plan parsed for Kit Filtering:
         }
     }
 
-    class DataPoint(
-        val type: String,
-        val name: String? = null,
-        val eventType: String? = null,
-    ) {
+    class DataPoint(val type: String, val name: String? = null, val eventType: String? = null) {
         constructor(datapoint: DataPoint) : this(
             datapoint.type,
             datapoint.name,
@@ -462,15 +454,14 @@ Data Plan parsed for Kit Filtering:
         var productAttributeType: String? = null
             private set
 
-        fun getProductDataPoints() =
-            when (type) {
-                PRODUCT_ACTION_KEY, PRODUCT_IMPRESSION_KEY ->
-                    listOf(
-                        DataPoint(this).apply { productAttributeType = PRODUCT_ACTION_PRODUCTS },
-                        DataPoint(this).apply { productAttributeType = PRODUCT_IMPRESSION_PRODUCTS },
-                    )
-                else -> null
-            }
+        fun getProductDataPoints() = when (type) {
+            PRODUCT_ACTION_KEY, PRODUCT_IMPRESSION_KEY ->
+                listOf(
+                    DataPoint(this).apply { productAttributeType = PRODUCT_ACTION_PRODUCTS },
+                    DataPoint(this).apply { productAttributeType = PRODUCT_IMPRESSION_PRODUCTS },
+                )
+            else -> null
+        }
 
         override fun toString() =
             "$type${if (name != null) ".$name" else ""}${if (eventType != null) ".$eventType" else ""}${productAttributeType?.let {

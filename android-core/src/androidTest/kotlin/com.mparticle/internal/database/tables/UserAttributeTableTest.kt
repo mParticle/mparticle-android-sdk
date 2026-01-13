@@ -31,7 +31,7 @@ class UserAttributeTableTest : BaseTableTest() {
     }
 
     companion object {
-        const val old_CREATE_USER_ATTRIBUTES_DDL =
+        const val OLD_CREATE_USER_ATTRIBUTES_DDL =
             "CREATE TABLE IF NOT EXISTS " + UserAttributesTable.UserAttributesTableColumns.TABLE_NAME + " (" + BaseColumns._ID +
                 " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 UserAttributesTable.UserAttributesTableColumns.ATTRIBUTE_KEY + " COLLATE NOCASE NOT NULL, " +

@@ -31,7 +31,7 @@ class ReportingTableTest : BaseTableTest() {
     }
 
     companion object {
-        const val old_CREATE_REPORTING_DDL =
+        const val OLD_CREATE_REPORTING_DDL =
             "CREATE TABLE IF NOT EXISTS " + ReportingTable.ReportingTableColumns.TABLE_NAME + " (" + BaseColumns._ID +
                 " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 ReportingTable.ReportingTableColumns.MODULE_ID + " INTEGER NOT NULL, " +

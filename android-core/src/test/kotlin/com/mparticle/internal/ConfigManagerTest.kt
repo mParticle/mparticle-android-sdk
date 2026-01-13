@@ -44,7 +44,7 @@ class ConfigManagerTest {
             )
         mockMp = MockMParticle()
         MParticle.setInstance(mockMp)
-        manager.updateConfig(JSONObject(sampleConfig))
+        manager.updateConfig(JSONObject(SAMPLE_CONFIG))
     }
 
     @Test
@@ -130,7 +130,7 @@ class ConfigManagerTest {
     @Test
     @Throws(Exception::class)
     fun testUpdateConfigWithReload() {
-        manager.updateConfig(JSONObject(sampleConfig))
+        manager.updateConfig(JSONObject(SAMPLE_CONFIG))
         manager.reloadCoreConfig(JSONObject())
         val `object` =
             ConfigManager.sPreferences
@@ -217,7 +217,7 @@ class ConfigManagerTest {
         Assert.assertFalse(manager.logUnhandledExceptions)
         manager.logUnhandledExceptions = true
         Assert.assertTrue(manager.logUnhandledExceptions)
-        val `object` = JSONObject(sampleConfig)
+        val `object` = JSONObject(SAMPLE_CONFIG)
         `object`.put(ConfigManager.KEY_UNHANDLED_EXCEPTIONS, "forcecatch")
         manager.updateConfig(`object`)
         manager.logUnhandledExceptions = false
@@ -241,7 +241,7 @@ class ConfigManagerTest {
     @Test
     @Throws(Exception::class)
     fun testUploadInterval() {
-        val `object` = JSONObject(sampleConfig)
+        val `object` = JSONObject(SAMPLE_CONFIG)
         manager.setUploadInterval(987)
         Assert.assertEquals((1000 * 987).toLong(), manager.uploadInterval)
         `object`.put(ConfigManager.KEY_UPLOAD_INTERVAL, 110)
@@ -260,7 +260,7 @@ class ConfigManagerTest {
     fun testSessionTimeout() {
         manager.sessionTimeout = 123
         Assert.assertEquals((123 * 1000).toLong(), manager.sessionTimeout.toLong())
-        val `object` = JSONObject(sampleConfig)
+        val `object` = JSONObject(SAMPLE_CONFIG)
         `object`.put(ConfigManager.KEY_SESSION_TIMEOUT, 123)
         manager.updateConfig(`object`)
         Assert.assertEquals((123 * 1000).toLong(), manager.sessionTimeout.toLong())
@@ -280,7 +280,7 @@ class ConfigManagerTest {
         Assert.assertTrue(manager.isEnabled)
         manager.setOptOut(true)
         Assert.assertFalse(manager.isEnabled)
-        val `object` = JSONObject(sampleConfig)
+        val `object` = JSONObject(SAMPLE_CONFIG)
         `object`.put(ConfigManager.KEY_OPT_OUT, true)
         manager.updateConfig(`object`)
         Assert.assertTrue(manager.isEnabled)
@@ -341,7 +341,7 @@ class ConfigManagerTest {
     @Throws(Exception::class)
     fun testGetCurrentRampValue() {
         Assert.assertEquals(-1, manager.currentRampValue.toLong())
-        val `object` = JSONObject(sampleConfig)
+        val `object` = JSONObject(SAMPLE_CONFIG)
         `object`.put(ConfigManager.KEY_RAMP, 43)
         manager.updateConfig(`object`)
         Assert.assertEquals(43, manager.currentRampValue.toLong())
@@ -398,47 +398,47 @@ class ConfigManagerTest {
     @Test
     @Throws(Exception::class)
     fun testSetNullIntegrationAttributes() {
-        Assert.assertFalse(ConfigManager.sPreferences.contains(ATTRIBUTES))
+        Assert.assertFalse(ConfigManager.sPreferences.contains(attributes))
         manager.setIntegrationAttributes(1, null)
-        Assert.assertFalse(ConfigManager.sPreferences.contains(ATTRIBUTES))
+        Assert.assertFalse(ConfigManager.sPreferences.contains(attributes))
         ConfigManager.sPreferences
             .edit()
-            .putString(ATTRIBUTES, "{\"1\":{\"test-key\":\"test-value\"}}")
+            .putString(attributes, "{\"1\":{\"test-key\":\"test-value\"}}")
             .apply()
-        Assert.assertTrue(ConfigManager.sPreferences.contains(ATTRIBUTES))
+        Assert.assertTrue(ConfigManager.sPreferences.contains(attributes))
         manager.setIntegrationAttributes(1, null)
-        Assert.assertFalse(ConfigManager.sPreferences.contains(ATTRIBUTES))
+        Assert.assertFalse(ConfigManager.sPreferences.contains(attributes))
     }
 
     @Test
     @Throws(Exception::class)
     fun testSetEmptyIntegrationAttributes() {
-        Assert.assertFalse(ConfigManager.sPreferences.contains(ATTRIBUTES))
-        val attributes: Map<String, String> = HashMap()
-        manager.setIntegrationAttributes(1, attributes)
-        Assert.assertFalse(ConfigManager.sPreferences.contains(ATTRIBUTES))
+        Assert.assertFalse(ConfigManager.sPreferences.contains(attributes))
+        val testAttributes: Map<String, String> = HashMap()
+        manager.setIntegrationAttributes(1, testAttributes)
+        Assert.assertFalse(ConfigManager.sPreferences.contains(attributes))
         ConfigManager.sPreferences
             .edit()
-            .putString(ATTRIBUTES, "{\"1\":{\"test-key\":\"test-value\"}}")
+            .putString(attributes, "{\"1\":{\"test-key\":\"test-value\"}}")
             .apply()
-        Assert.assertTrue(ConfigManager.sPreferences.contains(ATTRIBUTES))
-        manager.setIntegrationAttributes(1, attributes)
-        Assert.assertFalse(ConfigManager.sPreferences.contains(ATTRIBUTES))
+        Assert.assertTrue(ConfigManager.sPreferences.contains(attributes))
+        manager.setIntegrationAttributes(1, testAttributes)
+        Assert.assertFalse(ConfigManager.sPreferences.contains(attributes))
     }
 
     @Test
     @Throws(Exception::class)
     fun testSetNonEmptyIntegrationAttributes() {
-        Assert.assertFalse(ConfigManager.sPreferences.contains(ATTRIBUTES))
-        val attributes: MutableMap<String, String> = HashMap()
-        attributes["test-key"] = "value 2"
-        manager.setIntegrationAttributes(1, attributes)
-        attributes["test-key"] = "value 3"
-        manager.setIntegrationAttributes(12, attributes)
+        Assert.assertFalse(ConfigManager.sPreferences.contains(attributes))
+        val testAttributes: MutableMap<String, String> = HashMap()
+        testAttributes["test-key"] = "value 2"
+        manager.setIntegrationAttributes(1, testAttributes)
+        testAttributes["test-key"] = "value 3"
+        manager.setIntegrationAttributes(12, testAttributes)
         Assert.assertEquals(
             "{\"1\":{\"test-key\":\"value 2\"},\"12\":{\"test-key\":\"value 3\"}}",
             ConfigManager.sPreferences.getString(
-                ATTRIBUTES,
+                attributes,
                 null,
             ),
         )
@@ -447,23 +447,23 @@ class ConfigManagerTest {
     @Test
     @Throws(Exception::class)
     fun testGetKitIntegrationAttributes() {
-        Assert.assertFalse(ConfigManager.sPreferences.contains(ATTRIBUTES))
+        Assert.assertFalse(ConfigManager.sPreferences.contains(attributes))
         Assert.assertEquals(0, manager.getIntegrationAttributes(1).size.toLong())
         ConfigManager.sPreferences
             .edit()
             .putString(
-                ATTRIBUTES,
+                attributes,
                 "{\"1\":{\"test-key\":\"value 2\"},\"12\":{\"test-key\":\"value 3\"}}",
             ).apply()
-        var attributes = manager.getIntegrationAttributes(1)
-        Assert.assertEquals(1, attributes.size.toLong())
-        Assert.assertEquals("value 2", attributes["test-key"])
-        attributes = manager.getIntegrationAttributes(12)
-        Assert.assertEquals(1, attributes.size.toLong())
-        Assert.assertEquals("value 3", attributes["test-key"])
+        var testAttributes = manager.getIntegrationAttributes(1)
+        Assert.assertEquals(1, testAttributes.size.toLong())
+        Assert.assertEquals("value 2", testAttributes["test-key"])
+        testAttributes = manager.getIntegrationAttributes(12)
+        Assert.assertEquals(1, testAttributes.size.toLong())
+        Assert.assertEquals("value 3", testAttributes["test-key"])
         ConfigManager.sPreferences
             .edit()
-            .remove(ATTRIBUTES)
+            .remove(attributes)
             .apply()
         Assert.assertEquals(0, manager.getIntegrationAttributes(1).size.toLong())
         Assert.assertEquals(0, manager.getIntegrationAttributes(12).size.toLong())
@@ -472,21 +472,21 @@ class ConfigManagerTest {
     @Test
     @Throws(Exception::class)
     fun testGetAllIntegrationAttributes() {
-        Assert.assertFalse(ConfigManager.sPreferences.contains(ATTRIBUTES))
+        Assert.assertFalse(ConfigManager.sPreferences.contains(attributes))
         Assert.assertNull(manager.integrationAttributes)
         ConfigManager.sPreferences
             .edit()
             .putString(
-                ATTRIBUTES,
+                attributes,
                 "{\"1\":{\"test-key\":\"value 2\"},\"12\":{\"test-key\":\"value 3\"}}",
             ).apply()
-        val attributes = manager.integrationAttributes
-        Assert.assertEquals(2, attributes.length().toLong())
-        Assert.assertEquals("value 2", attributes.getJSONObject("1")["test-key"])
-        Assert.assertEquals("value 3", attributes.getJSONObject("12")["test-key"])
+        val testAttributes = manager.integrationAttributes
+        Assert.assertEquals(2, testAttributes.length().toLong())
+        Assert.assertEquals("value 2", testAttributes.getJSONObject("1")["test-key"])
+        Assert.assertEquals("value 3", testAttributes.getJSONObject("12")["test-key"])
         ConfigManager.sPreferences
             .edit()
-            .remove(ATTRIBUTES)
+            .remove(attributes)
             .apply()
         Assert.assertNull(manager.integrationAttributes)
     }
@@ -730,8 +730,8 @@ class ConfigManagerTest {
     }
 
     companion object {
-        private const val sampleConfig =
+        private const val SAMPLE_CONFIG =
             "{ \"dt\":\"ac\", \"id\":\"5b7b8073-852b-47c2-9b89-c4bc66e3bd55\", \"ct\":1428030730685, \"dbg\":false, \"cue\":\"appdefined\", \"pmk\":[ \"mp_message\", \"com.urbanairship.push.ALERT\", \"alert\", \"a\", \"message\" ], \"cnp\":\"appdefined\", \"soc\":0, \"oo\":false, \"tri\" : { \"mm\" : [{ \"dt\" : \"x\", \"eh\" : true } ], \"evts\" : [1217787541, 2, 3] }, \"eks\":[ { \"id\":64, \"as\":{ \"clientId\":\"8FMBElARYl9ZtgwYIN5sZA==\", \"surveyId\":\"android_app\", \"sendAppVersion\":\"True\", \"rootUrl\":\"http://survey.foreseeresults.com/survey/display\" }, \"hs\":{ \"et\":{ \"57\":0, \"49\":0, \"55\":0, \"52\":0, \"53\":0, \"50\":0, \"56\":0, \"51\":0, \"54\":0, \"48\":0 }, \"ec\":{ \"609391310\":0, \"-1282670145\":0, \"2138942058\":0, \"-1262630649\":0, \"-877324321\":0, \"1700497048\":0, \"1611158813\":0, \"1900204162\":0, \"-998867355\":0, \"-1758179958\":0, \"-994832826\":0, \"1598473606\":0, \"-2106320589\":0 }, \"ea\":{ \"343635109\":0, \"1162787110\":0, \"-427055400\":0, \"-1285822129\":0, \"1699530232\":0 }, \"svec\":{ \"-725356351\":0, \"-1992427723\":0, \"751512662\":0, \"-118381281\":0, \"-171137512\":0, \"-2036479142\":0, \"-1338304551\":0, \"1003167705\":0, \"1046650497\":0, \"1919407518\":0, \"-1326325184\":0, \"480870493\":0, \"-1087232483\":0, \"-725540438\":0, \"-461793000\":0, \"1935019626\":0, \"76381608\":0, \"273797382\":0, \"-948909976\":0, \"-348193740\":0, \"-685370074\":0, \"-849874419\":0, \"2074021738\":0, \"-767572488\":0, \"-1091433459\":0, \"1671688881\":0, \"1304651793\":0, \"1299738196\":0, \"326063875\":0, \"296835202\":0, \"268236000\":0, \"1708308839\":0, \"101093345\":0, \"-652558691\":0, \"-1613021771\":0, \"1106318256\":0, \"-473874363\":0, \"-1267780435\":0, \"486732621\":0, \"1855792002\":0, \"-881258627\":0, \"698731249\":0, \"1510155838\":0, \"1119638805\":0, \"479337352\":0, \"1312099430\":0, \"1712783405\":0, \"-459721027\":0, \"-214402990\":0, \"617910950\":0, \"428901717\":0, \"-201124647\":0, \"940674176\":0, \"1632668193\":0, \"338835860\":0, \"879890181\":0, \"1667730064\":0 } } } ], \"lsv\":\"2.1.4\", \"pio\":30 }"
-        var ATTRIBUTES = "mp::integrationattributes"
+        var attributes = "mp::integrationattributes"
     }
 }

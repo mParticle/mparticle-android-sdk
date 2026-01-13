@@ -38,7 +38,7 @@ class MessageTableTest : BaseTableTest() {
         runTest(
             object : SQLiteOpenHelperWrapper {
                 override fun onCreate(database: SQLiteDatabase) {
-                    database.execSQL(old_no_dp_CREATE_MESSAGES_DDL)
+                    database.execSQL(OLD_NO_DP_CREATE_MESSAGES_DDL)
                 }
 
                 override fun onUpgrade(
@@ -60,7 +60,7 @@ class MessageTableTest : BaseTableTest() {
     }
 
     companion object {
-        const val old_no_mpid_CREATE_MESSAGES_DDL =
+        const val OLD_NO_MPID_CREATE_MESSAGES_DDL =
             "CREATE TABLE IF NOT EXISTS " + MessageTable.MessageTableColumns.TABLE_NAME + " (" + BaseColumns._ID +
                 " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 MessageTable.MessageTableColumns.SESSION_ID + " STRING NOT NULL, " +
@@ -71,7 +71,7 @@ class MessageTableTest : BaseTableTest() {
                 MessageTable.MessageTableColumns.MESSAGE_TYPE + " TEXT, " +
                 MessageTable.MessageTableColumns.CF_UUID + " TEXT" +
                 ");"
-        private const val old_no_dp_CREATE_MESSAGES_DDL =
+        private const val OLD_NO_DP_CREATE_MESSAGES_DDL =
             "CREATE TABLE IF NOT EXISTS " + MessageTable.MessageTableColumns.TABLE_NAME + " (" + BaseColumns._ID +
                 " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 MessageTable.MessageTableColumns.SESSION_ID + " STRING NOT NULL, " +

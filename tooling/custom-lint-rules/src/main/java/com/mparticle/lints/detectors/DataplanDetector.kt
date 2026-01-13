@@ -56,7 +56,7 @@ class DataplanDetector : CallScanner() {
                 |Retrieving the MParticle Data Plan is necessary to evaluate any violations.
                 |There may be a problem with locating your "dataPlanVersionFile".
                 |Please double check the values is correct in your "mparticle" block in build.gradle or your mp.config.json file
-                """.trimMargin(),
+                """,
                 Category.USABILITY,
                 4,
                 Severity.INFORMATIONAL,
@@ -72,11 +72,7 @@ class DataplanDetector : CallScanner() {
         // stub logger in MParticle to avoid any dependencies on Android Log when building Events
         Logger.setLogHandler(
             object : Logger.DefaultLogHandler() {
-                override fun log(
-                    priority: MParticle.LogLevel?,
-                    error: Throwable?,
-                    messages: String?,
-                ) {}
+                override fun log(priority: MParticle.LogLevel?, error: Throwable?, messages: String?) {}
             },
         )
 
@@ -102,11 +98,7 @@ class DataplanDetector : CallScanner() {
         }
     }
 
-    override fun onInstanceCollected(
-        context: JavaContext,
-        unresolvedObject: Expression,
-        reportingNode: UExpression,
-    ) {
+    override fun onInstanceCollected(context: JavaContext, unresolvedObject: Expression, reportingNode: UExpression) {
         val instance =
             try {
                 unresolvedObject.resolve()
@@ -230,10 +222,7 @@ class DataplanDetector : CallScanner() {
         }
     }
 
-    fun getErrorMessageBySchemaKeyword(
-        schemaKeyword: ViolationSchemaKeywordType,
-        expectedValue: String? = null,
-    ): String {
+    fun getErrorMessageBySchemaKeyword(schemaKeyword: ViolationSchemaKeywordType, expectedValue: String? = null): String {
         val expectedValueMessage = expectedValue?.let { ": $it" } ?: ""
         return when (schemaKeyword) {
             ViolationSchemaKeywordType.Const ->
@@ -285,9 +274,8 @@ class DataplanDetector : CallScanner() {
         ;
 
         companion object {
-            fun get(value: String?): ViolationSchemaKeywordType =
-                values().firstOrNull { it.toString().toLowerCase() == value?.toLowerCase() }
-                    ?: Unknown
+            fun get(value: String?): ViolationSchemaKeywordType = values().firstOrNull { it.toString().toLowerCase() == value?.toLowerCase() }
+                ?: Unknown
         }
     }
 

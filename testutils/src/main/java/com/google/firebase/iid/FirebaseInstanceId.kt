@@ -17,8 +17,5 @@ class FirebaseInstanceId {
 
     fun getToken() = FirebaseInstanceIdToken.token
 
-    fun getToken(
-        authority: String,
-        scope: String,
-    ) = FirebaseInstanceIdToken.token
+    fun getToken(authority: String, scope: String) = FirebaseInstanceIdToken.token
 }

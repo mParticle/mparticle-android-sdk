@@ -21,5 +21,4 @@ class ConfiguredKitOptions : KitOptions() {
     }
 }
 
-fun ConfiguredKitOptions(configuredKitOptions: ConfiguredKitOptions.() -> Unit): ConfiguredKitOptions =
-    ConfiguredKitOptions().apply(configuredKitOptions)
+fun ConfiguredKitOptions(configuredKitOptions: ConfiguredKitOptions.() -> Unit): ConfiguredKitOptions = ConfiguredKitOptions().apply(configuredKitOptions)
