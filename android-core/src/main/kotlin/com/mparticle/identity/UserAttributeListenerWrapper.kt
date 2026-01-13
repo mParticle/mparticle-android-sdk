@@ -4,14 +4,8 @@ import com.mparticle.TypedUserAttributeListener
 import com.mparticle.UserAttributeListener
 import com.mparticle.UserAttributeListenerType
 
-class UserAttributeListenerWrapper(
-    val listener: UserAttributeListenerType,
-) {
-    fun onUserAttributesReceived(
-        singles: Map<String, Any?>?,
-        lists: Map<String, List<String?>?>?,
-        mpid: Long?,
-    ) {
+class UserAttributeListenerWrapper(val listener: UserAttributeListenerType) {
+    fun onUserAttributesReceived(singles: Map<String, Any?>?, lists: Map<String, List<String?>?>?, mpid: Long?) {
         when (listener) {
             is UserAttributeListener ->
                 (singles ?: mutableMapOf<String, String?>())

@@ -11,10 +11,7 @@ import org.json.JSONArray
 @TargetApi(19)
 object KitKatHelper {
     @JvmStatic
-    fun remove(
-        array: JSONArray,
-        index: Int,
-    ) {
+    fun remove(array: JSONArray, index: Int) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             array.remove(index)
         }

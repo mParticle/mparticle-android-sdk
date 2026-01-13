@@ -16,8 +16,7 @@ class IdentityApiOutgoingTest : BaseCleanStartedEachTest() {
             Matcher(mServer.Endpoints().loginUrl).bodyMatch(
                 object :
                     IdentityMatcher() {
-                    override fun isIdentityMatch(identityRequest: IdentityRequestBody): Boolean =
-                        mStartingMpid == identityRequest.previousMpid
+                    override fun isIdentityMatch(identityRequest: IdentityRequestBody): Boolean = mStartingMpid == identityRequest.previousMpid
                 },
             ),
         )
@@ -31,8 +30,7 @@ class IdentityApiOutgoingTest : BaseCleanStartedEachTest() {
             Matcher(mServer.Endpoints().loginUrl).bodyMatch(
                 object :
                     IdentityMatcher() {
-                    override fun isIdentityMatch(identityRequest: IdentityRequestBody): Boolean =
-                        mStartingMpid == identityRequest.previousMpid
+                    override fun isIdentityMatch(identityRequest: IdentityRequestBody): Boolean = mStartingMpid == identityRequest.previousMpid
                 },
             ),
         )
@@ -46,8 +44,7 @@ class IdentityApiOutgoingTest : BaseCleanStartedEachTest() {
             Matcher(mServer.Endpoints().logoutUrl).bodyMatch(
                 object :
                     IdentityMatcher() {
-                    override fun isIdentityMatch(identityRequest: IdentityRequestBody): Boolean =
-                        mStartingMpid == identityRequest.previousMpid
+                    override fun isIdentityMatch(identityRequest: IdentityRequestBody): Boolean = mStartingMpid == identityRequest.previousMpid
                 },
             ),
         )
@@ -61,8 +58,7 @@ class IdentityApiOutgoingTest : BaseCleanStartedEachTest() {
             Matcher(mServer.Endpoints().logoutUrl).bodyMatch(
                 object :
                     IdentityMatcher() {
-                    override fun isIdentityMatch(identityRequest: IdentityRequestBody): Boolean =
-                        mStartingMpid == identityRequest.previousMpid
+                    override fun isIdentityMatch(identityRequest: IdentityRequestBody): Boolean = mStartingMpid == identityRequest.previousMpid
                 },
             ),
         )
@@ -88,8 +84,7 @@ class IdentityApiOutgoingTest : BaseCleanStartedEachTest() {
             Matcher(mServer.Endpoints().identifyUrl).bodyMatch(
                 object :
                     IdentityMatcher() {
-                    override fun isIdentityMatch(identityRequest: IdentityRequestBody): Boolean =
-                        mStartingMpid == identityRequest.previousMpid
+                    override fun isIdentityMatch(identityRequest: IdentityRequestBody): Boolean = mStartingMpid == identityRequest.previousMpid
                 },
             ),
         )

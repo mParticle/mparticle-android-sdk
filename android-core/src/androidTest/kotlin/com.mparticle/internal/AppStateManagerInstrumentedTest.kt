@@ -109,20 +109,19 @@ class AppStateManagerInstrumentedTest : BaseCleanStartedEachTest() {
 
     @Test
     @Throws(InterruptedException::class)
-    fun testOnApplicationForeground() =
-        runTest(StandardTestDispatcher()) {
-            val latch: CountDownLatch = MPLatch(2)
-            val kitManagerTester = KitManagerTester(mContext, latch)
-            com.mparticle.AccessUtils.setKitManager(kitManagerTester)
-            goToBackground()
-            Assert.assertNull(mAppStateManager?.currentActivity)
-            Thread.sleep(AppStateManager.ACTIVITY_DELAY + 100)
-            goToForeground()
-            Assert.assertNotNull(mAppStateManager?.currentActivity?.get())
-            latch.await()
-            Assert.assertTrue(kitManagerTester.onApplicationBackgroundCalled)
-            Assert.assertTrue(kitManagerTester.onApplicationForegroundCalled)
-        }
+    fun testOnApplicationForeground() = runTest(StandardTestDispatcher()) {
+        val latch: CountDownLatch = MPLatch(2)
+        val kitManagerTester = KitManagerTester(mContext, latch)
+        com.mparticle.AccessUtils.setKitManager(kitManagerTester)
+        goToBackground()
+        Assert.assertNull(mAppStateManager?.currentActivity)
+        Thread.sleep(AppStateManager.ACTIVITY_DELAY + 100)
+        goToForeground()
+        Assert.assertNotNull(mAppStateManager?.currentActivity?.get())
+        latch.await()
+        Assert.assertTrue(kitManagerTester.onApplicationBackgroundCalled)
+        Assert.assertTrue(kitManagerTester.onApplicationForegroundCalled)
+    }
 
     internal inner class KitManagerTester(
         context: Context?,

@@ -14,10 +14,7 @@ interface CoreCallbacks {
 
     fun isEnabled(): Boolean
 
-    fun setIntegrationAttributes(
-        kitId: Int,
-        integrationAttributes: Map<String, String>,
-    )
+    fun setIntegrationAttributes(kitId: Int, integrationAttributes: Map<String, String>)
 
     fun getIntegrationAttributes(kitId: Int): Map<String, String>?
 
@@ -43,30 +40,15 @@ interface CoreCallbacks {
     interface KitListener {
         fun kitFound(kitId: Int)
 
-        fun kitConfigReceived(
-            kitId: Int,
-            configuration: String?,
-        )
+        fun kitConfigReceived(kitId: Int, configuration: String?)
 
-        fun kitExcluded(
-            kitId: Int,
-            reason: String?,
-        )
+        fun kitExcluded(kitId: Int, reason: String?)
 
         fun kitStarted(kitId: Int)
 
-        fun onKitApiCalled(
-            kitId: Int,
-            used: Boolean?,
-            vararg objects: Any?,
-        )
+        fun onKitApiCalled(kitId: Int, used: Boolean?, vararg objects: Any?)
 
-        fun onKitApiCalled(
-            methodName: String?,
-            kitId: Int,
-            used: Boolean?,
-            vararg objects: Any?,
-        )
+        fun onKitApiCalled(methodName: String?, kitId: Int, used: Boolean?, vararg objects: Any?)
 
         companion object {
             @JvmField
@@ -74,30 +56,15 @@ interface CoreCallbacks {
                 object : KitListener {
                     override fun kitFound(kitId: Int) {}
 
-                    override fun kitConfigReceived(
-                        kitId: Int,
-                        configuration: String?,
-                    ) {}
+                    override fun kitConfigReceived(kitId: Int, configuration: String?) {}
 
-                    override fun kitExcluded(
-                        kitId: Int,
-                        reason: String?,
-                    ) {}
+                    override fun kitExcluded(kitId: Int, reason: String?) {}
 
                     override fun kitStarted(kitId: Int) {}
 
-                    override fun onKitApiCalled(
-                        kitId: Int,
-                        used: Boolean?,
-                        vararg objects: Any?,
-                    ) {}
+                    override fun onKitApiCalled(kitId: Int, used: Boolean?, vararg objects: Any?) {}
 
-                    override fun onKitApiCalled(
-                        methodName: String?,
-                        kitId: Int,
-                        used: Boolean?,
-                        vararg objects: Any?,
-                    ) {}
+                    override fun onKitApiCalled(methodName: String?, kitId: Int, used: Boolean?, vararg objects: Any?) {}
                 }
         }
     }

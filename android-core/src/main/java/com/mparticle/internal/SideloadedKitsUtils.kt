@@ -3,10 +3,7 @@ package com.mparticle.internal
 import org.json.JSONArray
 
 object SideloadedKitsUtils {
-    fun combineConfig(
-        kitConfig: JSONArray?,
-        kits: List<SideloadedKit>,
-    ): JSONArray {
+    fun combineConfig(kitConfig: JSONArray?, kits: List<SideloadedKit>): JSONArray {
         var results = JSONArray()
         var addedIds = mutableSetOf<Int>()
         kitConfig?.let { kitConfig ->

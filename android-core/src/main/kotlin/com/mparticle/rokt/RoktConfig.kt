@@ -1,10 +1,6 @@
 package com.mparticle.rokt
 
-class RoktConfig private constructor(
-    val colorMode: ColorMode?,
-    val cacheConfig: CacheConfig?,
-    val edgeToEdgeDisplay: Boolean,
-) {
+class RoktConfig private constructor(val colorMode: ColorMode?, val cacheConfig: CacheConfig?, val edgeToEdgeDisplay: Boolean) {
     data class Builder(
         private var colorMode: ColorMode? = null,
         private var cacheConfig: CacheConfig? = null,
@@ -22,10 +18,7 @@ class RoktConfig private constructor(
     enum class ColorMode { LIGHT, DARK, SYSTEM }
 }
 
-class CacheConfig(
-    val cacheDurationInSeconds: Long = DEFAULT_CACHE_DURATION_SECS,
-    val cacheAttributes: Map<String, String>? = null,
-) {
+class CacheConfig(val cacheDurationInSeconds: Long = DEFAULT_CACHE_DURATION_SECS, val cacheAttributes: Map<String, String>? = null) {
     companion object {
         const val DEFAULT_CACHE_DURATION_SECS: Long = 90 * 60
     }

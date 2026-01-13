@@ -1,5 +1,3 @@
 package com.mparticle.audience
 
-data class Audience(
-    val audienceID: String,
-)
+data class Audience(val audienceID: String)

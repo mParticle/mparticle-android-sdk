@@ -12,13 +12,8 @@ import android.os.Bundle
  * Separated into its own class to avoid annoying logcat messages on pre-ICS devices.
  */
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-internal class MPLifecycleCallbackDelegate(
-    private val mStateManager: AppStateManager,
-) : ActivityLifecycleCallbacks {
-    override fun onActivityCreated(
-        activity: Activity,
-        savedInstanceState: Bundle?,
-    ) {
+internal class MPLifecycleCallbackDelegate(private val mStateManager: AppStateManager) : ActivityLifecycleCallbacks {
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         mStateManager.onActivityCreated(activity, savedInstanceState)
     }
 
@@ -38,10 +33,7 @@ internal class MPLifecycleCallbackDelegate(
         mStateManager.onActivityStopped(activity)
     }
 
-    override fun onActivitySaveInstanceState(
-        activity: Activity,
-        outState: Bundle,
-    ) {
+    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
         mStateManager.onActivitySaveInstanceState(activity, outState)
     }
 

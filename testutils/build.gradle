@@ -51,6 +51,9 @@ android {
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
+    lint {
+        disable 'OutdatedLibrary'
+    }
 }
 
 dependencies {

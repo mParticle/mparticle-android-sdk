@@ -222,12 +222,11 @@ class ConfigStalenessCheckTest : BaseCleanInstallEachTest() {
         assertEquals(config2.toString(), configManager.config)
     }
 
-    private fun randomJson(size: Int) =
-        (1..size)
-            .map { mRandomUtils.getAlphaNumericString(4) to mRandomUtils.getAlphaNumericString(6) }
-            .fold(JSONObject()) { init, attribute ->
-                init.apply { put(attribute.first, attribute.second) }
-            }
+    private fun randomJson(size: Int) = (1..size)
+        .map { mRandomUtils.getAlphaNumericString(4) to mRandomUtils.getAlphaNumericString(6) }
+        .fold(JSONObject()) { init, attribute ->
+            init.apply { put(attribute.first, attribute.second) }
+        }
 
     fun <T> T?.assertNotNull(): T {
         assertNotNull(this)

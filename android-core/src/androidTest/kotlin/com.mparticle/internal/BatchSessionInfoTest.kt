@@ -13,8 +13,7 @@ import kotlin.test.assertNotEquals
 class BatchSessionInfoTest : BaseCleanStartedEachTest() {
     override fun useInMemoryDatabase() = true
 
-    override fun transformMParticleOptions(builder: MParticleOptions.Builder): MParticleOptions.Builder =
-        builder.logLevel(MParticle.LogLevel.INFO)
+    override fun transformMParticleOptions(builder: MParticleOptions.Builder): MParticleOptions.Builder = builder.logLevel(MParticle.LogLevel.INFO)
 
     /**
      * This test is in response to a bug where, when many messages (> 1 batch worth)

@@ -553,14 +553,13 @@ class MParticleTest : BaseCleanStartedEachTest() {
         }
     }
 
-    private fun getSharedPrefsContents(name: String): String =
-        try {
-            val prefs = mContext.getSharedPreferences(name, Context.MODE_PRIVATE)
-            """
+    private fun getSharedPrefsContents(name: String): String = try {
+        val prefs = mContext.getSharedPreferences(name, Context.MODE_PRIVATE)
+        """
             $name:
             ${JSONObject(prefs.all).toString(4)}
-            """.trimIndent()
-        } catch (e: JSONException) {
-            "error printing SharedPrefs :/"
-        }
+        """.trimIndent()
+    } catch (e: JSONException) {
+        "error printing SharedPrefs :/"
+    }
 }
