@@ -21,6 +21,7 @@ import com.mparticle.WrapperSdkVersion;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.MParticleUser;
+import com.mparticle.rokt.PlacementOptions;
 import com.mparticle.rokt.RoktConfig;
 import com.mparticle.rokt.RoktEmbeddedView;
 
@@ -625,6 +626,15 @@ public abstract class KitIntegration {
                      @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
                      @Nullable FilteredMParticleUser user,
                      @Nullable RoktConfig config);
+
+        void execute(@NonNull String viewName,
+                     @NonNull Map<String, String> attributes,
+                     @Nullable MpRoktEventCallback mpRoktEventCallback,
+                     @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
+                     @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
+                     @Nullable FilteredMParticleUser user,
+                     @Nullable RoktConfig config,
+                     @Nullable PlacementOptions options);
 
         Flow<RoktEvent> events(@NonNull String identifier);
 
