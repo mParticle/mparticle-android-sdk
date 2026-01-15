@@ -5,6 +5,7 @@ import android.os.Looper
 import android.os.SystemClock
 import com.mparticle.internal.ConfigManager
 import com.mparticle.internal.KitManager
+import com.mparticle.rokt.PlacementOptions
 import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
 import kotlinx.coroutines.flow.Flow
@@ -14,7 +15,10 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.eq
+import org.mockito.ArgumentMatchers.isNull
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
@@ -82,7 +86,7 @@ class RoktTest {
             config = config,
         )
 
-        verify(kitManager)?.execute("testView", attributes, callbacks, placeholders, fonts, config)
+        verify(kitManager)?.execute(eq("testView"), eq(attributes), eq(callbacks), eq(placeholders), eq(fonts), eq(config), any())
     }
 
     @Test
@@ -94,7 +98,7 @@ class RoktTest {
 
         rokt.selectPlacements(attributes = attributes, identifier = "basicView")
 
-        verify(kitManager).execute("basicView", attributes, null, null, null, null)
+        verify(kitManager).execute(eq("basicView"), eq(attributes), isNull(), isNull(), isNull(), isNull(), any())
     }
 
     @Test
@@ -106,7 +110,7 @@ class RoktTest {
             attributes = HashMap(),
         )
 
-        verify(kitManager, never()).execute(any(), any(), any(), any(), any(), any())
+        verify(kitManager, never()).execute(any(), any(), any(), any(), any(), any(), any())
     }
 
     @Test
@@ -200,5 +204,31 @@ class RoktTest {
         val result = rokt.getSessionId()
         verify(kitManager, never()).getSessionId()
         assertNull(result)
+    }
+
+    @Test
+    fun testSelectPlacements_withOptions_whenEnabled() {
+        `when`(configManager.isEnabled).thenReturn(true)
+        val currentTimeMillis = System.currentTimeMillis()
+
+        val attributes = mutableMapOf<String, String>()
+
+        rokt.selectPlacements(
+            identifier = "testView",
+            attributes = attributes,
+        )
+
+        // Verify call is forwarded
+        val optionsCaptor = ArgumentCaptor.forClass(PlacementOptions::class.java)
+        verify(kitManager).execute(
+            eq("testView"),
+            eq(HashMap(attributes)),
+            isNull(),
+            isNull(),
+            isNull(),
+            isNull(),
+            optionsCaptor.capture(),
+        )
+        assertTrue(optionsCaptor.value.integrationStartTimestamp >= currentTimeMillis)
     }
 }

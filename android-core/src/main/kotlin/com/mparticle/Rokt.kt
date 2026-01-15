@@ -4,6 +4,7 @@ import android.graphics.Typeface
 import com.mparticle.internal.ConfigManager
 import com.mparticle.internal.KitManager
 import com.mparticle.internal.listeners.ApiClass
+import com.mparticle.rokt.PlacementOptions
 import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
 import kotlinx.coroutines.flow.Flow
@@ -12,6 +13,11 @@ import java.lang.ref.WeakReference
 
 @ApiClass
 class Rokt internal constructor(private val mConfigManager: ConfigManager, private val mKitManager: KitManager) {
+
+    companion object {
+        const val JOINT_SDK_SELECT_PLACEMENTS = "jointSdkSelectPlacements"
+    }
+
     @JvmOverloads
     fun selectPlacements(
         identifier: String,
@@ -22,7 +28,7 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
         config: RoktConfig? = null,
     ) {
         if (mConfigManager.isEnabled) {
-            mKitManager.execute(identifier, HashMap(attributes), callbacks, embeddedViews, fontTypefaces, config)
+            mKitManager.execute(identifier, HashMap(attributes), callbacks, embeddedViews, fontTypefaces, config, buildPlacementOptions())
         }
     }
 
@@ -70,4 +76,8 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
     } else {
         null
     }
+
+    private fun buildPlacementOptions(): PlacementOptions = PlacementOptions(
+        performanceMarkers = mutableMapOf(JOINT_SDK_SELECT_PLACEMENTS to System.currentTimeMillis()),
+    )
 }
