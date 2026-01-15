@@ -26,6 +26,7 @@ import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.listeners.InternalListenerManager;
+import com.mparticle.rokt.PlacementOptions;
 import com.mparticle.rokt.RoktConfig;
 import com.mparticle.rokt.RoktEmbeddedView;
 import com.mparticle.rokt.RoktOptions;
@@ -682,6 +683,25 @@ public class KitFrameworkWrapper implements KitManager {
                     placeHolders,
                     fontTypefaces,
                     config);
+        }
+    }
+
+    @Override
+    public void execute(@NonNull String identifier,
+                        @NonNull Map<String, String> attributes,
+                        @Nullable MpRoktEventCallback mpRoktEventCallback,
+                        @Nullable Map<String, WeakReference<RoktEmbeddedView>> embeddedViews,
+                        @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
+                        @Nullable RoktConfig config,
+                        @Nullable PlacementOptions options) {
+        if (mKitManager != null) {
+            mKitManager.execute(identifier,
+                attributes,
+                mpRoktEventCallback,
+                embeddedViews,
+                fontTypefaces,
+                config,
+                options);
         }
     }
 

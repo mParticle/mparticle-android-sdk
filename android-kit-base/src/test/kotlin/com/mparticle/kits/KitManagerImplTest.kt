@@ -29,6 +29,7 @@ import com.mparticle.mock.MockContext
 import com.mparticle.mock.MockKitConfiguration
 import com.mparticle.mock.MockKitManagerImpl
 import com.mparticle.mock.MockMParticle
+import com.mparticle.rokt.PlacementOptions
 import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
 import com.mparticle.testutils.TestingUtils
@@ -43,10 +44,12 @@ import org.json.JSONException
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
@@ -1849,6 +1852,77 @@ class KitManagerImplTest {
     }
 
     @Test
+    fun testRokt_execute_with_PlacementOptions() {
+        val mockUser = mock(MParticleUser::class.java)
+        `when`(mockIdentity!!.currentUser).thenReturn(mockUser)
+
+        val manager: KitManagerImpl = MockKitManagerImpl()
+        val roktListener =
+            mock(
+                KitIntegration::class.java,
+                withSettings().extraInterfaces(KitIntegration.RoktListener::class.java),
+            )
+        `when`(roktListener.isDisabled).thenReturn(false)
+        manager.providers =
+            ConcurrentHashMap<Int, KitIntegration>().apply {
+                put(1, roktListener)
+            }
+
+        val attributes = hashMapOf<String, String>()
+        val placementOptions = PlacementOptions(integrationStartTimestamp = 123L)
+
+        manager.execute("Test", attributes, null, null, null, null, placementOptions)
+
+        val optionsCaptor = ArgumentCaptor.forClass(PlacementOptions::class.java)
+        verify(roktListener as KitIntegration.RoktListener).execute(
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            optionsCaptor.capture(),
+        )
+        assertSame(placementOptions, optionsCaptor.value)
+    }
+
+    @Test
+    fun testRokt_execute_without_PlacementOptions() {
+        val mockUser = mock(MParticleUser::class.java)
+        `when`(mockIdentity!!.currentUser).thenReturn(mockUser)
+
+        val manager: KitManagerImpl = MockKitManagerImpl()
+        val roktListener =
+            mock(
+                KitIntegration::class.java,
+                withSettings().extraInterfaces(KitIntegration.RoktListener::class.java),
+            )
+        `when`(roktListener.isDisabled).thenReturn(false)
+        manager.providers =
+            ConcurrentHashMap<Int, KitIntegration>().apply {
+                put(1, roktListener)
+            }
+
+        val attributes = hashMapOf<String, String>()
+
+        manager.execute("Test", attributes, null, null, null, null)
+
+        val optionsCaptor = ArgumentCaptor.forClass(PlacementOptions::class.java)
+        verify(roktListener as KitIntegration.RoktListener).execute(
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            optionsCaptor.capture(),
+        )
+        assertNull(optionsCaptor.value)
+    }
+
+    @Test
     fun testRokt_SandboxMode_When_Environment_IS_Development() {
         val sideloadedKit = mock(MPSideloadedKit::class.java)
         val kitId = 6000000
@@ -2263,6 +2337,19 @@ class KitManagerImplTest {
             config: RoktConfig?,
         ) {
             Logger.info("Executed with $attributes")
+        }
+
+        override fun execute(
+            viewName: String,
+            attributes: MutableMap<String, String>,
+            mpRoktEventCallback: MpRoktEventCallback?,
+            placeHolders: MutableMap<String, WeakReference<RoktEmbeddedView>>?,
+            fontTypefaces: MutableMap<String, WeakReference<Typeface>>?,
+            user: FilteredMParticleUser?,
+            config: RoktConfig?,
+            options: PlacementOptions?,
+        ) {
+            Logger.info("Executed with $attributes and options $options")
         }
 
         override fun events(identifier: String): Flow<RoktEvent> {
