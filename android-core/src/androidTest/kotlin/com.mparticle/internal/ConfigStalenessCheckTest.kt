@@ -189,10 +189,12 @@ class ConfigStalenessCheckTest : BaseCleanInstallEachTest() {
     fun MParticleOptions.Builder.addCredentials() = this.credentials("apiKey", "apiSecret")
 
     fun ConfigManager.onNewConfig(callback: () -> Unit) {
-        addConfigUpdatedListener { configType, isNew ->
-            if (isNew && configType == ConfigManager.ConfigType.CORE) {
-                callback()
+        addConfigUpdatedListener(object : ConfigManager.ConfigLoadedListener {
+            override fun onConfigUpdated(configType: ConfigManager.ConfigType, isNew: Boolean) {
+                if (isNew && configType == ConfigManager.ConfigType.CORE) {
+                    callback()
+                }
             }
-        }
+        })
     }
 }
