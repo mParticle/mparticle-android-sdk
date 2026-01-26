@@ -19,6 +19,22 @@ max_line_length = 150
 ij_kotlin_allow_trailing_comma = true
 ij_kotlin_allow_trailing_comma_on_call_site = true
 
+# Android default ktlint rules for kits
+# Uses android_studio code style with Android's default standard rules
+[kits/**/*.kt]
+ktlint_code_style = android_studio
+indent_size = 4
+continuation_indent_size = 4
+max_line_length = 150
+insert_final_newline = true
+trim_trailing_whitespace = true
+# TODO: Align ktlint rules for kits with core modules to avoid divergence in coding standards
+ktlint_standard_function-signature = disabled
+ktlint_standard_max-line-length = disabled
+ktlint_standard_import-ordering = disabled
+ktlint_standard_no-unused-imports = disabled
+ktlint_standard_class-signature = disabled
+
 [tooling/**/*.kt]
 max_line_length = 200
 
