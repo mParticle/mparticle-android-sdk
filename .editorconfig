@@ -28,6 +28,7 @@ continuation_indent_size = 4
 max_line_length = 150
 insert_final_newline = true
 trim_trailing_whitespace = true
+# TODO: Align ktlint rules for kits with core modules to avoid divergence in coding standards
 ktlint_standard_function-signature = disabled
 ktlint_standard_max-line-length = disabled
 ktlint_standard_import-ordering = disabled
