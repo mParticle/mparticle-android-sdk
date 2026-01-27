@@ -43,6 +43,22 @@ subprojects {
         androidVariant "release"
     }
     apply plugin: 'org.jlleitschuh.gradle.ktlint'
+
+    // Kits include their own `.editorconfig` files (some with `root = true`) which can
+    // prevent the repository `.editorconfig` from being applied. To keep lint behavior
+    // consistent without modifying kit repos, we override the relevant ktlint rules here.
+    if (project.projectDir.toString().startsWith("${rootProject.projectDir}/kits/")) {
+        project.plugins.withId("org.jlleitschuh.gradle.ktlint") {
+            project.ktlint {
+                additionalEditorconfig = [
+                    "ktlint_standard_indent": "disabled",
+                    "ktlint_standard_trailing-comma-on-call-site": "disabled",
+                    "ktlint_standard_trailing-comma-on-declaration-site": "disabled",
+                    "ktlint_standard_no-consecutive-blank-lines": "disabled",
+                ]
+            }
+        }
+    }
 }
 
 allprojects {
