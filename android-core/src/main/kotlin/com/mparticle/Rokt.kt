@@ -4,6 +4,7 @@ import android.graphics.Typeface
 import com.mparticle.internal.ConfigManager
 import com.mparticle.internal.KitManager
 import com.mparticle.internal.listeners.ApiClass
+import com.mparticle.rokt.PlacementOptions
 import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
 import kotlinx.coroutines.flow.Flow
@@ -22,7 +23,8 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
         config: RoktConfig? = null,
     ) {
         if (mConfigManager.isEnabled) {
-            mKitManager.execute(identifier, HashMap(attributes), callbacks, embeddedViews, fontTypefaces, config)
+            val placementOptions = PlacementOptions(integrationStartTimestamp = System.currentTimeMillis())
+            mKitManager.execute(identifier, HashMap(attributes), callbacks, embeddedViews, fontTypefaces, config, placementOptions)
         }
     }
 
