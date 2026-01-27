@@ -1,3 +1,29 @@
+## [5.76.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.75.1...v5.76.0) (2026-01-27)
+
+
+### Features
+
+* Add trunk rule to detect mParticle API keys ([#633](https://github.com/mParticle/mparticle-android-sdk/issues/633)) ([3f3c79f](https://github.com/mParticle/mparticle-android-sdk/commit/3f3c79faf8b6ee8bff407428c8f11839e75faa2e))
+* Update Android Gradle plugin to 8.1.0 ([#575](https://github.com/mParticle/mparticle-android-sdk/issues/575)) ([fc6a25d](https://github.com/mParticle/mparticle-android-sdk/commit/fc6a25d354d180fc2e7a59e2a80b57880c608891))
+
+
+### Bug Fixes
+
+* Align ktlint rules for kits with Android Studio defaults ([#640](https://github.com/mParticle/mparticle-android-sdk/issues/640)) ([e5484a0](https://github.com/mParticle/mparticle-android-sdk/commit/e5484a0fcafed11852c580c6f3cc5e27db0934fb))
+* migrate all generic logs to Logger class ([#630](https://github.com/mParticle/mparticle-android-sdk/issues/630)) ([9c9cb33](https://github.com/mParticle/mparticle-android-sdk/commit/9c9cb338424bf2f95038ed2456014f12bb7fe9b3))
+* Override ktlint rules for kits to avoid editorconfig conflicts ([#642](https://github.com/mParticle/mparticle-android-sdk/issues/642)) ([e31027a](https://github.com/mParticle/mparticle-android-sdk/commit/e31027a9fe70f483fd188a97641aa53fffeddbb3))
+
+
+### Updates & Maintenance
+
+* bump actions/cache from 4 to 5 ([#635](https://github.com/mParticle/mparticle-android-sdk/issues/635)) ([fb471fa](https://github.com/mParticle/mparticle-android-sdk/commit/fb471fa5ffec283a03fd629ee2758262a726582e))
+* bump actions/checkout from 5 to 6 ([#631](https://github.com/mParticle/mparticle-android-sdk/issues/631)) ([a0b2442](https://github.com/mParticle/mparticle-android-sdk/commit/a0b24424aaa43808a4fdac028d82cc4db8d40262))
+* bump actions/checkout from 5.0.0 to 6.0.1 ([#637](https://github.com/mParticle/mparticle-android-sdk/issues/637)) ([449a0b5](https://github.com/mParticle/mparticle-android-sdk/commit/449a0b5c22293bfe21336002cf2835eb81c8a1af))
+* bump actions/setup-java from 4 to 5 ([#625](https://github.com/mParticle/mparticle-android-sdk/issues/625)) ([46823b8](https://github.com/mParticle/mparticle-android-sdk/commit/46823b8d1174bdb5345483ab43407bbe82e34f88))
+* bump actions/upload-artifact from 5 to 6 ([#636](https://github.com/mParticle/mparticle-android-sdk/issues/636)) ([05f6133](https://github.com/mParticle/mparticle-android-sdk/commit/05f6133f5e69f1bc1d331fd4772e8f4134fec539))
+* Remove empty workflow file ([#634](https://github.com/mParticle/mparticle-android-sdk/issues/634)) ([0780abd](https://github.com/mParticle/mparticle-android-sdk/commit/0780abd0387a4b8281e0c8432180813719f080ad))
+* Update submodules ([d6bf37f](https://github.com/mParticle/mparticle-android-sdk/commit/d6bf37f7ad63f467efeb7c706c40841be48fbc5b))
+
 ## [5.75.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.75.0...v5.75.1) (2025-11-20)
 
 
