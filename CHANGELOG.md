@@ -1,3 +1,11 @@
+## [5.76.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.76.0...v5.76.1) (2026-01-29)
+
+
+### Updates & Maintenance
+
+* bump actions/checkout from 6.0.1 to 6.0.2 ([#641](https://github.com/mParticle/mparticle-android-sdk/issues/641)) ([227b421](https://github.com/mParticle/mparticle-android-sdk/commit/227b4218fef761a82fe10ca0e0fdd5668b0f4979))
+* Update submodules ([e6dbcb8](https://github.com/mParticle/mparticle-android-sdk/commit/e6dbcb8f57d491d1e43457dca2f44b192ad5be29))
+
 ## [5.76.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.75.1...v5.76.0) (2026-01-27)
 
 
