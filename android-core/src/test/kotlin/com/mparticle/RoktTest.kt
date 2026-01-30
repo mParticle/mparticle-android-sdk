@@ -23,8 +23,8 @@ import org.mockito.MockitoAnnotations
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
 import java.lang.ref.WeakReference
-import kotlin.test.assertNull
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @RunWith(PowerMockRunner::class)

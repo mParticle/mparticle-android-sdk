@@ -2292,6 +2292,15 @@ class KitManagerImplTest {
         override fun close() {
             Logger.info("close called")
         }
+
+        override fun setSessionId(sessionId: String) {
+            Logger.info("setSessionId called with $sessionId")
+        }
+
+        override fun getSessionId(): String? {
+            Logger.info("getSessionId called")
+            return null
+        }
     }
 
     internal inner class KitManagerEventCounter : MockKitManagerImpl() {
