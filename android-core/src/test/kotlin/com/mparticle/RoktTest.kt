@@ -24,6 +24,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
 import java.lang.ref.WeakReference
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @RunWith(PowerMockRunner::class)
@@ -168,5 +169,36 @@ class RoktTest {
             val elements = result.toList()
             assertTrue(elements.isEmpty())
         }
+    }
+
+    @Test
+    fun testSetSessionId_whenEnabled_delegatesToKitManager() {
+        `when`(configManager.isEnabled).thenReturn(true)
+        rokt.setSessionId("test-session-id")
+        verify(kitManager).setSessionId("test-session-id")
+    }
+
+    @Test
+    fun testSetSessionId_whenDisabled_doesNotCallKitManager() {
+        `when`(configManager.isEnabled).thenReturn(false)
+        rokt.setSessionId("test-session-id")
+        verify(kitManager, never()).setSessionId(any())
+    }
+
+    @Test
+    fun testGetSessionId_whenEnabled_delegatesToKitManager() {
+        `when`(configManager.isEnabled).thenReturn(true)
+        `when`(kitManager.getSessionId()).thenReturn("expected-session-id")
+        val result = rokt.getSessionId()
+        verify(kitManager).getSessionId()
+        assertEquals("expected-session-id", result)
+    }
+
+    @Test
+    fun testGetSessionId_whenDisabled_returnsNull() {
+        `when`(configManager.isEnabled).thenReturn(false)
+        val result = rokt.getSessionId()
+        verify(kitManager, never()).getSessionId()
+        assertNull(result)
     }
 }

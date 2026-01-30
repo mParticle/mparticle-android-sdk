@@ -43,4 +43,31 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
             mKitManager.close()
         }
     }
+
+    /**
+     * Set the session id to use for the next execute call.
+     *
+     * This is useful for cases where you have a session id from a non-native integration,
+     * e.g. WebView, and you want the session to be consistent across integrations.
+     *
+     * **Note:** Empty strings are ignored and will not update the session.
+     *
+     * @param sessionId The session id to be set. Must be a non-empty string.
+     */
+    fun setSessionId(sessionId: String) {
+        if (mConfigManager.isEnabled) {
+            mKitManager.setSessionId(sessionId)
+        }
+    }
+
+    /**
+     * Get the session id to use within a non-native integration e.g. WebView.
+     *
+     * @return The session id or null if no session is present or SDK is not initialized.
+     */
+    fun getSessionId(): String? = if (mConfigManager.isEnabled) {
+        mKitManager.getSessionId()
+    } else {
+        null
+    }
 }
