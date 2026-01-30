@@ -28,11 +28,18 @@ android {
         }
 
         file("../android-core/src/androidTest/res/raw").mkdir()
-        def file = file("../android-core/src/androidTest/res/raw/mparticle_js_sdk")
-        file.createNewFile()
+        def jsSdkRawFile = file("../android-core/src/androidTest/res/raw/mparticle_js_sdk")
+        jsSdkRawFile.createNewFile()
         if (project.hasProperty('js-sdk-file')) {
-            file.text = new File(project.property('js-sdk-file')).text
-            buildConfigField 'boolean', 'JS_TEST_SDK', 'true'
+            def jsSdkPath = project.property('js-sdk-file')
+            def jsSdkSourceFile = file(jsSdkPath)
+            if (jsSdkSourceFile.exists() && jsSdkSourceFile.isFile()) {
+                jsSdkRawFile.text = jsSdkSourceFile.text
+                buildConfigField 'boolean', 'JS_TEST_SDK', 'true'
+            } else {
+                logger.warn("js-sdk-file was provided but does not exist or is not a file: ${jsSdkPath}. Falling back to remote JS SDK fetch.")
+                buildConfigField 'boolean', 'JS_TEST_SDK', 'false'
+            }
         } else {
             buildConfigField 'boolean', 'JS_TEST_SDK', 'false'
         }
