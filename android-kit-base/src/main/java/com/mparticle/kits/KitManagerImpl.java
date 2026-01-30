@@ -1485,6 +1485,34 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     }
 
     @Override
+    public void setSessionId(@NonNull String sessionId) {
+        for (KitIntegration provider : providers.values()) {
+            try {
+                if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
+                    ((KitIntegration.RoktListener) provider).setSessionId(sessionId);
+                }
+            } catch (Exception e) {
+                Logger.warning("Failed to call setSessionId for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    @Nullable
+    public String getSessionId() {
+        for (KitIntegration provider : providers.values()) {
+            try {
+                if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
+                    return ((KitIntegration.RoktListener) provider).getSessionId();
+                }
+            } catch (Exception e) {
+                Logger.warning("Failed to call getSessionId for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+        return null;
+    }
+
+    @Override
     public void prepareAttributesAsync(@NonNull Map<String, String> attributes) {
 
         for (KitIntegration provider : providers.values()) {

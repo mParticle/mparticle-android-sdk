@@ -148,6 +148,21 @@ public interface KitManager {
 
     void close();
 
+    /**
+     * Set the session id to use for the next execute call.
+     *
+     * @param sessionId The session id to be set. Must be a non-empty string.
+     */
+    void setSessionId(@NonNull String sessionId);
+
+    /**
+     * Get the session id to use within a non-native integration e.g. WebView.
+     *
+     * @return The session id or null if no session is present.
+     */
+    @Nullable
+    String getSessionId();
+
     void prepareAttributesAsync(@NonNull Map<String, String> attributes);
 
     enum KitStatus {

@@ -722,6 +722,22 @@ public class KitFrameworkWrapper implements KitManager {
         }
     }
 
+    @Override
+    public void setSessionId(@NonNull String sessionId) {
+        if (mKitManager != null) {
+            mKitManager.setSessionId(sessionId);
+        }
+    }
+
+    @Override
+    @Nullable
+    public String getSessionId() {
+        if (mKitManager != null) {
+            return mKitManager.getSessionId();
+        }
+        return null;
+    }
+
     static class CoreCallbacksImpl implements CoreCallbacks {
         KitFrameworkWrapper mKitFrameworkWrapper;
         ConfigManager mConfigManager;
