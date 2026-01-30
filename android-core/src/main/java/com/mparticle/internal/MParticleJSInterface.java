@@ -15,6 +15,7 @@ import com.mparticle.commerce.Impression;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.Promotion;
 import com.mparticle.commerce.TransactionAttributes;
+import com.mparticle.identity.AliasRequest;
 import com.mparticle.identity.IdentityApi.SingleUserIdentificationCallback;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
@@ -98,6 +99,12 @@ public class MParticleJSInterface {
     protected static final String IDENTITY = "Identity";
     protected static final String TYPE = "Type";
 
+    // Alias (Identity) keys - accept multiple JS naming conventions
+    private static final String ALIAS_SOURCE_MPID = "source_mpid";
+    private static final String ALIAS_DESTINATION_MPID = "destination_mpid";
+    private static final String ALIAS_START_TIME_MS = "start_unixtime_ms";
+    private static final String ALIAS_END_TIME_MS = "end_unixtime_ms";
+
     public MParticleJSInterface() {
         Product.setEqualityComparator(new Product.EqualityComparator() {
             @Override
@@ -166,6 +173,61 @@ public class MParticleJSInterface {
             Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
         MParticle.getInstance().Identity().modify(request);
+    }
+
+    /**
+     * Initiate an Identity Alias request.
+     *
+     * Expects JSON containing:
+     * - source mpid
+     * - destination mpid (if omitted, will default to current user's mpid when available)
+     * - start/end times (unix time; accepts ms or seconds)
+     *
+     * Returns true if the request passed validation and was queued.
+     */
+    @JavascriptInterface
+    public boolean aliasUsers(String json) {
+        try {
+            JSONObject jsonObject = new JSONObject(json);
+
+            long sourceMpid = getFlexibleLong(jsonObject,
+                    "sourceMpid", "sourceMPID", ALIAS_SOURCE_MPID, "source_mpid", "source_mpid"
+            );
+            long destinationMpid = getFlexibleLong(jsonObject,
+                    "destinationMpid", "destinationMPID", ALIAS_DESTINATION_MPID, "destination_mpid", "destination_mpid"
+            );
+
+            if (destinationMpid == 0) {
+                MParticleUser currentUser = MParticle.getInstance().Identity().getCurrentUser();
+                if (currentUser != null) {
+                    destinationMpid = currentUser.getId();
+                }
+            }
+
+            long startTime = getFlexibleLong(jsonObject,
+                    "startTime", "start_time", "startTimeMs", "start_time_ms", ALIAS_START_TIME_MS
+            );
+            long endTime = getFlexibleLong(jsonObject,
+                    "endTime", "end_time", "endTimeMs", "end_time_ms", ALIAS_END_TIME_MS
+            );
+
+            startTime = maybeSecondsToMs(startTime);
+            endTime = maybeSecondsToMs(endTime);
+
+            AliasRequest request = AliasRequest.builder()
+                    .sourceMpid(sourceMpid)
+                    .destinationMpid(destinationMpid)
+                    .startTime(startTime)
+                    .endTime(endTime)
+                    .build();
+
+            return MParticle.getInstance().Identity().aliasUsers(request);
+        } catch (JSONException jse) {
+            Logger.warning(String.format(errorMsg, jse.getMessage()));
+        } catch (Exception ex) {
+            Logger.warning(String.format(errorMsg, ex.getMessage()));
+        }
+        return false;
     }
 
     @JavascriptInterface
@@ -836,5 +898,42 @@ public class MParticleJSInterface {
         }
         bridgeName.append("_v2");
         return bridgeName.toString();
+    }
+
+    private static long getFlexibleLong(JSONObject jsonObject, String... keys) {
+        if (jsonObject == null || keys == null) {
+            return 0;
+        }
+        for (String key : keys) {
+            if (MPUtility.isEmpty(key) || !jsonObject.has(key)) {
+                continue;
+            }
+            Object value = jsonObject.opt(key);
+            if (value == null || value == JSONObject.NULL) {
+                continue;
+            }
+            if (value instanceof Number) {
+                return ((Number) value).longValue();
+            }
+            if (value instanceof String) {
+                try {
+                    return Long.parseLong((String) value);
+                } catch (NumberFormatException ignore) {
+                    // continue
+                }
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * If the value looks like seconds-since-epoch (10 digits), convert to milliseconds.
+     * This avoids accidentally scaling small relative values.
+     */
+    private static long maybeSecondsToMs(long unixTime) {
+        if (unixTime > 1000000000L && unixTime < 10000000000L) {
+            return unixTime * 1000L;
+        }
+        return unixTime;
     }
 }
