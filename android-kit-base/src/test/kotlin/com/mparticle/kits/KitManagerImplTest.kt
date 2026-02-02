@@ -1869,7 +1869,7 @@ class KitManagerImplTest {
             }
 
         val attributes = hashMapOf<String, String>()
-        val placementOptions = PlacementOptions(integrationStartTimestamp = 123L)
+        val placementOptions = PlacementOptions(jointSdkSelectPlacements = 123L)
 
         manager.execute("Test", attributes, null, null, null, null, placementOptions)
 
@@ -2326,18 +2326,6 @@ class KitManagerImplTest {
         }
 
         override fun getConfiguration(): KitConfiguration = config
-
-        override fun execute(
-            viewName: String,
-            attributes: MutableMap<String, String>,
-            mpRoktEventCallback: MpRoktEventCallback?,
-            placeHolders: MutableMap<String, WeakReference<RoktEmbeddedView>>?,
-            fontTypefaces: MutableMap<String, WeakReference<Typeface>>?,
-            user: FilteredMParticleUser?,
-            config: RoktConfig?,
-        ) {
-            Logger.info("Executed with $attributes")
-        }
 
         override fun execute(
             viewName: String,

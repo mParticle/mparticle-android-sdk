@@ -14,10 +14,6 @@ import java.lang.ref.WeakReference
 @ApiClass
 class Rokt internal constructor(private val mConfigManager: ConfigManager, private val mKitManager: KitManager) {
 
-    companion object {
-        const val JOINT_SDK_SELECT_PLACEMENTS = "jointSdkSelectPlacements"
-    }
-
     @JvmOverloads
     fun selectPlacements(
         identifier: String,
@@ -78,6 +74,6 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
     }
 
     private fun buildPlacementOptions(): PlacementOptions = PlacementOptions(
-        performanceMarkers = mutableMapOf(JOINT_SDK_SELECT_PLACEMENTS to System.currentTimeMillis()),
+        jointSdkSelectPlacements = System.currentTimeMillis(),
     )
 }

@@ -1,3 +1,6 @@
 package com.mparticle.rokt
 
-data class PlacementOptions(val performanceMarkers: MutableMap<String, Long>)
+data class PlacementOptions(
+    val jointSdkSelectPlacements: Long,
+    val dynamicPerformanceMarkers: MutableMap<String, Long> = mutableMapOf(),
+)

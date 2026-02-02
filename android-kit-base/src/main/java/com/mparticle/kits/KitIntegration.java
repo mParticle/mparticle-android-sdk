@@ -619,13 +619,6 @@ public abstract class KitIntegration {
     }
 
     public interface RoktListener {
-        void execute(@NonNull String viewName,
-                     @NonNull Map<String, String> attributes,
-                     @Nullable MpRoktEventCallback mpRoktEventCallback,
-                     @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
-                     @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
-                     @Nullable FilteredMParticleUser user,
-                     @Nullable RoktConfig config);
 
         void execute(@NonNull String viewName,
                      @NonNull Map<String, String> attributes,
