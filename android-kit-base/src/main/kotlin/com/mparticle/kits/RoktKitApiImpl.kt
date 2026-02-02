@@ -26,10 +26,7 @@ import java.util.Objects
  * This class handles user resolution and attribute preparation before delegating
  * to the underlying Rokt Kit implementation.
  */
-internal class RoktKitApiImpl(
-    private val roktListener: KitIntegration.RoktListener,
-    private val kitIntegration: KitIntegration,
-) : RoktKitApi {
+internal class RoktKitApiImpl(private val roktListener: KitIntegration.RoktListener, private val kitIntegration: KitIntegration) : RoktKitApi {
 
     override fun execute(
         viewName: String,
@@ -70,14 +67,12 @@ internal class RoktKitApiImpl(
         }
     }
 
-    override fun events(identifier: String): Flow<RoktEvent> {
-        return try {
-            Logger.verbose("Calling events for Rokt Kit with identifier: $identifier")
-            roktListener.events(identifier)
-        } catch (e: Exception) {
-            Logger.warning("Failed to call events for Rokt Kit: ${e.message}")
-            flowOf()
-        }
+    override fun events(identifier: String): Flow<RoktEvent> = try {
+        Logger.verbose("Calling events for Rokt Kit with identifier: $identifier")
+        roktListener.events(identifier)
+    } catch (e: Exception) {
+        Logger.warning("Failed to call events for Rokt Kit: ${e.message}")
+        flowOf()
     }
 
     override fun purchaseFinalized(placementId: String, catalogItemId: String, status: Boolean) {
@@ -104,13 +99,11 @@ internal class RoktKitApiImpl(
         }
     }
 
-    override fun getSessionId(): String? {
-        return try {
-            roktListener.sessionId
-        } catch (e: Exception) {
-            Logger.warning("Failed to call getSessionId for Rokt Kit: ${e.message}")
-            null
-        }
+    override fun getSessionId(): String? = try {
+        roktListener.sessionId
+    } catch (e: Exception) {
+        Logger.warning("Failed to call getSessionId for Rokt Kit: ${e.message}")
+        null
     }
 
     override fun prepareAttributesAsync(attributes: Map<String, String>) {
@@ -149,10 +142,7 @@ internal class RoktKitApiImpl(
         return null
     }
 
-    private fun prepareAttributes(
-        finalAttributes: MutableMap<String, String>,
-        user: MParticleUser?,
-    ): MutableMap<String, String> {
+    private fun prepareAttributes(finalAttributes: MutableMap<String, String>, user: MParticleUser?): MutableMap<String, String> {
         val kitConfig = kitIntegration.configuration
         val jsonArray = try {
             kitConfig?.placementAttributesMapping ?: org.json.JSONArray()
@@ -227,7 +217,8 @@ internal class RoktKitApiImpl(
                 } else if (hashedEmailMismatch && existingHashedEmail != null) {
                     // If there's an existing other but it doesn't match the passed-in hashed email, log a warning
                     Logger.warning(
-                        "The existing hashed email on the user ($existingHashedEmail) does not match the hashed email passed to selectPlacements ($hashedEmail). " +
+                        "The existing hashed email on the user ($existingHashedEmail) does not match " +
+                            "the hashed email passed to selectPlacements ($hashedEmail). " +
                             "Please make sure to sync the hashed email identity to mParticle as soon as it's available. " +
                             "Identifying user with the provided hashed email before continuing to selectPlacements.",
                     )
