@@ -3,6 +3,7 @@ package com.mparticle
 import android.graphics.Typeface
 import com.mparticle.internal.ConfigManager
 import com.mparticle.internal.KitManager
+import com.mparticle.internal.Logger
 import com.mparticle.internal.listeners.ApiClass
 import com.mparticle.rokt.PlacementOptions
 import com.mparticle.rokt.RoktConfig
@@ -14,6 +15,16 @@ import java.lang.ref.WeakReference
 @ApiClass
 class Rokt internal constructor(private val mConfigManager: ConfigManager, private val mKitManager: KitManager) {
 
+    /**
+     * Display a Rokt placement with the specified parameters.
+     *
+     * @param identifier The placement identifier
+     * @param attributes User attributes to pass to Rokt
+     * @param callbacks Optional callback for Rokt events
+     * @param embeddedViews Optional map of embedded view placeholders
+     * @param fontTypefaces Optional map of font typefaces
+     * @param config Optional Rokt configuration
+     */
     @JvmOverloads
     fun selectPlacements(
         identifier: String,
@@ -24,25 +35,46 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
         config: RoktConfig? = null,
     ) {
         if (mConfigManager.isEnabled) {
-            mKitManager.execute(identifier, HashMap(attributes), callbacks, embeddedViews, fontTypefaces, config, buildPlacementOptions())
+            val roktApi = mKitManager.roktKitApi
+            if (roktApi != null) {
+                roktApi.execute(identifier, HashMap(attributes), callbacks, embeddedViews, fontTypefaces, config, buildPlacementOptions())
+            } else {
+                Logger.warning("Rokt Kit is not available. Make sure the Rokt Kit is included in your app.")
+            }
         }
     }
 
+    /**
+     * Get a Flow of Rokt events for the specified identifier.
+     *
+     * @param identifier The placement identifier to listen for events
+     * @return A Flow emitting RoktEvent objects
+     */
     fun events(identifier: String): Flow<RoktEvent> = if (mConfigManager.isEnabled) {
-        mKitManager.events(identifier)
+        mKitManager.roktKitApi?.events(identifier) ?: flowOf()
     } else {
         flowOf()
     }
 
+    /**
+     * Notify Rokt that a purchase has been finalized.
+     *
+     * @param placementId The placement identifier
+     * @param catalogItemId The catalog item identifier
+     * @param status Whether the purchase was successful
+     */
     fun purchaseFinalized(placementId: String, catalogItemId: String, status: Boolean) {
         if (mConfigManager.isEnabled) {
-            mKitManager.purchaseFinalized(placementId, catalogItemId, status)
+            mKitManager.roktKitApi?.purchaseFinalized(placementId, catalogItemId, status)
         }
     }
 
+    /**
+     * Close any active Rokt placements.
+     */
     fun close() {
         if (mConfigManager.isEnabled) {
-            mKitManager.close()
+            mKitManager.roktKitApi?.close()
         }
     }
 
@@ -58,7 +90,7 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
      */
     fun setSessionId(sessionId: String) {
         if (mConfigManager.isEnabled) {
-            mKitManager.setSessionId(sessionId)
+            mKitManager.roktKitApi?.setSessionId(sessionId)
         }
     }
 
@@ -68,9 +100,20 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
      * @return The session id or null if no session is present or SDK is not initialized.
      */
     fun getSessionId(): String? = if (mConfigManager.isEnabled) {
-        mKitManager.getSessionId()
+        mKitManager.roktKitApi?.getSessionId()
     } else {
         null
+    }
+
+    /**
+     * Prepare attributes asynchronously before executing a placement.
+     *
+     * @param attributes The attributes to prepare
+     */
+    fun prepareAttributesAsync(attributes: Map<String, String>) {
+        if (mConfigManager.isEnabled) {
+            mKitManager.roktKitApi?.prepareAttributesAsync(attributes)
+        }
     }
 
     private fun buildPlacementOptions(): PlacementOptions = PlacementOptions(

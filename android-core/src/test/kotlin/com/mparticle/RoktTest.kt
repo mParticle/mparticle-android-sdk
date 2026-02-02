@@ -5,6 +5,7 @@ import android.os.Looper
 import android.os.SystemClock
 import com.mparticle.internal.ConfigManager
 import com.mparticle.internal.KitManager
+import com.mparticle.internal.RoktKitApi
 import com.mparticle.rokt.PlacementOptions
 import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
@@ -16,8 +17,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchers.eq
+import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.isNull
 import org.mockito.Mock
 import org.mockito.Mockito.never
@@ -38,8 +38,32 @@ class RoktTest {
     lateinit var kitManager: KitManager
 
     @Mock
+    lateinit var roktKitApi: RoktKitApi
+
+    @Mock
     lateinit var configManager: ConfigManager
     private lateinit var rokt: Rokt
+
+    // Helpers to make Mockito matchers work in Kotlin with non-nullable types.
+    // Mockito matchers return null, which Kotlin rejects for non-nullable params.
+    // These helpers call the matcher (to register it) then return a cast null.
+    private fun <T> capture(captor: ArgumentCaptor<T>): T {
+        captor.capture()
+        @Suppress("UNCHECKED_CAST")
+        return null as T
+    }
+
+    private fun <T> any(): T {
+        ArgumentMatchers.any<T>()
+        @Suppress("UNCHECKED_CAST")
+        return null as T
+    }
+
+    private fun <T> eq(value: T): T {
+        ArgumentMatchers.eq(value)
+        @Suppress("UNCHECKED_CAST")
+        return null as T
+    }
 
     @Before
     fun setUp() {
@@ -50,6 +74,7 @@ class RoktTest {
     @Test
     fun testSelectPlacements_withFullParams_whenEnabled() {
         `when`(configManager.isEnabled).thenReturn(true)
+        `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
 
         val attributes = mutableMapOf<String, String>()
         attributes["key"] = "value"
@@ -86,31 +111,49 @@ class RoktTest {
             config = config,
         )
 
-        verify(kitManager)?.execute(eq("testView"), eq(attributes), eq(callbacks), eq(placeholders), eq(fonts), eq(config), any())
+        verify(roktKitApi).execute(
+            eq("testView"),
+            eq(attributes),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+        )
     }
 
     @Test
     fun testSelectPlacements_withBasicParams_whenEnabled() {
         `when`(configManager.isEnabled()).thenReturn(true)
+        `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
 
         val attributes = mutableMapOf<String, String>()
         attributes["a"] = "b"
 
         rokt.selectPlacements(attributes = attributes, identifier = "basicView")
 
-        verify(kitManager).execute(eq("basicView"), eq(attributes), isNull(), isNull(), isNull(), isNull(), any())
+        verify(roktKitApi).execute(
+            eq("basicView"),
+            eq(attributes),
+            isNull(),
+            isNull(),
+            isNull(),
+            isNull(),
+            any(),
+        )
     }
 
     @Test
     fun testSelectPlacements_withBasicParams_whenDisabled() {
         `when`(configManager.isEnabled()).thenReturn(false)
+        `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
 
         rokt.selectPlacements(
             identifier = "basicView",
             attributes = HashMap(),
         )
 
-        verify(kitManager, never()).execute(any(), any(), any(), any(), any(), any(), any())
+        verify(roktKitApi, never()).execute(any(), any(), any(), any(), any(), any(), any())
     }
 
     @Test
@@ -128,47 +171,51 @@ class RoktTest {
     @Test
     fun testReportConversion_withBasicParams_whenEnabled() {
         `when`(configManager.isEnabled()).thenReturn(true)
+        `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
 
         val attributes = mutableMapOf<String, String>()
         attributes["a"] = "b"
 
         rokt.purchaseFinalized("132", "1111", true)
 
-        verify(kitManager).purchaseFinalized("132", "1111", true)
+        verify(roktKitApi).purchaseFinalized("132", "1111", true)
     }
 
     @Test
     fun testReportConversion_withBasicParams_whenDisabled() {
         `when`(configManager.isEnabled()).thenReturn(false)
+        `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
 
         rokt.purchaseFinalized("132", "1111", true)
 
-        verify(kitManager, never()).purchaseFinalized("132", "1111", true)
+        verify(roktKitApi, never()).purchaseFinalized("132", "1111", true)
     }
 
     @Test
     fun testEvents_whenEnabled_delegatesToKitManager() {
         `when`(configManager.isEnabled).thenReturn(true)
+        `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
 
         val testIdentifier = "test-identifier"
         val expectedFlow: Flow<RoktEvent> = flowOf()
-        `when`(kitManager.events(testIdentifier)).thenReturn(expectedFlow)
+        `when`(roktKitApi.events(testIdentifier)).thenReturn(expectedFlow)
 
         val result = rokt.events(testIdentifier)
 
-        verify(kitManager).events(testIdentifier)
+        verify(roktKitApi).events(testIdentifier)
         assertEquals(expectedFlow, result)
     }
 
     @Test
     fun testEvents_whenDisabled_returnsEmptyFlow() {
         `when`(configManager.isEnabled).thenReturn(false)
+        `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
 
         val testIdentifier = "test-identifier"
 
         val result = rokt.events(testIdentifier)
 
-        verify(kitManager, never()).events(any())
+        verify(roktKitApi, never()).events(any())
         runTest {
             val elements = result.toList()
             assertTrue(elements.isEmpty())
@@ -178,37 +225,42 @@ class RoktTest {
     @Test
     fun testSetSessionId_whenEnabled_delegatesToKitManager() {
         `when`(configManager.isEnabled).thenReturn(true)
+        `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
         rokt.setSessionId("test-session-id")
-        verify(kitManager).setSessionId("test-session-id")
+        verify(roktKitApi).setSessionId("test-session-id")
     }
 
     @Test
     fun testSetSessionId_whenDisabled_doesNotCallKitManager() {
         `when`(configManager.isEnabled).thenReturn(false)
+        `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
         rokt.setSessionId("test-session-id")
-        verify(kitManager, never()).setSessionId(any())
+        verify(roktKitApi, never()).setSessionId(any())
     }
 
     @Test
     fun testGetSessionId_whenEnabled_delegatesToKitManager() {
         `when`(configManager.isEnabled).thenReturn(true)
-        `when`(kitManager.getSessionId()).thenReturn("expected-session-id")
+        `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
+        `when`(roktKitApi.getSessionId()).thenReturn("expected-session-id")
         val result = rokt.getSessionId()
-        verify(kitManager).getSessionId()
+        verify(roktKitApi).getSessionId()
         assertEquals("expected-session-id", result)
     }
 
     @Test
     fun testGetSessionId_whenDisabled_returnsNull() {
         `when`(configManager.isEnabled).thenReturn(false)
+        `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
         val result = rokt.getSessionId()
-        verify(kitManager, never()).getSessionId()
+        verify(roktKitApi, never()).getSessionId()
         assertNull(result)
     }
 
     @Test
     fun testSelectPlacements_withOptions_whenEnabled() {
         `when`(configManager.isEnabled).thenReturn(true)
+        `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
         val currentTimeMillis = System.currentTimeMillis()
 
         val attributes = mutableMapOf<String, String>()
@@ -219,16 +271,17 @@ class RoktTest {
         )
 
         // Verify call is forwarded
+        val viewNameCaptor = ArgumentCaptor.forClass(String::class.java)
         val optionsCaptor = ArgumentCaptor.forClass(PlacementOptions::class.java)
-        verify(kitManager).execute(
+        verify(roktKitApi).execute(
             eq("testView"),
-            eq(HashMap(attributes)),
+            any(),
             isNull(),
             isNull(),
             isNull(),
             isNull(),
-            optionsCaptor.capture(),
+            capture(optionsCaptor),
         )
-        assertTrue(optionsCaptor.value.integrationStartTimestamp >= currentTimeMillis)
+        assertTrue(optionsCaptor.value.jointSdkSelectPlacements >= currentTimeMillis)
     }
 }

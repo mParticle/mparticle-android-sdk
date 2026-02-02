@@ -19,16 +19,11 @@ import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
-import com.mparticle.MpRoktEventCallback;
-import com.mparticle.RoktEvent;
 import com.mparticle.WrapperSdkVersion;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.listeners.InternalListenerManager;
-import com.mparticle.rokt.PlacementOptions;
-import com.mparticle.rokt.RoktConfig;
-import com.mparticle.rokt.RoktEmbeddedView;
 import com.mparticle.rokt.RoktOptions;
 
 import org.json.JSONArray;
@@ -43,8 +38,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
-import kotlinx.coroutines.flow.Flow;
 
 public class KitFrameworkWrapper implements KitManager {
     private final Context mContext;
@@ -670,48 +663,12 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     @Override
-    public void execute(@NonNull String viewName,
-                        @NonNull Map<String, String> attributes,
-                        @Nullable MpRoktEventCallback mpRoktEventCallback,
-                        @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
-                        @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
-                        @Nullable RoktConfig config) {
+    @Nullable
+    public RoktKitApi getRoktKitApi() {
         if (mKitManager != null) {
-            mKitManager.execute(viewName,
-                    attributes,
-                    mpRoktEventCallback,
-                    placeHolders,
-                    fontTypefaces,
-                    config);
+            return mKitManager.getRoktKitApi();
         }
-    }
-
-    @Override
-    public void execute(@NonNull String identifier,
-                        @NonNull Map<String, String> attributes,
-                        @Nullable MpRoktEventCallback mpRoktEventCallback,
-                        @Nullable Map<String, WeakReference<RoktEmbeddedView>> embeddedViews,
-                        @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
-                        @Nullable RoktConfig config,
-                        @Nullable PlacementOptions options) {
-        if (mKitManager != null) {
-            mKitManager.execute(identifier,
-                attributes,
-                mpRoktEventCallback,
-                embeddedViews,
-                fontTypefaces,
-                config,
-                options);
-        }
-    }
-
-    @Override
-    public Flow<RoktEvent> events(@NonNull String identifier) {
-        if (mKitManager != null) {
-            return mKitManager.events(identifier);
-        } else {
-            return flowOf();
-        }
+        return null;
     }
 
     @Override
@@ -719,43 +676,6 @@ public class KitFrameworkWrapper implements KitManager {
         if (mKitManager != null) {
             mKitManager.setWrapperSdkVersion(wrapperSdkVersion);
         }
-    }
-
-    @Override
-    public void purchaseFinalized(@NonNull String placementId, @NonNull String catalogItemId, boolean status) {
-        if (mKitManager != null) {
-            mKitManager.purchaseFinalized(placementId, catalogItemId, status);
-        }
-    }
-
-    @Override
-    public void close() {
-        if (mKitManager != null) {
-            mKitManager.close();
-        }
-    }
-
-    @Override
-    public void prepareAttributesAsync(@NonNull Map<String, String> attributes) {
-        if (mKitManager != null) {
-            mKitManager.prepareAttributesAsync(attributes);
-        }
-    }
-
-    @Override
-    public void setSessionId(@NonNull String sessionId) {
-        if (mKitManager != null) {
-            mKitManager.setSessionId(sessionId);
-        }
-    }
-
-    @Override
-    @Nullable
-    public String getSessionId() {
-        if (mKitManager != null) {
-            return mKitManager.getSessionId();
-        }
-        return null;
     }
 
     static class CoreCallbacksImpl implements CoreCallbacks {

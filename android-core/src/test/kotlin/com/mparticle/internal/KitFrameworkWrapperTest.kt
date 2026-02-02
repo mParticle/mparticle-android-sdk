@@ -8,16 +8,11 @@ import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.MockMParticle
-import com.mparticle.RoktEvent
 import com.mparticle.WrapperSdk
 import com.mparticle.WrapperSdkVersion
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.internal.PushRegistrationHelper.PushRegistration
 import com.mparticle.testutils.RandomUtils
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.test.runTest
 import org.json.JSONArray
 import org.junit.Assert
 import org.junit.Test
@@ -34,7 +29,7 @@ import org.powermock.modules.junit4.PowerMockRunner
 import java.lang.ref.WeakReference
 import java.util.Random
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import kotlin.test.assertNull
 
 @RunWith(PowerMockRunner::class)
 class KitFrameworkWrapperTest {
@@ -728,7 +723,7 @@ class KitFrameworkWrapperTest {
     }
 
     @Test
-    fun testEvents_kitManagerNull_returnsEmptyFlow() {
+    fun testGetRoktKitApi_kitManagerNull_returnsNull() {
         val wrapper =
             KitFrameworkWrapper(
                 mock(
@@ -741,16 +736,13 @@ class KitFrameworkWrapperTest {
                 mock(MParticleOptions::class.java),
             )
 
-        val result = wrapper.events("test-identifier")
+        val result = wrapper.roktKitApi
 
-        runTest {
-            val elements = result.toList()
-            assertTrue(elements.isEmpty())
-        }
+        assertNull(result)
     }
 
     @Test
-    fun testEvents_kitManagerSet_delegatesToKitManager() {
+    fun testGetRoktKitApi_kitManagerSet_delegatesToKitManager() {
         val wrapper =
             KitFrameworkWrapper(
                 mock(
@@ -764,15 +756,14 @@ class KitFrameworkWrapperTest {
             )
 
         val mockKitManager = mock(KitManager::class.java)
-        val expectedFlow: Flow<RoktEvent> = flowOf()
-        val testIdentifier = "test-identifier"
+        val mockRoktKitApi = mock(RoktKitApi::class.java)
 
-        `when`(mockKitManager.events(testIdentifier)).thenReturn(expectedFlow)
+        `when`(mockKitManager.roktKitApi).thenReturn(mockRoktKitApi)
         wrapper.setKitManager(mockKitManager)
 
-        val result = wrapper.events(testIdentifier)
+        val result = wrapper.roktKitApi
 
-        verify(mockKitManager).events(testIdentifier)
-        assertEquals(expectedFlow, result)
+        verify(mockKitManager).roktKitApi
+        assertEquals(mockRoktKitApi, result)
     }
 }
