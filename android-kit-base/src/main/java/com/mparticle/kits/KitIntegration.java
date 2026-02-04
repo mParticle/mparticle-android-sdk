@@ -21,6 +21,7 @@ import com.mparticle.WrapperSdkVersion;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.MParticleUser;
+import com.mparticle.rokt.PlacementOptions;
 import com.mparticle.rokt.RoktConfig;
 import com.mparticle.rokt.RoktEmbeddedView;
 
@@ -617,14 +618,26 @@ public abstract class KitIntegration {
         List<ReportingMessage> logBatch(JSONObject jsonObject);
     }
 
+    /**
+     * Interface for Rokt Kit implementations.
+     *
+     * <p>This interface is internal to kit-base and is bridged to the
+     * {@link com.mparticle.internal.RoktKitApi} interface via a wrapper implementation
+     * in {@link KitManagerImpl}. The wrapper handles user resolution and
+     * attribute preparation before delegating to the kit's methods.</p>
+     *
+     * @see com.mparticle.internal.RoktKitApi
+     */
     public interface RoktListener {
+
         void execute(@NonNull String viewName,
                      @NonNull Map<String, String> attributes,
                      @Nullable MpRoktEventCallback mpRoktEventCallback,
                      @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
                      @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
                      @Nullable FilteredMParticleUser user,
-                     @Nullable RoktConfig config);
+                     @Nullable RoktConfig config,
+                     @Nullable PlacementOptions options);
 
         Flow<RoktEvent> events(@NonNull String identifier);
 
