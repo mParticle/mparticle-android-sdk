@@ -29,7 +29,7 @@ class RoktKitApiImplTest {
     }
 
     @Test
-    fun testExecute_mapsAttributesAndAddsSandbox() {
+    fun testSelectPlacements_mapsAttributesAndAddsSandbox() {
         val kitConfig = KitConfiguration.createKitConfiguration(JSONObject().put("id", 42))
         val settingsMap =
             hashMapOf(
@@ -61,11 +61,11 @@ class RoktKitApiImplTest {
                 "country" to "US",
             )
 
-        roktApi.execute("Test", attributes, null, null, null, null, null)
+        roktApi.selectPlacements("Test", attributes, null, null, null, null, null)
 
         @Suppress("UNCHECKED_CAST")
         val attributesCaptor = ArgumentCaptor.forClass(Map::class.java) as ArgumentCaptor<Map<String, String>>
-        verify(roktListener).execute(
+        verify(roktListener).selectPlacements(
             any(),
             attributesCaptor.capture(),
             any(),
@@ -83,7 +83,7 @@ class RoktKitApiImplTest {
     }
 
     @Test
-    fun testExecute_passesPlacementOptions() {
+    fun testSelectPlacements_passesPlacementOptions() {
         val kitConfig = KitConfiguration.createKitConfiguration(JSONObject().put("id", 42))
         val kitIntegration =
             mock(
@@ -96,10 +96,10 @@ class RoktKitApiImplTest {
 
         val placementOptions = PlacementOptions(jointSdkSelectPlacements = 123L)
 
-        roktApi.execute("Test", emptyMap(), null, null, null, null, placementOptions)
+        roktApi.selectPlacements("Test", emptyMap(), null, null, null, null, placementOptions)
 
         val optionsCaptor = ArgumentCaptor.forClass(PlacementOptions::class.java)
-        verify(roktListener).execute(
+        verify(roktListener).selectPlacements(
             any(),
             any(),
             any(),

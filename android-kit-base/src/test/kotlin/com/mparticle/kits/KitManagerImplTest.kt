@@ -954,7 +954,7 @@ class KitManagerImplTest {
 
         val roktApi = manager.getRoktKitApi()
         Assert.assertNotNull(roktApi)
-        roktApi!!.execute("Test", attributes, null, null, null, null)
+        roktApi!!.selectPlacements("Test", attributes, null, null, null, null)
         val finalAttributes = mockedProvider.lastAttributes
         Assert.assertNotNull(finalAttributes)
         finalAttributes!!
@@ -968,7 +968,7 @@ class KitManagerImplTest {
     }
 
     @Test
-    fun testExecute_shouldNotModifyAttributes_ifMappedKeysDoNotExist() {
+    fun testSelectPlacements_shouldNotModifyAttributes_ifMappedKeysDoNotExist() {
         val sideloadedKit = mock(MPSideloadedKit::class.java)
         val kitId = 6000000
 
@@ -1032,7 +1032,7 @@ class KitManagerImplTest {
 
         val roktApi = manager.getRoktKitApi()
         Assert.assertNotNull(roktApi)
-        roktApi!!.execute("Test", attributes, null, null, null, null)
+        roktApi!!.selectPlacements("Test", attributes, null, null, null, null)
         val finalAttributes = mockedProvider.lastAttributes
         Assert.assertNotNull(finalAttributes)
         finalAttributes!!
@@ -1047,7 +1047,7 @@ class KitManagerImplTest {
     }
 
     @Test
-    fun testExecute_shouldNotModifyAttributes_ifMapAndValueKeysAreSame() {
+    fun testSelectPlacements_shouldNotModifyAttributes_ifMapAndValueKeysAreSame() {
         val sideloadedKit = mock(MPSideloadedKit::class.java)
         val kitId = 6000000
 
@@ -1111,7 +1111,7 @@ class KitManagerImplTest {
 
         val roktApi = manager.getRoktKitApi()
         Assert.assertNotNull(roktApi)
-        roktApi!!.execute("Test", attributes, null, null, null, null)
+        roktApi!!.selectPlacements("Test", attributes, null, null, null, null)
         val finalAttributes = mockedProvider.lastAttributes
         Assert.assertNotNull(finalAttributes)
         finalAttributes!!
@@ -1187,7 +1187,7 @@ class KitManagerImplTest {
 
         val roktApi = manager.getRoktKitApi()
         Assert.assertNotNull(roktApi)
-        roktApi!!.execute("Test", attributes, null, null, null, null)
+        roktApi!!.selectPlacements("Test", attributes, null, null, null, null)
         val finalAttributes = mockedProvider.lastAttributes
         Assert.assertNotNull(finalAttributes)
         finalAttributes!!
@@ -1261,7 +1261,7 @@ class KitManagerImplTest {
             )
         val roktApi = manager.getRoktKitApi()
         Assert.assertNotNull(roktApi)
-        roktApi!!.execute("Test", attributes, null, null, null, null)
+        roktApi!!.selectPlacements("Test", attributes, null, null, null, null)
         val finalAttributes = mockedProvider.lastAttributes
         Assert.assertNotNull(finalAttributes)
         finalAttributes!!
@@ -1275,7 +1275,7 @@ class KitManagerImplTest {
     }
 
     @Test
-    fun testRokt_execute_with_PlacementOptions() {
+    fun testRokt_selectPlacements_with_PlacementOptions() {
         val mockUser = mock(MParticleUser::class.java)
         `when`(mockIdentity!!.currentUser).thenReturn(mockUser)
 
@@ -1296,10 +1296,10 @@ class KitManagerImplTest {
 
         val roktApi = manager.getRoktKitApi()
         Assert.assertNotNull(roktApi)
-        roktApi!!.execute("Test", attributes, null, null, null, null, placementOptions)
+        roktApi!!.selectPlacements("Test", attributes, null, null, null, null, placementOptions)
 
         val optionsCaptor = ArgumentCaptor.forClass(PlacementOptions::class.java)
-        verify(roktListener as KitIntegration.RoktListener).execute(
+        verify(roktListener as KitIntegration.RoktListener).selectPlacements(
             any(),
             any(),
             any(),
@@ -1313,7 +1313,7 @@ class KitManagerImplTest {
     }
 
     @Test
-    fun testRokt_execute_without_PlacementOptions() {
+    fun testRokt_selectPlacements_without_PlacementOptions() {
         val mockUser = mock(MParticleUser::class.java)
         `when`(mockIdentity!!.currentUser).thenReturn(mockUser)
 
@@ -1333,10 +1333,10 @@ class KitManagerImplTest {
 
         val roktApi = manager.getRoktKitApi()
         Assert.assertNotNull(roktApi)
-        roktApi!!.execute("Test", attributes, null, null, null, null)
+        roktApi!!.selectPlacements("Test", attributes, null, null, null, null)
 
         val optionsCaptor = ArgumentCaptor.forClass(PlacementOptions::class.java)
-        verify(roktListener as KitIntegration.RoktListener).execute(
+        verify(roktListener as KitIntegration.RoktListener).selectPlacements(
             any(),
             any(),
             any(),
@@ -1411,7 +1411,7 @@ class KitManagerImplTest {
             )
         val roktApi = manager.getRoktKitApi()
         Assert.assertNotNull(roktApi)
-        roktApi!!.execute("Test", attributes, null, null, null, null)
+        roktApi!!.selectPlacements("Test", attributes, null, null, null, null)
         val finalAttributes = mockedProvider.lastAttributes
         Assert.assertNotNull(finalAttributes)
         finalAttributes!!
@@ -1487,7 +1487,7 @@ class KitManagerImplTest {
             )
         val roktApi = manager.getRoktKitApi()
         Assert.assertNotNull(roktApi)
-        roktApi!!.execute("Test", attributes, null, null, null, null)
+        roktApi!!.selectPlacements("Test", attributes, null, null, null, null)
         val finalAttributes = mockedProvider.lastAttributes
         Assert.assertNotNull(finalAttributes)
         finalAttributes!!
@@ -1785,7 +1785,7 @@ class KitManagerImplTest {
 
         override fun getConfiguration(): KitConfiguration = config
 
-        override fun execute(
+        override fun selectPlacements(
             viewName: String,
             attributes: MutableMap<String, String>,
             mpRoktEventCallback: MpRoktEventCallback?,
@@ -1798,7 +1798,7 @@ class KitManagerImplTest {
             lastAttributes = attributes.toMap()
             lastOptions = options
             lastUser = user
-            Logger.info("Executed with $attributes and options $options")
+            Logger.info("selectPlacements with $attributes and options $options")
         }
 
         override fun events(identifier: String): Flow<RoktEvent> {

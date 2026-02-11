@@ -17,7 +17,7 @@ import java.lang.ref.WeakReference
  */
 interface RoktKitApi {
     /**
-     * Execute a Rokt placement with the specified parameters.
+     * Initiate a Rokt placement selection with the specified parameters.
      *
      * @param viewName The identifier for the placement view
      * @param attributes User attributes to pass to Rokt
@@ -27,7 +27,7 @@ interface RoktKitApi {
      * @param config Optional Rokt configuration
      * @param options Optional placement options
      */
-    fun execute(
+    fun selectPlacements(
         viewName: String,
         attributes: Map<String, String>,
         mpRoktEventCallback: MpRoktEventCallback?,

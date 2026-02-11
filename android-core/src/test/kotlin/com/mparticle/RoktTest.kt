@@ -111,7 +111,7 @@ class RoktTest {
             config = config,
         )
 
-        verify(roktKitApi).execute(
+        verify(roktKitApi).selectPlacements(
             eq("testView"),
             eq(attributes),
             any(),
@@ -132,7 +132,7 @@ class RoktTest {
 
         rokt.selectPlacements(attributes = attributes, identifier = "basicView")
 
-        verify(roktKitApi).execute(
+        verify(roktKitApi).selectPlacements(
             eq("basicView"),
             eq(attributes),
             isNull(),
@@ -153,7 +153,7 @@ class RoktTest {
             attributes = HashMap(),
         )
 
-        verify(roktKitApi, never()).execute(any(), any(), any(), any(), any(), any(), any())
+        verify(roktKitApi, never()).selectPlacements(any(), any(), any(), any(), any(), any(), any())
     }
 
     @Test
@@ -273,7 +273,7 @@ class RoktTest {
         // Verify call is forwarded
         val viewNameCaptor = ArgumentCaptor.forClass(String::class.java)
         val optionsCaptor = ArgumentCaptor.forClass(PlacementOptions::class.java)
-        verify(roktKitApi).execute(
+        verify(roktKitApi).selectPlacements(
             eq("testView"),
             any(),
             isNull(),

@@ -28,7 +28,7 @@ import java.util.Objects
  */
 internal class RoktKitApiImpl(private val roktListener: KitIntegration.RoktListener, private val kitIntegration: KitIntegration) : RoktKitApi {
 
-    override fun execute(
+    override fun selectPlacements(
         viewName: String,
         attributes: Map<String, String>,
         mpRoktEventCallback: MpRoktEventCallback?,
@@ -51,7 +51,7 @@ internal class RoktKitApiImpl(private val roktListener: KitIntegration.RoktListe
 
             confirmEmail(email, hashedEmail, user, instance.Identity(), kitConfig) {
                 val finalAttributes = prepareAttributes(mutableAttributes, user)
-                roktListener.execute(
+                roktListener.selectPlacements(
                     viewName,
                     finalAttributes,
                     mpRoktEventCallback,

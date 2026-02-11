@@ -37,7 +37,7 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
         if (mConfigManager.isEnabled) {
             val roktApi = mKitManager.roktKitApi
             if (roktApi != null) {
-                roktApi.execute(identifier, HashMap(attributes), callbacks, embeddedViews, fontTypefaces, config, buildPlacementOptions())
+                roktApi.selectPlacements(identifier, HashMap(attributes), callbacks, embeddedViews, fontTypefaces, config, buildPlacementOptions())
             } else {
                 Logger.warning("Rokt Kit is not available. Make sure the Rokt Kit is included in your app.")
             }
