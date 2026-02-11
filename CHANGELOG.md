@@ -1,3 +1,20 @@
+## [5.77.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.76.1...v5.77.0) (2026-02-03)
+
+
+### Features
+
+* Add support for Get / Set SessionId on Rokt ([#645](https://github.com/mParticle/mparticle-android-sdk/issues/645)) ([2956a05](https://github.com/mParticle/mparticle-android-sdk/commit/2956a0547f93914e89e34c70f22820f0a3ea26ba))
+
+
+### Bug Fixes
+
+* Validate js-sdk-file input for Gradle 8 compatibility ([#644](https://github.com/mParticle/mparticle-android-sdk/issues/644)) ([2725387](https://github.com/mParticle/mparticle-android-sdk/commit/2725387df98c77dff9bf251fb528fc8241f4409c))
+
+
+### Updates & Maintenance
+
+* Update submodules ([d5d503f](https://github.com/mParticle/mparticle-android-sdk/commit/d5d503fe8443222777d08bbe667696402753a8b8))
+
 ## [5.76.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.76.0...v5.76.1) (2026-01-29)
 
 
