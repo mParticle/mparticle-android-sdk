@@ -21,6 +21,7 @@ import com.mparticle.WrapperSdkVersion;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.MParticleUser;
+import com.mparticle.rokt.PlacementOptions;
 import com.mparticle.rokt.RoktConfig;
 import com.mparticle.rokt.RoktEmbeddedView;
 
@@ -115,7 +116,7 @@ public abstract class KitIntegration {
 
     public boolean isDisabled(boolean isOptOutEvent) {
         return !getConfiguration().passesBracketing(kitManager.getUserBucket()) ||
-                (getConfiguration().shouldHonorOptOut() && kitManager.isOptedOut() && !isOptOutEvent);
+            (getConfiguration().shouldHonorOptOut() && kitManager.isOptedOut() && !isOptOutEvent);
     }
 
     @Deprecated
@@ -141,7 +142,7 @@ public abstract class KitIntegration {
     /**
      * Retrieve filtered user attributes. Use this method to retrieve user attributes at any time.
      * To ensure that filtering is respected, kits must use this method rather than the public API.
-     *
+     * <p>
      * If the KitIntegration implements the {@link AttributeListener} interface and returns true
      * for {@link AttributeListener#supportsAttributeLists()}, this method will pass back all attributes
      * as they are (as String values or as List&lt;String&gt; values). Otherwise, this method will comma-separate
@@ -160,8 +161,8 @@ public abstract class KitIntegration {
                     userAttributes = kitManager.getDataplanFilter().transformUserAttributes(userAttributes);
                 }
                 Map<String, Object> attributes = (Map<String, Object>) KitConfiguration.filterAttributes(
-                        getConfiguration().getUserAttributeFilters(),
-                        userAttributes
+                    getConfiguration().getUserAttributeFilters(),
+                    userAttributes
                 );
                 if ((this instanceof AttributeListener) && ((AttributeListener) this).supportsAttributeLists()) {
                     return attributes;
@@ -418,7 +419,7 @@ public abstract class KitIntegration {
 
         /**
          * Indicate to the mParticle Kit framework if this AttributeListener supports attribute-values as lists.
-         *
+         * <p>
          * If an AttributeListener returns false, the setUserAttributeList method will never be called. Instead, setUserAttribute
          * will be called with the attribute-value lists combined as a csv.
          *
@@ -617,14 +618,26 @@ public abstract class KitIntegration {
         List<ReportingMessage> logBatch(JSONObject jsonObject);
     }
 
+    /**
+     * Interface for Rokt Kit implementations.
+     *
+     * <p>This interface is internal to kit-base and is bridged to the
+     * {@link com.mparticle.internal.RoktKitApi} interface via a wrapper implementation
+     * in {@link KitManagerImpl}. The wrapper handles user resolution and
+     * attribute preparation before delegating to the kit's methods.</p>
+     *
+     * @see com.mparticle.internal.RoktKitApi
+     */
     public interface RoktListener {
-        void execute(@NonNull String viewName,
-                     @NonNull Map<String, String> attributes,
-                     @Nullable MpRoktEventCallback mpRoktEventCallback,
-                     @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
-                     @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
-                     @Nullable FilteredMParticleUser user,
-                     @Nullable RoktConfig config);
+
+        void selectPlacements(@NonNull String viewName,
+                              @NonNull Map<String, String> attributes,
+                              @Nullable MpRoktEventCallback mpRoktEventCallback,
+                              @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
+                              @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
+                              @Nullable FilteredMParticleUser user,
+                              @Nullable RoktConfig config,
+                              @Nullable PlacementOptions options);
 
         Flow<RoktEvent> events(@NonNull String identifier);
 

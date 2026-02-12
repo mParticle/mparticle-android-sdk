@@ -25,19 +25,14 @@ import com.mparticle.Configuration;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
-import com.mparticle.MParticleTask;
-import com.mparticle.MpRoktEventCallback;
-import com.mparticle.RoktEvent;
+import com.mparticle.internal.RoktKitApi;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.WrapperSdkVersion;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
-import com.mparticle.identity.IdentityApi;
 import com.mparticle.identity.IdentityApiRequest;
-import com.mparticle.identity.IdentityApiResult;
 import com.mparticle.identity.IdentityStateListener;
 import com.mparticle.identity.MParticleUser;
-import com.mparticle.internal.Constants;
 import com.mparticle.internal.CoreCallbacks;
 import com.mparticle.internal.KitManager;
 import com.mparticle.internal.KitsLoadedCallback;
@@ -45,8 +40,6 @@ import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.ReportingManager;
 import com.mparticle.kits.mappings.CustomMapping;
-import com.mparticle.rokt.RoktConfig;
-import com.mparticle.rokt.RoktEmbeddedView;
 import com.mparticle.rokt.RoktOptions;
 
 import org.json.JSONArray;
@@ -62,12 +55,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
-
-import kotlinx.coroutines.flow.Flow;
 
 public class KitManagerImpl implements KitManager, AttributionListener, UserAttributeListener, IdentityStateListener {
 
@@ -1347,102 +1337,14 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     }
 
     @Override
-    public void execute(@NonNull String viewName,
-                        @NonNull Map<String, String> attributes,
-                        @Nullable MpRoktEventCallback mpRoktEventCallback,
-                        @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
-                        @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
-                        @Nullable RoktConfig config) {
+    @Nullable
+    public RoktKitApi getRoktKitApi() {
         for (KitIntegration provider : providers.values()) {
-            try {
-                if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
-                    if (attributes == null) {
-                        attributes = new HashMap<>();
-                    }
-                    MParticle instance = MParticle.getInstance();
-                    MParticleUser user = instance.Identity().getCurrentUser();
-                    String email = getValueIgnoreCase(attributes, "email");
-                    String hashedEmail = getValueIgnoreCase(attributes, "emailsha256");
-                    Map<String, String> tempAttributes = attributes;
-                    KitConfiguration kitConfig = provider.getConfiguration();
-                    confirmEmail(email, hashedEmail, user, instance.Identity(), kitConfig, () -> {
-                        Map<String, String> finalAttributes = prepareAttributes(provider, tempAttributes, user);
-
-                        ((KitIntegration.RoktListener) provider).execute(viewName,
-                                finalAttributes,
-                                mpRoktEventCallback,
-                                placeHolders,
-                                fontTypefaces,
-                                FilteredMParticleUser.getInstance(user.getId(), provider),
-                                config);
-                    });
-                }
-            } catch (Exception e) {
-                Logger.warning("Failed to call execute for kit: " + provider.getName() + ": " + e.getMessage());
-            }
-        }
-    }
-
-    private String getValueIgnoreCase(Map<String, String> map, String searchKey) {
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            if (entry.getKey().equalsIgnoreCase(searchKey)) {
-                return entry.getValue();
+            if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
+                return new RoktKitApiImpl((KitIntegration.RoktListener) provider, provider);
             }
         }
         return null;
-    }
-
-    private Map<String, String> prepareAttributes(KitIntegration provider, Map<String, String> finalAttributes, MParticleUser user){
-        JSONArray jsonArray = new JSONArray();
-
-        KitConfiguration kitConfig = provider.getConfiguration();
-        if (kitConfig != null) {
-            try {
-                jsonArray = kitConfig.getPlacementAttributesMapping();
-            } catch (JSONException e) {
-                Logger.warning("Invalid placementAttributes for kit: " + provider.getName() + " JSON: " + e.getMessage());
-            }
-        }
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject obj = jsonArray.optJSONObject(i);
-            if (obj == null) continue;
-            String mapFrom = obj.optString("map");
-            String mapTo = obj.optString("value");
-            if (finalAttributes.containsKey(mapFrom)) {
-                String value = finalAttributes.remove(mapFrom);
-                finalAttributes.put(mapTo, value);
-            }
-        }
-        Map<String, Object> objectAttributes = new HashMap<>();
-        for (Map.Entry<String, String> entry : finalAttributes.entrySet()) {
-            if(!entry.getKey().equals(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
-                objectAttributes.put(entry.getKey(), entry.getValue());
-            }
-        }
-        if (user != null) {
-            user.setUserAttributes(objectAttributes);
-        }
-
-        if (!finalAttributes.containsKey(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
-            finalAttributes.put(Constants.MessageKey.SANDBOX_MODE_ROKT, String.valueOf(Objects.toString(MPUtility.isDevEnv(), "false")));  // Default value is "false" if null
-        }
-        return finalAttributes;
-    }
-
-    @Override
-    public Flow<RoktEvent> events(@NonNull String identifier) {
-        for (KitIntegration provider : providers.values()) {
-            try {
-                if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
-                    Logger.verbose("Calling events for kit: " + provider.getName() + " with identifier: " + identifier);
-                    return ((KitIntegration.RoktListener) provider).events(identifier);
-                }
-            } catch (Exception e) {
-                Logger.warning("Failed to call setWrapperSdkVersion for kit: " + provider.getName() + ": " + e.getMessage());
-            }
-        }
-        Logger.warning("No RoktListener found");
-        return flowOf();
     }
 
     @Override
@@ -1455,165 +1357,6 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             } catch (Exception e) {
                 Logger.warning("Failed to call setWrapperSdkVersion for kit: " + provider.getName() + ": " + e.getMessage());
             }
-        }
-    }
-
-    @Override
-    public void purchaseFinalized(@NonNull String placementId, @NonNull String catalogItemId, boolean status) {
-        for (KitIntegration provider : providers.values()) {
-            try {
-                if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
-                    ((KitIntegration.RoktListener) provider).purchaseFinalized(placementId,catalogItemId,status);
-                }
-            } catch (Exception e) {
-                Logger.warning("Failed to call purchaseFinalized for kit: " + provider.getName() + ": " + e.getMessage());
-            }
-        }
-    }
-
-    @Override
-    public void close() {
-        for (final KitIntegration provider : providers.values()) {
-            try {
-                if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
-                    ((KitIntegration.RoktListener) provider).close();
-                }
-            } catch (final Exception e) {
-                Logger.warning("Failed to call close for kit: " + provider.getName() + ": " + e.getMessage());
-            }
-        }
-    }
-
-    @Override
-    public void setSessionId(@NonNull String sessionId) {
-        for (KitIntegration provider : providers.values()) {
-            try {
-                if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
-                    ((KitIntegration.RoktListener) provider).setSessionId(sessionId);
-                }
-            } catch (Exception e) {
-                Logger.warning("Failed to call setSessionId for kit: " + provider.getName() + ": " + e.getMessage());
-            }
-        }
-    }
-
-    @Override
-    @Nullable
-    public String getSessionId() {
-        for (KitIntegration provider : providers.values()) {
-            try {
-                if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
-                    return ((KitIntegration.RoktListener) provider).getSessionId();
-                }
-            } catch (Exception e) {
-                Logger.warning("Failed to call getSessionId for kit: " + provider.getName() + ": " + e.getMessage());
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public void prepareAttributesAsync(@NonNull Map<String, String> attributes) {
-
-        for (KitIntegration provider : providers.values()) {
-            try {
-                if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
-                    if (attributes == null) {
-                        attributes = new HashMap<>();
-                    }
-                    MParticle instance = MParticle.getInstance();
-                    MParticleUser user = instance.Identity().getCurrentUser();
-                    String email = attributes.get("email");
-                    String hashedEmail = getValueIgnoreCase(attributes, "emailsha256");
-                    Map<String, String> tempAttributes = attributes;
-                    KitConfiguration kitConfig = provider.getConfiguration();
-                    confirmEmail(email, hashedEmail, user, instance.Identity(), kitConfig, () -> {
-                        Map<String, String> finalAttributes = prepareAttributes(provider, tempAttributes, user);
-                        ((KitIntegration.RoktListener) provider).enrichAttributes(
-                                finalAttributes, FilteredMParticleUser.getInstance(user.getId(), provider));
-                    });
-                }
-            } catch (Exception e) {
-                Logger.warning("Failed to call prepareRoktListener for kit: " + provider.getName() + ": " + e.getMessage());
-            }
-        }
-    }
-
-    private void confirmEmail(
-            @Nullable String email,
-            @Nullable String hashedEmail,
-            @Nullable MParticleUser user,
-            IdentityApi identityApi,
-            KitConfiguration kitConfiguration,
-            Runnable runnable
-    ) {
-        boolean hasEmail = email != null && !email.isEmpty();
-        boolean hasHashedEmail = hashedEmail != null && !hashedEmail.isEmpty();
-
-        if ((hasEmail || hasHashedEmail) && user != null) {
-            MParticle.IdentityType selectedIdentityType = null;
-            try {
-                String identityTypeStr = (kitConfiguration != null)
-                        ? kitConfiguration.getHashedEmailUserIdentityType()
-                        : null;
-                if (identityTypeStr != null ) {
-                    selectedIdentityType = MParticle.IdentityType.valueOf(identityTypeStr);
-                }
-            } catch (IllegalArgumentException e) {
-                Logger.error("Invalid identity type "+e.getMessage());
-            }
-            String existingEmail = user.getUserIdentities().get(MParticle.IdentityType.Email);
-            String existingHashedEmail = selectedIdentityType != null ? user.getUserIdentities().get(selectedIdentityType) : null;
-            boolean emailMismatch = hasEmail && !email.equalsIgnoreCase(existingEmail);
-            boolean hashedEmailMismatch = hasHashedEmail && !hashedEmail.equalsIgnoreCase(existingHashedEmail);
-
-            if (emailMismatch || (hashedEmailMismatch && selectedIdentityType != null)) {
-                // If there's an existing email but it doesn't match the passed-in email, log a warning
-                if (emailMismatch && existingEmail != null) {
-                    Logger.warning(String.format(
-                            "The existing email on the user (%s) does not match the email passed to selectPlacements (%s). " +
-                                    "Please make sure to sync the email identity to mParticle as soon as it's available. " +
-                                    "Identifying user with the provided email before continuing to selectPlacements.",
-                            existingEmail, email
-                    ));
-                }
-                // If there's an existing other but it doesn't match the passed-in hashed email, log a warning
-                else if (hashedEmailMismatch && existingHashedEmail != null) {
-                    Logger.warning(String.format(
-                            "The existing hashed email on the user (%s) does not match the hashed email passed to selectPlacements (%s). " +
-                                    "Please make sure to sync the hashed email identity to mParticle as soon as it's available. " +
-                                    "Identifying user with the provided hashed email before continuing to selectPlacements.",
-                            existingHashedEmail, hashedEmail
-                    ));
-                }
-
-                IdentityApiRequest.Builder identityBuilder = IdentityApiRequest.withUser(user);
-                if (emailMismatch) {
-                    identityBuilder.email(email);
-                }
-                if (hashedEmailMismatch) {
-                    identityBuilder.userIdentity(selectedIdentityType, hashedEmail);
-                }
-
-                IdentityApiRequest identityRequest = identityBuilder.build();
-                MParticleTask<IdentityApiResult> task = identityApi.identify(identityRequest);
-
-                task.addFailureListener(result -> {
-                    Logger.error("Failed to sync email from selectPlacement to user: " + result.getErrors());
-                    runnable.run();
-                });
-
-                task.addSuccessListener(result -> {
-                    Logger.debug("Updated email identity based on selectPlacement's attributes: " +
-                            result.getUser().getUserIdentities().get(MParticle.IdentityType.Email));
-                    runnable.run();
-                });
-
-            } else {
-                runnable.run();
-            }
-        } else {
-            runnable.run();
         }
     }
 
