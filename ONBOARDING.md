@@ -139,6 +139,40 @@ Now run the following command in the terminal:
 
 You can now work on the specific kits you need, test them and even contribute through pull requests.
 
+### Isolated Kits (different Kotlin version)
+
+Some kits require a higher Kotlin version than the main SDK and cannot be
+included in the multi-kit `settings-kits.gradle` build. These kits are built
+standalone from their own directory, using their own Gradle wrapper and
+Kotlin version.
+
+**Currently isolated:**
+
+- `urbanairship-kit` (Kotlin 2.2.x, `urbanairship-core:20.3.0`)
+
+To build an isolated kit after publishing core to mavenLocal:
+
+```bash
+cd kits/urbanairship-kit
+./gradlew testRelease publishReleaseLocal
+```
+
+The kit resolves `android-kit-base` from mavenLocal, so you must publish
+the core first (`./gradlew -PisRelease=true publishReleaseLocal`).
+
+To verify all kits (main + isolated):
+
+```bash
+./gradlew -PisRelease=true publishReleaseLocal
+./gradlew -PisRelease=true testRelease publishReleaseLocal -c settings-kits.gradle
+cd kits/urbanairship-kit && ./gradlew -PisRelease=true testRelease
+```
+
+**Adding a new isolated kit:** If a kit upgrades to a Kotlin version
+incompatible with the root KGP (2.0.20), remove it from
+`settings-kits.gradle` with a comment, and add standalone build steps
+to the CI workflows following the urbanairship-kit pattern.
+
 ## Read More
 
 - [Official Oracle JDK download Website](https://www.oracle.com/java/technologies/downloads/)

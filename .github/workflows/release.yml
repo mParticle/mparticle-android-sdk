@@ -151,6 +151,14 @@ jobs:
         run: |
           ./gradlew -PisRelease=true publishReleasePublicationToMavenLocal
           ./gradlew -PisRelease=true publishReleasePublicationToMavenRepository -c settings-kits.gradle --stacktrace
+      - name: "Get SDK version for isolated kits"
+        if: ${{ github.event.inputs.dryRun == 'false'}}
+        id: sdk-version
+        run: echo "version=$(grep "version = " build.gradle | head -1 | sed "s/.*'\(.*\)-SNAPSHOT'/\1/")" >> $GITHUB_OUTPUT
+      - name: "Publish Isolated Kits (urbanairship-kit)"
+        if: ${{ github.event.inputs.dryRun == 'false'}}
+        working-directory: kits/urbanairship-kit
+        run: ./gradlew -PisRelease=true -Pversion=${{ steps.sdk-version.outputs.version }} publishReleasePublicationToMavenRepository --stacktrace
 
       # Temporary workaround: https://central.sonatype.org/publish/publish-portal-ossrh-staging-api/#ensuring-deployment-visibility-in-the-central-publisher-portal
       - name: Ensuring Deployment Visibility In The Central Publisher Portal

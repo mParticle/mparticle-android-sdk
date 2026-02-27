@@ -77,6 +77,17 @@ We use JUnit and Mockito for our testing framework. Please write tests for new c
 
 Make sure all tests pass successfully before submitting your PR. If you encounter any test failures, investigate and fix the issues before proceeding.
 
+#### Isolated Kit Tests
+
+Some kits require a different Kotlin version and are built standalone.
+See [ONBOARDING.md](ONBOARDING.md#isolated-kits-different-kotlin-version)
+for details. Before submitting a PR that affects core APIs, verify isolated
+kits also build:
+
+```bash
+cd kits/urbanairship-kit && ./gradlew testRelease
+```
+
 ### Reporting Bugs
 
 This section guides you through submitting a bug report for the mParticle Android SDK. Following these guidelines helps maintainers and the community understand your report, reproduce the behavior, and find related reports.
