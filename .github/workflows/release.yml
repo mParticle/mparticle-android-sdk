@@ -154,7 +154,7 @@ jobs:
       - name: "Get SDK version for isolated kits"
         if: ${{ github.event.inputs.dryRun == 'false'}}
         id: sdk-version
-        run: echo "version=$(grep "version = " build.gradle | head -1 | sed "s/.*'\(.*\)-SNAPSHOT'/\1/")" >> $GITHUB_OUTPUT
+        run: echo "version=$(./gradlew -PisRelease=true -q properties | grep '^version:' | awk '{print $2}')" >> $GITHUB_OUTPUT
       - name: "Publish Isolated Kits (urbanairship-kit)"
         if: ${{ github.event.inputs.dryRun == 'false'}}
         working-directory: kits/urbanairship-kit
