@@ -1,3 +1,12 @@
+## [5.78.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.78.0...v5.78.1) (2026-02-27)
+
+
+### Updates & Maintenance
+
+* Add AGENTS file ([#646](https://github.com/mParticle/mparticle-android-sdk/issues/646)) ([8e227fd](https://github.com/mParticle/mparticle-android-sdk/commit/8e227fd256d36bdcc92cfd58ecf81806e15d3c56))
+* add isolated kit support for urbanairship-kit ([#647](https://github.com/mParticle/mparticle-android-sdk/issues/647)) ([2b24344](https://github.com/mParticle/mparticle-android-sdk/commit/2b24344cb338e9704a4cce2bc204eb32c8213492))
+* Update submodules ([0200c4c](https://github.com/mParticle/mparticle-android-sdk/commit/0200c4c5b74f17ac55663651e80f6dfae84fe12d))
+
 ## [5.78.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.77.0...v5.78.0) (2026-02-12)
 
 
