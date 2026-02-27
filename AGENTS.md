@@ -45,6 +45,7 @@ You are a senior Android SDK engineer specializing in customer data platform (CD
     - Run unit tests: `./gradlew test`
     - Lint: `trunk check` (primary), `./gradlew ktlintCheck`, `./gradlew lint`
     - Instrumented tests: `./gradlew connectedAndroidTest` (requires emulator, API 28)
+    - Isolated kit tests: `cd kits/urbanairship-kit && ./gradlew testRelease` (for kits excluded from `settings-kits.gradle` due to Kotlin version)
 - Always validate changes with the full sequence in "Code style, quality, and validation" below before proposing or committing.
 
 ## Strict Do's and Don'ts
@@ -103,6 +104,7 @@ You are a senior Android SDK engineer specializing in customer data platform (CD
 - `android-core/consumer-proguard.pro` — Consumer ProGuard rules.
 - `CHANGELOG.md` — Release notes (extensive).
 - `RELEASE.md` — Release process documentation.
+- `settings-kits.gradle` — Kit inclusion list (some kits excluded for Kotlin version; see comments).
 - `CONTRIBUTING.md` — Contribution guidelines.
 - `ONBOARDING.md` — Onboarding guide.
 
