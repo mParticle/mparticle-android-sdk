@@ -121,7 +121,8 @@ task coreSdkJavadocs(type: Javadoc) {
         exclude {
             String filePath = it.toString()
             filePath.contains('/com/mparticle/internal/') ||
-                    filePath.contains('/com/mparticle/kits/')
+                    filePath.contains('/com/mparticle/kits/') ||
+                    filePath.contains('/com/mparticle/modernization/')
         }
     }
 }
@@ -144,6 +145,8 @@ dependencies {
     api 'androidx.annotation:annotation:[1.0.0,)'
     compileOnly 'androidx.core:core:[1.3.2, )'
 
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
+
     api 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0'
 
     lintPublish project(path: ':tooling:custom-lint-rules', configuration: 'lintBuild')
@@ -164,7 +167,7 @@ dependencies {
 
     androidTestImplementation project(':testutils')
     if (useOrchestrator()) {
-        androidTestImplementation 'androidx.test:runner:1.4.0'
+        androidTestImplementation 'androidx.test:runner:1.5.2'
         androidTestUtil 'androidx.test:orchestrator:1.4.2'
     }
     androidTestImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
