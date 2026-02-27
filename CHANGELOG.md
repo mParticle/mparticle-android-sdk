@@ -1,3 +1,10 @@
+## [5.78.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.78.1...v5.78.2) (2026-02-27)
+
+
+### Bug Fixes
+
+* ci - use Gradle properties for SDK version extraction in release ([63b39e7](https://github.com/mParticle/mparticle-android-sdk/commit/63b39e71ec952735ac26bf10dbe4f3968120e371))
+
 ## [5.78.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.78.0...v5.78.1) (2026-02-27)
 
 
