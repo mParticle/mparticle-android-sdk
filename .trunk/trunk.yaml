@@ -67,6 +67,7 @@ lint:
       paths:
         - gradlew
         - scripts/install-start-emulator.sh
+        - kits/appsflyer/appsflyer-6/
 actions:
   enabled:
     - trunk-announce
