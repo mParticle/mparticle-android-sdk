@@ -19,7 +19,7 @@ include (
         ':kits:ga:ga-23',
         ':kits:ga4:ga4-23',
         ':kits:iterable-kit',
-        ':kits:kochava-kit',
+        ':kits:kochava:kochava-5',
         ':kits:leanplum-kit',
         ':kits:localytics-kit',
         //Neura hosts kit
@@ -35,7 +35,8 @@ include (
         //Swrve hosts kit
         ':kits:taplytics-kit',
         ':kits:tune-kit',
-        //  ':kits:urbanairship-kit',  // Kotlin 2.2.x -- built standalone (see ONBOARDING.md)
+        //  ':kits:urbanairship-kit',  // Kotlin 2.2.x -- built standalone (see ONBOARDING.md
+)
         ':kits:wootric-kit',
         ':kits:example-kit'
 )
