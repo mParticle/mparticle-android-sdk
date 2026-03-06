@@ -1,7 +1,7 @@
 //keep things alphabetical like readme
 
 include (
-        ':kits:adjust-kit',
+        ':kits:adjust:adjust-5',
         ':kits:adobe-kit',
         ':kits:adobemedia-kit',
         ':kits:appsflyer:appsflyer-6',
