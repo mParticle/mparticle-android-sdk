@@ -8,15 +8,15 @@ include (
         ':kits:apptentive-kit',
         ':kits:apptimize-kit',
         ':kits:apteligent-kit',
+        ':kits:branch-kit',
         //blueshift hosts kit
         ':kits:braze:braze-38',
-        ':kits:branch-kit',
         ':kits:button-kit',
         ':kits:clevertap-kit',
         ':kits:comscore-kit',
         ':kits:flurry-kit',
         ':kits:foresee-kit',
-        ':kits:googleanalyticsfirebase-kit',
+        ':kits:ga:ga-23',
         ':kits:googleanalyticsfirebasega4-kit',
         ':kits:iterable-kit',
         ':kits:kochava-kit',
@@ -35,7 +35,8 @@ include (
         //Swrve hosts kit
         ':kits:taplytics-kit',
         ':kits:tune-kit',
-        //  ':kits:urbanairship-kit',  // Kotlin 2.2.x -- built standalone (see ONBOARDING.md)
+        //  ':kits:urbanairship-kit',  // Kotlin 2.2.x -- built standalone (see ONBOARDING.md
+)
         ':kits:wootric-kit',
         ':kits:example-kit'
 )
