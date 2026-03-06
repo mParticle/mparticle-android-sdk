@@ -11,6 +11,7 @@ include (
         ':kits:branch-kit',
         //blueshift hosts kit
         ':kits:braze:braze-38',
+        ':kits:branch:branch-5',
         ':kits:button-kit',
         ':kits:clevertap:clevertap-7',
         ':kits:comscore:comscore-6',
