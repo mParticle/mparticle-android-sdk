@@ -37,9 +37,6 @@
 [submodule "kits/foresee-kit"]
 	path = kits/foresee-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-foresee.git
-[submodule "kits/googleanalyticsfirebasega4-kit"]
-	path = kits/googleanalyticsfirebasega4-kit
-	url = git@github.com:mparticle-integrations/mparticle-android-integration-google-analytics-firebase-ga4.git
 [submodule "kits/iterable-kit"]
 	path = kits/iterable-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-iterable.git
