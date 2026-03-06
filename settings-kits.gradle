@@ -17,7 +17,7 @@ include (
         ':kits:flurry-kit',
         ':kits:foresee-kit',
         ':kits:ga:ga-23',
-        ':kits:googleanalyticsfirebasega4-kit',
+        ':kits:ga4:ga4-23',
         ':kits:iterable-kit',
         ':kits:kochava-kit',
         ':kits:leanplum-kit',
@@ -35,7 +35,8 @@ include (
         //Swrve hosts kit
         ':kits:taplytics-kit',
         ':kits:tune-kit',
-        //  ':kits:urbanairship-kit',  // Kotlin 2.2.x -- built standalone (see ONBOARDING.md)
+        //  ':kits:urbanairship-kit',  // Kotlin 2.2.x -- built standalone (see ONBOARDING.md
+)
         ':kits:wootric-kit',
         ':kits:example-kit'
 )
