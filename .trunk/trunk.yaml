@@ -68,6 +68,7 @@ lint:
         - "**/gradlew"
         - scripts/install-start-emulator.sh
         - kits/adjust/adjust-5/**
+        - kits/apptentive/apptentive-6/**
         - kits/appsflyer/appsflyer-6/**
         - kits/braze/braze-38/**
         - kits/ga/ga-23/**
