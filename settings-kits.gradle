@@ -36,7 +36,6 @@ include (
         ':kits:taplytics-kit',
         ':kits:tune-kit',
         //  ':kits:urbanairship-kit',  // Kotlin 2.2.x -- built standalone (see ONBOARDING.md
-)
         ':kits:wootric-kit',
         ':kits:example-kit'
 )
