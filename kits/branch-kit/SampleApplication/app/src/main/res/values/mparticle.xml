@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mp_key">{MP_KEY}</string>
+    <string name="mp_secret">{MP_SECRET}</string>
+</resources>

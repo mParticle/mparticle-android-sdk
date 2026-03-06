@@ -1,0 +1,43 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdk = 34
+    buildToolsVersion "27.0.3"
+    defaultConfig {
+        applicationId "com.mparticle.branchsample"
+        minSdk = 25
+        targetSdk = 33
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    packagingOptions {
+        exclude 'META-INF/proguard/androidx-annotations.pro'
+        exclude 'META-INF/versions/9/module-info.class'
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'com.android.installreferrer:installreferrer:2.2'
+
+    // Local project dependency
+    api project(':local-mParticle-Branch-kit')
+
+    // Uncomment below to use published version instead
+    // implementation 'com.mparticle:android-branch-kit:5+'
+
+    testImplementation 'junit:junit:4.13.2'
+
+    androidTestImplementation('androidx.test.espresso:espresso-core:3.5.1', {
+        exclude group: 'androidx.test', module: 'runner'
+    })
+}

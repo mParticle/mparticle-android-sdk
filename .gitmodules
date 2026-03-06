@@ -1,9 +1,6 @@
 [submodule "kits/apteligent-kit"]
     path = kits/apteligent-kit
     url = git@github.com:mParticle-integrations/mparticle-android-integration-apteligent.git
-[submodule "kits/branch-kit"]
-    path = kits/branch-kit
-    url = git@github.com:mParticle-integrations/mparticle-android-integration-branch.git
 [submodule "kits/button-kit"]
 	path = kits/button-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-button.git
