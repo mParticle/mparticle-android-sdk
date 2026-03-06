@@ -1,6 +1,3 @@
-[submodule "kits/adjust-kit"]
-    path = kits/adjust-kit
-    url = git@github.com:mParticle-integrations/mparticle-android-integration-adjust.git
 [submodule "kits/adobe-kit"]
 	path = kits/adobe-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-adobe.git
