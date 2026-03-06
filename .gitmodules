@@ -7,9 +7,6 @@
 [submodule "kits/adobemedia-kit"]
 	path = kits/adobemedia-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-adobe-media.git
-[submodule "kits/appboy-kit"]
-    path = kits/appboy-kit
-    url = git@github.com:mParticle-integrations/mparticle-android-integration-appboy.git
 [submodule "kits/apptentive-kit"]
 	path = kits/apptentive-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-apptentive.git
