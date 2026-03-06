@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "729939687029",
+    "firebase_url": "https://leanplum-example.firebaseio.com",
+    "project_id": "leanplum-example",
+    "storage_bucket": "leanplum-example.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:729939687029:android:ea702dd6ade00c98",
+        "android_client_info": {
+          "package_name": "com.mparticle.example.leanplum"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "729939687029-cjhjntccvnsq6c46ecb4o2a5pmdg4spd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "YOUR_GOOGLE_API_KEY_HERE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

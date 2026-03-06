@@ -20,8 +20,8 @@ include (
         ':kits:ga4:ga4-23',
         ':kits:iterable-kit',
         ':kits:kochava:kochava-5',
-        ':kits:leanplum-kit',
         ':kits:localytics:localytics-6',
+        ':kits:leanplum:leanplum-7',
         //Neura hosts kit
         ':kits:onetrust-kit',
         ':kits:optimizely-kit',
