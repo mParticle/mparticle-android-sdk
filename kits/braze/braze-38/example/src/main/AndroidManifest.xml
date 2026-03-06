@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.mparticle.kits.braze.example">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:name=".ExampleApplication"
+        android:theme="@style/AppTheme">
+
+        <!-- This Braze receiver is necessary to react to pending Intents within push notifications -->
+        <receiver android:name="com.braze.push.BrazePushReceiver" />
+
+        <!-- This mParticle receiver is necessary to register for push notification tokens -->
+        <receiver
+            android:name="com.mparticle.MPReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+
+                <!-- Use your package name as the category -->
+                <category android:name="com.mparticle.kits.braze.example" />
+            </intent-filter>
+        </receiver>
+
+        <!-- This mParticle service is necessary to listen for token-updates -->
+        <service android:name="com.mparticle.messaging.InstanceIdService" />
+
+        <!-- This is the service that takes care of forwarding push registrations, receipts, and opens to Braze -->
+        <service android:name="com.mparticle.MPService" />
+
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
