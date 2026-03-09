@@ -70,12 +70,14 @@ lint:
         - kits/adjust/adjust-5/**
         - kits/appsflyer/appsflyer-6/**
         - kits/braze/braze-38/**
+        - kits/clevertap/clevertap-7/**
         - kits/ga/ga-23/**
         - kits/ga4/ga4-23/**
         - kits/kochava/kochava-5/**
         - kits/leanplum/leanplum-7/**
         - kits/rokt/rokt/**
         - kits/localytics/localytics-6/**
+        - kits/rokt/rokt/**
 actions:
   enabled:
     - trunk-announce
