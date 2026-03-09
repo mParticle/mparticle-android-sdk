@@ -71,6 +71,7 @@ lint:
         - kits/braze/braze-38/**
         - kits/ga/ga-23/**
         - kits/ga4/ga4-23/**
+        - kits/kochava/kochava-5/**
         - kits/rokt/rokt/**
 actions:
   enabled:

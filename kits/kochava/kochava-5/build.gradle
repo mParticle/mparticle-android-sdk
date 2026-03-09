@@ -1,0 +1,66 @@
+buildscript {
+    ext.kotlin_version = '2.0.20'
+    if (!project.hasProperty('version') || project.version.equals('unspecified')) {
+        project.version = '+'
+    }
+
+    repositories {
+        google()
+        mavenLocal()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.1.4'
+        classpath 'com.mparticle:android-kit-plugin:' + project.version
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+plugins {
+    id "org.sonarqube" version "3.5.0.2730"
+    id "org.jlleitschuh.gradle.ktlint" version "13.0.0"
+}
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", "mparticle-android-integration-kochava"
+        property "sonar.organization", "mparticle"
+        property "sonar.host.url", "https://sonarcloud.io"
+    }
+}
+
+apply plugin: 'org.jlleitschuh.gradle.ktlint'
+apply plugin: 'kotlin-android'
+apply plugin: 'com.mparticle.kit'
+
+android {
+    namespace 'com.mparticle.kits.kochava'
+    buildFeatures {
+        buildConfig = true
+    }
+    defaultConfig {
+        minSdkVersion 16
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+    testOptions {
+        unitTests.all {
+            jvmArgs += ['--add-opens', 'java.base/java.lang=ALL-UNNAMED']
+        }
+    }
+}
+
+dependencies {
+    def kochava_tracker_version = "5.4.0"
+    implementation("com.kochava.tracker:tracker:$kochava_tracker_version") // Required
+    implementation("com.kochava.tracker:events:$kochava_tracker_version") // Optional
+    implementation("com.kochava.tracker:engagement:$kochava_tracker_version") // Optional
+    implementation("com.kochava.tracker:datapointnetwork:$kochava_tracker_version") // Optional
+    implementation("com.kochava.tracker:legacyreferrer:$kochava_tracker_version") // Optional
+}

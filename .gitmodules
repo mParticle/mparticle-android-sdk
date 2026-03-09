@@ -40,9 +40,6 @@
 [submodule "kits/iterable-kit"]
 	path = kits/iterable-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-iterable.git
-[submodule "kits/kochava-kit"]
-    path = kits/kochava-kit
-    url = git@github.com:mParticle-integrations/mparticle-android-integration-kochava.git
 [submodule "kits/leanplum-kit"]
 	path = kits/leanplum-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-leanplum.git

@@ -19,7 +19,7 @@ include (
         ':kits:ga:ga-23',
         ':kits:ga4:ga4-23',
         ':kits:iterable-kit',
-        ':kits:kochava-kit',
+        ':kits:kochava:kochava-5',
         ':kits:leanplum-kit',
         ':kits:localytics-kit',
         //Neura hosts kit
