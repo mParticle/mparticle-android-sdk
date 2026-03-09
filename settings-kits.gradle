@@ -17,7 +17,7 @@ include (
         ':kits:flurry-kit',
         ':kits:foresee-kit',
         ':kits:ga:ga-23',
-        ':kits:googleanalyticsfirebasega4-kit',
+        ':kits:ga4:ga4-23',
         ':kits:iterable-kit',
         ':kits:kochava-kit',
         ':kits:leanplum-kit',
