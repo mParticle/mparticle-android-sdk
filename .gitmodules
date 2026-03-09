@@ -19,9 +19,6 @@
 [submodule "kits/button-kit"]
 	path = kits/button-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-button.git
-[submodule "kits/clevertap-kit"]
-	path = kits/clevertap-kit
-	url = git@github.com:mparticle-integrations/mparticle-android-integration-clevertap.git
 [submodule "kits/comscore-kit"]
     path = kits/comscore-kit
     url = git@github.com:mParticle-integrations/mparticle-android-integration-comscore.git
