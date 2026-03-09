@@ -43,9 +43,6 @@
 [submodule "kits/leanplum-kit"]
 	path = kits/leanplum-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-leanplum.git
-[submodule "kits/localytics-kit"]
-    path = kits/localytics-kit
-    url = git@github.com:mParticle-integrations/mparticle-android-integration-localytics.git
 [submodule "kits/onetrust-kit"]
 	path = kits/onetrust-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-onetrust.git
