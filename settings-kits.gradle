@@ -12,7 +12,7 @@ include (
         //blueshift hosts kit
         ':kits:braze:braze-38',
         ':kits:button-kit',
-        ':kits:clevertap-kit',
+        ':kits:clevertap:clevertap-7',
         ':kits:comscore-kit',
         ':kits:flurry-kit',
         ':kits:foresee-kit',
