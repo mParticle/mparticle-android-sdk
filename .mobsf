@@ -5,8 +5,12 @@
   - android-kit-base/src/test/
   - android-kit-base/src/androidTest/
   - testutils/
+  - "**/src/test/**"
+  - "**/example/**"
+  - "**/*-example/**"
 
   ignore-rules:
+  - webview_javascript_interface  # Intentional: JS bridge for mParticle WebView SDK; workspace token controls access
   - hardcoded_api_key
   - hardcoded_username
   - android_kotlin_hardcoded
