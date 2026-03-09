@@ -74,6 +74,7 @@ lint:
         - kits/ga4/ga4-23/**
         - kits/kochava/kochava-5/**
         - kits/rokt/rokt/**
+        - kits/localytics/localytics-6/**
 actions:
   enabled:
     - trunk-announce

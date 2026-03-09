@@ -21,7 +21,7 @@ include (
         ':kits:iterable-kit',
         ':kits:kochava:kochava-5',
         ':kits:leanplum-kit',
-        ':kits:localytics-kit',
+        ':kits:localytics:localytics-6',
         //Neura hosts kit
         ':kits:onetrust-kit',
         ':kits:optimizely-kit',
