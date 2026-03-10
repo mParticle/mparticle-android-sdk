@@ -20,6 +20,12 @@ on:
         type: number
         default: 20
 
+permissions:
+  contents: read
+  pull-requests: read
+  checks: write
+  actions: write
+
 jobs:
   instrumented:
     name: "Instrumented Tests (${{ inputs.display_name }})"
