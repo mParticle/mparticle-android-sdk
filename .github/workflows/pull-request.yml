@@ -95,7 +95,7 @@ jobs:
 
   lint-checks:
     name: "Lint Checks"
-    timeout-minutes: 15
+    timeout-minutes: 20
     runs-on: macos-latest
     steps:
       - name: "Checkout Branch"
