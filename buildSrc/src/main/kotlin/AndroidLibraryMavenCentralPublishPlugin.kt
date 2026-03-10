@@ -1,5 +1,5 @@
-import com.mparticle.publish.MParticleMavenPublishExtension
 import com.mparticle.configureMavenPublishing
+import com.mparticle.publish.MParticleMavenPublishExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
