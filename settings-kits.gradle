@@ -30,7 +30,7 @@ include (
         ':kits:responsys-kit',
         ':kits:revealmobile-kit',
         ':kits:rokt:rokt',
-        ':kits:singular-kit',
+        ':kits:singular:singular-12',
         ':kits:skyhook-kit',
         //Swrve hosts kit
         ':kits:taplytics-kit',
