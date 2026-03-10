@@ -18,7 +18,7 @@ include (
         ':kits:foresee-kit',
         ':kits:ga:ga-23',
         ':kits:ga4:ga4-23',
-        ':kits:iterable-kit',
+        ':kits:iterable:iterable-3',
         ':kits:kochava:kochava-5',
         ':kits:localytics:localytics-6',
         ':kits:leanplum:leanplum-7',
