@@ -13,7 +13,7 @@ include (
         ':kits:braze:braze-38',
         ':kits:button-kit',
         ':kits:clevertap:clevertap-7',
-        ':kits:comscore-kit',
+        ':kits:comscore:comscore-6',
         ':kits:flurry-kit',
         ':kits:foresee-kit',
         ':kits:ga:ga-23',
