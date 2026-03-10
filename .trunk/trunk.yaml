@@ -82,6 +82,7 @@ lint:
         - kits/kochava/kochava-5/**
         - kits/leanplum/leanplum-7/**
         - kits/localytics/localytics-6/**
+        - kits/optimizely/optimizely-3/**
         - kits/radar/radar-3/**
         - kits/rokt/rokt/**
         - kits/singular/singular-12/**
