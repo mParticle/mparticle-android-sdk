@@ -5,7 +5,7 @@ include (
         ':kits:adobe-kit',
         ':kits:adobemedia-kit',
         ':kits:appsflyer:appsflyer-6',
-        ':kits:apptentive-kit',
+        ':kits:apptentive:apptentive-6',
         ':kits:apptimize-kit',
         ':kits:apteligent-kit',
         ':kits:branch-kit',
