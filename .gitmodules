@@ -76,3 +76,6 @@
 [submodule "kits/wootric-kit"]
     path = kits/wootric-kit
     url = git@github.com:mParticle-integrations/mparticle-android-integration-wootric.git
+[submodule "kits/rokt-kit"]
+	path = kits/rokt-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-rokt.git
