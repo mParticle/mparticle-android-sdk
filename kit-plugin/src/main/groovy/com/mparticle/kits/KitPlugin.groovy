@@ -17,7 +17,7 @@ class KitPlugin implements Plugin<Project> {
         target.repositories.add(target.repositories.google())
         target.repositories.add(target.repositories.mavenCentral())
         target.configurations.create('deployerJars')
-        def kitBaseVersion = target.findProperty('VERSION') ?: '0.0.0'
+        def kitBaseVersion = target.findProperty('VERSION') ?: '+'
         target.dependencies.add('api', 'com.mparticle:android-kit-base:' + kitBaseVersion)
         target.dependencies.add('testImplementation', 'junit:junit:4.13.2')
         target.dependencies.add('testImplementation', 'org.mockito:mockito-core:1.10.19')
