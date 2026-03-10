@@ -37,9 +37,6 @@
 [submodule "kits/iterable-kit"]
 	path = kits/iterable-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-iterable.git
-[submodule "kits/leanplum-kit"]
-	path = kits/leanplum-kit
-	url = git@github.com:mparticle-integrations/mparticle-android-integration-leanplum.git
 [submodule "kits/onetrust-kit"]
 	path = kits/onetrust-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-onetrust.git

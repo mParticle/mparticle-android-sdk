@@ -35,8 +35,8 @@ import org.mockito.MockitoAnnotations
 import java.lang.ref.WeakReference
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
+import java.security.SecureRandom
 import java.util.HashMap
-import java.util.Random
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -46,14 +46,13 @@ import java.util.Random
 class GoogleAnalyticsFirebaseGA4KitTest {
     private lateinit var kitInstance: GoogleAnalyticsFirebaseGA4Kit
     private lateinit var firebaseSdk: FirebaseAnalytics
+    private var random = SecureRandom()
 
     @Mock
     lateinit var user: MParticleUser
 
     @Mock
     lateinit var filteredMParticleUser: FilteredMParticleUser
-
-    private var random = Random()
 
     @Before
     @Throws(JSONException::class)

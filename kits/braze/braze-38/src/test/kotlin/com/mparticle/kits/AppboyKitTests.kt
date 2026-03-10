@@ -31,12 +31,12 @@ import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 import java.lang.reflect.Method
 import java.math.BigDecimal
+import java.security.SecureRandom
 import java.util.Calendar
 import java.util.Locale
-import java.util.Random
 
 class AppboyKitTests {
-    private var random = Random()
+    private var random = SecureRandom()
 
     private lateinit var braze: Braze.Companion
 
