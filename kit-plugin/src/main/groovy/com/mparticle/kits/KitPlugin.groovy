@@ -42,16 +42,20 @@ class KitPlugin implements Plugin<Project> {
             jvmArgs += ['--add-opens', 'java.base/java.util.concurrent=ALL-UNNAMED'] }
 
 
-        target.apply(plugin: 'mparticle.android.library.publish')
-        // Use convention() with a lazy Provider so the values are resolved when the
-        // convention plugin's afterEvaluate reads them — by which point the kit's
-        // mparticle { kitDescription } block has already been evaluated.
-        def publishExt = target.extensions.getByName('mparticleMavenPublish')
-        publishExt.artifactId.convention(target.providers.provider { target.name })
-        publishExt.description.convention(target.providers.provider {
-            String desc = target.extensions.findByName('mparticle')?.kitDescription
-            desc ?: (target.name + ' for the mParticle SDK')
-        })
+        // mparticle.android.library.publish is only available when building inside the
+        // monorepo (buildSrc on classpath). Standalone kit builds and test fixtures skip
+        // Maven publishing configuration — kits will be migrated to the monorepo.
+        try {
+            target.apply(plugin: 'mparticle.android.library.publish')
+            def publishExt = target.extensions.getByName('mparticleMavenPublish')
+            publishExt.artifactId.convention(target.providers.provider { target.name })
+            publishExt.description.convention(target.providers.provider {
+                String desc = target.extensions.findByName('mparticle')?.kitDescription
+                desc ?: (target.name + ' for the mParticle SDK')
+            })
+        } catch (org.gradle.api.plugins.UnknownPluginException ignored) {
+            // no-op: publish plugin unavailable outside monorepo
+        }
     }
 }
 
