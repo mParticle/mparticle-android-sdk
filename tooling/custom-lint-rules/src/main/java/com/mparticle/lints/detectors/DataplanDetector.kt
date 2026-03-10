@@ -274,7 +274,7 @@ class DataplanDetector : CallScanner() {
         ;
 
         companion object {
-            fun get(value: String?): ViolationSchemaKeywordType = values().firstOrNull { it.toString().toLowerCase() == value?.toLowerCase() }
+            fun get(value: String?): ViolationSchemaKeywordType = values().firstOrNull { it.toString().lowercase() == value?.lowercase() }
                 ?: Unknown
         }
     }
