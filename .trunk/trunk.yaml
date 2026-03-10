@@ -79,6 +79,7 @@ lint:
         - kits/leanplum/leanplum-7/**
         - kits/rokt/rokt/**
         - kits/localytics/localytics-6/**
+        - kits/radar/radar-3/**
         - kits/rokt/rokt/**
 actions:
   enabled:
