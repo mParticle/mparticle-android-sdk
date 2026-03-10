@@ -19,9 +19,6 @@
 [submodule "kits/onetrust-kit"]
 	path = kits/onetrust-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-onetrust.git
-[submodule "kits/optimizely-kit"]
-    path = kits/optimizely-kit
-    url = git@github.com:mparticle-integrations/mparticle-android-integration-optimizely.git
 [submodule "kits/pilgrim-kit"]
 	path = kits/pilgrim-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-pilgrim.git
