@@ -26,7 +26,7 @@ include (
         ':kits:onetrust-kit',
         ':kits:optimizely-kit',
       //  ':kits:pilgrim-kit',
-        ':kits:radar-kit',
+        ':kits:radar:radar-3',
         ':kits:responsys-kit',
         ':kits:revealmobile-kit',
         ':kits:rokt:rokt',
