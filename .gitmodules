@@ -4,9 +4,6 @@
 [submodule "kits/adobemedia-kit"]
 	path = kits/adobemedia-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-adobe-media.git
-[submodule "kits/apptentive-kit"]
-	path = kits/apptentive-kit
-	url = git@github.com:mparticle-integrations/mparticle-android-integration-apptentive.git
 [submodule "kits/apptimize-kit"]
 	path = kits/apptimize-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-apptimize.git
@@ -19,9 +16,6 @@
 [submodule "kits/button-kit"]
 	path = kits/button-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-button.git
-[submodule "kits/clevertap-kit"]
-	path = kits/clevertap-kit
-	url = git@github.com:mparticle-integrations/mparticle-android-integration-clevertap.git
 [submodule "kits/comscore-kit"]
     path = kits/comscore-kit
     url = git@github.com:mParticle-integrations/mparticle-android-integration-comscore.git
@@ -37,12 +31,6 @@
 [submodule "kits/iterable-kit"]
 	path = kits/iterable-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-iterable.git
-[submodule "kits/leanplum-kit"]
-	path = kits/leanplum-kit
-	url = git@github.com:mparticle-integrations/mparticle-android-integration-leanplum.git
-[submodule "kits/localytics-kit"]
-    path = kits/localytics-kit
-    url = git@github.com:mParticle-integrations/mparticle-android-integration-localytics.git
 [submodule "kits/onetrust-kit"]
 	path = kits/onetrust-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-onetrust.git

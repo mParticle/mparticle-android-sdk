@@ -5,8 +5,14 @@
   - android-kit-base/src/test/
   - android-kit-base/src/androidTest/
   - testutils/
+  - "**/src/test/**"
+  - "**/example/**"
+  - "**/*-example/**"
 
   ignore-rules:
+  - webview_javascript_interface  # Intentional: JS bridge for mParticle WebView SDK; workspace token controls access
+  - android_manifest_insecure_minsdk_error  # Example apps; SDK minSdk 14+ per AGENTS.md
+  - android_manifest_allow_backup  # Example apps only; acceptable for demo/debug
   - hardcoded_api_key
   - hardcoded_username
   - android_kotlin_hardcoded
