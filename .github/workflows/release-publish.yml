@@ -1,0 +1,64 @@
+name: Release – Publish
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - VERSION
+
+permissions:
+  contents: write
+
+jobs:
+  setup-and-version:
+    runs-on: ubuntu-latest
+    outputs:
+      final_version: ${{ steps.version-file.outputs.release-version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Get current version
+        id: version-file
+        run: |
+          version_from_file=$(head -n 1 VERSION)
+          echo "release-version=$version_from_file" >> $GITHUB_OUTPUT
+
+  build-and-release:
+    needs: setup-and-version
+    runs-on: ubuntu-latest
+    env:
+      ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY }}
+      ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_PASSWORD }}
+      ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+      ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: "zulu"
+          java-version: "17"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Publish core to Maven local (required before kits can compile)
+        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=${{ needs.setup-and-version.outputs.final_version }}
+
+      - name: Publish core to Maven Central
+        run: ./gradlew publishMavenPublicationToMavenCentralRepository -PVERSION=${{ needs.setup-and-version.outputs.final_version }}
+
+      - name: Publish kits to Maven Central
+        run: ./gradlew publishMavenPublicationToMavenCentralRepository -PVERSION=${{ needs.setup-and-version.outputs.final_version }} -c settings-kits.gradle
+
+      - name: Create GitHub release
+        uses: ncipollo/release-action@v1
+        with:
+          makeLatest: true
+          tag: ${{ needs.setup-and-version.outputs.final_version }}
+          body: |
+            Release ${{ needs.setup-and-version.outputs.final_version }}

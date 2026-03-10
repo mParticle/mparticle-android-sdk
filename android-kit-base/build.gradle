@@ -1,10 +1,11 @@
-ext {
-    kitDescription = 'mParticle Kit library for extending the Core mParticle SDK.'
-}
-
 apply plugin: 'com.android.library'
-apply from: '../scripts/maven.gradle'
+apply plugin: 'mparticle.android.library.publish'
 apply plugin: 'kotlin-android'
+
+mparticleMavenPublish {
+    artifactId.set('android-kit-base')
+    description.set('mParticle Kit library for extending the Core mParticle SDK.')
+}
 
 
 android {
@@ -47,30 +48,6 @@ tasks.withType(Test).configureEach {
     jvmArgs("--add-opens=java.base/java.util=ALL-UNNAMED")
     jvmArgs("--add-opens=java.base/java.lang.reflect=ALL-UNNAMED")
     jvmArgs('--add-opens=java.base/java.util.concurrent=ALL-UNNAMED')
-}
-
-task kitSdkJavadocs(type: Javadoc) {
-    include {
-        String filePath = it.toString()
-        filePath.contains('KitIntegration.java') ||
-                filePath.contains('KitUtils')
-    }
-    source = android.sourceSets.main.java.srcDirs
-    source += 'build/generated/source/buildConfig/release/'
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    title = 'mParticle Android Kit API Reference'
-    failOnError true
-    getOptions().setNoTimestamp(true)
-}
-
-task generateJavadocsJar(type: Jar, dependsOn: kitSdkJavadocs) {
-    archiveClassifier.set('javadoc')
-    from kitSdkJavadocs.destinationDir
-}
-
-task generateSourcesJar(type: Jar) {
-    archiveClassifier.set('sources')
-    from android.sourceSets.main.java.srcDirs
 }
 
 dependencies {

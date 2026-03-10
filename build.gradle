@@ -1,6 +1,6 @@
 buildscript {
     ext.kotlin_version = '1.9.0'
-    ext.gradle_version = '8.1.4'
+    ext.gradle_version = '8.3.2'
 
     repositories {
         mavenCentral()
@@ -63,10 +63,6 @@ subprojects {
 
 allprojects {
     group = 'com.mparticle'
-    version = '5.78.2-SNAPSHOT'
-    if (project.hasProperty('isRelease') && project.isRelease) {
-        version = version.toString().replace("-SNAPSHOT", "")
-    }
 
     repositories {
         mavenLocal()

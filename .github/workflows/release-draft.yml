@@ -1,0 +1,76 @@
+name: Release – Draft
+
+on:
+  workflow_dispatch: # checkov:skip=CKV_GHA_7
+    inputs:
+      bump-type:
+        description: "Specify if the version should be bumped as patch, minor, or major"
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  publish-draft-release:
+    runs-on: ubuntu-latest
+    env:
+      ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY }}
+      ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_PASSWORD }}
+      ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+      ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Install JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: "zulu"
+          java-version: "17"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Get current version
+        id: version-file
+        run: |
+          version_from_file=$(head -n 1 VERSION)
+          echo "release-version=$version_from_file" >> $GITHUB_OUTPUT
+
+      - name: Bump version
+        id: bump-version
+        uses: actions-ecosystem/action-bump-semver@v1
+        with:
+          current_version: ${{ steps.version-file.outputs.release-version }}
+          level: ${{ github.event.inputs.bump-type || 'patch' }}
+
+      - name: Save bumped version to file
+        run: |
+          echo "${{ steps.bump-version.outputs.new_version }}" > VERSION
+
+      - name: Publish to Maven local (smoke test)
+        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=${{ steps.bump-version.outputs.new_version }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
+          commit-message: "chore: prepare release ${{ steps.bump-version.outputs.new_version }}"
+          branch: release/${{ steps.bump-version.outputs.new_version }}
+          title: "Prepare release ${{ steps.bump-version.outputs.new_version }}"
+          base: main
+          body: |
+            Preparing for release ${{ steps.bump-version.outputs.new_version }}
+            - Bumped version to ${{ steps.bump-version.outputs.new_version }}
