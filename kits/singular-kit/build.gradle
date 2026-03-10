@@ -1,0 +1,77 @@
+buildscript {
+    ext.kotlin_version = '2.0.20'
+    if (!project.hasProperty('version') || project.version.equals('unspecified')) {
+        project.version = '+'
+    }
+
+    repositories {
+        google()
+        mavenLocal()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.1.4'
+        classpath 'com.mparticle:android-kit-plugin:' + project.version
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+plugins {
+    id "org.sonarqube" version "3.5.0.2730"
+    id "org.jlleitschuh.gradle.ktlint" version "13.0.0"
+}
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", "mparticle-android-integration-singular"
+        property "sonar.organization", "mparticle"
+        property "sonar.host.url", "https://sonarcloud.io"
+    }
+}
+
+apply plugin: 'org.jlleitschuh.gradle.ktlint'
+apply plugin: 'kotlin-android'
+apply plugin: 'com.mparticle.kit'
+
+repositories {
+    maven {
+        url 'https://maven.singular.net'
+    }
+    mavenCentral()
+}
+
+android {
+    namespace 'com.mparticle.kits.singular'
+    buildFeatures {
+        buildConfig = true
+    }
+    defaultConfig {
+        minSdkVersion 16
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+    testOptions {
+        unitTests.all {
+            jvmArgs += ['--add-opens', 'java.base/java.lang=ALL-UNNAMED']
+        }
+    }
+}
+
+dependencies {
+    api 'com.singular.sdk:singular_sdk:12.5.4'
+
+    androidTestImplementation 'androidx.test:runner:1.5.2'
+    testImplementation 'org.powermock:powermock-core:2.0.9'
+    testImplementation 'org.powermock:powermock-api-mockito2:2.0.2'
+    testImplementation 'org.powermock:powermock-module-junit4-rule:2.0.9'
+    testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
+    testImplementation 'org.powermock:powermock-classloading-xstream:2.0.2'
+    testImplementation "org.robolectric:robolectric:4.3.1"
+    testImplementation 'org.json:json:20220320'
+}
