@@ -83,6 +83,7 @@ lint:
         - kits/rokt/rokt/**
         - kits/localytics/localytics-6/**
         - kits/rokt/rokt/**
+        - kits/comscore/comscore-6/**
 actions:
   enabled:
     - trunk-announce

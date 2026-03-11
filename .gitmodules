@@ -7,9 +7,6 @@
 [submodule "kits/button-kit"]
 	path = kits/button-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-button.git
-[submodule "kits/comscore-kit"]
-    path = kits/comscore-kit
-    url = git@github.com:mParticle-integrations/mparticle-android-integration-comscore.git
 [submodule "kits/example-kit"]
 	path = kits/example-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-example.git
