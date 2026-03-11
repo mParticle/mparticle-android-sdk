@@ -1,3 +1,11 @@
+## [5.78.3](https://github.com/mParticle/mparticle-android-sdk/compare/v5.78.2...v5.78.3) (2026-03-11)
+
+
+### Updates & Maintenance
+
+* bump actions/upload-artifact from 6 to 7 ([#649](https://github.com/mParticle/mparticle-android-sdk/issues/649)) ([0a188b1](https://github.com/mParticle/mparticle-android-sdk/commit/0a188b1f88efde471f8d6bff2aa8611b1b4bf956))
+* Update submodules ([cbb17d7](https://github.com/mParticle/mparticle-android-sdk/commit/cbb17d7e359d41d8d7577a9516cf7788c7288442))
+
 ## [5.78.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.78.1...v5.78.2) (2026-02-27)
 
 
