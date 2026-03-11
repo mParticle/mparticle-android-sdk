@@ -2,7 +2,7 @@
 
 include (
         ':kits:adjust:adjust-5',
-        ':kits:adobe-kit',
+        ':kits:adobe:adobe-5',
         ':kits:adobemedia:adobemedia-5',
         ':kits:appsflyer:appsflyer-6',
         ':kits:apptentive:apptentive-6',
