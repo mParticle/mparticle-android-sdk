@@ -1,0 +1,96 @@
+buildscript {
+    ext.kotlin_version = '2.0.20'
+    if (!project.hasProperty('version') || project.version.equals('unspecified')) {
+        project.version = '+'
+    }
+
+    repositories {
+        google()
+        mavenLocal()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.1.4'
+        classpath 'com.mparticle:android-kit-plugin:' + project.version
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+plugins {
+    id "org.sonarqube" version "3.5.0.2730"
+    id "org.jlleitschuh.gradle.ktlint" version "13.0.0"
+}
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", "mparticle-android-integration-adobe-media"
+        property "sonar.organization", "mparticle"
+        property "sonar.host.url", "https://sonarcloud.io"
+    }
+}
+
+apply plugin: 'org.jlleitschuh.gradle.ktlint'
+apply plugin: 'kotlin-android'
+apply plugin: 'com.mparticle.kit'
+
+android {
+    namespace 'com.mparticle.kits.adobemedia'
+    buildFeatures {
+        buildConfig = true
+    }
+    defaultConfig {
+        minSdkVersion 21
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+    testOptions {
+        unitTests.all {
+            jvmArgs += ['--add-opens', 'java.base/java.lang=ALL-UNNAMED']
+        }
+    }
+    lint {
+        // Workaround for lint internal crash
+        abortOnError false
+        // Ignore obsolete custom lint checks from older fragment library
+        disable 'ObsoleteLintCustomCheck'
+    }
+}
+
+repositories {
+    google()
+    mavenCentral()
+}
+
+configurations.all {
+    resolutionStrategy {
+        force "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+        force "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+        force "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+        force "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlin_version"
+        // Force Kotlin compiler version to match stdlib
+        eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == 'org.jetbrains.kotlin' && details.requested.name.startsWith('kotlin-')) {
+                details.useVersion kotlin_version
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    api 'com.mparticle:android-media:1.5.0'
+    api 'com.adobe.marketing.mobile:mobileservices:1.1.5'
+    api 'com.adobe.marketing.mobile:analytics:3.0.1'
+    api 'com.adobe.marketing.mobile:media:3.1.0'
+    api 'com.adobe.marketing.mobile:userprofile:3.0.0'
+    api 'com.adobe.marketing.mobile:lifecycle:3.0.0'
+    api 'com.adobe.marketing.mobile:identity:3.0.0'
+    api 'com.adobe.marketing.mobile:signal:3.0.0'
+    api 'com.adobe.marketing.mobile:sdk-core:1.11.7'
+}
