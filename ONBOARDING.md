@@ -148,12 +148,12 @@ Kotlin version.
 
 **Currently isolated:**
 
-- `urbanairship-kit` (Kotlin 2.2.x, `urbanairship-core:20.3.0`)
+- `kits/urbanairship/urbanairship-20` (Kotlin 2.2.x, `urbanairship-core:20.3.0`)
 
 To build an isolated kit after publishing core to mavenLocal:
 
 ```bash
-cd kits/urbanairship-kit
+cd kits/urbanairship/urbanairship-20
 ./gradlew testRelease publishReleaseLocal
 ```
 
@@ -165,13 +165,13 @@ To verify all kits (main + isolated):
 ```bash
 ./gradlew -PisRelease=true publishReleaseLocal
 ./gradlew -PisRelease=true testRelease publishReleaseLocal -c settings-kits.gradle
-cd kits/urbanairship-kit && ./gradlew -PisRelease=true testRelease
+cd kits/urbanairship/urbanairship-20 && ./gradlew -PisRelease=true testRelease
 ```
 
 **Adding a new isolated kit:** If a kit upgrades to a Kotlin version
 incompatible with the root KGP (2.0.20), remove it from
 `settings-kits.gradle` with a comment, and add standalone build steps
-to the CI workflows following the urbanairship-kit pattern.
+to the CI workflows following the urbanairship pattern.
 
 ## Read More
 
