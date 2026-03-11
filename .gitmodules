@@ -31,9 +31,6 @@
 [submodule "kits/revealmobile-kit"]
 	path = kits/revealmobile-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-revealmobile.git
-[submodule "kits/singular-kit"]
-	path = kits/singular-kit
-	url = git@github.com:mparticle-integrations/mparticle-android-integration-singular.git
 [submodule "kits/skyhook-kit"]
 	path = kits/skyhook-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-skyhook.git
