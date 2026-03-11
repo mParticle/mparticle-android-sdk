@@ -68,11 +68,14 @@ lint:
         - "**/gradlew"
         - scripts/install-start-emulator.sh
         - kits/adjust/adjust-5/**
+        - kits/adobe/adobe-5/**
+        - kits/adobemedia/adobemedia-5/**
         - kits/apptentive/apptentive-6/**
         - kits/appsflyer/appsflyer-6/**
         - kits/apptimize/apptimize-3/**
         - kits/braze/braze-38/**
         - kits/clevertap/clevertap-7/**
+        - kits/iterable/iterable-3/**
         - kits/ga/ga-23/**
         - kits/ga4/ga4-23/**
         - kits/kochava/kochava-5/**
@@ -80,8 +83,6 @@ lint:
         - kits/rokt/rokt/**
         - kits/localytics/localytics-6/**
         - kits/rokt/rokt/**
-        - kits/adobe/adobe-5/**
-        - kits/adobemedia/adobemedia-5/**
 actions:
   enabled:
     - trunk-announce
