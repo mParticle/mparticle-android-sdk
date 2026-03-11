@@ -23,7 +23,7 @@ include (
         ':kits:localytics:localytics-6',
         ':kits:leanplum:leanplum-7',
         //Neura hosts kit
-        ':kits:onetrust:onetrust-202411',
+        ':kits:onetrust:onetrust',
         ':kits:optimizely:optimizely-3',
       //  ':kits:pilgrim-kit',
         ':kits:radar:radar-3',
