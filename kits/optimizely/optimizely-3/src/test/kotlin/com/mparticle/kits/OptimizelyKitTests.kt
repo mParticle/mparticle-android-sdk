@@ -28,7 +28,6 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
 import java.util.HashMap
-import java.util.Random
 import java.util.UUID
 
 class OptimizelyKitTests {
@@ -111,7 +110,7 @@ class OptimizelyKitTests {
                 .addProduct(product2)
                 .addProduct(product3)
                 .build()
-        val mpid = Random().nextLong()
+        val mpid = randomUtils.randomLong(1, Long.MAX_VALUE)
         val customerId = randomUtils.getAlphaNumericString(20)
         val email = randomUtils.getAlphaNumericString(10)
         val identities: MutableMap<IdentityType, String> = HashMap()

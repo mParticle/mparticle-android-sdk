@@ -207,7 +207,7 @@ class IterableKit :
             ).onFailure(
                 object : Future.FailureCallback {
                     override fun onFailure(throwable: Throwable?) {
-                        Log.e(ITERABLE_KIT_ERROR_TAG, ITERABLE_KIT_ERROR_MESSAGE, throwable)
+                        Log.e(ITERABLE_KIT_ERROR_TAG, ITERABLE_KIT_ERROR_MESSAGE)
                     }
                 },
             )
