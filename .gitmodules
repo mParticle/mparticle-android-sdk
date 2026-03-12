@@ -34,9 +34,6 @@
 [submodule "kits/tune-kit"]
     path = kits/tune-kit
     url = git@github.com:mParticle-integrations/mparticle-android-integration-tune.git
-[submodule "kits/urbanairship-kit"]
- 	path = kits/urbanairship-kit
- 	url = git@github.com:mparticle-integrations/mparticle-android-integration-urbanairship.git
 [submodule "kits/wootric-kit"]
     path = kits/wootric-kit
     url = git@github.com:mParticle-integrations/mparticle-android-integration-wootric.git

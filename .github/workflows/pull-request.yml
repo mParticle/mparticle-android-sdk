@@ -176,8 +176,8 @@ jobs:
         run: ./gradlew -PisRelease=true :android-kit-base:testRelease
       - name: "Run Kit Release Tests and Build"
         run: ./gradlew -PisRelease=true -p kits testRelease -c ../settings-kits.gradle
-      - name: "Run Isolated Kit Compatibility Tests (urbanairship-kit)"
-        working-directory: kits/urbanairship-kit
+      - name: "Run Isolated Kit Compatibility Tests (urbanairship)"
+        working-directory: kits/urbanairship/urbanairship-20
         run: ./gradlew -PisRelease=true testRelease
 
   automerge-dependabot:

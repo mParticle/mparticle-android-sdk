@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">PushSample</string>
+    <string name="hello">Hello,\nsend me a push notification</string>
+</resources>
