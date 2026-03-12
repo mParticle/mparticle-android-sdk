@@ -37,7 +37,6 @@ jobs:
           token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
           repository: mparticle/mparticle-android-sdk
           ref: main
-          submodules: recursive
       - name: "Import GPG Key"
         uses: crazy-max/ghaction-import-gpg@e89d40939c28e39f97cf32126055eeae86ba74ec #v6.0
         with:
@@ -49,13 +48,6 @@ jobs:
         run: |
           git checkout -b release/${{ github.run_number }}
           git push origin release/${{ github.run_number }}
-      - name: "Commit Kit Updates"
-        run: |
-          git submodule foreach "git fetch; git reset --hard origin/main";
-          git add .
-          git diff-index --quiet HEAD || git commit -m 'chore: Update submodules'
-      - name: "Push kit updates to release branch"
-        run: git push origin release/${{ github.run_number }}
 
   regression-check:
     needs: create-release-branch
@@ -135,7 +127,6 @@ jobs:
         with:
           repository: mparticle/mparticle-android-sdk
           ref: release/${{ github.run_number }}
-          submodules: recursive
       - name: "Install JDK 17"
         uses: actions/setup-java@v5
         with:
@@ -155,9 +146,9 @@ jobs:
         if: ${{ github.event.inputs.dryRun == 'false'}}
         id: sdk-version
         run: echo "version=$(./gradlew -PisRelease=true -q properties | grep '^version:' | awk '{print $2}')" >> $GITHUB_OUTPUT
-      - name: "Publish Isolated Kits (urbanairship-kit)"
+      - name: "Publish Isolated Kits (urbanairship)"
         if: ${{ github.event.inputs.dryRun == 'false'}}
-        working-directory: kits/urbanairship-kit
+        working-directory: kits/urbanairship/urbanairship-20
         run: ./gradlew -PisRelease=true -Pversion=${{ steps.sdk-version.outputs.version }} publishReleasePublicationToMavenRepository --stacktrace
 
       # Temporary workaround: https://central.sonatype.org/publish/publish-portal-ossrh-staging-api/#ensuring-deployment-visibility-in-the-central-publisher-portal
