@@ -4,7 +4,6 @@ import com.mparticle.internal.AccessUtils
 import com.mparticle.testutils.BaseCleanStartedEachTest
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class MPUserTest : BaseCleanStartedEachTest() {
