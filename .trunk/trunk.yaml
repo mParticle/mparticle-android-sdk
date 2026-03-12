@@ -67,7 +67,6 @@ lint:
       paths:
         - "**/gradlew"
         - scripts/install-start-emulator.sh
-        - kits/adobe/adobe-5/**
         - kits/adobemedia/adobemedia-5/**
         - kits/apptentive/apptentive-6/**
         - kits/appsflyer/appsflyer-6/**
