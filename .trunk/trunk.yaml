@@ -67,7 +67,6 @@ lint:
       paths:
         - "**/gradlew"
         - scripts/install-start-emulator.sh
-        - kits/localytics/localytics-6/**
         - kits/onetrust/onetrust/**
         - kits/optimizely/optimizely-3/**
         - kits/radar/radar-3/**
