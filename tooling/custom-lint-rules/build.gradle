@@ -73,8 +73,11 @@ rootProject.project('android-core').android.buildTypes.all {
 }
 
 task zipSources(type: Jar) {
-    def fileName = "$project.rootDir/android-core/build/intermediates/javac/${targetBuildType}/classes"
-    from(fileTree(dir: fileName))
+    from {
+        def compileTask = rootProject.project('android-core')
+            .tasks.named("compile${targetBuildType.capitalize()}JavaWithJavac").get()
+        fileTree(dir: compileTask.destinationDirectory.get().asFile)
+    }
     destinationDirectory.set(new File("$project.projectDir/libs"))
     archiveFileName.set("mparticle.jar")
     outputs.upToDateWhen { false }
