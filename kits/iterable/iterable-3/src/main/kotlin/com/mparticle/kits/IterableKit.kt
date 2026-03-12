@@ -68,8 +68,7 @@ class IterableKit :
             val activity = activityRef.get()
             if (activity != null) {
                 val currentLink = activity.intent.dataString
-                if (!currentLink.isNullOrEmpty() && !previousLinks.contains(currentLink)
-                ) {
+                if (!currentLink.isNullOrEmpty() && !previousLinks.contains(currentLink)) {
                     previousLinks.add(currentLink)
                     val clickCallback =
                         IterableActionHandler { result ->
