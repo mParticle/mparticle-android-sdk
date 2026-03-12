@@ -299,7 +299,7 @@ class MpApiDetectorKt :
                 var isApplicationSubclass =
                     evaluator.extendsClass(it, "android.app.Application", false)
                 var isApplicationClass =
-                    method.containingClass?.qualifiedName.equals("android.app.Application")
+                    method.getContainingUClass()?.qualifiedName == "android.app.Application"
                 isApplicationSubclass && !isApplicationClass
             } ?: false
     }

@@ -75,7 +75,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
       - name: "Install JDK 17"
         uses: actions/setup-java@v5
         with:
@@ -95,11 +95,11 @@ jobs:
 
   lint-checks:
     name: "Lint Checks"
-    timeout-minutes: 15
+    timeout-minutes: 20
     runs-on: macos-latest
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
       - name: "Install JDK 17"
         uses: actions/setup-java@v5
         with:
@@ -108,7 +108,7 @@ jobs:
       - name: "Run Android Core SDK Lint"
         run: ./gradlew lint
       - name: "Setup Android Kit Lint"
-        run: ./gradlew publishReleaseLocal
+        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=$(head -n 1 VERSION)
       - name: "Run Android Kit Lint"
         run: ./gradlew -c settings-kits.gradle lint
       - name: "Archive Lint Test Results"
@@ -124,7 +124,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
       - name: "Install JDK 17"
         uses: actions/setup-java@v5
         with:
@@ -133,7 +133,7 @@ jobs:
       - name: "Run Android Core SDK Kotlin Lint"
         run: ./gradlew ktlintCheck
       - name: "Setup Android Kit Kotlin Lint"
-        run: ./gradlew publishReleaseLocal
+        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=$(head -n 1 VERSION)
       - name: "Run Android Kit Kotlin Lint"
         run: ./gradlew -c settings-kits.gradle ktlintCheck
       - name: "Archive Kotlin Lint Test Results"
@@ -155,18 +155,18 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
       - name: "Install JDK 17"
         uses: actions/setup-java@v5
         with:
           distribution: "zulu"
           java-version: "17"
       - name: "Generate Core Release Build"
-        run: ./gradlew -PisRelease=true publishLocal
+        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=$(head -n 1 VERSION)
       - name: "Run Kit-Base Release Tests and Build"
-        run: ./gradlew -PisRelease=true :android-kit-base:testRelease
+        run: ./gradlew :android-kit-base:testRelease -PVERSION=$(head -n 1 VERSION)
       - name: "Run Kit Release Tests and Build"
-        run: ./gradlew -PisRelease=true -p kits testRelease -c ../settings-kits.gradle
+        run: ./gradlew -p kits testRelease -c ../settings-kits.gradle -PVERSION=$(head -n 1 VERSION)
       - name: "Run Isolated Kit Compatibility Tests (urbanairship)"
         working-directory: kits/urbanairship/urbanairship-20
         run: ./gradlew -PisRelease=true testRelease

@@ -45,7 +45,7 @@ jobs:
       GIT_COMMITTER_EMAIL: developers@mparticle.com
     steps:
       - name: "Clone branch"
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
         with:
           token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
           repository: mparticle/mparticle-android-sdk
@@ -69,7 +69,7 @@ jobs:
   #    needs: create-regression-branch
   #    steps:
   #      - name: "Checkout future release branch"
-  #        uses: actions/checkout@v6.0.2
+  #        uses: actions/checkout@v6
   #        with:
   #          repository: mparticle/mparticle-android-sdk
   #          ref: regression/${{ github.run_number }}
@@ -102,7 +102,7 @@ jobs:
   #    needs: create-regression-branch
   #    steps:
   #      - name: "Checkout Branch"
-  #        uses: actions/checkout@v6.0.2
+  #        uses: actions/checkout@v6
   #        with:
   #          repository: mparticle/mparticle-android-sdk
   #          ref: regression/${{ github.run_number }}
@@ -192,7 +192,7 @@ jobs:
     needs: create-regression-branch
     steps:
       - name: "Checkout future release branch"
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
         with:
           repository: mparticle/mparticle-android-sdk
           ref: regression/${{ github.run_number }}
@@ -221,7 +221,7 @@ jobs:
     needs: create-regression-branch
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
         with:
           ref: regression/${{ github.run_number }}
       - name: "Install JDK 17"
@@ -233,10 +233,10 @@ jobs:
       - name: "Run Android Core SDK Lint"
         run: ./gradlew lint
       - name: "Setup Android Kit Lint"
-        run: ./gradlew publishReleaseLocal
+        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=$(head -n 1 VERSION)
       - name: "Run Android Kit Lint"
-        run: ./gradlew publishReleaseLocal -c settings-kits.gradle lint
-      - name: "Run Isolated Kit Lint (urbanairship)"
+        run: ./gradlew lint -c settings-kits.gradle
+      - name: "Run Isolated Kit Lint (urbanairship-kit)"
         working-directory: kits/urbanairship/urbanairship-20
         run: ./gradlew lint
       - name: "Archive Test Results"
@@ -259,7 +259,7 @@ jobs:
     needs: create-regression-branch
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
         with:
           ref: regression/${{ github.run_number }}
       - name: "Install JDK 17"
@@ -271,10 +271,10 @@ jobs:
       - name: "Run Android Core SDK Kotlin Lint"
         run: ./gradlew ktlintCheck
       - name: "Setup Android Kit Kotlin Lint"
-        run: ./gradlew publishReleaseLocal
+        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=$(head -n 1 VERSION)
       - name: "Run Android Kit Kotlin Lint"
-        run: ./gradlew publishReleaseLocal -c settings-kits.gradle ktlintCheck
-      - name: "Run Isolated Kit Kotlin Lint (urbanairship)"
+        run: ./gradlew ktlintCheck -c settings-kits.gradle
+      - name: "Run Isolated Kit Kotlin Lint (urbanairship-kit)"
         working-directory: kits/urbanairship/urbanairship-20
         run: ./gradlew ktlintCheck
       - name: "Archive Test Results"
@@ -301,7 +301,7 @@ jobs:
       GIT_COMMITTER_EMAIL: developers@mparticle.com
     steps:
       - name: "Checkout future release branch"
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
         with:
           repository: mparticle/mparticle-android-sdk
           ref: regression/${{ github.run_number }}
@@ -312,12 +312,12 @@ jobs:
           java-version: "17"
           cache: "gradle"
       - name: "Build Android Core"
-        run: ./gradlew -PisRelease=true clean publishReleaseLocal
+        run: ./gradlew clean publishMavenPublicationToMavenLocal -PVERSION=$(head -n 1 VERSION)
       - name: "Test Kits"
-        run: ./gradlew -PisRelease=true clean testRelease publishReleaseLocal -c settings-kits.gradle
-      - name: "Test Isolated Kits (urbanairship)"
+        run: ./gradlew clean testRelease -c settings-kits.gradle
+      - name: "Test Isolated Kits (urbanairship-kit)"
         working-directory: kits/urbanairship/urbanairship-20
-        run: ./gradlew -PisRelease=true clean testRelease publishReleaseLocal
+        run: ./gradlew clean testRelease
 
   semantic-release-dryrun:
     name: "Test Semantic Release - Dry Run"
@@ -331,7 +331,7 @@ jobs:
       GIT_COMMITTER_EMAIL: developers@mparticle.com
     steps:
       - name: "Checkout public main branch"
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: main
@@ -362,7 +362,7 @@ jobs:
       GIT_COMMITTER_EMAIL: developers@mparticle.com
     steps:
       - name: "Checkout repo"
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
         with:
           token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
           fetch-depth: 0
