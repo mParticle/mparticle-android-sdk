@@ -2,40 +2,40 @@
 
 include (
         ':kits:adjust:adjust-5',
-        ':kits:adobe-kit',
-        ':kits:adobemedia-kit',
+        ':kits:adobe:adobe-5',
+        ':kits:adobemedia:adobemedia-5',
         ':kits:appsflyer:appsflyer-6',
         ':kits:apptentive:apptentive-6',
-        ':kits:apptimize-kit',
+        ':kits:apptimize:apptimize-3',
         ':kits:apteligent-kit',
-        ':kits:branch-kit',
         //blueshift hosts kit
         ':kits:braze:braze-38',
+        ':kits:branch:branch-5',
         ':kits:button-kit',
         ':kits:clevertap:clevertap-7',
-        ':kits:comscore-kit',
+        ':kits:comscore:comscore-6',
         ':kits:flurry-kit',
         ':kits:foresee-kit',
         ':kits:ga:ga-23',
         ':kits:ga4:ga4-23',
-        ':kits:iterable-kit',
+        ':kits:iterable:iterable-3',
         ':kits:kochava:kochava-5',
         ':kits:localytics:localytics-6',
         ':kits:leanplum:leanplum-7',
         //Neura hosts kit
         ':kits:onetrust-kit',
-        ':kits:optimizely-kit',
+        ':kits:optimizely:optimizely-3',
       //  ':kits:pilgrim-kit',
-        ':kits:radar-kit',
+        ':kits:radar:radar-3',
         ':kits:responsys-kit',
         ':kits:revealmobile-kit',
         ':kits:rokt:rokt',
-        ':kits:singular-kit',
+        ':kits:singular:singular-12',
         ':kits:skyhook-kit',
         //Swrve hosts kit
         ':kits:taplytics-kit',
         ':kits:tune-kit',
-        //  ':kits:urbanairship-kit',  // Kotlin 2.2.x -- built standalone (see ONBOARDING.md)
+        //  ':kits:urbanairship:urbanairship-20',  // Kotlin 2.2.x -- built standalone (see ONBOARDING.md)
         ':kits:wootric-kit',
         ':kits:example-kit'
 )

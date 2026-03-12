@@ -176,9 +176,9 @@ jobs:
         run: ./gradlew :android-kit-base:testRelease -PVERSION=$(head -n 1 VERSION)
       - name: "Run Kit Release Tests and Build"
         run: ./gradlew -p kits testRelease -c ../settings-kits.gradle -PVERSION=$(head -n 1 VERSION)
-      - name: "Run Isolated Kit Compatibility Tests (urbanairship-kit)"
-        working-directory: kits/urbanairship-kit
-        run: ./gradlew testRelease
+      - name: "Run Isolated Kit Compatibility Tests (urbanairship)"
+        working-directory: kits/urbanairship/urbanairship-20
+        run: ./gradlew -PisRelease=true testRelease
 
   automerge-dependabot:
     name: "Save PR Number for Dependabot Automerge"

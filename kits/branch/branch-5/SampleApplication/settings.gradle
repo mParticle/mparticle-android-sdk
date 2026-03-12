@@ -1,0 +1,3 @@
+include ':app'
+include ':local-mParticle-Branch-kit'
+project(':local-mParticle-Branch-kit').projectDir = new File(settingsDir, '..')
