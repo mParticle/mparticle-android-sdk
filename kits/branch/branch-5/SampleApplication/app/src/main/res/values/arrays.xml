@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="mparticle_ecom_events">
+        <item>add_to_cart</item>
+        <item>remove_from_cart</item>
+        <item>add_to_wishlist</item>
+        <item>remove_from_wishlist</item>
+        <item>checkout</item>
+        <item>click</item>
+        <item>view_detail</item>
+        <item>purchase</item>
+        <item>refund</item>
+        <item>checkout_option</item>
+    </string-array>
+</resources>

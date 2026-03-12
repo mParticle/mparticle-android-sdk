@@ -22,7 +22,7 @@ internal object CustomDataParser {
         try {
             if (value != null) parseValueGuarded(value) else null
         } catch (e: Exception) {
-            Log.e(LogTag("pParticle"), "Unable to parse value: $value")
+            Log.e(LogTag("pParticle"), "Unable to parse custom data value")
             value
         }
 

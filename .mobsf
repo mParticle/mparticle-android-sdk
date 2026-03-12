@@ -8,6 +8,7 @@
   - "**/src/test/**"
   - "**/example/**"
   - "**/*-example/**"
+  - "**/SampleApplication/**"
 
   ignore-rules:
   - webview_javascript_interface  # Intentional: JS bridge for mParticle WebView SDK; workspace token controls access
@@ -27,3 +28,6 @@
   - android_certificate_pinning
   - android_ssl_pinning
   - accept_self_signed_certificate
+  - android_manifest_well_known_assetlinks  # Sample apps use third-party domains (e.g. Branch mp-fortune.app.link)
+  - android_task_hijacking1  # Sample apps; targetSdk in build.gradle
+  - android_task_hijacking2  # Sample apps; targetSdk in build.gradle
