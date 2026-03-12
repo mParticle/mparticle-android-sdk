@@ -67,7 +67,6 @@ lint:
       paths:
         - "**/gradlew"
         - scripts/install-start-emulator.sh
-        - kits/rokt/rokt/**
         - kits/singular/singular-12/**
         - kits/urbanairship/urbanairship-20/**
 actions:
