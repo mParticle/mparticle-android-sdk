@@ -67,7 +67,6 @@ lint:
       paths:
         - "**/gradlew"
         - scripts/install-start-emulator.sh
-        - kits/comscore/comscore-6/**
         - kits/iterable/iterable-3/**
         - kits/ga/ga-23/**
         - kits/ga4/ga4-23/**
