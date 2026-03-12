@@ -85,7 +85,7 @@ for details. Before submitting a PR that affects core APIs, verify isolated
 kits also build:
 
 ```bash
-cd kits/urbanairship-kit && ./gradlew testRelease
+cd kits/urbanairship/urbanairship-20 && ./gradlew testRelease
 ```
 
 ### Reporting Bugs

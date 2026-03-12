@@ -50,7 +50,6 @@ jobs:
           token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
           repository: mparticle/mparticle-android-sdk
           ref: ${{ inputs.branch_name }}
-          submodules: recursive
       - name: "Import GPG Key"
         uses: crazy-max/ghaction-import-gpg@e89d40939c28e39f97cf32126055eeae86ba74ec #v6.0
         with:
@@ -62,13 +61,6 @@ jobs:
         run: |
           git checkout -b regression/${{ github.run_number }}
           git push origin regression/${{ github.run_number }}
-      - name: "Commit Kit Updates"
-        run: |
-          git submodule foreach "git fetch; git reset --hard origin/main";
-          git add .
-          git diff-index --quiet HEAD || git commit -m 'chore: Update Submodules'
-      - name: "Push kit updates to release branch"
-        run: git push origin regression/${{ github.run_number }}
 
   #  instrumented-tests:
   #    name: "Instrumented Tests"
@@ -232,7 +224,6 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: regression/${{ github.run_number }}
-          submodules: recursive
       - name: "Install JDK 17"
         uses: actions/setup-java@v5
         with:
@@ -244,9 +235,9 @@ jobs:
       - name: "Setup Android Kit Lint"
         run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=$(head -n 1 VERSION)
       - name: "Run Android Kit Lint"
-        run: ./gradlew lint -c settings-kits.gradle -PVERSION=$(head -n 1 VERSION)
+        run: ./gradlew lint -c settings-kits.gradle
       - name: "Run Isolated Kit Lint (urbanairship-kit)"
-        working-directory: kits/urbanairship-kit
+        working-directory: kits/urbanairship/urbanairship-20
         run: ./gradlew lint
       - name: "Archive Test Results"
         uses: actions/upload-artifact@v7
@@ -271,7 +262,6 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: regression/${{ github.run_number }}
-          submodules: recursive
       - name: "Install JDK 17"
         uses: actions/setup-java@v5
         with:
@@ -283,9 +273,9 @@ jobs:
       - name: "Setup Android Kit Kotlin Lint"
         run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=$(head -n 1 VERSION)
       - name: "Run Android Kit Kotlin Lint"
-        run: ./gradlew ktlintCheck -c settings-kits.gradle -PVERSION=$(head -n 1 VERSION)
+        run: ./gradlew ktlintCheck -c settings-kits.gradle
       - name: "Run Isolated Kit Kotlin Lint (urbanairship-kit)"
-        working-directory: kits/urbanairship-kit
+        working-directory: kits/urbanairship/urbanairship-20
         run: ./gradlew ktlintCheck
       - name: "Archive Test Results"
         uses: actions/upload-artifact@v7
@@ -315,7 +305,6 @@ jobs:
         with:
           repository: mparticle/mparticle-android-sdk
           ref: regression/${{ github.run_number }}
-          submodules: recursive
       - name: "Install JDK 17"
         uses: actions/setup-java@v5
         with:
@@ -325,9 +314,9 @@ jobs:
       - name: "Build Android Core"
         run: ./gradlew clean publishMavenPublicationToMavenLocal -PVERSION=$(head -n 1 VERSION)
       - name: "Test Kits"
-        run: ./gradlew clean testRelease publishMavenPublicationToMavenLocal -PVERSION=$(head -n 1 VERSION) -c settings-kits.gradle
+        run: ./gradlew clean testRelease -c settings-kits.gradle
       - name: "Test Isolated Kits (urbanairship-kit)"
-        working-directory: kits/urbanairship-kit
+        working-directory: kits/urbanairship/urbanairship-20
         run: ./gradlew clean testRelease
 
   semantic-release-dryrun:

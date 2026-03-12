@@ -40,23 +40,8 @@ jobs:
           java-version: "17"
       - name: Gradle cache
         uses: gradle/gradle-build-action@842c587ad8aa4c68eeba24c396e15af4c2e9f30a #v2.9.0
-      - name: AVD cache
-        uses: actions/cache@v5
-        id: avd-cache
-        with:
-          path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-          key: avd-29
-      - name: create AVD and generate snapshot for caching
-        if: steps.avd-cache.outputs.cache-hit != 'true'
-        uses: reactivecircus/android-emulator-runner@b530d96654c385303d652368551fb075bc2f0b6b #v2.35.0
-        with:
-          api-level: 28
-          force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          disable-animations: false
-          script: echo "Generated AVD snapshot for caching."
+      # AVD cache disabled: causes indefinite hangs on emulator shutdown (see
+      # ReactiveCircus/android-emulator-runner#373, #385, #362; WordPress/gutenberg#66771)
       - name: Enable KVM group perms
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -64,6 +49,8 @@ jobs:
           sudo udevadm trigger --name-match=kvm
       - name: "Run Instrumented Tests (${{ inputs.display_name }})"
         uses: reactivecircus/android-emulator-runner@b530d96654c385303d652368551fb075bc2f0b6b #v2.35.0
+        env:
+          ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL: 60
         with:
           api-level: 28
           force-avd-creation: false
