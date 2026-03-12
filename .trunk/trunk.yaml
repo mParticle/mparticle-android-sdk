@@ -67,7 +67,6 @@ lint:
       paths:
         - "**/gradlew"
         - scripts/install-start-emulator.sh
-        - kits/ga4/ga4-23/**
         - kits/kochava/kochava-5/**
         - kits/leanplum/leanplum-7/**
         - kits/localytics/localytics-6/**

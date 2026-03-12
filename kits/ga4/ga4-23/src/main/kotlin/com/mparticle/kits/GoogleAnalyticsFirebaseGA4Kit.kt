@@ -182,8 +182,7 @@ class GoogleAnalyticsFirebaseGA4Kit :
                 Product.CHECKOUT_OPTION -> {
                     val warningMessage = WARNING_MESSAGE
                     val customFlags = commerceEvent.customFlags
-                    if ((customFlags != null) && customFlags.containsKey(CF_GA4COMMERCE_EVENT_TYPE)
-                    ) {
+                    if ((customFlags != null) && customFlags.containsKey(CF_GA4COMMERCE_EVENT_TYPE)) {
                         val commerceEventTypes =
                             customFlags[CF_GA4COMMERCE_EVENT_TYPE]
                         if (!commerceEventTypes.isNullOrEmpty()) {
@@ -340,8 +339,7 @@ class GoogleAnalyticsFirebaseGA4Kit :
             }
 
             if (!KitUtils.isEmpty(userId)) {
-                if (true.toString().equals(settings[SHOULD_HASH_USER_ID], true)
-                ) {
+                if (true.toString().equals(settings[SHOULD_HASH_USER_ID], true)) {
                     if (userId != null) {
                         userId = KitUtils.hashFnv1a(userId.toByteArray()).toString()
                     }
