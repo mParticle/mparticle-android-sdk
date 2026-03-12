@@ -67,7 +67,6 @@ lint:
       paths:
         - "**/gradlew"
         - scripts/install-start-emulator.sh
-        - kits/braze/braze-38/**
         - kits/clevertap/clevertap-7/**
         - kits/comscore/comscore-6/**
         - kits/iterable/iterable-3/**
