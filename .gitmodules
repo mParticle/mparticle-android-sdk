@@ -13,9 +13,6 @@
 [submodule "kits/foresee-kit"]
 	path = kits/foresee-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-foresee.git
-[submodule "kits/onetrust-kit"]
-	path = kits/onetrust-kit
-	url = git@github.com:mparticle-integrations/mparticle-android-integration-onetrust.git
 [submodule "kits/pilgrim-kit"]
 	path = kits/pilgrim-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-pilgrim.git
