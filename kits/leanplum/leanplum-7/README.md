@@ -1,12 +1,12 @@
-## Leanplum Kit Integration
+# Leanplum Kit Integration
 
-This repository contains the [Leanplum](https://www.leanplum.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
+This repository contains the [Leanplum](https://www.leanplum.com/) integration for the [mParticle Android SDK](https://github.com/mParticle.mparticle-android-sdk).
 
-### Adding the integration
+## Adding the integration
 
 1. The Leanplum Kit requires that you add Leanplum's Maven server to your buildscript:
 
-    ```
+    ```groovy
     repositories {
         maven { url "http://www.leanplum.com/leanplum-sdks/" }
         ...
@@ -24,7 +24,7 @@ This repository contains the [Leanplum](https://www.leanplum.com/) integration f
 3. Follow the mParticle Android SDK [quick-start](https://github.com/mParticle/mparticle-android-sdk), then rebuild and launch your app, and verify that you see `"Leanplum detected"` in the output of `adb logcat`.
 4. Reference mParticle's integration docs below to enable the integration.
 
-### GCM Compatibility
+## GCM Compatibility
 
 Leanplum is deprecating GCM support, but it is still available. While we recommend migrating to FCM, if your application requires GCM, take the following steps:
 
@@ -38,10 +38,11 @@ Leanplum is deprecating GCM support, but it is still available. While we recomme
         implementation 'com.leanplum:leanplum-gcm:4.1.1'
     }
     ```
-### Documentation
+
+## Documentation
 
 [Leanplum integration](https://docs.mparticle.com/integrations/leanplum/event/)
 
-### License
+## License
 
 [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
