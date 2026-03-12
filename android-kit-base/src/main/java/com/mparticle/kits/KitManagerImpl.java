@@ -19,6 +19,7 @@ import androidx.annotation.Nullable;
 
 import com.mparticle.AttributionError;
 import com.mparticle.AttributionListener;
+import com.mparticle.TypedUserAttributeListener;
 import com.mparticle.AttributionResult;
 import com.mparticle.BaseEvent;
 import com.mparticle.Configuration;
@@ -26,7 +27,6 @@ import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.internal.RoktKitApi;
-import com.mparticle.UserAttributeListener;
 import com.mparticle.WrapperSdkVersion;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
@@ -59,7 +59,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class KitManagerImpl implements KitManager, AttributionListener, UserAttributeListener, IdentityStateListener {
+public class KitManagerImpl implements KitManager, AttributionListener, IdentityStateListener {
 
     private static HandlerThread kitHandlerThread;
 
@@ -593,7 +593,6 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     //================================================================================
     // KitIntegration.AttributeListener forwarding
     //================================================================================
-    @Override
     public void onUserAttributesReceived(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists, Long mpid) {
         userAttributes = mDataplanFilter.transformUserAttributes(userAttributes);
         userAttributeLists = mDataplanFilter.transformUserAttributes(userAttributeLists);
@@ -1255,7 +1254,20 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             }
         }
 
-        mParticleUser.getUserAttributes(this);
+        mParticleUser.getUserAttributes(new TypedUserAttributeListener() {
+            @Override
+            public void onUserAttributesReceived(@NonNull Map<String, ?> userAttributes, @NonNull Map<String, ? extends List<String>> userAttributeLists, long mpid) {
+                Map<String, String> stringAttributes = new HashMap<>();
+                for (Map.Entry<String, ?> entry : userAttributes.entrySet()) {
+                    if (entry.getValue() != null) {
+                        stringAttributes.put(entry.getKey(), entry.getValue().toString());
+                    } else {
+                        stringAttributes.put(entry.getKey(), null);
+                    }
+                }
+                onUserAttributesReceived(stringAttributes, (Map<String, List<String>>) userAttributeLists, mpid);
+            }
+        });
     }
 
     @Override

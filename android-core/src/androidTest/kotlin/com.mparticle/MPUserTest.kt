@@ -35,26 +35,6 @@ class MPUserTest : BaseCleanStartedEachTest() {
             android_test_hack()
 
             getUserAttributes(
-                object : UserAttributeListener {
-                    override fun onUserAttributesReceived(
-                        userAttributes: Map<String, String?>?,
-                        userAttributeLists: Map<String, List<String?>>?,
-                        mpid: Long?,
-                    ) {
-                        assertNotNull(userAttributes)
-                        assertEquals(6, userAttributes.size)
-                        assertEquals("bar", userAttributes["foo"])
-                        assertEquals("123", userAttributes["fooInt"])
-                        assertEquals("12345", userAttributes["fooLong"])
-                        assertEquals("10.15", userAttributes["fooDouble"])
-                        assertEquals("-10", userAttributes["fooNegInt"])
-                        assertEquals("-1010", userAttributes["fooNegLong"])
-                        assertEquals(null, userAttributes["fooNull"])
-                    }
-                },
-            )
-
-            getUserAttributes(
                 object : TypedUserAttributeListener {
                     override fun onUserAttributesReceived(
                         userAttributes: Map<String, Any?>,

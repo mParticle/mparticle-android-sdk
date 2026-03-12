@@ -4,7 +4,6 @@ import com.mparticle.MParticle
 import com.mparticle.MParticle.IdentityType
 import com.mparticle.MockMParticle
 import com.mparticle.TypedUserAttributeListener
-import com.mparticle.UserAttributeListener
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert
@@ -153,28 +152,13 @@ class MParticleUserTest {
     fun testGetAllUserAttributes() {
         val listener =
             Mockito.mock(
-                UserAttributeListener::class.java,
+                TypedUserAttributeListener::class.java,
             )
         id?.currentUser?.getUserAttributes(listener)
         Mockito
             .verify(
                 mp?.Identity()?.mMessageManager,
                 Mockito.times(1),
-            )?.getUserAttributes(
-                ArgumentMatchers.any(
-                    UserAttributeListenerWrapper::class.java,
-                ),
-                ArgumentMatchers.eq<Long>(defaultMpId),
-            )
-        val typedListener =
-            Mockito.mock(
-                TypedUserAttributeListener::class.java,
-            )
-        id?.currentUser?.getUserAttributes(typedListener)
-        Mockito
-            .verify(
-                mp?.Identity()?.mMessageManager,
-                Mockito.times(2),
             )?.getUserAttributes(
                 ArgumentMatchers.any(
                     UserAttributeListenerWrapper::class.java,
