@@ -518,8 +518,10 @@ public class ConfigManager {
         if (instance != null) {
             Set<Integer> supportedKitIds = instance.Internal().getKitManager().getSupportedKits();
             if (supportedKitIds != null && !supportedKitIds.isEmpty()) {
-                StringBuilder buffer = new StringBuilder(supportedKitIds.size() * 3);
-                Iterator<Integer> it = supportedKitIds.iterator();
+                List<Integer> sortedKitIds = new ArrayList<>(supportedKitIds);
+                Collections.sort(sortedKitIds);
+                StringBuilder buffer = new StringBuilder(sortedKitIds.size() * 3);
+                Iterator<Integer> it = sortedKitIds.iterator();
                 while (it.hasNext()) {
                     Integer next = it.next();
                     buffer.append(next);

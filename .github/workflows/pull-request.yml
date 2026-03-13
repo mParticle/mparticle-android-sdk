@@ -50,7 +50,7 @@ jobs:
         shard: [0, 1, 2, 3]
     with:
       display_name: "Kit Base Shard ${{ matrix.shard }}/4"
-      gradle_command: ":android-kit-base:cAT -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=none -Pandroid.testInstrumentationRunnerArguments.numShards=4 -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }}"
+      gradle_command: ":android-kit-base:cAT -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=none -Pandroid.testInstrumentationRunnerArguments.numShards=4 -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }} --info --stacktrace"
       artifact_name: "instrumented-kit-base-results-shard-${{ matrix.shard }}"
       artifact_path: android-kit-base/build/reports/androidTests/connected/**
 

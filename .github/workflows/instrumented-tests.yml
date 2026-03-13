@@ -49,7 +49,7 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
       - name: "Run Instrumented Tests (${{ inputs.display_name }})"
-        uses: reactivecircus/android-emulator-runner@b530d96654c385303d652368551fb075bc2f0b6b #v2.35.0
+        uses: reactivecircus/android-emulator-runner@5d6e86df22ab11632167a1a6b0c9ab0dc3469586 #v2.36.0
         env:
           ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL: 60
         with:
@@ -61,7 +61,7 @@ jobs:
             adb shell settings put global transition_animation_scale 0.0
             adb shell settings put global animator_duration_scale 0.0
             for pkg in com.mparticle.kittests com.mparticle.kits.test com.mparticle.legacyTest com.mparticle.test; do if adb shell pm list packages | grep -q "$pkg"; then adb uninstall "$pkg"; fi; done
-            ./gradlew ${{ inputs.gradle_command }}
+            ./gradlew --no-daemon ${{ inputs.gradle_command }}
             # Workaround for ReactiveCircus/android-emulator-runner#385: crashpad_handler
             # child processes orphaned on emulator shutdown cause the action to deadlock.
             # Send SIGINT to allow graceful exit; the || true prevents failure if already gone.
