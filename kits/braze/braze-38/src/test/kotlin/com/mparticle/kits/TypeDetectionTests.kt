@@ -51,8 +51,8 @@ class TypeDetectionTests {
     private inner class SomeParser internal constructor(
         enableTypeDetection: Boolean?,
     ) : StringTypeParser(
-            enableTypeDetection!!,
-        ) {
+        enableTypeDetection!!,
+    ) {
         override fun toString(
             key: String,
             value: String,

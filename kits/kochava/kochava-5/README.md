@@ -1,10 +1,9 @@
-## Kochava Kit Integration
+# Kochava Kit Integration
 
 This repository contains the [Kochava](https://www.kochava.com) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
 
-### Adding the integration
+## Adding the integration
 
-    ```
 1. Add the kit dependency to your app's build.gradle:
 
     ```groovy
@@ -12,53 +11,52 @@ This repository contains the [Kochava](https://www.kochava.com) integration for 
         implementation 'com.mparticle:android-kochava-kit:5+'
     }
     ```
+
 2. Add the following dependencies to enable various Kochava capabilites.
 
-    >
     > NOTE: Starting with Play Services 15 the dependency requirements have changed. The Android Advertising ID (adid) collection has moved out of play-services “base” and into “ads-identifier”. Use the appropriate option for the version of Play Services you are using as indicated below.
-    >
-    > ```
-    > dependencies {
-    >
-    >      //Required: Google Play Services Ads Identifier (If publishing to the Google Play Store)
-    >      implementation 'com.google.android.gms:play-services-ads-identifier:15.0.1'
-    >      //Required: If using Play Services prior to version 15.
-    >      //implementation 'com.google.android.gms:play-services-base:12.0.1'
-    >
-    >      //Required: Install Referrer (If publishing to the Google Play Store)
-    >      implementation 'com.android.installreferrer:installreferrer:1+'
-    >
-    >      //Optional: Location Collection. Note: This feature must also be enabled server side before collection will occur.
-    >      implementation 'com.google.android.gms:play-services-location:15.0.1'
-    >
-    >      //Optional: Instant App Status Collection
-    >      implementation 'com.google.android.instantapps:instantapps:1.1.0'
-    >  }
-    > ```
-    >  https://support.kochava.com/sdk-integration/sdk-kochavatracker-android/_
 
+    ```groovy
+    dependencies {
+        //Required: Google Play Services Ads Identifier (If publishing to the Google Play Store)
+        implementation 'com.google.android.gms:play-services-ads-identifier:15.0.1'
+        //Required: If using Play Services prior to version 15.
+        //implementation 'com.google.android.gms:play-services-base:12.0.1'
+
+        //Required: Install Referrer (If publishing to the Google Play Store)
+        implementation 'com.android.installreferrer:installreferrer:1+'
+
+        //Optional: Location Collection. Note: This feature must also be enabled server side before collection will occur.
+        implementation 'com.google.android.gms:play-services-location:15.0.1'
+
+        //Optional: Instant App Status Collection
+        implementation 'com.google.android.instantapps:instantapps:1.1.0'
+    }
+    ```
+
+    > [Kochava SDK documentation](https://support.kochava.com/sdk-integration/sdk-kochavatracker-android/_)
 
 3. Follow the mParticle Android SDK [quick-start](https://github.com/mParticle/mparticle-android-sdk), then rebuild and launch your app, and verify that you see `"Kochava detected"` in the output of `adb logcat`.
 4. Reference mParticle's integration docs below to enable the integration.
 
-### Documentation
+## Documentation
 
 [Kochava integration](https://docs.mparticle.com/integrations/kochava/event/)
 
-### IdentityLink
+## IdentityLink
 
 If you would like to associate the Account Identity with a custom Identifier that is not the Device Identity, you can include the data in the Kochava kit's initialization, by calling `KochavaKit.setIdentityLink` before `MParticle.start()`
 
-```
+```java
 Map<String, String> identityLink = new HashMap<String, String>();
 identityLink.put("key1", "identity1");
 identityLink.put("key2", "identity2");
 KochavaKit.setIdentityLink(identityLink);
 ```
 
-### Attribution, Deeplinking and Enhanced Deeplinking results
+## Attribution, Deeplinking and Enhanced Deeplinking results
 
-Kochava offers a number of APIs to process attribution and deeplinking data. In our abstraction, the 
+Kochava offers a number of APIs to process attribution and deeplinking data. In our abstraction, the
 results from these are all routed to our `AttributionListener` under distinct, constant keys.
 
 ```kotlin
@@ -102,6 +100,6 @@ MParticle.start(
 
 ```
 
-### License
+## License
 
 [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0)

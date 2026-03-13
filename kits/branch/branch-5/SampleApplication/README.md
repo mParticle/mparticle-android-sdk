@@ -1,6 +1,6 @@
-##mParticle-Branch Example
+# mParticle-Branch Example
 
-###Overview
+## Overview
 
 This sample app demonstrates:
 
@@ -11,4 +11,3 @@ This sample app demonstrates:
 • How to Branch deep links are handled in an app when using branch with mParticle.
 
 • How event tracking is handled in mParticle and Branch.
-
