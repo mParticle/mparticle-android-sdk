@@ -296,7 +296,7 @@ class LocalyticsKit :
         (
             intent.extras?.containsKey("ll") == true ||
                 intent.extras?.containsKey("localyticsUninstallTrackingPush") == true
-        ) &&
+            ) &&
             MPUtility.isFirebaseAvailable()
 
     override fun onPushMessageReceived(

@@ -117,8 +117,7 @@ class GoogleAnalyticsFirebaseKit :
                 Product.CHECKOUT_OPTION -> {
                     val warningMessage = WARNING_MESSAGE
                     val customFlags = commerceEvent.customFlags
-                    if ((customFlags != null) && customFlags.containsKey(CF_COMMERCE_EVENT_TYPE)
-                    ) {
+                    if ((customFlags != null) && customFlags.containsKey(CF_COMMERCE_EVENT_TYPE)) {
                         val commerceEventTypes =
                             customFlags[CF_COMMERCE_EVENT_TYPE]
                         if (!commerceEventTypes.isNullOrEmpty()) {
