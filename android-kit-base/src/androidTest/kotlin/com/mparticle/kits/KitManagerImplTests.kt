@@ -104,7 +104,7 @@ class KitManagerImplTests : BaseKitOptionsTest() {
 
         // double check that ConfigManager is generating the right string
         val expectedActiveKits = "-6,-4,-3,-1"
-        val expectedBundledKits = "-6,-5,-4,-3,-2.-1"
+        val expectedBundledKits = "-6,-5,-4,-3,-2,-1"
         assertEquals(
             expectedActiveKits,
             MParticle
