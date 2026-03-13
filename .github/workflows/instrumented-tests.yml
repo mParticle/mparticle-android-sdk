@@ -38,8 +38,9 @@ jobs:
         with:
           distribution: "zulu"
           java-version: "17"
-      - name: Gradle cache
-        uses: gradle/gradle-build-action@842c587ad8aa4c68eeba24c396e15af4c2e9f30a #v2.9.0
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
+
       # AVD cache disabled: causes indefinite hangs on emulator shutdown (see
       # ReactiveCircus/android-emulator-runner#373, #385, #362; WordPress/gutenberg#66771)
       - name: Enable KVM group perms
