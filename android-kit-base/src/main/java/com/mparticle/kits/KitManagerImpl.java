@@ -63,11 +63,6 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
 
     private static HandlerThread kitHandlerThread;
 
-    static {
-        kitHandlerThread = new HandlerThread("mParticle_kit_thread");
-        kitHandlerThread.start();
-    }
-
     private final ReportingManager mReportingManager;
     protected final CoreCallbacks mCoreCallbacks;
     private Handler mKitHandler;
@@ -1339,6 +1334,11 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
 
     @Override
     public void reset() {
+        if (kitHandlerThread != null) {
+            kitHandlerThread.quitSafely();
+            kitHandlerThread = null;
+            mKitHandler = null;
+        }
         for (KitIntegration provider : providers.values()) {
             try {
                 provider.reset();
@@ -1373,6 +1373,11 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     }
 
     public void runOnKitThread(Runnable runnable) {
+        if (kitHandlerThread == null || !kitHandlerThread.isAlive()) {
+            kitHandlerThread = new HandlerThread("mParticle_kit_thread");
+            kitHandlerThread.start();
+            mKitHandler = null;
+        }
         if (mKitHandler == null) {
             mKitHandler = new Handler(kitHandlerThread.getLooper());
         }

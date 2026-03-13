@@ -165,6 +165,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         mAppStateManager = appStateManager;
         mAppStateManager.setMessageManager(this);
         mMParticleDBManager = dbManager;
+        if (sMessageHandlerThread == null || !sMessageHandlerThread.isAlive()) {
+            startThreads();
+        }
         mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), this, options.getContext(), dbManager, options.getDataplanId(), options.getDataplanVersion());
         mUploadHandler = new UploadHandler(options.getContext(), sUploadHandlerThread.getLooper(), configManager, appStateManager, this, dbManager, kitFrameworkWrapper);
         sPreferences = options.getContext().getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
@@ -1044,12 +1047,16 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public static void destroy() {
         if (sMessageHandlerThread != null) {
-            sMessageHandlerThread.quit();
+            sMessageHandlerThread.quitSafely();
+            sMessageHandlerThread = null;
         }
         if (sUploadHandlerThread != null) {
-            sUploadHandlerThread.quit();
+            sUploadHandlerThread.quitSafely();
+            sUploadHandlerThread = null;
         }
-        startThreads();
+        // Do NOT call startThreads() here — new threads are started lazily when MParticle.start()
+        // constructs the next MessageManager. Starting threads inside destroy() causes
+        // "Thread starting during runtime shutdown" on google_apis API 28 emulators.
     }
 
     public void logAliasRequest(final AliasRequest aliasRequest) {
