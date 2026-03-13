@@ -61,6 +61,10 @@ jobs:
             adb shell settings put global animator_duration_scale 0.0
             for pkg in com.mparticle.kittests com.mparticle.kits.test com.mparticle.legacyTest com.mparticle.test; do if adb shell pm list packages | grep -q "$pkg"; then adb uninstall "$pkg"; fi; done
             ./gradlew ${{ inputs.gradle_command }}
+            # Workaround for ReactiveCircus/android-emulator-runner#385: crashpad_handler
+            # child processes orphaned on emulator shutdown cause the action to deadlock.
+            # Send SIGINT to allow graceful exit; the || true prevents failure if already gone.
+            killall -INT crashpad_handler || true
       - name: "Archive ${{ inputs.display_name }} Results"
         uses: actions/upload-artifact@v7
         if: always()
