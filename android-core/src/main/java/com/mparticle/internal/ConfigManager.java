@@ -489,7 +489,11 @@ public class ConfigManager {
     }
 
     public String getActiveModuleIds() {
-        Map<Integer, KitManager.KitStatus> kitStatusMap = MParticle.getInstance().Internal().getKitManager().getKitStatus();
+        MParticle instance = MParticle.getInstance();
+        if (instance == null) {
+            return "";
+        }
+        Map<Integer, KitManager.KitStatus> kitStatusMap = instance.Internal().getKitManager().getKitStatus();
         List<Integer> activeKits = new ArrayList<>();
         for (Map.Entry<Integer, KitManager.KitStatus> kitStatus : kitStatusMap.entrySet()) {
             KitManager.KitStatus status = kitStatus.getValue();

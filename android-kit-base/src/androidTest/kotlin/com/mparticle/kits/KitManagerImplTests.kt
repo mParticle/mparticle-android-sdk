@@ -115,13 +115,19 @@ class KitManagerImplTests : BaseKitOptionsTest() {
         )
 
         // check that the active kits value is sent to the server
+        val uploadLatch = MPLatch(1)
+        var uploadVerified = false
+        mServer.waitForVerify(Matcher(mServer.Endpoints().eventsUrl)) {
+            assertEquals(it.headers["x-mp-kits"], expectedActiveKits)
+            assertEquals(it.headers["x-mp-bundled-kits"], expectedBundledKits)
+            uploadVerified = true
+            uploadLatch.countDown()
+        }
         MParticle.getInstance()?.apply {
             logEvent(MPEvent.Builder("some event").build())
             upload()
         }
-        mServer.waitForVerify(Matcher(mServer.Endpoints().eventsUrl)) {
-            assertEquals(it.headers["x-mp-kits"], expectedActiveKits)
-            assertEquals(it.headers["x-mp-bundled-kits"], expectedBundledKits)
-        }
+        uploadLatch.await()
+        assertTrue("Upload request was not received with expected kit headers", uploadVerified)
     }
 }

@@ -16,6 +16,7 @@ import com.mparticle.kits.testkits.IdentityListenerTestKit
 import com.mparticle.kits.testkits.ListenerTestKit
 import com.mparticle.kits.testkits.UserAttributeListenerTestKit
 import com.mparticle.testutils.MPLatch
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -29,6 +30,41 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
     private lateinit var identityListenerKitKit: IdentityListenerTestKit
     private lateinit var userAttributeListenerKitKit: UserAttributeListenerTestKit
     private lateinit var kitIntegrationTestKits: List<ListenerTestKit>
+
+    @After
+    fun afterTests() {
+        if (::kitIntegrationTestKits.isInitialized) {
+            kitIntegrationTestKits.forEach {
+                it.onAttributeReceived = null
+                it.onIdentityReceived = null
+                it.onUserReceived = null
+            }
+        }
+        if (::attributeListenerKitKit.isInitialized) {
+            attributeListenerKitKit.setUserAttribute = null
+            attributeListenerKitKit.setUserAttributeList = null
+            attributeListenerKitKit.setAllUserAttributes = null
+            attributeListenerKitKit.removeUserAttribute = null
+            attributeListenerKitKit.setUserIdentity = null
+            attributeListenerKitKit.removeUserIdentity = null
+        }
+        if (::identityListenerKitKit.isInitialized) {
+            identityListenerKitKit.onLoginCompleted = null
+            identityListenerKitKit.onLogoutCompleted = null
+            identityListenerKitKit.onIdentifyCompleted = null
+            identityListenerKitKit.onModifyCompleted = null
+            identityListenerKitKit.onUserIdentified = null
+        }
+        if (::userAttributeListenerKitKit.isInitialized) {
+            userAttributeListenerKitKit.onSetUserAttribute = null
+            userAttributeListenerKitKit.onSetUserAttributeList = null
+            userAttributeListenerKitKit.onRemoveUserAttribute = null
+            userAttributeListenerKitKit.onSetUserTag = null
+            userAttributeListenerKitKit.onSetAllUserAttributes = null
+            userAttributeListenerKitKit.onIncrementUserAttribute = null
+            userAttributeListenerKitKit.onConsentStateUpdated = null
+        }
+    }
 
     @Before
     fun beforeTests() {
