@@ -17,13 +17,13 @@ class MockKitManagerImpl(
     reportingManager: ReportingManager?,
     coreCallbacks: CoreCallbacks?,
 ) : KitManagerImpl(
-        context,
-        reportingManager,
-        coreCallbacks,
-        Mockito.mock(
-            MParticleOptions::class.java,
-        ),
-    ) {
+    context,
+    reportingManager,
+    coreCallbacks,
+    Mockito.mock(
+        MParticleOptions::class.java,
+    ),
+) {
     constructor() : this(
         MockContext(),
         Mockito.mock<ReportingManager>(ReportingManager::class.java),
