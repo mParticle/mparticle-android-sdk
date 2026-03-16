@@ -4,7 +4,6 @@ import com.mparticle.internal.AccessUtils
 import com.mparticle.testutils.BaseCleanStartedEachTest
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class MPUserTest : BaseCleanStartedEachTest() {
@@ -33,26 +32,6 @@ class MPUserTest : BaseCleanStartedEachTest() {
             setUserAttribute("fooNegLong", -1010)
             this.userAttributes.put("fooNull", null)
             android_test_hack()
-
-            getUserAttributes(
-                object : UserAttributeListener {
-                    override fun onUserAttributesReceived(
-                        userAttributes: Map<String, String?>?,
-                        userAttributeLists: Map<String, List<String?>>?,
-                        mpid: Long?,
-                    ) {
-                        assertNotNull(userAttributes)
-                        assertEquals(6, userAttributes.size)
-                        assertEquals("bar", userAttributes["foo"])
-                        assertEquals("123", userAttributes["fooInt"])
-                        assertEquals("12345", userAttributes["fooLong"])
-                        assertEquals("10.15", userAttributes["fooDouble"])
-                        assertEquals("-10", userAttributes["fooNegInt"])
-                        assertEquals("-1010", userAttributes["fooNegLong"])
-                        assertEquals(null, userAttributes["fooNull"])
-                    }
-                },
-            )
 
             getUserAttributes(
                 object : TypedUserAttributeListener {

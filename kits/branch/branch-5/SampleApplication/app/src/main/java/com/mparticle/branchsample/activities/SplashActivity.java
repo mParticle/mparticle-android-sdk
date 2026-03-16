@@ -64,7 +64,7 @@ public class SplashActivity extends AppCompatActivity implements SampleApplicati
 
             MPEvent event = new MPEvent.Builder("Referred Session", MParticle.EventType.UserContent)
                     .duration(300)
-                    .info(infoMap)
+                    .customAttributes(infoMap)
                     .category("Session").build();
             MParticle.getInstance().logEvent(event);
             intent.putExtra(HomeActivity.BRANCH_PARAMS, params.toString());

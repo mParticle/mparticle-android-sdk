@@ -249,7 +249,7 @@ class MParticleUserDelegate {
         }
     }
 
-    boolean setUser(Context context, long previousMpid, long newMpid, Map<MParticle.IdentityType, String> identities, UserAliasHandler userAliasHandler, boolean isLoggedIn) {
+    boolean setUser(Context context, long previousMpid, long newMpid, Map<MParticle.IdentityType, String> identities, boolean isLoggedIn) {
         setUserIdentities(this, identities, newMpid);
         // if the mpid remains equal to the temporary_mpid, as the case could be when a network request fails
         // or on startup, then there is no reason to do anything
@@ -259,17 +259,6 @@ class MParticleUserDelegate {
         mConfigManager.mergeUserConfigs(Constants.TEMPORARY_MPID, newMpid);
         mMessageManager.getMParticleDBManager().updateMpId(Constants.TEMPORARY_MPID, newMpid);
         mConfigManager.deleteUserStorage(Constants.TEMPORARY_MPID);
-
-        if (userAliasHandler != null && previousMpid != newMpid) {
-            try {
-                userAliasHandler.onUserAlias(
-                        MParticleUserImpl.getInstance(context, previousMpid, this),
-                        MParticleUserImpl.getInstance(context, newMpid, this)
-                );
-            } catch (Exception e) {
-                Logger.error("Error while executing UserAliasHandler: " + e.toString());
-            }
-        }
         mConfigManager.setMpid(newMpid, isLoggedIn);
         return true;
 

@@ -166,7 +166,7 @@ public final class KitUtils {
     @TargetApi(Build.VERSION_CODES.CUPCAKE)
     @Nullable
     public static String getAndroidID(Context context) {
-        if (!MParticle.isAndroidIdDisabled()) {
+        if (MParticle.isAndroidIdEnabled()) {
             return Settings.Secure.getString(context.getContentResolver(), "android_id");
         } else {
             return null;

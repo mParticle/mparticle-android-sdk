@@ -11,7 +11,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
-import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.identity.IdentityApi.SingleUserIdentificationCallback
 import com.mparticle.identity.IdentityApiRequest
@@ -182,11 +181,6 @@ constructor(context: Context, unitTesting: Boolean = false) {
 
             val instance = MParticle.getInstance()
             if (instance != null) {
-                if (instance.isAutoTrackingEnabled) {
-                    currentActivityName?.let {
-                        instance.logScreen(it)
-                    }
-                }
                 if (isBackToForeground) {
                     instance.Internal().kitManager.onApplicationForeground()
                     Logger.debug("App foregrounded.")
@@ -223,14 +217,6 @@ constructor(context: Context, unitTesting: Boolean = false) {
 
             val instance = MParticle.getInstance()
             if (instance != null) {
-                if (instance.isAutoTrackingEnabled) {
-                    instance.logScreen(
-                        MPEvent
-                            .Builder(getActivityName(activity))
-                            .internalNavigationDirection(false)
-                            .build(),
-                    )
-                }
                 instance.Internal().kitManager.onActivityPaused(activity)
             }
         } catch (e: Exception) {

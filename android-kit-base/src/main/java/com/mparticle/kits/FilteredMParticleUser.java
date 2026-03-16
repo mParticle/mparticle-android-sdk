@@ -6,7 +6,6 @@ import androidx.annotation.NonNull;
 
 import com.mparticle.MParticle;
 import com.mparticle.TypedUserAttributeListener;
-import com.mparticle.UserAttributeListener;
 import com.mparticle.UserAttributeListenerType;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.audience.AudienceResponse;
@@ -81,20 +80,6 @@ public class FilteredMParticleUser implements MParticleUser {
                 SparseBooleanArray filters = provider.getConfiguration().getUserAttributeFilters();
                 if (userAttributes == null) {
                     userAttributes = new HashMap<>();
-                }
-                if (listener instanceof UserAttributeListener) {
-                    Map<String, String> stringifiedAttributes = new HashMap<>();
-                    for (Map.Entry<String, ?> entry : userAttributes.entrySet()) {
-                        if (entry.getValue() != null) {
-                            stringifiedAttributes.put(entry.getKey(), entry.getValue().toString());
-                        } else {
-                            stringifiedAttributes.put(entry.getKey(), null);
-                        }
-                    }
-                    ((UserAttributeListener) listener).onUserAttributesReceived(
-                            (Map<String, String>) KitConfiguration.filterAttributes(filters, stringifiedAttributes),
-                            (Map<String, List<String>>) KitConfiguration.filterAttributes(filters, userAttributeLists),
-                            mpid);
                 }
                 if (listener instanceof TypedUserAttributeListener) {
                     ((TypedUserAttributeListener) listener).onUserAttributesReceived(
