@@ -1336,6 +1336,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     public void reset() {
         if (kitHandlerThread != null) {
             kitHandlerThread.quitSafely();
+            try { kitHandlerThread.join(500); } catch (InterruptedException ignored) { Thread.currentThread().interrupt(); }
             kitHandlerThread = null;
             mKitHandler = null;
         }

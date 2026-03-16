@@ -1048,10 +1048,12 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     public static void destroy() {
         if (sMessageHandlerThread != null) {
             sMessageHandlerThread.quitSafely();
+            try { sMessageHandlerThread.join(500); } catch (InterruptedException ignored) { Thread.currentThread().interrupt(); }
             sMessageHandlerThread = null;
         }
         if (sUploadHandlerThread != null) {
             sUploadHandlerThread.quitSafely();
+            try { sUploadHandlerThread.join(500); } catch (InterruptedException ignored) { Thread.currentThread().interrupt(); }
             sUploadHandlerThread = null;
         }
         // Do NOT call startThreads() here — new threads are started lazily when MParticle.start()
