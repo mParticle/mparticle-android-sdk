@@ -53,7 +53,7 @@ jobs:
         env:
           ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL: 60
         with:
-          api-level: 28
+          api-level: 29
           target: default
           arch: x86_64
           force-avd-creation: false
