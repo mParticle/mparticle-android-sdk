@@ -80,15 +80,6 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     MessageHandler mMessageHandler;
     public UploadHandler mUploadHandler;
 
-    /**
-     * Ideally these threads would not be started in a static initializer
-     * block. but this is cleaner than checking if they have been started in
-     * the constructor.
-     */
-    static {
-        startThreads();
-    }
-
     private static void startThreads() {
         sMessageHandlerThread = new HandlerThread("mParticleMessageHandler",
                 Process.THREAD_PRIORITY_BACKGROUND);
