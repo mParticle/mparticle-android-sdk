@@ -9,6 +9,7 @@ include (
         ':kits:apptimize:apptimize-3',
         //blueshift hosts kit
         ':kits:braze:braze-38',
+        ':kits:braze:braze-39',
         ':kits:branch:branch-5',
         ':kits:clevertap:clevertap-7',
         ':kits:comscore:comscore-6',
