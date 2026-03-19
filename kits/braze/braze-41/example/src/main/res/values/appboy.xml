@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="com_appboy_handle_push_deep_links_automatically">true</bool>
+</resources>
