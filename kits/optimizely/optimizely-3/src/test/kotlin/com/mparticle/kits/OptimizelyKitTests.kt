@@ -4,7 +4,6 @@ import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.MParticle.IdentityType
 import com.mparticle.TypedUserAttributeListener
-import com.mparticle.UserAttributeListener
 import com.mparticle.UserAttributeListenerType
 import com.mparticle.audience.AudienceResponse
 import com.mparticle.audience.AudienceTask
@@ -556,13 +555,6 @@ class OptimizelyKitTests {
 
         override fun getUserAttributes(userAttributeListener: UserAttributeListenerType?): Map<String, Any>? {
             if (userAttributeListener is TypedUserAttributeListener) {
-                userAttributeListener.onUserAttributesReceived(
-                    HashMap(),
-                    HashMap(),
-                    id,
-                )
-            }
-            if (userAttributeListener is UserAttributeListener) {
                 userAttributeListener.onUserAttributesReceived(
                     HashMap(),
                     HashMap(),

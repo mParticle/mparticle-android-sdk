@@ -6,7 +6,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.MParticle.EventType
-import com.mparticle.UserAttributeListener
+import com.mparticle.TypedUserAttributeListener
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.commerce.Product
 import com.mparticle.consent.ConsentState
@@ -156,9 +156,16 @@ class GoogleAnalyticsFirebaseKit :
         setUserId(mParticleUser)
         try {
             mParticleUser.getUserAttributes(
-                UserAttributeListener { userAttributeSingles, userAttributeLists, mpid ->
-                    val userAttributes: MutableMap<String, String> = HashMap(userAttributeSingles)
-                    onSetAllUserAttributes(userAttributes, null, null)
+                object : TypedUserAttributeListener {
+                    override fun onUserAttributesReceived(
+                        userAttributes: Map<String, Any?>,
+                        userAttributeLists: Map<String, List<String?>?>,
+                        mpid: Long,
+                    ) {
+                        @Suppress("UNCHECKED_CAST")
+                        val stringAttributes = userAttributes.mapValues { it.value?.toString() }.filterValues { it != null } as Map<String, String>
+                        onSetAllUserAttributes(stringAttributes, null, null)
+                    }
                 },
             )
         } catch (e: Exception) {
@@ -173,9 +180,16 @@ class GoogleAnalyticsFirebaseKit :
         setUserId(mParticleUser)
         try {
             mParticleUser.getUserAttributes(
-                UserAttributeListener { userAttributeSingles, userAttributeLists, mpid ->
-                    val userAttributes: MutableMap<String, String> = HashMap(userAttributeSingles)
-                    onSetAllUserAttributes(userAttributes, null, null)
+                object : TypedUserAttributeListener {
+                    override fun onUserAttributesReceived(
+                        userAttributes: Map<String, Any?>,
+                        userAttributeLists: Map<String, List<String?>?>,
+                        mpid: Long,
+                    ) {
+                        @Suppress("UNCHECKED_CAST")
+                        val stringAttributes = userAttributes.mapValues { it.value?.toString() }.filterValues { it != null } as Map<String, String>
+                        onSetAllUserAttributes(stringAttributes, null, null)
+                    }
                 },
             )
         } catch (e: Exception) {
@@ -197,9 +211,16 @@ class GoogleAnalyticsFirebaseKit :
         setUserId(mParticleUser)
         try {
             mParticleUser.getUserAttributes(
-                UserAttributeListener { userAttributeSingles, userAttributeLists, mpid ->
-                    val userAttributes: MutableMap<String, String> = HashMap(userAttributeSingles)
-                    onSetAllUserAttributes(userAttributes, null, null)
+                object : TypedUserAttributeListener {
+                    override fun onUserAttributesReceived(
+                        userAttributes: Map<String, Any?>,
+                        userAttributeLists: Map<String, List<String?>?>,
+                        mpid: Long,
+                    ) {
+                        @Suppress("UNCHECKED_CAST")
+                        val stringAttributes = userAttributes.mapValues { it.value?.toString() }.filterValues { it != null } as Map<String, String>
+                        onSetAllUserAttributes(stringAttributes, null, null)
+                    }
                 },
             )
         } catch (e: Exception) {

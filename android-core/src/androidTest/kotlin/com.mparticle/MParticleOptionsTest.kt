@@ -156,25 +156,12 @@ class MParticleOptionsTest : BaseAbstractTest() {
 
     @Test
     @Throws(Exception::class)
-    fun testAndroidIdDisabled() {
+    fun testAndroidIdEnabled() {
         // test defaults
         Assert.assertFalse(MParticle.isAndroidIdEnabled())
-        Assert.assertTrue(MParticle.isAndroidIdDisabled())
         MParticle.setInstance(null)
         startMParticle(MParticleOptions.builder(mContext))
         Assert.assertFalse(MParticle.isAndroidIdEnabled())
-        Assert.assertTrue(MParticle.isAndroidIdDisabled())
-
-        // test androidIdDisabled == true
-        MParticle.setInstance(null)
-        startMParticle(
-            MParticleOptions
-                .builder(mContext)
-                .androidIdDisabled(true),
-        )
-        Assert.assertFalse(MParticle.isAndroidIdEnabled())
-        Assert.assertTrue(MParticle.isAndroidIdDisabled())
-        MParticle.setInstance(null)
 
         // test androidIdEnabled == false
         MParticle.setInstance(null)
@@ -184,17 +171,7 @@ class MParticleOptionsTest : BaseAbstractTest() {
                 .androidIdEnabled(false),
         )
         Assert.assertFalse(MParticle.isAndroidIdEnabled())
-        Assert.assertTrue(MParticle.isAndroidIdDisabled())
         MParticle.setInstance(null)
-
-        // test androidIdDisabled == false
-        startMParticle(
-            MParticleOptions
-                .builder(mContext)
-                .androidIdDisabled(false),
-        )
-        Assert.assertTrue(MParticle.isAndroidIdEnabled())
-        Assert.assertFalse(MParticle.isAndroidIdDisabled())
 
         // test androidIdEnabled == true
         startMParticle(
@@ -203,7 +180,6 @@ class MParticleOptionsTest : BaseAbstractTest() {
                 .androidIdEnabled(true),
         )
         Assert.assertTrue(MParticle.isAndroidIdEnabled())
-        Assert.assertFalse(MParticle.isAndroidIdDisabled())
     }
 
     @Test
@@ -714,14 +690,14 @@ class MParticleOptionsTest : BaseAbstractTest() {
         MParticleOptions
             .builder(mContext)
             .credentials("this", "that")
-            .androidIdDisabled(true)
+            .androidIdEnabled(false)
             .build()
         Assert.assertTrue(infoLogs.contains("ANDROID_ID will not be collected based on MParticleOptions settings"))
         infoLogs.clear()
         MParticleOptions
             .builder(mContext)
             .credentials("this", "that")
-            .androidIdDisabled(false)
+            .androidIdEnabled(true)
             .build()
         Assert.assertTrue(infoLogs.contains("ANDROID_ID will be collected based on MParticleOptions settings"))
         infoLogs.clear()

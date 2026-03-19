@@ -142,7 +142,7 @@ public class HomeActivity extends AppCompatActivity {
 
         MPEvent event = new MPEvent.Builder("Simple Event", MParticle.EventType.Transaction)
                 .duration(100)
-                .info(eventInfo)
+                .customAttributes(eventInfo)
                 .category("Food and Beverages")
                 .build();
         MParticle.getInstance().logEvent(event);
