@@ -1,0 +1,66 @@
+/**
+ *
+ * Example app build.gradle for using mParticle + Braze + Firebase Cloud Messaging
+ * Please see the inline comments below.
+ *
+ */
+
+
+apply plugin: 'com.android.application'
+
+android {
+    compileSdk 31
+
+    defaultConfig {
+        applicationId "com.mparticle.com.mparticle.kits.braze.example"
+        minSdk 16
+        targetSdk 31
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://appboy.github.io/appboy-android-sdk/sdk" } //REQUIRED: Braze isn't available in jCenter or Maven Central - so you need to add their Maven Server
+    google()
+}
+
+buildscript {
+    repositories {
+        //REQUIRED: com.google.gms:google-services requires both jCenter and Google's Maven :rollseyes:
+        mavenCentral()
+        google()
+    }
+    dependencies {
+        classpath 'com.google.gms:google-services:4.2.0' //REQUIRED for Firebase
+    }
+}
+dependencies {
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support:support-v4:28.0.0'
+    implementation 'com.android.support:support-media-compat:28.0.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+
+    // REQUIRED: Add the Braze (formerly Appboy) kit here
+    // this will also pull in mParticle's Core SDK (com.mparticle:android-core) as a transitive dependency
+    implementation 'com.mparticle:braze-40:5+'
+
+    // REQUIRED for Firebase
+    implementation 'com.google.firebase:firebase-messaging:17.3.4'
+
+    // Not strictly required but strongly recommended so that mParticle and Braze can query for the Android Advertising ID
+    implementation 'com.google.android.gms:play-services-ads-identifier:16.0.0'
+
+}
+
+apply plugin: 'com.google.gms.google-services'  //REQUIRED for Firebase
