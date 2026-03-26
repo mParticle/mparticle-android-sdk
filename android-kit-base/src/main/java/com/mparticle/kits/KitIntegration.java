@@ -30,7 +30,6 @@ import org.json.JSONObject;
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -117,46 +116,6 @@ public abstract class KitIntegration {
     public boolean isDisabled(boolean isOptOutEvent) {
         return !getConfiguration().passesBracketing(kitManager.getUserBucket()) ||
             (getConfiguration().shouldHonorOptOut() && kitManager.isOptedOut() && !isOptOutEvent);
-    }
-
-    /**
-     * Retrieve filtered user attributes. Use this method to retrieve user attributes at any time.
-     * To ensure that filtering is respected, kits must use this method rather than the public API.
-     * <p>
-     * If the KitIntegration implements the {@link AttributeListener} interface and returns true
-     * for {@link AttributeListener#supportsAttributeLists()}, this method will pass back all attributes
-     * as they are (as String values or as List&lt;String&gt; values). Otherwise, this method will comma-separate
-     * the List values and return back all String values.
-     *
-     * @return a Map of attributes according to the logic above.
-     */
-    @Deprecated
-    public final Map<String, Object> getAllUserAttributes() {
-        MParticle instance = MParticle.getInstance();
-        if (instance != null) {
-            MParticleUser user = instance.Identity().getCurrentUser();
-            if (user != null) {
-                Map<String, Object> userAttributes = user.getUserAttributes();
-                if (kitManager != null) {
-                    userAttributes = kitManager.getDataplanFilter().transformUserAttributes(userAttributes);
-                }
-                Map<String, Object> attributes = (Map<String, Object>) KitConfiguration.filterAttributes(
-                    getConfiguration().getUserAttributeFilters(),
-                    userAttributes
-                );
-                if ((this instanceof AttributeListener) && ((AttributeListener) this).supportsAttributeLists()) {
-                    return attributes;
-                } else {
-                    for (Map.Entry<String, Object> entry : attributes.entrySet()) {
-                        if (entry.getValue() instanceof List) {
-                            attributes.put(entry.getKey(), KitUtils.join((List) entry.getValue()));
-                        }
-                    }
-                    return attributes;
-                }
-            }
-        }
-        return new HashMap<String, Object>();
     }
 
     public final MParticleUser getCurrentUser() {
