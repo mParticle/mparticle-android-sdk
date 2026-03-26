@@ -119,26 +119,6 @@ public abstract class KitIntegration {
             (getConfiguration().shouldHonorOptOut() && kitManager.isOptedOut() && !isOptOutEvent);
     }
 
-    @Deprecated
-    public final Map<MParticle.IdentityType, String> getUserIdentities() {
-        MParticle instance = MParticle.getInstance();
-        if (instance != null) {
-            MParticleUser user = instance.Identity().getCurrentUser();
-            if (user != null) {
-                Map<MParticle.IdentityType, String> identities = user.getUserIdentities();
-                identities = getKitManager().getDataplanFilter().transformIdentities(identities);
-                Map<MParticle.IdentityType, String> filteredIdentities = new HashMap<MParticle.IdentityType, String>(identities.size());
-                for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()) {
-                    if (getConfiguration().shouldSetIdentity(entry.getKey())) {
-                        filteredIdentities.put(entry.getKey(), entry.getValue());
-                    }
-                }
-                return identities;
-            }
-        }
-        return new HashMap<MParticle.IdentityType, String>();
-    }
-
     /**
      * Retrieve filtered user attributes. Use this method to retrieve user attributes at any time.
      * To ensure that filtering is respected, kits must use this method rather than the public API.
