@@ -292,7 +292,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         }
         latch.await()
         kitIntegrationTestKits.forEach { kit ->
-            assertEquals(allowedIdentities, kit.userIdentities)
+            assertEquals(allowedIdentities, kit.getCurrentUser()?.userIdentities)
         }
         // sanity check to make sure the non-filtered User has the blocked identities
         assertEquals(
