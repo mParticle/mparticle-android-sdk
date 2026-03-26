@@ -11,6 +11,7 @@ include (
         ':kits:braze:braze-38',
         ':kits:braze:braze-39',
         ':kits:braze:braze-40',
+        ':kits:braze:braze-41',
         ':kits:branch:branch-5',
         ':kits:clevertap:clevertap-7',
         ':kits:comscore:comscore-6',
