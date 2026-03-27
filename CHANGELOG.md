@@ -2,6 +2,7 @@
 
 ### Removed
 
+- Remove deprecated `KitIntegration.getAllUserAttributes()`. Custom kits must use `getCurrentUser().getUserAttributes()` (or other `FilteredMParticleUser` APIs) and `AttributeListener` callbacks instead ([#682](https://github.com/mParticle/mparticle-android-sdk/pull/682))
 - Remove deprecated `KitIntegration.getUserIdentities()`. Custom kits must use identity data from kit callbacks and request objects instead ([#681](https://github.com/mParticle/mparticle-android-sdk/pull/681)) ([8d3a23c8](https://github.com/mParticle/mparticle-android-sdk/commit/8d3a23c84c96d11f0ee1f80763adacc4f964b544))
 
 ## [5.78.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.78.1...v5.78.2) (2026-02-27)

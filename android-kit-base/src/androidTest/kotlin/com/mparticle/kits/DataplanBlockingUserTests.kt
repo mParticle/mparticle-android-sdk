@@ -90,7 +90,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         AccessUtils.awaitMessageHandler()
 
         kitIntegrationTestKits.forEach { kit ->
-            assertEquals(kit.name, allowedAttributes, kit.allUserAttributes)
+            assertEquals(kit.name, allowedAttributes, kit.getCurrentUser()?.userAttributes)
         }
         // sanity check to make sure the non-filtered User has the blocked identities
         assertEquals(
@@ -174,7 +174,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         assertEquals(count, allowedAttributes.size * 4)
 
         kitIntegrationTestKits.forEach {
-            assertEquals(0, it.allUserAttributes.size)
+            assertEquals(0, it.getCurrentUser()?.userAttributes?.size ?: 0)
         }
         // sanity check to make sure the non-filtered User has the blocked identities
         assertEquals(
@@ -241,8 +241,9 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
 
         assertEquals(count, allowedAttributes.size * 4)
         kitIntegrationTestKits.forEach { kit ->
-            assertEquals(allowedAttributes.size, kit.allUserAttributes.size)
-            assertEquals(allowedAttributes.keys, kit.allUserAttributes.keys)
+            val filtered = kit.getCurrentUser()?.userAttributes
+            assertEquals(allowedAttributes.size, filtered?.size ?: 0)
+            assertEquals(allowedAttributes.keys, filtered?.keys)
         }
         // sanity check to make sure the non-filtered User has the blocked attributes
         assertEquals(
