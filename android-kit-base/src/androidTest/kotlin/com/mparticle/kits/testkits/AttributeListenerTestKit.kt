@@ -6,7 +6,8 @@ import com.mparticle.kits.ReportingMessage
 
 open class AttributeListenerTestKit :
     ListenerTestKit(),
-    KitIntegration.AttributeListener {
+    KitIntegration.AttributeListener,
+    KitIntegration.LogoutListener {
     var setUserAttribute: ((attributeKey: String?, attributeValue: String?) -> Unit)? = null
     var setUserAttributeList: ((attributeKey: String?, attributeValueList: List<String?>?) -> Unit)? =
         null

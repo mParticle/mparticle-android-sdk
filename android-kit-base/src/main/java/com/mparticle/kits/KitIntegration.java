@@ -346,6 +346,21 @@ public abstract class KitIntegration {
     }
 
     /**
+     * Kits may implement this interface to respond when the mParticle Identity API performs a logout.
+     */
+    public interface LogoutListener {
+
+        /**
+         * The mParticle SDK exposes a logout API, allowing developers to track an event
+         * when a user logs out of their app/platform. Use this opportunity to perform the appropriate logic
+         * as per your platforms logout paradigm, such as clearing user attributes.
+         *
+         * @return Kits should return a List of ReportingMessages indicating that the logout was processed one or more times, or null if it was not processed
+         */
+        List<ReportingMessage> logout();
+    }
+
+    /**
      * Kits should implement this interface when their underlying service has the notion
      * of a user with attributes.
      */
@@ -373,15 +388,6 @@ public abstract class KitIntegration {
         void setUserIdentity(MParticle.IdentityType identityType, String identity);
 
         void removeUserIdentity(MParticle.IdentityType identityType);
-
-        /**
-         * The mParticle SDK exposes a logout API, allowing developers to track an event
-         * when a user logs out of their app/platform. Use this opportunity to perform the appropriate logic
-         * as per your platforms logout paradigm, such as clearing user attributes.
-         *
-         * @return Kits should return a List of ReportingMessages indicating that the logout was processed one or more times, or null if it was not processed
-         */
-        List<ReportingMessage> logout();
 
     }
 

@@ -809,8 +809,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     public void logout() {
         for (KitIntegration provider : providers.values()) {
             try {
-                if (provider instanceof KitIntegration.AttributeListener && !provider.isDisabled()) {
-                    List<ReportingMessage> report = ((KitIntegration.AttributeListener) provider).logout();
+                if (provider instanceof KitIntegration.LogoutListener && !provider.isDisabled()) {
+                    List<ReportingMessage> report = ((KitIntegration.LogoutListener) provider).logout();
                     getReportingManager().logAll(report);
                 }
             } catch (Exception e) {

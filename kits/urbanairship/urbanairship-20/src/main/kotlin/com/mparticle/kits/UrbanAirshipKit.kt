@@ -28,7 +28,8 @@ class UrbanAirshipKit :
     KitIntegration.PushListener,
     KitIntegration.EventListener,
     CommerceListener,
-    KitIntegration.AttributeListener {
+    KitIntegration.AttributeListener,
+    KitIntegration.LogoutListener {
     private var channelIdListener: ChannelIdListener? = null
     private var configuration: UrbanAirshipConfiguration? = null
 

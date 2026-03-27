@@ -54,6 +54,7 @@ import kotlin.collections.HashMap
 open class AppboyKit :
     KitIntegration(),
     AttributeListener,
+    KitIntegration.LogoutListener,
     CommerceListener,
     KitIntegration.EventListener,
     PushListener,

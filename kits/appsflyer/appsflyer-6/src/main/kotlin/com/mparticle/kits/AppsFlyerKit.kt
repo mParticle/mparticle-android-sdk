@@ -44,6 +44,7 @@ class AppsFlyerKit :
     KitIntegration(),
     KitIntegration.EventListener,
     KitIntegration.AttributeListener,
+    KitIntegration.LogoutListener,
     KitIntegration.CommerceListener,
     AppsFlyerConversionListener,
     KitIntegration.ActivityListener,
