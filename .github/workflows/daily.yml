@@ -235,7 +235,7 @@ jobs:
       - name: "Setup Android Kit Lint"
         run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=$(head -n 1 VERSION)
       - name: "Run Android Kit Lint"
-        run: ./gradlew lint -c settings-kits.gradle
+        run: ./gradlew lint -c settings-kits.gradle -PVERSION=$(head -n 1 VERSION)
       - name: "Run Isolated Kit Lint (urbanairship-kit)"
         working-directory: kits/urbanairship/urbanairship-20
         run: ./gradlew lint
@@ -273,7 +273,7 @@ jobs:
       - name: "Setup Android Kit Kotlin Lint"
         run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=$(head -n 1 VERSION)
       - name: "Run Android Kit Kotlin Lint"
-        run: ./gradlew ktlintCheck -c settings-kits.gradle
+        run: ./gradlew ktlintCheck -c settings-kits.gradle -PVERSION=$(head -n 1 VERSION)
       - name: "Run Isolated Kit Kotlin Lint (urbanairship-kit)"
         working-directory: kits/urbanairship/urbanairship-20
         run: ./gradlew ktlintCheck
@@ -314,7 +314,7 @@ jobs:
       - name: "Build Android Core"
         run: ./gradlew clean publishMavenPublicationToMavenLocal -PVERSION=$(head -n 1 VERSION)
       - name: "Test Kits"
-        run: ./gradlew clean testRelease -c settings-kits.gradle
+        run: ./gradlew clean testRelease -c settings-kits.gradle -PVERSION=$(head -n 1 VERSION)
       - name: "Test Isolated Kits (urbanairship-kit)"
         working-directory: kits/urbanairship/urbanairship-20
         run: ./gradlew clean testRelease

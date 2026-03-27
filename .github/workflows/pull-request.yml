@@ -110,7 +110,7 @@ jobs:
       - name: "Setup Android Kit Lint"
         run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=$(head -n 1 VERSION)
       - name: "Run Android Kit Lint"
-        run: ./gradlew -c settings-kits.gradle lint
+        run: ./gradlew -c settings-kits.gradle lint -PVERSION=$(head -n 1 VERSION)
       - name: "Archive Lint Test Results"
         uses: actions/upload-artifact@v7
         if: always()
@@ -135,7 +135,7 @@ jobs:
       - name: "Setup Android Kit Kotlin Lint"
         run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=$(head -n 1 VERSION)
       - name: "Run Android Kit Kotlin Lint"
-        run: ./gradlew -c settings-kits.gradle ktlintCheck
+        run: ./gradlew -c settings-kits.gradle ktlintCheck -PVERSION=$(head -n 1 VERSION)
       - name: "Archive Kotlin Lint Test Results"
         uses: actions/upload-artifact@v7
         if: always()
