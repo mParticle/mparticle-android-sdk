@@ -19,7 +19,6 @@ import com.mparticle.kits.KitIntegration.ApplicationStateListener
 import com.mparticle.kits.KitIntegration.AttributeListener
 import com.mparticle.kits.KitIntegration.CommerceListener
 import com.mparticle.kits.KitIntegration.EventListener
-import com.mparticle.kits.KitIntegration.LogoutListener
 import com.mparticle.kits.KitIntegration.PushListener
 import com.mparticle.kits.KitIntegration.UserAttributeListener
 import com.singular.sdk.SDIDAccessorHandler
@@ -40,7 +39,7 @@ open class SingularKit :
     ApplicationStateListener,
     UserAttributeListener,
     AttributeListener,
-    LogoutListener {
+    KitIntegration.LogoutListener {
     interface DeviceAttributionCallback : SingularDeviceAttributionHandler
 
     interface SdidAccessorHandler : SDIDAccessorHandler

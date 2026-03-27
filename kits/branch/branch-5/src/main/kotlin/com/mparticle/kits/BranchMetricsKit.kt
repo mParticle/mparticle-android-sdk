@@ -15,7 +15,6 @@ import com.mparticle.kits.KitIntegration.AttributeListener
 import com.mparticle.kits.KitIntegration.CommerceListener
 import com.mparticle.kits.KitIntegration.EventListener
 import com.mparticle.kits.KitIntegration.IdentityListener
-import com.mparticle.kits.KitIntegration.LogoutListener
 import io.branch.referral.Branch
 import io.branch.referral.Branch.BranchReferralInitListener
 import io.branch.referral.BranchError
@@ -38,7 +37,7 @@ class BranchMetricsKit :
     EventListener,
     CommerceListener,
     AttributeListener,
-    LogoutListener,
+    KitIntegration.LogoutListener,
     ApplicationStateListener,
     IdentityListener,
     BranchReferralInitListener {

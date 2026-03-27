@@ -19,7 +19,6 @@ import com.mparticle.internal.MPUtility
 import com.mparticle.kits.KitIntegration.AttributeListener
 import com.mparticle.kits.KitIntegration.CommerceListener
 import com.mparticle.kits.KitIntegration.EventListener
-import com.mparticle.kits.KitIntegration.LogoutListener
 import com.mparticle.kits.KitIntegration.PushListener
 import com.mparticle.kits.ReportingMessage
 import org.json.JSONArray
@@ -32,7 +31,7 @@ class LocalyticsKit :
     KitIntegration.EventListener,
     CommerceListener,
     AttributeListener,
-    LogoutListener,
+    KitIntegration.LogoutListener,
     PushListener,
     CallToActionListener {
     private var customDimensionJson: JSONArray? = null

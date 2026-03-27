@@ -10,14 +10,13 @@ import com.mparticle.AttributionResult
 import com.mparticle.MParticle.IdentityType
 import com.mparticle.identity.MParticleUser
 import com.mparticle.kits.KitIntegration.AttributeListener
-import com.mparticle.kits.KitIntegration.LogoutListener
 import org.json.JSONException
 import org.json.JSONObject
 
 class KochavaKit :
     KitIntegration(),
     AttributeListener,
-    LogoutListener,
+    KitIntegration.LogoutListener,
     KitIntegration.IdentityListener {
     override fun getName(): String = NAME
 
