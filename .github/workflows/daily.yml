@@ -237,8 +237,7 @@ jobs:
       - name: "Run Android Kit Lint"
         run: ./gradlew lint -c settings-kits.gradle -PVERSION=$(head -n 1 VERSION)
       - name: "Run Isolated Kit Lint (urbanairship-kit)"
-        working-directory: kits/urbanairship/urbanairship-20
-        run: ./gradlew lint
+        run: ./gradlew -p kits/urbanairship/urbanairship-20 -PVERSION=$(head -n 1 VERSION) lint
       - name: "Archive Test Results"
         uses: actions/upload-artifact@v7
         if: always()
@@ -275,8 +274,7 @@ jobs:
       - name: "Run Android Kit Kotlin Lint"
         run: ./gradlew ktlintCheck -c settings-kits.gradle -PVERSION=$(head -n 1 VERSION)
       - name: "Run Isolated Kit Kotlin Lint (urbanairship-kit)"
-        working-directory: kits/urbanairship/urbanairship-20
-        run: ./gradlew ktlintCheck
+        run: ./gradlew -p kits/urbanairship/urbanairship-20 -PVERSION=$(head -n 1 VERSION) ktlintCheck
       - name: "Archive Test Results"
         uses: actions/upload-artifact@v7
         if: always()
@@ -316,8 +314,7 @@ jobs:
       - name: "Test Kits"
         run: ./gradlew clean testRelease -c settings-kits.gradle -PVERSION=$(head -n 1 VERSION)
       - name: "Test Isolated Kits (urbanairship-kit)"
-        working-directory: kits/urbanairship/urbanairship-20
-        run: ./gradlew clean testRelease
+        run: ./gradlew -p kits/urbanairship/urbanairship-20 -PVERSION=$(head -n 1 VERSION) clean testRelease
 
   semantic-release-dryrun:
     name: "Test Semantic Release - Dry Run"
