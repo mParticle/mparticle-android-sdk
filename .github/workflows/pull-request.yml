@@ -100,6 +100,7 @@ jobs:
     steps:
       - name: "Checkout Branch"
         uses: actions/checkout@v6
+      - run: echo "ORG_GRADLE_PROJECT_VERSION=$(head -n 1 VERSION)" >> $GITHUB_ENV
       - name: "Install JDK 17"
         uses: actions/setup-java@v5
         with:
@@ -108,9 +109,9 @@ jobs:
       - name: "Run Android Core SDK Lint"
         run: ./gradlew lint
       - name: "Setup Android Kit Lint"
-        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=$(head -n 1 VERSION)
+        run: ./gradlew publishMavenPublicationToMavenLocal
       - name: "Run Android Kit Lint"
-        run: ./gradlew -c settings-kits.gradle lint -PVERSION=$(head -n 1 VERSION)
+        run: ./gradlew -c settings-kits.gradle lint
       - name: "Archive Lint Test Results"
         uses: actions/upload-artifact@v7
         if: always()
@@ -125,6 +126,7 @@ jobs:
     steps:
       - name: "Checkout Branch"
         uses: actions/checkout@v6
+      - run: echo "ORG_GRADLE_PROJECT_VERSION=$(head -n 1 VERSION)" >> $GITHUB_ENV
       - name: "Install JDK 17"
         uses: actions/setup-java@v5
         with:
@@ -133,9 +135,9 @@ jobs:
       - name: "Run Android Core SDK Kotlin Lint"
         run: ./gradlew ktlintCheck
       - name: "Setup Android Kit Kotlin Lint"
-        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=$(head -n 1 VERSION)
+        run: ./gradlew publishMavenPublicationToMavenLocal
       - name: "Run Android Kit Kotlin Lint"
-        run: ./gradlew -c settings-kits.gradle ktlintCheck -PVERSION=$(head -n 1 VERSION)
+        run: ./gradlew -c settings-kits.gradle ktlintCheck
       - name: "Archive Kotlin Lint Test Results"
         uses: actions/upload-artifact@v7
         if: always()
@@ -156,19 +158,20 @@ jobs:
     steps:
       - name: "Checkout Branch"
         uses: actions/checkout@v6
+      - run: echo "ORG_GRADLE_PROJECT_VERSION=$(head -n 1 VERSION)" >> $GITHUB_ENV
       - name: "Install JDK 17"
         uses: actions/setup-java@v5
         with:
           distribution: "zulu"
           java-version: "17"
       - name: "Generate Core Release Build"
-        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=$(head -n 1 VERSION)
+        run: ./gradlew publishMavenPublicationToMavenLocal
       - name: "Run Kit-Base Release Tests and Build"
-        run: ./gradlew :android-kit-base:testRelease -PVERSION=$(head -n 1 VERSION)
+        run: ./gradlew :android-kit-base:testRelease
       - name: "Run Kit Release Tests and Build"
-        run: ./gradlew -p kits testRelease -c ../settings-kits.gradle -PVERSION=$(head -n 1 VERSION)
+        run: ./gradlew -p kits testRelease -c ../settings-kits.gradle
       - name: "Run Isolated Kit Compatibility Tests (urbanairship)"
-        run: ./gradlew -p kits/urbanairship/urbanairship-20 -PisRelease=true -PVERSION=$(head -n 1 VERSION) testRelease
+        run: ./gradlew -p kits/urbanairship/urbanairship-20 -PisRelease=true testRelease
 
   automerge-dependabot:
     name: "Save PR Number for Dependabot Automerge"
