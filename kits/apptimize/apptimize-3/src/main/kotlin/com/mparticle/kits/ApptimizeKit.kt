@@ -13,12 +13,13 @@ import com.mparticle.MParticle.IdentityType
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.kits.KitIntegration.AttributeListener
 import com.mparticle.kits.KitIntegration.CommerceListener
+import com.mparticle.kits.KitIntegration.LogoutListener
 import java.math.BigDecimal
 
 class ApptimizeKit :
     KitIntegration(),
     AttributeListener,
-    KitIntegration.LogoutListener,
+    LogoutListener,
     KitIntegration.EventListener,
     CommerceListener,
     OnTestRunListener {

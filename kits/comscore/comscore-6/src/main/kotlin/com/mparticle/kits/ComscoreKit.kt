@@ -12,6 +12,7 @@ import com.mparticle.MParticle
 import com.mparticle.MParticle.IdentityType
 import com.mparticle.kits.KitIntegration.ActivityListener
 import com.mparticle.kits.KitIntegration.AttributeListener
+import com.mparticle.kits.KitIntegration.LogoutListener
 import java.util.HashMap
 import java.util.LinkedList
 
@@ -19,7 +20,7 @@ class ComscoreKit :
     KitIntegration(),
     KitIntegration.EventListener,
     AttributeListener,
-    KitIntegration.LogoutListener,
+    LogoutListener,
     ActivityListener {
     private var isEnterprise = false
 

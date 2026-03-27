@@ -31,6 +31,7 @@ import com.mparticle.commerce.Product
 import com.mparticle.consent.ConsentState
 import com.mparticle.internal.Logger
 import com.mparticle.internal.MPUtility
+import com.mparticle.kits.KitIntegration.LogoutListener
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -44,7 +45,7 @@ class AppsFlyerKit :
     KitIntegration(),
     KitIntegration.EventListener,
     KitIntegration.AttributeListener,
-    KitIntegration.LogoutListener,
+    LogoutListener,
     KitIntegration.CommerceListener,
     AppsFlyerConversionListener,
     KitIntegration.ActivityListener,

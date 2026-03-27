@@ -7,6 +7,7 @@ import com.mparticle.MParticle.IdentityType
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.commerce.Product
 import com.mparticle.kits.KitIntegration.CommerceListener
+import com.mparticle.kits.KitIntegration.LogoutListener
 import com.urbanairship.Airship
 import com.urbanairship.Autopilot
 import com.urbanairship.PrivacyManager
@@ -29,7 +30,7 @@ class UrbanAirshipKit :
     KitIntegration.EventListener,
     CommerceListener,
     KitIntegration.AttributeListener,
-    KitIntegration.LogoutListener {
+    LogoutListener {
     private var channelIdListener: ChannelIdListener? = null
     private var configuration: UrbanAirshipConfiguration? = null
 

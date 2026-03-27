@@ -20,6 +20,7 @@ import com.mparticle.MParticle
 import com.mparticle.kits.KitIntegration.ApplicationStateListener
 import com.mparticle.kits.KitIntegration.AttributeListener
 import com.mparticle.kits.KitIntegration.EventListener
+import com.mparticle.kits.KitIntegration.LogoutListener
 import com.mparticle.kits.KitIntegration.PushListener
 import com.mparticle.media.events.ContentType
 import com.mparticle.media.events.EventAttributes
@@ -36,7 +37,7 @@ open class AdobeKit :
     KitIntegration(),
     EventListener,
     AttributeListener,
-    KitIntegration.LogoutListener,
+    LogoutListener,
     PushListener,
     ApplicationStateListener {
     companion object {
