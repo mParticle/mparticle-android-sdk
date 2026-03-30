@@ -170,15 +170,11 @@ class LocalyticsKit :
         }
     }
 
-    fun removeUserAttribute(key: String) {
-        Localytics.deleteProfileAttribute(key)
-    }
-
     override fun onRemoveUserAttribute(
         key: String,
         user: FilteredMParticleUser,
     ) {
-        removeUserAttribute(key)
+        Localytics.deleteProfileAttribute(key)
     }
 
     override fun setOptOut(optOutStatus: Boolean): List<ReportingMessage> {

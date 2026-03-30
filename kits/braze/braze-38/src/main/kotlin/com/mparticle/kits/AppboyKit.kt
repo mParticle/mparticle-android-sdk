@@ -444,7 +444,40 @@ open class AppboyKit :
         key: String?,
         user: FilteredMParticleUser?,
     ) {
-        key?.let { removeUserAttribute(it) }
+        if (key == null) {
+            return
+        }
+        var keyMut = key
+        Braze
+            .getInstance(context)
+            .getCurrentUser(
+                object : IValueCallback<BrazeUser> {
+                    override fun onSuccess(value: BrazeUser) {
+                        if (UserAttributes.CITY == keyMut) {
+                            value.setHomeCity(null)
+                        } else if (UserAttributes.COUNTRY == keyMut) {
+                            value.setCountry(null)
+                        } else if (UserAttributes.FIRSTNAME == keyMut) {
+                            value.setFirstName(null)
+                        } else if (UserAttributes.LASTNAME == keyMut) {
+                            value.setLastName(null)
+                        } else if (UserAttributes.MOBILE_NUMBER == keyMut) {
+                            value.setPhoneNumber(null)
+                        } else {
+                            var customKey = keyMut
+                            if (customKey.startsWith("$")) {
+                                customKey = customKey.substring(1)
+                            }
+                            value.unsetCustomUserAttribute(customKey)
+                        }
+                        queueDataFlush()
+                    }
+
+                    override fun onError() {
+                        Logger.warning("unable to remove User Attribute with key: " + key)
+                    }
+                },
+            )
     }
 
     override fun onSetUserAttribute(
@@ -625,39 +658,6 @@ open class AppboyKit :
             }
             kitPreferences.edit().putBoolean(PREF_KEY_HAS_SYNCED_ATTRIBUTES, true).apply()
         }
-    }
-
-    fun removeUserAttribute(keyIn: String) {
-        var key = keyIn
-        Braze
-            .getInstance(context)
-            .getCurrentUser(
-                object : IValueCallback<BrazeUser> {
-                    override fun onSuccess(value: BrazeUser) {
-                        if (UserAttributes.CITY == key) {
-                            value.setHomeCity(null)
-                        } else if (UserAttributes.COUNTRY == key) {
-                            value.setCountry(null)
-                        } else if (UserAttributes.FIRSTNAME == key) {
-                            value.setFirstName(null)
-                        } else if (UserAttributes.LASTNAME == key) {
-                            value.setLastName(null)
-                        } else if (UserAttributes.MOBILE_NUMBER == key) {
-                            value.setPhoneNumber(null)
-                        } else {
-                            if (key.startsWith("$")) {
-                                key = key.substring(1)
-                            }
-                            value.unsetCustomUserAttribute(key)
-                        }
-                        queueDataFlush()
-                    }
-
-                    override fun onError() {
-                        Logger.warning("unable to remove User Attribute with key: " + key)
-                    }
-                },
-            )
     }
 
     override fun setUserIdentity(

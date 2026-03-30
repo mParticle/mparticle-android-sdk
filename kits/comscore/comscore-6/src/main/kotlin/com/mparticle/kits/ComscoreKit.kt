@@ -112,17 +112,13 @@ class ComscoreKit :
         }
     }
 
-    fun removeUserAttribute(key: String) {
-        if (isEnterprise) {
-            Analytics.getConfiguration().removePersistentLabel(KitUtils.sanitizeAttributeKey(key))
-        }
-    }
-
     override fun onRemoveUserAttribute(
         key: String,
         user: FilteredMParticleUser,
     ) {
-        removeUserAttribute(key)
+        if (isEnterprise) {
+            Analytics.getConfiguration().removePersistentLabel(KitUtils.sanitizeAttributeKey(key))
+        }
     }
 
     override fun removeUserIdentity(identityType: IdentityType) {

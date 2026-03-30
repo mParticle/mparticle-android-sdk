@@ -98,13 +98,10 @@ class KochavaKit :
         map1: Map<String, List<String>>,
     ) {}
 
-    fun removeUserAttribute(key: String) {}
-
     override fun onRemoveUserAttribute(
         key: String,
         user: FilteredMParticleUser,
     ) {
-        removeUserAttribute(key)
     }
 
     override fun setInstallReferrer(intent: Intent) {}

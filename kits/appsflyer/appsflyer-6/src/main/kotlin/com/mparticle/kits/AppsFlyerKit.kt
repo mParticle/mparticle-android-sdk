@@ -306,8 +306,6 @@ class AppsFlyerKit :
         map1: Map<String, List<String>>,
     ) {}
 
-    fun removeUserAttribute(key: String) {}
-
     override fun removeUserIdentity(identityType: MParticle.IdentityType) {
         with(instance) {
             if (MParticle.IdentityType.CustomerId == identityType) {
