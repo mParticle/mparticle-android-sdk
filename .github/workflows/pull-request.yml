@@ -111,7 +111,7 @@ jobs:
       - name: "Setup Android Kit Lint"
         run: ./gradlew publishMavenPublicationToMavenLocal
       - name: "Run Android Kit Lint"
-        run: ./gradlew -c settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true lint
+        run: ./gradlew -Pversion=$(head -n 1 VERSION) -c settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true lint
       - name: "Archive Lint Test Results"
         uses: actions/upload-artifact@v7
         if: always()
@@ -137,7 +137,7 @@ jobs:
       - name: "Setup Android Kit Kotlin Lint"
         run: ./gradlew publishMavenPublicationToMavenLocal
       - name: "Run Android Kit Kotlin Lint"
-        run: ./gradlew -c settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true ktlintCheck
+        run: ./gradlew -Pversion=$(head -n 1 VERSION) -c settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true ktlintCheck
       - name: "Archive Kotlin Lint Test Results"
         uses: actions/upload-artifact@v7
         if: always()
@@ -169,7 +169,7 @@ jobs:
       - name: "Run Kit-Base Release Tests and Build"
         run: ./gradlew :android-kit-base:testRelease
       - name: "Run Kit Release Tests and Build"
-        run: ./gradlew -p kits testRelease -c ../settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true
+        run: ./gradlew -Pversion=$(head -n 1 VERSION) -p kits testRelease -c ../settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true
       - name: "Run Isolated Kit Compatibility Tests (urbanairship)"
         run: ./gradlew -p kits/urbanairship/urbanairship-20 -PisRelease=true testRelease
 
