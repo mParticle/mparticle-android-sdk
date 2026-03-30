@@ -77,6 +77,12 @@ class KitPlugin implements Plugin<Project> {
 
     private static void configureRepositories(RepositoryHandler repositories, boolean mparticleFromMavenLocalOnly) {
         if (mparticleFromMavenLocalOnly) {
+            // Root build scripts may have already attached unfiltered repos. Rebuild this
+            // project's repository chain so com.mparticle cannot resolve outside mavenLocal().
+            def existingRepos = repositories.toList()
+            existingRepos.each { repo ->
+                repositories.remove(repo)
+            }
             repositories.mavenLocal {
                 content {
                     includeGroup 'com.mparticle'
