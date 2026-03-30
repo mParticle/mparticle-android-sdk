@@ -77,14 +77,21 @@ class KitPlugin implements Plugin<Project> {
 
     private static void configureRepositories(RepositoryHandler repositories, boolean mparticleFromMavenLocalOnly) {
         if (mparticleFromMavenLocalOnly) {
-            repositories.exclusiveContent {
-                forRepository(repositories.mavenLocal())
-                filter {
+            repositories.mavenLocal {
+                content {
                     includeGroup 'com.mparticle'
                 }
             }
-            repositories.google()
-            repositories.mavenCentral()
+            repositories.google {
+                content {
+                    excludeGroup 'com.mparticle'
+                }
+            }
+            repositories.mavenCentral {
+                content {
+                    excludeGroup 'com.mparticle'
+                }
+            }
         } else {
             repositories.mavenLocal()
             repositories.google()
