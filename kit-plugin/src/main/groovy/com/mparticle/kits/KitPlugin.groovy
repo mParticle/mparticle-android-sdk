@@ -15,7 +15,10 @@ class KitPlugin implements Plugin<Project> {
         configureRepositories(target.buildscript.repositories, mparticleFromMavenLocalOnly)
         configureRepositories(target.repositories, mparticleFromMavenLocalOnly)
         target.configurations.create('deployerJars')
-        def kitBaseVersion = target.findProperty('VERSION') ?: '+'
+        // VERSION from CI is often set only on the root project (e.g. ORG_GRADLE_PROJECT_VERSION); kit
+        // subprojects do not always inherit it, which would fall back to '+' and unstable resolution.
+        def kitBaseVersion =
+            target.findProperty('VERSION') ?: target.rootProject.findProperty('VERSION') ?: '+'
         target.dependencies.add('api', 'com.mparticle:android-kit-base:' + kitBaseVersion)
         target.dependencies.add('testImplementation', 'junit:junit:4.13.2')
         target.dependencies.add('testImplementation', 'org.mockito:mockito-core:1.10.19')
