@@ -238,7 +238,7 @@ jobs:
       - name: "Run Android Kit Lint"
         run: ./gradlew -Pversion=$(head -n 1 VERSION) lint -c settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true
       - name: "Run Isolated Kit Lint (urbanairship-kit)"
-        run: ./gradlew -p kits/urbanairship/urbanairship-20 lint
+        run: ./gradlew -Pversion=$(head -n 1 VERSION) -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 lint
       - name: "Archive Test Results"
         uses: actions/upload-artifact@v7
         if: always()
@@ -276,7 +276,7 @@ jobs:
       - name: "Run Android Kit Kotlin Lint"
         run: ./gradlew -Pversion=$(head -n 1 VERSION) ktlintCheck -c settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true
       - name: "Run Isolated Kit Kotlin Lint (urbanairship-kit)"
-        run: ./gradlew -p kits/urbanairship/urbanairship-20 ktlintCheck
+        run: ./gradlew -Pversion=$(head -n 1 VERSION) -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 ktlintCheck
       - name: "Archive Test Results"
         uses: actions/upload-artifact@v7
         if: always()
@@ -317,7 +317,7 @@ jobs:
       - name: "Test Kits"
         run: ./gradlew -Pversion=$(head -n 1 VERSION) clean testRelease -c settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true
       - name: "Test Isolated Kits (urbanairship-kit)"
-        run: ./gradlew -p kits/urbanairship/urbanairship-20 clean testRelease
+        run: ./gradlew -Pversion=$(head -n 1 VERSION) -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 clean testRelease
 
   semantic-release-dryrun:
     name: "Test Semantic Release - Dry Run"

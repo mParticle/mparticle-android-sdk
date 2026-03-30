@@ -171,7 +171,7 @@ jobs:
       - name: "Run Kit Release Tests and Build"
         run: ./gradlew -Pversion=$(head -n 1 VERSION) -p kits testRelease -c ../settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true
       - name: "Run Isolated Kit Compatibility Tests (urbanairship)"
-        run: ./gradlew -p kits/urbanairship/urbanairship-20 -PisRelease=true testRelease
+        run: ./gradlew -Pversion=$(head -n 1 VERSION) -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 -PisRelease=true testRelease
 
   automerge-dependabot:
     name: "Save PR Number for Dependabot Automerge"
