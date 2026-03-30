@@ -140,7 +140,7 @@ abstract class AdobeKitBase :
             dcsRegion,
             pushId,
             gaid,
-            currentUser.userIdentities ?: emptyMap(),
+            currentUser?.userIdentities ?: emptyMap(),
         )
     }
 
