@@ -1,7 +1,6 @@
 package com.mparticle.kits.testkits
 
 import com.mparticle.MParticle
-import com.mparticle.kits.KitIntegration
 import com.mparticle.kits.KitIntegration.AttributeListener
 import com.mparticle.kits.KitIntegration.LogoutListener
 import com.mparticle.kits.ReportingMessage
