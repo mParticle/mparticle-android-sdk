@@ -627,7 +627,7 @@ open class AppboyKit :
         }
     }
 
-    override fun removeUserAttribute(keyIn: String) {
+    fun removeUserAttribute(keyIn: String) {
         var key = keyIn
         Braze
             .getInstance(context)

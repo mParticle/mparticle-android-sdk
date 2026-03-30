@@ -170,7 +170,7 @@ class LocalyticsKit :
         }
     }
 
-    override fun removeUserAttribute(key: String) {
+    fun removeUserAttribute(key: String) {
         Localytics.deleteProfileAttribute(key)
     }
 

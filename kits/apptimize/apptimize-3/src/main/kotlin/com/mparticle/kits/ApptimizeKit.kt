@@ -152,7 +152,7 @@ class ApptimizeKit :
         }
     }
 
-    override fun removeUserAttribute(key: String) {
+    fun removeUserAttribute(key: String) {
         Apptimize.clearUserAttribute(key)
     }
 

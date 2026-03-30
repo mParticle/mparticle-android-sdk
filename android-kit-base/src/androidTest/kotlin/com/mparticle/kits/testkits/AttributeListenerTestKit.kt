@@ -62,7 +62,7 @@ open class AttributeListenerTestKit :
         onIdentityReceived?.invoke(identityType, null)
     }
 
-    override fun removeUserAttribute(key: String) {
+    fun removeUserAttribute(key: String) {
         removeUserAttribute?.invoke(key)
         onAttributeReceived?.invoke(key, null)
     }

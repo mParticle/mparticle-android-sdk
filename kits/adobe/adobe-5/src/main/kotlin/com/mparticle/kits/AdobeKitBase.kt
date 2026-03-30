@@ -71,8 +71,15 @@ abstract class AdobeKitBase :
         syncIds()
     }
 
-    override fun removeUserAttribute(s: String) {
+    fun removeUserAttribute(s: String) {
         syncIds()
+    }
+
+    override fun onRemoveUserAttribute(
+        key: String,
+        user: FilteredMParticleUser,
+    ) {
+        removeUserAttribute(key)
     }
 
     override fun setUserIdentity(

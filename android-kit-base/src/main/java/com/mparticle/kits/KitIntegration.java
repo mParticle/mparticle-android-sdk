@@ -397,8 +397,6 @@ public abstract class KitIntegration {
 
         void setAllUserAttributes(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists);
 
-        void removeUserAttribute(String key);
-
         void setUserIdentity(MParticle.IdentityType identityType, String identity);
 
         void removeUserIdentity(MParticle.IdentityType identityType);

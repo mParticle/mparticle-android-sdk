@@ -108,7 +108,7 @@ open class AdobeKit :
         syncIds()
     }
 
-    override fun removeUserAttribute(s: String) {
+    fun removeUserAttribute(s: String) {
         syncIds()
     }
 

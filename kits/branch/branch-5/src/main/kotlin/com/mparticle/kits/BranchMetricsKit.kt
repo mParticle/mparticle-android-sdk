@@ -191,7 +191,7 @@ class BranchMetricsKit :
         map1: Map<String, List<String>>,
     ) {}
 
-    override fun removeUserAttribute(s: String) {}
+    fun removeUserAttribute(s: String) {}
 
     override fun onRemoveUserAttribute(
         key: String,

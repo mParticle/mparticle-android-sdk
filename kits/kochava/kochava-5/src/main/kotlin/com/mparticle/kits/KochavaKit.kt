@@ -98,7 +98,7 @@ class KochavaKit :
         map1: Map<String, List<String>>,
     ) {}
 
-    override fun removeUserAttribute(key: String) {}
+    fun removeUserAttribute(key: String) {}
 
     override fun onRemoveUserAttribute(
         key: String,

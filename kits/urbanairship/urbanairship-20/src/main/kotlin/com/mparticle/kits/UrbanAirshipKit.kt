@@ -284,7 +284,7 @@ class UrbanAirshipKit :
         }
     }
 
-    override fun removeUserAttribute(attribute: String) {
+    fun removeUserAttribute(attribute: String) {
         Airship.channel
             .editTags()
             .removeTag(attribute)
