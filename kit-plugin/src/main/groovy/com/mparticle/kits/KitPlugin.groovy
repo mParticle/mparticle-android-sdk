@@ -88,11 +88,7 @@ class KitPlugin implements Plugin<Project> {
                     includeGroup 'com.mparticle'
                 }
             }
-            repositories.google {
-                content {
-                    excludeGroup 'com.mparticle'
-                }
-            }
+            repositories.google()
             repositories.mavenCentral {
                 content {
                     excludeGroup 'com.mparticle'
