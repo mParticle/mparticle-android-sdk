@@ -3,6 +3,7 @@ package com.mparticle.kits
 import com.android.build.gradle.LibraryExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.dsl.RepositoryHandler
 
 class KitPlugin implements Plugin<Project> {
     void apply(Project target) {
@@ -10,12 +11,9 @@ class KitPlugin implements Plugin<Project> {
         //formerly in kit-common.gradle
         target.apply(plugin: 'com.android.library')
         target.group = 'com.mparticle'
-        target.buildscript.repositories.add(target.repositories.mavenLocal())
-        target.buildscript.repositories.add(target.repositories.google())
-        target.buildscript.repositories.add(target.repositories.mavenCentral())
-        target.repositories.add(target.repositories.mavenLocal())
-        target.repositories.add(target.repositories.google())
-        target.repositories.add(target.repositories.mavenCentral())
+        boolean mparticleFromMavenLocalOnly = resolveMparticleFromMavenLocalOnly(target)
+        configureRepositories(target.buildscript.repositories, mparticleFromMavenLocalOnly)
+        configureRepositories(target.repositories, mparticleFromMavenLocalOnly)
         target.configurations.create('deployerJars')
         def kitBaseVersion = target.findProperty('VERSION') ?: '+'
         target.dependencies.add('api', 'com.mparticle:android-kit-base:' + kitBaseVersion)
@@ -55,6 +53,41 @@ class KitPlugin implements Plugin<Project> {
             })
         } catch (org.gradle.api.plugins.UnknownPluginException ignored) {
             // no-op: publish plugin unavailable outside monorepo
+        }
+    }
+
+    /**
+     * When true, {@code com.mparticle} artifacts (e.g. android-kit-base, android-kit-plugin) resolve
+     * only from {@code mavenLocal()}; Maven Central / Google are not queried for that group.
+     * Use after {@code publishMavenPublicationToMavenLocal} so CI and monorepo kit builds use the
+     * freshly published local artifacts. Enable with {@code -Pmparticle.kit.mparticleFromMavenLocalOnly=true}
+     * or env {@code MPARTICLE_KIT_FROM_MAVEN_LOCAL_ONLY=true}.
+     */
+    private static boolean resolveMparticleFromMavenLocalOnly(Project target) {
+        String prop = target.findProperty('mparticle.kit.mparticleFromMavenLocalOnly')?.toString()
+        if (prop != null && Boolean.parseBoolean(prop)) {
+            return true
+        }
+        String env = System.getenv('MPARTICLE_KIT_FROM_MAVEN_LOCAL_ONLY')
+        return env != null && 'true'.equalsIgnoreCase(env)
+    }
+
+    private static void configureRepositories(RepositoryHandler repositories, boolean mparticleFromMavenLocalOnly) {
+        if (mparticleFromMavenLocalOnly) {
+            repositories.exclusiveContent {
+                forRepository {
+                    mavenLocal()
+                }
+                filter {
+                    includeGroup 'com.mparticle'
+                }
+            }
+            repositories.google()
+            repositories.mavenCentral()
+        } else {
+            repositories.mavenLocal()
+            repositories.google()
+            repositories.mavenCentral()
         }
     }
 }
