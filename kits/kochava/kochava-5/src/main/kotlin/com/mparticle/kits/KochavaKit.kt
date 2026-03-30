@@ -100,6 +100,13 @@ class KochavaKit :
 
     override fun removeUserAttribute(key: String) {}
 
+    override fun onRemoveUserAttribute(
+        key: String,
+        user: FilteredMParticleUser,
+    ) {
+        removeUserAttribute(key)
+    }
+
     override fun setInstallReferrer(intent: Intent) {}
 
     override fun setUserIdentity(

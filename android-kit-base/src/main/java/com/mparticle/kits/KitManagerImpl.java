@@ -723,15 +723,10 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
         }
         for (KitIntegration provider : providers.values()) {
             try {
-                if ((provider instanceof KitIntegration.AttributeListener || provider instanceof KitIntegration.UserAttributeListener)
+                if ((provider instanceof KitIntegration.BaseAttributeListener listener)
                         && !provider.isDisabled()
                         && KitConfiguration.shouldForwardAttribute(provider.getConfiguration().getUserAttributeFilters(), key)) {
-                    if (provider instanceof KitIntegration.AttributeListener) {
-                        ((KitIntegration.AttributeListener) provider).removeUserAttribute(key);
-                    }
-                    if (provider instanceof KitIntegration.UserAttributeListener) {
-                        ((KitIntegration.UserAttributeListener) provider).onRemoveUserAttribute(key, FilteredMParticleUser.getInstance(mpid, provider));
-                    }
+                    listener.onRemoveUserAttribute(key, FilteredMParticleUser.getInstance(mpid, provider));
                 }
             } catch (Exception e) {
                 Logger.warning("Failed to call removeUserAttribute/onRemoveUserAttribute for kit: " + provider.getName() + ": " + e.getMessage());

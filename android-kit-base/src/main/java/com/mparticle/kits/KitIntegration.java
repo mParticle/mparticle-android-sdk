@@ -379,6 +379,14 @@ public abstract class KitIntegration {
          * @return true if this listener supports attribute values as lists.
          */
         boolean supportsAttributeLists();
+
+        /**
+         * Called when a user attribute is removed for the current user.
+         *
+         * @param key  attribute key
+         * @param user filtered user context for this kit
+         */
+        void onRemoveUserAttribute(String key, FilteredMParticleUser user);
     }
 
     public interface AttributeListener extends BaseAttributeListener {
@@ -549,8 +557,6 @@ public abstract class KitIntegration {
     public interface UserAttributeListener extends BaseAttributeListener {
 
         void onIncrementUserAttribute(String key, Number incrementedBy, String value, FilteredMParticleUser user);
-
-        void onRemoveUserAttribute(String key, FilteredMParticleUser user);
 
         void onSetUserAttribute(String key, Object value, FilteredMParticleUser user);
 

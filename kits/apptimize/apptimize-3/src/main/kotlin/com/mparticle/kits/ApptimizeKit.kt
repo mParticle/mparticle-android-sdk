@@ -156,6 +156,13 @@ class ApptimizeKit :
         Apptimize.clearUserAttribute(key)
     }
 
+    override fun onRemoveUserAttribute(
+        key: String,
+        user: FilteredMParticleUser,
+    ) {
+        removeUserAttribute(key)
+    }
+
     /**
      * @param identityType only Alias and CustomerId are suppoted by the Apptimize kit.
      */

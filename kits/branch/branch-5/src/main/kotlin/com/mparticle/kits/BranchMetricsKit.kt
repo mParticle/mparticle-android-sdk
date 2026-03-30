@@ -193,6 +193,13 @@ class BranchMetricsKit :
 
     override fun removeUserAttribute(s: String) {}
 
+    override fun onRemoveUserAttribute(
+        key: String,
+        user: FilteredMParticleUser,
+    ) {
+        removeUserAttribute(key)
+    }
+
     override fun setUserIdentity(
         identityType: IdentityType,
         s: String,

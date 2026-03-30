@@ -1,6 +1,7 @@
 package com.mparticle.kits.testkits
 
 import com.mparticle.MParticle
+import com.mparticle.kits.FilteredMParticleUser
 import com.mparticle.kits.KitIntegration.AttributeListener
 import com.mparticle.kits.KitIntegration.LogoutListener
 import com.mparticle.kits.ReportingMessage
@@ -62,6 +63,14 @@ open class AttributeListenerTestKit :
     }
 
     override fun removeUserAttribute(key: String) {
+        removeUserAttribute?.invoke(key)
+        onAttributeReceived?.invoke(key, null)
+    }
+
+    override fun onRemoveUserAttribute(
+        key: String,
+        user: FilteredMParticleUser,
+    ) {
         removeUserAttribute?.invoke(key)
         onAttributeReceived?.invoke(key, null)
     }

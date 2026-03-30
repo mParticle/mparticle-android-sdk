@@ -174,6 +174,13 @@ class LocalyticsKit :
         Localytics.deleteProfileAttribute(key)
     }
 
+    override fun onRemoveUserAttribute(
+        key: String,
+        user: FilteredMParticleUser,
+    ) {
+        removeUserAttribute(key)
+    }
+
     override fun setOptOut(optOutStatus: Boolean): List<ReportingMessage> {
         Localytics.setOptedOut(optOutStatus)
         val messageList: MutableList<ReportingMessage> = LinkedList()

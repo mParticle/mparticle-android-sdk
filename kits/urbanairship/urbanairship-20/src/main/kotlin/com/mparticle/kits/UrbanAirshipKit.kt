@@ -291,6 +291,13 @@ class UrbanAirshipKit :
             .apply()
     }
 
+    override fun onRemoveUserAttribute(
+        key: String,
+        user: FilteredMParticleUser,
+    ) {
+        removeUserAttribute(key)
+    }
+
     // not supported
     override fun logout(): List<ReportingMessage> = emptyList()
 
