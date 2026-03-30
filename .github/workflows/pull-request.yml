@@ -101,6 +101,7 @@ jobs:
       - name: "Checkout Branch"
         uses: actions/checkout@v6
       - run: echo "ORG_GRADLE_PROJECT_VERSION=$(head -n 1 VERSION)" >> $GITHUB_ENV
+      - run: echo "ORG_GRADLE_PROJECT_version=$(head -n 1 VERSION)" >> $GITHUB_ENV
       - name: "Install JDK 17"
         uses: actions/setup-java@v5
         with:
@@ -111,7 +112,7 @@ jobs:
       - name: "Setup Android Kit Lint"
         run: ./gradlew publishMavenPublicationToMavenLocal
       - name: "Run Android Kit Lint"
-        run: ./gradlew -Pversion=$(head -n 1 VERSION) -c settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true lint
+        run: ./gradlew -c settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true lint
       - name: "Archive Lint Test Results"
         uses: actions/upload-artifact@v7
         if: always()
@@ -127,6 +128,7 @@ jobs:
       - name: "Checkout Branch"
         uses: actions/checkout@v6
       - run: echo "ORG_GRADLE_PROJECT_VERSION=$(head -n 1 VERSION)" >> $GITHUB_ENV
+      - run: echo "ORG_GRADLE_PROJECT_version=$(head -n 1 VERSION)" >> $GITHUB_ENV
       - name: "Install JDK 17"
         uses: actions/setup-java@v5
         with:
@@ -137,7 +139,7 @@ jobs:
       - name: "Setup Android Kit Kotlin Lint"
         run: ./gradlew publishMavenPublicationToMavenLocal
       - name: "Run Android Kit Kotlin Lint"
-        run: ./gradlew -Pversion=$(head -n 1 VERSION) -c settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true ktlintCheck
+        run: ./gradlew -c settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true ktlintCheck
       - name: "Archive Kotlin Lint Test Results"
         uses: actions/upload-artifact@v7
         if: always()
@@ -159,6 +161,7 @@ jobs:
       - name: "Checkout Branch"
         uses: actions/checkout@v6
       - run: echo "ORG_GRADLE_PROJECT_VERSION=$(head -n 1 VERSION)" >> $GITHUB_ENV
+      - run: echo "ORG_GRADLE_PROJECT_version=$(head -n 1 VERSION)" >> $GITHUB_ENV
       - name: "Install JDK 17"
         uses: actions/setup-java@v5
         with:
@@ -169,9 +172,9 @@ jobs:
       - name: "Run Kit-Base Release Tests and Build"
         run: ./gradlew :android-kit-base:testRelease
       - name: "Run Kit Release Tests and Build"
-        run: ./gradlew -Pversion=$(head -n 1 VERSION) -p kits testRelease -c ../settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true
+        run: ./gradlew -p kits testRelease -c ../settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true
       - name: "Run Isolated Kit Compatibility Tests (urbanairship)"
-        run: ./gradlew -Pversion=$(head -n 1 VERSION) -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 -PisRelease=true testRelease
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 -PisRelease=true testRelease
 
   automerge-dependabot:
     name: "Save PR Number for Dependabot Automerge"
