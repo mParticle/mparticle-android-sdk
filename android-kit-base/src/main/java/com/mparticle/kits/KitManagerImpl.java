@@ -605,8 +605,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
                             userAttributes);
                     Map<String, List<String>> filteredAttributeLists = (Map<String, List<String>>) KitConfiguration.filterAttributes(provider.getConfiguration().getUserAttributeFilters(),
                             userAttributeLists);
+                    boolean supportsAttributeLists = ((KitIntegration.BaseAttributeListener) provider).supportsAttributeLists();
                     if (provider instanceof KitIntegration.AttributeListener) {
-                        if (((KitIntegration.AttributeListener) provider).supportsAttributeLists()) {
+                        if (supportsAttributeLists) {
                             ((KitIntegration.AttributeListener) provider).setAllUserAttributes(filteredAttributeSingles, filteredAttributeLists);
                         } else {
                             Map<String, String> singlesCopy = new HashMap<>(filteredAttributeSingles);
@@ -617,7 +618,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
                         }
                     }
                     if (provider instanceof KitIntegration.UserAttributeListener) {
-                        if (((KitIntegration.UserAttributeListener) provider).supportsAttributeLists()) {
+                        if (supportsAttributeLists) {
                             ((KitIntegration.UserAttributeListener) provider).onSetAllUserAttributes(filteredAttributeSingles, filteredAttributeLists, FilteredMParticleUser.getInstance(mpid, provider));
                         } else {
                             Map<String, String> singlesCopy = new HashMap<>(filteredAttributeSingles);
@@ -683,15 +684,16 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
         if ((provider instanceof KitIntegration.AttributeListener || provider instanceof KitIntegration.UserAttributeListener)
                 && !provider.isDisabled()
                 && KitConfiguration.shouldForwardAttribute(provider.getConfiguration().getUserAttributeFilters(), attributeKey)) {
+            boolean supportsAttributeLists = ((KitIntegration.BaseAttributeListener) provider).supportsAttributeLists();
             if (provider instanceof KitIntegration.AttributeListener) {
-                if (((KitIntegration.AttributeListener) provider).supportsAttributeLists()) {
+                if (supportsAttributeLists) {
                     ((KitIntegration.AttributeListener) provider).setUserAttributeList(attributeKey, valueList);
                 } else {
                     ((KitIntegration.AttributeListener) provider).setUserAttribute(attributeKey, KitUtils.join(valueList));
                 }
             }
             if (provider instanceof KitIntegration.UserAttributeListener) {
-                if (((KitIntegration.UserAttributeListener) provider).supportsAttributeLists()) {
+                if (supportsAttributeLists) {
                     ((KitIntegration.UserAttributeListener) provider).onSetUserAttributeList(attributeKey, valueList, FilteredMParticleUser.getInstance(mpid, provider));
                 } else {
                     ((KitIntegration.UserAttributeListener) provider).onSetUserAttribute(attributeKey, KitUtils.join(valueList), FilteredMParticleUser.getInstance(mpid, provider));
