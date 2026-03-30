@@ -444,6 +444,7 @@ open class AppboyKit :
         key: String?,
         user: FilteredMParticleUser?,
     ) {
+        key?.let { removeUserAttribute(it) }
     }
 
     override fun onSetUserAttribute(
