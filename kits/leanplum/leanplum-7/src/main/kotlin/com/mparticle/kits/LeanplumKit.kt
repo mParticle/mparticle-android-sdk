@@ -77,7 +77,7 @@ class LeanplumKit :
             generateLeanplumUserId(
                 it,
                 settings,
-                userIdentities,
+                it.userIdentities ?: emptyMap(),
             )?.ifEmpty { null }
         }
 

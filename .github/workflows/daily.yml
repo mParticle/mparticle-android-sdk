@@ -224,6 +224,8 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: regression/${{ github.run_number }}
+      - run: echo "ORG_GRADLE_PROJECT_VERSION=$(head -n 1 VERSION)" >> $GITHUB_ENV
+      - run: echo "ORG_GRADLE_PROJECT_version=$(head -n 1 VERSION)" >> $GITHUB_ENV
       - name: "Install JDK 17"
         uses: actions/setup-java@v5
         with:
@@ -233,12 +235,11 @@ jobs:
       - name: "Run Android Core SDK Lint"
         run: ./gradlew lint
       - name: "Setup Android Kit Lint"
-        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=$(head -n 1 VERSION)
+        run: ./gradlew publishMavenPublicationToMavenLocal
       - name: "Run Android Kit Lint"
-        run: ./gradlew lint -c settings-kits.gradle
+        run: ./gradlew lint -c settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true
       - name: "Run Isolated Kit Lint (urbanairship-kit)"
-        working-directory: kits/urbanairship/urbanairship-20
-        run: ./gradlew lint
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 lint
       - name: "Archive Test Results"
         uses: actions/upload-artifact@v7
         if: always()
@@ -262,6 +263,8 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: regression/${{ github.run_number }}
+      - run: echo "ORG_GRADLE_PROJECT_VERSION=$(head -n 1 VERSION)" >> $GITHUB_ENV
+      - run: echo "ORG_GRADLE_PROJECT_version=$(head -n 1 VERSION)" >> $GITHUB_ENV
       - name: "Install JDK 17"
         uses: actions/setup-java@v5
         with:
@@ -271,12 +274,11 @@ jobs:
       - name: "Run Android Core SDK Kotlin Lint"
         run: ./gradlew ktlintCheck
       - name: "Setup Android Kit Kotlin Lint"
-        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=$(head -n 1 VERSION)
+        run: ./gradlew publishMavenPublicationToMavenLocal
       - name: "Run Android Kit Kotlin Lint"
-        run: ./gradlew ktlintCheck -c settings-kits.gradle
+        run: ./gradlew ktlintCheck -c settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true
       - name: "Run Isolated Kit Kotlin Lint (urbanairship-kit)"
-        working-directory: kits/urbanairship/urbanairship-20
-        run: ./gradlew ktlintCheck
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 ktlintCheck
       - name: "Archive Test Results"
         uses: actions/upload-artifact@v7
         if: always()
@@ -305,6 +307,8 @@ jobs:
         with:
           repository: mparticle/mparticle-android-sdk
           ref: regression/${{ github.run_number }}
+      - run: echo "ORG_GRADLE_PROJECT_VERSION=$(head -n 1 VERSION)" >> $GITHUB_ENV
+      - run: echo "ORG_GRADLE_PROJECT_version=$(head -n 1 VERSION)" >> $GITHUB_ENV
       - name: "Install JDK 17"
         uses: actions/setup-java@v5
         with:
@@ -312,12 +316,11 @@ jobs:
           java-version: "17"
           cache: "gradle"
       - name: "Build Android Core"
-        run: ./gradlew clean publishMavenPublicationToMavenLocal -PVERSION=$(head -n 1 VERSION)
+        run: ./gradlew clean publishMavenPublicationToMavenLocal
       - name: "Test Kits"
-        run: ./gradlew clean testRelease -c settings-kits.gradle
+        run: ./gradlew clean testRelease -c settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true
       - name: "Test Isolated Kits (urbanairship-kit)"
-        working-directory: kits/urbanairship/urbanairship-20
-        run: ./gradlew clean testRelease
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 clean testRelease
 
   semantic-release-dryrun:
     name: "Test Semantic Release - Dry Run"

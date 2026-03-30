@@ -35,6 +35,7 @@ import com.mparticle.kits.KitIntegration.AttributeListener
 import com.mparticle.kits.KitIntegration.CommerceListener
 import com.mparticle.kits.KitIntegration.EventListener
 import com.mparticle.kits.KitIntegration.IdentityListener
+import com.mparticle.kits.KitIntegration.LogoutListener
 import com.mparticle.kits.KitIntegration.PushListener
 import com.mparticle.kits.KitIntegration.UserAttributeListener
 import org.json.JSONArray
@@ -54,6 +55,7 @@ import kotlin.collections.HashMap
 open class AppboyKit :
     KitIntegration(),
     AttributeListener,
+    LogoutListener,
     CommerceListener,
     KitIntegration.EventListener,
     PushListener,

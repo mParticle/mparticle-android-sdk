@@ -39,6 +39,7 @@ import com.mparticle.internal.KitsLoadedCallback;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.ReportingManager;
+import com.mparticle.kits.KitIntegration.LogoutListener;
 import com.mparticle.kits.mappings.CustomMapping;
 import com.mparticle.rokt.RoktOptions;
 
@@ -809,9 +810,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     public void logout() {
         for (KitIntegration provider : providers.values()) {
             try {
-                if (provider instanceof KitIntegration.AttributeListener && !provider.isDisabled()) {
-                    List<ReportingMessage> report = ((KitIntegration.AttributeListener) provider).logout();
-                    getReportingManager().logAll(report);
+                if (provider instanceof LogoutListener listener && !provider.isDisabled()) {
+                    getReportingManager().logAll(listener.logout());
                 }
             } catch (Exception e) {
                 Logger.warning("Failed to call logout for kit: " + provider.getName() + ": " + e.getMessage());

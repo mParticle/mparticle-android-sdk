@@ -7,6 +7,7 @@ import com.mparticle.MParticle.IdentityType
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.commerce.Product
 import com.mparticle.kits.KitIntegration.CommerceListener
+import com.mparticle.kits.KitIntegration.LogoutListener
 import com.urbanairship.Airship
 import com.urbanairship.Autopilot
 import com.urbanairship.PrivacyManager
@@ -19,6 +20,7 @@ import com.urbanairship.push.PushMessage
 import com.urbanairship.push.PushProviderBridge
 import java.math.BigDecimal
 import java.util.LinkedList
+import com.mparticle.kits.KitIntegration.AttributeListener
 
 /**
  * mParticle-Urban Airship Kit integration
@@ -28,7 +30,8 @@ class UrbanAirshipKit :
     KitIntegration.PushListener,
     KitIntegration.EventListener,
     CommerceListener,
-    KitIntegration.AttributeListener {
+    AttributeListener,
+    LogoutListener {
     private var channelIdListener: ChannelIdListener? = null
     private var configuration: UrbanAirshipConfiguration? = null
 
