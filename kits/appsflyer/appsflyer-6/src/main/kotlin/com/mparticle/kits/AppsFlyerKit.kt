@@ -37,6 +37,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.math.BigDecimal
 import java.util.LinkedList
+import com.mparticle.kits.KitIntegration.AttributeListener
 
 /**
  * mParticle Kit wrapper for the AppsFlyer SDK
@@ -44,7 +45,7 @@ import java.util.LinkedList
 class AppsFlyerKit :
     KitIntegration(),
     KitIntegration.EventListener,
-    KitIntegration.AttributeListener,
+    AttributeListener,
     LogoutListener,
     KitIntegration.CommerceListener,
     AppsFlyerConversionListener,
