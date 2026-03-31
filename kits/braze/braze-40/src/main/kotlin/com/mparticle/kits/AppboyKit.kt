@@ -440,27 +440,6 @@ open class AppboyKit :
         }
     }
 
-    private fun setUserAttributeList(
-        key: String,
-        list: List<String>,
-    ) {
-        Braze
-            .getInstance(context)
-            .getCurrentUser(
-                object : IValueCallback<BrazeUser> {
-                    override fun onSuccess(value: BrazeUser) {
-                        val array = list.toTypedArray<String?>()
-                        value.setCustomAttributeArray(key, array)
-                        queueDataFlush()
-                    }
-
-                    override fun onError() {
-                        Logger.warning("unable to set key: " + key + " with User Attribute List: " + list)
-                    }
-                },
-            )
-    }
-
     override fun onIncrementUserAttribute(
         key: String?,
         incrementedBy: Number?,
@@ -532,7 +511,23 @@ open class AppboyKit :
         if (attributeKey == null || attributeValueList == null) {
             return
         }
-        setUserAttributeList(attributeKey, attributeValueList)
+        Braze
+            .getInstance(context)
+            .getCurrentUser(
+                object : IValueCallback<BrazeUser> {
+                    override fun onSuccess(value: BrazeUser) {
+                        val array = attributeValueList.toTypedArray<String?>()
+                        value.setCustomAttributeArray(attributeKey, array)
+                        queueDataFlush()
+                    }
+
+                    override fun onError() {
+                        Logger.warning(
+                            "unable to set key: " + attributeKey + " with User Attribute List: " + attributeValueList,
+                        )
+                    }
+                },
+            )
     }
 
     override fun onSetAllUserAttributes(
@@ -689,7 +684,21 @@ open class AppboyKit :
                 applyScalarUserAttribute(key, value)
             }
             for ((key, value) in attributeLists) {
-                setUserAttributeList(key, value)
+                Braze
+                    .getInstance(context)
+                    .getCurrentUser(
+                        object : IValueCallback<BrazeUser> {
+                            override fun onSuccess(brazeUser: BrazeUser) {
+                                val array = value.toTypedArray<String?>()
+                                brazeUser.setCustomAttributeArray(key, array)
+                                queueDataFlush()
+                            }
+
+                            override fun onError() {
+                                Logger.warning("unable to set key: " + key + " with User Attribute List: " + value)
+                            }
+                        },
+                    )
             }
             kitPreferences.edit().putBoolean(PREF_KEY_HAS_SYNCED_ATTRIBUTES, true).apply()
         }

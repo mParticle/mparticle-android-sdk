@@ -148,20 +148,12 @@ class LocalyticsKit :
         }
     }
 
-    private fun setUserAttributeList(
-        key: String,
-        list: List<String>,
-    ) {
-        val array = list.toTypedArray()
-        Localytics.setProfileAttribute(key, array)
-    }
-
     override fun onSetUserAttributeList(
         attributeKey: String,
         attributeValueList: List<String>,
         user: FilteredMParticleUser,
     ) {
-        setUserAttributeList(attributeKey, attributeValueList)
+        Localytics.setProfileAttribute(attributeKey, attributeValueList.toTypedArray())
     }
 
     override fun supportsAttributeLists(): Boolean = true
@@ -174,7 +166,7 @@ class LocalyticsKit :
             applyScalarUserAttribute(key, value)
         }
         for ((key, value) in attributeLists) {
-            setUserAttributeList(key, value)
+            Localytics.setProfileAttribute(key, value.toTypedArray())
         }
     }
 
