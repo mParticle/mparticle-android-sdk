@@ -440,7 +440,7 @@ open class AppboyKit :
         }
     }
 
-    override fun setUserAttributeList(
+    private fun setUserAttributeList(
         key: String,
         list: List<String>,
     ) {

@@ -148,7 +148,7 @@ class LocalyticsKit :
         }
     }
 
-    override fun setUserAttributeList(
+    private fun setUserAttributeList(
         key: String,
         list: List<String>,
     ) {

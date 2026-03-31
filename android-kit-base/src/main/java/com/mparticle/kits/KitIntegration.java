@@ -409,8 +409,6 @@ public abstract class KitIntegration {
 
     public interface AttributeListener extends BaseAttributeListener {
 
-        void setUserAttributeList(String attributeKey, List<String> attributeValueList);
-
         void setAllUserAttributes(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists);
 
         void setUserIdentity(MParticle.IdentityType identityType, String identity);

@@ -338,13 +338,6 @@ open class SingularKit :
     ): List<ReportingMessage> = emptyList()
 
     //endregion
-    //endregion
-    //region Deprecated Attribute Listener
-    override fun setUserAttributeList(
-        s: String,
-        list: List<String>,
-    ) {}
-
     override fun onIncrementUserAttribute(
         key: String?,
         incrementedBy: Number?,
@@ -397,7 +390,6 @@ open class SingularKit :
         list: List<String>,
         filteredMParticleUser: FilteredMParticleUser,
     ) {
-        setUserAttributeList(s, list)
     }
 
     override fun onSetAllUserAttributes(

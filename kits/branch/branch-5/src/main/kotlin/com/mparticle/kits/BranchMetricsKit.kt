@@ -174,17 +174,11 @@ class BranchMetricsKit :
         )
     }
 
-    override fun setUserAttributeList(
-        s: String,
-        list: List<String>,
-    ) {}
-
     override fun onSetUserAttributeList(
         attributeKey: String,
         attributeValueList: List<String>,
         user: FilteredMParticleUser,
     ) {
-        setUserAttributeList(attributeKey, attributeValueList)
     }
 
     override fun supportsAttributeLists(): Boolean = true

@@ -121,22 +121,12 @@ class ApptimizeKit :
 
     override fun getName(): String = KIT_NAME
 
-    /**
-     * Not supported by the Apptimize kit.
-     */
-    override fun setUserAttributeList(
-        key: String,
-        list: List<String>,
-    ) {
-        // not supported
-    }
-
     override fun onSetUserAttributeList(
         attributeKey: String,
         attributeValueList: List<String>,
         user: FilteredMParticleUser,
     ) {
-        setUserAttributeList(attributeKey, attributeValueList)
+        // not supported by the Apptimize kit
     }
 
     override fun supportsAttributeLists(): Boolean = false

@@ -24,20 +24,13 @@ open class AttributeListenerTestKit :
 
     override fun supportsAttributeLists() = supportsAttributeLists?.invoke() ?: true
 
-    override fun setUserAttributeList(
-        attributeKey: String,
-        attributeValueList: MutableList<String>,
-    ) {
-        setUserAttributeList?.invoke(attributeKey, attributeValueList)
-        onAttributeReceived?.invoke(attributeKey, attributeValueList)
-    }
-
     override fun onSetUserAttributeList(
         attributeKey: String,
         attributeValueList: List<String>,
         user: FilteredMParticleUser,
     ) {
-        setUserAttributeList(attributeKey, attributeValueList.toMutableList())
+        setUserAttributeList?.invoke(attributeKey, attributeValueList)
+        onAttributeReceived?.invoke(attributeKey, attributeValueList)
     }
 
     override fun setAllUserAttributes(

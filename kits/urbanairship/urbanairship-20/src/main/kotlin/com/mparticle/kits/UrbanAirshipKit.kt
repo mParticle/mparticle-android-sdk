@@ -237,19 +237,12 @@ class UrbanAirshipKit :
         }
     }
 
-    override fun setUserAttributeList(
-        s: String,
-        list: List<String>,
-    ) {
-        // not supported
-    }
-
     override fun onSetUserAttributeList(
         attributeKey: String,
         attributeValueList: List<String>,
         user: FilteredMParticleUser,
     ) {
-        setUserAttributeList(attributeKey, attributeValueList)
+        // not supported
     }
 
     override fun supportsAttributeLists(): Boolean = false

@@ -85,19 +85,12 @@ open class AdobeKit :
         syncIds()
     }
 
-    override fun setUserAttributeList(
-        s: String,
-        list: List<String>,
-    ) {
-        syncIds()
-    }
-
     override fun onSetUserAttributeList(
         attributeKey: String,
         attributeValueList: List<String>,
         user: FilteredMParticleUser,
     ) {
-        setUserAttributeList(attributeKey, attributeValueList)
+        syncIds()
     }
 
     override fun supportsAttributeLists(): Boolean = false
