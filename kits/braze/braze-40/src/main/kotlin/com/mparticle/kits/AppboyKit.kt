@@ -453,22 +453,19 @@ open class AppboyKit :
             .getCurrentUser(
                 object : IValueCallback<BrazeUser> {
                     override fun onSuccess(value: BrazeUser) {
-                        if (UserAttributes.CITY == keyMut) {
-                            value.setHomeCity(null)
-                        } else if (UserAttributes.COUNTRY == keyMut) {
-                            value.setCountry(null)
-                        } else if (UserAttributes.FIRSTNAME == keyMut) {
-                            value.setFirstName(null)
-                        } else if (UserAttributes.LASTNAME == keyMut) {
-                            value.setLastName(null)
-                        } else if (UserAttributes.MOBILE_NUMBER == keyMut) {
-                            value.setPhoneNumber(null)
-                        } else {
-                            var customKey = keyMut
-                            if (customKey.startsWith("$")) {
-                                customKey = customKey.substring(1)
+                        when (keyMut) {
+                            UserAttributes.CITY -> value.setHomeCity(null)
+                            UserAttributes.COUNTRY -> value.setCountry(null)
+                            UserAttributes.FIRSTNAME -> value.setFirstName(null)
+                            UserAttributes.LASTNAME -> value.setLastName(null)
+                            UserAttributes.MOBILE_NUMBER -> value.setPhoneNumber(null)
+                            else -> {
+                                var customKey = keyMut
+                                if (customKey.startsWith("$")) {
+                                    customKey = customKey.substring(1)
+                                }
+                                value.unsetCustomUserAttribute(customKey)
                             }
-                            value.unsetCustomUserAttribute(customKey)
                         }
                         queueDataFlush()
                     }
