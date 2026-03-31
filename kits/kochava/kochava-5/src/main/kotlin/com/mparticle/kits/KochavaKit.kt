@@ -79,6 +79,7 @@ class KochavaKit :
     }
 
     override fun setLocation(location: Location) {
+        // No-op: this kit does not implement this feature.
     }
 
     override fun setUserAttribute(

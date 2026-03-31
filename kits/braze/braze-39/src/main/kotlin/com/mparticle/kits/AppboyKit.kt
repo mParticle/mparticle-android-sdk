@@ -491,6 +491,7 @@ open class AppboyKit :
         key: String?,
         user: FilteredMParticleUser?,
     ) {
+        // No-op: this kit does not implement this feature.
     }
 
     override fun onSetUserAttributeList(
@@ -498,6 +499,7 @@ open class AppboyKit :
         attributeValueList: MutableList<String>?,
         user: FilteredMParticleUser?,
     ) {
+        // No-op: this kit does not implement this feature.
     }
 
     override fun onSetAllUserAttributes(
@@ -665,7 +667,9 @@ open class AppboyKit :
         identity: String,
     ) {}
 
-    override fun removeUserIdentity(identityType: IdentityType) {}
+    override fun removeUserIdentity(identityType: IdentityType) {
+        // No-op: this kit does not implement this feature.
+    }
 
     override fun logout(): List<ReportingMessage> = emptyList()
 
