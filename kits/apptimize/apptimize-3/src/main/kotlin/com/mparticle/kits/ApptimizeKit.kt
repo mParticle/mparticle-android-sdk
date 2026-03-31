@@ -121,7 +121,7 @@ class ApptimizeKit :
 
     override fun getName(): String = KIT_NAME
 
-    override fun setUserAttribute(
+    fun setUserAttribute(
         key: String,
         value: String,
     ) {

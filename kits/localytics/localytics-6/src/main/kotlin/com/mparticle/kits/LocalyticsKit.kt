@@ -127,7 +127,7 @@ class LocalyticsKit :
         return -1
     }
 
-    override fun setUserAttribute(
+    fun setUserAttribute(
         key: String,
         value: String,
     ) {

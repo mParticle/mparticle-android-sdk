@@ -85,7 +85,7 @@ open class AdobeKit :
         syncIds()
     }
 
-    override fun setUserAttribute(
+    fun setUserAttribute(
         s: String,
         s1: String,
     ) {

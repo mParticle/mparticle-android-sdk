@@ -340,7 +340,7 @@ open class SingularKit :
     //endregion
     //endregion
     //region Deprecated Attribute Listener
-    override fun setUserAttribute(
+    fun setUserAttribute(
         key: String,
         value: String,
     ) {

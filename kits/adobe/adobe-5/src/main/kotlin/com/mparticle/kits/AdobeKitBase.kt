@@ -48,7 +48,7 @@ abstract class AdobeKitBase :
         syncIds()
     }
 
-    override fun setUserAttribute(
+    fun setUserAttribute(
         s: String,
         s1: String,
     ) {

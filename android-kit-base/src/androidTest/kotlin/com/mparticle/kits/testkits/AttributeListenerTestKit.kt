@@ -10,7 +10,7 @@ open class AttributeListenerTestKit :
     ListenerTestKit(),
     AttributeListener,
     LogoutListener {
-    var setUserAttribute: ((attributeKey: String?, attributeValue: String?) -> Unit)? = null
+    var setUserAttributeCallback: ((attributeKey: String?, attributeValue: String?) -> Unit)? = null
     var setUserAttributeList: ((attributeKey: String?, attributeValueList: List<String?>?) -> Unit)? =
         null
     var supportsAttributeLists: (() -> Boolean)? = null
@@ -41,11 +41,11 @@ open class AttributeListenerTestKit :
         userAttributeLists.forEach { onAttributeReceived?.invoke(it.key, it.value) }
     }
 
-    override fun setUserAttribute(
+    fun setUserAttribute(
         attributeKey: String,
         attributeValue: String?,
     ) {
-        setUserAttribute?.invoke(attributeKey, attributeValue)
+        setUserAttributeCallback?.invoke(attributeKey, attributeValue)
         onAttributeReceived?.invoke(attributeKey, attributeValue)
     }
 
@@ -78,8 +78,7 @@ open class AttributeListenerTestKit :
         if (value == null || value !is String) {
             return
         }
-        setUserAttribute?.invoke(key, value)
-        onAttributeReceived?.invoke(key, value)
+        setUserAttribute(key, value)
     }
 
     override fun logout(): List<ReportingMessage> = logout?.invoke() ?: listOf()

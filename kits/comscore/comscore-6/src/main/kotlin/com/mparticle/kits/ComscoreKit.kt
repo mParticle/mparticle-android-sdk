@@ -83,7 +83,7 @@ class ComscoreKit :
                 .build(),
         )!!
 
-    override fun setUserAttribute(
+    fun setUserAttribute(
         key: String,
         value: String,
     ) {

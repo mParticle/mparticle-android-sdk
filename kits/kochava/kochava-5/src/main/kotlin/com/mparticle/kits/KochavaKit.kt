@@ -82,7 +82,7 @@ class KochavaKit :
         // No-op: this kit does not implement this feature.
     }
 
-    override fun setUserAttribute(
+    fun setUserAttribute(
         attributeKey: String,
         attributeValue: String,
     ) {}

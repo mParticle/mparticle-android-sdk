@@ -248,7 +248,7 @@ class AppsFlyerKit :
         return messageList
     }
 
-    override fun setUserAttribute(
+    fun setUserAttribute(
         attributeKey: String,
         attributeValue: String,
     ) {}

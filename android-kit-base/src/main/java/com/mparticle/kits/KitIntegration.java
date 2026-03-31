@@ -400,8 +400,6 @@ public abstract class KitIntegration {
 
     public interface AttributeListener extends BaseAttributeListener {
 
-        void setUserAttribute(String attributeKey, String attributeValue);
-
         void setUserAttributeList(String attributeKey, List<String> attributeValueList);
 
         void setAllUserAttributes(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists);

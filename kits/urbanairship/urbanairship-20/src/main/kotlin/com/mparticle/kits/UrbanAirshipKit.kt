@@ -237,7 +237,7 @@ class UrbanAirshipKit :
         }
     }
 
-    override fun setUserAttribute(
+    fun setUserAttribute(
         key: String,
         value: String,
     ) {

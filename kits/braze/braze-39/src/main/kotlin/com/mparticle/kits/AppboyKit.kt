@@ -301,7 +301,7 @@ open class AppboyKit :
         return messages
     }
 
-    override fun setUserAttribute(
+    fun setUserAttribute(
         keyIn: String,
         attributeValue: String,
     ) {

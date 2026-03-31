@@ -740,8 +740,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
                     if (provider instanceof KitIntegration.UserAttributeListener) {
                         ((KitIntegration.UserAttributeListener) provider).onIncrementUserAttribute(key, incrementedBy, newValue, FilteredMParticleUser.getInstance(mpid, provider));
                     }
-                if (provider instanceof KitIntegration.AttributeListener) {
-                    ((KitIntegration.AttributeListener) provider).setUserAttribute(key, newValue);
+                if (provider instanceof KitIntegration.BaseAttributeListener listener) {
+                    listener.onSetUserAttribute(key, newValue, FilteredMParticleUser.getInstance(mpid, provider));
                 }
             } catch (Exception e) {
                 Logger.warning("Failed to call onIncrementUserAttribute for kit: " + provider.getName() + ": " + e.getMessage());
