@@ -51,6 +51,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq
+import org.mockito.ArgumentMatchers.isNull
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
@@ -560,7 +561,7 @@ class KitManagerImplTest {
         verify(integration as AttributeListener, Mockito.times(1))
             .setUserAttributeList("test key", attributeList)
         verify(integration2 as BaseAttributeListener, Mockito.times(1))
-            .onSetUserAttribute(eq("test key"), eq("1,2,3"), any(FilteredMParticleUser::class.java))
+            .onSetUserAttribute(eq("test key"), eq("1,2,3"), isNull())
     }
 
     @Test
