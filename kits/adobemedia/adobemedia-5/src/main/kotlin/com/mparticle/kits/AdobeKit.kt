@@ -115,6 +115,17 @@ open class AdobeKit :
         syncIds()
     }
 
+    override fun onSetUserAttribute(
+        key: String,
+        value: Any?,
+        user: FilteredMParticleUser,
+    ) {
+        if (value == null || value !is String) {
+            return
+        }
+        setUserAttribute(key, value)
+    }
+
     override fun setUserIdentity(
         identityType: MParticle.IdentityType,
         s: String,

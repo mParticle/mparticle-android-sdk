@@ -159,6 +159,17 @@ class ApptimizeKit :
         Apptimize.clearUserAttribute(key)
     }
 
+    override fun onSetUserAttribute(
+        key: String,
+        value: Any?,
+        user: FilteredMParticleUser,
+    ) {
+        if (value == null || value !is String) {
+            return
+        }
+        setUserAttribute(key, value)
+    }
+
     /**
      * @param identityType only Alias and CustomerId are suppoted by the Apptimize kit.
      */

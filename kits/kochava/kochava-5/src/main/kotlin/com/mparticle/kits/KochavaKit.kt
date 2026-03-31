@@ -106,6 +106,17 @@ class KochavaKit :
         // No-op: this kit does not implement this feature.
     }
 
+    override fun onSetUserAttribute(
+        key: String,
+        value: Any?,
+        user: FilteredMParticleUser,
+    ) {
+        if (value == null || value !is String) {
+            return
+        }
+        setUserAttribute(key, value)
+    }
+
     override fun setInstallReferrer(intent: Intent) {}
 
     override fun setUserIdentity(

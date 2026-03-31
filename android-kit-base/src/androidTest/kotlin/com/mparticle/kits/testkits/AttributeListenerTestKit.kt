@@ -70,5 +70,17 @@ open class AttributeListenerTestKit :
         onAttributeReceived?.invoke(key, null)
     }
 
+    override fun onSetUserAttribute(
+        key: String,
+        value: Any?,
+        user: FilteredMParticleUser,
+    ) {
+        if (value == null || value !is String) {
+            return
+        }
+        setUserAttribute?.invoke(key, value)
+        onAttributeReceived?.invoke(key, value)
+    }
+
     override fun logout(): List<ReportingMessage> = logout?.invoke() ?: listOf()
 }

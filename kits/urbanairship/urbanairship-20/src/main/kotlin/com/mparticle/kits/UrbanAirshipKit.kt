@@ -294,6 +294,17 @@ class UrbanAirshipKit :
             .apply()
     }
 
+    override fun onSetUserAttribute(
+        key: String,
+        value: Any?,
+        user: FilteredMParticleUser,
+    ) {
+        if (value == null || value !is String) {
+            return
+        }
+        setUserAttribute(key, value)
+    }
+
     // not supported
     override fun logout(): List<ReportingMessage> = emptyList()
 

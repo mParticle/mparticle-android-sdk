@@ -387,6 +387,15 @@ public abstract class KitIntegration {
          * @param user filtered user context for this kit
          */
         void onRemoveUserAttribute(String key, FilteredMParticleUser user);
+
+        /**
+         * Called when a scalar user attribute is set for the current user.
+         *
+         * @param key   attribute key
+         * @param value attribute value (may be non-String for some {@link UserAttributeListener} call paths)
+         * @param user  filtered user context for this kit
+         */
+        void onSetUserAttribute(String key, Object value, FilteredMParticleUser user);
     }
 
     public interface AttributeListener extends BaseAttributeListener {
@@ -555,8 +564,6 @@ public abstract class KitIntegration {
     public interface UserAttributeListener extends BaseAttributeListener {
 
         void onIncrementUserAttribute(String key, Number incrementedBy, String value, FilteredMParticleUser user);
-
-        void onSetUserAttribute(String key, Object value, FilteredMParticleUser user);
 
         void onSetUserTag(String key, FilteredMParticleUser user);
 
