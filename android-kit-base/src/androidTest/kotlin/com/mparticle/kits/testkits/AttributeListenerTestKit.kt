@@ -1,6 +1,7 @@
 package com.mparticle.kits.testkits
 
 import com.mparticle.MParticle
+import com.mparticle.kits.FilteredMParticleUser
 import com.mparticle.kits.KitIntegration.AttributeListener
 import com.mparticle.kits.KitIntegration.LogoutListener
 import com.mparticle.kits.ReportingMessage
@@ -15,7 +16,7 @@ open class AttributeListenerTestKit :
     var supportsAttributeLists: (() -> Boolean)? = null
     var setAllUserAttributes: ((userAttributes: Map<String, String>?, userAttributeLists: Map<String, List<String>>?) -> Unit)? =
         null
-    var removeUserAttribute: ((key: String?) -> Unit)? = null
+    var removeUserAttributeListener: ((key: String?) -> Unit)? = null
     var setUserIdentity: ((identityType: MParticle.IdentityType?, identity: String?) -> Unit)? =
         null
     var removeUserIdentity: ((identityType: MParticle.IdentityType?) -> Unit)? = null
@@ -61,8 +62,11 @@ open class AttributeListenerTestKit :
         onIdentityReceived?.invoke(identityType, null)
     }
 
-    override fun removeUserAttribute(key: String) {
-        removeUserAttribute?.invoke(key)
+    override fun onRemoveUserAttribute(
+        key: String,
+        user: FilteredMParticleUser,
+    ) {
+        removeUserAttributeListener?.invoke(key)
         onAttributeReceived?.invoke(key, null)
     }
 

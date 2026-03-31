@@ -152,7 +152,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
             // make sure these are the attributes that are being removed
             count++
         }
-        attributeListenerKitKit.removeUserAttribute = {
+        attributeListenerKitKit.removeUserAttributeListener = {
             assertTrue(allowedAttributes.containsKey(it))
             assertFalse(blockedAttributes.containsKey(it))
             count++

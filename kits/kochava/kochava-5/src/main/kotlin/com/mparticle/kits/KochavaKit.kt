@@ -79,6 +79,7 @@ class KochavaKit :
     }
 
     override fun setLocation(location: Location) {
+        // No-op: this kit does not implement this feature.
     }
 
     override fun setUserAttribute(
@@ -98,7 +99,12 @@ class KochavaKit :
         map1: Map<String, List<String>>,
     ) {}
 
-    override fun removeUserAttribute(key: String) {}
+    override fun onRemoveUserAttribute(
+        key: String,
+        user: FilteredMParticleUser,
+    ) {
+        // No-op: this kit does not implement this feature.
+    }
 
     override fun setInstallReferrer(intent: Intent) {}
 

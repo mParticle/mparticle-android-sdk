@@ -284,10 +284,13 @@ class UrbanAirshipKit :
         }
     }
 
-    override fun removeUserAttribute(attribute: String) {
+    override fun onRemoveUserAttribute(
+        key: String,
+        user: FilteredMParticleUser,
+    ) {
         Airship.channel
             .editTags()
-            .removeTag(attribute)
+            .removeTag(key)
             .apply()
     }
 

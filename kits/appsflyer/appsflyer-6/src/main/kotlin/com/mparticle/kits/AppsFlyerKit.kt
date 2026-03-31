@@ -277,6 +277,7 @@ class AppsFlyerKit :
         value: Any?,
         user: FilteredMParticleUser?,
     ) {
+        // No-op: this kit does not implement this feature.
     }
 
     override fun onSetUserTag(
@@ -304,9 +305,9 @@ class AppsFlyerKit :
     override fun setAllUserAttributes(
         map: Map<String, String>,
         map1: Map<String, List<String>>,
-    ) {}
-
-    override fun removeUserAttribute(key: String) {}
+    ) {
+        // No-op: this kit does not implement this feature.
+    }
 
     override fun removeUserIdentity(identityType: MParticle.IdentityType) {
         with(instance) {

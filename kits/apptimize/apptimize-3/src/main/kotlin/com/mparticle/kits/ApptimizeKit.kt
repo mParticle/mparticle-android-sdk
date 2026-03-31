@@ -152,7 +152,10 @@ class ApptimizeKit :
         }
     }
 
-    override fun removeUserAttribute(key: String) {
+    override fun onRemoveUserAttribute(
+        key: String,
+        user: FilteredMParticleUser,
+    ) {
         Apptimize.clearUserAttribute(key)
     }
 

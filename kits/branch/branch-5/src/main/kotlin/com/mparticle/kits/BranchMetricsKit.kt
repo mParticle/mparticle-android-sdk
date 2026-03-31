@@ -191,12 +191,19 @@ class BranchMetricsKit :
         map1: Map<String, List<String>>,
     ) {}
 
-    override fun removeUserAttribute(s: String) {}
+    override fun onRemoveUserAttribute(
+        key: String,
+        user: FilteredMParticleUser,
+    ) {
+        // No-op: this kit does not implement this feature.
+    }
 
     override fun setUserIdentity(
         identityType: IdentityType,
         s: String,
-    ) {}
+    ) {
+        // No-op: this kit does not implement this feature.
+    }
 
     override fun removeUserIdentity(identityType: IdentityType) {}
 

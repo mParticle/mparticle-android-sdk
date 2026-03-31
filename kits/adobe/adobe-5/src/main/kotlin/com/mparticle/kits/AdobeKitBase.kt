@@ -71,7 +71,10 @@ abstract class AdobeKitBase :
         syncIds()
     }
 
-    override fun removeUserAttribute(s: String) {
+    override fun onRemoveUserAttribute(
+        key: String,
+        user: FilteredMParticleUser,
+    ) {
         syncIds()
     }
 
@@ -93,7 +96,9 @@ abstract class AdobeKitBase :
     override fun onPushMessageReceived(
         context: Context,
         intent: Intent,
-    ) {}
+    ) {
+        // No-op: this kit does not implement push message handling.
+    }
 
     override fun onPushRegistration(
         instanceId: String,

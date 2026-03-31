@@ -427,8 +427,6 @@ open class SingularKit :
         map1: Map<String, List<String>>,
     ) {}
 
-    override fun removeUserAttribute(s: String) {}
-
     override fun setUserIdentity(
         identityType: IdentityType,
         s: String,

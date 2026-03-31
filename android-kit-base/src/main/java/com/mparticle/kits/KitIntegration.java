@@ -361,29 +361,41 @@ public abstract class KitIntegration {
     }
 
     /**
-     * Kits should implement this interface when their underlying service has the notion
-     * of a user with attributes.
+     * Temporary shared contract used while {@link AttributeListener} behavior is migrated to
+     * {@link UserAttributeListener}. Factoring out common API surface lets the SDK land incremental changes
+     * and smaller pull requests instead of a single large refactor.
+     * <p>
+     * Kits implement {@link AttributeListener} and/or {@link UserAttributeListener}; they do not implement this
+     * type directly.
      */
     @Deprecated
-    public interface AttributeListener {
+    public interface BaseAttributeListener {
+
+        /**
+         * Indicate to the mParticle Kit framework if this listener supports attribute-values as lists.
+         * <p>
+         * If false, list-specific APIs are not used; values are passed via scalar/csv paths instead.
+         *
+         * @return true if this listener supports attribute values as lists.
+         */
+        boolean supportsAttributeLists();
+
+        /**
+         * Called when a user attribute is removed for the current user.
+         *
+         * @param key  attribute key
+         * @param user filtered user context for this kit
+         */
+        void onRemoveUserAttribute(String key, FilteredMParticleUser user);
+    }
+
+    public interface AttributeListener extends BaseAttributeListener {
 
         void setUserAttribute(String attributeKey, String attributeValue);
 
         void setUserAttributeList(String attributeKey, List<String> attributeValueList);
 
-        /**
-         * Indicate to the mParticle Kit framework if this AttributeListener supports attribute-values as lists.
-         * <p>
-         * If an AttributeListener returns false, the setUserAttributeList method will never be called. Instead, setUserAttribute
-         * will be called with the attribute-value lists combined as a csv.
-         *
-         * @return true if this AttributeListener supports attribute values as lists.
-         */
-        boolean supportsAttributeLists();
-
         void setAllUserAttributes(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists);
-
-        void removeUserAttribute(String key);
 
         void setUserIdentity(MParticle.IdentityType identityType, String identity);
 
@@ -540,11 +552,9 @@ public abstract class KitIntegration {
 
     }
 
-    public interface UserAttributeListener {
+    public interface UserAttributeListener extends BaseAttributeListener {
 
         void onIncrementUserAttribute(String key, Number incrementedBy, String value, FilteredMParticleUser user);
-
-        void onRemoveUserAttribute(String key, FilteredMParticleUser user);
 
         void onSetUserAttribute(String key, Object value, FilteredMParticleUser user);
 
@@ -553,8 +563,6 @@ public abstract class KitIntegration {
         void onSetUserAttributeList(String attributeKey, List<String> attributeValueList, FilteredMParticleUser user);
 
         void onSetAllUserAttributes(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists, FilteredMParticleUser user);
-
-        boolean supportsAttributeLists();
 
         void onConsentStateUpdated(ConsentState oldState, ConsentState newState, FilteredMParticleUser user);
     }

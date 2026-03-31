@@ -444,6 +444,37 @@ open class AppboyKit :
         key: String?,
         user: FilteredMParticleUser?,
     ) {
+        if (key == null) {
+            return
+        }
+        var keyMut = key
+        Braze
+            .getInstance(context)
+            .getCurrentUser(
+                object : IValueCallback<BrazeUser> {
+                    override fun onSuccess(value: BrazeUser) {
+                        when (keyMut) {
+                            UserAttributes.CITY -> value.setHomeCity(null)
+                            UserAttributes.COUNTRY -> value.setCountry(null)
+                            UserAttributes.FIRSTNAME -> value.setFirstName(null)
+                            UserAttributes.LASTNAME -> value.setLastName(null)
+                            UserAttributes.MOBILE_NUMBER -> value.setPhoneNumber(null)
+                            else -> {
+                                var customKey = keyMut
+                                if (customKey.startsWith("$")) {
+                                    customKey = customKey.substring(1)
+                                }
+                                value.unsetCustomUserAttribute(customKey)
+                            }
+                        }
+                        queueDataFlush()
+                    }
+
+                    override fun onError() {
+                        Logger.warning("unable to remove User Attribute with key: " + key)
+                    }
+                },
+            )
     }
 
     override fun onSetUserAttribute(
@@ -457,6 +488,7 @@ open class AppboyKit :
         key: String?,
         user: FilteredMParticleUser?,
     ) {
+        // No-op: this kit does not implement this feature.
     }
 
     override fun onSetUserAttributeList(
@@ -464,6 +496,7 @@ open class AppboyKit :
         attributeValueList: MutableList<String>?,
         user: FilteredMParticleUser?,
     ) {
+        // No-op: this kit does not implement this feature.
     }
 
     override fun onSetAllUserAttributes(
@@ -626,45 +659,14 @@ open class AppboyKit :
         }
     }
 
-    override fun removeUserAttribute(keyIn: String) {
-        var key = keyIn
-        Braze
-            .getInstance(context)
-            .getCurrentUser(
-                object : IValueCallback<BrazeUser> {
-                    override fun onSuccess(value: BrazeUser) {
-                        if (UserAttributes.CITY == key) {
-                            value.setHomeCity(null)
-                        } else if (UserAttributes.COUNTRY == key) {
-                            value.setCountry(null)
-                        } else if (UserAttributes.FIRSTNAME == key) {
-                            value.setFirstName(null)
-                        } else if (UserAttributes.LASTNAME == key) {
-                            value.setLastName(null)
-                        } else if (UserAttributes.MOBILE_NUMBER == key) {
-                            value.setPhoneNumber(null)
-                        } else {
-                            if (key.startsWith("$")) {
-                                key = key.substring(1)
-                            }
-                            value.unsetCustomUserAttribute(key)
-                        }
-                        queueDataFlush()
-                    }
-
-                    override fun onError() {
-                        Logger.warning("unable to remove User Attribute with key: " + key)
-                    }
-                },
-            )
-    }
-
     override fun setUserIdentity(
         identityType: IdentityType,
         identity: String,
     ) {}
 
-    override fun removeUserIdentity(identityType: IdentityType) {}
+    override fun removeUserIdentity(identityType: IdentityType) {
+        // No-op: this kit does not implement this feature.
+    }
 
     override fun logout(): List<ReportingMessage> = emptyList()
 

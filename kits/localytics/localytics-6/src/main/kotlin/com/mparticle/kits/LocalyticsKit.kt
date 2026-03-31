@@ -170,7 +170,10 @@ class LocalyticsKit :
         }
     }
 
-    override fun removeUserAttribute(key: String) {
+    override fun onRemoveUserAttribute(
+        key: String,
+        user: FilteredMParticleUser,
+    ) {
         Localytics.deleteProfileAttribute(key)
     }
 
