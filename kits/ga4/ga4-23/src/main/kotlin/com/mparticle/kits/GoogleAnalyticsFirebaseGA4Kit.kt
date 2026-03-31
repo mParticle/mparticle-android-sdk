@@ -613,7 +613,7 @@ class GoogleAnalyticsFirebaseGA4Kit :
     override fun onSetUserAttribute(
         key: String?,
         value: Any?,
-        filteredMParticleUser: FilteredMParticleUser,
+        user: FilteredMParticleUser?,
     ) {
         if (key == null) {
             return

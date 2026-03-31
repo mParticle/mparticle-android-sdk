@@ -124,7 +124,7 @@ class ComscoreKit :
     override fun onSetUserAttribute(
         key: String?,
         value: Any?,
-        user: FilteredMParticleUser,
+        user: FilteredMParticleUser?,
     ) {
         if (key == null || value == null || value !is String) {
             return

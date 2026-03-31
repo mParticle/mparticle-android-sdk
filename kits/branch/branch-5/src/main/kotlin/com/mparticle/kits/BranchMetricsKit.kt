@@ -196,11 +196,8 @@ class BranchMetricsKit :
     override fun onSetUserAttribute(
         key: String?,
         value: Any?,
-        user: FilteredMParticleUser,
+        user: FilteredMParticleUser?,
     ) {
-        if (key == null) {
-            return
-        }
         // No-op: this kit does not implement this feature.
     }
 
