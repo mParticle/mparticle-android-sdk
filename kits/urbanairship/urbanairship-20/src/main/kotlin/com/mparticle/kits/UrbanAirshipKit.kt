@@ -237,25 +237,6 @@ class UrbanAirshipKit :
         }
     }
 
-    override fun setUserAttribute(
-        key: String,
-        value: String,
-    ) {
-        if (configuration?.enableTags == true) {
-            if (KitUtils.isEmpty(value)) {
-                Airship.channel
-                    .editTags()
-                    .addTag(KitUtils.sanitizeAttributeKey(key))
-                    .apply()
-            } else if (configuration?.includeUserAttributes == true) {
-                Airship.channel
-                    .editTags()
-                    .addTag(KitUtils.sanitizeAttributeKey(key) + "-" + value)
-                    .apply()
-            }
-        }
-    }
-
     override fun setUserAttributeList(
         s: String,
         list: List<String>,
@@ -292,6 +273,29 @@ class UrbanAirshipKit :
             .editTags()
             .removeTag(key)
             .apply()
+    }
+
+    override fun onSetUserAttribute(
+        key: String?,
+        value: Any?,
+        user: FilteredMParticleUser?,
+    ) {
+        if (key == null || value == null || value !is String) {
+            return
+        }
+        if (configuration?.enableTags == true) {
+            if (KitUtils.isEmpty(value)) {
+                Airship.channel
+                    .editTags()
+                    .addTag(KitUtils.sanitizeAttributeKey(key))
+                    .apply()
+            } else if (configuration?.includeUserAttributes == true) {
+                Airship.channel
+                    .editTags()
+                    .addTag(KitUtils.sanitizeAttributeKey(key) + "-" + value)
+                    .apply()
+            }
+        }
     }
 
     // not supported

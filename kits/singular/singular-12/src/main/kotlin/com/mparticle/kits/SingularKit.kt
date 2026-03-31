@@ -340,32 +340,6 @@ open class SingularKit :
     //endregion
     //endregion
     //region Deprecated Attribute Listener
-    override fun setUserAttribute(
-        key: String,
-        value: String,
-    ) {
-        // TODO: Debug these lines to understand the code
-        val map = HashMap<String?, String?>()
-        if (MParticle.UserAttributes.AGE == key) {
-            map[USER_AGE_KEY] = value
-        } else if (MParticle.UserAttributes.GENDER == key) {
-            if (value.contains("fe")) {
-                map[USER_GENDER_KEY] = "f"
-            } else {
-                map[USER_GENDER_KEY] = "m"
-            }
-        }
-        if (map.isNotEmpty()) {
-            executeIfSingularInitialized(
-                {
-                    Singular.eventJSON("UserAttribute", (map as Map<*, *>?)?.let { JSONObject(it) })
-                },
-                forceInitSingular = false,
-                "setUserAttribute",
-            )
-        }
-    }
-
     override fun setUserAttributeList(
         s: String,
         list: List<String>,
@@ -385,10 +359,32 @@ open class SingularKit :
     ) {}
 
     override fun onSetUserAttribute(
-        s: String,
-        o: Any,
-        filteredMParticleUser: FilteredMParticleUser,
+        key: String?,
+        value: Any?,
+        user: FilteredMParticleUser?,
     ) {
+        if (key == null || value == null || value !is String) {
+            return
+        }
+        val map = HashMap<String?, String?>()
+        if (MParticle.UserAttributes.AGE == key) {
+            map[USER_AGE_KEY] = value
+        } else if (MParticle.UserAttributes.GENDER == key) {
+            if (value.contains("fe")) {
+                map[USER_GENDER_KEY] = "f"
+            } else {
+                map[USER_GENDER_KEY] = "m"
+            }
+        }
+        if (map.isNotEmpty()) {
+            executeIfSingularInitialized(
+                {
+                    Singular.eventJSON("UserAttribute", (map as Map<*, *>?)?.let { JSONObject(it) })
+                },
+                forceInitSingular = false,
+                "setUserAttribute",
+            )
+        }
     }
 
     override fun onSetUserTag(

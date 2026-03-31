@@ -214,10 +214,13 @@ class LeanplumKit :
     override fun setOptOut(optedOut: Boolean): List<ReportingMessage> = emptyList()
 
     override fun onSetUserAttribute(
-        key: String,
-        value: Any,
-        user: FilteredMParticleUser,
+        key: String?,
+        value: Any?,
+        user: FilteredMParticleUser?,
     ) {
+        if (key == null) {
+            return
+        }
         val attributes = mutableMapOf<String, Any?>()
         attributes[key] = value
         setAttributesAndCheckId(attributes)

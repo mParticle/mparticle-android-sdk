@@ -83,7 +83,7 @@ class ComscoreKit :
                 .build(),
         )!!
 
-    override fun setUserAttribute(
+    private fun applyEnterpriseScalarUserAttribute(
         key: String,
         value: String,
     ) {
@@ -107,7 +107,7 @@ class ComscoreKit :
     ) {
         if (isEnterprise) {
             for ((key, value) in attributes) {
-                setUserAttribute(key, value)
+                applyEnterpriseScalarUserAttribute(key, value)
             }
         }
     }
@@ -119,6 +119,17 @@ class ComscoreKit :
         if (isEnterprise) {
             Analytics.getConfiguration().removePersistentLabel(KitUtils.sanitizeAttributeKey(key))
         }
+    }
+
+    override fun onSetUserAttribute(
+        key: String?,
+        value: Any?,
+        user: FilteredMParticleUser?,
+    ) {
+        if (key == null || value == null || value !is String) {
+            return
+        }
+        applyEnterpriseScalarUserAttribute(key, value)
     }
 
     override fun removeUserIdentity(identityType: IdentityType) {

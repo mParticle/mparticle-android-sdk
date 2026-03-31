@@ -248,11 +248,6 @@ class AppsFlyerKit :
         return messageList
     }
 
-    override fun setUserAttribute(
-        attributeKey: String,
-        attributeValue: String,
-    ) {}
-
     override fun setUserAttributeList(
         s: String,
         list: List<String>,

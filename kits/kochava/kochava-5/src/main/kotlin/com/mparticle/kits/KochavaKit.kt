@@ -82,11 +82,6 @@ class KochavaKit :
         // No-op: this kit does not implement this feature.
     }
 
-    override fun setUserAttribute(
-        attributeKey: String,
-        attributeValue: String,
-    ) {}
-
     override fun setUserAttributeList(
         s: String,
         list: List<String>,
@@ -102,6 +97,14 @@ class KochavaKit :
     override fun onRemoveUserAttribute(
         key: String,
         user: FilteredMParticleUser,
+    ) {
+        // No-op: this kit does not implement this feature.
+    }
+
+    override fun onSetUserAttribute(
+        key: String?,
+        value: Any?,
+        user: FilteredMParticleUser?,
     ) {
         // No-op: this kit does not implement this feature.
     }

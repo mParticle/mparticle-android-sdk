@@ -85,13 +85,6 @@ open class AdobeKit :
         syncIds()
     }
 
-    override fun setUserAttribute(
-        s: String,
-        s1: String,
-    ) {
-        syncIds()
-    }
-
     override fun setUserAttributeList(
         s: String,
         list: List<String>,
@@ -112,6 +105,17 @@ open class AdobeKit :
         key: String,
         user: FilteredMParticleUser,
     ) {
+        syncIds()
+    }
+
+    override fun onSetUserAttribute(
+        key: String?,
+        value: Any?,
+        user: FilteredMParticleUser?,
+    ) {
+        if (key == null || value == null || value !is String) {
+            return
+        }
         syncIds()
     }
 

@@ -77,7 +77,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
             assertTrue(allowedAttributes.containsKey(key))
             assertFalse(blockedAttributes.containsKey(key))
         }
-        attributeListenerKitKit.setUserAttribute = { key, _ ->
+        attributeListenerKitKit.setUserAttributeCallback = { key, _ ->
             assertTrue(allowedAttributes.containsKey(key))
             assertFalse(blockedAttributes.containsKey(key))
         }

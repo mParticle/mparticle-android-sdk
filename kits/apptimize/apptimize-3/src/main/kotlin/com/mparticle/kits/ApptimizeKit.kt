@@ -121,13 +121,6 @@ class ApptimizeKit :
 
     override fun getName(): String = KIT_NAME
 
-    override fun setUserAttribute(
-        key: String,
-        value: String,
-    ) {
-        Apptimize.setUserAttribute(key, value)
-    }
-
     /**
      * Not supported by the Apptimize kit.
      */
@@ -148,7 +141,7 @@ class ApptimizeKit :
         attributeLists: Map<String, List<String>>,
     ) {
         for ((key, value) in attributes) {
-            setUserAttribute(key, value)
+            Apptimize.setUserAttribute(key, value)
         }
     }
 
@@ -157,6 +150,17 @@ class ApptimizeKit :
         user: FilteredMParticleUser,
     ) {
         Apptimize.clearUserAttribute(key)
+    }
+
+    override fun onSetUserAttribute(
+        key: String?,
+        value: Any?,
+        user: FilteredMParticleUser?,
+    ) {
+        if (key == null || value == null || value !is String) {
+            return
+        }
+        Apptimize.setUserAttribute(key, value)
     }
 
     /**

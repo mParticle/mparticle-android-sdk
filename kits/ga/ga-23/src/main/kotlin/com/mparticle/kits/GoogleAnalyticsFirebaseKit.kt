@@ -400,10 +400,13 @@ class GoogleAnalyticsFirebaseKit :
      * We are going to ignore Lists here, since Firebase only supports String "user property" values
      */
     override fun onSetUserAttribute(
-        key: String,
-        value: Any,
-        filteredMParticleUser: FilteredMParticleUser,
+        key: String?,
+        value: Any?,
+        user: FilteredMParticleUser?,
     ) {
+        if (key == null) {
+            return
+        }
         if (value is String) {
             standardizeName(key, false)?.let {
                 FirebaseAnalytics.getInstance(context).setUserProperty(

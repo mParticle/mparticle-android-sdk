@@ -127,7 +127,7 @@ class LocalyticsKit :
         return -1
     }
 
-    override fun setUserAttribute(
+    private fun applyScalarUserAttribute(
         key: String,
         value: String,
     ) {
@@ -163,7 +163,7 @@ class LocalyticsKit :
         attributeLists: Map<String, List<String>>,
     ) {
         for ((key, value) in attributes) {
-            setUserAttribute(key, value)
+            applyScalarUserAttribute(key, value)
         }
         for ((key, value) in attributeLists) {
             setUserAttributeList(key, value)
@@ -175,6 +175,17 @@ class LocalyticsKit :
         user: FilteredMParticleUser,
     ) {
         Localytics.deleteProfileAttribute(key)
+    }
+
+    override fun onSetUserAttribute(
+        key: String?,
+        value: Any?,
+        user: FilteredMParticleUser?,
+    ) {
+        if (key == null || value == null || value !is String) {
+            return
+        }
+        applyScalarUserAttribute(key, value)
     }
 
     override fun setOptOut(optOutStatus: Boolean): List<ReportingMessage> {

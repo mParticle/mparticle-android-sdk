@@ -301,95 +301,124 @@ open class AppboyKit :
         return messages
     }
 
-    override fun setUserAttribute(
+    private fun applyScalarUserAttribute(
         keyIn: String,
         attributeValue: String,
     ) {
-        var key = keyIn
         Braze
             .getInstance(context)
             .getCurrentUser(
                 object : IValueCallback<BrazeUser> {
                     override fun onSuccess(value: BrazeUser) {
                         val userAttributeSetter = UserAttributeSetter(value, enableTypeDetection)
-
-                        when (key) {
-                            UserAttributes.CITY -> value.setHomeCity(attributeValue)
-                            UserAttributes.COUNTRY -> value.setCountry(attributeValue)
-                            UserAttributes.FIRSTNAME -> value.setFirstName(attributeValue)
-                            UserAttributes.LASTNAME -> value.setLastName(attributeValue)
-                            UserAttributes.MOBILE_NUMBER -> value.setPhoneNumber(attributeValue)
-                            UserAttributes.ZIPCODE -> value.setCustomUserAttribute("Zip", attributeValue)
-                            UserAttributes.AGE -> {
-                                val calendar = getCalendarMinusYears(attributeValue)
-                                if (calendar != null) {
-                                    value.setDateOfBirth(calendar[Calendar.YEAR], Month.JANUARY, 1)
-                                } else {
-                                    Logger.warning("unable to set DateOfBirth for " + UserAttributes.AGE + " = " + value)
-                                }
-                            }
-                            EMAIL_SUBSCRIBE -> {
-                                when (attributeValue) {
-                                    OPTED_IN -> value.setEmailNotificationSubscriptionType(NotificationSubscriptionType.OPTED_IN)
-                                    UNSUBSCRIBED -> value.setEmailNotificationSubscriptionType(NotificationSubscriptionType.UNSUBSCRIBED)
-                                    SUBSCRIBED -> value.setEmailNotificationSubscriptionType(NotificationSubscriptionType.SUBSCRIBED)
-                                    else -> {
-                                        Logger.warning("unable to set email_subscribe with invalid value: " + value)
-                                    }
-                                }
-                            }
-                            PUSH_SUBSCRIBE -> {
-                                when (attributeValue) {
-                                    OPTED_IN -> value.setPushNotificationSubscriptionType(NotificationSubscriptionType.OPTED_IN)
-                                    UNSUBSCRIBED -> value.setPushNotificationSubscriptionType(NotificationSubscriptionType.UNSUBSCRIBED)
-                                    SUBSCRIBED -> value.setPushNotificationSubscriptionType(NotificationSubscriptionType.SUBSCRIBED)
-                                    else -> {
-                                        Logger.warning("unable to set push_subscribe with invalid value: " + value)
-                                    }
-                                }
-                            }
-                            DOB -> useDobString(attributeValue, value)
-                            UserAttributes.GENDER -> {
-                                if (attributeValue.contains("fe")) {
-                                    value.setGender(Gender.FEMALE)
-                                } else {
-                                    value.setGender(Gender.MALE)
-                                }
-                            }
-                            else -> {
-                                if (subscriptionGroupIds?.containsKey(key) == true) {
-                                    val groupId = subscriptionGroupIds?.get(key)
-                                    when (attributeValue.lowercase()) {
-                                        "true" -> {
-                                            groupId?.let { value.addToSubscriptionGroup(it) }
-                                        }
-
-                                        "false" -> {
-                                            groupId?.let { value.removeFromSubscriptionGroup(it) }
-                                        }
-
-                                        else -> {
-                                            Logger.warning(
-                                                "Unable to set Subscription Group ID for user attribute: $key due to invalid value data type. Expected Boolean.",
-                                            )
-                                        }
-                                    }
-                                } else {
-                                    if (key.startsWith("$")) {
-                                        key = key.substring(1)
-                                    }
-                                    userAttributeSetter?.parseValue(key, attributeValue)
-                                }
-                            }
-                        }
+                        applyScalarUserAttributeOnUser(value, keyIn, attributeValue, userAttributeSetter)
                         queueDataFlush()
                     }
 
                     override fun onError() {
-                        Logger.warning("unable to set key: " + key + " with value: " + attributeValue)
+                        Logger.warning("unable to set key: " + keyIn + " with value: " + attributeValue)
                     }
                 },
             )
+    }
+
+    private fun applyScalarUserAttributeOnUser(
+        user: BrazeUser,
+        key: String,
+        attributeValue: String,
+        userAttributeSetter: UserAttributeSetter,
+    ) {
+        when (key) {
+            UserAttributes.CITY -> user.setHomeCity(attributeValue)
+            UserAttributes.COUNTRY -> user.setCountry(attributeValue)
+            UserAttributes.FIRSTNAME -> user.setFirstName(attributeValue)
+            UserAttributes.LASTNAME -> user.setLastName(attributeValue)
+            UserAttributes.MOBILE_NUMBER -> user.setPhoneNumber(attributeValue)
+            UserAttributes.ZIPCODE -> user.setCustomUserAttribute("Zip", attributeValue)
+            UserAttributes.AGE -> setAgeAsDateOfBirthFromUserAttribute(user, attributeValue)
+            EMAIL_SUBSCRIBE -> setEmailSubscriptionFromUserAttribute(user, attributeValue)
+            PUSH_SUBSCRIBE -> setPushSubscriptionFromUserAttribute(user, attributeValue)
+            DOB -> useDobString(attributeValue, user)
+            UserAttributes.GENDER -> setGenderFromUserAttribute(user, attributeValue)
+            else -> applyUnmappedScalarUserAttribute(user, key, attributeValue, userAttributeSetter)
+        }
+    }
+
+    private fun setAgeAsDateOfBirthFromUserAttribute(
+        user: BrazeUser,
+        attributeValue: String,
+    ) {
+        val calendar = getCalendarMinusYears(attributeValue)
+        if (calendar != null) {
+            user.setDateOfBirth(calendar[Calendar.YEAR], Month.JANUARY, 1)
+        } else {
+            Logger.warning("unable to set DateOfBirth for " + UserAttributes.AGE + " = " + attributeValue)
+        }
+    }
+
+    private fun setEmailSubscriptionFromUserAttribute(
+        user: BrazeUser,
+        attributeValue: String,
+    ) {
+        when (attributeValue) {
+            OPTED_IN -> user.setEmailNotificationSubscriptionType(NotificationSubscriptionType.OPTED_IN)
+            UNSUBSCRIBED -> user.setEmailNotificationSubscriptionType(NotificationSubscriptionType.UNSUBSCRIBED)
+            SUBSCRIBED -> user.setEmailNotificationSubscriptionType(NotificationSubscriptionType.SUBSCRIBED)
+            else -> Logger.warning("unable to set email_subscribe with invalid value: $attributeValue")
+        }
+    }
+
+    private fun setPushSubscriptionFromUserAttribute(
+        user: BrazeUser,
+        attributeValue: String,
+    ) {
+        when (attributeValue) {
+            OPTED_IN -> user.setPushNotificationSubscriptionType(NotificationSubscriptionType.OPTED_IN)
+            UNSUBSCRIBED -> user.setPushNotificationSubscriptionType(NotificationSubscriptionType.UNSUBSCRIBED)
+            SUBSCRIBED -> user.setPushNotificationSubscriptionType(NotificationSubscriptionType.SUBSCRIBED)
+            else -> Logger.warning("unable to set push_subscribe with invalid value: $attributeValue")
+        }
+    }
+
+    private fun setGenderFromUserAttribute(
+        user: BrazeUser,
+        attributeValue: String,
+    ) {
+        if (attributeValue.contains("fe")) {
+            user.setGender(Gender.FEMALE)
+        } else {
+            user.setGender(Gender.MALE)
+        }
+    }
+
+    private fun applySubscriptionGroupAttribute(
+        user: BrazeUser,
+        key: String,
+        attributeValue: String,
+    ) {
+        val groupId = subscriptionGroupIds?.get(key)
+        when (attributeValue.lowercase()) {
+            "true" -> groupId?.let { user.addToSubscriptionGroup(it) }
+            "false" -> groupId?.let { user.removeFromSubscriptionGroup(it) }
+            else ->
+                Logger.warning(
+                    "Unable to set Subscription Group ID for user attribute: $key due to invalid value data type. Expected Boolean.",
+                )
+        }
+    }
+
+    private fun applyUnmappedScalarUserAttribute(
+        user: BrazeUser,
+        key: String,
+        attributeValue: String,
+        userAttributeSetter: UserAttributeSetter,
+    ) {
+        if (subscriptionGroupIds?.containsKey(key) == true) {
+            applySubscriptionGroupAttribute(user, key, attributeValue)
+        } else {
+            val customKey = if (key.startsWith("$")) key.substring(1) else key
+            userAttributeSetter.parseValue(customKey, attributeValue)
+        }
     }
 
     // Expected Date Format @"yyyy'-'MM'-'dd"
@@ -482,6 +511,10 @@ open class AppboyKit :
         value: Any?,
         user: FilteredMParticleUser?,
     ) {
+        if (key == null || value == null || value !is String) {
+            return
+        }
+        applyScalarUserAttribute(key, value)
     }
 
     override fun onSetUserTag(
@@ -650,7 +683,7 @@ open class AppboyKit :
     ) {
         if (!kitPreferences.getBoolean(PREF_KEY_HAS_SYNCED_ATTRIBUTES, false)) {
             for ((key, value) in attributes) {
-                setUserAttribute(key, value)
+                applyScalarUserAttribute(key, value)
             }
             for ((key, value) in attributeLists) {
                 setUserAttributeList(key, value)
