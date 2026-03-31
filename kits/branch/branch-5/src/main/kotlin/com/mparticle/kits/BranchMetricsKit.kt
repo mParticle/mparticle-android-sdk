@@ -179,6 +179,7 @@ class BranchMetricsKit :
         attributeValueList: List<String>?,
         user: FilteredMParticleUser?,
     ) {
+        // not supported
     }
 
     override fun supportsAttributeLists(): Boolean = true

@@ -281,7 +281,7 @@ class AppsFlyerKit :
         attributeValueList: List<String>?,
         user: FilteredMParticleUser?,
     ) {
-        // No-op: this kit does not implement this feature.
+        // not supported
     }
 
     override fun onSetAllUserAttributes(

@@ -390,6 +390,7 @@ open class SingularKit :
         attributeValueList: List<String>?,
         user: FilteredMParticleUser?,
     ) {
+        // not supported
     }
 
     override fun onSetAllUserAttributes(

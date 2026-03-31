@@ -638,6 +638,7 @@ class GoogleAnalyticsFirebaseGA4Kit :
         attributeValueList: List<String>?,
         user: FilteredMParticleUser?,
     ) {
+        // not supported
     }
 
     override fun onSetAllUserAttributes(

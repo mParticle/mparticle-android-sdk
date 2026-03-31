@@ -99,6 +99,7 @@ class ComscoreKit :
         attributeValueList: List<String>?,
         user: FilteredMParticleUser?,
     ) {
+        // not supported
     }
 
     override fun supportsAttributeLists(): Boolean = !isEnterprise
