@@ -482,6 +482,10 @@ open class AppboyKit :
         value: Any?,
         user: FilteredMParticleUser?,
     ) {
+        if (key == null || value == null || value !is String) {
+            return
+        }
+        setUserAttribute(key, value)
     }
 
     override fun onSetUserTag(
