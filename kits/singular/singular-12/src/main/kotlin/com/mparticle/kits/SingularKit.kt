@@ -385,10 +385,14 @@ open class SingularKit :
     ) {}
 
     override fun onSetUserAttribute(
-        s: String,
-        o: Any,
-        filteredMParticleUser: FilteredMParticleUser,
+        key: String?,
+        value: Any?,
+        user: FilteredMParticleUser?,
     ) {
+        if (key == null || value == null || value !is String) {
+            return
+        }
+        setUserAttribute(key, value)
     }
 
     override fun onSetUserTag(

@@ -277,7 +277,10 @@ class AppsFlyerKit :
         value: Any?,
         user: FilteredMParticleUser?,
     ) {
-        // No-op: this kit does not implement this feature.
+        if (key == null || value == null || value !is String) {
+            return
+        }
+        setUserAttribute(key, value)
     }
 
     override fun onSetUserTag(
