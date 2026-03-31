@@ -529,7 +529,10 @@ open class AppboyKit :
         attributeValueList: MutableList<String>?,
         user: FilteredMParticleUser?,
     ) {
-        // No-op: this kit does not implement this feature.
+        if (attributeKey == null || attributeValueList == null) {
+            return
+        }
+        setUserAttributeList(attributeKey, attributeValueList)
     }
 
     override fun onSetAllUserAttributes(

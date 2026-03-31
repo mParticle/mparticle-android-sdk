@@ -286,6 +286,7 @@ class AppsFlyerKit :
         attributeValueList: MutableList<String>?,
         user: FilteredMParticleUser?,
     ) {
+        // No-op: this kit does not implement this feature.
     }
 
     override fun onSetAllUserAttributes(

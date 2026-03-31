@@ -397,6 +397,7 @@ open class SingularKit :
         list: List<String>,
         filteredMParticleUser: FilteredMParticleUser,
     ) {
+        setUserAttributeList(s, list)
     }
 
     override fun onSetAllUserAttributes(
