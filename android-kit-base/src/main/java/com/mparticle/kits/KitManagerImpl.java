@@ -686,17 +686,18 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
                 && KitConfiguration.shouldForwardAttribute(provider.getConfiguration().getUserAttributeFilters(), attributeKey)) {
             boolean supportsAttributeLists = ((KitIntegration.BaseAttributeListener) provider).supportsAttributeLists();
             FilteredMParticleUser user = FilteredMParticleUser.getInstance(mpid, provider);
-            if (provider instanceof KitIntegration.UserAttributeListener) {
-                if (supportsAttributeLists) {
-                    ((KitIntegration.UserAttributeListener) provider).onSetUserAttributeList(attributeKey, valueList, user);
-                } else {
-                    ((KitIntegration.BaseAttributeListener) provider).onSetUserAttribute(attributeKey, KitUtils.join(valueList), user);
-                }
-            } else if (provider instanceof KitIntegration.AttributeListener) {
+            if (provider instanceof KitIntegration.AttributeListener) {
                 if (supportsAttributeLists) {
                     ((KitIntegration.AttributeListener) provider).setUserAttributeList(attributeKey, valueList);
                 } else {
                     ((KitIntegration.BaseAttributeListener) provider).onSetUserAttribute(attributeKey, KitUtils.join(valueList), user);
+                }
+            }
+            if (provider instanceof KitIntegration.UserAttributeListener) {
+                if (supportsAttributeLists) {
+                    ((KitIntegration.UserAttributeListener) provider).onSetUserAttributeList(attributeKey, valueList, user);
+                } else {
+                    ((KitIntegration.UserAttributeListener) provider).onSetUserAttribute(attributeKey, KitUtils.join(valueList), user);
                 }
             }
         }
