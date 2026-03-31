@@ -301,7 +301,7 @@ open class AppboyKit :
         return messages
     }
 
-    fun setUserAttribute(
+    private fun applyScalarUserAttribute(
         keyIn: String,
         attributeValue: String,
     ) {
@@ -485,7 +485,7 @@ open class AppboyKit :
         if (key == null || value == null || value !is String) {
             return
         }
-        setUserAttribute(key, value)
+        applyScalarUserAttribute(key, value)
     }
 
     override fun onSetUserTag(
@@ -654,7 +654,7 @@ open class AppboyKit :
     ) {
         if (!kitPreferences.getBoolean(PREF_KEY_HAS_SYNCED_ATTRIBUTES, false)) {
             for ((key, value) in attributes) {
-                setUserAttribute(key, value)
+                applyScalarUserAttribute(key, value)
             }
             for ((key, value) in attributeLists) {
                 setUserAttributeList(key, value)

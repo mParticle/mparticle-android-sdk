@@ -83,7 +83,7 @@ class ComscoreKit :
                 .build(),
         )!!
 
-    fun setUserAttribute(
+    private fun applyEnterpriseScalarUserAttribute(
         key: String,
         value: String,
     ) {
@@ -107,7 +107,7 @@ class ComscoreKit :
     ) {
         if (isEnterprise) {
             for ((key, value) in attributes) {
-                setUserAttribute(key, value)
+                applyEnterpriseScalarUserAttribute(key, value)
             }
         }
     }
@@ -129,7 +129,7 @@ class ComscoreKit :
         if (value == null || value !is String) {
             return
         }
-        setUserAttribute(key, value)
+        applyEnterpriseScalarUserAttribute(key, value)
     }
 
     override fun removeUserIdentity(identityType: IdentityType) {

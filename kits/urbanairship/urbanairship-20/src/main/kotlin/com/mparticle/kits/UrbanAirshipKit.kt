@@ -237,25 +237,6 @@ class UrbanAirshipKit :
         }
     }
 
-    fun setUserAttribute(
-        key: String,
-        value: String,
-    ) {
-        if (configuration?.enableTags == true) {
-            if (KitUtils.isEmpty(value)) {
-                Airship.channel
-                    .editTags()
-                    .addTag(KitUtils.sanitizeAttributeKey(key))
-                    .apply()
-            } else if (configuration?.includeUserAttributes == true) {
-                Airship.channel
-                    .editTags()
-                    .addTag(KitUtils.sanitizeAttributeKey(key) + "-" + value)
-                    .apply()
-            }
-        }
-    }
-
     override fun setUserAttributeList(
         s: String,
         list: List<String>,
@@ -302,7 +283,19 @@ class UrbanAirshipKit :
         if (value == null || value !is String) {
             return
         }
-        setUserAttribute(key, value)
+        if (configuration?.enableTags == true) {
+            if (KitUtils.isEmpty(value)) {
+                Airship.channel
+                    .editTags()
+                    .addTag(KitUtils.sanitizeAttributeKey(key))
+                    .apply()
+            } else if (configuration?.includeUserAttributes == true) {
+                Airship.channel
+                    .editTags()
+                    .addTag(KitUtils.sanitizeAttributeKey(key) + "-" + value)
+                    .apply()
+            }
+        }
     }
 
     // not supported

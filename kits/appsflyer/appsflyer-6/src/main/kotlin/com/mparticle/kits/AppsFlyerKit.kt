@@ -248,11 +248,6 @@ class AppsFlyerKit :
         return messageList
     }
 
-    fun setUserAttribute(
-        attributeKey: String,
-        attributeValue: String,
-    ) {}
-
     override fun setUserAttributeList(
         s: String,
         list: List<String>,
@@ -277,10 +272,7 @@ class AppsFlyerKit :
         value: Any?,
         user: FilteredMParticleUser?,
     ) {
-        if (key == null || value == null || value !is String) {
-            return
-        }
-        setUserAttribute(key, value)
+        // No-op: this kit does not implement this feature.
     }
 
     override fun onSetUserTag(

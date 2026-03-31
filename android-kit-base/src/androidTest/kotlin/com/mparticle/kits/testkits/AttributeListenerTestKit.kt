@@ -41,14 +41,6 @@ open class AttributeListenerTestKit :
         userAttributeLists.forEach { onAttributeReceived?.invoke(it.key, it.value) }
     }
 
-    fun setUserAttribute(
-        attributeKey: String,
-        attributeValue: String?,
-    ) {
-        setUserAttributeCallback?.invoke(attributeKey, attributeValue)
-        onAttributeReceived?.invoke(attributeKey, attributeValue)
-    }
-
     override fun setUserIdentity(
         identityType: MParticle.IdentityType,
         identity: String?,
@@ -78,7 +70,8 @@ open class AttributeListenerTestKit :
         if (value == null || value !is String) {
             return
         }
-        setUserAttribute(key, value)
+        setUserAttributeCallback?.invoke(key, value)
+        onAttributeReceived?.invoke(key, value)
     }
 
     override fun logout(): List<ReportingMessage> = logout?.invoke() ?: listOf()

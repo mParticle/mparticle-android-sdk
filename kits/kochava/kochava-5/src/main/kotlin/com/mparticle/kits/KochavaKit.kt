@@ -82,11 +82,6 @@ class KochavaKit :
         // No-op: this kit does not implement this feature.
     }
 
-    fun setUserAttribute(
-        attributeKey: String,
-        attributeValue: String,
-    ) {}
-
     override fun setUserAttributeList(
         s: String,
         list: List<String>,
@@ -111,10 +106,7 @@ class KochavaKit :
         value: Any?,
         user: FilteredMParticleUser,
     ) {
-        if (value == null || value !is String) {
-            return
-        }
-        setUserAttribute(key, value)
+        // No-op: this kit does not implement this feature.
     }
 
     override fun setInstallReferrer(intent: Intent) {}

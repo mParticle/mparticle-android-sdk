@@ -127,7 +127,7 @@ class LocalyticsKit :
         return -1
     }
 
-    fun setUserAttribute(
+    private fun applyScalarUserAttribute(
         key: String,
         value: String,
     ) {
@@ -163,7 +163,7 @@ class LocalyticsKit :
         attributeLists: Map<String, List<String>>,
     ) {
         for ((key, value) in attributes) {
-            setUserAttribute(key, value)
+            applyScalarUserAttribute(key, value)
         }
         for ((key, value) in attributeLists) {
             setUserAttributeList(key, value)
@@ -185,7 +185,7 @@ class LocalyticsKit :
         if (value == null || value !is String) {
             return
         }
-        setUserAttribute(key, value)
+        applyScalarUserAttribute(key, value)
     }
 
     override fun setOptOut(optOutStatus: Boolean): List<ReportingMessage> {

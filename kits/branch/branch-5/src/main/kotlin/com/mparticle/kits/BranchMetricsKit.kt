@@ -174,11 +174,6 @@ class BranchMetricsKit :
         )
     }
 
-    fun setUserAttribute(
-        s: String,
-        s1: String,
-    ) {}
-
     override fun setUserAttributeList(
         s: String,
         list: List<String>,
@@ -203,10 +198,7 @@ class BranchMetricsKit :
         value: Any?,
         user: FilteredMParticleUser,
     ) {
-        if (value == null || value !is String) {
-            return
-        }
-        setUserAttribute(key, value)
+        // No-op: this kit does not implement this feature.
     }
 
     override fun setUserIdentity(

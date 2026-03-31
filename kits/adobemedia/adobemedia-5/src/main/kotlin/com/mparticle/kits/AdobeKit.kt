@@ -85,13 +85,6 @@ open class AdobeKit :
         syncIds()
     }
 
-    fun setUserAttribute(
-        s: String,
-        s1: String,
-    ) {
-        syncIds()
-    }
-
     override fun setUserAttributeList(
         s: String,
         list: List<String>,
@@ -123,7 +116,7 @@ open class AdobeKit :
         if (value == null || value !is String) {
             return
         }
-        setUserAttribute(key, value)
+        syncIds()
     }
 
     override fun setUserIdentity(

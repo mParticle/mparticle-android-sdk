@@ -121,13 +121,6 @@ class ApptimizeKit :
 
     override fun getName(): String = KIT_NAME
 
-    fun setUserAttribute(
-        key: String,
-        value: String,
-    ) {
-        Apptimize.setUserAttribute(key, value)
-    }
-
     /**
      * Not supported by the Apptimize kit.
      */
@@ -148,7 +141,7 @@ class ApptimizeKit :
         attributeLists: Map<String, List<String>>,
     ) {
         for ((key, value) in attributes) {
-            setUserAttribute(key, value)
+            Apptimize.setUserAttribute(key, value)
         }
     }
 
@@ -167,7 +160,7 @@ class ApptimizeKit :
         if (value == null || value !is String) {
             return
         }
-        setUserAttribute(key, value)
+        Apptimize.setUserAttribute(key, value)
     }
 
     /**
