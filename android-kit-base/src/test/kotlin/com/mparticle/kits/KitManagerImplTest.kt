@@ -23,6 +23,7 @@ import com.mparticle.internal.Logger
 import com.mparticle.internal.MPUtility
 import com.mparticle.internal.SideloadedKit
 import com.mparticle.kits.KitIntegration.AttributeListener
+import com.mparticle.kits.KitIntegration.BaseAttributeListener
 import com.mparticle.mock.MockContext
 import com.mparticle.mock.MockKitConfiguration
 import com.mparticle.mock.MockKitManagerImpl
@@ -49,6 +50,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
@@ -557,8 +559,8 @@ class KitManagerImplTest {
         manager.setUserAttributeList("test key", attributeList, 1)
         verify(integration as AttributeListener, Mockito.times(1))
             .setUserAttributeList("test key", attributeList)
-        verify(integration2 as AttributeListener, Mockito.times(1))
-            .setUserAttribute("test key", "1,2,3")
+        verify(integration2 as BaseAttributeListener, Mockito.times(1))
+            .onSetUserAttribute(eq("test key"), eq("1,2,3"), any(FilteredMParticleUser::class.java))
     }
 
     @Test
