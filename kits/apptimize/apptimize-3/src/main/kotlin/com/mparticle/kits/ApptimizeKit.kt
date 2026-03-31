@@ -131,6 +131,14 @@ class ApptimizeKit :
         // not supported
     }
 
+    override fun onSetUserAttributeList(
+        attributeKey: String,
+        attributeValueList: List<String>,
+        user: FilteredMParticleUser,
+    ) {
+        setUserAttributeList(attributeKey, attributeValueList)
+    }
+
     override fun supportsAttributeLists(): Boolean = false
 
     /**

@@ -396,6 +396,15 @@ public abstract class KitIntegration {
          * @param user  filtered user context for this kit
          */
         void onSetUserAttribute(String key, Object value, FilteredMParticleUser user);
+
+        /**
+         * Called when a list-valued user attribute is set and {@link #supportsAttributeLists()} returns true.
+         *
+         * @param attributeKey       attribute key
+         * @param attributeValueList attribute values
+         * @param user               filtered user context for this kit
+         */
+        void onSetUserAttributeList(String attributeKey, List<String> attributeValueList, FilteredMParticleUser user);
     }
 
     public interface AttributeListener extends BaseAttributeListener {
@@ -564,8 +573,6 @@ public abstract class KitIntegration {
         void onIncrementUserAttribute(String key, Number incrementedBy, String value, FilteredMParticleUser user);
 
         void onSetUserTag(String key, FilteredMParticleUser user);
-
-        void onSetUserAttributeList(String attributeKey, List<String> attributeValueList, FilteredMParticleUser user);
 
         void onSetAllUserAttributes(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists, FilteredMParticleUser user);
 
