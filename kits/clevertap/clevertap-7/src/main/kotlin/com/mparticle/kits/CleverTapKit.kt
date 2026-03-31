@@ -237,40 +237,43 @@ class CleverTapKit :
     }
 
     override fun onSetUserAttribute(
-        keyIn: String,
-        valueIn: Any,
+        key: String?,
+        value: Any?,
         user: FilteredMParticleUser,
     ) {
-        var key = keyIn
-        var value = valueIn
+        if (key == null || value == null) {
+            return
+        }
+        var mappedKey = key
+        var mappedValue: Any = value
         val profile =
             HashMap<String, Any>()
         when {
-            BIRTHDAY == key -> {
-                key = DOB
+            BIRTHDAY == mappedKey -> {
+                mappedKey = DOB
             }
-            "name" == key -> {
-                key = NAME
+            "name" == mappedKey -> {
+                mappedKey = NAME
             }
-            UserAttributes.GENDER == key -> {
-                val genderValue = value as String
-                value =
+            UserAttributes.GENDER == mappedKey -> {
+                val genderValue = mappedValue as String
+                mappedValue =
                     if (genderValue.contains("fe")) {
                         FEMALE
                     } else {
                         MALE
                     }
             }
-            UserAttributes.MOBILE_NUMBER == key -> {
-                key = PHONE
+            UserAttributes.MOBILE_NUMBER == mappedKey -> {
+                mappedKey = PHONE
             }
             else -> {
-                if (key.startsWith("$")) {
-                    key = key.substring(1)
+                if (mappedKey.startsWith("$")) {
+                    mappedKey = mappedKey.substring(1)
                 }
             }
         }
-        profile[key] = value
+        profile[mappedKey] = mappedValue
         cleverTapInstance?.pushProfile(profile)
     }
 

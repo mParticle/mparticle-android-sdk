@@ -178,11 +178,11 @@ class LocalyticsKit :
     }
 
     override fun onSetUserAttribute(
-        key: String,
+        key: String?,
         value: Any?,
         user: FilteredMParticleUser,
     ) {
-        if (value == null || value !is String) {
+        if (key == null || value == null || value !is String) {
             return
         }
         applyScalarUserAttribute(key, value)

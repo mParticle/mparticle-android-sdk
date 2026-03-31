@@ -102,10 +102,13 @@ class KochavaKit :
     }
 
     override fun onSetUserAttribute(
-        key: String,
+        key: String?,
         value: Any?,
         user: FilteredMParticleUser,
     ) {
+        if (key == null) {
+            return
+        }
         // No-op: this kit does not implement this feature.
     }
 
