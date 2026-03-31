@@ -505,7 +505,7 @@ open class AppboyKit :
 
     override fun onSetUserAttributeList(
         attributeKey: String?,
-        attributeValueList: MutableList<String>?,
+        attributeValueList: List<String>?,
         user: FilteredMParticleUser?,
     ) {
         if (attributeKey == null || attributeValueList == null) {

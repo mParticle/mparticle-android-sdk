@@ -11,7 +11,7 @@ open class AttributeListenerTestKit :
     AttributeListener,
     LogoutListener {
     var setUserAttributeCallback: ((attributeKey: String?, attributeValue: String?) -> Unit)? = null
-    var setUserAttributeList: ((attributeKey: String?, attributeValueList: List<String?>?) -> Unit)? =
+    var setUserAttributeList: ((attributeKey: String?, attributeValueList: List<String>?) -> Unit)? =
         null
     var supportsAttributeLists: (() -> Boolean)? = null
     var setAllUserAttributes: ((userAttributes: Map<String, String>?, userAttributeLists: Map<String, List<String>>?) -> Unit)? =
@@ -25,9 +25,9 @@ open class AttributeListenerTestKit :
     override fun supportsAttributeLists() = supportsAttributeLists?.invoke() ?: true
 
     override fun onSetUserAttributeList(
-        attributeKey: String,
-        attributeValueList: List<String>,
-        user: FilteredMParticleUser,
+        attributeKey: String?,
+        attributeValueList: List<String>?,
+        user: FilteredMParticleUser?,
     ) {
         setUserAttributeList?.invoke(attributeKey, attributeValueList)
         onAttributeReceived?.invoke(attributeKey, attributeValueList)

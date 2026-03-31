@@ -203,10 +203,13 @@ class CleverTapKit :
     }
 
     override fun onSetUserAttributeList(
-        attributeKey: String,
-        attributeValueList: List<String>,
-        user: FilteredMParticleUser,
+        attributeKey: String?,
+        attributeValueList: List<String>?,
+        user: FilteredMParticleUser?,
     ) {
+        if (attributeKey == null || attributeValueList == null) {
+            return
+        }
         cleverTapInstance!!.setMultiValuesForKey(attributeKey, ArrayList(attributeValueList))
     }
 
@@ -293,8 +296,8 @@ class CleverTapKit :
             for ((key, value) in userAttributes) {
                 onSetUserAttribute(key, value, user)
             }
-            for ((key, value) in userAttributeLists) {
-                onSetUserAttributeList(key, value, user)
+            for ((attributeKey, attributeValueList) in userAttributeLists) {
+                onSetUserAttributeList(attributeKey, attributeValueList, user)
             }
             kitPreferences.edit().putBoolean(PREF_KEY_HAS_SYNCED_ATTRIBUTES, true).apply()
         }

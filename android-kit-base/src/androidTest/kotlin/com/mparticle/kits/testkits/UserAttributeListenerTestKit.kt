@@ -13,7 +13,7 @@ open class UserAttributeListenerTestKit :
     var onSetUserAttribute: ((key: String?, value: Any?, user: FilteredMParticleUser?) -> Unit)? =
         null
     var onSetUserTag: ((key: String?, user: FilteredMParticleUser?) -> Unit)? = null
-    var onSetUserAttributeList: ((attributeKey: String?, attributeValueList: List<String?>?, user: FilteredMParticleUser?) -> Unit)? =
+    var onSetUserAttributeList: ((attributeKey: String?, attributeValueList: List<String>?, user: FilteredMParticleUser?) -> Unit)? =
         null
     var onSetAllUserAttributes: (
         (
@@ -75,7 +75,7 @@ open class UserAttributeListenerTestKit :
 
     override fun onSetUserAttributeList(
         attributeKey: String?,
-        attributeValueList: MutableList<String>?,
+        attributeValueList: List<String>?,
         user: FilteredMParticleUser?,
     ) {
         onSetUserAttributeList?.invoke(attributeKey, attributeValueList, user)

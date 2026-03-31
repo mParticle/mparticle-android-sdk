@@ -400,11 +400,14 @@ public abstract class KitIntegration {
         /**
          * Called when a list-valued user attribute is set and {@link #supportsAttributeLists()} returns true.
          *
-         * @param attributeKey       attribute key
-         * @param attributeValueList attribute values
-         * @param user               filtered user context for this kit
+         * @param attributeKey       attribute key (may be null)
+         * @param attributeValueList attribute values (may be null)
+         * @param user               filtered user context for this kit (may be null)
          */
-        void onSetUserAttributeList(String attributeKey, List<String> attributeValueList, FilteredMParticleUser user);
+        void onSetUserAttributeList(
+                @Nullable String attributeKey,
+                @Nullable List<String> attributeValueList,
+                @Nullable FilteredMParticleUser user);
     }
 
     public interface AttributeListener extends BaseAttributeListener {

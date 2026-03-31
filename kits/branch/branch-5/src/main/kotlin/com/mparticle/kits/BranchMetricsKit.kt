@@ -175,9 +175,9 @@ class BranchMetricsKit :
     }
 
     override fun onSetUserAttributeList(
-        attributeKey: String,
-        attributeValueList: List<String>,
-        user: FilteredMParticleUser,
+        attributeKey: String?,
+        attributeValueList: List<String>?,
+        user: FilteredMParticleUser?,
     ) {
     }
 

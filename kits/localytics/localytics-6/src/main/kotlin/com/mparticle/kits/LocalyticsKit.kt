@@ -149,10 +149,13 @@ class LocalyticsKit :
     }
 
     override fun onSetUserAttributeList(
-        attributeKey: String,
-        attributeValueList: List<String>,
-        user: FilteredMParticleUser,
+        attributeKey: String?,
+        attributeValueList: List<String>?,
+        user: FilteredMParticleUser?,
     ) {
+        if (attributeKey == null || attributeValueList == null) {
+            return
+        }
         Localytics.setProfileAttribute(attributeKey, attributeValueList.toTypedArray())
     }
 

@@ -386,9 +386,9 @@ open class SingularKit :
     ) {}
 
     override fun onSetUserAttributeList(
-        s: String,
-        list: List<String>,
-        filteredMParticleUser: FilteredMParticleUser,
+        attributeKey: String?,
+        attributeValueList: List<String>?,
+        user: FilteredMParticleUser?,
     ) {
     }
 
