@@ -558,8 +558,8 @@ class KitManagerImplTest {
         attributeList.add("2")
         attributeList.add("3")
         manager.setUserAttributeList("test key", attributeList, 1)
-        verify(integration as AttributeListener, Mockito.times(1))
-            .setUserAttributeList("test key", attributeList)
+        verify(integration as BaseAttributeListener, Mockito.times(1))
+            .onSetUserAttributeList(eq("test key"), eq(attributeList), any())
         verify(integration2 as BaseAttributeListener, Mockito.times(1))
             .onSetUserAttribute(eq("test key"), eq("1,2,3"), isNull())
     }
