@@ -35,11 +35,19 @@ open class AttributeListenerTestKit :
 
     override fun setAllUserAttributes(
         userAttributes: Map<String, String>,
-        userAttributeLists: Map<String, MutableList<String>>,
+        userAttributeLists: Map<String, List<String>>,
     ) {
         setAllUserAttributes?.invoke(userAttributes, userAttributeLists)
         userAttributes.forEach { onAttributeReceived?.invoke(it.key, it.value) }
         userAttributeLists.forEach { onAttributeReceived?.invoke(it.key, it.value) }
+    }
+
+    override fun onSetAllUserAttributes(
+        userAttributes: Map<String, String>,
+        userAttributeLists: Map<String, List<String>>,
+        user: FilteredMParticleUser,
+    ) {
+        setAllUserAttributes(userAttributes, userAttributeLists)
     }
 
     override fun setUserIdentity(

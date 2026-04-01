@@ -408,6 +408,21 @@ public abstract class KitIntegration {
                 @Nullable String attributeKey,
                 @Nullable List<String> attributeValueList,
                 @Nullable FilteredMParticleUser user);
+
+        /**
+         * Called when the full set of user attributes is synchronized for the current user.
+         * Kits that also implement {@link AttributeListener} typically delegate to
+         * {@link AttributeListener#setAllUserAttributes(Map, Map)}.
+         *
+         * @param userAttributes       scalar user attributes
+         * @param userAttributeLists     list-valued user attributes when {@link #supportsAttributeLists()} is true;
+         *                               otherwise list values may be merged into scalars by the framework
+         * @param user                 filtered user context for this kit
+         */
+        void onSetAllUserAttributes(
+                Map<String, String> userAttributes,
+                Map<String, List<String>> userAttributeLists,
+                FilteredMParticleUser user);
     }
 
     public interface AttributeListener extends BaseAttributeListener {
@@ -575,9 +590,8 @@ public abstract class KitIntegration {
 
         void onSetUserTag(String key, FilteredMParticleUser user);
 
-        void onSetAllUserAttributes(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists, FilteredMParticleUser user);
-
         void onConsentStateUpdated(ConsentState oldState, ConsentState newState, FilteredMParticleUser user);
+        
     }
 
     public interface BatchListener {

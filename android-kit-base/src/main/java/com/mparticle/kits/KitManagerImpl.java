@@ -606,27 +606,15 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
                     Map<String, List<String>> filteredAttributeLists = (Map<String, List<String>>) KitConfiguration.filterAttributes(provider.getConfiguration().getUserAttributeFilters(),
                             userAttributeLists);
                     boolean supportsAttributeLists = ((KitIntegration.BaseAttributeListener) provider).supportsAttributeLists();
-                    if (provider instanceof KitIntegration.AttributeListener) {
-                        if (supportsAttributeLists) {
-                            ((KitIntegration.AttributeListener) provider).setAllUserAttributes(filteredAttributeSingles, filteredAttributeLists);
-                        } else {
-                            Map<String, String> singlesCopy = new HashMap<>(filteredAttributeSingles);
-                            for (Map.Entry<String, List<String>> entry : filteredAttributeLists.entrySet()) {
-                                singlesCopy.put(entry.getKey(), KitUtils.join(entry.getValue()));
-                            }
-                            ((KitIntegration.AttributeListener) provider).setAllUserAttributes(singlesCopy, new HashMap<String, List<String>>());
+                    KitIntegration.BaseAttributeListener baseAttributeListener = (KitIntegration.BaseAttributeListener) provider;
+                    if (supportsAttributeLists) {
+                        baseAttributeListener.onSetAllUserAttributes(filteredAttributeSingles, filteredAttributeLists, FilteredMParticleUser.getInstance(mpid, provider));
+                    } else {
+                        Map<String, String> singlesCopy = new HashMap<>(filteredAttributeSingles);
+                        for (Map.Entry<String, List<String>> entry : filteredAttributeLists.entrySet()) {
+                            singlesCopy.put(entry.getKey(), KitUtils.join(entry.getValue()));
                         }
-                    }
-                    if (provider instanceof KitIntegration.UserAttributeListener) {
-                        if (supportsAttributeLists) {
-                            ((KitIntegration.UserAttributeListener) provider).onSetAllUserAttributes(filteredAttributeSingles, filteredAttributeLists, FilteredMParticleUser.getInstance(mpid, provider));
-                        } else {
-                            Map<String, String> singlesCopy = new HashMap<>(filteredAttributeSingles);
-                            for (Map.Entry<String, List<String>> entry : filteredAttributeLists.entrySet()) {
-                                singlesCopy.put(entry.getKey(), KitUtils.join(entry.getValue()));
-                            }
-                            ((KitIntegration.UserAttributeListener) provider).onSetAllUserAttributes(singlesCopy, new HashMap<String, List<String>>(), FilteredMParticleUser.getInstance(mpid, provider));
-                        }
+                        baseAttributeListener.onSetAllUserAttributes(singlesCopy, new HashMap<String, List<String>>(), FilteredMParticleUser.getInstance(mpid, provider));
                     }
                 }
             } catch (Exception e) {

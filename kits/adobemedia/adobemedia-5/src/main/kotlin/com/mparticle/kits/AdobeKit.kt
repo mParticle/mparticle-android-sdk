@@ -102,6 +102,14 @@ open class AdobeKit :
         syncIds()
     }
 
+    override fun onSetAllUserAttributes(
+        userAttributes: Map<String, String>,
+        userAttributeLists: Map<String, List<String>>,
+        user: FilteredMParticleUser,
+    ) {
+        setAllUserAttributes(userAttributes, userAttributeLists)
+    }
+
     override fun onRemoveUserAttribute(
         key: String,
         user: FilteredMParticleUser,
