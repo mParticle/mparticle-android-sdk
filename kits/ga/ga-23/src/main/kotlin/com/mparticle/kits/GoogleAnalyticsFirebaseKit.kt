@@ -423,10 +423,11 @@ class GoogleAnalyticsFirebaseKit :
     ) {}
 
     override fun onSetUserAttributeList(
-        s: String,
-        list: List<String>,
-        filteredMParticleUser: FilteredMParticleUser,
+        attributeKey: String?,
+        attributeValueList: List<String>?,
+        user: FilteredMParticleUser?,
     ) {
+        // not supported
     }
 
     override fun onSetAllUserAttributes(

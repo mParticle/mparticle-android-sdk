@@ -143,7 +143,7 @@ class ApptentiveKit :
 
     override fun onSetUserAttributeList(
         attributeKey: String?,
-        attributeValueList: MutableList<String>?,
+        attributeValueList: List<String>?,
         user: FilteredMParticleUser?,
     ) {
         // Ignored

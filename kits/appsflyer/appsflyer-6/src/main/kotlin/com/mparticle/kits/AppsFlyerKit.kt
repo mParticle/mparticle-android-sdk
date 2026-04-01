@@ -248,11 +248,6 @@ class AppsFlyerKit :
         return messageList
     }
 
-    override fun setUserAttributeList(
-        s: String,
-        list: List<String>,
-    ) {}
-
     override fun onIncrementUserAttribute(
         key: String?,
         incrementedBy: Number?,
@@ -283,9 +278,10 @@ class AppsFlyerKit :
 
     override fun onSetUserAttributeList(
         attributeKey: String?,
-        attributeValueList: MutableList<String>?,
+        attributeValueList: List<String>?,
         user: FilteredMParticleUser?,
     ) {
+        // not supported
     }
 
     override fun onSetAllUserAttributes(

@@ -681,24 +681,15 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     }
 
     private void setUserAttribute(KitIntegration provider, String attributeKey, List<String> valueList, long mpid) {
-        if ((provider instanceof KitIntegration.AttributeListener || provider instanceof KitIntegration.UserAttributeListener)
+        if ((provider instanceof KitIntegration.BaseAttributeListener listener)
                 && !provider.isDisabled()
                 && KitConfiguration.shouldForwardAttribute(provider.getConfiguration().getUserAttributeFilters(), attributeKey)) {
-            boolean supportsAttributeLists = ((KitIntegration.BaseAttributeListener) provider).supportsAttributeLists();
+            boolean supportsAttributeLists = listener.supportsAttributeLists();
             FilteredMParticleUser user = FilteredMParticleUser.getInstance(mpid, provider);
-            if (provider instanceof KitIntegration.AttributeListener) {
-                if (supportsAttributeLists) {
-                    ((KitIntegration.AttributeListener) provider).setUserAttributeList(attributeKey, valueList);
-                } else {
-                    ((KitIntegration.BaseAttributeListener) provider).onSetUserAttribute(attributeKey, KitUtils.join(valueList), user);
-                }
-            }
-            if (provider instanceof KitIntegration.UserAttributeListener) {
-                if (supportsAttributeLists) {
-                    ((KitIntegration.UserAttributeListener) provider).onSetUserAttributeList(attributeKey, valueList, user);
-                } else {
-                    ((KitIntegration.UserAttributeListener) provider).onSetUserAttribute(attributeKey, KitUtils.join(valueList), user);
-                }
+            if (supportsAttributeLists) {
+                listener.onSetUserAttributeList(attributeKey, valueList, user);
+            } else {
+                listener.onSetUserAttribute(attributeKey, KitUtils.join(valueList), user);
             }
         }
     }

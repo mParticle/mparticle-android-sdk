@@ -232,12 +232,15 @@ class LeanplumKit :
     ) {}
 
     override fun onSetUserAttributeList(
-        key: String,
-        list: List<String>,
-        user: FilteredMParticleUser,
+        attributeKey: String?,
+        attributeValueList: List<String>?,
+        user: FilteredMParticleUser?,
     ) {
+        if (attributeKey == null || attributeValueList == null) {
+            return
+        }
         val attributes = mutableMapOf<String, Any?>()
-        attributes[key] = list
+        attributes[attributeKey] = attributeValueList
         setAttributesAndCheckId(attributes)
     }
 

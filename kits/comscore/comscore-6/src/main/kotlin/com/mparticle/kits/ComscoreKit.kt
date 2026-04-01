@@ -94,10 +94,13 @@ class ComscoreKit :
         }
     }
 
-    override fun setUserAttributeList(
-        key: String,
-        list: List<String>,
-    ) {}
+    override fun onSetUserAttributeList(
+        attributeKey: String?,
+        attributeValueList: List<String>?,
+        user: FilteredMParticleUser?,
+    ) {
+        // not supported
+    }
 
     override fun supportsAttributeLists(): Boolean = !isEnterprise
 
