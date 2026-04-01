@@ -289,6 +289,10 @@ class AppsFlyerKit :
         userAttributeLists: MutableMap<String, MutableList<String>>?,
         user: FilteredMParticleUser?,
     ) {
+        setAllUserAttributes(
+            userAttributes ?: emptyMap(),
+            userAttributeLists ?: emptyMap(),
+        )
     }
 
     override fun supportsAttributeLists(): Boolean = true

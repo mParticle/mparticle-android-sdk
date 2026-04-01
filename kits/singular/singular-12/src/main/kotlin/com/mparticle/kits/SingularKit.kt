@@ -394,10 +394,11 @@ open class SingularKit :
     }
 
     override fun onSetAllUserAttributes(
-        map: Map<String, String>,
-        map1: Map<String, List<String>>,
-        filteredMParticleUser: FilteredMParticleUser,
+        userAttributes: Map<String, String>,
+        userAttributeLists: Map<String, List<String>>,
+        user: FilteredMParticleUser,
     ) {
+        setAllUserAttributes(userAttributes, userAttributeLists)
     }
 
     override fun supportsAttributeLists(): Boolean = false
