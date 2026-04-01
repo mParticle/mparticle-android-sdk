@@ -411,8 +411,8 @@ public abstract class KitIntegration {
 
         /**
          * Called when the full set of user attributes is synchronized for the current user.
-         * Kits that also implement {@link AttributeListener} typically delegate to
-         * {@link AttributeListener#setAllUserAttributes(Map, Map)}.
+         * Kits implementing {@link AttributeListener} typically implement a {@code setAllUserAttributes}
+         * helper and invoke it from here with the same maps.
          *
          * @param userAttributes       scalar user attributes
          * @param userAttributeLists     list-valued user attributes when {@link #supportsAttributeLists()} is true;
@@ -426,8 +426,6 @@ public abstract class KitIntegration {
     }
 
     public interface AttributeListener extends BaseAttributeListener {
-
-        void setAllUserAttributes(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists);
 
         void setUserIdentity(MParticle.IdentityType identityType, String identity);
 

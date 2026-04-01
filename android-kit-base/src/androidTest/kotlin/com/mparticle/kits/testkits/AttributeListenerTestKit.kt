@@ -33,7 +33,7 @@ open class AttributeListenerTestKit :
         onAttributeReceived?.invoke(attributeKey, attributeValueList)
     }
 
-    override fun setAllUserAttributes(
+    fun setAllUserAttributes(
         userAttributes: Map<String, String>,
         userAttributeLists: Map<String, List<String>>,
     ) {

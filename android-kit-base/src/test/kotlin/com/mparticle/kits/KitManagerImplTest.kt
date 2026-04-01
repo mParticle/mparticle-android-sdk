@@ -519,15 +519,15 @@ class KitManagerImplTest {
         attributeList.add("3")
         userAttributeLists["test 3"] = attributeList
         manager.onUserAttributesReceived(userAttributeSingles, userAttributeLists, 1L)
-        verify(integration as AttributeListener, Mockito.times(1))
-            .setAllUserAttributes(userAttributeSingles, userAttributeLists)
+        verify(integration as BaseAttributeListener, Mockito.times(1))
+            .onSetAllUserAttributes(eq(userAttributeSingles), eq(userAttributeLists), any())
         val userAttributesCombined: MutableMap<String, String> = HashMap()
         userAttributesCombined["test"] = "whatever"
         userAttributesCombined["test 2"] = "whatever 2"
         userAttributesCombined["test 3"] = "1,2,3"
         val clearedOutList: Map<String, List<String>> = HashMap()
-        verify(integration2 as AttributeListener, Mockito.times(1))
-            .setAllUserAttributes(userAttributesCombined, clearedOutList)
+        verify(integration2 as BaseAttributeListener, Mockito.times(1))
+            .onSetAllUserAttributes(eq(userAttributesCombined), eq(clearedOutList), any())
     }
 
     @Test

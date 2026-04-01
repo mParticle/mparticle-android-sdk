@@ -413,7 +413,7 @@ open class SingularKit :
         }, forceInitSingular = false, "onConsentStateUpdated")
     }
 
-    override fun setAllUserAttributes(
+    fun setAllUserAttributes(
         map: Map<String, String>,
         map1: Map<String, List<String>>,
     ) {}

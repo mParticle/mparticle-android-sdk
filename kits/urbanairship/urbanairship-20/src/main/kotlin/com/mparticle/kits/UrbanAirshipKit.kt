@@ -247,7 +247,7 @@ class UrbanAirshipKit :
 
     override fun supportsAttributeLists(): Boolean = false
 
-    override fun setAllUserAttributes(
+    fun setAllUserAttributes(
         stringAttributes: Map<String, String>,
         listAttributes: Map<String, List<String>>,
     ) {

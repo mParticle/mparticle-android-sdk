@@ -297,7 +297,7 @@ class AppsFlyerKit :
 
     override fun supportsAttributeLists(): Boolean = true
 
-    override fun setAllUserAttributes(
+    fun setAllUserAttributes(
         map: Map<String, String>,
         map1: Map<String, List<String>>,
     ) {

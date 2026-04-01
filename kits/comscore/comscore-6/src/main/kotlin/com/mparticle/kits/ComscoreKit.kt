@@ -104,7 +104,7 @@ class ComscoreKit :
 
     override fun supportsAttributeLists(): Boolean = !isEnterprise
 
-    override fun setAllUserAttributes(
+    fun setAllUserAttributes(
         attributes: Map<String, String>,
         attributeLists: Map<String, List<String>>,
     ) {

@@ -679,7 +679,7 @@ open class AppboyKit :
     /**
      * This is called when the Kit is added to the mParticle SDK, typically on app-startup.
      */
-    override fun setAllUserAttributes(
+    fun setAllUserAttributes(
         attributes: Map<String, String>,
         attributeLists: Map<String, List<String>>,
     ) {

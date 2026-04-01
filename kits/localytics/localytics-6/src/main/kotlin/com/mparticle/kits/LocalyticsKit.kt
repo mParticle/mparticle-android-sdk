@@ -161,7 +161,7 @@ class LocalyticsKit :
 
     override fun supportsAttributeLists(): Boolean = true
 
-    override fun setAllUserAttributes(
+    fun setAllUserAttributes(
         attributes: Map<String, String>,
         attributeLists: Map<String, List<String>>,
     ) {

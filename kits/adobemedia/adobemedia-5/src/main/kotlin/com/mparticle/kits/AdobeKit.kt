@@ -95,7 +95,7 @@ open class AdobeKit :
 
     override fun supportsAttributeLists(): Boolean = false
 
-    override fun setAllUserAttributes(
+    fun setAllUserAttributes(
         map: Map<String, String>,
         map1: Map<String, List<String>>,
     ) {
