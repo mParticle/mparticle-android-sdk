@@ -599,22 +599,22 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
         userAttributeLists = mDataplanFilter.transformUserAttributes(userAttributeLists);
         for (KitIntegration provider : providers.values()) {
             try {
-                if ((provider instanceof KitIntegration.AttributeListener || provider instanceof KitIntegration.UserAttributeListener)
+                if ((provider instanceof KitIntegration.BaseAttributeListener listener)
                         && !provider.isDisabled()) {
                     Map<String, String> filteredAttributeSingles = (Map<String, String>) KitConfiguration.filterAttributes(provider.getConfiguration().getUserAttributeFilters(),
                             userAttributes);
                     Map<String, List<String>> filteredAttributeLists = (Map<String, List<String>>) KitConfiguration.filterAttributes(provider.getConfiguration().getUserAttributeFilters(),
                             userAttributeLists);
-                    boolean supportsAttributeLists = ((KitIntegration.BaseAttributeListener) provider).supportsAttributeLists();
-                    KitIntegration.BaseAttributeListener baseAttributeListener = (KitIntegration.BaseAttributeListener) provider;
+                    boolean supportsAttributeLists = listener.supportsAttributeLists();
+                    FilteredMParticleUser filteredUser = FilteredMParticleUser.getInstance(mpid, provider);
                     if (supportsAttributeLists) {
-                        baseAttributeListener.onSetAllUserAttributes(filteredAttributeSingles, filteredAttributeLists, FilteredMParticleUser.getInstance(mpid, provider));
+                        listener.onSetAllUserAttributes(filteredAttributeSingles, filteredAttributeLists, filteredUser);
                     } else {
                         Map<String, String> singlesCopy = new HashMap<>(filteredAttributeSingles);
                         for (Map.Entry<String, List<String>> entry : filteredAttributeLists.entrySet()) {
                             singlesCopy.put(entry.getKey(), KitUtils.join(entry.getValue()));
                         }
-                        baseAttributeListener.onSetAllUserAttributes(singlesCopy, new HashMap<String, List<String>>(), FilteredMParticleUser.getInstance(mpid, provider));
+                        listener.onSetAllUserAttributes(singlesCopy, new HashMap<String, List<String>>(), filteredUser);
                     }
                 }
             } catch (Exception e) {
