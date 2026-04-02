@@ -22,8 +22,8 @@ import com.mparticle.internal.CoreCallbacks
 import com.mparticle.internal.Logger
 import com.mparticle.internal.MPUtility
 import com.mparticle.internal.SideloadedKit
-import com.mparticle.kits.KitIntegration.BaseAttributeListener
 import com.mparticle.kits.KitIntegration.ModifyIdentityListener
+import com.mparticle.kits.KitIntegration.UserAttributeListener
 import com.mparticle.mock.MockContext
 import com.mparticle.mock.MockKitConfiguration
 import com.mparticle.mock.MockKitManagerImpl
@@ -493,15 +493,15 @@ class KitManagerImplTest {
         val integration =
             mock(
                 KitIntegration::class.java,
-                withSettings().extraInterfaces(ModifyIdentityListener::class.java, BaseAttributeListener::class.java),
+                withSettings().extraInterfaces(ModifyIdentityListener::class.java, UserAttributeListener::class.java),
             )
         val integration2 =
             mock(
                 KitIntegration::class.java,
-                withSettings().extraInterfaces(ModifyIdentityListener::class.java, BaseAttributeListener::class.java),
+                withSettings().extraInterfaces(ModifyIdentityListener::class.java, UserAttributeListener::class.java),
             )
-        `when`((integration as BaseAttributeListener).supportsAttributeLists()).thenReturn(true)
-        `when`((integration2 as BaseAttributeListener).supportsAttributeLists())
+        `when`((integration as UserAttributeListener).supportsAttributeLists()).thenReturn(true)
+        `when`((integration2 as UserAttributeListener).supportsAttributeLists())
             .thenReturn(false)
         `when`(integration.configuration)
             .thenReturn(MockKitConfiguration.createKitConfiguration())
@@ -519,14 +519,14 @@ class KitManagerImplTest {
         attributeList.add("3")
         userAttributeLists["test 3"] = attributeList
         manager.onUserAttributesReceived(userAttributeSingles, userAttributeLists, 1L)
-        verify(integration as BaseAttributeListener, Mockito.times(1))
+        verify(integration as UserAttributeListener, Mockito.times(1))
             .onSetAllUserAttributes(eq(userAttributeSingles), eq(userAttributeLists), any())
         val userAttributesCombined: MutableMap<String, String> = HashMap()
         userAttributesCombined["test"] = "whatever"
         userAttributesCombined["test 2"] = "whatever 2"
         userAttributesCombined["test 3"] = "1,2,3"
         val clearedOutList: Map<String, List<String>> = HashMap()
-        verify(integration2 as BaseAttributeListener, Mockito.times(1))
+        verify(integration2 as UserAttributeListener, Mockito.times(1))
             .onSetAllUserAttributes(eq(userAttributesCombined), eq(clearedOutList), any())
     }
 
@@ -537,15 +537,15 @@ class KitManagerImplTest {
         val integration =
             mock(
                 KitIntegration::class.java,
-                withSettings().extraInterfaces(ModifyIdentityListener::class.java, BaseAttributeListener::class.java),
+                withSettings().extraInterfaces(ModifyIdentityListener::class.java, UserAttributeListener::class.java),
             )
         val integration2 =
             mock(
                 KitIntegration::class.java,
-                withSettings().extraInterfaces(ModifyIdentityListener::class.java, BaseAttributeListener::class.java),
+                withSettings().extraInterfaces(ModifyIdentityListener::class.java, UserAttributeListener::class.java),
             )
-        `when`((integration as BaseAttributeListener).supportsAttributeLists()).thenReturn(true)
-        `when`((integration2 as BaseAttributeListener).supportsAttributeLists())
+        `when`((integration as UserAttributeListener).supportsAttributeLists()).thenReturn(true)
+        `when`((integration2 as UserAttributeListener).supportsAttributeLists())
             .thenReturn(false)
         `when`(integration.configuration)
             .thenReturn(MockKitConfiguration.createKitConfiguration())
@@ -558,9 +558,9 @@ class KitManagerImplTest {
         attributeList.add("2")
         attributeList.add("3")
         manager.setUserAttributeList("test key", attributeList, 1)
-        verify(integration as BaseAttributeListener, Mockito.times(1))
+        verify(integration as UserAttributeListener, Mockito.times(1))
             .onSetUserAttributeList(eq("test key"), eq(attributeList), any())
-        verify(integration2 as BaseAttributeListener, Mockito.times(1))
+        verify(integration2 as UserAttributeListener, Mockito.times(1))
             .onSetUserAttribute(eq("test key"), eq("1,2,3"), isNull())
     }
 
@@ -571,15 +571,15 @@ class KitManagerImplTest {
         val integration =
             mock(
                 KitIntegration::class.java,
-                withSettings().extraInterfaces(ModifyIdentityListener::class.java, BaseAttributeListener::class.java),
+                withSettings().extraInterfaces(ModifyIdentityListener::class.java, UserAttributeListener::class.java),
             )
         val integration2 =
             mock(
                 KitIntegration::class.java,
-                withSettings().extraInterfaces(ModifyIdentityListener::class.java, BaseAttributeListener::class.java),
+                withSettings().extraInterfaces(ModifyIdentityListener::class.java, UserAttributeListener::class.java),
             )
-        `when`((integration as BaseAttributeListener).supportsAttributeLists()).thenReturn(true)
-        `when`((integration2 as BaseAttributeListener).supportsAttributeLists())
+        `when`((integration as UserAttributeListener).supportsAttributeLists()).thenReturn(true)
+        `when`((integration2 as UserAttributeListener).supportsAttributeLists())
             .thenReturn(false)
         `when`(integration.configuration)
             .thenReturn(MockKitConfiguration.createKitConfiguration())

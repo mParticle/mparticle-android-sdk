@@ -592,14 +592,14 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     }
 
     //================================================================================
-    // BaseAttributeListener user-attribute forwarding
+    // UserAttributeListener user-attribute forwarding
     //================================================================================
     public void onUserAttributesReceived(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists, Long mpid) {
         userAttributes = mDataplanFilter.transformUserAttributes(userAttributes);
         userAttributeLists = mDataplanFilter.transformUserAttributes(userAttributeLists);
         for (KitIntegration provider : providers.values()) {
             try {
-                if ((provider instanceof KitIntegration.BaseAttributeListener listener)
+                if ((provider instanceof KitIntegration.UserAttributeListener listener)
                         && !provider.isDisabled()) {
                     Map<String, String> filteredAttributeSingles = (Map<String, String>) KitConfiguration.filterAttributes(provider.getConfiguration().getUserAttributeFilters(),
                             userAttributes);
@@ -623,7 +623,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
         }
     }
 
-    private void syncUserIdentities(KitIntegration.ModifyIdentityListener modifyIdentityListener, KitConfiguration configuration) {
+    private void syncUserIdentities(KitIntegration.ModifyIdentityListener listener, KitConfiguration configuration) {
         MParticle instance = MParticle.getInstance();
         if (instance != null) {
             MParticleUser user = instance.Identity().getCurrentUser();
@@ -632,7 +632,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
                 if (identities != null) {
                     for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()) {
                         if (configuration.shouldSetIdentity(entry.getKey())) {
-                            modifyIdentityListener.setUserIdentity(entry.getKey(), entry.getValue());
+                            listener.setUserIdentity(entry.getKey(), entry.getValue());
                         }
                     }
                 }
@@ -669,7 +669,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     }
 
     private void setUserAttribute(KitIntegration provider, String attributeKey, List<String> valueList, long mpid) {
-        if ((provider instanceof KitIntegration.BaseAttributeListener listener)
+        if ((provider instanceof KitIntegration.UserAttributeListener listener)
                 && !provider.isDisabled()
                 && KitConfiguration.shouldForwardAttribute(provider.getConfiguration().getUserAttributeFilters(), attributeKey)) {
             boolean supportsAttributeLists = listener.supportsAttributeLists();
@@ -683,7 +683,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     }
 
     private void setUserAttribute(KitIntegration provider, String attributeKey, String attributeValue, long mpid) {
-        if ((provider instanceof KitIntegration.BaseAttributeListener listener)
+        if ((provider instanceof KitIntegration.UserAttributeListener listener)
                 && !provider.isDisabled()
                 && KitConfiguration.shouldForwardAttribute(provider.getConfiguration().getUserAttributeFilters(),
                 attributeKey)) {
@@ -698,7 +698,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
         }
         for (KitIntegration provider : providers.values()) {
             try {
-                if ((provider instanceof KitIntegration.BaseAttributeListener listener)
+                if ((provider instanceof KitIntegration.UserAttributeListener listener)
                         && !provider.isDisabled()
                         && KitConfiguration.shouldForwardAttribute(provider.getConfiguration().getUserAttributeFilters(), key)) {
                     listener.onRemoveUserAttribute(key, FilteredMParticleUser.getInstance(mpid, provider));
@@ -716,12 +716,11 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
         }
         for (KitIntegration provider : providers.values()) {
             try {
-                if (!provider.isDisabled() && KitConfiguration.shouldForwardAttribute(provider.getConfiguration().getUserAttributeFilters(), key))
-                    if (provider instanceof KitIntegration.UserAttributeListener) {
-                        ((KitIntegration.UserAttributeListener) provider).onIncrementUserAttribute(key, incrementedBy, newValue, FilteredMParticleUser.getInstance(mpid, provider));
+                if (!provider.isDisabled() && KitConfiguration.shouldForwardAttribute(provider.getConfiguration().getUserAttributeFilters(), key)) {
+                    if (provider instanceof KitIntegration.UserAttributeListener listener) {
+                        listener.onIncrementUserAttribute(key, incrementedBy, newValue, FilteredMParticleUser.getInstance(mpid, provider));
+                        listener.onSetUserAttribute(key, newValue, FilteredMParticleUser.getInstance(mpid, provider));
                     }
-                if (provider instanceof KitIntegration.BaseAttributeListener listener) {
-                    listener.onSetUserAttribute(key, newValue, FilteredMParticleUser.getInstance(mpid, provider));
                 }
             } catch (Exception e) {
                 Logger.warning("Failed to call onIncrementUserAttribute for kit: " + provider.getName() + ": " + e.getMessage());

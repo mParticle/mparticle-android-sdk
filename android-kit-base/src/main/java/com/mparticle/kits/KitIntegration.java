@@ -361,72 +361,8 @@ public abstract class KitIntegration {
     }
 
     /**
-     * Temporary shared contract used while {@link ModifyIdentityListener} behavior is migrated to
-     * {@link UserAttributeListener}. Factoring out common API surface lets the SDK land incremental changes
-     * and smaller pull requests instead of a single large refactor.
-     * <p>
-     * User attribute callbacks shared by {@link ModifyIdentityListener} (implement both) and {@link UserAttributeListener}
-     * (extends this interface). Kits implementing only {@link UserAttributeListener} do not list this type explicitly.
-     */
-    @Deprecated
-    public interface BaseAttributeListener {
-
-        /**
-         * Indicate to the mParticle Kit framework if this listener supports attribute-values as lists.
-         * <p>
-         * If false, list-specific APIs are not used; values are passed via scalar/csv paths instead.
-         *
-         * @return true if this listener supports attribute values as lists.
-         */
-        boolean supportsAttributeLists();
-
-        /**
-         * Called when a user attribute is removed for the current user.
-         *
-         * @param key  attribute key
-         * @param user filtered user context for this kit
-         */
-        void onRemoveUserAttribute(String key, FilteredMParticleUser user);
-
-        /**
-         * Called when a scalar user attribute is set for the current user.
-         *
-         * @param key   attribute key
-         * @param value attribute value (may be non-String for some {@link UserAttributeListener} call paths)
-         * @param user  filtered user context for this kit
-         */
-        void onSetUserAttribute(String key, Object value, FilteredMParticleUser user);
-
-        /**
-         * Called when a list-valued user attribute is set and {@link #supportsAttributeLists()} returns true.
-         *
-         * @param attributeKey       attribute key (may be null)
-         * @param attributeValueList attribute values (may be null)
-         * @param user               filtered user context for this kit (may be null)
-         */
-        void onSetUserAttributeList(
-                @Nullable String attributeKey,
-                @Nullable List<String> attributeValueList,
-                @Nullable FilteredMParticleUser user);
-
-        /**
-         * Called when the full set of user attributes is synchronized for the current user.
-         *
-         * @param userAttributes       scalar user attributes
-         * @param userAttributeLists     list-valued user attributes when {@link #supportsAttributeLists()} is true;
-         *                               otherwise list values may be merged into scalars by the framework
-         * @param user                 filtered user context for this kit
-         */
-        void onSetAllUserAttributes(
-                Map<String, String> userAttributes,
-                Map<String, List<String>> userAttributeLists,
-                FilteredMParticleUser user);
-    }
-
-    /**
      * Identity forwarding for kits that also receive user attribute callbacks. Implement together with
-     * {@link BaseAttributeListener} (kits that only need user attributes may implement {@link UserAttributeListener}
-     * instead, which extends {@link BaseAttributeListener}).
+     * {@link UserAttributeListener} when the kit should receive user attribute updates.
      */
     public interface ModifyIdentityListener {
 
@@ -585,14 +521,68 @@ public abstract class KitIntegration {
 
     }
 
-    public interface UserAttributeListener extends BaseAttributeListener {
+    /**
+     * Kits should implement this interface to receive user attribute updates, tags, increments, consent changes,
+     * and full attribute syncs from the mParticle SDK.
+     */
+    public interface UserAttributeListener {
+
+        /**
+         * Indicate to the mParticle Kit framework if this listener supports attribute-values as lists.
+         * <p>
+         * If false, list-specific APIs are not used; values are passed via scalar/csv paths instead.
+         *
+         * @return true if this listener supports attribute values as lists.
+         */
+        boolean supportsAttributeLists();
+
+        /**
+         * Called when a user attribute is removed for the current user.
+         *
+         * @param key  attribute key
+         * @param user filtered user context for this kit
+         */
+        void onRemoveUserAttribute(String key, FilteredMParticleUser user);
+
+        /**
+         * Called when a scalar user attribute is set for the current user.
+         *
+         * @param key   attribute key
+         * @param value attribute value (may be non-String for some call paths)
+         * @param user  filtered user context for this kit
+         */
+        void onSetUserAttribute(String key, Object value, FilteredMParticleUser user);
+
+        /**
+         * Called when a list-valued user attribute is set and {@link #supportsAttributeLists()} returns true.
+         *
+         * @param attributeKey       attribute key (may be null)
+         * @param attributeValueList attribute values (may be null)
+         * @param user               filtered user context for this kit (may be null)
+         */
+        void onSetUserAttributeList(
+                @Nullable String attributeKey,
+                @Nullable List<String> attributeValueList,
+                @Nullable FilteredMParticleUser user);
+
+        /**
+         * Called when the full set of user attributes is synchronized for the current user.
+         *
+         * @param userAttributes     scalar user attributes
+         * @param userAttributeLists list-valued user attributes when {@link #supportsAttributeLists()} is true;
+         *                           otherwise list values may be merged into scalars by the framework
+         * @param user               filtered user context for this kit
+         */
+        void onSetAllUserAttributes(
+                Map<String, String> userAttributes,
+                Map<String, List<String>> userAttributeLists,
+                FilteredMParticleUser user);
 
         void onIncrementUserAttribute(String key, Number incrementedBy, String value, FilteredMParticleUser user);
 
         void onSetUserTag(String key, FilteredMParticleUser user);
 
         void onConsentStateUpdated(ConsentState oldState, ConsentState newState, FilteredMParticleUser user);
-        
     }
 
     public interface BatchListener {

@@ -11,8 +11,9 @@ import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.MParticle.IdentityType
 import com.mparticle.kits.KitIntegration.ActivityListener
+import com.mparticle.consent.ConsentState
 import com.mparticle.kits.KitIntegration.ModifyIdentityListener
-import com.mparticle.kits.KitIntegration.BaseAttributeListener
+import com.mparticle.kits.KitIntegration.UserAttributeListener
 import com.mparticle.kits.KitIntegration.LogoutListener
 import java.util.HashMap
 import java.util.LinkedList
@@ -20,7 +21,7 @@ import java.util.LinkedList
 class ComscoreKit :
     KitIntegration(),
     KitIntegration.EventListener,
-    BaseAttributeListener,
+    UserAttributeListener,
     ModifyIdentityListener,
     LogoutListener,
     ActivityListener {
@@ -136,6 +137,27 @@ class ComscoreKit :
             return
         }
         applyEnterpriseScalarUserAttribute(key, value)
+    }
+
+    override fun onIncrementUserAttribute(
+        key: String?,
+        incrementedBy: Number?,
+        value: String?,
+        user: FilteredMParticleUser?,
+    ) {
+    }
+
+    override fun onSetUserTag(
+        key: String?,
+        user: FilteredMParticleUser?,
+    ) {
+    }
+
+    override fun onConsentStateUpdated(
+        oldState: ConsentState?,
+        newState: ConsentState?,
+        user: FilteredMParticleUser?,
+    ) {
     }
 
     override fun removeUserIdentity(identityType: IdentityType) {
