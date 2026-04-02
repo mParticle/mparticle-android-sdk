@@ -87,6 +87,17 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
 
 
     ConcurrentHashMap<Integer, KitIntegration> providers = new ConcurrentHashMap<Integer, KitIntegration>();
+
+    List<KitIntegration> activeKits() {
+        List<KitIntegration> activeKits = new ArrayList<>();
+        for (KitIntegration kit : providers.values()) {
+            if (!kit.isDisabled()) {
+                activeKits.add(kit);
+            }
+        }
+        return activeKits;
+    }
+    
     private final Context mContext;
 
     public KitManagerImpl(Context context, ReportingManager reportingManager, CoreCallbacks coreCallbacks, MParticleOptions options) {

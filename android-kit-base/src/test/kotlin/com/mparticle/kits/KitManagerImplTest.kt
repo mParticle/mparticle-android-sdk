@@ -94,6 +94,25 @@ class KitManagerImplTest {
         Assert.assertEquals(factory, manager.mKitIntegrationFactory)
     }
 
+    @Test
+    fun testActiveKitsExcludesDisabled() {
+        val manager: KitManagerImpl = MockKitManagerImpl()
+        val enabled1 = mock(KitIntegration::class.java)
+        val enabled2 = mock(KitIntegration::class.java)
+        val disabled = mock(KitIntegration::class.java)
+        `when`(enabled1.isDisabled()).thenReturn(false)
+        `when`(enabled2.isDisabled()).thenReturn(false)
+        `when`(disabled.isDisabled()).thenReturn(true)
+        manager.providers[1] = enabled1
+        manager.providers[2] = disabled
+        manager.providers[3] = enabled2
+        val active = manager.activeKits()
+        assertEquals(2, active.size)
+        assertTrue(active.contains(enabled1))
+        assertTrue(active.contains(enabled2))
+        Assert.assertFalse(active.contains(disabled))
+    }
+
     private fun createKitsMap(
         ids: List<Int>,
         type: Class<*> = KitIntegration::class.java,
