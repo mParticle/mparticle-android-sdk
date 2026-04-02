@@ -608,16 +608,15 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     public void onUserAttributesReceived(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists, Long mpid) {
         userAttributes = mDataplanFilter.transformUserAttributes(userAttributes);
         userAttributeLists = mDataplanFilter.transformUserAttributes(userAttributeLists);
-        for (KitIntegration provider : providers.values()) {
+        for (KitIntegration kit : activeKits()) {
             try {
-                if ((provider instanceof KitIntegration.UserAttributeListener listener)
-                        && !provider.isDisabled()) {
-                    Map<String, String> filteredAttributeSingles = (Map<String, String>) KitConfiguration.filterAttributes(provider.getConfiguration().getUserAttributeFilters(),
+                if (kit instanceof KitIntegration.UserAttributeListener listener) {
+                    Map<String, String> filteredAttributeSingles = (Map<String, String>) KitConfiguration.filterAttributes(kit.getConfiguration().getUserAttributeFilters(),
                             userAttributes);
-                    Map<String, List<String>> filteredAttributeLists = (Map<String, List<String>>) KitConfiguration.filterAttributes(provider.getConfiguration().getUserAttributeFilters(),
+                    Map<String, List<String>> filteredAttributeLists = (Map<String, List<String>>) KitConfiguration.filterAttributes(kit.getConfiguration().getUserAttributeFilters(),
                             userAttributeLists);
                     boolean supportsAttributeLists = listener.supportsAttributeLists();
-                    FilteredMParticleUser filteredUser = FilteredMParticleUser.getInstance(mpid, provider);
+                    FilteredMParticleUser filteredUser = FilteredMParticleUser.getInstance(mpid, kit);
                     if (supportsAttributeLists) {
                         listener.onSetAllUserAttributes(filteredAttributeSingles, filteredAttributeLists, filteredUser);
                     } else {
@@ -629,7 +628,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
                     }
                 }
             } catch (Exception e) {
-                Logger.warning("Failed to call setUserAttributes for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call setUserAttributes for kit: " + kit.getName() + ": " + e.getMessage());
             }
         }
     }
