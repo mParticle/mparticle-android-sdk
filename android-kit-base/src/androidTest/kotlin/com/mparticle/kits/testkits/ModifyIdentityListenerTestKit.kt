@@ -1,14 +1,17 @@
 package com.mparticle.kits.testkits
 
 import com.mparticle.MParticle
+import com.mparticle.consent.ConsentState
 import com.mparticle.kits.FilteredMParticleUser
-import com.mparticle.kits.KitIntegration.AttributeListener
 import com.mparticle.kits.KitIntegration.LogoutListener
+import com.mparticle.kits.KitIntegration.ModifyIdentityListener
+import com.mparticle.kits.KitIntegration.UserAttributeListener
 import com.mparticle.kits.ReportingMessage
 
-open class AttributeListenerTestKit :
+open class ModifyIdentityListenerTestKit :
     ListenerTestKit(),
-    AttributeListener,
+    UserAttributeListener,
+    ModifyIdentityListener,
     LogoutListener {
     var setUserAttributeCallback: ((attributeKey: String?, attributeValue: String?) -> Unit)? = null
     var setUserAttributeList: ((attributeKey: String?, attributeValueList: List<String>?) -> Unit)? =
@@ -74,6 +77,27 @@ open class AttributeListenerTestKit :
         }
         setUserAttributeCallback?.invoke(key, value)
         onAttributeReceived?.invoke(key, value)
+    }
+
+    override fun onIncrementUserAttribute(
+        key: String?,
+        incrementedBy: Number?,
+        value: String?,
+        user: FilteredMParticleUser?,
+    ) {
+    }
+
+    override fun onSetUserTag(
+        key: String?,
+        user: FilteredMParticleUser?,
+    ) {
+    }
+
+    override fun onConsentStateUpdated(
+        oldState: ConsentState?,
+        newState: ConsentState?,
+        user: FilteredMParticleUser?,
+    ) {
     }
 
     override fun logout(): List<ReportingMessage> = logout?.invoke() ?: listOf()

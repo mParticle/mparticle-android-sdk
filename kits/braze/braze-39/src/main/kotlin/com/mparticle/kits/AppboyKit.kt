@@ -31,7 +31,7 @@ import com.mparticle.consent.ConsentState
 import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.Logger
 import com.mparticle.kits.CommerceEventUtils.OnAttributeExtracted
-import com.mparticle.kits.KitIntegration.AttributeListener
+import com.mparticle.kits.KitIntegration.ModifyIdentityListener
 import com.mparticle.kits.KitIntegration.CommerceListener
 import com.mparticle.kits.KitIntegration.EventListener
 import com.mparticle.kits.KitIntegration.IdentityListener
@@ -54,7 +54,7 @@ import kotlin.collections.HashMap
  */
 open class AppboyKit :
     KitIntegration(),
-    AttributeListener,
+    ModifyIdentityListener,
     LogoutListener,
     CommerceListener,
     KitIntegration.EventListener,

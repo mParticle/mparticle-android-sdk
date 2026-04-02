@@ -20,7 +20,9 @@ import com.urbanairship.push.PushMessage
 import com.urbanairship.push.PushProviderBridge
 import java.math.BigDecimal
 import java.util.LinkedList
-import com.mparticle.kits.KitIntegration.AttributeListener
+import com.mparticle.consent.ConsentState
+import com.mparticle.kits.KitIntegration.ModifyIdentityListener
+import com.mparticle.kits.KitIntegration.UserAttributeListener
 
 /**
  * mParticle-Urban Airship Kit integration
@@ -30,7 +32,8 @@ class UrbanAirshipKit :
     KitIntegration.PushListener,
     KitIntegration.EventListener,
     CommerceListener,
-    AttributeListener,
+    UserAttributeListener,
+    ModifyIdentityListener,
     LogoutListener {
     private var channelIdListener: ChannelIdListener? = null
     private var configuration: UrbanAirshipConfiguration? = null
@@ -298,6 +301,27 @@ class UrbanAirshipKit :
                     .apply()
             }
         }
+    }
+
+    override fun onIncrementUserAttribute(
+        key: String?,
+        incrementedBy: Number?,
+        value: String?,
+        user: FilteredMParticleUser?,
+    ) {
+    }
+
+    override fun onSetUserTag(
+        key: String?,
+        user: FilteredMParticleUser?,
+    ) {
+    }
+
+    override fun onConsentStateUpdated(
+        oldState: ConsentState?,
+        newState: ConsentState?,
+        user: FilteredMParticleUser?,
+    ) {
     }
 
     // not supported

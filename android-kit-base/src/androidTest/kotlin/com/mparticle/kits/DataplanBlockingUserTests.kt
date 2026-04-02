@@ -11,9 +11,9 @@ import com.mparticle.Utils.randomString
 import com.mparticle.identity.IdentityApiRequest
 import com.mparticle.internal.AccessUtils
 import com.mparticle.kits.DataplanFilterImpl.Companion.getEventsApiName
-import com.mparticle.kits.testkits.AttributeListenerTestKit
 import com.mparticle.kits.testkits.IdentityListenerTestKit
 import com.mparticle.kits.testkits.ListenerTestKit
+import com.mparticle.kits.testkits.ModifyIdentityListenerTestKit
 import com.mparticle.kits.testkits.UserAttributeListenerTestKit
 import com.mparticle.testutils.MPLatch
 import org.junit.Assert.assertEquals
@@ -25,7 +25,7 @@ import org.junit.Test
 import kotlin.random.Random
 
 class DataplanBlockingUserTests : BaseKitOptionsTest() {
-    private lateinit var attributeListenerKitKit: AttributeListenerTestKit
+    private lateinit var attributeListenerKitKit: ModifyIdentityListenerTestKit
     private lateinit var identityListenerKitKit: IdentityListenerTestKit
     private lateinit var userAttributeListenerKitKit: UserAttributeListenerTestKit
     private lateinit var kitIntegrationTestKits: List<ListenerTestKit>
@@ -36,7 +36,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
             .builder(mContext)
             .configuration(
                 KitOptions {
-                    addKit(-1, AttributeListenerTestKit::class.java)
+                    addKit(-1, ModifyIdentityListenerTestKit::class.java)
                     addKit(-2, IdentityListenerTestKit::class.java)
                     addKit(-3, UserAttributeListenerTestKit::class.java)
                 },
@@ -44,7 +44,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
                 startMParticle(it)
             }
         attributeListenerKitKit =
-            MParticle.getInstance()?.getKitInstance(-1) as AttributeListenerTestKit
+            MParticle.getInstance()?.getKitInstance(-1) as ModifyIdentityListenerTestKit
         identityListenerKitKit =
             MParticle.getInstance()?.getKitInstance(-2) as IdentityListenerTestKit
         userAttributeListenerKitKit =

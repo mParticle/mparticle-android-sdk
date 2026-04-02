@@ -16,7 +16,7 @@ import com.mparticle.internal.Logger
 import com.mparticle.internal.MPUtility
 import com.mparticle.kits.KitIntegration.ActivityListener
 import com.mparticle.kits.KitIntegration.ApplicationStateListener
-import com.mparticle.kits.KitIntegration.AttributeListener
+import com.mparticle.kits.KitIntegration.ModifyIdentityListener
 import com.mparticle.kits.KitIntegration.CommerceListener
 import com.mparticle.kits.KitIntegration.EventListener
 import com.mparticle.kits.KitIntegration.LogoutListener
@@ -39,7 +39,7 @@ open class SingularKit :
     CommerceListener,
     ApplicationStateListener,
     UserAttributeListener,
-    AttributeListener,
+    ModifyIdentityListener,
     LogoutListener {
     interface DeviceAttributionCallback : SingularDeviceAttributionHandler
 

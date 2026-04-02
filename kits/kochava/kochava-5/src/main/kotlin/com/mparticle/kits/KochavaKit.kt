@@ -9,14 +9,17 @@ import com.mparticle.AttributionError
 import com.mparticle.AttributionResult
 import com.mparticle.MParticle.IdentityType
 import com.mparticle.identity.MParticleUser
-import com.mparticle.kits.KitIntegration.AttributeListener
+import com.mparticle.consent.ConsentState
+import com.mparticle.kits.KitIntegration.ModifyIdentityListener
+import com.mparticle.kits.KitIntegration.UserAttributeListener
 import com.mparticle.kits.KitIntegration.LogoutListener
 import org.json.JSONException
 import org.json.JSONObject
 
 class KochavaKit :
     KitIntegration(),
-    AttributeListener,
+    UserAttributeListener,
+    ModifyIdentityListener,
     LogoutListener,
     KitIntegration.IdentityListener {
     override fun getName(): String = NAME
@@ -112,6 +115,27 @@ class KochavaKit :
         user: FilteredMParticleUser?,
     ) {
         // No-op: this kit does not implement this feature.
+    }
+
+    override fun onIncrementUserAttribute(
+        key: String?,
+        incrementedBy: Number?,
+        value: String?,
+        user: FilteredMParticleUser?,
+    ) {
+    }
+
+    override fun onSetUserTag(
+        key: String?,
+        user: FilteredMParticleUser?,
+    ) {
+    }
+
+    override fun onConsentStateUpdated(
+        oldState: ConsentState?,
+        newState: ConsentState?,
+        user: FilteredMParticleUser?,
+    ) {
     }
 
     override fun setInstallReferrer(intent: Intent) {}

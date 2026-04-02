@@ -6,7 +6,9 @@ import com.mparticle.MParticle.IdentityType
 import com.mparticle.internal.MPUtility
 import com.mparticle.internal.MPUtility.AdIdInfo
 import com.mparticle.kits.KitIntegration.ApplicationStateListener
-import com.mparticle.kits.KitIntegration.AttributeListener
+import com.mparticle.consent.ConsentState
+import com.mparticle.kits.KitIntegration.ModifyIdentityListener
+import com.mparticle.kits.KitIntegration.UserAttributeListener
 import com.mparticle.kits.KitIntegration.LogoutListener
 import com.mparticle.kits.KitIntegration.PushListener
 import org.json.JSONException
@@ -16,7 +18,8 @@ import java.net.URL
 
 abstract class AdobeKitBase :
     KitIntegration(),
-    AttributeListener,
+    UserAttributeListener,
+    ModifyIdentityListener,
     LogoutListener,
     PushListener,
     ApplicationStateListener {
@@ -82,6 +85,27 @@ abstract class AdobeKitBase :
             return
         }
         syncIds()
+    }
+
+    override fun onIncrementUserAttribute(
+        key: String?,
+        incrementedBy: Number?,
+        value: String?,
+        user: FilteredMParticleUser?,
+    ) {
+    }
+
+    override fun onSetUserTag(
+        key: String?,
+        user: FilteredMParticleUser?,
+    ) {
+    }
+
+    override fun onConsentStateUpdated(
+        oldState: ConsentState?,
+        newState: ConsentState?,
+        user: FilteredMParticleUser?,
+    ) {
     }
 
     override fun setUserIdentity(

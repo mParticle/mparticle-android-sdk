@@ -18,7 +18,9 @@ import com.mparticle.BaseEvent
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.kits.KitIntegration.ApplicationStateListener
-import com.mparticle.kits.KitIntegration.AttributeListener
+import com.mparticle.consent.ConsentState
+import com.mparticle.kits.KitIntegration.ModifyIdentityListener
+import com.mparticle.kits.KitIntegration.UserAttributeListener
 import com.mparticle.kits.KitIntegration.EventListener
 import com.mparticle.kits.KitIntegration.LogoutListener
 import com.mparticle.kits.KitIntegration.PushListener
@@ -36,7 +38,8 @@ import com.mparticle.media.events.StreamType
 open class AdobeKit :
     KitIntegration(),
     EventListener,
-    AttributeListener,
+    UserAttributeListener,
+    ModifyIdentityListener,
     LogoutListener,
     PushListener,
     ApplicationStateListener {
@@ -119,6 +122,27 @@ open class AdobeKit :
             return
         }
         syncIds()
+    }
+
+    override fun onIncrementUserAttribute(
+        key: String?,
+        incrementedBy: Number?,
+        value: String?,
+        user: FilteredMParticleUser?,
+    ) {
+    }
+
+    override fun onSetUserTag(
+        key: String?,
+        user: FilteredMParticleUser?,
+    ) {
+    }
+
+    override fun onConsentStateUpdated(
+        oldState: ConsentState?,
+        newState: ConsentState?,
+        user: FilteredMParticleUser?,
+    ) {
     }
 
     override fun setUserIdentity(

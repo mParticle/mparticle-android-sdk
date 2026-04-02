@@ -16,7 +16,9 @@ import com.mparticle.commerce.CommerceEvent
 import com.mparticle.commerce.Product
 import com.mparticle.internal.Logger
 import com.mparticle.internal.MPUtility
-import com.mparticle.kits.KitIntegration.AttributeListener
+import com.mparticle.consent.ConsentState
+import com.mparticle.kits.KitIntegration.ModifyIdentityListener
+import com.mparticle.kits.KitIntegration.UserAttributeListener
 import com.mparticle.kits.KitIntegration.CommerceListener
 import com.mparticle.kits.KitIntegration.EventListener
 import com.mparticle.kits.KitIntegration.LogoutListener
@@ -31,7 +33,8 @@ class LocalyticsKit :
     KitIntegration(),
     KitIntegration.EventListener,
     CommerceListener,
-    AttributeListener,
+    UserAttributeListener,
+    ModifyIdentityListener,
     LogoutListener,
     PushListener,
     CallToActionListener {
@@ -190,6 +193,27 @@ class LocalyticsKit :
             return
         }
         applyScalarUserAttribute(key, value)
+    }
+
+    override fun onIncrementUserAttribute(
+        key: String?,
+        incrementedBy: Number?,
+        value: String?,
+        user: FilteredMParticleUser?,
+    ) {
+    }
+
+    override fun onSetUserTag(
+        key: String?,
+        user: FilteredMParticleUser?,
+    ) {
+    }
+
+    override fun onConsentStateUpdated(
+        oldState: ConsentState?,
+        newState: ConsentState?,
+        user: FilteredMParticleUser?,
+    ) {
     }
 
     override fun setOptOut(optOutStatus: Boolean): List<ReportingMessage> {

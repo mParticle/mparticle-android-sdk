@@ -11,7 +11,9 @@ import com.mparticle.commerce.CommerceEvent
 import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.Logger
 import com.mparticle.kits.KitIntegration.ApplicationStateListener
-import com.mparticle.kits.KitIntegration.AttributeListener
+import com.mparticle.consent.ConsentState
+import com.mparticle.kits.KitIntegration.ModifyIdentityListener
+import com.mparticle.kits.KitIntegration.UserAttributeListener
 import com.mparticle.kits.KitIntegration.CommerceListener
 import com.mparticle.kits.KitIntegration.EventListener
 import com.mparticle.kits.KitIntegration.IdentityListener
@@ -37,7 +39,8 @@ class BranchMetricsKit :
     KitIntegration(),
     EventListener,
     CommerceListener,
-    AttributeListener,
+    UserAttributeListener,
+    ModifyIdentityListener,
     LogoutListener,
     ApplicationStateListener,
     IdentityListener,
@@ -204,6 +207,27 @@ class BranchMetricsKit :
         user: FilteredMParticleUser?,
     ) {
         // No-op: this kit does not implement this feature.
+    }
+
+    override fun onIncrementUserAttribute(
+        key: String?,
+        incrementedBy: Number?,
+        value: String?,
+        user: FilteredMParticleUser?,
+    ) {
+    }
+
+    override fun onSetUserTag(
+        key: String?,
+        user: FilteredMParticleUser?,
+    ) {
+    }
+
+    override fun onConsentStateUpdated(
+        oldState: ConsentState?,
+        newState: ConsentState?,
+        user: FilteredMParticleUser?,
+    ) {
     }
 
     override fun setUserIdentity(
