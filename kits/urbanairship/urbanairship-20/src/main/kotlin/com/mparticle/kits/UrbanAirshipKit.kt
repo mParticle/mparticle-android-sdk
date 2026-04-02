@@ -20,7 +20,7 @@ import com.urbanairship.push.PushMessage
 import com.urbanairship.push.PushProviderBridge
 import java.math.BigDecimal
 import java.util.LinkedList
-import com.mparticle.kits.KitIntegration.AttributeListener
+import com.mparticle.kits.KitIntegration.ModifyIdentityListener
 import com.mparticle.kits.KitIntegration.BaseAttributeListener
 
 /**
@@ -32,7 +32,7 @@ class UrbanAirshipKit :
     KitIntegration.EventListener,
     CommerceListener,
     BaseAttributeListener,
-    AttributeListener,
+    ModifyIdentityListener,
     LogoutListener {
     private var channelIdListener: ChannelIdListener? = null
     private var configuration: UrbanAirshipConfiguration? = null

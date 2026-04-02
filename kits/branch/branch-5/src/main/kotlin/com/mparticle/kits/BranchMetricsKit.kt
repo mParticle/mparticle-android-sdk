@@ -11,7 +11,7 @@ import com.mparticle.commerce.CommerceEvent
 import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.Logger
 import com.mparticle.kits.KitIntegration.ApplicationStateListener
-import com.mparticle.kits.KitIntegration.AttributeListener
+import com.mparticle.kits.KitIntegration.ModifyIdentityListener
 import com.mparticle.kits.KitIntegration.BaseAttributeListener
 import com.mparticle.kits.KitIntegration.CommerceListener
 import com.mparticle.kits.KitIntegration.EventListener
@@ -39,7 +39,7 @@ class BranchMetricsKit :
     EventListener,
     CommerceListener,
     BaseAttributeListener,
-    AttributeListener,
+    ModifyIdentityListener,
     LogoutListener,
     ApplicationStateListener,
     IdentityListener,

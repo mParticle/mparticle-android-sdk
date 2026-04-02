@@ -22,8 +22,8 @@ import com.mparticle.internal.CoreCallbacks
 import com.mparticle.internal.Logger
 import com.mparticle.internal.MPUtility
 import com.mparticle.internal.SideloadedKit
-import com.mparticle.kits.KitIntegration.AttributeListener
 import com.mparticle.kits.KitIntegration.BaseAttributeListener
+import com.mparticle.kits.KitIntegration.ModifyIdentityListener
 import com.mparticle.mock.MockContext
 import com.mparticle.mock.MockKitConfiguration
 import com.mparticle.mock.MockKitManagerImpl
@@ -493,12 +493,12 @@ class KitManagerImplTest {
         val integration =
             mock(
                 KitIntegration::class.java,
-                withSettings().extraInterfaces(AttributeListener::class.java, BaseAttributeListener::class.java),
+                withSettings().extraInterfaces(ModifyIdentityListener::class.java, BaseAttributeListener::class.java),
             )
         val integration2 =
             mock(
                 KitIntegration::class.java,
-                withSettings().extraInterfaces(AttributeListener::class.java, BaseAttributeListener::class.java),
+                withSettings().extraInterfaces(ModifyIdentityListener::class.java, BaseAttributeListener::class.java),
             )
         `when`((integration as BaseAttributeListener).supportsAttributeLists()).thenReturn(true)
         `when`((integration2 as BaseAttributeListener).supportsAttributeLists())
@@ -537,12 +537,12 @@ class KitManagerImplTest {
         val integration =
             mock(
                 KitIntegration::class.java,
-                withSettings().extraInterfaces(AttributeListener::class.java, BaseAttributeListener::class.java),
+                withSettings().extraInterfaces(ModifyIdentityListener::class.java, BaseAttributeListener::class.java),
             )
         val integration2 =
             mock(
                 KitIntegration::class.java,
-                withSettings().extraInterfaces(AttributeListener::class.java, BaseAttributeListener::class.java),
+                withSettings().extraInterfaces(ModifyIdentityListener::class.java, BaseAttributeListener::class.java),
             )
         `when`((integration as BaseAttributeListener).supportsAttributeLists()).thenReturn(true)
         `when`((integration2 as BaseAttributeListener).supportsAttributeLists())
@@ -571,12 +571,12 @@ class KitManagerImplTest {
         val integration =
             mock(
                 KitIntegration::class.java,
-                withSettings().extraInterfaces(AttributeListener::class.java, BaseAttributeListener::class.java),
+                withSettings().extraInterfaces(ModifyIdentityListener::class.java, BaseAttributeListener::class.java),
             )
         val integration2 =
             mock(
                 KitIntegration::class.java,
-                withSettings().extraInterfaces(AttributeListener::class.java, BaseAttributeListener::class.java),
+                withSettings().extraInterfaces(ModifyIdentityListener::class.java, BaseAttributeListener::class.java),
             )
         `when`((integration as BaseAttributeListener).supportsAttributeLists()).thenReturn(true)
         `when`((integration2 as BaseAttributeListener).supportsAttributeLists())

@@ -361,11 +361,11 @@ public abstract class KitIntegration {
     }
 
     /**
-     * Temporary shared contract used while {@link AttributeListener} behavior is migrated to
+     * Temporary shared contract used while {@link ModifyIdentityListener} behavior is migrated to
      * {@link UserAttributeListener}. Factoring out common API surface lets the SDK land incremental changes
      * and smaller pull requests instead of a single large refactor.
      * <p>
-     * User attribute callbacks shared by {@link AttributeListener} (implement both) and {@link UserAttributeListener}
+     * User attribute callbacks shared by {@link ModifyIdentityListener} (implement both) and {@link UserAttributeListener}
      * (extends this interface). Kits implementing only {@link UserAttributeListener} do not list this type explicitly.
      */
     @Deprecated
@@ -428,7 +428,7 @@ public abstract class KitIntegration {
      * {@link BaseAttributeListener} (kits that only need user attributes may implement {@link UserAttributeListener}
      * instead, which extends {@link BaseAttributeListener}).
      */
-    public interface AttributeListener {
+    public interface ModifyIdentityListener {
 
         void setUserIdentity(MParticle.IdentityType identityType, String identity);
 

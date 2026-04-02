@@ -16,7 +16,7 @@ import com.mparticle.commerce.CommerceEvent
 import com.mparticle.commerce.Product
 import com.mparticle.internal.Logger
 import com.mparticle.internal.MPUtility
-import com.mparticle.kits.KitIntegration.AttributeListener
+import com.mparticle.kits.KitIntegration.ModifyIdentityListener
 import com.mparticle.kits.KitIntegration.BaseAttributeListener
 import com.mparticle.kits.KitIntegration.CommerceListener
 import com.mparticle.kits.KitIntegration.EventListener
@@ -33,7 +33,7 @@ class LocalyticsKit :
     KitIntegration.EventListener,
     CommerceListener,
     BaseAttributeListener,
-    AttributeListener,
+    ModifyIdentityListener,
     LogoutListener,
     PushListener,
     CallToActionListener {

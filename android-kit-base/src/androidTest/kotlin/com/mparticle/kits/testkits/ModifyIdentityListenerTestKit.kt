@@ -2,15 +2,15 @@ package com.mparticle.kits.testkits
 
 import com.mparticle.MParticle
 import com.mparticle.kits.FilteredMParticleUser
-import com.mparticle.kits.KitIntegration.AttributeListener
 import com.mparticle.kits.KitIntegration.BaseAttributeListener
 import com.mparticle.kits.KitIntegration.LogoutListener
+import com.mparticle.kits.KitIntegration.ModifyIdentityListener
 import com.mparticle.kits.ReportingMessage
 
-open class AttributeListenerTestKit :
+open class ModifyIdentityListenerTestKit :
     ListenerTestKit(),
     BaseAttributeListener,
-    AttributeListener,
+    ModifyIdentityListener,
     LogoutListener {
     var setUserAttributeCallback: ((attributeKey: String?, attributeValue: String?) -> Unit)? = null
     var setUserAttributeList: ((attributeKey: String?, attributeValueList: List<String>?) -> Unit)? =
