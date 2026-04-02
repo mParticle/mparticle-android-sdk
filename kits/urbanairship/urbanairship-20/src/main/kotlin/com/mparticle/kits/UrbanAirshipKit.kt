@@ -247,15 +247,16 @@ class UrbanAirshipKit :
 
     override fun supportsAttributeLists(): Boolean = false
 
-    fun setAllUserAttributes(
-        stringAttributes: Map<String, String>,
-        listAttributes: Map<String, List<String>>,
+    override fun onSetAllUserAttributes(
+        userAttributes: Map<String, String>,
+        userAttributeLists: Map<String, List<String>>,
+        user: FilteredMParticleUser,
     ) {
         if (configuration?.enableTags == true) {
             val editor =
                 Airship.channel
                     .editTags()
-            for ((key, value) in stringAttributes) {
+            for ((key, value) in userAttributes) {
                 if (KitUtils.isEmpty(value)) {
                     editor.addTag(KitUtils.sanitizeAttributeKey(key))
                 } else if (configuration?.includeUserAttributes == true) {
@@ -264,14 +265,6 @@ class UrbanAirshipKit :
             }
             editor.apply()
         }
-    }
-
-    override fun onSetAllUserAttributes(
-        userAttributes: Map<String, String>,
-        userAttributeLists: Map<String, List<String>>,
-        user: FilteredMParticleUser,
-    ) {
-        setAllUserAttributes(userAttributes, userAttributeLists)
     }
 
     override fun onRemoveUserAttribute(

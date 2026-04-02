@@ -289,20 +289,10 @@ class AppsFlyerKit :
         userAttributeLists: MutableMap<String, MutableList<String>>?,
         user: FilteredMParticleUser?,
     ) {
-        setAllUserAttributes(
-            userAttributes ?: emptyMap(),
-            userAttributeLists ?: emptyMap(),
-        )
+        // No-op: this kit does not implement this feature.
     }
 
     override fun supportsAttributeLists(): Boolean = true
-
-    fun setAllUserAttributes(
-        map: Map<String, String>,
-        map1: Map<String, List<String>>,
-    ) {
-        // No-op: this kit does not implement this feature.
-    }
 
     override fun removeUserIdentity(identityType: MParticle.IdentityType) {
         with(instance) {

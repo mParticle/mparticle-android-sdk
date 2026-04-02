@@ -184,17 +184,11 @@ class BranchMetricsKit :
 
     override fun supportsAttributeLists(): Boolean = true
 
-    fun setAllUserAttributes(
-        map: Map<String, String>,
-        map1: Map<String, List<String>>,
-    ) {}
-
     override fun onSetAllUserAttributes(
         userAttributes: Map<String, String>,
         userAttributeLists: Map<String, List<String>>,
         user: FilteredMParticleUser,
     ) {
-        setAllUserAttributes(userAttributes, userAttributeLists)
     }
 
     override fun onRemoveUserAttribute(

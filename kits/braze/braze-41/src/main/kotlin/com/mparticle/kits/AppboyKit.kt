@@ -535,10 +535,31 @@ open class AppboyKit :
         userAttributeLists: MutableMap<String, MutableList<String>>?,
         user: FilteredMParticleUser?,
     ) {
-        setAllUserAttributes(
-            userAttributes ?: emptyMap(),
-            userAttributeLists ?: emptyMap(),
-        )
+        val attributes = userAttributes ?: emptyMap()
+        val attributeLists = userAttributeLists ?: emptyMap()
+        if (!kitPreferences.getBoolean(PREF_KEY_HAS_SYNCED_ATTRIBUTES, false)) {
+            for ((key, value) in attributes) {
+                applyScalarUserAttribute(key, value)
+            }
+            for ((key, value) in attributeLists) {
+                Braze
+                    .getInstance(context)
+                    .getCurrentUser(
+                        object : IValueCallback<BrazeUser> {
+                            override fun onSuccess(brazeUser: BrazeUser) {
+                                val array = value.toTypedArray<String?>()
+                                brazeUser.setCustomAttributeArray(key, array)
+                                queueDataFlush()
+                            }
+
+                            override fun onError() {
+                                Logger.warning("unable to set key: " + key + " with User Attribute List: " + value)
+                            }
+                        },
+                    )
+            }
+            kitPreferences.edit().putBoolean(PREF_KEY_HAS_SYNCED_ATTRIBUTES, true).apply()
+        }
     }
 
     override fun supportsAttributeLists(): Boolean = true
@@ -674,38 +695,6 @@ open class AppboyKit :
     protected open fun queueDataFlush() {
         dataFlushRunnable?.let { dataFlushHandler.removeCallbacks(it) }
         dataFlushRunnable?.let { dataFlushHandler.postDelayed(it, FLUSH_DELAY.toLong()) }
-    }
-
-    /**
-     * This is called when the Kit is added to the mParticle SDK, typically on app-startup.
-     */
-    fun setAllUserAttributes(
-        attributes: Map<String, String>,
-        attributeLists: Map<String, List<String>>,
-    ) {
-        if (!kitPreferences.getBoolean(PREF_KEY_HAS_SYNCED_ATTRIBUTES, false)) {
-            for ((key, value) in attributes) {
-                applyScalarUserAttribute(key, value)
-            }
-            for ((key, value) in attributeLists) {
-                Braze
-                    .getInstance(context)
-                    .getCurrentUser(
-                        object : IValueCallback<BrazeUser> {
-                            override fun onSuccess(brazeUser: BrazeUser) {
-                                val array = value.toTypedArray<String?>()
-                                brazeUser.setCustomAttributeArray(key, array)
-                                queueDataFlush()
-                            }
-
-                            override fun onError() {
-                                Logger.warning("unable to set key: " + key + " with User Attribute List: " + value)
-                            }
-                        },
-                    )
-            }
-            kitPreferences.edit().putBoolean(PREF_KEY_HAS_SYNCED_ATTRIBUTES, true).apply()
-        }
     }
 
     override fun setUserIdentity(
