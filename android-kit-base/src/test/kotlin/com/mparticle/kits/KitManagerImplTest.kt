@@ -493,15 +493,15 @@ class KitManagerImplTest {
         val integration =
             mock(
                 KitIntegration::class.java,
-                withSettings().extraInterfaces(AttributeListener::class.java),
+                withSettings().extraInterfaces(AttributeListener::class.java, BaseAttributeListener::class.java),
             )
         val integration2 =
             mock(
                 KitIntegration::class.java,
-                withSettings().extraInterfaces(AttributeListener::class.java),
+                withSettings().extraInterfaces(AttributeListener::class.java, BaseAttributeListener::class.java),
             )
-        `when`((integration as AttributeListener).supportsAttributeLists()).thenReturn(true)
-        `when`((integration2 as AttributeListener).supportsAttributeLists())
+        `when`((integration as BaseAttributeListener).supportsAttributeLists()).thenReturn(true)
+        `when`((integration2 as BaseAttributeListener).supportsAttributeLists())
             .thenReturn(false)
         `when`(integration.configuration)
             .thenReturn(MockKitConfiguration.createKitConfiguration())
@@ -537,15 +537,15 @@ class KitManagerImplTest {
         val integration =
             mock(
                 KitIntegration::class.java,
-                withSettings().extraInterfaces(AttributeListener::class.java),
+                withSettings().extraInterfaces(AttributeListener::class.java, BaseAttributeListener::class.java),
             )
         val integration2 =
             mock(
                 KitIntegration::class.java,
-                withSettings().extraInterfaces(AttributeListener::class.java),
+                withSettings().extraInterfaces(AttributeListener::class.java, BaseAttributeListener::class.java),
             )
-        `when`((integration as AttributeListener).supportsAttributeLists()).thenReturn(true)
-        `when`((integration2 as AttributeListener).supportsAttributeLists())
+        `when`((integration as BaseAttributeListener).supportsAttributeLists()).thenReturn(true)
+        `when`((integration2 as BaseAttributeListener).supportsAttributeLists())
             .thenReturn(false)
         `when`(integration.configuration)
             .thenReturn(MockKitConfiguration.createKitConfiguration())
@@ -571,15 +571,15 @@ class KitManagerImplTest {
         val integration =
             mock(
                 KitIntegration::class.java,
-                withSettings().extraInterfaces(AttributeListener::class.java),
+                withSettings().extraInterfaces(AttributeListener::class.java, BaseAttributeListener::class.java),
             )
         val integration2 =
             mock(
                 KitIntegration::class.java,
-                withSettings().extraInterfaces(AttributeListener::class.java),
+                withSettings().extraInterfaces(AttributeListener::class.java, BaseAttributeListener::class.java),
             )
-        `when`((integration as AttributeListener).supportsAttributeLists()).thenReturn(true)
-        `when`((integration2 as AttributeListener).supportsAttributeLists())
+        `when`((integration as BaseAttributeListener).supportsAttributeLists()).thenReturn(true)
+        `when`((integration2 as BaseAttributeListener).supportsAttributeLists())
             .thenReturn(false)
         `when`(integration.configuration)
             .thenReturn(MockKitConfiguration.createKitConfiguration())

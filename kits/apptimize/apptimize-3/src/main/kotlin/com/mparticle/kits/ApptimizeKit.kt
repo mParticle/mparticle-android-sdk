@@ -12,12 +12,14 @@ import com.mparticle.MParticle
 import com.mparticle.MParticle.IdentityType
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.kits.KitIntegration.AttributeListener
+import com.mparticle.kits.KitIntegration.BaseAttributeListener
 import com.mparticle.kits.KitIntegration.CommerceListener
 import com.mparticle.kits.KitIntegration.LogoutListener
 import java.math.BigDecimal
 
 class ApptimizeKit :
     KitIntegration(),
+    BaseAttributeListener,
     AttributeListener,
     LogoutListener,
     KitIntegration.EventListener,

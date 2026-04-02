@@ -3,11 +3,13 @@ package com.mparticle.kits.testkits
 import com.mparticle.MParticle
 import com.mparticle.kits.FilteredMParticleUser
 import com.mparticle.kits.KitIntegration.AttributeListener
+import com.mparticle.kits.KitIntegration.BaseAttributeListener
 import com.mparticle.kits.KitIntegration.LogoutListener
 import com.mparticle.kits.ReportingMessage
 
 open class AttributeListenerTestKit :
     ListenerTestKit(),
+    BaseAttributeListener,
     AttributeListener,
     LogoutListener {
     var setUserAttributeCallback: ((attributeKey: String?, attributeValue: String?) -> Unit)? = null

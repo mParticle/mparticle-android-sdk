@@ -10,12 +10,14 @@ import com.mparticle.AttributionResult
 import com.mparticle.MParticle.IdentityType
 import com.mparticle.identity.MParticleUser
 import com.mparticle.kits.KitIntegration.AttributeListener
+import com.mparticle.kits.KitIntegration.BaseAttributeListener
 import com.mparticle.kits.KitIntegration.LogoutListener
 import org.json.JSONException
 import org.json.JSONObject
 
 class KochavaKit :
     KitIntegration(),
+    BaseAttributeListener,
     AttributeListener,
     LogoutListener,
     KitIntegration.IdentityListener {

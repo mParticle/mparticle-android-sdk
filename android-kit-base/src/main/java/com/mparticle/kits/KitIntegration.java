@@ -365,8 +365,8 @@ public abstract class KitIntegration {
      * {@link UserAttributeListener}. Factoring out common API surface lets the SDK land incremental changes
      * and smaller pull requests instead of a single large refactor.
      * <p>
-     * Kits implement {@link AttributeListener} and/or {@link UserAttributeListener}; they do not implement this
-     * type directly.
+     * User attribute callbacks shared by {@link AttributeListener} (implement both) and {@link UserAttributeListener}
+     * (extends this interface). Kits implementing only {@link UserAttributeListener} do not list this type explicitly.
      */
     @Deprecated
     public interface BaseAttributeListener {
@@ -423,7 +423,12 @@ public abstract class KitIntegration {
                 FilteredMParticleUser user);
     }
 
-    public interface AttributeListener extends BaseAttributeListener {
+    /**
+     * Identity forwarding for kits that also receive user attribute callbacks. Implement together with
+     * {@link BaseAttributeListener} (kits that only need user attributes may implement {@link UserAttributeListener}
+     * instead, which extends {@link BaseAttributeListener}).
+     */
+    public interface AttributeListener {
 
         void setUserIdentity(MParticle.IdentityType identityType, String identity);
 
