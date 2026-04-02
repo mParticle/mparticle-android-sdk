@@ -79,7 +79,6 @@ class ApptentiveKit :
     override fun onConsentStateUpdated(
         oldState: ConsentState?,
         newState: ConsentState?,
-        user: FilteredMParticleUser?,
     ) {
         // Ignored
     }
@@ -91,14 +90,12 @@ class ApptentiveKit :
         key: String?,
         incrementedBy: Number?,
         value: String?,
-        user: FilteredMParticleUser?,
     ) {
         // Ignored
     }
 
     override fun onRemoveUserAttribute(
         key: String?,
-        user: FilteredMParticleUser?,
     ) {
         key?.let {
             Apptentive.removeCustomPersonData(it)
@@ -108,7 +105,6 @@ class ApptentiveKit :
     override fun onSetUserAttribute(
         key: String?,
         value: Any?,
-        user: FilteredMParticleUser?,
     ) {
         if (key != null && value != null) {
             when (key.lowercase()) {
@@ -136,7 +132,6 @@ class ApptentiveKit :
 
     override fun onSetUserTag(
         key: String?,
-        user: FilteredMParticleUser?,
     ) {
         // Ignored
     }
@@ -144,7 +139,6 @@ class ApptentiveKit :
     override fun onSetUserAttributeList(
         attributeKey: String?,
         attributeValueList: List<String>?,
-        user: FilteredMParticleUser?,
     ) {
         // Ignored
     }
@@ -152,7 +146,6 @@ class ApptentiveKit :
     override fun onSetAllUserAttributes(
         userAttributes: MutableMap<String, String>?,
         userAttributeLists: MutableMap<String, MutableList<String>>?,
-        user: FilteredMParticleUser?,
     ) {
         userAttributes?.let { userAttribute ->
             val firstName = userAttribute[MParticle.UserAttributes.FIRSTNAME] ?: ""

@@ -51,7 +51,6 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq
-import org.mockito.ArgumentMatchers.isNull
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
@@ -539,14 +538,14 @@ class KitManagerImplTest {
         userAttributeLists["test 3"] = attributeList
         manager.onUserAttributesReceived(userAttributeSingles, userAttributeLists, 1L)
         verify(integration as UserAttributeListener, Mockito.times(1))
-            .onSetAllUserAttributes(eq(userAttributeSingles), eq(userAttributeLists), any())
+            .onSetAllUserAttributes(eq(userAttributeSingles), eq(userAttributeLists))
         val userAttributesCombined: MutableMap<String, String> = HashMap()
         userAttributesCombined["test"] = "whatever"
         userAttributesCombined["test 2"] = "whatever 2"
         userAttributesCombined["test 3"] = "1,2,3"
         val clearedOutList: Map<String, List<String>> = HashMap()
         verify(integration2 as UserAttributeListener, Mockito.times(1))
-            .onSetAllUserAttributes(eq(userAttributesCombined), eq(clearedOutList), any())
+            .onSetAllUserAttributes(eq(userAttributesCombined), eq(clearedOutList))
     }
 
     @Test
@@ -578,9 +577,9 @@ class KitManagerImplTest {
         attributeList.add("3")
         manager.setUserAttributeList("test key", attributeList, 1)
         verify(integration as UserAttributeListener, Mockito.times(1))
-            .onSetUserAttributeList(eq("test key"), eq(attributeList), any())
+            .onSetUserAttributeList(eq("test key"), eq(attributeList))
         verify(integration2 as UserAttributeListener, Mockito.times(1))
-            .onSetUserAttribute(eq("test key"), eq("1,2,3"), isNull())
+            .onSetUserAttribute(eq("test key"), eq("1,2,3"))
     }
 
     @Test

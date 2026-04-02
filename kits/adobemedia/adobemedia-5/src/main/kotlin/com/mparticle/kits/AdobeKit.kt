@@ -91,7 +91,6 @@ open class AdobeKit :
     override fun onSetUserAttributeList(
         attributeKey: String?,
         attributeValueList: List<String>?,
-        user: FilteredMParticleUser?,
     ) {
         syncIds()
     }
@@ -101,14 +100,12 @@ open class AdobeKit :
     override fun onSetAllUserAttributes(
         userAttributes: Map<String, String>,
         userAttributeLists: Map<String, List<String>>,
-        user: FilteredMParticleUser,
     ) {
         syncIds()
     }
 
     override fun onRemoveUserAttribute(
         key: String,
-        user: FilteredMParticleUser,
     ) {
         syncIds()
     }
@@ -116,7 +113,6 @@ open class AdobeKit :
     override fun onSetUserAttribute(
         key: String?,
         value: Any?,
-        user: FilteredMParticleUser?,
     ) {
         if (key == null || value == null || value !is String) {
             return
@@ -128,20 +124,17 @@ open class AdobeKit :
         key: String?,
         incrementedBy: Number?,
         value: String?,
-        user: FilteredMParticleUser?,
     ) {
     }
 
     override fun onSetUserTag(
         key: String?,
-        user: FilteredMParticleUser?,
     ) {
     }
 
     override fun onConsentStateUpdated(
         oldState: ConsentState?,
         newState: ConsentState?,
-        user: FilteredMParticleUser?,
     ) {
     }
 

@@ -2,7 +2,6 @@ package com.mparticle.kits.testkits
 
 import com.mparticle.MParticle
 import com.mparticle.consent.ConsentState
-import com.mparticle.kits.FilteredMParticleUser
 import com.mparticle.kits.KitIntegration.LogoutListener
 import com.mparticle.kits.KitIntegration.ModifyIdentityListener
 import com.mparticle.kits.KitIntegration.UserAttributeListener
@@ -30,7 +29,6 @@ open class ModifyIdentityListenerTestKit :
     override fun onSetUserAttributeList(
         attributeKey: String?,
         attributeValueList: List<String>?,
-        user: FilteredMParticleUser?,
     ) {
         setUserAttributeList?.invoke(attributeKey, attributeValueList)
         onAttributeReceived?.invoke(attributeKey, attributeValueList)
@@ -39,7 +37,6 @@ open class ModifyIdentityListenerTestKit :
     override fun onSetAllUserAttributes(
         userAttributes: Map<String, String>,
         userAttributeLists: Map<String, List<String>>,
-        user: FilteredMParticleUser,
     ) {
         setAllUserAttributes?.invoke(userAttributes, userAttributeLists)
         userAttributes.forEach { onAttributeReceived?.invoke(it.key, it.value) }
@@ -61,7 +58,6 @@ open class ModifyIdentityListenerTestKit :
 
     override fun onRemoveUserAttribute(
         key: String,
-        user: FilteredMParticleUser,
     ) {
         removeUserAttributeListener?.invoke(key)
         onAttributeReceived?.invoke(key, null)
@@ -70,7 +66,6 @@ open class ModifyIdentityListenerTestKit :
     override fun onSetUserAttribute(
         key: String?,
         value: Any?,
-        user: FilteredMParticleUser?,
     ) {
         if (key == null || value == null || value !is String) {
             return
@@ -83,20 +78,17 @@ open class ModifyIdentityListenerTestKit :
         key: String?,
         incrementedBy: Number?,
         value: String?,
-        user: FilteredMParticleUser?,
     ) {
     }
 
     override fun onSetUserTag(
         key: String?,
-        user: FilteredMParticleUser?,
     ) {
     }
 
     override fun onConsentStateUpdated(
         oldState: ConsentState?,
         newState: ConsentState?,
-        user: FilteredMParticleUser?,
     ) {
     }
 

@@ -88,7 +88,6 @@ class KochavaKit :
     override fun onSetUserAttributeList(
         attributeKey: String?,
         attributeValueList: List<String>?,
-        user: FilteredMParticleUser?,
     ) {
         // not supported
     }
@@ -98,13 +97,11 @@ class KochavaKit :
     override fun onSetAllUserAttributes(
         userAttributes: Map<String, String>,
         userAttributeLists: Map<String, List<String>>,
-        user: FilteredMParticleUser,
     ) {
     }
 
     override fun onRemoveUserAttribute(
         key: String,
-        user: FilteredMParticleUser,
     ) {
         // No-op: this kit does not implement this feature.
     }
@@ -112,7 +109,6 @@ class KochavaKit :
     override fun onSetUserAttribute(
         key: String?,
         value: Any?,
-        user: FilteredMParticleUser?,
     ) {
         // No-op: this kit does not implement this feature.
     }
@@ -121,20 +117,17 @@ class KochavaKit :
         key: String?,
         incrementedBy: Number?,
         value: String?,
-        user: FilteredMParticleUser?,
     ) {
     }
 
     override fun onSetUserTag(
         key: String?,
-        user: FilteredMParticleUser?,
     ) {
     }
 
     override fun onConsentStateUpdated(
         oldState: ConsentState?,
         newState: ConsentState?,
-        user: FilteredMParticleUser?,
     ) {
     }
 

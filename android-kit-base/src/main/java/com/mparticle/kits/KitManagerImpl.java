@@ -616,15 +616,14 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
                     Map<String, List<String>> filteredAttributeLists = (Map<String, List<String>>) KitConfiguration.filterAttributes(kit.getConfiguration().getUserAttributeFilters(),
                             userAttributeLists);
                     boolean supportsAttributeLists = listener.supportsAttributeLists();
-                    FilteredMParticleUser filteredUser = FilteredMParticleUser.getInstance(mpid, kit);
                     if (supportsAttributeLists) {
-                        listener.onSetAllUserAttributes(filteredAttributeSingles, filteredAttributeLists, filteredUser);
+                        listener.onSetAllUserAttributes(filteredAttributeSingles, filteredAttributeLists);
                     } else {
                         Map<String, String> singlesCopy = new HashMap<>(filteredAttributeSingles);
                         for (Map.Entry<String, List<String>> entry : filteredAttributeLists.entrySet()) {
                             singlesCopy.put(entry.getKey(), KitUtils.join(entry.getValue()));
                         }
-                        listener.onSetAllUserAttributes(singlesCopy, new HashMap<String, List<String>>(), filteredUser);
+                        listener.onSetAllUserAttributes(singlesCopy, new HashMap<String, List<String>>());
                     }
                 }
             } catch (Exception e) {
@@ -663,7 +662,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
                 if ((kit instanceof KitIntegration.UserAttributeListener listener)
                     && KitConfiguration.shouldForwardAttribute(kit.getConfiguration().getUserAttributeFilters(),
                     attributeKey)) {
-                    listener.onSetUserAttribute(attributeKey, attributeValue, FilteredMParticleUser.getInstance(mpid, kit));
+                    listener.onSetUserAttribute(attributeKey, attributeValue);
                 }
             } catch (Exception e) {
                 Logger.warning("Failed to call setUserAttributes/onSetUserAttribute for kit: " + kit.getName() + ": " + e.getMessage());
@@ -681,11 +680,10 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
                 if ((kit instanceof KitIntegration.UserAttributeListener listener)
                     && KitConfiguration.shouldForwardAttribute(kit.getConfiguration().getUserAttributeFilters(), attributeKey)) {
                     boolean supportsAttributeLists = listener.supportsAttributeLists();
-                    FilteredMParticleUser user = FilteredMParticleUser.getInstance(mpid, kit);
                     if (supportsAttributeLists) {
-                        listener.onSetUserAttributeList(attributeKey, valuesList, user);
+                        listener.onSetUserAttributeList(attributeKey, valuesList);
                     } else {
-                        listener.onSetUserAttribute(attributeKey, KitUtils.join(valuesList), user);
+                        listener.onSetUserAttribute(attributeKey, KitUtils.join(valuesList));
                     }
                 }
             } catch (Exception e) {
@@ -703,7 +701,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
             try {
                 if ((kit instanceof KitIntegration.UserAttributeListener listener)
                         && KitConfiguration.shouldForwardAttribute(kit.getConfiguration().getUserAttributeFilters(), key)) {
-                    listener.onRemoveUserAttribute(key, FilteredMParticleUser.getInstance(mpid, kit));
+                    listener.onRemoveUserAttribute(key);
                 }
             } catch (Exception e) {
                 Logger.warning("Failed to call removeUserAttribute/onRemoveUserAttribute for kit: " + kit.getName() + ": " + e.getMessage());
@@ -720,8 +718,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
             try {
                 if (KitConfiguration.shouldForwardAttribute(kit.getConfiguration().getUserAttributeFilters(), key)) {
                     if (kit instanceof KitIntegration.UserAttributeListener listener) {
-                        listener.onIncrementUserAttribute(key, incrementedBy, newValue, FilteredMParticleUser.getInstance(mpid, kit));
-                        listener.onSetUserAttribute(key, newValue, FilteredMParticleUser.getInstance(mpid, kit));
+                        listener.onIncrementUserAttribute(key, incrementedBy, newValue);
+                        listener.onSetUserAttribute(key, newValue);
                     }
                 }
             } catch (Exception e) {
@@ -739,7 +737,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
             try {
                 if (kit instanceof KitIntegration.UserAttributeListener listener
                         && KitConfiguration.shouldForwardAttribute(kit.getConfiguration().getUserAttributeFilters(), tag)) {
-                    listener.onSetUserTag(tag, FilteredMParticleUser.getInstance(mpid, kit));
+                    listener.onSetUserTag(tag);
                 }
             } catch (Exception e) {
                 Logger.warning("Failed to call onSetUserTag for kit: " + kit.getName() + ": " + e.getMessage());
@@ -1302,7 +1300,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
         for (KitIntegration provider : providers.values()) {
             if (provider instanceof KitIntegration.UserAttributeListener && !provider.isDisabled()) {
                 try {
-                    ((KitIntegration.UserAttributeListener) provider).onConsentStateUpdated(oldState, newState, FilteredMParticleUser.getInstance(mpid, provider));
+                    ((KitIntegration.UserAttributeListener) provider).onConsentStateUpdated(oldState, newState);
                 } catch (Exception e) {
                     Logger.warning("Failed to call onConsentStateUpdated for kit: " + provider.getName() + ": " + e.getMessage());
                 }

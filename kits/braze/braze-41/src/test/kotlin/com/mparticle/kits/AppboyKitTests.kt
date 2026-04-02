@@ -258,10 +258,9 @@ class AppboyKitTests {
         val currentUser = braze.currentUser
 
         kit.onKitCreate(settings, MockContextApplication())
-        val filteredUser = Mockito.mock(FilteredMParticleUser::class.java)
-        kit.onSetUserAttribute("test1", "true", filteredUser)
-        kit.onSetUserAttribute("test2", "false", filteredUser)
-        kit.onSetUserAttribute("test3", "notABoolean", filteredUser)
+        kit.onSetUserAttribute("test1", "true")
+        kit.onSetUserAttribute("test2", "false")
+        kit.onSetUserAttribute("test3", "notABoolean")
         Assert.assertEquals(2, currentUser.getCustomUserAttribute().size.toLong())
     }
 

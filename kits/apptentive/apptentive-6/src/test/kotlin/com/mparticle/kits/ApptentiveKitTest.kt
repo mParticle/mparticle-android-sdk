@@ -60,14 +60,13 @@ class ApptentiveKitTest {
 
     @Test
     fun testLastNameValueOnSetUserAttribute() {
-        val user = mockk<FilteredMParticleUser>()
         mockkStatic(Apptentive::class)
         every { Apptentive.setPersonName(any()) } returns Unit
         val key = MParticle.UserAttributes.LASTNAME
         val value = "Doe"
 
         // when
-        kit.onSetUserAttribute(key, value, user)
+        kit.onSetUserAttribute(key, value)
 
         // then
         verify { Apptentive.setPersonName("Doe") }
@@ -76,7 +75,6 @@ class ApptentiveKitTest {
     @OptIn(InternalUseOnly::class)
     @Test
     fun testFirstNameValueOnSetUserAttribute() {
-        val user = mockk<FilteredMParticleUser>()
         mockkStatic(Apptentive::class)
         every { Apptentive.setPersonName(any()) } returns Unit
 
@@ -84,7 +82,7 @@ class ApptentiveKitTest {
         val value = "John"
 
         // when
-        kit.onSetUserAttribute(key, value, user)
+        kit.onSetUserAttribute(key, value)
 
         // then
         verify { Apptentive.setPersonName("John") }
@@ -92,7 +90,6 @@ class ApptentiveKitTest {
 
     @Test
     fun testPersonCustomData() {
-        val user = mockk<FilteredMParticleUser>()
         mockkStatic(Apptentive::class)
         every { Apptentive.addCustomPersonData(any<String>(), any<String>()) } returns Unit
         every { Apptentive.addCustomPersonData(any<String>(), 30) } returns Unit
@@ -100,7 +97,7 @@ class ApptentiveKitTest {
         val value = "30"
 
         // when
-        kit.onSetUserAttribute(key, value, user)
+        kit.onSetUserAttribute(key, value)
 
         // then
         // enableTypeDetection is false & 30 will be passed as string
@@ -109,14 +106,13 @@ class ApptentiveKitTest {
 
     @Test
     fun testOnSetUserAttributeWithNullKey() {
-        val user = mockk<FilteredMParticleUser>()
         mockkStatic(Apptentive::class)
 
         val key = null
         val value = "30"
 
         // when
-        kit.onSetUserAttribute(key, value, user)
+        kit.onSetUserAttribute(key, value)
 
         // then
         verify(exactly = 0) { Apptentive.setPersonName(any()) }
@@ -135,12 +131,11 @@ class ApptentiveKitTest {
                 MParticle.UserAttributes.LASTNAME to "Doe",
             )
 
-        val user = mockk<FilteredMParticleUser>()
         mockkStatic(Apptentive::class)
         every { Apptentive.setPersonName(any()) } returns Unit
 
         // when
-        kit.onSetAllUserAttributes(userAttributes, null, user)
+        kit.onSetAllUserAttributes(userAttributes, null)
 
         verify {
             Apptentive.setPersonName("John Doe")
@@ -154,11 +149,10 @@ class ApptentiveKitTest {
                 "key1" to "value1",
                 "key2" to "20",
             )
-        val user = mockk<FilteredMParticleUser>()
         mockkStatic(Apptentive::class)
         every { Apptentive.addCustomPersonData(any<String>(), any<String>()) } returns Unit
         every { Apptentive.addCustomPersonData(any<String>(), 20) } returns Unit
-        kit.onSetAllUserAttributes(userAttributes, null, user)
+        kit.onSetAllUserAttributes(userAttributes, null)
 
         verify {
             Apptentive.addCustomPersonData("key1", "value1")

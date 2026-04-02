@@ -18,7 +18,6 @@ import com.mparticle.internal.Logger
 import com.mparticle.internal.MPUtility
 import com.mparticle.kits.CommerceEventUtils
 import com.mparticle.kits.FilteredIdentityApiRequest
-import com.mparticle.kits.FilteredMParticleUser
 import com.mparticle.kits.KitIntegration.CommerceListener
 import com.mparticle.kits.KitIntegration.IdentityListener
 import com.mparticle.kits.KitIntegration.PushListener
@@ -205,7 +204,6 @@ class CleverTapKit :
     override fun onSetUserAttributeList(
         attributeKey: String?,
         attributeValueList: List<String>?,
-        user: FilteredMParticleUser?,
     ) {
         if (attributeKey == null || attributeValueList == null) {
             return
@@ -219,14 +217,12 @@ class CleverTapKit :
         key: String?,
         incrementedBy: Number?,
         value: String?,
-        user: FilteredMParticleUser?,
     ) {
         // not supported
     }
 
     override fun onRemoveUserAttribute(
         keyIn: String,
-        user: FilteredMParticleUser,
     ) {
         var key = keyIn
         if (UserAttributes.MOBILE_NUMBER == key) {
@@ -242,7 +238,6 @@ class CleverTapKit :
     override fun onSetUserAttribute(
         key: String?,
         value: Any?,
-        user: FilteredMParticleUser?,
     ) {
         if (key == null || value == null) {
             return
@@ -282,7 +277,6 @@ class CleverTapKit :
 
     override fun onSetUserTag(
         key: String,
-        user: FilteredMParticleUser,
     ) {
         // not supported
     }
@@ -290,14 +284,13 @@ class CleverTapKit :
     override fun onSetAllUserAttributes(
         userAttributes: Map<String, String>,
         userAttributeLists: Map<String, List<String>>,
-        user: FilteredMParticleUser,
     ) {
         if (!kitPreferences.getBoolean(PREF_KEY_HAS_SYNCED_ATTRIBUTES, false)) {
             for ((key, value) in userAttributes) {
-                onSetUserAttribute(key, value, user)
+                onSetUserAttribute(key, value)
             }
             for ((attributeKey, attributeValueList) in userAttributeLists) {
-                onSetUserAttributeList(attributeKey, attributeValueList, user)
+                onSetUserAttributeList(attributeKey, attributeValueList)
             }
             kitPreferences.edit().putBoolean(PREF_KEY_HAS_SYNCED_ATTRIBUTES, true).apply()
         }
@@ -306,7 +299,6 @@ class CleverTapKit :
     override fun onConsentStateUpdated(
         oldState: ConsentState,
         newState: ConsentState,
-        user: FilteredMParticleUser,
     ) {
         // not supported
     }

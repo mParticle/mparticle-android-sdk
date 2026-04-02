@@ -154,7 +154,6 @@ class LocalyticsKit :
     override fun onSetUserAttributeList(
         attributeKey: String?,
         attributeValueList: List<String>?,
-        user: FilteredMParticleUser?,
     ) {
         if (attributeKey == null || attributeValueList == null) {
             return
@@ -167,7 +166,6 @@ class LocalyticsKit :
     override fun onSetAllUserAttributes(
         userAttributes: Map<String, String>,
         userAttributeLists: Map<String, List<String>>,
-        user: FilteredMParticleUser,
     ) {
         for ((key, value) in userAttributes) {
             applyScalarUserAttribute(key, value)
@@ -179,7 +177,6 @@ class LocalyticsKit :
 
     override fun onRemoveUserAttribute(
         key: String,
-        user: FilteredMParticleUser,
     ) {
         Localytics.deleteProfileAttribute(key)
     }
@@ -187,7 +184,6 @@ class LocalyticsKit :
     override fun onSetUserAttribute(
         key: String?,
         value: Any?,
-        user: FilteredMParticleUser?,
     ) {
         if (key == null || value == null || value !is String) {
             return
@@ -199,20 +195,17 @@ class LocalyticsKit :
         key: String?,
         incrementedBy: Number?,
         value: String?,
-        user: FilteredMParticleUser?,
     ) {
     }
 
     override fun onSetUserTag(
         key: String?,
-        user: FilteredMParticleUser?,
     ) {
     }
 
     override fun onConsentStateUpdated(
         oldState: ConsentState?,
         newState: ConsentState?,
-        user: FilteredMParticleUser?,
     ) {
     }
 

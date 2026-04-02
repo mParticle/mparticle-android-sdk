@@ -100,7 +100,6 @@ class ComscoreKit :
     override fun onSetUserAttributeList(
         attributeKey: String?,
         attributeValueList: List<String>?,
-        user: FilteredMParticleUser?,
     ) {
         // not supported
     }
@@ -110,7 +109,6 @@ class ComscoreKit :
     override fun onSetAllUserAttributes(
         userAttributes: Map<String, String>,
         userAttributeLists: Map<String, List<String>>,
-        user: FilteredMParticleUser,
     ) {
         if (isEnterprise) {
             for ((key, value) in userAttributes) {
@@ -121,7 +119,6 @@ class ComscoreKit :
 
     override fun onRemoveUserAttribute(
         key: String,
-        user: FilteredMParticleUser,
     ) {
         if (isEnterprise) {
             Analytics.getConfiguration().removePersistentLabel(KitUtils.sanitizeAttributeKey(key))
@@ -131,7 +128,6 @@ class ComscoreKit :
     override fun onSetUserAttribute(
         key: String?,
         value: Any?,
-        user: FilteredMParticleUser?,
     ) {
         if (key == null || value == null || value !is String) {
             return
@@ -143,20 +139,17 @@ class ComscoreKit :
         key: String?,
         incrementedBy: Number?,
         value: String?,
-        user: FilteredMParticleUser?,
     ) {
     }
 
     override fun onSetUserTag(
         key: String?,
-        user: FilteredMParticleUser?,
     ) {
     }
 
     override fun onConsentStateUpdated(
         oldState: ConsentState?,
         newState: ConsentState?,
-        user: FilteredMParticleUser?,
     ) {
     }
 

@@ -444,13 +444,11 @@ open class AppboyKit :
         key: String?,
         incrementedBy: Number?,
         value: String?,
-        user: FilteredMParticleUser?,
     ) {
     }
 
     override fun onRemoveUserAttribute(
         key: String?,
-        user: FilteredMParticleUser?,
     ) {
         if (key == null) {
             return
@@ -488,7 +486,6 @@ open class AppboyKit :
     override fun onSetUserAttribute(
         key: String?,
         value: Any?,
-        user: FilteredMParticleUser?,
     ) {
         if (key == null || value == null || value !is String) {
             return
@@ -498,7 +495,6 @@ open class AppboyKit :
 
     override fun onSetUserTag(
         key: String?,
-        user: FilteredMParticleUser?,
     ) {
         // No-op: this kit does not implement this feature.
     }
@@ -506,7 +502,6 @@ open class AppboyKit :
     override fun onSetUserAttributeList(
         attributeKey: String?,
         attributeValueList: List<String>?,
-        user: FilteredMParticleUser?,
     ) {
         if (attributeKey == null || attributeValueList == null) {
             return
@@ -533,7 +528,6 @@ open class AppboyKit :
     override fun onSetAllUserAttributes(
         userAttributes: MutableMap<String, String>?,
         userAttributeLists: MutableMap<String, MutableList<String>>?,
-        user: FilteredMParticleUser?,
     ) {
         val attributes = userAttributes ?: emptyMap()
         val attributeLists = userAttributeLists ?: emptyMap()
@@ -567,7 +561,6 @@ open class AppboyKit :
     override fun onConsentStateUpdated(
         oldState: ConsentState,
         newState: ConsentState,
-        user: FilteredMParticleUser,
     ) {
         setConsent(newState)
     }
