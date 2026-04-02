@@ -132,13 +132,14 @@ class ApptimizeKit :
     override fun supportsAttributeLists(): Boolean = false
 
     /**
-     * @param attributeLists is ignored by the Apptimize kit.
+     * [userAttributeLists] is ignored by the Apptimize kit.
      */
-    override fun setAllUserAttributes(
-        attributes: Map<String, String>,
-        attributeLists: Map<String, List<String>>,
+    override fun onSetAllUserAttributes(
+        userAttributes: Map<String, String>,
+        userAttributeLists: Map<String, List<String>>,
+        user: FilteredMParticleUser,
     ) {
-        for ((key, value) in attributes) {
+        for ((key, value) in userAttributes) {
             Apptimize.setUserAttribute(key, value)
         }
     }

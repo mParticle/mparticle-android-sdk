@@ -161,14 +161,15 @@ class LocalyticsKit :
 
     override fun supportsAttributeLists(): Boolean = true
 
-    override fun setAllUserAttributes(
-        attributes: Map<String, String>,
-        attributeLists: Map<String, List<String>>,
+    override fun onSetAllUserAttributes(
+        userAttributes: Map<String, String>,
+        userAttributeLists: Map<String, List<String>>,
+        user: FilteredMParticleUser,
     ) {
-        for ((key, value) in attributes) {
+        for ((key, value) in userAttributes) {
             applyScalarUserAttribute(key, value)
         }
-        for ((key, value) in attributeLists) {
+        for ((key, value) in userAttributeLists) {
             Localytics.setProfileAttribute(key, value.toTypedArray())
         }
     }

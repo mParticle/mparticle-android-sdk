@@ -394,9 +394,9 @@ open class SingularKit :
     }
 
     override fun onSetAllUserAttributes(
-        map: Map<String, String>,
-        map1: Map<String, List<String>>,
-        filteredMParticleUser: FilteredMParticleUser,
+        userAttributes: Map<String, String>,
+        userAttributeLists: Map<String, List<String>>,
+        user: FilteredMParticleUser,
     ) {
     }
 
@@ -411,11 +411,6 @@ open class SingularKit :
             consentState.ccpaConsentState?.let { Singular.limitDataSharing(it.isConsented) }
         }, forceInitSingular = false, "onConsentStateUpdated")
     }
-
-    override fun setAllUserAttributes(
-        map: Map<String, String>,
-        map1: Map<String, List<String>>,
-    ) {}
 
     override fun setUserIdentity(
         identityType: IdentityType,

@@ -104,12 +104,13 @@ class ComscoreKit :
 
     override fun supportsAttributeLists(): Boolean = !isEnterprise
 
-    override fun setAllUserAttributes(
-        attributes: Map<String, String>,
-        attributeLists: Map<String, List<String>>,
+    override fun onSetAllUserAttributes(
+        userAttributes: Map<String, String>,
+        userAttributeLists: Map<String, List<String>>,
+        user: FilteredMParticleUser,
     ) {
         if (isEnterprise) {
-            for ((key, value) in attributes) {
+            for ((key, value) in userAttributes) {
                 applyEnterpriseScalarUserAttribute(key, value)
             }
         }
