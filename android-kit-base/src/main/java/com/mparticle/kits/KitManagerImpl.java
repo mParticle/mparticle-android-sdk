@@ -98,6 +98,16 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
         return activeKits;
     }
 
+    private List<KitIntegration.UserAttributeListener> userAttributeListeners() {
+        List<KitIntegration.UserAttributeListener> listeners = new ArrayList<>();
+        for (KitIntegration kit : activeKits()) {
+            if (kit instanceof KitIntegration.UserAttributeListener listener) {
+                listeners.add(listener);
+            }
+        }
+        return listeners;
+    }
+
     private final Context mContext;
 
     public KitManagerImpl(Context context, ReportingManager reportingManager, CoreCallbacks coreCallbacks, MParticleOptions options) {
@@ -608,26 +618,24 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     public void onUserAttributesReceived(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists, Long mpid) {
         userAttributes = mDataplanFilter.transformUserAttributes(userAttributes);
         userAttributeLists = mDataplanFilter.transformUserAttributes(userAttributeLists);
-        for (KitIntegration kit : activeKits()) {
+        for (KitIntegration.UserAttributeListener listener : userAttributeListeners()) {
             try {
-                if (kit instanceof KitIntegration.UserAttributeListener listener) {
-                    Map<String, String> filteredAttributeSingles = (Map<String, String>) KitConfiguration.filterAttributes(kit.getConfiguration().getUserAttributeFilters(),
-                            userAttributes);
-                    Map<String, List<String>> filteredAttributeLists = (Map<String, List<String>>) KitConfiguration.filterAttributes(kit.getConfiguration().getUserAttributeFilters(),
-                            userAttributeLists);
-                    boolean supportsAttributeLists = listener.supportsAttributeLists();
-                    if (supportsAttributeLists) {
-                        listener.onSetAllUserAttributes(filteredAttributeSingles, filteredAttributeLists);
-                    } else {
-                        Map<String, String> singlesCopy = new HashMap<>(filteredAttributeSingles);
-                        for (Map.Entry<String, List<String>> entry : filteredAttributeLists.entrySet()) {
-                            singlesCopy.put(entry.getKey(), KitUtils.join(entry.getValue()));
-                        }
-                        listener.onSetAllUserAttributes(singlesCopy, new HashMap<String, List<String>>());
+                Map<String, String> filteredAttributeSingles = (Map<String, String>) KitConfiguration.filterAttributes(listener.getConfiguration().getUserAttributeFilters(),
+                    userAttributes);
+                Map<String, List<String>> filteredAttributeLists = (Map<String, List<String>>) KitConfiguration.filterAttributes(listener.getConfiguration().getUserAttributeFilters(),
+                    userAttributeLists);
+                boolean supportsAttributeLists = listener.supportsAttributeLists();
+                if (supportsAttributeLists) {
+                    listener.onSetAllUserAttributes(filteredAttributeSingles, filteredAttributeLists);
+                } else {
+                    Map<String, String> singlesCopy = new HashMap<>(filteredAttributeSingles);
+                    for (Map.Entry<String, List<String>> entry : filteredAttributeLists.entrySet()) {
+                        singlesCopy.put(entry.getKey(), KitUtils.join(entry.getValue()));
                     }
+                    listener.onSetAllUserAttributes(singlesCopy, new HashMap<String, List<String>>());
                 }
             } catch (Exception e) {
-                Logger.warning("Failed to call setUserAttributes for kit: " + kit.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call setUserAttributes for kit: " + listener.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -657,15 +665,14 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
         if (mDataplanFilter.isUserAttributeBlocked(attributeKey)) {
             return;
         }
-        for (KitIntegration kit : activeKits()) {
+        for (KitIntegration.UserAttributeListener listener : userAttributeListeners()) {
             try {
-                if ((kit instanceof KitIntegration.UserAttributeListener listener)
-                    && KitConfiguration.shouldForwardAttribute(kit.getConfiguration().getUserAttributeFilters(),
+                if (KitConfiguration.shouldForwardAttribute(listener.getConfiguration().getUserAttributeFilters(),
                     attributeKey)) {
                     listener.onSetUserAttribute(attributeKey, attributeValue);
                 }
             } catch (Exception e) {
-                Logger.warning("Failed to call setUserAttributes/onSetUserAttribute for kit: " + kit.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call setUserAttributes/onSetUserAttribute for kit: " + listener.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -675,10 +682,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
         if (mDataplanFilter.isUserAttributeBlocked(attributeKey)) {
             return;
         }
-        for (KitIntegration kit : activeKits()) {
+        for (KitIntegration.UserAttributeListener listener : userAttributeListeners()) {
             try {
-                if ((kit instanceof KitIntegration.UserAttributeListener listener)
-                    && KitConfiguration.shouldForwardAttribute(kit.getConfiguration().getUserAttributeFilters(), attributeKey)) {
+                if (KitConfiguration.shouldForwardAttribute(listener.getConfiguration().getUserAttributeFilters(), attributeKey)) {
                     boolean supportsAttributeLists = listener.supportsAttributeLists();
                     if (supportsAttributeLists) {
                         listener.onSetUserAttributeList(attributeKey, valuesList);
@@ -687,7 +693,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
                     }
                 }
             } catch (Exception e) {
-                Logger.warning("Failed to call setUserAttributes/onSetUserAttribute for kit: " + kit.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call setUserAttributes/onSetUserAttribute for kit: " + listener.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -697,14 +703,13 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
         if (mDataplanFilter.isUserAttributeBlocked(key)) {
             return;
         }
-        for (KitIntegration kit : activeKits()) {
+        for (KitIntegration.UserAttributeListener listener : userAttributeListeners()) {
             try {
-                if ((kit instanceof KitIntegration.UserAttributeListener listener)
-                        && KitConfiguration.shouldForwardAttribute(kit.getConfiguration().getUserAttributeFilters(), key)) {
+                if (KitConfiguration.shouldForwardAttribute(listener.getConfiguration().getUserAttributeFilters(), key)) {
                     listener.onRemoveUserAttribute(key);
                 }
             } catch (Exception e) {
-                Logger.warning("Failed to call removeUserAttribute/onRemoveUserAttribute for kit: " + kit.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call removeUserAttribute/onRemoveUserAttribute for kit: " + listener.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -714,16 +719,14 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
         if (mDataplanFilter.isUserAttributeBlocked(key)) {
             return;
         }
-        for (KitIntegration kit : activeKits()) {
+        for (KitIntegration.UserAttributeListener listener : userAttributeListeners()) {
             try {
-                if (KitConfiguration.shouldForwardAttribute(kit.getConfiguration().getUserAttributeFilters(), key)) {
-                    if (kit instanceof KitIntegration.UserAttributeListener listener) {
-                        listener.onIncrementUserAttribute(key, incrementedBy, newValue);
-                        listener.onSetUserAttribute(key, newValue);
-                    }
+                if (KitConfiguration.shouldForwardAttribute(listener.getConfiguration().getUserAttributeFilters(), key)) {
+                    listener.onIncrementUserAttribute(key, incrementedBy, newValue);
+                    listener.onSetUserAttribute(key, newValue);
                 }
             } catch (Exception e) {
-                Logger.warning("Failed to call onIncrementUserAttribute for kit: " + kit.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call onIncrementUserAttribute for kit: " + listener.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -733,14 +736,13 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
         if (mDataplanFilter.isUserAttributeBlocked(tag)) {
             return;
         }
-        for (KitIntegration kit : activeKits()) {
+        for (KitIntegration.UserAttributeListener listener : userAttributeListeners()) {
             try {
-                if (kit instanceof KitIntegration.UserAttributeListener listener
-                        && KitConfiguration.shouldForwardAttribute(kit.getConfiguration().getUserAttributeFilters(), tag)) {
+                if (KitConfiguration.shouldForwardAttribute(listener.getConfiguration().getUserAttributeFilters(), tag)) {
                     listener.onSetUserTag(tag);
                 }
             } catch (Exception e) {
-                Logger.warning("Failed to call onSetUserTag for kit: " + kit.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call onSetUserTag for kit: " + listener.getName() + ": " + e.getMessage());
             }
         }
     }

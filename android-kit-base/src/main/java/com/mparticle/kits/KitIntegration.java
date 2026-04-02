@@ -577,6 +577,10 @@ public abstract class KitIntegration {
         void onSetUserTag(String key);
 
         void onConsentStateUpdated(ConsentState oldState, ConsentState newState);
+
+        KitConfiguration getConfiguration();
+
+        String getName();
     }
 
     public interface BatchListener {
