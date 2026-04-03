@@ -35,9 +35,6 @@ class AppsflyerKitTests {
     private var appsflyer = AppsFlyerLib()
 
     @Mock
-    lateinit var filteredMParticleUser: FilteredMParticleUser
-
-    @Mock
     lateinit var user: MParticleUser
 
     @Before
@@ -226,9 +223,7 @@ class AppsflyerKitTests {
                 .builder()
                 .addGDPRConsentState("Marketing", marketingConsent)
                 .build()
-        filteredMParticleUser = FilteredMParticleUser.getInstance(user, kit)
-
-        kit.onConsentStateUpdated(state, state, filteredMParticleUser)
+        kit.onConsentStateUpdated(state, state)
 
         val afConsentResults = appsflyer.getConsentState()
         val expectedConsentValue =
@@ -275,9 +270,7 @@ class AppsflyerKitTests {
                 .builder()
                 .addGDPRConsentState("test1", marketingConsent)
                 .build()
-        filteredMParticleUser = FilteredMParticleUser.getInstance(user, kit)
-
-        kit.onConsentStateUpdated(state, state, filteredMParticleUser)
+        kit.onConsentStateUpdated(state, state)
 
         val afConsentResults = appsflyer.getConsentState()
         val expectedConsentValue =
@@ -324,9 +317,7 @@ class AppsflyerKitTests {
                 .builder()
                 .addGDPRConsentState("test1", marketingConsent)
                 .build()
-        filteredMParticleUser = FilteredMParticleUser.getInstance(user, kit)
-
-        kit.onConsentStateUpdated(state, state, filteredMParticleUser)
+        kit.onConsentStateUpdated(state, state)
 
         val afConsentResults = appsflyer.getConsentState()
         val expectedConsentValue =
@@ -392,9 +383,7 @@ class AppsflyerKitTests {
                 .addGDPRConsentState("Marketing", marketingConsent)
                 .addGDPRConsentState("testconsent", testConsent)
                 .build()
-        filteredMParticleUser = FilteredMParticleUser.getInstance(user, kit)
-
-        kit.onConsentStateUpdated(state, state, filteredMParticleUser)
+        kit.onConsentStateUpdated(state, state)
 
         val afConsentResults = appsflyer.getConsentState()
         val expectedConsentValue =
@@ -453,9 +442,7 @@ class AppsflyerKitTests {
                 .addGDPRConsentState("Performance", performanceConsent)
                 .addGDPRConsentState("Marketing", marketingConsent)
                 .build()
-        filteredMParticleUser = FilteredMParticleUser.getInstance(user, kit)
-
-        kit.onConsentStateUpdated(state, state, filteredMParticleUser)
+        kit.onConsentStateUpdated(state, state)
 
         val afConsentResults = appsflyer.getConsentState()
         val expectedConsentValue =
@@ -511,9 +498,7 @@ class AppsflyerKitTests {
                 .addGDPRConsentState("Marketing", marketingConsent)
                 .addGDPRConsentState("Performance", performanceConsent)
                 .build()
-        filteredMParticleUser = FilteredMParticleUser.getInstance(user, kit)
-
-        kit.onConsentStateUpdated(state, state, filteredMParticleUser)
+        kit.onConsentStateUpdated(state, state)
         val afConsentResults = appsflyer.getConsentState()
         val expectedConsentValue =
             afConsentResults
@@ -559,9 +544,7 @@ class AppsflyerKitTests {
                 .addGDPRConsentState("Marketing", marketingConsent)
                 .addGDPRConsentState("Performance", performanceConsent)
                 .build()
-        filteredMParticleUser = FilteredMParticleUser.getInstance(user, kit)
-
-        kit.onConsentStateUpdated(state, state, filteredMParticleUser)
+        kit.onConsentStateUpdated(state, state)
 
         TestCase.assertEquals(0, appsflyer.getConsentState().size)
     }
@@ -599,9 +582,7 @@ class AppsflyerKitTests {
                 .addGDPRConsentState("Marketing", marketingConsent)
                 .addGDPRConsentState("Performance", performanceConsent)
                 .build()
-        filteredMParticleUser = FilteredMParticleUser.getInstance(user, kit)
-
-        kit.onConsentStateUpdated(state, state, filteredMParticleUser)
+        kit.onConsentStateUpdated(state, state)
 
         val afConsentResults = appsflyer.getConsentState()
         val expectedConsentValue =
@@ -657,9 +638,7 @@ class AppsflyerKitTests {
                 .addGDPRConsentState("Marketing", marketingConsent)
                 .addGDPRConsentState("Performance", performanceConsent)
                 .build()
-        filteredMParticleUser = FilteredMParticleUser.getInstance(user, kit)
-
-        kit.onConsentStateUpdated(state, state, filteredMParticleUser)
+        kit.onConsentStateUpdated(state, state)
 
         TestCase.assertEquals(1, appsflyer.getConsentState().size)
         val afConsentResults = appsflyer.getConsentState()
