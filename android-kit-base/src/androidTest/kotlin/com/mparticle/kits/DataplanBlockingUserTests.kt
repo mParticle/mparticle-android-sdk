@@ -146,7 +146,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
                 count++
             }
         }
-        userAttributeListenerKitKit.onRemoveUserAttribute = { key, _ ->
+        userAttributeListenerKitKit.onRemoveUserAttribute = { key ->
             assertTrue(allowedAttributes.containsKey(key))
             assertFalse(blockedAttributes.containsKey(key))
             // make sure these are the attributes that are being removed
