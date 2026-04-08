@@ -49,7 +49,7 @@ public class MPLatch extends CountDownLatch {
 
     @Override
     public void await() throws InterruptedException {
-        int timeoutTimeMs = 30 * 1000;
+        int timeoutTimeMs = 5 * 1000;
         synchronized (this) {
             if (count == countDowned) {
                 return;
