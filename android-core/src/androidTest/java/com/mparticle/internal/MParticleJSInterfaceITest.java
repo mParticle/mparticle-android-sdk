@@ -33,6 +33,8 @@ import com.mparticle.testutils.AndroidUtils;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.testutils.BuildConfig;
 import com.mparticle.testutils.MPLatch;
+
+import java.util.concurrent.TimeUnit;
 import com.mparticle.testutils.RandomUtils;
 
 import org.json.JSONArray;
@@ -68,6 +70,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
     private static boolean sdkFetchedSuccessfully = false;
     private static String bridgeToken = new RandomUtils().getAlphaString(5);
     private static String bridgeVersion = "2";
+    private static final int WEBVIEW_TIMEOUT_SECONDS = 30;
 
     private static final String jsStartupMParticle = "window.mParticle = {\n" +
             "            config: {\n" +
@@ -238,7 +241,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
 
             }
         });
-        latch.await();
+        latch.await(WEBVIEW_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         assertTrue(called.value);
     }
 
@@ -263,7 +266,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                 }
             }
         });
-        latch.await();
+        latch.await(WEBVIEW_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         assertTrue(called.value);
     }
 
@@ -304,7 +307,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                 }
             }
         });
-        latch.await();
+        latch.await(WEBVIEW_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         assertTrue(called.value);
     }
 
@@ -361,7 +364,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                 }
             }
         });
-        latch.await();
+        latch.await(WEBVIEW_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         assertTrue(called.value);
     }
 
@@ -443,7 +446,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
             }
         });
         assertNull(error.value);
-        latch.await();
+        latch.await(WEBVIEW_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         assertTrue(called.value);
     }
 
@@ -470,7 +473,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                 }
             }
         });
-        latch.await();
+        latch.await(WEBVIEW_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         assertTrue(called.value);
     }
 
@@ -496,7 +499,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                 latch.countDown();
             }
         });
-        latch.await();
+        latch.await(WEBVIEW_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         assertTrue(called.value);
     }
 
@@ -522,7 +525,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                 }
             }
         });
-        latch.await();
+        latch.await(WEBVIEW_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         assertTrue(called.value);
     }
 
@@ -548,7 +551,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                 latch.countDown();
             }
         });
-        latch.await();
+        latch.await(WEBVIEW_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         assertTrue(called.value);
     }
 
@@ -574,7 +577,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                 }
             }
         });
-        latch.await();
+        latch.await(WEBVIEW_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         assertTrue(called.value);
     }
 
