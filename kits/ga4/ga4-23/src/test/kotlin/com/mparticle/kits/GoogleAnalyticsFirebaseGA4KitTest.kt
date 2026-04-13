@@ -51,9 +51,6 @@ class GoogleAnalyticsFirebaseGA4KitTest {
     @Mock
     lateinit var user: MParticleUser
 
-    @Mock
-    lateinit var filteredMParticleUser: FilteredMParticleUser
-
     @Before
     @Throws(JSONException::class)
     fun before() {
@@ -167,9 +164,7 @@ class GoogleAnalyticsFirebaseGA4KitTest {
                 .builder()
                 .addGDPRConsentState("Marketing", marketingConsent)
                 .build()
-        filteredMParticleUser = FilteredMParticleUser.getInstance(user, kitInstance)
-
-        kitInstance.onConsentStateUpdated(state, state, filteredMParticleUser)
+        kitInstance.onConsentStateUpdated(state, state)
 
         val expectedConsentValue =
             firebaseSdk.getConsentState().getKeyByValue("AD_PERSONALIZATION").toString()
@@ -210,9 +205,7 @@ class GoogleAnalyticsFirebaseGA4KitTest {
                 .builder()
                 .addGDPRConsentState("Marketing", marketingConsent)
                 .build()
-        filteredMParticleUser = FilteredMParticleUser.getInstance(user, kitInstance)
-
-        kitInstance.onConsentStateUpdated(state, state, filteredMParticleUser)
+        kitInstance.onConsentStateUpdated(state, state)
 
         val expectedConsentValue =
             firebaseSdk.getConsentState().getKeyByValue("AD_PERSONALIZATION").toString()
@@ -253,9 +246,7 @@ class GoogleAnalyticsFirebaseGA4KitTest {
                 .builder()
                 .addGDPRConsentState("Performance", performanceConsent)
                 .build()
-        filteredMParticleUser = FilteredMParticleUser.getInstance(user, kitInstance)
-
-        kitInstance.onConsentStateUpdated(state, state, filteredMParticleUser)
+        kitInstance.onConsentStateUpdated(state, state)
 
         val expectedConsentValue =
             firebaseSdk.getConsentState().getKeyByValue("AD_USER_DATA").toString()
@@ -297,9 +288,7 @@ class GoogleAnalyticsFirebaseGA4KitTest {
                 .builder()
                 .addGDPRConsentState("Performance", performanceConsent)
                 .build()
-        filteredMParticleUser = FilteredMParticleUser.getInstance(user, kitInstance)
-
-        kitInstance.onConsentStateUpdated(state, state, filteredMParticleUser)
+        kitInstance.onConsentStateUpdated(state, state)
 
         val expectedConsentValue =
             firebaseSdk.getConsentState().getKeyByValue("AD_USER_DATA").toString()
@@ -350,9 +339,7 @@ class GoogleAnalyticsFirebaseGA4KitTest {
                 .addGDPRConsentState("Marketing", marketingConsent)
                 .addGDPRConsentState("Performance", performanceConsent)
                 .build()
-        filteredMParticleUser = FilteredMParticleUser.getInstance(user, kitInstance)
-
-        kitInstance.onConsentStateUpdated(state, state, filteredMParticleUser)
+        kitInstance.onConsentStateUpdated(state, state)
 
         val expectedConsentValue =
             firebaseSdk.getConsentState().getKeyByValue("AD_USER_DATA").toString()
@@ -399,9 +386,7 @@ class GoogleAnalyticsFirebaseGA4KitTest {
                 .addGDPRConsentState("Marketing", marketingConsent)
                 .addGDPRConsentState("Performance", performanceConsent)
                 .build()
-        filteredMParticleUser = FilteredMParticleUser.getInstance(user, kitInstance)
-
-        kitInstance.onConsentStateUpdated(state, state, filteredMParticleUser)
+        kitInstance.onConsentStateUpdated(state, state)
 
         val expectedConsentValue =
             firebaseSdk.getConsentState().getKeyByValue("AD_USER_DATA").toString()
@@ -436,9 +421,7 @@ class GoogleAnalyticsFirebaseGA4KitTest {
                 .addGDPRConsentState("Marketing", marketingConsent)
                 .addGDPRConsentState("Performance", performanceConsent)
                 .build()
-        filteredMParticleUser = FilteredMParticleUser.getInstance(user, kitInstance)
-
-        kitInstance.onConsentStateUpdated(state, state, filteredMParticleUser)
+        kitInstance.onConsentStateUpdated(state, state)
 
         TestCase.assertEquals(0, firebaseSdk.getConsentState().size)
     }
@@ -476,9 +459,7 @@ class GoogleAnalyticsFirebaseGA4KitTest {
                 .addGDPRConsentState("Marketing", marketingConsent)
                 .addGDPRConsentState("Performance", performanceConsent)
                 .build()
-        filteredMParticleUser = FilteredMParticleUser.getInstance(user, kitInstance)
-
-        kitInstance.onConsentStateUpdated(state, state, filteredMParticleUser)
+        kitInstance.onConsentStateUpdated(state, state)
 
         val expectedConsentValue =
             firebaseSdk.getConsentState().getKeyByValue("AD_STORAGE").toString()
@@ -527,9 +508,7 @@ class GoogleAnalyticsFirebaseGA4KitTest {
                 .addGDPRConsentState("Marketing", marketingConsent)
                 .addGDPRConsentState("Performance", performanceConsent)
                 .build()
-        filteredMParticleUser = FilteredMParticleUser.getInstance(user, kitInstance)
-
-        kitInstance.onConsentStateUpdated(state, state, filteredMParticleUser)
+        kitInstance.onConsentStateUpdated(state, state)
 
         TestCase.assertEquals(0, firebaseSdk.getConsentState().size)
     }
@@ -568,9 +547,7 @@ class GoogleAnalyticsFirebaseGA4KitTest {
                 .addGDPRConsentState("Marketing", marketingConsent)
                 .addGDPRConsentState("Performance", performanceConsent)
                 .build()
-        filteredMParticleUser = FilteredMParticleUser.getInstance(user, kitInstance)
-
-        kitInstance.onConsentStateUpdated(state, state, filteredMParticleUser)
+        kitInstance.onConsentStateUpdated(state, state)
 
         val expectedConsentValue =
             firebaseSdk.getConsentState().getKeyByValue("AD_USER_DATA").toString()
