@@ -252,34 +252,29 @@ class AppsFlyerKit :
         key: String?,
         incrementedBy: Number?,
         value: String?,
-        user: FilteredMParticleUser?,
     ) {
     }
 
     override fun onRemoveUserAttribute(
         key: String?,
-        user: FilteredMParticleUser?,
     ) {
     }
 
     override fun onSetUserAttribute(
         key: String?,
         value: Any?,
-        user: FilteredMParticleUser?,
     ) {
         // No-op: this kit does not implement this feature.
     }
 
     override fun onSetUserTag(
         key: String?,
-        user: FilteredMParticleUser?,
     ) {
     }
 
     override fun onSetUserAttributeList(
         attributeKey: String?,
         attributeValueList: List<String>?,
-        user: FilteredMParticleUser?,
     ) {
         // not supported
     }
@@ -287,7 +282,6 @@ class AppsFlyerKit :
     override fun onSetAllUserAttributes(
         userAttributes: MutableMap<String, String>?,
         userAttributeLists: MutableMap<String, MutableList<String>>?,
-        user: FilteredMParticleUser?,
     ) {
         // No-op: this kit does not implement this feature.
     }
@@ -375,7 +369,6 @@ class AppsFlyerKit :
     override fun onConsentStateUpdated(
         consentState: ConsentState,
         consentState1: ConsentState,
-        filteredMParticleUser: FilteredMParticleUser,
     ) {
         setConsent(consentState1)
     }

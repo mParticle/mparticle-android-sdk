@@ -17,7 +17,6 @@ import com.mparticle.consent.ConsentState
 import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.Logger
 import com.mparticle.kits.FilteredIdentityApiRequest
-import com.mparticle.kits.FilteredMParticleUser
 import com.mparticle.kits.KitIntegration.CommerceListener
 import com.mparticle.kits.KitIntegration.EventListener
 import com.mparticle.kits.KitIntegration.IdentityListener
@@ -216,7 +215,6 @@ class LeanplumKit :
     override fun onSetUserAttribute(
         key: String?,
         value: Any?,
-        user: FilteredMParticleUser?,
     ) {
         if (key == null) {
             return
@@ -228,13 +226,11 @@ class LeanplumKit :
 
     override fun onSetUserTag(
         s: String,
-        filteredMParticleUser: FilteredMParticleUser,
     ) {}
 
     override fun onSetUserAttributeList(
         attributeKey: String?,
         attributeValueList: List<String>?,
-        user: FilteredMParticleUser?,
     ) {
         if (attributeKey == null || attributeValueList == null) {
             return
@@ -248,7 +244,6 @@ class LeanplumKit :
         key: String?,
         incrementedBy: Number?,
         newValue: String,
-        user: FilteredMParticleUser?,
     ) {
         val attributes = mutableMapOf<String, Any?>()
         attributes[attr.key.toString()] = newValue
@@ -260,14 +255,12 @@ class LeanplumKit :
     override fun onConsentStateUpdated(
         consentState: ConsentState,
         consentState1: ConsentState,
-        filteredMParticleUser: FilteredMParticleUser,
     ) {
     }
 
     override fun onSetAllUserAttributes(
         attributes: Map<String, String>,
         attributeLists: Map<String, List<String>>,
-        user: FilteredMParticleUser,
     ) {
         val map = mutableMapOf<String, Any?>()
         map.putAll(attributes)
@@ -278,7 +271,6 @@ class LeanplumKit :
 
     override fun onRemoveUserAttribute(
         key: String,
-        user: FilteredMParticleUser,
     ) {
         val attributes = mutableMapOf<String, Any?>()
         attributes[key] = null

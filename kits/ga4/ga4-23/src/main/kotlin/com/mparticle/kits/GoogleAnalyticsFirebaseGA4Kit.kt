@@ -230,7 +230,7 @@ class GoogleAnalyticsFirebaseGA4Kit :
                         ) {
                             @Suppress("UNCHECKED_CAST")
                             val stringAttributes = userAttributes.mapValues { it.value?.toString() }.filterValues { it != null } as Map<String, String>
-                            onSetAllUserAttributes(stringAttributes, null, null)
+                            onSetAllUserAttributes(stringAttributes, null)
                         }
                     },
                 )
@@ -256,7 +256,7 @@ class GoogleAnalyticsFirebaseGA4Kit :
                         ) {
                             @Suppress("UNCHECKED_CAST")
                             val stringAttributes = userAttributes.mapValues { it.value?.toString() }.filterValues { it != null } as Map<String, String>
-                            onSetAllUserAttributes(stringAttributes, null, null)
+                            onSetAllUserAttributes(stringAttributes, null)
                         }
                     },
                 )
@@ -291,7 +291,7 @@ class GoogleAnalyticsFirebaseGA4Kit :
                         ) {
                             @Suppress("UNCHECKED_CAST")
                             val stringAttributes = userAttributes.mapValues { it.value?.toString() }.filterValues { it != null } as Map<String, String>
-                            onSetAllUserAttributes(stringAttributes, null, null)
+                            onSetAllUserAttributes(stringAttributes, null)
                         }
                     },
                 )
@@ -585,7 +585,6 @@ class GoogleAnalyticsFirebaseGA4Kit :
         key: String?,
         incrementedBy: Number?,
         value: String?,
-        user: FilteredMParticleUser?,
     ) {
         standardizeName(key, false)?.let {
             FirebaseAnalytics.getInstance(context).setUserProperty(
@@ -597,7 +596,6 @@ class GoogleAnalyticsFirebaseGA4Kit :
 
     override fun onRemoveUserAttribute(
         key: String,
-        filteredMParticleUser: FilteredMParticleUser,
     ) {
         standardizeName(key, false)?.let {
             FirebaseAnalytics.getInstance(context).setUserProperty(
@@ -613,7 +611,6 @@ class GoogleAnalyticsFirebaseGA4Kit :
     override fun onSetUserAttribute(
         key: String?,
         value: Any?,
-        user: FilteredMParticleUser?,
     ) {
         if (key == null) {
             return
@@ -630,13 +627,11 @@ class GoogleAnalyticsFirebaseGA4Kit :
 
     override fun onSetUserTag(
         s: String,
-        filteredMParticleUser: FilteredMParticleUser,
     ) {}
 
     override fun onSetUserAttributeList(
         attributeKey: String?,
         attributeValueList: List<String>?,
-        user: FilteredMParticleUser?,
     ) {
         // not supported
     }
@@ -644,7 +639,6 @@ class GoogleAnalyticsFirebaseGA4Kit :
     override fun onSetAllUserAttributes(
         userAttributesIn: Map<String, String>,
         userAttributeLists: Map<String, List<String>>?,
-        filteredMParticleUser: FilteredMParticleUser?,
     ) {
         var userAttributes: Map<String, String>? = userAttributesIn
         userAttributes = standardizeAttributes(userAttributes, false)
@@ -710,7 +704,6 @@ class GoogleAnalyticsFirebaseGA4Kit :
     override fun onConsentStateUpdated(
         consentState: ConsentState,
         consentState1: ConsentState,
-        filteredMParticleUser: FilteredMParticleUser,
     ) {
         setConsent(consentState1)
     }

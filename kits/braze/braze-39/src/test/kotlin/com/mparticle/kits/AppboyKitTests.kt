@@ -44,9 +44,6 @@ class AppboyKitTests {
     private val mTypeFilters: SparseBooleanArray? = null
 
     @Mock
-    lateinit var filteredMParticleUser: FilteredMParticleUser
-
-    @Mock
     lateinit var user: MParticleUser
 
     private val kit: AppboyKit
@@ -258,10 +255,9 @@ class AppboyKitTests {
         val currentUser = braze.currentUser
 
         kit.onKitCreate(settings, MockContextApplication())
-        val filteredUser = Mockito.mock(FilteredMParticleUser::class.java)
-        kit.onSetUserAttribute("test1", "true", filteredUser)
-        kit.onSetUserAttribute("test2", "false", filteredUser)
-        kit.onSetUserAttribute("test3", "notABoolean", filteredUser)
+        kit.onSetUserAttribute("test1", "true")
+        kit.onSetUserAttribute("test2", "false")
+        kit.onSetUserAttribute("test3", "notABoolean")
         Assert.assertEquals(2, currentUser.getCustomUserAttribute().size.toLong())
     }
 
@@ -1334,9 +1330,7 @@ class AppboyKitTests {
                 .builder()
                 .addGDPRConsentState("Marketing", marketingConsent)
                 .build()
-        filteredMParticleUser = FilteredMParticleUser.getInstance(user, kit)
-
-        kit.onConsentStateUpdated(state, state, filteredMParticleUser)
+        kit.onConsentStateUpdated(state, state)
         TestCase.assertEquals(
             false,
             currentUser.getCustomUserAttribute()["\$google_ad_personalization"],
@@ -1382,9 +1376,7 @@ class AppboyKitTests {
                 .addGDPRConsentState("Marketing", marketingConsent)
                 .addGDPRConsentState("Performance", performanceConsent)
                 .build()
-        filteredMParticleUser = FilteredMParticleUser.getInstance(user, kit)
-
-        kit.onConsentStateUpdated(state, state, filteredMParticleUser)
+        kit.onConsentStateUpdated(state, state)
         TestCase.assertEquals(true, currentUser.getCustomUserAttribute()["\$google_ad_user_data"])
         TestCase.assertEquals(
             true,
@@ -1419,8 +1411,7 @@ class AppboyKitTests {
                 .addGDPRConsentState("Marketing", marketingConsent)
                 .addGDPRConsentState("Performance", performanceConsent)
                 .build()
-        filteredMParticleUser = FilteredMParticleUser.getInstance(user, kit)
-        kit.onConsentStateUpdated(state, state, filteredMParticleUser)
+        kit.onConsentStateUpdated(state, state)
         TestCase.assertEquals(0, currentUser.getCustomUserAttribute().size)
     }
 
@@ -1460,9 +1451,7 @@ class AppboyKitTests {
                 .addGDPRConsentState("Marketing", marketingConsent)
                 .addGDPRConsentState("Performance", performanceConsent)
                 .build()
-        filteredMParticleUser = FilteredMParticleUser.getInstance(user, kit)
-
-        kit.onConsentStateUpdated(state, state, filteredMParticleUser)
+        kit.onConsentStateUpdated(state, state)
 
         TestCase.assertEquals(0, currentUser.getCustomUserAttribute().size)
     }

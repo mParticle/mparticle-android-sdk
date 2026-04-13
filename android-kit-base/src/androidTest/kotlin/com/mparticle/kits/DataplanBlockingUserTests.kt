@@ -73,7 +73,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
             ),
         )
 
-        userAttributeListenerKitKit.onSetUserAttribute = { key, _, _ ->
+        userAttributeListenerKitKit.onSetUserAttribute = { key, _ ->
             assertTrue(allowedAttributes.containsKey(key))
             assertFalse(blockedAttributes.containsKey(key))
         }
@@ -146,7 +146,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
                 count++
             }
         }
-        userAttributeListenerKitKit.onRemoveUserAttribute = { key, _ ->
+        userAttributeListenerKitKit.onRemoveUserAttribute = { key ->
             assertTrue(allowedAttributes.containsKey(key))
             assertFalse(blockedAttributes.containsKey(key))
             // make sure these are the attributes that are being removed
@@ -221,7 +221,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
                 count++
             }
         }
-        userAttributeListenerKitKit.onSetUserAttributeList = { key, _, _ ->
+        userAttributeListenerKitKit.onSetUserAttributeList = { key, _ ->
             assertTrue(allowedAttributes.containsKey(key))
             assertFalse(blockedAttributes.containsKey(key))
             count++

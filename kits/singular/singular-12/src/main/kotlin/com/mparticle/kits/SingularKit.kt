@@ -342,19 +342,16 @@ open class SingularKit :
         key: String?,
         incrementedBy: Number?,
         value: String?,
-        user: FilteredMParticleUser?,
     ) {
     }
 
     override fun onRemoveUserAttribute(
         s: String,
-        filteredMParticleUser: FilteredMParticleUser,
     ) {}
 
     override fun onSetUserAttribute(
         key: String?,
         value: Any?,
-        user: FilteredMParticleUser?,
     ) {
         if (key == null || value == null || value !is String) {
             return
@@ -382,13 +379,11 @@ open class SingularKit :
 
     override fun onSetUserTag(
         s: String,
-        filteredMParticleUser: FilteredMParticleUser,
     ) {}
 
     override fun onSetUserAttributeList(
         attributeKey: String?,
         attributeValueList: List<String>?,
-        user: FilteredMParticleUser?,
     ) {
         // not supported
     }
@@ -396,7 +391,6 @@ open class SingularKit :
     override fun onSetAllUserAttributes(
         userAttributes: Map<String, String>,
         userAttributeLists: Map<String, List<String>>,
-        user: FilteredMParticleUser,
     ) {
     }
 
@@ -405,7 +399,6 @@ open class SingularKit :
     override fun onConsentStateUpdated(
         consentState: ConsentState,
         consentState1: ConsentState,
-        filteredMParticleUser: FilteredMParticleUser,
     ) {
         executeIfSingularInitialized({
             consentState.ccpaConsentState?.let { Singular.limitDataSharing(it.isConsented) }

@@ -51,7 +51,6 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq
-import org.mockito.ArgumentMatchers.isNull
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
@@ -92,6 +91,25 @@ class KitManagerImplTest {
             )
         manager.setKitFactory(factory)
         Assert.assertEquals(factory, manager.mKitIntegrationFactory)
+    }
+
+    @Test
+    fun testActiveKitsExcludesDisabled() {
+        val manager: KitManagerImpl = MockKitManagerImpl()
+        val enabled1 = mock(KitIntegration::class.java)
+        val enabled2 = mock(KitIntegration::class.java)
+        val disabled = mock(KitIntegration::class.java)
+        `when`(enabled1.isDisabled()).thenReturn(false)
+        `when`(enabled2.isDisabled()).thenReturn(false)
+        `when`(disabled.isDisabled()).thenReturn(true)
+        manager.providers[1] = enabled1
+        manager.providers[2] = disabled
+        manager.providers[3] = enabled2
+        val active = manager.activeKits()
+        assertEquals(2, active.size)
+        assertTrue(active.contains(enabled1))
+        assertTrue(active.contains(enabled2))
+        Assert.assertFalse(active.contains(disabled))
     }
 
     private fun createKitsMap(
@@ -520,14 +538,14 @@ class KitManagerImplTest {
         userAttributeLists["test 3"] = attributeList
         manager.onUserAttributesReceived(userAttributeSingles, userAttributeLists, 1L)
         verify(integration as UserAttributeListener, Mockito.times(1))
-            .onSetAllUserAttributes(eq(userAttributeSingles), eq(userAttributeLists), any())
+            .onSetAllUserAttributes(eq(userAttributeSingles), eq(userAttributeLists))
         val userAttributesCombined: MutableMap<String, String> = HashMap()
         userAttributesCombined["test"] = "whatever"
         userAttributesCombined["test 2"] = "whatever 2"
         userAttributesCombined["test 3"] = "1,2,3"
         val clearedOutList: Map<String, List<String>> = HashMap()
         verify(integration2 as UserAttributeListener, Mockito.times(1))
-            .onSetAllUserAttributes(eq(userAttributesCombined), eq(clearedOutList), any())
+            .onSetAllUserAttributes(eq(userAttributesCombined), eq(clearedOutList))
     }
 
     @Test
@@ -559,9 +577,9 @@ class KitManagerImplTest {
         attributeList.add("3")
         manager.setUserAttributeList("test key", attributeList, 1)
         verify(integration as UserAttributeListener, Mockito.times(1))
-            .onSetUserAttributeList(eq("test key"), eq(attributeList), any())
+            .onSetUserAttributeList(eq("test key"), eq(attributeList))
         verify(integration2 as UserAttributeListener, Mockito.times(1))
-            .onSetUserAttribute(eq("test key"), eq("1,2,3"), isNull())
+            .onSetUserAttribute(eq("test key"), eq("1,2,3"))
     }
 
     @Test
