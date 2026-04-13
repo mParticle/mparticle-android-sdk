@@ -65,7 +65,8 @@ jobs:
 
       - name: Generate changelog entry
         id: changelog
-        uses: ROKT/rokt-workflows/actions/generate-changelog@main
+        # Pinned SHA for Semgrep (no mutable @main); bump when upgrading the action.
+        uses: ROKT/rokt-workflows/actions/generate-changelog@c5c93e92107c520fb8b8cf71070995abdf4c403f
         with:
           version: ${{ steps.bump-version.outputs.new_version }}
           repo-url: https://github.com/${{ github.repository }}
