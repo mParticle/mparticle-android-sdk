@@ -63,6 +63,17 @@ jobs:
       - name: Publish to Maven local (smoke test)
         run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=${{ steps.bump-version.outputs.new_version }}
 
+      - name: Generate changelog entry
+        id: changelog
+        # Pinned SHA for Semgrep (no mutable @main); bump when upgrading the action.
+        uses: ROKT/rokt-workflows/actions/generate-changelog@c5c93e92107c520fb8b8cf71070995abdf4c403f
+        with:
+          version: ${{ steps.bump-version.outputs.new_version }}
+          repo-url: https://github.com/${{ github.repository }}
+          changelog-path: CHANGELOG.md
+          exclude-types: chore,ci,test,build
+          kits-path: kits
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
         with:
