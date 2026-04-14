@@ -887,8 +887,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     public void leaveBreadcrumb(String breadcrumb) {
         for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.EventListener) {
-                    List<ReportingMessage> report = ((KitIntegration.EventListener) provider).leaveBreadcrumb(breadcrumb);
+                if (provider instanceof KitIntegration.EventListener listener) {
+                    List<ReportingMessage> report = listener.leaveBreadcrumb(breadcrumb);
                     getReportingManager().logAll(report);
                     mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), breadcrumb);
                 }
@@ -902,8 +902,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     public void logError(String message, Map<String, String> eventData) {
         for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.EventListener) {
-                    List<ReportingMessage> report = ((KitIntegration.EventListener) provider).logError(message, eventData);
+                if (provider instanceof KitIntegration.EventListener listener) {
+                    List<ReportingMessage> report = listener.logError(message, eventData);
                     getReportingManager().logAll(report);
                     mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), message, eventData);
                 }
@@ -917,8 +917,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     public void logException(Exception exception, Map<String, String> eventData, String message) {
         for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.EventListener) {
-                    List<ReportingMessage> report = ((KitIntegration.EventListener) provider).logException(exception, eventData, message);
+                if (provider instanceof KitIntegration.EventListener listener) {
+                    List<ReportingMessage> report = listener.logException(exception, eventData, message);
                     getReportingManager().logAll(report);
                     mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), exception, message, eventData);
                 }
@@ -1004,8 +1004,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
         for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.ActivityListener) {
-                    List<ReportingMessage> reportingMessages = ((KitIntegration.ActivityListener) provider).onActivityCreated(activity, savedInstanceState);
+                if (provider instanceof KitIntegration.ActivityListener listener) {
+                    List<ReportingMessage> reportingMessages = listener.onActivityCreated(activity, savedInstanceState);
                     getReportingManager().logAll(reportingMessages);
                 }
             } catch (Exception e) {
@@ -1018,8 +1018,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     public void onActivityStarted(Activity activity) {
         for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.ActivityListener) {
-                    List<ReportingMessage> reportingMessages = ((KitIntegration.ActivityListener) provider).onActivityStarted(activity);
+                if (provider instanceof KitIntegration.ActivityListener listener) {
+                    List<ReportingMessage> reportingMessages = listener.onActivityStarted(activity);
                     getReportingManager().logAll(reportingMessages);
                 }
             } catch (Exception e) {
@@ -1032,8 +1032,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     public void onActivityResumed(Activity activity) {
         for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.ActivityListener) {
-                    List<ReportingMessage> reportingMessages = ((KitIntegration.ActivityListener) provider).onActivityResumed(activity);
+                if (provider instanceof KitIntegration.ActivityListener listener) {
+                    List<ReportingMessage> reportingMessages = listener.onActivityResumed(activity);
                     getReportingManager().logAll(reportingMessages);
                 }
             } catch (Exception e) {
@@ -1046,8 +1046,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     public void onActivityPaused(Activity activity) {
         for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.ActivityListener) {
-                    List<ReportingMessage> reportingMessages = ((KitIntegration.ActivityListener) provider).onActivityPaused(activity);
+                if (provider instanceof KitIntegration.ActivityListener listener) {
+                    List<ReportingMessage> reportingMessages = listener.onActivityPaused(activity);
                     getReportingManager().logAll(reportingMessages);
                 }
             } catch (Exception e) {
@@ -1060,8 +1060,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     public void onActivityStopped(Activity activity) {
         for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.ActivityListener) {
-                    List<ReportingMessage> reportingMessages = ((KitIntegration.ActivityListener) provider).onActivityStopped(activity);
+                if (provider instanceof KitIntegration.ActivityListener listener) {
+                    List<ReportingMessage> reportingMessages = listener.onActivityStopped(activity);
                     getReportingManager().logAll(reportingMessages);
                 }
             } catch (Exception e) {
@@ -1074,8 +1074,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
         for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.ActivityListener) {
-                    List<ReportingMessage> reportingMessages = ((KitIntegration.ActivityListener) provider).onActivitySaveInstanceState(activity, outState);
+                if (provider instanceof KitIntegration.ActivityListener listener) {
+                    List<ReportingMessage> reportingMessages = listener.onActivitySaveInstanceState(activity, outState);
                     getReportingManager().logAll(reportingMessages);
                 }
             } catch (Exception e) {
@@ -1088,8 +1088,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     public void onActivityDestroyed(Activity activity) {
         for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.ActivityListener) {
-                    List<ReportingMessage> reportingMessages = ((KitIntegration.ActivityListener) provider).onActivityDestroyed(activity);
+                if (provider instanceof KitIntegration.ActivityListener listener) {
+                    List<ReportingMessage> reportingMessages = listener.onActivityDestroyed(activity);
                     getReportingManager().logAll(reportingMessages);
                 }
             } catch (Exception e) {
@@ -1102,8 +1102,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     public void onSessionEnd() {
         for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.SessionListener) {
-                    List<ReportingMessage> reportingMessages = ((KitIntegration.SessionListener) provider).onSessionEnd();
+                if (provider instanceof KitIntegration.SessionListener listener) {
+                    List<ReportingMessage> reportingMessages = listener.onSessionEnd();
                     getReportingManager().logAll(reportingMessages);
                 }
             } catch (Exception e) {
@@ -1209,8 +1209,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
         reloadKits();
         for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.IdentityListener) {
-                    ((KitIntegration.IdentityListener) provider).onUserIdentified(FilteredMParticleUser.getInstance(mParticleUser, provider));
+                if (provider instanceof KitIntegration.IdentityListener listener) {
+                    listener.onUserIdentified(FilteredMParticleUser.getInstance(mParticleUser, provider));
                 }
             } catch (Exception e) {
                 Logger.warning("Failed to call onUserIdentified for kit: " + provider.getName() + ": " + e.getMessage());
@@ -1237,8 +1237,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     public void onIdentifyCompleted(MParticleUser mParticleUser, IdentityApiRequest identityApiRequest) {
         for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.IdentityListener) {
-                    ((KitIntegration.IdentityListener) provider).onIdentifyCompleted(FilteredMParticleUser.getInstance(mParticleUser, provider), new FilteredIdentityApiRequest(identityApiRequest, provider));
+                if (provider instanceof KitIntegration.IdentityListener listener) {
+                    listener.onIdentifyCompleted(FilteredMParticleUser.getInstance(mParticleUser, provider), new FilteredIdentityApiRequest(identityApiRequest, provider));
                 }
             } catch (Exception e) {
                 Logger.warning("Failed to call onIdentifyCompleted for kit: " + provider.getName() + ": " + e.getMessage());
@@ -1250,8 +1250,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     public void onLoginCompleted(MParticleUser mParticleUser, IdentityApiRequest identityApiRequest) {
         for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.IdentityListener) {
-                    ((KitIntegration.IdentityListener) provider).onLoginCompleted(FilteredMParticleUser.getInstance(mParticleUser, provider), new FilteredIdentityApiRequest(identityApiRequest, provider));
+                if (provider instanceof KitIntegration.IdentityListener listener) {
+                    listener.onLoginCompleted(FilteredMParticleUser.getInstance(mParticleUser, provider), new FilteredIdentityApiRequest(identityApiRequest, provider));
                 }
             } catch (Exception e) {
                 Logger.warning("Failed to call onLoginCompleted for kit: " + provider.getName() + ": " + e.getMessage());
@@ -1263,8 +1263,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     public void onLogoutCompleted(MParticleUser mParticleUser, IdentityApiRequest identityApiRequest) {
         for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.IdentityListener) {
-                    ((KitIntegration.IdentityListener) provider).onLogoutCompleted(FilteredMParticleUser.getInstance(mParticleUser, provider), new FilteredIdentityApiRequest(identityApiRequest, provider));
+                if (provider instanceof KitIntegration.IdentityListener listener) {
+                    listener.onLogoutCompleted(FilteredMParticleUser.getInstance(mParticleUser, provider), new FilteredIdentityApiRequest(identityApiRequest, provider));
                 }
             } catch (Exception e) {
                 Logger.warning("Failed to call onLogoutCompleted for kit: " + provider.getName() + ": " + e.getMessage());
@@ -1276,8 +1276,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     public void onModifyCompleted(MParticleUser mParticleUser, IdentityApiRequest identityApiRequest) {
         for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.IdentityListener) {
-                    ((KitIntegration.IdentityListener) provider).onModifyCompleted(FilteredMParticleUser.getInstance(mParticleUser, provider), new FilteredIdentityApiRequest(identityApiRequest, provider));
+                if (provider instanceof KitIntegration.IdentityListener listener) {
+                    listener.onModifyCompleted(FilteredMParticleUser.getInstance(mParticleUser, provider), new FilteredIdentityApiRequest(identityApiRequest, provider));
                 }
             } catch (Exception e) {
                 Logger.warning("Failed to call onModifyCompleted for kit: " + provider.getName() + ": " + e.getMessage());
@@ -1313,8 +1313,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     @Nullable
     public RoktKitApi getRoktKitApi() {
         for (KitIntegration provider : activeKits()) {
-            if (provider instanceof KitIntegration.RoktListener) {
-                return new RoktKitApiImpl((KitIntegration.RoktListener) provider, provider);
+            if (provider instanceof KitIntegration.RoktListener listener) {
+                return new RoktKitApiImpl(listener, provider);
             }
         }
         return null;
@@ -1324,8 +1324,8 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     public void setWrapperSdkVersion(@NonNull WrapperSdkVersion wrapperSdkVersion) {
         for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.RoktListener) {
-                    ((KitIntegration.RoktListener) provider).setWrapperSdkVersion(wrapperSdkVersion);
+                if (provider instanceof KitIntegration.RoktListener listener) {
+                    listener.setWrapperSdkVersion(wrapperSdkVersion);
                 }
             } catch (Exception e) {
                 Logger.warning("Failed to call setWrapperSdkVersion for kit: " + provider.getName() + ": " + e.getMessage());
