@@ -1334,9 +1334,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
 
     @Override
     public void setWrapperSdkVersion(@NonNull WrapperSdkVersion wrapperSdkVersion) {
-        for (KitIntegration provider : providers.values()) {
+        for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.RoktListener && !provider.isDisabled()) {
+                if (provider instanceof KitIntegration.RoktListener) {
                     ((KitIntegration.RoktListener) provider).setWrapperSdkVersion(wrapperSdkVersion);
                 }
             } catch (Exception e) {
