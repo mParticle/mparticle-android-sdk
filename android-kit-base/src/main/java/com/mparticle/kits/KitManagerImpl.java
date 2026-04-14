@@ -394,12 +394,10 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
 
     @Override
     public void setLocation(Location location) {
-        for (KitIntegration provider : providers.values()) {
+        for (KitIntegration provider : activeKits()) {
             try {
-                if (!provider.isDisabled()) {
-                    provider.setLocation(location);
-                    mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), true, location);
-                }
+                provider.setLocation(location);
+                mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), true, location);
             } catch (Exception e) {
                 Logger.warning("Failed to call setLocation for kit: " + provider.getName() + ": " + e.getMessage());
             }
@@ -408,13 +406,11 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
 
     @Override
     public void logNetworkPerformance(String url, long startTime, String method, long length, long bytesSent, long bytesReceived, String requestString, int responseCode) {
-        for (KitIntegration provider : providers.values()) {
+        for (KitIntegration provider : activeKits()) {
             try {
-                if (!provider.isDisabled()) {
-                    List<ReportingMessage> report = provider.logNetworkPerformance(url, startTime, method, length, bytesSent, bytesReceived, requestString, responseCode);
-                    getReportingManager().logAll(report);
-                    mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), url, startTime, method, length, bytesSent, bytesReceived, requestString, responseCode);
-                }
+                List<ReportingMessage> report = provider.logNetworkPerformance(url, startTime, method, length, bytesSent, bytesReceived, requestString, responseCode);
+                getReportingManager().logAll(report);
+                mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), url, startTime, method, length, bytesSent, bytesReceived, requestString, responseCode);
             } catch (Exception e) {
                 Logger.warning("Failed to call logNetworkPerformance for kit: " + provider.getName() + ": " + e.getMessage());
             }
@@ -485,74 +481,74 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
     //================================================================================
 
     protected void logCommerceEvent(CommerceEvent event) {
-        for (KitIntegration provider : providers.values()) {
+        for (KitIntegration provider : activeKits()) {
             try {
-                if (!provider.isDisabled()) {
-                    CommerceEvent filteredEvent = provider.getConfiguration().filterCommerceEvent(event);
-                    if (filteredEvent != null) {
-                        if (provider instanceof KitIntegration.CommerceListener) {
-                            List<CustomMapping.ProjectionResult> projectedEvents = CustomMapping.projectEvents(
-                                    filteredEvent,
-                                    provider.getConfiguration().getCustomMappingList(),
-                                    provider.getConfiguration().getDefaultCommerceCustomMapping()
-                            );
-                            if (projectedEvents != null && projectedEvents.size() > 0) {
-                                ReportingMessage masterMessage = ReportingMessage.fromEvent(provider, filteredEvent);
-                                boolean forwarded = false;
-                                for (int i = 0; i < projectedEvents.size(); i++) {
-                                    CustomMapping.ProjectionResult result = projectedEvents.get(i);
-                                    List<ReportingMessage> report = null;
-                                    String messageType = null;
-                                    if (result.getMPEvent() != null) {
-                                        MPEvent projectedEvent = projectedEvents.get(i).getMPEvent();
-                                        report = ((KitIntegration.EventListener) provider).logEvent(projectedEvent);
-                                        mCoreCallbacks.getKitListener().onKitApiCalled("logMPEvent()", provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), projectedEvent);
-                                        messageType = ReportingMessage.MessageType.EVENT;
-                                    } else {
-                                        CommerceEvent projectedEvent = projectedEvents.get(i).getCommerceEvent();
-                                        report = ((KitIntegration.CommerceListener) provider).logEvent(projectedEvent);
-                                        mCoreCallbacks.getKitListener().onKitApiCalled("logMPEvent()", provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), projectedEvent);
-                                        messageType = ReportingMessage.MessageType.COMMERCE_EVENT;
-                                    }
-                                    if (report != null && report.size() > 0) {
-                                        forwarded = true;
-                                        for (ReportingMessage message : report) {
-                                            masterMessage.addProjectionReport(
-                                                    new ReportingMessage.ProjectionReport(projectedEvents.get(i).getProjectionId(),
-                                                            messageType,
-                                                            message.getEventName(),
-                                                            message.getEventTypeString())
-                                            );
-                                        }
-                                    }
-                                }
-                                if (forwarded) {
-                                    getReportingManager().log(masterMessage);
-                                }
-                            } else {
-                                List<ReportingMessage> reporting = ((KitIntegration.CommerceListener) provider).logEvent(filteredEvent);
-                                mCoreCallbacks.getKitListener().onKitApiCalled("logMPEvent()", provider.getConfiguration().getKitId(), !MPUtility.isEmpty(reporting), filteredEvent);
-                                if (reporting != null && reporting.size() > 0) {
-                                    getReportingManager().log(
-                                            ReportingMessage.fromEvent(provider, filteredEvent)
-                                    );
-                                }
-                            }
-                        } else if (provider instanceof KitIntegration.EventListener) {
-                            List<MPEvent> events = CommerceEventUtils.expand(filteredEvent);
+                CommerceEvent filteredEvent = provider.getConfiguration().filterCommerceEvent(event);
+                if (filteredEvent != null) {
+                    if (provider instanceof KitIntegration.CommerceListener) {
+                        List<CustomMapping.ProjectionResult> projectedEvents = CustomMapping.projectEvents(
+                                filteredEvent,
+                                provider.getConfiguration().getCustomMappingList(),
+                                provider.getConfiguration().getDefaultCommerceCustomMapping()
+                        );
+                        if (projectedEvents != null && projectedEvents.size() > 0) {
+                            ReportingMessage masterMessage = ReportingMessage.fromEvent(provider, filteredEvent);
                             boolean forwarded = false;
-                            if (events != null) {
-                                for (MPEvent expandedEvent : events) {
-                                    List<ReportingMessage> reporting = ((KitIntegration.EventListener) provider).logEvent(expandedEvent);
-                                    mCoreCallbacks.getKitListener().onKitApiCalled("logMPEvent()", provider.getConfiguration().getKitId(), !MPUtility.isEmpty(reporting), expandedEvent);
-                                    forwarded = forwarded || (reporting != null && reporting.size() > 0);
+                            for (int i = 0; i < projectedEvents.size(); i++) {
+                                CustomMapping.ProjectionResult result = projectedEvents.get(i);
+                                List<ReportingMessage> report = null;
+                                String messageType = null;
+                                if (result.getMPEvent() != null) {
+                                    MPEvent projectedEvent = projectedEvents.get(i).getMPEvent();
+                                    report = ((KitIntegration.EventListener) provider).logEvent(projectedEvent);
+                                    mCoreCallbacks.getKitListener().onKitApiCalled("logMPEvent()", provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), projectedEvent);
+                                    messageType = ReportingMessage.MessageType.EVENT;
+                                } else {
+                                    CommerceEvent projectedEvent = projectedEvents.get(i).getCommerceEvent();
+                                    report = ((KitIntegration.CommerceListener) provider).logEvent(projectedEvent);
+                                    mCoreCallbacks.getKitListener().onKitApiCalled("logMPEvent()", provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), projectedEvent);
+                                    messageType = ReportingMessage.MessageType.COMMERCE_EVENT;
+                                }
+                                if (report != null && report.size() > 0) {
+                                    forwarded = true;
+                                    for (ReportingMessage message : report) {
+                                        masterMessage.addProjectionReport(
+                                                new ReportingMessage.ProjectionReport(projectedEvents.get(i).getProjectionId(),
+                                                        messageType,
+                                                        message.getEventName(),
+                                                        message.getEventTypeString())
+                                        );
+                                    }
                                 }
                             }
                             if (forwarded) {
                                 getReportingManager().log(
+                                        masterMessage
+                                );
+                            }
+                        } else {
+                            List<ReportingMessage> reporting = ((KitIntegration.CommerceListener) provider).logEvent(filteredEvent);
+                            mCoreCallbacks.getKitListener().onKitApiCalled("logMPEvent()", provider.getConfiguration().getKitId(), !MPUtility.isEmpty(reporting), filteredEvent);
+                            if (reporting != null && reporting.size() > 0) {
+                                getReportingManager().log(
                                         ReportingMessage.fromEvent(provider, filteredEvent)
                                 );
                             }
+                        }
+                    } else if (provider instanceof KitIntegration.EventListener) {
+                        List<MPEvent> events = CommerceEventUtils.expand(filteredEvent);
+                        boolean forwarded = false;
+                        if (events != null) {
+                            for (MPEvent expandedEvent : events) {
+                                List<ReportingMessage> reporting = ((KitIntegration.EventListener) provider).logEvent(expandedEvent);
+                                mCoreCallbacks.getKitListener().onKitApiCalled("logMPEvent()", provider.getConfiguration().getKitId(), !MPUtility.isEmpty(reporting), expandedEvent);
+                                forwarded = forwarded || (reporting != null && reporting.size() > 0);
+                            }
+                        }
+                        if (forwarded) {
+                            getReportingManager().log(
+                                    ReportingMessage.fromEvent(provider, filteredEvent)
+                            );
                         }
                     }
                 }
