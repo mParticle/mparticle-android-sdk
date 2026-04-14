@@ -564,19 +564,17 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
 
     @Override
     public boolean onMessageReceived(Context context, Intent intent) {
-        for (KitIntegration provider : providers.values()) {
+        for (KitIntegration provider : activeKits()) {
             if (provider instanceof KitIntegration.PushListener) {
                 try {
-                    if (!provider.isDisabled()) {
-                        boolean willHandlePush = ((KitIntegration.PushListener) provider).willHandlePushMessage(intent);
-                        mCoreCallbacks.getKitListener().onKitApiCalled("willHandlePushMessage()", provider.getConfiguration().getKitId(), willHandlePush, intent);
-                        if (willHandlePush) {
-                            ((KitIntegration.PushListener) provider).onPushMessageReceived(context, intent);
-                            mCoreCallbacks.getKitListener().onKitApiCalled("onPushMessageReceived()", provider.getConfiguration().getKitId(), null, context, intent);
-                            ReportingMessage message = ReportingMessage.fromPushMessage(provider, intent);
-                            getReportingManager().log(message);
-                            return true;
-                        }
+                    boolean willHandlePush = ((KitIntegration.PushListener) provider).willHandlePushMessage(intent);
+                    mCoreCallbacks.getKitListener().onKitApiCalled("willHandlePushMessage()", provider.getConfiguration().getKitId(), willHandlePush, intent);
+                    if (willHandlePush) {
+                        ((KitIntegration.PushListener) provider).onPushMessageReceived(context, intent);
+                        mCoreCallbacks.getKitListener().onKitApiCalled("onPushMessageReceived()", provider.getConfiguration().getKitId(), null, context, intent);
+                        ReportingMessage message = ReportingMessage.fromPushMessage(provider, intent);
+                        getReportingManager().log(message);
+                        return true;
                     }
                 } catch (Exception e) {
                     Logger.warning("Failed to call onPushMessageReceived for kit: " + provider.getName() + ": " + e.getMessage());
@@ -588,18 +586,16 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
 
     @Override
     public boolean onPushRegistration(String token, String senderId) {
-        for (KitIntegration provider : providers.values()) {
+        for (KitIntegration provider : activeKits()) {
             if (provider instanceof KitIntegration.PushListener) {
                 try {
-                    if (!provider.isDisabled()) {
-                        boolean onPushRegistration = ((KitIntegration.PushListener) provider).onPushRegistration(token, senderId);
-                        mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), onPushRegistration, token, senderId);
-                        if (onPushRegistration) {
-                            ReportingMessage message = ReportingMessage.fromPushRegistrationMessage(provider);
-                            getReportingManager().log(message);
-                        }
-                        return true;
+                    boolean onPushRegistration = ((KitIntegration.PushListener) provider).onPushRegistration(token, senderId);
+                    mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), onPushRegistration, token, senderId);
+                    if (onPushRegistration) {
+                        ReportingMessage message = ReportingMessage.fromPushRegistrationMessage(provider);
+                        getReportingManager().log(message);
                     }
+                    return true;
                 } catch (Exception e) {
                     Logger.warning("Failed to call onPushRegistration for kit: " + provider.getName() + ": " + e.getMessage());
                 }
@@ -889,9 +885,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
 
     @Override
     public void leaveBreadcrumb(String breadcrumb) {
-        for (KitIntegration provider : providers.values()) {
+        for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.EventListener && !provider.isDisabled()) {
+                if (provider instanceof KitIntegration.EventListener) {
                     List<ReportingMessage> report = ((KitIntegration.EventListener) provider).leaveBreadcrumb(breadcrumb);
                     getReportingManager().logAll(report);
                     mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), breadcrumb);
@@ -904,9 +900,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
 
     @Override
     public void logError(String message, Map<String, String> eventData) {
-        for (KitIntegration provider : providers.values()) {
+        for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.EventListener && !provider.isDisabled()) {
+                if (provider instanceof KitIntegration.EventListener) {
                     List<ReportingMessage> report = ((KitIntegration.EventListener) provider).logError(message, eventData);
                     getReportingManager().logAll(report);
                     mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), message, eventData);
@@ -919,9 +915,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
 
     @Override
     public void logException(Exception exception, Map<String, String> eventData, String message) {
-        for (KitIntegration provider : providers.values()) {
+        for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.EventListener && !provider.isDisabled()) {
+                if (provider instanceof KitIntegration.EventListener) {
                     List<ReportingMessage> report = ((KitIntegration.EventListener) provider).logException(exception, eventData, message);
                     getReportingManager().logAll(report);
                     mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), exception, message, eventData);
@@ -1006,9 +1002,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
 
     @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-        for (KitIntegration provider : providers.values()) {
+        for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.ActivityListener && !provider.isDisabled()) {
+                if (provider instanceof KitIntegration.ActivityListener) {
                     List<ReportingMessage> reportingMessages = ((KitIntegration.ActivityListener) provider).onActivityCreated(activity, savedInstanceState);
                     getReportingManager().logAll(reportingMessages);
                 }
@@ -1020,9 +1016,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
 
     @Override
     public void onActivityStarted(Activity activity) {
-        for (KitIntegration provider : providers.values()) {
+        for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.ActivityListener && !provider.isDisabled()) {
+                if (provider instanceof KitIntegration.ActivityListener) {
                     List<ReportingMessage> reportingMessages = ((KitIntegration.ActivityListener) provider).onActivityStarted(activity);
                     getReportingManager().logAll(reportingMessages);
                 }
@@ -1034,9 +1030,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
 
     @Override
     public void onActivityResumed(Activity activity) {
-        for (KitIntegration provider : providers.values()) {
+        for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.ActivityListener && !provider.isDisabled()) {
+                if (provider instanceof KitIntegration.ActivityListener) {
                     List<ReportingMessage> reportingMessages = ((KitIntegration.ActivityListener) provider).onActivityResumed(activity);
                     getReportingManager().logAll(reportingMessages);
                 }
@@ -1048,9 +1044,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
 
     @Override
     public void onActivityPaused(Activity activity) {
-        for (KitIntegration provider : providers.values()) {
+        for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.ActivityListener && !provider.isDisabled()) {
+                if (provider instanceof KitIntegration.ActivityListener) {
                     List<ReportingMessage> reportingMessages = ((KitIntegration.ActivityListener) provider).onActivityPaused(activity);
                     getReportingManager().logAll(reportingMessages);
                 }
@@ -1062,9 +1058,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
 
     @Override
     public void onActivityStopped(Activity activity) {
-        for (KitIntegration provider : providers.values()) {
+        for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.ActivityListener && !provider.isDisabled()) {
+                if (provider instanceof KitIntegration.ActivityListener) {
                     List<ReportingMessage> reportingMessages = ((KitIntegration.ActivityListener) provider).onActivityStopped(activity);
                     getReportingManager().logAll(reportingMessages);
                 }
@@ -1076,9 +1072,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
 
     @Override
     public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-        for (KitIntegration provider : providers.values()) {
+        for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.ActivityListener && !provider.isDisabled()) {
+                if (provider instanceof KitIntegration.ActivityListener) {
                     List<ReportingMessage> reportingMessages = ((KitIntegration.ActivityListener) provider).onActivitySaveInstanceState(activity, outState);
                     getReportingManager().logAll(reportingMessages);
                 }
@@ -1090,9 +1086,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
 
     @Override
     public void onActivityDestroyed(Activity activity) {
-        for (KitIntegration provider : providers.values()) {
+        for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.ActivityListener && !provider.isDisabled()) {
+                if (provider instanceof KitIntegration.ActivityListener) {
                     List<ReportingMessage> reportingMessages = ((KitIntegration.ActivityListener) provider).onActivityDestroyed(activity);
                     getReportingManager().logAll(reportingMessages);
                 }
@@ -1104,9 +1100,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
 
     @Override
     public void onSessionEnd() {
-        for (KitIntegration provider : providers.values()) {
+        for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.SessionListener && !provider.isDisabled()) {
+                if (provider instanceof KitIntegration.SessionListener) {
                     List<ReportingMessage> reportingMessages = ((KitIntegration.SessionListener) provider).onSessionEnd();
                     getReportingManager().logAll(reportingMessages);
                 }
@@ -1118,9 +1114,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
 
     @Override
     public void onSessionStart() {
-        for (KitIntegration provider : providers.values()) {
+        for (KitIntegration provider : activeKits()) {
             try {
-                if (provider instanceof KitIntegration.SessionListener && !provider.isDisabled()) {
+                if (provider instanceof KitIntegration.SessionListener) {
                     List<ReportingMessage> reportingMessages = ((KitIntegration.SessionListener) provider).onSessionStart();
                     getReportingManager().logAll(reportingMessages);
                 }
