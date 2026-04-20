@@ -235,12 +235,17 @@ public class UploadHandler extends BaseHandler {
      * Run an age-based retention sweep across persisted events, batches, and sessions at most
      * once every {@link #PERSISTENCE_CLEANUP_INTERVAL_MILLIS}. When the consumer has not
      * configured {@link com.mparticle.MParticleOptions.Builder#persistenceMaxAgeSeconds(int)},
-     * the default 90-day window is used.
+     * the default 90-day window is used. The throttle timestamp is only advanced on a
+     * successful sweep so that transient failures (for example a locked database) can be
+     * retried on the next upload cycle rather than deferred for 24 hours.
      *
      * @param nowMillis current time in unix-epoch milliseconds
      */
     void maybePrunePersistedRecords(long nowMillis) {
         if (nowMillis - mLastPersistenceCleanupMillis < PERSISTENCE_CLEANUP_INTERVAL_MILLIS) {
+            return;
+        }
+        if (mParticleDBManager == null) {
             return;
         }
         try {
@@ -250,10 +255,9 @@ public class UploadHandler extends BaseHandler {
                     : configured.longValue() * 1000L;
             long cutoffMillis = nowMillis - maxAgeMillis;
             mParticleDBManager.deleteRecordsOlderThan(cutoffMillis);
+            mLastPersistenceCleanupMillis = nowMillis;
         } catch (Exception e) {
             Logger.warning(e, "Failed to prune persisted records by age.");
-        } finally {
-            mLastPersistenceCleanupMillis = nowMillis;
         }
     }
 

@@ -131,6 +131,30 @@ class UploadHandlerTest {
     }
 
     @Test
+    fun testMaybePrunePersistedRecordsRetriesAfterFailure() {
+        val db = handler.mParticleDBManager
+
+        // Phase 1 - deleteRecordsOlderThan throws; throttle must NOT be armed.
+        Mockito.doThrow(RuntimeException("boom")).`when`(db).deleteRecordsOlderThan(Mockito.anyLong())
+        val t1 = 1_000_000_000_000L
+        handler.maybePrunePersistedRecords(t1)
+        Mockito.verify(db, Mockito.times(1)).deleteRecordsOlderThan(Mockito.anyLong())
+
+        // Phase 2 - a minute later the sweep retries because the throttle was not armed.
+        handler.maybePrunePersistedRecords(t1 + 60_000L)
+        Mockito.verify(db, Mockito.times(2)).deleteRecordsOlderThan(Mockito.anyLong())
+
+        // Phase 3 - successful sweep arms the throttle.
+        Mockito.doNothing().`when`(db).deleteRecordsOlderThan(Mockito.anyLong())
+        handler.maybePrunePersistedRecords(t1 + 120_000L)
+        Mockito.verify(db, Mockito.times(3)).deleteRecordsOlderThan(Mockito.anyLong())
+
+        // Phase 4 - a minute after the successful sweep the throttle short-circuits the call.
+        handler.maybePrunePersistedRecords(t1 + 180_000L)
+        Mockito.verify(db, Mockito.times(3)).deleteRecordsOlderThan(Mockito.anyLong())
+    }
+
+    @Test
     @Throws(Exception::class)
     fun testGetDeviceInfo() {
         val attributes =
