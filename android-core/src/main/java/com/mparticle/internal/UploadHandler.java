@@ -8,6 +8,7 @@ import android.os.Looper;
 import android.os.Message;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.mparticle.MParticle;
 import com.mparticle.audience.AudienceResponse;
@@ -61,12 +62,14 @@ public class UploadHandler extends BaseHandler {
      * {@link com.mparticle.MParticleOptions.Builder#persistenceMaxAgeSeconds(int)} is not set.
      * Matches the iOS SDK's 90-day default.
      */
+    @VisibleForTesting
     static final long DEFAULT_PERSISTENCE_MAX_AGE_MILLIS = 90L * 24L * 60L * 60L * 1000L;
 
     /**
      * Minimum interval between age-based persistence sweeps, matching the iOS SDK's 24 hour
      * throttle on {@code cleanUp}.
      */
+    @VisibleForTesting
     static final long PERSISTENCE_CLEANUP_INTERVAL_MILLIS = 24L * 60L * 60L * 1000L;
 
     /**
@@ -241,6 +244,7 @@ public class UploadHandler extends BaseHandler {
      *
      * @param nowMillis current time in unix-epoch milliseconds
      */
+    @VisibleForTesting
     void maybePrunePersistedRecords(long nowMillis) {
         if (nowMillis - mLastPersistenceCleanupMillis < PERSISTENCE_CLEANUP_INTERVAL_MILLIS) {
             return;
