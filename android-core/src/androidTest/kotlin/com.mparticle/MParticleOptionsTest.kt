@@ -695,6 +695,46 @@ class MParticleOptionsTest : BaseAbstractTest() {
     }
 
     @Test
+    fun testPersistenceMaxAgeSeconds() {
+        // nothing set, should return null (SDK will fall back to the 90-day default)
+        var options =
+            MParticleOptions
+                .builder(mContext)
+                .credentials("key", "secret")
+                .build()
+        Assert.assertNull(options.persistenceMaxAgeSeconds)
+
+        // positive number should be preserved
+        val testValue = Math.abs(ran.nextInt()) + 1
+        options =
+            MParticleOptions
+                .builder(mContext)
+                .credentials("key", "secret")
+                .persistenceMaxAgeSeconds(testValue)
+                .build()
+        Assert.assertEquals(testValue, options.persistenceMaxAgeSeconds)
+
+        // zero is non-positive and should be rejected (differs from configMaxAgeSeconds which
+        // accepts zero as "always stale") - mirrors iOS SDK behaviour
+        options =
+            MParticleOptions
+                .builder(mContext)
+                .credentials("key", "secret")
+                .persistenceMaxAgeSeconds(0)
+                .build()
+        Assert.assertNull(options.persistenceMaxAgeSeconds)
+
+        // negative numbers should be rejected
+        options =
+            MParticleOptions
+                .builder(mContext)
+                .credentials("key", "secret")
+                .persistenceMaxAgeSeconds(-5)
+                .build()
+        Assert.assertNull(options.persistenceMaxAgeSeconds)
+    }
+
+    @Test
     fun testAndroidIdLogMessage() {
         val infoLogs = ArrayList<String?>()
         Logger.setLogHandler(

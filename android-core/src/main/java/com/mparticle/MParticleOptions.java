@@ -42,6 +42,7 @@ public class MParticleOptions {
     private Integer mUploadInterval = ConfigManager.DEFAULT_UPLOAD_INTERVAL;  //seconds
     private Integer mSessionTimeout = ConfigManager.DEFAULT_SESSION_TIMEOUT_SECONDS; //seconds
     private Integer mConfigMaxAge = null;
+    private Integer mPersistenceMaxAgeSeconds = null;
     private Boolean mUnCaughtExceptionLogging = false;
     private MParticle.LogLevel mLogLevel = MParticle.LogLevel.DEBUG;
     private AttributionListener mAttributionListener;
@@ -116,6 +117,13 @@ public class MParticleOptions {
                 Logger.warning("Config Max Age must be a positive number, disregarding value.");
             } else {
                 this.mConfigMaxAge = builder.configMaxAge;
+            }
+        }
+        if (builder.persistenceMaxAgeSeconds != null) {
+            if (builder.persistenceMaxAgeSeconds <= 0) {
+                Logger.warning("Persistence Max Age must be a positive number, disregarding value.");
+            } else {
+                this.mPersistenceMaxAgeSeconds = builder.persistenceMaxAgeSeconds;
             }
         }
         if (builder.unCaughtExceptionLogging != null) {
@@ -290,6 +298,22 @@ public class MParticleOptions {
         return mConfigMaxAge;
     }
 
+    /**
+     * The maximum threshold (in seconds) for locally persisted events, batches, and sessions.
+     * <p>
+     * When {@code null} (the default), records are retained for 90 days before being deleted.
+     * Values less than or equal to zero are rejected at build time and result in the default
+     * being used.
+     *
+     * @return the configured maximum persistence age in seconds, or {@code null} when the default
+     *         (90 days) applies
+     * @see Builder#persistenceMaxAgeSeconds(int)
+     */
+    @Nullable
+    public Integer getPersistenceMaxAgeSeconds() {
+        return mPersistenceMaxAgeSeconds;
+    }
+
     @NonNull
     public Boolean isUncaughtExceptionLoggingEnabled() {
         return mUnCaughtExceptionLogging;
@@ -403,6 +427,7 @@ public class MParticleOptions {
         private Integer uploadInterval = null;
         private Integer sessionTimeout = null;
         private Integer configMaxAge = null;
+        private Integer persistenceMaxAgeSeconds = null;
         private Boolean unCaughtExceptionLogging = null;
         MParticle.LogLevel logLevel = null;
         BaseIdentityTask identityTask;
@@ -619,6 +644,32 @@ public class MParticleOptions {
         @NonNull
         public Builder configMaxAgeSeconds(int configMaxAge) {
             this.configMaxAge = configMaxAge;
+            return this;
+        }
+
+        /**
+         * Set a maximum threshold for locally persisted events, batches, and sessions, in seconds.
+         * <p>
+         * By default, data is persisted for 90 days before being deleted to minimize data loss;
+         * however, this can lead to excessive storage usage on some users' devices. This is
+         * exacerbated if your app logs a large number of events, or events carrying a lot of data
+         * (attributes, etc.).
+         * <p>
+         * Set a lower value (for example, 48 hours or 1 week) if you have storage usage concerns.
+         * Alternatively, if you have data loss concerns, set a longer value than the default.
+         * <p>
+         * This is the Android equivalent of the iOS SDK's
+         * {@code MParticleOptions.persistenceMaxAgeSeconds} option.
+         *
+         * @param persistenceMaxAgeSeconds the upper limit, in seconds, for how long persisted
+         *                                 data may live on disk. Must be greater than zero;
+         *                                 non-positive values are rejected and the default
+         *                                 (90 days) is used instead
+         * @return the instance of the builder, for chaining calls
+         */
+        @NonNull
+        public Builder persistenceMaxAgeSeconds(int persistenceMaxAgeSeconds) {
+            this.persistenceMaxAgeSeconds = persistenceMaxAgeSeconds;
             return this;
         }
 

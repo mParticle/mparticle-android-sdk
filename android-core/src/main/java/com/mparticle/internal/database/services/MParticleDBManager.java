@@ -206,6 +206,31 @@ public class MParticleDBManager {
         }
     }
 
+    /**
+     * Age-based retention sweep across the three persistence tables.
+     * <p>
+     * Deletes any messages and uploads whose {@code CREATED_AT} is strictly less than
+     * {@code cutoffMillis}, and any sessions whose {@code END_TIME} is strictly less than
+     * {@code cutoffMillis}. Mirrors the behaviour of the iOS SDK's
+     * {@code MPPersistenceController.deleteRecordsOlderThan:}.
+     *
+     * @param cutoffMillis the unix-epoch millisecond cutoff; rows older than this are removed
+     */
+    public void deleteRecordsOlderThan(long cutoffMillis) {
+        MPDatabase db = getDatabase();
+        try {
+            db.beginTransaction();
+            MessageService.deleteMessagesOlderThan(db, cutoffMillis);
+            UploadService.deleteUploadsOlderThan(db, cutoffMillis);
+            SessionService.deleteSessionsOlderThan(db, cutoffMillis);
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Logger.warning(e, "Error pruning persisted records older than " + cutoffMillis + " ms.");
+        } finally {
+            db.endTransaction();
+        }
+    }
+
     private HashMap<BatchId, MessageBatch> getUploadMessageByBatchIdMap(List<MessageService.ReadyMessage> readyMessages, MPDatabase db, ConfigManager configManager) throws JSONException {
         return getUploadMessageByBatchIdMap(readyMessages, db, configManager, false);
     }

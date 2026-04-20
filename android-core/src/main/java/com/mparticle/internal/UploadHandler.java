@@ -56,6 +56,25 @@ public class UploadHandler extends BaseHandler {
      */
     public static final int INIT_CONFIG = 6;
 
+    /**
+     * Default retention window for persisted events, batches, and sessions when
+     * {@link com.mparticle.MParticleOptions.Builder#persistenceMaxAgeSeconds(int)} is not set.
+     * Matches the iOS SDK's 90-day default.
+     */
+    static final long DEFAULT_PERSISTENCE_MAX_AGE_MILLIS = 90L * 24L * 60L * 60L * 1000L;
+
+    /**
+     * Minimum interval between age-based persistence sweeps, matching the iOS SDK's 24 hour
+     * throttle on {@code cleanUp}.
+     */
+    static final long PERSISTENCE_CLEANUP_INTERVAL_MILLIS = 24L * 60L * 60L * 1000L;
+
+    /**
+     * Unix-epoch millisecond timestamp of the last successful age-based sweep. Zero means
+     * "never run in this process".
+     */
+    private long mLastPersistenceCleanupMillis = 0L;
+
     private final SharedPreferences mPreferences;
     private final SegmentDatabase audienceDB;
 
@@ -186,6 +205,7 @@ public class UploadHandler extends BaseHandler {
      * This method is responsible for looking for batches that are ready to be uploaded, and uploading them.
      */
     protected void upload() {
+        maybePrunePersistedRecords(System.currentTimeMillis());
         mParticleDBManager.cleanupUploadMessages();
         try {
             List<MParticleDBManager.ReadyUpload> readyUploads = mParticleDBManager.getReadyUploads();
@@ -208,6 +228,32 @@ public class UploadHandler extends BaseHandler {
             Logger.error("Bad API request - is the correct API key and secret configured?");
         } catch (Exception e) {
             Logger.error(e, "Error processing batch uploads in mParticle DB.");
+        }
+    }
+
+    /**
+     * Run an age-based retention sweep across persisted events, batches, and sessions at most
+     * once every {@link #PERSISTENCE_CLEANUP_INTERVAL_MILLIS}. When the consumer has not
+     * configured {@link com.mparticle.MParticleOptions.Builder#persistenceMaxAgeSeconds(int)},
+     * the default 90-day window is used.
+     *
+     * @param nowMillis current time in unix-epoch milliseconds
+     */
+    void maybePrunePersistedRecords(long nowMillis) {
+        if (nowMillis - mLastPersistenceCleanupMillis < PERSISTENCE_CLEANUP_INTERVAL_MILLIS) {
+            return;
+        }
+        try {
+            Integer configured = mConfigManager == null ? null : mConfigManager.getPersistenceMaxAgeSeconds();
+            long maxAgeMillis = (configured == null)
+                    ? DEFAULT_PERSISTENCE_MAX_AGE_MILLIS
+                    : configured.longValue() * 1000L;
+            long cutoffMillis = nowMillis - maxAgeMillis;
+            mParticleDBManager.deleteRecordsOlderThan(cutoffMillis);
+        } catch (Exception e) {
+            Logger.warning(e, "Failed to prune persisted records by age.");
+        } finally {
+            mLastPersistenceCleanupMillis = nowMillis;
         }
     }
 
