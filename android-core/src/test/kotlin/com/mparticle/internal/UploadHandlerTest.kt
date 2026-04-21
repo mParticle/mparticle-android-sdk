@@ -150,7 +150,7 @@ class UploadHandlerTest {
         val capturedCutoff = java.util.concurrent.atomic.AtomicLong(Long.MIN_VALUE)
         Mockito.doAnswer { invocation ->
             capturedCutoff.set(invocation.getArgument(0))
-            null
+            true
         }.`when`(db).deleteRecordsOlderThan(Mockito.anyLong())
 
         val now = 1_700_000_000_000L
@@ -182,7 +182,7 @@ class UploadHandlerTest {
         val capturedCutoff = java.util.concurrent.atomic.AtomicLong(Long.MIN_VALUE)
         Mockito.doAnswer { invocation ->
             capturedCutoff.set(invocation.getArgument(0))
-            null
+            true
         }.`when`(db).deleteRecordsOlderThan(Mockito.anyLong())
 
         val now = 1_700_000_000_000L
@@ -194,6 +194,8 @@ class UploadHandlerTest {
     @Test
     fun testMaybePrunePersistedRecordsHonorsTwentyFourHourThrottle() {
         val db = handler.mParticleDBManager
+        // The sweep must succeed so the throttle arms; otherwise every call retries.
+        Mockito.`when`(db.deleteRecordsOlderThan(Mockito.anyLong())).thenReturn(true)
         val t0 = 1_000_000_000_000L
 
         // First call always runs the sweep.
@@ -213,8 +215,10 @@ class UploadHandlerTest {
     fun testMaybePrunePersistedRecordsRetriesAfterFailure() {
         val db = handler.mParticleDBManager
 
-        // Phase 1 - deleteRecordsOlderThan throws; throttle must NOT be armed.
-        Mockito.doThrow(RuntimeException("boom")).`when`(db).deleteRecordsOlderThan(Mockito.anyLong())
+        // Phase 1 - deleteRecordsOlderThan reports failure (false); throttle must NOT be armed.
+        // This models the real contract: MParticleDBManager.deleteRecordsOlderThan catches
+        // SQL exceptions internally and signals failure via its return value.
+        Mockito.`when`(db.deleteRecordsOlderThan(Mockito.anyLong())).thenReturn(false)
         val t1 = 1_000_000_000_000L
         handler.maybePrunePersistedRecords(t1)
         Mockito.verify(db, Mockito.times(1)).deleteRecordsOlderThan(Mockito.anyLong())
@@ -224,7 +228,7 @@ class UploadHandlerTest {
         Mockito.verify(db, Mockito.times(2)).deleteRecordsOlderThan(Mockito.anyLong())
 
         // Phase 3 - successful sweep arms the throttle.
-        Mockito.doNothing().`when`(db).deleteRecordsOlderThan(Mockito.anyLong())
+        Mockito.`when`(db.deleteRecordsOlderThan(Mockito.anyLong())).thenReturn(true)
         handler.maybePrunePersistedRecords(t1 + 120_000L)
         Mockito.verify(db, Mockito.times(3)).deleteRecordsOlderThan(Mockito.anyLong())
 

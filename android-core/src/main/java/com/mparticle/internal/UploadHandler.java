@@ -252,16 +252,13 @@ public class UploadHandler extends BaseHandler {
         if (mParticleDBManager == null) {
             return;
         }
-        try {
-            Integer configured = mConfigManager == null ? null : mConfigManager.getPersistenceMaxAgeSeconds();
-            long maxAgeMillis = (configured == null)
-                    ? DEFAULT_PERSISTENCE_MAX_AGE_MILLIS
-                    : configured.longValue() * 1000L;
-            long cutoffMillis = nowMillis - maxAgeMillis;
-            mParticleDBManager.deleteRecordsOlderThan(cutoffMillis);
+        Integer configured = mConfigManager == null ? null : mConfigManager.getPersistenceMaxAgeSeconds();
+        long maxAgeMillis = (configured == null)
+                ? DEFAULT_PERSISTENCE_MAX_AGE_MILLIS
+                : configured.longValue() * 1000L;
+        long cutoffMillis = nowMillis - maxAgeMillis;
+        if (mParticleDBManager.deleteRecordsOlderThan(cutoffMillis)) {
             mLastPersistenceCleanupMillis = nowMillis;
-        } catch (Exception e) {
-            Logger.warning(e, "Failed to prune persisted records by age.");
         }
     }
 
