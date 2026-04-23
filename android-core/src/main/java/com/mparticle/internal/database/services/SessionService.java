@@ -34,6 +34,23 @@ public class SessionService extends SessionTable {
     }
 
     /**
+     * Delete sessions whose {@link SessionTableColumns#END_TIME} is strictly less than
+     * {@code cutoffMillis}.
+     *
+     * @param database     the session database
+     * @param cutoffMillis the unix-epoch millisecond cutoff; sessions that ended before this are
+     *                     removed
+     * @return the number of rows deleted
+     */
+    public static int deleteSessionsOlderThan(MPDatabase database, long cutoffMillis) {
+        String[] whereArgs = new String[]{Long.toString(cutoffMillis)};
+        return database.delete(
+                TABLE_NAME,
+                SessionTableColumns.END_TIME + " < ?",
+                whereArgs);
+    }
+
+    /**
      * delete Session entries with session_id that are not a part of the Set
      *
      * @param database

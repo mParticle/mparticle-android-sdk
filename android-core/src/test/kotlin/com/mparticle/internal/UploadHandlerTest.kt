@@ -131,6 +131,113 @@ class UploadHandlerTest {
     }
 
     @Test
+    fun testMaybePrunePersistedRecordsUsesDefaultMaxAgeWhenUnconfigured() {
+        val db = Mockito.mock(MParticleDBManager::class.java)
+        val config = Mockito.mock(ConfigManager::class.java)
+        // Mockito's default Answer returns Integer.valueOf(0) for Integer wrapper return
+        // types, so stub null explicitly to model the "consumer did not configure a value"
+        // path. The production code must then fall back to DEFAULT_PERSISTENCE_MAX_AGE_MILLIS.
+        Mockito.doReturn(null).`when`(config).persistenceMaxAgeSeconds
+        val uploadHandler =
+            UploadHandler(
+                MockContext(),
+                config,
+                Mockito.mock(AppStateManager::class.java),
+                Mockito.mock(MessageManager::class.java),
+                db,
+                Mockito.mock(KitFrameworkWrapper::class.java),
+            )
+        val capturedCutoff = java.util.concurrent.atomic.AtomicLong(Long.MIN_VALUE)
+        Mockito.doAnswer { invocation ->
+            capturedCutoff.set(invocation.getArgument(0))
+            true
+        }.`when`(db).deleteRecordsOlderThan(Mockito.anyLong())
+
+        val now = 1_700_000_000_000L
+        uploadHandler.maybePrunePersistedRecords(now)
+
+        Mockito.verify(db, Mockito.times(1)).deleteRecordsOlderThan(Mockito.anyLong())
+        Assert.assertEquals(
+            now - UploadHandler.DEFAULT_PERSISTENCE_MAX_AGE_MILLIS,
+            capturedCutoff.get(),
+        )
+    }
+
+    @Test
+    fun testMaybePrunePersistedRecordsUsesConfiguredMaxAge() {
+        val db = Mockito.mock(MParticleDBManager::class.java)
+        val config = Mockito.mock(ConfigManager::class.java)
+        // 1 hour retention window -> cutoff should be exactly now - 3_600_000 ms.
+        // Guards the seconds-to-millis conversion in maybePrunePersistedRecords.
+        Mockito.`when`(config.persistenceMaxAgeSeconds).thenReturn(3600)
+        val uploadHandler =
+            UploadHandler(
+                MockContext(),
+                config,
+                Mockito.mock(AppStateManager::class.java),
+                Mockito.mock(MessageManager::class.java),
+                db,
+                Mockito.mock(KitFrameworkWrapper::class.java),
+            )
+        val capturedCutoff = java.util.concurrent.atomic.AtomicLong(Long.MIN_VALUE)
+        Mockito.doAnswer { invocation ->
+            capturedCutoff.set(invocation.getArgument(0))
+            true
+        }.`when`(db).deleteRecordsOlderThan(Mockito.anyLong())
+
+        val now = 1_700_000_000_000L
+        uploadHandler.maybePrunePersistedRecords(now)
+
+        Assert.assertEquals(now - 3_600_000L, capturedCutoff.get())
+    }
+
+    @Test
+    fun testMaybePrunePersistedRecordsHonorsTwentyFourHourThrottle() {
+        val db = handler.mParticleDBManager
+        // The sweep must succeed so the throttle arms; otherwise every call retries.
+        Mockito.`when`(db.deleteRecordsOlderThan(Mockito.anyLong())).thenReturn(true)
+        val t0 = 1_000_000_000_000L
+
+        // First call always runs the sweep.
+        handler.maybePrunePersistedRecords(t0)
+        Mockito.verify(db, Mockito.times(1)).deleteRecordsOlderThan(Mockito.anyLong())
+
+        // One millisecond before the throttle interval expires - still a no-op.
+        handler.maybePrunePersistedRecords(t0 + UploadHandler.PERSISTENCE_CLEANUP_INTERVAL_MILLIS - 1L)
+        Mockito.verify(db, Mockito.times(1)).deleteRecordsOlderThan(Mockito.anyLong())
+
+        // Exactly at the throttle boundary - the sweep runs again.
+        handler.maybePrunePersistedRecords(t0 + UploadHandler.PERSISTENCE_CLEANUP_INTERVAL_MILLIS)
+        Mockito.verify(db, Mockito.times(2)).deleteRecordsOlderThan(Mockito.anyLong())
+    }
+
+    @Test
+    fun testMaybePrunePersistedRecordsRetriesAfterFailure() {
+        val db = handler.mParticleDBManager
+
+        // Phase 1 - deleteRecordsOlderThan reports failure (false); throttle must NOT be armed.
+        // This models the real contract: MParticleDBManager.deleteRecordsOlderThan catches
+        // SQL exceptions internally and signals failure via its return value.
+        Mockito.`when`(db.deleteRecordsOlderThan(Mockito.anyLong())).thenReturn(false)
+        val t1 = 1_000_000_000_000L
+        handler.maybePrunePersistedRecords(t1)
+        Mockito.verify(db, Mockito.times(1)).deleteRecordsOlderThan(Mockito.anyLong())
+
+        // Phase 2 - a minute later the sweep retries because the throttle was not armed.
+        handler.maybePrunePersistedRecords(t1 + 60_000L)
+        Mockito.verify(db, Mockito.times(2)).deleteRecordsOlderThan(Mockito.anyLong())
+
+        // Phase 3 - successful sweep arms the throttle.
+        Mockito.`when`(db.deleteRecordsOlderThan(Mockito.anyLong())).thenReturn(true)
+        handler.maybePrunePersistedRecords(t1 + 120_000L)
+        Mockito.verify(db, Mockito.times(3)).deleteRecordsOlderThan(Mockito.anyLong())
+
+        // Phase 4 - a minute after the successful sweep the throttle short-circuits the call.
+        handler.maybePrunePersistedRecords(t1 + 180_000L)
+        Mockito.verify(db, Mockito.times(3)).deleteRecordsOlderThan(Mockito.anyLong())
+    }
+
+    @Test
     @Throws(Exception::class)
     fun testGetDeviceInfo() {
         val attributes =

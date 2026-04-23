@@ -4,6 +4,7 @@ import android.database.Cursor
 import com.mparticle.internal.BatchId
 import com.mparticle.internal.MessageBatch
 import com.mparticle.internal.database.tables.SessionTable
+import org.json.JSONException
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Assert.assertEquals
@@ -74,6 +75,59 @@ class SessionServiceTest : BaseMPServiceTest() {
             batchBySessionId["1"]?.remove(messageBatch)
             assertEquals(--size, batchBySessionId["1"]?.size)
         }
+    }
+
+    @Test
+    @Throws(JSONException::class)
+    fun testDeleteSessionsOlderThan() {
+        val now = System.currentTimeMillis()
+        val oneDayMillis = 24L * 60L * 60L * 1000L
+        val oldEndTime = now - 10L * oneDayMillis
+        val recentEndTime = now - 60L * 60L * 1000L
+
+        // Insert 5 sessions whose END_TIME is 10 days ago and 5 whose END_TIME is 1 hour ago.
+        // insertSession seeds END_TIME = START_TIME, so we call updateSessionEndTime to model
+        // the production flow where subsequent events advance END_TIME independently.
+        for (i in 0 until 5) {
+            val oldSessionId = UUID.randomUUID().toString()
+            SessionService.insertSession(database, getMpMessage(oldSessionId), "apiKey", "{}", "{}", 1L)
+            SessionService.updateSessionEndTime(database, oldSessionId, oldEndTime, 0)
+        }
+        for (i in 0 until 5) {
+            val recentSessionId = UUID.randomUUID().toString()
+            SessionService.insertSession(database, getMpMessage(recentSessionId), "apiKey", "{}", "{}", 1L)
+            SessionService.updateSessionEndTime(database, recentSessionId, recentEndTime, 0)
+        }
+        assertEquals(10, countSessions())
+
+        // Cut off at 7 days ago - the 5 old sessions should be removed and the 5 recent kept.
+        val cutoffMillis = now - 7L * oneDayMillis
+        val deleted = SessionService.deleteSessionsOlderThan(database, cutoffMillis)
+        assertEquals(5, deleted)
+        assertEquals(5, countSessions())
+
+        // Rows whose END_TIME is exactly at the cutoff must not be removed (strict `<` predicate).
+        val boundarySessionId = UUID.randomUUID().toString()
+        SessionService.insertSession(database, getMpMessage(boundarySessionId), "apiKey", "{}", "{}", 1L)
+        SessionService.updateSessionEndTime(database, boundarySessionId, cutoffMillis, 0)
+        assertEquals(0, SessionService.deleteSessionsOlderThan(database, cutoffMillis))
+        assertEquals(6, countSessions())
+    }
+
+    private fun countSessions(): Int {
+        var count = 0
+        var cursor: Cursor? = null
+        try {
+            cursor = SessionService.getSessions(database)
+            while (cursor.moveToNext()) {
+                count++
+            }
+        } finally {
+            if (cursor != null && !cursor.isClosed) {
+                cursor.close()
+            }
+        }
+        return count
     }
 
     internal inner class MockMessageBatch(

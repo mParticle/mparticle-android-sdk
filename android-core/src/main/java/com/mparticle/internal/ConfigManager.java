@@ -106,6 +106,8 @@ public class ConfigManager {
     private String mDataplanId;
     private Integer mDataplanVersion;
     private Integer mMaxConfigAge;
+    @Nullable
+    private Integer mPersistenceMaxAgeSeconds;
     public static final int DEFAULT_CONNECTION_TIMEOUT_SECONDS = 30;
     public static final int MINIMUM_CONNECTION_TIMEOUT_SECONDS = 1;
     public static final int DEFAULT_SESSION_TIMEOUT_SECONDS = 60;
@@ -136,6 +138,17 @@ public class ConfigManager {
 
     public ConfigManager(@NonNull MParticleOptions options) {
         this(options.getContext(), options.getEnvironment(), options.getApiKey(), options.getApiSecret(), options.getDataplanOptions(), options.getDataplanId(), options.getDataplanVersion(), options.getConfigMaxAge(), options.getConfigurationsForTarget(ConfigManager.class), options.getSideloadedKits());
+        mPersistenceMaxAgeSeconds = options.getPersistenceMaxAgeSeconds();
+    }
+
+    /**
+     * @return the configured maximum persistence age in seconds, or {@code null} when the SDK
+     *         should fall back to its 90-day default.
+     * @see MParticleOptions.Builder#persistenceMaxAgeSeconds(int)
+     */
+    @Nullable
+    public Integer getPersistenceMaxAgeSeconds() {
+        return mPersistenceMaxAgeSeconds;
     }
 
     public ConfigManager(@NonNull Context context, @Nullable MParticle.Environment environment, @Nullable String apiKey, @Nullable String apiSecret, @Nullable MParticleOptions.DataplanOptions dataplanOptions, @Nullable String dataplanId, @Nullable Integer dataplanVersion, @Nullable Integer configMaxAge, @Nullable List<Configuration<ConfigManager>> configurations, @Nullable List<SideloadedKit> sideloadedKits) {
