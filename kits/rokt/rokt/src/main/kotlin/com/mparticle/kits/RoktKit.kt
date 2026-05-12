@@ -362,9 +362,12 @@ class RoktKit :
         mpRoktEventCallback: MpRoktEventCallback?,
         onResult: (Map<String, String>, RoktCallback) -> Unit,
     ) {
-        val instance = MParticle.getInstance()
         deferredAttributes = CompletableDeferred()
-        instance?.Internal()?.kitManager?.roktKitApi?.prepareAttributesAsync(attributes)
+        RoktKitRequestHelper.prepareAttributesAsync(
+            kitIntegration = this,
+            roktListener = this,
+            attributes = attributes,
+        )
         this.mpRoktEventCallback = mpRoktEventCallback
         CoroutineScope(Dispatchers.Default).launch {
             val resultAttributes = deferredAttributes!!.await()
