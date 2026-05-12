@@ -32,7 +32,7 @@ class Rokt internal constructor(private val mConfigManager: Any, private val mKi
         config: RoktConfig? = null,
     ) {
         if (isEnabled()) {
-            val roktApi = mKitManager.roktKitApi
+            val roktApi = resolveRoktKit()
             if (roktApi != null) {
                 roktApi.selectPlacements(
                     identifier,
@@ -56,7 +56,7 @@ class Rokt internal constructor(private val mConfigManager: Any, private val mKi
      * @return A Flow emitting RoktEvent objects
      */
     fun events(identifier: String): Flow<RoktEvent> = if (isEnabled()) {
-        mKitManager.roktKitApi?.events(identifier) ?: flowOf()
+        resolveRoktKit()?.events(identifier) ?: flowOf()
     } else {
         flowOf()
     }
@@ -70,7 +70,7 @@ class Rokt internal constructor(private val mConfigManager: Any, private val mKi
      */
     fun purchaseFinalized(placementId: String, catalogItemId: String, status: Boolean) {
         if (isEnabled()) {
-            mKitManager.roktKitApi?.purchaseFinalized(placementId, catalogItemId, status)
+            resolveRoktKit()?.purchaseFinalized(placementId, catalogItemId, status)
         }
     }
 
@@ -79,7 +79,7 @@ class Rokt internal constructor(private val mConfigManager: Any, private val mKi
      */
     fun close() {
         if (isEnabled()) {
-            mKitManager.roktKitApi?.close()
+            resolveRoktKit()?.close()
         }
     }
 
@@ -95,7 +95,7 @@ class Rokt internal constructor(private val mConfigManager: Any, private val mKi
      */
     fun setSessionId(sessionId: String) {
         if (isEnabled()) {
-            mKitManager.roktKitApi?.setSessionId(sessionId)
+            resolveRoktKit()?.setSessionId(sessionId)
         }
     }
 
@@ -105,7 +105,7 @@ class Rokt internal constructor(private val mConfigManager: Any, private val mKi
      * @return The session id or null if no session is present or SDK is not initialized.
      */
     fun getSessionId(): String? = if (isEnabled()) {
-        mKitManager.roktKitApi?.getSessionId()
+        resolveRoktKit()?.getSessionId()
     } else {
         null
     }
@@ -117,9 +117,11 @@ class Rokt internal constructor(private val mConfigManager: Any, private val mKi
      */
     fun prepareAttributesAsync(attributes: Map<String, String>) {
         if (isEnabled()) {
-            mKitManager.roktKitApi?.prepareAttributesAsync(attributes)
+            resolveRoktKit()?.prepareAttributesAsync(attributes)
         }
     }
+
+    private fun resolveRoktKit() = mKitManager.roktKitApi
 
     private fun isEnabled(): Boolean = try {
         val field = mConfigManager.javaClass.getMethod("isEnabled")
