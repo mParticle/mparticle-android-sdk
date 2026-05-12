@@ -590,12 +590,8 @@ public abstract class KitIntegration {
     /**
      * Interface for Rokt Kit implementations.
      *
-     * <p>This interface is internal to kit-base and is bridged to the
-     * {@link com.mparticle.internal.RoktKitApi} interface via a wrapper implementation
-     * in {@link KitManagerImpl}. The wrapper handles user resolution and
-     * attribute preparation before delegating to the kit's methods.</p>
-     *
-     * @see com.mparticle.internal.RoktKitApi
+     * <p>This interface is internal to kit-base and is implemented by the Rokt kit to
+     * handle placement selection, event streaming, and session operations.</p>
      */
     public interface RoktListener {
 
