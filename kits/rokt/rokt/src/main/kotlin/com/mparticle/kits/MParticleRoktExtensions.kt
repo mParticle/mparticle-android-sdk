@@ -22,7 +22,5 @@ object MParticleRokt {
 private fun createRokt(mParticle: MParticle): Rokt {
     val configManager = mParticle.Internal().configManager
     val kitManager = mParticle.Internal().kitManager
-    val constructor = Rokt::class.java.getDeclaredConstructor(configManager::class.java, kitManager::class.java)
-    constructor.isAccessible = true
-    return constructor.newInstance(configManager, kitManager)
+    return Rokt(configManager, kitManager)
 }

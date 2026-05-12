@@ -3,7 +3,6 @@ package com.mparticle
 import android.graphics.Typeface
 import android.os.Looper
 import android.os.SystemClock
-import com.mparticle.internal.ConfigManager
 import com.mparticle.internal.KitManager
 import com.mparticle.internal.RoktKitApi
 import com.mparticle.rokt.PlacementOptions
@@ -40,9 +39,12 @@ class RoktTest {
     @Mock
     lateinit var roktKitApi: RoktKitApi
 
-    @Mock
-    lateinit var configManager: ConfigManager
+    private lateinit var configManager: FakeConfigManager
     private lateinit var rokt: Rokt
+
+    class FakeConfigManager(var enabled: Boolean = true) {
+        fun isEnabled(): Boolean = enabled
+    }
 
     // Helpers to make Mockito matchers work in Kotlin with non-nullable types.
     // Mockito matchers return null, which Kotlin rejects for non-nullable params.
@@ -68,12 +70,13 @@ class RoktTest {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        configManager = FakeConfigManager(enabled = true)
         rokt = Rokt(configManager, kitManager)
     }
 
     @Test
     fun testSelectPlacements_withFullParams_whenEnabled() {
-        `when`(configManager.isEnabled).thenReturn(true)
+        configManager.enabled = true
         `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
 
         val attributes = mutableMapOf<String, String>()
@@ -124,7 +127,7 @@ class RoktTest {
 
     @Test
     fun testSelectPlacements_withBasicParams_whenEnabled() {
-        `when`(configManager.isEnabled()).thenReturn(true)
+        configManager.enabled = true
         `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
 
         val attributes = mutableMapOf<String, String>()
@@ -145,7 +148,7 @@ class RoktTest {
 
     @Test
     fun testSelectPlacements_withBasicParams_whenDisabled() {
-        `when`(configManager.isEnabled()).thenReturn(false)
+        configManager.enabled = false
         `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
 
         rokt.selectPlacements(
@@ -158,7 +161,7 @@ class RoktTest {
 
     @Test
     fun testRoktSetWrapperSdk_whenDisabled_kitManagerNotCalled() {
-        `when`(configManager.isEnabled()).thenReturn(false)
+        configManager.enabled = false
 
         rokt.selectPlacements(
             identifier = "basicView",
@@ -170,7 +173,7 @@ class RoktTest {
 
     @Test
     fun testReportConversion_withBasicParams_whenEnabled() {
-        `when`(configManager.isEnabled()).thenReturn(true)
+        configManager.enabled = true
         `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
 
         val attributes = mutableMapOf<String, String>()
@@ -183,7 +186,7 @@ class RoktTest {
 
     @Test
     fun testReportConversion_withBasicParams_whenDisabled() {
-        `when`(configManager.isEnabled()).thenReturn(false)
+        configManager.enabled = false
         `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
 
         rokt.purchaseFinalized("132", "1111", true)
@@ -193,7 +196,7 @@ class RoktTest {
 
     @Test
     fun testEvents_whenEnabled_delegatesToKitManager() {
-        `when`(configManager.isEnabled).thenReturn(true)
+        configManager.enabled = true
         `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
 
         val testIdentifier = "test-identifier"
@@ -208,7 +211,7 @@ class RoktTest {
 
     @Test
     fun testEvents_whenDisabled_returnsEmptyFlow() {
-        `when`(configManager.isEnabled).thenReturn(false)
+        configManager.enabled = false
         `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
 
         val testIdentifier = "test-identifier"
@@ -224,7 +227,7 @@ class RoktTest {
 
     @Test
     fun testSetSessionId_whenEnabled_delegatesToKitManager() {
-        `when`(configManager.isEnabled).thenReturn(true)
+        configManager.enabled = true
         `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
         rokt.setSessionId("test-session-id")
         verify(roktKitApi).setSessionId("test-session-id")
@@ -232,7 +235,7 @@ class RoktTest {
 
     @Test
     fun testSetSessionId_whenDisabled_doesNotCallKitManager() {
-        `when`(configManager.isEnabled).thenReturn(false)
+        configManager.enabled = false
         `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
         rokt.setSessionId("test-session-id")
         verify(roktKitApi, never()).setSessionId(any())
@@ -240,7 +243,7 @@ class RoktTest {
 
     @Test
     fun testGetSessionId_whenEnabled_delegatesToKitManager() {
-        `when`(configManager.isEnabled).thenReturn(true)
+        configManager.enabled = true
         `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
         `when`(roktKitApi.getSessionId()).thenReturn("expected-session-id")
         val result = rokt.getSessionId()
@@ -250,7 +253,7 @@ class RoktTest {
 
     @Test
     fun testGetSessionId_whenDisabled_returnsNull() {
-        `when`(configManager.isEnabled).thenReturn(false)
+        configManager.enabled = false
         `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
         val result = rokt.getSessionId()
         verify(roktKitApi, never()).getSessionId()
@@ -259,7 +262,7 @@ class RoktTest {
 
     @Test
     fun testSelectPlacements_withOptions_whenEnabled() {
-        `when`(configManager.isEnabled).thenReturn(true)
+        configManager.enabled = true
         `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
         val currentTimeMillis = System.currentTimeMillis()
 

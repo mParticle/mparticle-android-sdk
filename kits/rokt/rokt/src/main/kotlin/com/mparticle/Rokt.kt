@@ -1,10 +1,8 @@
 package com.mparticle
 
 import android.graphics.Typeface
-import com.mparticle.internal.ConfigManager
 import com.mparticle.internal.KitManager
 import com.mparticle.internal.Logger
-import com.mparticle.internal.listeners.ApiClass
 import com.mparticle.rokt.PlacementOptions
 import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
@@ -12,8 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import java.lang.ref.WeakReference
 
-@ApiClass
-class Rokt internal constructor(private val mConfigManager: ConfigManager, private val mKitManager: KitManager) {
+class Rokt internal constructor(private val mConfigManager: Any, private val mKitManager: KitManager) {
 
     /**
      * Display a Rokt placement with the specified parameters.
@@ -34,10 +31,18 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
         fontTypefaces: Map<String, WeakReference<Typeface>>? = null,
         config: RoktConfig? = null,
     ) {
-        if (mConfigManager.isEnabled) {
+        if (isEnabled()) {
             val roktApi = mKitManager.roktKitApi
             if (roktApi != null) {
-                roktApi.selectPlacements(identifier, HashMap(attributes), callbacks, embeddedViews, fontTypefaces, config, buildPlacementOptions())
+                roktApi.selectPlacements(
+                    identifier,
+                    HashMap(attributes),
+                    callbacks,
+                    embeddedViews,
+                    fontTypefaces,
+                    config,
+                    buildPlacementOptions(),
+                )
             } else {
                 Logger.warning("Rokt Kit is not available. Make sure the Rokt Kit is included in your app.")
             }
@@ -50,7 +55,7 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
      * @param identifier The placement identifier to listen for events
      * @return A Flow emitting RoktEvent objects
      */
-    fun events(identifier: String): Flow<RoktEvent> = if (mConfigManager.isEnabled) {
+    fun events(identifier: String): Flow<RoktEvent> = if (isEnabled()) {
         mKitManager.roktKitApi?.events(identifier) ?: flowOf()
     } else {
         flowOf()
@@ -64,7 +69,7 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
      * @param status Whether the purchase was successful
      */
     fun purchaseFinalized(placementId: String, catalogItemId: String, status: Boolean) {
-        if (mConfigManager.isEnabled) {
+        if (isEnabled()) {
             mKitManager.roktKitApi?.purchaseFinalized(placementId, catalogItemId, status)
         }
     }
@@ -73,7 +78,7 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
      * Close any active Rokt placements.
      */
     fun close() {
-        if (mConfigManager.isEnabled) {
+        if (isEnabled()) {
             mKitManager.roktKitApi?.close()
         }
     }
@@ -89,7 +94,7 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
      * @param sessionId The session id to be set. Must be a non-empty string.
      */
     fun setSessionId(sessionId: String) {
-        if (mConfigManager.isEnabled) {
+        if (isEnabled()) {
             mKitManager.roktKitApi?.setSessionId(sessionId)
         }
     }
@@ -99,7 +104,7 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
      *
      * @return The session id or null if no session is present or SDK is not initialized.
      */
-    fun getSessionId(): String? = if (mConfigManager.isEnabled) {
+    fun getSessionId(): String? = if (isEnabled()) {
         mKitManager.roktKitApi?.getSessionId()
     } else {
         null
@@ -111,9 +116,16 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
      * @param attributes The attributes to prepare
      */
     fun prepareAttributesAsync(attributes: Map<String, String>) {
-        if (mConfigManager.isEnabled) {
+        if (isEnabled()) {
             mKitManager.roktKitApi?.prepareAttributesAsync(attributes)
         }
+    }
+
+    private fun isEnabled(): Boolean = try {
+        val field = mConfigManager.javaClass.getMethod("isEnabled")
+        field.invoke(mConfigManager) as? Boolean ?: false
+    } catch (ignored: Exception) {
+        false
     }
 
     private fun buildPlacementOptions(): PlacementOptions = PlacementOptions(
