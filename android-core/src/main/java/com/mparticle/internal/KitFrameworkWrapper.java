@@ -663,15 +663,6 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     @Override
-    @Nullable
-    public RoktKitApi getRoktKitApi() {
-        if (mKitManager != null) {
-            return mKitManager.getRoktKitApi();
-        }
-        return null;
-    }
-
-    @Override
     public void setWrapperSdkVersion(@NonNull WrapperSdkVersion wrapperSdkVersion) {
         if (mKitManager != null) {
             mKitManager.setWrapperSdkVersion(wrapperSdkVersion);

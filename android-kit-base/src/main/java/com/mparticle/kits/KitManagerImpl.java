@@ -1309,7 +1309,6 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
         }
     }
 
-    @Override
     @Nullable
     public RoktKitApi getRoktKitApi() {
         for (KitIntegration provider : activeKits()) {

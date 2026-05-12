@@ -127,14 +127,6 @@ public interface KitManager {
 
     void reset();
 
-    /**
-     * Get the RoktKitApi implementation if available.
-     *
-     * @return RoktKitApi instance or null if Rokt Kit is not configured or active
-     */
-    @Nullable
-    RoktKitApi getRoktKitApi();
-
     void setWrapperSdkVersion(@NonNull WrapperSdkVersion wrapperSdkVersion);
 
     enum KitStatus {
