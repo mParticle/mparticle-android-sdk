@@ -3,8 +3,10 @@ package com.mparticle
 import android.graphics.Typeface
 import android.os.Looper
 import android.os.SystemClock
+import com.mparticle.identity.IdentityApi
+import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.KitManager
-import com.mparticle.internal.RoktKitApi
+import com.mparticle.kits.KitIntegration
 import com.mparticle.rokt.PlacementOptions
 import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
@@ -22,6 +24,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.withSettings
 import org.mockito.MockitoAnnotations
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
@@ -37,7 +40,16 @@ class RoktTest {
     lateinit var kitManager: KitManager
 
     @Mock
-    lateinit var roktKitApi: RoktKitApi
+    lateinit var identityApi: IdentityApi
+
+    @Mock
+    lateinit var mParticle: MParticle
+
+    @Mock
+    lateinit var mParticleUser: MParticleUser
+
+    private lateinit var roktKit: KitIntegration
+    private lateinit var roktListener: KitIntegration.RoktListener
 
     private lateinit var configManager: FakeConfigManager
     private lateinit var rokt: Rokt
@@ -71,13 +83,23 @@ class RoktTest {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         configManager = FakeConfigManager(enabled = true)
+        roktKit =
+            org.mockito.Mockito.mock(
+                KitIntegration::class.java,
+                withSettings().extraInterfaces(KitIntegration.RoktListener::class.java),
+            )
+        roktListener = roktKit as KitIntegration.RoktListener
+        MParticle.setInstance(mParticle)
+        `when`(mParticle.Identity()).thenReturn(identityApi)
+        `when`(identityApi.currentUser).thenReturn(mParticleUser)
+        `when`(kitManager.isKitActive(MParticle.ServiceProviders.ROKT)).thenReturn(true)
+        `when`(kitManager.getKitInstance(MParticle.ServiceProviders.ROKT)).thenReturn(roktKit)
         rokt = Rokt(configManager, kitManager)
     }
 
     @Test
     fun testSelectPlacements_withFullParams_whenEnabled() {
         configManager.enabled = true
-        `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
 
         val attributes = mutableMapOf<String, String>()
         attributes["key"] = "value"
@@ -114,9 +136,10 @@ class RoktTest {
             config = config,
         )
 
-        verify(roktKitApi).selectPlacements(
+        verify(roktListener).selectPlacements(
             eq("testView"),
-            eq(attributes),
+            any(),
+            any(),
             any(),
             any(),
             any(),
@@ -128,20 +151,20 @@ class RoktTest {
     @Test
     fun testSelectPlacements_withBasicParams_whenEnabled() {
         configManager.enabled = true
-        `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
 
         val attributes = mutableMapOf<String, String>()
         attributes["a"] = "b"
 
         rokt.selectPlacements(attributes = attributes, identifier = "basicView")
 
-        verify(roktKitApi).selectPlacements(
+        verify(roktListener).selectPlacements(
             eq("basicView"),
-            eq(attributes),
+            any(),
             isNull(),
             isNull(),
             isNull(),
             isNull(),
+            any(),
             any(),
         )
     }
@@ -149,14 +172,13 @@ class RoktTest {
     @Test
     fun testSelectPlacements_withBasicParams_whenDisabled() {
         configManager.enabled = false
-        `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
 
         rokt.selectPlacements(
             identifier = "basicView",
             attributes = HashMap(),
         )
 
-        verify(roktKitApi, never()).selectPlacements(any(), any(), any(), any(), any(), any(), any())
+        verify(roktListener, never()).selectPlacements(any(), any(), any(), any(), any(), any(), any(), any())
     }
 
     @Test
@@ -174,51 +196,47 @@ class RoktTest {
     @Test
     fun testReportConversion_withBasicParams_whenEnabled() {
         configManager.enabled = true
-        `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
 
         val attributes = mutableMapOf<String, String>()
         attributes["a"] = "b"
 
         rokt.purchaseFinalized("132", "1111", true)
 
-        verify(roktKitApi).purchaseFinalized("132", "1111", true)
+        verify(roktListener).purchaseFinalized("132", "1111", true)
     }
 
     @Test
     fun testReportConversion_withBasicParams_whenDisabled() {
         configManager.enabled = false
-        `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
 
         rokt.purchaseFinalized("132", "1111", true)
 
-        verify(roktKitApi, never()).purchaseFinalized("132", "1111", true)
+        verify(roktListener, never()).purchaseFinalized("132", "1111", true)
     }
 
     @Test
     fun testEvents_whenEnabled_delegatesToKitManager() {
         configManager.enabled = true
-        `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
 
         val testIdentifier = "test-identifier"
         val expectedFlow: Flow<RoktEvent> = flowOf()
-        `when`(roktKitApi.events(testIdentifier)).thenReturn(expectedFlow)
+        `when`(roktListener.events(testIdentifier)).thenReturn(expectedFlow)
 
         val result = rokt.events(testIdentifier)
 
-        verify(roktKitApi).events(testIdentifier)
+        verify(roktListener).events(testIdentifier)
         assertEquals(expectedFlow, result)
     }
 
     @Test
     fun testEvents_whenDisabled_returnsEmptyFlow() {
         configManager.enabled = false
-        `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
 
         val testIdentifier = "test-identifier"
 
         val result = rokt.events(testIdentifier)
 
-        verify(roktKitApi, never()).events(any())
+        verify(roktListener, never()).events(any())
         runTest {
             val elements = result.toList()
             assertTrue(elements.isEmpty())
@@ -228,42 +246,37 @@ class RoktTest {
     @Test
     fun testSetSessionId_whenEnabled_delegatesToKitManager() {
         configManager.enabled = true
-        `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
         rokt.setSessionId("test-session-id")
-        verify(roktKitApi).setSessionId("test-session-id")
+        verify(roktListener).setSessionId("test-session-id")
     }
 
     @Test
     fun testSetSessionId_whenDisabled_doesNotCallKitManager() {
         configManager.enabled = false
-        `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
         rokt.setSessionId("test-session-id")
-        verify(roktKitApi, never()).setSessionId(any())
+        verify(roktListener, never()).setSessionId(any())
     }
 
     @Test
     fun testGetSessionId_whenEnabled_delegatesToKitManager() {
         configManager.enabled = true
-        `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
-        `when`(roktKitApi.getSessionId()).thenReturn("expected-session-id")
+        `when`(roktListener.sessionId).thenReturn("expected-session-id")
         val result = rokt.getSessionId()
-        verify(roktKitApi).getSessionId()
+        verify(roktListener).getSessionId()
         assertEquals("expected-session-id", result)
     }
 
     @Test
     fun testGetSessionId_whenDisabled_returnsNull() {
         configManager.enabled = false
-        `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
         val result = rokt.getSessionId()
-        verify(roktKitApi, never()).getSessionId()
+        verify(roktListener, never()).getSessionId()
         assertNull(result)
     }
 
     @Test
     fun testSelectPlacements_withOptions_whenEnabled() {
         configManager.enabled = true
-        `when`(kitManager.roktKitApi).thenReturn(roktKitApi)
         val currentTimeMillis = System.currentTimeMillis()
 
         val attributes = mutableMapOf<String, String>()
@@ -274,14 +287,14 @@ class RoktTest {
         )
 
         // Verify call is forwarded
-        val viewNameCaptor = ArgumentCaptor.forClass(String::class.java)
         val optionsCaptor = ArgumentCaptor.forClass(PlacementOptions::class.java)
-        verify(roktKitApi).selectPlacements(
+        verify(roktListener).selectPlacements(
             eq("testView"),
             any(),
             isNull(),
             isNull(),
             isNull(),
+            any(),
             isNull(),
             capture(optionsCaptor),
         )

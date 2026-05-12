@@ -3,6 +3,8 @@ package com.mparticle
 import android.graphics.Typeface
 import com.mparticle.internal.KitManager
 import com.mparticle.internal.Logger
+import com.mparticle.kits.KitIntegration
+import com.mparticle.kits.RoktKitRequestHelper
 import com.mparticle.rokt.PlacementOptions
 import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
@@ -32,16 +34,19 @@ class Rokt internal constructor(private val mConfigManager: Any, private val mKi
         config: RoktConfig? = null,
     ) {
         if (isEnabled()) {
-            val roktApi = resolveRoktKit()
-            if (roktApi != null) {
-                roktApi.selectPlacements(
-                    identifier,
-                    HashMap(attributes),
-                    callbacks,
-                    embeddedViews,
-                    fontTypefaces,
-                    config,
-                    buildPlacementOptions(),
+            val resolved = resolveRoktKit()
+            if (resolved != null) {
+                val (kitIntegration, roktListener) = resolved
+                RoktKitRequestHelper.selectPlacements(
+                    kitIntegration = kitIntegration,
+                    roktListener = roktListener,
+                    viewName = identifier,
+                    attributes = HashMap(attributes),
+                    mpRoktEventCallback = callbacks,
+                    placeHolders = embeddedViews,
+                    fontTypefaces = fontTypefaces,
+                    config = config,
+                    options = buildPlacementOptions(),
                 )
             } else {
                 Logger.warning("Rokt Kit is not available. Make sure the Rokt Kit is included in your app.")
@@ -56,7 +61,7 @@ class Rokt internal constructor(private val mConfigManager: Any, private val mKi
      * @return A Flow emitting RoktEvent objects
      */
     fun events(identifier: String): Flow<RoktEvent> = if (isEnabled()) {
-        resolveRoktKit()?.events(identifier) ?: flowOf()
+        resolveRoktKit()?.second?.events(identifier) ?: flowOf()
     } else {
         flowOf()
     }
@@ -70,7 +75,7 @@ class Rokt internal constructor(private val mConfigManager: Any, private val mKi
      */
     fun purchaseFinalized(placementId: String, catalogItemId: String, status: Boolean) {
         if (isEnabled()) {
-            resolveRoktKit()?.purchaseFinalized(placementId, catalogItemId, status)
+            resolveRoktKit()?.second?.purchaseFinalized(placementId, catalogItemId, status)
         }
     }
 
@@ -79,7 +84,7 @@ class Rokt internal constructor(private val mConfigManager: Any, private val mKi
      */
     fun close() {
         if (isEnabled()) {
-            resolveRoktKit()?.close()
+            resolveRoktKit()?.second?.close()
         }
     }
 
@@ -95,7 +100,7 @@ class Rokt internal constructor(private val mConfigManager: Any, private val mKi
      */
     fun setSessionId(sessionId: String) {
         if (isEnabled()) {
-            resolveRoktKit()?.setSessionId(sessionId)
+            resolveRoktKit()?.second?.setSessionId(sessionId)
         }
     }
 
@@ -105,7 +110,7 @@ class Rokt internal constructor(private val mConfigManager: Any, private val mKi
      * @return The session id or null if no session is present or SDK is not initialized.
      */
     fun getSessionId(): String? = if (isEnabled()) {
-        resolveRoktKit()?.getSessionId()
+        resolveRoktKit()?.second?.sessionId
     } else {
         null
     }
@@ -117,11 +122,26 @@ class Rokt internal constructor(private val mConfigManager: Any, private val mKi
      */
     fun prepareAttributesAsync(attributes: Map<String, String>) {
         if (isEnabled()) {
-            resolveRoktKit()?.prepareAttributesAsync(attributes)
+            val resolved = resolveRoktKit()
+            if (resolved != null) {
+                val (kitIntegration, roktListener) = resolved
+                RoktKitRequestHelper.prepareAttributesAsync(
+                    kitIntegration = kitIntegration,
+                    roktListener = roktListener,
+                    attributes = attributes,
+                )
+            }
         }
     }
 
-    private fun resolveRoktKit() = mKitManager.roktKitApi
+    private fun resolveRoktKit(): Pair<KitIntegration, KitIntegration.RoktListener>? {
+        if (!mKitManager.isKitActive(MParticle.ServiceProviders.ROKT)) {
+            return null
+        }
+        val kitInstance = mKitManager.getKitInstance(MParticle.ServiceProviders.ROKT) as? KitIntegration ?: return null
+        val roktListener = kitInstance as? KitIntegration.RoktListener ?: return null
+        return kitInstance to roktListener
+    }
 
     private fun isEnabled(): Boolean = try {
         val field = mConfigManager.javaClass.getMethod("isEnabled")
