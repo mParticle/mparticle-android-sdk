@@ -18,7 +18,7 @@ import java.util.Objects
 internal object RoktKitRequestHelper {
     fun selectPlacements(
         kitIntegration: KitIntegration,
-        roktListener: KitIntegration.RoktListener,
+        roktListener: RoktKitBridge,
         viewName: String,
         attributes: Map<String, String>,
         mpRoktEventCallback: MpRoktEventCallback?,
@@ -55,7 +55,7 @@ internal object RoktKitRequestHelper {
 
     fun prepareAttributesAsync(
         kitIntegration: KitIntegration,
-        roktListener: KitIntegration.RoktListener,
+        roktListener: RoktKitBridge,
         attributes: Map<String, String>,
     ) {
         val mutableAttributes = attributes.toMutableMap()

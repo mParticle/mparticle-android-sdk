@@ -56,6 +56,7 @@ class RoktKit :
     CommerceListener,
     IdentityListener,
     RoktListener,
+    RoktKitBridge,
     Rokt.RoktCallback {
     private var applicationContext: Context? = null
     private var mpRoktEventCallback: MpRoktEventCallback? = null

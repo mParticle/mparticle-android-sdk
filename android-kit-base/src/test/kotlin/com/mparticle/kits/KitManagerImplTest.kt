@@ -28,9 +28,6 @@ import com.mparticle.mock.MockContext
 import com.mparticle.mock.MockKitConfiguration
 import com.mparticle.mock.MockKitManagerImpl
 import com.mparticle.mock.MockMParticle
-import com.mparticle.rokt.PlacementOptions
-import com.mparticle.rokt.RoktConfig
-import com.mparticle.rokt.RoktEmbeddedView
 import com.mparticle.testutils.TestingUtils
 import junit.framework.TestCase
 import junit.framework.TestCase.assertEquals

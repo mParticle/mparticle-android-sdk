@@ -7,6 +7,7 @@ import com.mparticle.identity.IdentityApi
 import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.KitManager
 import com.mparticle.kits.KitIntegration
+import com.mparticle.kits.RoktKitBridge
 import com.mparticle.rokt.PlacementOptions
 import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
@@ -49,7 +50,7 @@ class RoktTest {
     lateinit var mParticleUser: MParticleUser
 
     private lateinit var roktKit: KitIntegration
-    private lateinit var roktListener: KitIntegration.RoktListener
+    private lateinit var roktListener: RoktKitBridge
 
     private lateinit var configManager: FakeConfigManager
     private lateinit var rokt: Rokt
@@ -86,9 +87,9 @@ class RoktTest {
         roktKit =
             org.mockito.Mockito.mock(
                 KitIntegration::class.java,
-                withSettings().extraInterfaces(KitIntegration.RoktListener::class.java),
+                withSettings().extraInterfaces(RoktKitBridge::class.java),
             )
-        roktListener = roktKit as KitIntegration.RoktListener
+        roktListener = roktKit as RoktKitBridge
         MParticle.setInstance(mParticle)
         `when`(mParticle.Identity()).thenReturn(identityApi)
         `when`(identityApi.currentUser).thenReturn(mParticleUser)
@@ -260,7 +261,7 @@ class RoktTest {
     @Test
     fun testGetSessionId_whenEnabled_delegatesToKitManager() {
         configManager.enabled = true
-        `when`(roktListener.sessionId).thenReturn("expected-session-id")
+        `when`(roktListener.getSessionId()).thenReturn("expected-session-id")
         val result = rokt.getSessionId()
         verify(roktListener).getSessionId()
         assertEquals("expected-session-id", result)

@@ -4,6 +4,7 @@ import android.graphics.Typeface
 import com.mparticle.internal.KitManager
 import com.mparticle.internal.Logger
 import com.mparticle.kits.KitIntegration
+import com.mparticle.kits.RoktKitBridge
 import com.mparticle.kits.RoktKitRequestHelper
 import com.mparticle.rokt.PlacementOptions
 import com.mparticle.rokt.RoktConfig
@@ -110,7 +111,7 @@ class Rokt internal constructor(private val mConfigManager: Any, private val mKi
      * @return The session id or null if no session is present or SDK is not initialized.
      */
     fun getSessionId(): String? = if (isEnabled()) {
-        resolveRoktKit()?.second?.sessionId
+        resolveRoktKit()?.second?.getSessionId()
     } else {
         null
     }
@@ -134,13 +135,13 @@ class Rokt internal constructor(private val mConfigManager: Any, private val mKi
         }
     }
 
-    private fun resolveRoktKit(): Pair<KitIntegration, KitIntegration.RoktListener>? {
+    private fun resolveRoktKit(): Pair<KitIntegration, RoktKitBridge>? {
         if (!mKitManager.isKitActive(MParticle.ServiceProviders.ROKT)) {
             return null
         }
         val kitInstance = mKitManager.getKitInstance(MParticle.ServiceProviders.ROKT) as? KitIntegration ?: return null
-        val roktListener = kitInstance as? KitIntegration.RoktListener ?: return null
-        return kitInstance to roktListener
+        val roktBridge = kitInstance as? RoktKitBridge ?: return null
+        return kitInstance to roktBridge
     }
 
     private fun isEnabled(): Boolean = try {
