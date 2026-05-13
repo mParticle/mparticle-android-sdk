@@ -570,4 +570,29 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
                 .build()
         assertEquals(null, opts.customBaseURL)
     }
+
+    @Test
+    fun testCustomBaseURLSurvivesJsonRoundTrip() {
+        val original =
+            NetworkOptions
+                .builder()
+                .setCustomBaseURL("https://rkt.example.com:8443")
+                .build()
+        Assert.assertEquals("rkt.example.com:8443", original.customBaseURL)
+
+        val json = original.toJson().toString()
+        val restored = NetworkOptions.withNetworkOptions(json)
+        Assert.assertNotNull(restored)
+        Assert.assertEquals("rkt.example.com:8443", restored!!.customBaseURL)
+    }
+
+    @Test
+    fun testCustomBaseURLOmittedFromJsonWhenUnset() {
+        val opts = NetworkOptions.builder().build()
+        val json = opts.toJson()
+        Assert.assertFalse(json.has("customBaseURL"))
+
+        val restored = NetworkOptions.withNetworkOptions(json.toString())
+        Assert.assertNull(restored!!.customBaseURL)
+    }
 }

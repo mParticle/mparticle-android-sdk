@@ -16,11 +16,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.HashSet;
 import java.util.Set;
 
 public class NetworkOptions {
@@ -66,6 +68,13 @@ public class NetworkOptions {
             JSONObject jsonObject = new JSONObject(jsonString);
             builder.setPinningDisabledInDevelopment(jsonObject.optBoolean("disableDevPinning", false));
             builder.setPinningDisabled(jsonObject.optBoolean("disablePinning", false));
+            String storedCustomBaseURL = jsonObject.optString("customBaseURL", null);
+            if (!MPUtility.isEmpty(storedCustomBaseURL)) {
+                // Stored value is already host(:port). Skip the Builder setter (which expects a full
+                // HTTPS URL with scheme) and assign directly so a previously-validated value survives
+                // the JSON round-trip.
+                builder.customBaseURL = storedCustomBaseURL;
+            }
             JSONArray domainMappingsJson = jsonObject.getJSONArray("domainMappings");
             for (int i = 0; i < domainMappingsJson.length(); i++) {
                 builder.addDomainMapping(DomainMapping
@@ -138,6 +147,9 @@ public class NetworkOptions {
             JSONArray domainMappingsJson = new JSONArray();
             networkOptions.put("disableDevPinning", pinningDisabledInDevelopment);
             networkOptions.put("disablePinning", pinningDisabled);
+            if (!MPUtility.isEmpty(customBaseURL)) {
+                networkOptions.put("customBaseURL", customBaseURL);
+            }
             networkOptions.put("domainMappings", domainMappingsJson);
             for (DomainMapping domainMapping : domainMappings.values()) {
                 domainMappingsJson.put(domainMapping.toString());
@@ -221,7 +233,7 @@ public class NetworkOptions {
         @NonNull
         public Builder setCustomBaseURL(@NonNull String customBaseURL) {
             try {
-                java.net.URL parsed = new java.net.URL(customBaseURL);
+                URL parsed = new URL(customBaseURL);
                 if (!"https".equalsIgnoreCase(parsed.getProtocol()) || MPUtility.isEmpty(parsed.getHost())) {
                     Logger.warning("NetworkOptions: customBaseURL must use HTTPS and include a valid host — value ignored.");
                     return this;
@@ -231,7 +243,7 @@ public class NetworkOptions {
                     host.append(":").append(parsed.getPort());
                 }
                 this.customBaseURL = host.toString();
-            } catch (java.net.MalformedURLException e) {
+            } catch (MalformedURLException e) {
                 Logger.warning("NetworkOptions: customBaseURL is malformed — value ignored.");
             }
             return this;
