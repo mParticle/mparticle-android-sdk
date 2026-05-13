@@ -1,14 +1,12 @@
-package com.mparticle
+package com.mparticle.kits
 
 import android.graphics.Typeface
 import android.os.Looper
 import android.os.SystemClock
+import com.mparticle.MParticle
 import com.mparticle.identity.IdentityApi
 import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.KitManager
-import com.mparticle.kits.KitIntegration
-import com.mparticle.kits.RoktKitBridge
-import com.mparticle.rokt.RoktEmbeddedView
 import com.rokt.roktsdk.PlacementOptions
 import com.rokt.roktsdk.RoktConfig
 import com.rokt.roktsdk.RoktEvent

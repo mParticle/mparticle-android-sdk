@@ -1,12 +1,9 @@
-package com.mparticle
+package com.mparticle.kits
 
 import android.graphics.Typeface
+import com.mparticle.MParticle
 import com.mparticle.internal.KitManager
 import com.mparticle.internal.Logger
-import com.mparticle.kits.KitIntegration
-import com.mparticle.kits.RoktKitBridge
-import com.mparticle.kits.RoktKitRequestHelper
-import com.mparticle.rokt.RoktEmbeddedView
 import com.rokt.roktsdk.PlacementOptions
 import com.rokt.roktsdk.Rokt.RoktCallback
 import com.rokt.roktsdk.RoktConfig
@@ -16,17 +13,6 @@ import kotlinx.coroutines.flow.flowOf
 import java.lang.ref.WeakReference
 
 class Rokt internal constructor(private val mConfigManager: Any, private val mKitManager: KitManager) {
-
-    /**
-     * Display a Rokt placement with the specified parameters.
-     *
-     * @param identifier The placement identifier
-     * @param attributes User attributes to pass to Rokt
-     * @param callbacks Optional callback for Rokt events
-     * @param embeddedViews Optional map of embedded view placeholders
-     * @param fontTypefaces Optional map of font typefaces
-     * @param config Optional Rokt configuration
-     */
     @JvmOverloads
     fun selectPlacements(
         identifier: String,
@@ -57,72 +43,36 @@ class Rokt internal constructor(private val mConfigManager: Any, private val mKi
         }
     }
 
-    /**
-     * Get a Flow of Rokt events for the specified identifier.
-     *
-     * @param identifier The placement identifier to listen for events
-     * @return A Flow emitting native RoktEvent objects
-     */
     fun events(identifier: String): Flow<RoktEvent> = if (isEnabled()) {
         resolveRoktKit()?.second?.events(identifier) ?: flowOf()
     } else {
         flowOf()
     }
 
-    /**
-     * Notify Rokt that a purchase has been finalized.
-     *
-     * @param placementId The placement identifier
-     * @param catalogItemId The catalog item identifier
-     * @param status Whether the purchase was successful
-     */
     fun purchaseFinalized(placementId: String, catalogItemId: String, status: Boolean) {
         if (isEnabled()) {
             resolveRoktKit()?.second?.purchaseFinalized(placementId, catalogItemId, status)
         }
     }
 
-    /**
-     * Close any active Rokt placements.
-     */
     fun close() {
         if (isEnabled()) {
             resolveRoktKit()?.second?.close()
         }
     }
 
-    /**
-     * Set the session id to use for the next execute call.
-     *
-     * This is useful for cases where you have a session id from a non-native integration,
-     * e.g. WebView, and you want the session to be consistent across integrations.
-     *
-     * **Note:** Empty strings are ignored and will not update the session.
-     *
-     * @param sessionId The session id to be set. Must be a non-empty string.
-     */
     fun setSessionId(sessionId: String) {
         if (isEnabled()) {
             resolveRoktKit()?.second?.setSessionId(sessionId)
         }
     }
 
-    /**
-     * Get the session id to use within a non-native integration e.g. WebView.
-     *
-     * @return The session id or null if no session is present or SDK is not initialized.
-     */
     fun getSessionId(): String? = if (isEnabled()) {
         resolveRoktKit()?.second?.getSessionId()
     } else {
         null
     }
 
-    /**
-     * Prepare attributes asynchronously before executing a placement.
-     *
-     * @param attributes The attributes to prepare
-     */
     fun prepareAttributesAsync(attributes: Map<String, String>) {
         if (isEnabled()) {
             val resolved = resolveRoktKit()

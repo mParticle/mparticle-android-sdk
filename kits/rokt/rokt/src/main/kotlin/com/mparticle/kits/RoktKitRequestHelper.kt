@@ -7,7 +7,6 @@ import com.mparticle.identity.IdentityApiRequest
 import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.Logger
 import com.mparticle.internal.MPUtility
-import com.mparticle.rokt.RoktEmbeddedView
 import com.rokt.roktsdk.PlacementOptions
 import com.rokt.roktsdk.Rokt.RoktCallback
 import com.rokt.roktsdk.RoktConfig

@@ -1,7 +1,7 @@
 package com.mparticle.rokt
 
 import com.mparticle.MParticle
-import com.mparticle.Rokt
+import com.mparticle.kits.Rokt
 
 /**
  * Kotlin-friendly accessor for the legacy Rokt API object.

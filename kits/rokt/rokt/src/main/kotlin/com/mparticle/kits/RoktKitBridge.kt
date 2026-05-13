@@ -1,7 +1,6 @@
 package com.mparticle.kits
 
 import android.graphics.Typeface
-import com.mparticle.rokt.RoktEmbeddedView
 import com.rokt.roktsdk.PlacementOptions
 import com.rokt.roktsdk.Rokt.RoktCallback
 import com.rokt.roktsdk.RoktConfig
