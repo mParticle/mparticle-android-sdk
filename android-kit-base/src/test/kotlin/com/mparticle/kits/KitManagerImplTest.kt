@@ -1,7 +1,5 @@
 package com.mparticle.kits
 
-import android.content.Context
-import android.graphics.Typeface
 import android.os.Looper
 import android.os.SystemClock
 import com.mparticle.BaseEvent
@@ -17,7 +15,6 @@ import com.mparticle.consent.GDPRConsent
 import com.mparticle.identity.IdentityApi
 import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.CoreCallbacks
-import com.mparticle.internal.Logger
 import com.mparticle.internal.MPUtility
 import com.mparticle.internal.SideloadedKit
 import com.mparticle.kits.KitIntegration.ModifyIdentityListener
@@ -29,21 +26,15 @@ import com.mparticle.mock.MockMParticle
 import com.mparticle.testutils.TestingUtils
 import junit.framework.TestCase
 import junit.framework.TestCase.assertEquals
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.test.runTest
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito
@@ -55,7 +46,6 @@ import org.mockito.Mockito.withSettings
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
-import java.lang.ref.WeakReference
 import java.util.Arrays
 import java.util.LinkedList
 import java.util.concurrent.ConcurrentHashMap
