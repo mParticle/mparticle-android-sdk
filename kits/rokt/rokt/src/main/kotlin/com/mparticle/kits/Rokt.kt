@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import java.lang.ref.WeakReference
 
-class Rokt internal constructor(private val mConfigManager: Any, private val mKitManager: KitManager) {
+class Rokt internal constructor(private val mKitManager: KitManager, private val isEnabledProvider: () -> Boolean) {
     @JvmOverloads
     fun selectPlacements(
         identifier: String,
@@ -96,12 +96,7 @@ class Rokt internal constructor(private val mConfigManager: Any, private val mKi
         return kitInstance to roktBridge
     }
 
-    private fun isEnabled(): Boolean = try {
-        val field = mConfigManager.javaClass.getMethod("isEnabled")
-        field.invoke(mConfigManager) as? Boolean ?: false
-    } catch (ignored: Exception) {
-        false
-    }
+    private fun isEnabled(): Boolean = isEnabledProvider()
 
     private fun buildPlacementOptions(): PlacementOptions = PlacementOptions(
         jointSdkSelectPlacements = System.currentTimeMillis(),

@@ -94,7 +94,7 @@ class RoktTest {
         `when`(identityApi.currentUser).thenReturn(mParticleUser)
         `when`(kitManager.isKitActive(MParticle.ServiceProviders.ROKT)).thenReturn(true)
         `when`(kitManager.getKitInstance(MParticle.ServiceProviders.ROKT)).thenReturn(roktKit)
-        rokt = Rokt(configManager, kitManager)
+        rokt = Rokt(kitManager) { configManager.enabled }
     }
 
     @Test
