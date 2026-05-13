@@ -164,7 +164,7 @@ class RoktKitTests {
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
-            mpRoktConfig = null,
+            roktConfig = null,
             placementOptions = null,
         )
 
@@ -221,7 +221,7 @@ class RoktKitTests {
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
-            mpRoktConfig = null,
+            roktConfig = null,
             placementOptions = null,
         )
 
@@ -270,7 +270,7 @@ class RoktKitTests {
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
-            mpRoktConfig = null,
+            roktConfig = null,
             placementOptions = null,
         )
 
@@ -319,7 +319,7 @@ class RoktKitTests {
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
-            mpRoktConfig = null,
+            roktConfig = null,
             placementOptions = null,
         )
 
@@ -386,7 +386,7 @@ class RoktKitTests {
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
-            mpRoktConfig = null,
+            roktConfig = null,
             placementOptions = null,
         )
 
@@ -461,7 +461,7 @@ class RoktKitTests {
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
-            mpRoktConfig = null,
+            roktConfig = null,
             placementOptions = null,
         )
 
@@ -1362,7 +1362,7 @@ class RoktKitTests {
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
-            mpRoktConfig = null,
+            roktConfig = null,
             placementOptions = null,
         )
 

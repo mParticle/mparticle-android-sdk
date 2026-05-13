@@ -1,10 +1,10 @@
 package com.mparticle.kits
 
 import android.graphics.Typeface
-import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
 import com.rokt.roktsdk.PlacementOptions
 import com.rokt.roktsdk.Rokt.RoktCallback
+import com.rokt.roktsdk.RoktConfig
 import com.rokt.roktsdk.RoktEvent
 import kotlinx.coroutines.flow.Flow
 import java.lang.ref.WeakReference

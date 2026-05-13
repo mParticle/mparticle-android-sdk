@@ -18,7 +18,6 @@ import com.mparticle.internal.Logger
 import com.mparticle.kits.KitIntegration.CommerceListener
 import com.mparticle.kits.KitIntegration.IdentityListener
 import com.mparticle.kits.KitIntegration.RoktListener
-import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
 import com.rokt.roktsdk.PlacementOptions
 import com.rokt.roktsdk.Rokt
@@ -27,6 +26,7 @@ import com.rokt.roktsdk.Rokt.SdkFrameworkType.Android
 import com.rokt.roktsdk.Rokt.SdkFrameworkType.Cordova
 import com.rokt.roktsdk.Rokt.SdkFrameworkType.Flutter
 import com.rokt.roktsdk.Rokt.SdkFrameworkType.ReactNative
+import com.rokt.roktsdk.RoktConfig
 import com.rokt.roktsdk.RoktEvent
 import com.rokt.roktsdk.RoktWidgetDimensionCallBack
 import com.rokt.roktsdk.Widget
@@ -185,7 +185,7 @@ class RoktKit :
         placeHolders: MutableMap<String, WeakReference<RoktEmbeddedView>>?,
         fontTypefaces: MutableMap<String, WeakReference<Typeface>>?,
         filterUser: FilteredMParticleUser?,
-        mpRoktConfig: RoktConfig?,
+        roktConfig: RoktConfig?,
         placementOptions: PlacementOptions?,
     ) {
         val placeholders: Map<String, WeakReference<Widget>>? = placeHolders?.mapNotNull { entry ->
@@ -210,7 +210,6 @@ class RoktKit :
 
         this.roktCallback = roktCallback
         val finalAttributes = prepareFinalAttributes(filterUser, attributes)
-        val roktConfig = mpRoktConfig?.toRoktSdkConfig()
         Rokt.execute(
             viewName,
             finalAttributes,
