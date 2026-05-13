@@ -156,6 +156,11 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
         return mCoreCallbacks.getUserBucket();
     }
 
+    @Override
+    public boolean isEnabled() {
+        return mCoreCallbacks.isEnabled();
+    }
+
     public boolean isOptedOut() {
         return !mCoreCallbacks.isEnabled();
     }

@@ -458,6 +458,11 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     @Override
+    public boolean isEnabled() {
+        return mCoreCallbacks.isEnabled();
+    }
+
+    @Override
     public boolean isKitActive(int kitId) {
         if (mKitManager != null) {
             return mKitManager.isKitActive(kitId);

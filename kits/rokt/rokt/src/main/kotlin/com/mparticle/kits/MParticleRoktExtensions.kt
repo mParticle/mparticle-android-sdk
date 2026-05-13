@@ -1,7 +1,6 @@
 package com.mparticle.rokt
 
 import com.mparticle.MParticle
-import com.mparticle.internal.CoreCallbacks
 import com.mparticle.kits.Rokt
 
 /**
@@ -21,9 +20,6 @@ object MParticleRokt {
 }
 
 private fun createRokt(mParticle: MParticle): Rokt {
-    val configManager = mParticle.Internal().configManager
     val kitManager = mParticle.Internal().kitManager
-    return Rokt(kitManager) {
-        (configManager as? CoreCallbacks)?.isEnabled() ?: (mParticle.getOptOut() != true)
-    }
+    return Rokt(kitManager)
 }
