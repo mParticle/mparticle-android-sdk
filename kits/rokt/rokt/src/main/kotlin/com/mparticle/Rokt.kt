@@ -6,9 +6,9 @@ import com.mparticle.internal.Logger
 import com.mparticle.kits.KitIntegration
 import com.mparticle.kits.RoktKitBridge
 import com.mparticle.kits.RoktKitRequestHelper
-import com.mparticle.rokt.PlacementOptions
 import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
+import com.rokt.roktsdk.PlacementOptions
 import com.rokt.roktsdk.Rokt.RoktCallback
 import com.rokt.roktsdk.RoktEvent
 import kotlinx.coroutines.flow.Flow
@@ -155,5 +155,6 @@ class Rokt internal constructor(private val mConfigManager: Any, private val mKi
 
     private fun buildPlacementOptions(): PlacementOptions = PlacementOptions(
         jointSdkSelectPlacements = System.currentTimeMillis(),
+        dynamicPerformanceMarkers = mapOf(),
     )
 }

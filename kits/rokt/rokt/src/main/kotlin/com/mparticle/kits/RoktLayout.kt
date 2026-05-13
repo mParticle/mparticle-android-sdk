@@ -5,8 +5,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.mparticle.rokt.PlacementOptions
 import com.mparticle.rokt.RoktConfig
+import com.rokt.roktsdk.PlacementOptions
 import com.rokt.roktsdk.Rokt
 
 @Composable
@@ -48,7 +48,7 @@ fun RoktLayout(
             onShouldHideLoadingIndicator = { resultMap.callback.onShouldHideLoadingIndicator() },
             onUnload = { reason -> resultMap.callback.onUnload(reason) },
             config = config?.toRoktSdkConfig(),
-            placementOptions = placementOptions?.toRoktSdkPlacementOptions(),
+            placementOptions = placementOptions,
         )
     }
 }

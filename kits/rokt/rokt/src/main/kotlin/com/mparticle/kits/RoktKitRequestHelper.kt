@@ -7,9 +7,9 @@ import com.mparticle.identity.IdentityApiRequest
 import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.Logger
 import com.mparticle.internal.MPUtility
-import com.mparticle.rokt.PlacementOptions
 import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
+import com.rokt.roktsdk.PlacementOptions
 import com.rokt.roktsdk.Rokt.RoktCallback
 import org.json.JSONException
 import java.lang.ref.WeakReference

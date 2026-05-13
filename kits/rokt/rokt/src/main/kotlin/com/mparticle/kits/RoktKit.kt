@@ -18,9 +18,9 @@ import com.mparticle.internal.Logger
 import com.mparticle.kits.KitIntegration.CommerceListener
 import com.mparticle.kits.KitIntegration.IdentityListener
 import com.mparticle.kits.KitIntegration.RoktListener
-import com.mparticle.rokt.PlacementOptions
 import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
+import com.rokt.roktsdk.PlacementOptions
 import com.rokt.roktsdk.Rokt
 import com.rokt.roktsdk.Rokt.RoktCallback
 import com.rokt.roktsdk.Rokt.SdkFrameworkType.Android
@@ -219,7 +219,7 @@ class RoktKit :
             placeholders.takeIf { it?.isNotEmpty() == true },
             fontTypefaces.takeIf { it?.isNotEmpty() == true },
             roktConfig,
-            placementOptions?.toRoktSdkPlacementOptions(),
+            placementOptions,
         )
     }
 
