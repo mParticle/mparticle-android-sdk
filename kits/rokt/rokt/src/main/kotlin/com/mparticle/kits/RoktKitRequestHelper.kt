@@ -155,17 +155,26 @@ internal object RoktKitRequestHelper {
 
             if (emailMismatch || (hashedEmailMismatch && selectedIdentityType != null)) {
                 if (emailMismatch && existingEmail != null) {
+                    val emailMismatchMessage =
+                        "The existing email on the user ($existingEmail) does not match " +
+                            "the email passed to selectPlacements ($email). " +
+                            "Please make sure to sync the email identity to mParticle " +
+                            "as soon as it's available. " +
+                            "Identifying user with the provided email before continuing " +
+                            "to selectPlacements."
                     Logger.warning(
-                        "The existing email on the user ($existingEmail) does not match the email passed to selectPlacements ($email). " +
-                            "Please make sure to sync the email identity to mParticle as soon as it's available. " +
-                            "Identifying user with the provided email before continuing to selectPlacements.",
+                        emailMismatchMessage,
                     )
                 } else if (hashedEmailMismatch && existingHashedEmail != null) {
-                    Logger.warning(
+                    val hashedEmailMismatchMessage =
                         "The existing hashed email on the user ($existingHashedEmail) does not match " +
                             "the hashed email passed to selectPlacements ($hashedEmail). " +
-                            "Please make sure to sync the hashed email identity to mParticle as soon as it's available. " +
-                            "Identifying user with the provided hashed email before continuing to selectPlacements.",
+                            "Please make sure to sync the hashed email identity to mParticle " +
+                            "as soon as it's available. " +
+                            "Identifying user with the provided hashed email before continuing " +
+                            "to selectPlacements."
+                    Logger.warning(
+                        hashedEmailMismatchMessage,
                     )
                 }
 

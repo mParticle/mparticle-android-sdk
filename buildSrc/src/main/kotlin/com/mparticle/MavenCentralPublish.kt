@@ -77,14 +77,15 @@ fun Project.configureMavenPublishing(mparticleMavenPublish: MParticleMavenPublis
             }
         }
 
+        val capitalizedPublicationName = publicationName.capitalizeForTaskName()
         val validateTaskName =
-            "validatePomFor${publicationName.replaceFirstChar { it.uppercaseChar() }}Publication"
+            "validatePomFor${capitalizedPublicationName}Publication"
 
         tasks.register(validateTaskName, ValidatePomTask::class.java) {
             description = "Validates the generated POM file for the '$publicationName' publication."
             group = "verification"
             pomFile.set(project.layout.buildDirectory.file("publications/$publicationName/pom-default.xml"))
-            dependsOn("generatePomFileFor${publicationName.replaceFirstChar { it.uppercaseChar() }}Publication")
+            dependsOn("generatePomFileFor${capitalizedPublicationName}Publication")
         }
 
         tasks.withType(PublishToMavenLocal::class.java).configureEach {
@@ -93,4 +94,10 @@ fun Project.configureMavenPublishing(mparticleMavenPublish: MParticleMavenPublis
             }
         }
     }
+}
+
+private fun String.capitalizeForTaskName(): String = if (isEmpty()) {
+    this
+} else {
+    substring(0, 1).uppercase() + substring(1)
 }

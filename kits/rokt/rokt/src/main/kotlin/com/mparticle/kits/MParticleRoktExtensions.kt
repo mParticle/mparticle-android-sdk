@@ -12,9 +12,11 @@ fun MParticle.Rokt(): Rokt = createRokt(this)
  * Java-friendly accessors for the legacy Rokt API object.
  */
 object MParticleRokt {
+    @Suppress("FunctionName")
     @JvmStatic
     fun Rokt(mParticle: MParticle?): Rokt? = mParticle?.let { createRokt(it) }
 
+    @Suppress("FunctionName")
     @JvmStatic
     fun Rokt(): Rokt? = MParticle.getInstance()?.let { createRokt(it) }
 }
