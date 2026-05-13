@@ -114,50 +114,18 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
     protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath,HashMap<String, String> audienceQueryParams, @Nullable UploadSettings uploadSettings) throws MalformedURLException {
         NetworkOptions networkOptions = uploadSettings == null ? mConfigManager.getNetworkOptions() : uploadSettings.getNetworkOptions();
         DomainMapping domainMapping = networkOptions.getDomain(endpoint);
-        String url = NetworkOptionsManager.getDefaultUrl(endpoint);
         String apiKey = uploadSettings == null ? mApiKey : uploadSettings.getApiKey();
-        final String customBaseURL = networkOptions.getCustomBaseURL();
+        final boolean usingCustomBaseURL = !MPUtility.isEmpty(networkOptions.getCustomBaseURL());
 
-        // `defaultDomain` variable is for URL generation when domain mapping is specified.
-        String defaultDomain = url;
-        boolean isDefaultDomain = true;
-
-        if (!MPUtility.isEmpty(customBaseURL)) {
-            // customBaseURL takes priority over all individual domain mappings.
-            if (domainMapping != null && !MPUtility.isEmpty(domainMapping.getUrl())) {
-                Logger.warning("NetworkOptions: customBaseURL is set; domain mapping for " + endpoint.name() + " is ignored.");
-            }
-            url = customBaseURL;
-            isDefaultDomain = false;
-            if (endpoint != Endpoint.CONFIG) {
-                // When custom CNAME is used, the default-domain URL still needs the pod prefix
-                // so MPConnectionTest matching and pinning fallbacks continue to work.
-                defaultDomain = getPodUrl(defaultDomain, null, false);
-            }
-        } else {
-            // Check if domain mapping is specified and update the URL based on domain mapping
-            String domainMappingUrl = domainMapping != null ? domainMapping.getUrl() : null;
-            if (!MPUtility.isEmpty(domainMappingUrl)) {
-                isDefaultDomain = url.equals(domainMappingUrl);
-                url = domainMappingUrl;
-            }
-
-            if (endpoint != Endpoint.CONFIG) {
-                // Set URL with pod prefix if it’s the default domain and endpoint is not CONFIG
-                if (isDefaultDomain) {
-                    url = getPodUrl(url, mConfigManager.getPodPrefix(apiKey), mConfigManager.isDirectUrlRoutingEnabled());
-                } else {
-                    // When domain mapping is specified, generate the default domain. Whether podRedirection is enabled or not, always use the original URL.
-                    defaultDomain = getPodUrl(defaultDomain, null, false);
-                }
-            }
-        }
+        ResolvedHost host = resolveHost(endpoint, networkOptions, domainMapping, apiKey);
+        String url = host.url;
+        String defaultDomain = host.defaultDomain;
+        boolean isDefaultDomain = host.isDefaultDomain;
 
         Uri uri;
         String subdirectory;
         String pathPrefix;
         String pathPostfix;
-        final boolean usingCustomBaseURL = !MPUtility.isEmpty(customBaseURL);
         boolean overridesSubdirectory = domainMapping != null && domainMapping.isOverridesSubdirectory();
         if (usingCustomBaseURL && overridesSubdirectory) {
             Logger.warning("NetworkOptions: customBaseURL with overridesSubdirectory is unsupported for CDN routing; overridesSubdirectory will be ignored for " + endpoint.name() + ".");
@@ -266,6 +234,57 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
             return newUrl + ".mparticle.com";
         }
         return null;
+    }
+
+    /**
+     * Resolves the host(s) used to build the endpoint URL. Returns three values:
+     * {@code url} — host used for the request, {@code defaultDomain} — host used as the
+     * fallback for {@link #generateDefaultURL}, and {@code isDefaultDomain} — true when
+     * {@code url} is the unmodified mParticle default.
+     *
+     * <p>Priority: {@code customBaseURL} → per-endpoint {@code DomainMapping} → default.
+     */
+    private ResolvedHost resolveHost(Endpoint endpoint, NetworkOptions networkOptions, DomainMapping domainMapping, String apiKey) {
+        String defaultUrl = NetworkOptionsManager.getDefaultUrl(endpoint);
+        String customBaseURL = networkOptions.getCustomBaseURL();
+
+        if (!MPUtility.isEmpty(customBaseURL)) {
+            if (domainMapping != null && !MPUtility.isEmpty(domainMapping.getUrl())) {
+                Logger.warning("NetworkOptions: customBaseURL is set; domain mapping for " + endpoint.name() + " is ignored.");
+            }
+            // When custom CNAME is used, the default-domain URL still needs the pod prefix
+            // so MPConnectionTest matching and pinning fallbacks continue to work.
+            String defaultDomain = endpoint == Endpoint.CONFIG ? defaultUrl : getPodUrl(defaultUrl, null, false);
+            return new ResolvedHost(customBaseURL, defaultDomain, false);
+        }
+
+        String domainMappingUrl = domainMapping != null ? domainMapping.getUrl() : null;
+        boolean isDefaultDomain = MPUtility.isEmpty(domainMappingUrl) || defaultUrl.equals(domainMappingUrl);
+        String url = isDefaultDomain ? defaultUrl : domainMappingUrl;
+        String defaultDomain = defaultUrl;
+
+        if (endpoint != Endpoint.CONFIG) {
+            if (isDefaultDomain) {
+                // Default domain gets the pod prefix.
+                url = getPodUrl(url, mConfigManager.getPodPrefix(apiKey), mConfigManager.isDirectUrlRoutingEnabled());
+            } else {
+                // Domain-mapped: always generate the default with the original (un-pod-prefixed) host.
+                defaultDomain = getPodUrl(defaultDomain, null, false);
+            }
+        }
+        return new ResolvedHost(url, defaultDomain, isDefaultDomain);
+    }
+
+    private static final class ResolvedHost {
+        final String url;
+        final String defaultDomain;
+        final boolean isDefaultDomain;
+
+        ResolvedHost(String url, String defaultDomain, boolean isDefaultDomain) {
+            this.url = url;
+            this.defaultDomain = defaultDomain;
+            this.isDefaultDomain = isDefaultDomain;
+        }
     }
 
     public enum Endpoint {
