@@ -25,9 +25,11 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.unmockkObject
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import io.mockk.verifyOrder
 import kotlinx.coroutines.flow.first
@@ -1502,5 +1504,105 @@ class RoktKitTests {
         )
         method.isAccessible = true
         assertEquals(RoktLogLevel.NONE, method.invoke(roktKit, MParticle.LogLevel.NONE))
+    }
+
+    // MARK: - applyCustomBaseURLIfSet
+
+    private fun invokeApplyCustomBaseURLIfSet() {
+        val method = RoktKit::class.java.getDeclaredMethod("applyCustomBaseURLIfSet")
+        method.isAccessible = true
+        method.invoke(roktKit)
+    }
+
+    private fun stubNetworkOptionsCustomBaseURL(customBaseURL: String?): com.mparticle.networking.NetworkOptions {
+        val mockInternal = mock(MParticle.Internal::class.java)
+        val mockConfigManager = mock(com.mparticle.internal.ConfigManager::class.java)
+        val mockNetworkOptions = mock(com.mparticle.networking.NetworkOptions::class.java)
+        Mockito.`when`(MParticle.getInstance()?.Internal()).thenReturn(mockInternal)
+        Mockito.`when`(mockInternal.configManager).thenReturn(mockConfigManager)
+        Mockito.`when`(mockConfigManager.networkOptions).thenReturn(mockNetworkOptions)
+        Mockito.`when`(mockNetworkOptions.customBaseURL).thenReturn(customBaseURL)
+        return mockNetworkOptions
+    }
+
+    @Test
+    fun applyCustomBaseURLIfSet_whenHostIsSet_forwardsHttpsURLToRokt() {
+        stubNetworkOptionsCustomBaseURL("rkt.example.com")
+        mockkStatic(Rokt::class)
+        every { Rokt.setCustomBaseURL(any()) } just runs
+
+        invokeApplyCustomBaseURLIfSet()
+
+        verify(exactly = 1) {
+            Rokt.setCustomBaseURL(java.net.URL("https://rkt.example.com"))
+        }
+        unmockkStatic(Rokt::class)
+    }
+
+    @Test
+    fun applyCustomBaseURLIfSet_whenHostHasPort_preservesPortInURL() {
+        stubNetworkOptionsCustomBaseURL("rkt.example.com:8443")
+        mockkStatic(Rokt::class)
+        every { Rokt.setCustomBaseURL(any()) } just runs
+
+        invokeApplyCustomBaseURLIfSet()
+
+        verify(exactly = 1) {
+            Rokt.setCustomBaseURL(java.net.URL("https://rkt.example.com:8443"))
+        }
+        unmockkStatic(Rokt::class)
+    }
+
+    @Test
+    fun applyCustomBaseURLIfSet_whenHostIsNull_doesNotCallRokt() {
+        stubNetworkOptionsCustomBaseURL(null)
+        mockkStatic(Rokt::class)
+        every { Rokt.setCustomBaseURL(any()) } just runs
+
+        invokeApplyCustomBaseURLIfSet()
+
+        verify(exactly = 0) { Rokt.setCustomBaseURL(any()) }
+        unmockkStatic(Rokt::class)
+    }
+
+    @Test
+    fun applyCustomBaseURLIfSet_whenHostIsEmpty_doesNotCallRokt() {
+        stubNetworkOptionsCustomBaseURL("")
+        mockkStatic(Rokt::class)
+        every { Rokt.setCustomBaseURL(any()) } just runs
+
+        invokeApplyCustomBaseURLIfSet()
+
+        verify(exactly = 0) { Rokt.setCustomBaseURL(any()) }
+        unmockkStatic(Rokt::class)
+    }
+
+    @Test
+    fun applyCustomBaseURLIfSet_whenNetworkOptionsIsNull_doesNotCallRokt() {
+        val mockInternal = mock(MParticle.Internal::class.java)
+        val mockConfigManager = mock(com.mparticle.internal.ConfigManager::class.java)
+        Mockito.`when`(MParticle.getInstance()?.Internal()).thenReturn(mockInternal)
+        Mockito.`when`(mockInternal.configManager).thenReturn(mockConfigManager)
+        Mockito.`when`(mockConfigManager.networkOptions).thenReturn(null)
+
+        mockkStatic(Rokt::class)
+        every { Rokt.setCustomBaseURL(any()) } just runs
+
+        invokeApplyCustomBaseURLIfSet()
+
+        verify(exactly = 0) { Rokt.setCustomBaseURL(any()) }
+        unmockkStatic(Rokt::class)
+    }
+
+    @Test
+    fun applyCustomBaseURLIfSet_whenMParticleInstanceIsNull_doesNotCallRokt() {
+        MParticle.setInstance(null)
+        mockkStatic(Rokt::class)
+        every { Rokt.setCustomBaseURL(any()) } just runs
+
+        invokeApplyCustomBaseURLIfSet()
+
+        verify(exactly = 0) { Rokt.setCustomBaseURL(any()) }
+        unmockkStatic(Rokt::class)
     }
 }
