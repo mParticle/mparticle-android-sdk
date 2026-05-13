@@ -11,7 +11,6 @@ import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.MParticle.IdentityType
 import com.mparticle.MpRoktEventCallback
-import com.mparticle.UnloadReasons
 import com.mparticle.WrapperSdk
 import com.mparticle.WrapperSdkVersion
 import com.mparticle.commerce.CommerceEvent
@@ -445,18 +444,7 @@ class RoktKit :
     }
 
     override fun onUnload(reason: Rokt.UnloadReasons) {
-        mpRoktEventCallback?.onUnload(
-            when (reason) {
-                Rokt.UnloadReasons.NO_OFFERS -> UnloadReasons.NO_OFFERS
-                Rokt.UnloadReasons.FINISHED -> UnloadReasons.FINISHED
-                Rokt.UnloadReasons.TIMEOUT -> UnloadReasons.TIMEOUT
-                Rokt.UnloadReasons.NETWORK_ERROR -> UnloadReasons.NETWORK_ERROR
-                Rokt.UnloadReasons.NO_WIDGET -> UnloadReasons.NO_WIDGET
-                Rokt.UnloadReasons.INIT_FAILED -> UnloadReasons.INIT_FAILED
-                Rokt.UnloadReasons.UNKNOWN_PLACEHOLDER -> UnloadReasons.UNKNOWN_PLACEHOLDER
-                Rokt.UnloadReasons.UNKNOWN -> UnloadReasons.UNKNOWN
-            },
-        )
+        mpRoktEventCallback?.onUnload(reason)
     }
 }
 

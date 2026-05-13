@@ -117,7 +117,7 @@ class RoktTest {
                     println("View loaded")
                 }
 
-                override fun onUnload(reason: UnloadReasons) {
+                override fun onUnload(reason: com.rokt.roktsdk.Rokt.UnloadReasons) {
                     println("View unloaded due to: $reason")
                 }
 
