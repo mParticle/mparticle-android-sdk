@@ -116,25 +116,40 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
         DomainMapping domainMapping = networkOptions.getDomain(endpoint);
         String url = NetworkOptionsManager.getDefaultUrl(endpoint);
         String apiKey = uploadSettings == null ? mApiKey : uploadSettings.getApiKey();
+        final String customBaseURL = networkOptions.getCustomBaseURL();
 
         // `defaultDomain` variable is for URL generation when domain mapping is specified.
         String defaultDomain = url;
         boolean isDefaultDomain = true;
 
-        // Check if domain mapping is specified and update the URL based on domain mapping
-        String domainMappingUrl = domainMapping != null ? domainMapping.getUrl() : null;
-        if (!MPUtility.isEmpty(domainMappingUrl)) {
-            isDefaultDomain = url.equals(domainMappingUrl);
-            url = domainMappingUrl;
-        }
-
-        if (endpoint != Endpoint.CONFIG) {
-            // Set URL with pod prefix if it’s the default domain and endpoint is not CONFIG
-            if (isDefaultDomain) {
-                url = getPodUrl(url, mConfigManager.getPodPrefix(apiKey), mConfigManager.isDirectUrlRoutingEnabled());
-            } else {
-                // When domain mapping is specified, generate the default domain. Whether podRedirection is enabled or not, always use the original URL.
+        if (!MPUtility.isEmpty(customBaseURL)) {
+            // customBaseURL takes priority over all individual domain mappings.
+            if (domainMapping != null && !MPUtility.isEmpty(domainMapping.getUrl())) {
+                Logger.warning("NetworkOptions: customBaseURL is set; domain mapping for " + endpoint.name() + " is ignored.");
+            }
+            url = customBaseURL;
+            isDefaultDomain = false;
+            if (endpoint != Endpoint.CONFIG) {
+                // When custom CNAME is used, the default-domain URL still needs the pod prefix
+                // so MPConnectionTest matching and pinning fallbacks continue to work.
                 defaultDomain = getPodUrl(defaultDomain, null, false);
+            }
+        } else {
+            // Check if domain mapping is specified and update the URL based on domain mapping
+            String domainMappingUrl = domainMapping != null ? domainMapping.getUrl() : null;
+            if (!MPUtility.isEmpty(domainMappingUrl)) {
+                isDefaultDomain = url.equals(domainMappingUrl);
+                url = domainMappingUrl;
+            }
+
+            if (endpoint != Endpoint.CONFIG) {
+                // Set URL with pod prefix if it’s the default domain and endpoint is not CONFIG
+                if (isDefaultDomain) {
+                    url = getPodUrl(url, mConfigManager.getPodPrefix(apiKey), mConfigManager.isDirectUrlRoutingEnabled());
+                } else {
+                    // When domain mapping is specified, generate the default domain. Whether podRedirection is enabled or not, always use the original URL.
+                    defaultDomain = getPodUrl(defaultDomain, null, false);
+                }
             }
         }
 
@@ -142,10 +157,15 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
         String subdirectory;
         String pathPrefix;
         String pathPostfix;
+        final boolean usingCustomBaseURL = !MPUtility.isEmpty(customBaseURL);
         boolean overridesSubdirectory = domainMapping != null && domainMapping.isOverridesSubdirectory();
+        if (usingCustomBaseURL && overridesSubdirectory) {
+            Logger.warning("NetworkOptions: customBaseURL with overridesSubdirectory is unsupported for CDN routing; overridesSubdirectory will be ignored for " + endpoint.name() + ".");
+            overridesSubdirectory = false;
+        }
         switch (endpoint) {
             case CONFIG:
-                pathPrefix = SERVICE_VERSION_4 + "/";
+                pathPrefix = usingCustomBaseURL ? "/config/v4/" : SERVICE_VERSION_4 + "/";
                 subdirectory = overridesSubdirectory ? "" : pathPrefix;
                 pathPostfix = mApiKey + "/config";
                 Uri.Builder builder = new Uri.Builder()
@@ -165,9 +185,9 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
                         }
                     }
                 }
-                return MPUrl.getUrl(builder.build().toString(), generateDefaultURL(isDefaultDomain, builder.build(), defaultDomain, (pathPrefix + pathPostfix)));
+                return MPUrl.getUrl(builder.build().toString(), generateDefaultURL(isDefaultDomain, builder.build(), defaultDomain, (SERVICE_VERSION_4 + "/" + pathPostfix)));
             case EVENTS:
-                pathPrefix = SERVICE_VERSION_2 + "/";
+                pathPrefix = usingCustomBaseURL ? "/nativeevents/v2/" : SERVICE_VERSION_2 + "/";
                 subdirectory = overridesSubdirectory ? "" : pathPrefix;
                 pathPostfix = apiKey + "/events";
                 uri = new Uri.Builder()
@@ -176,9 +196,9 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
                         .path(subdirectory + pathPostfix)
                         .build();
 
-                return MPUrl.getUrl(uri.toString(), generateDefaultURL(isDefaultDomain, uri, defaultDomain, (pathPrefix + pathPostfix)));
+                return MPUrl.getUrl(uri.toString(), generateDefaultURL(isDefaultDomain, uri, defaultDomain, (SERVICE_VERSION_2 + "/" + pathPostfix)));
             case ALIAS:
-                pathPrefix = SERVICE_VERSION_1 + "/identity/";
+                pathPrefix = usingCustomBaseURL ? "/nativeevents/v1/identity/" : SERVICE_VERSION_1 + "/identity/";
                 subdirectory = overridesSubdirectory ? "" : pathPrefix;
                 pathPostfix = apiKey + "/alias";
                 uri = new Uri.Builder()
@@ -186,26 +206,28 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
                         .encodedAuthority(url)
                         .path(subdirectory + pathPostfix)
                         .build();
-                return MPUrl.getUrl(uri.toString(), generateDefaultURL(isDefaultDomain, uri, defaultDomain, (pathPrefix + pathPostfix)));
+                return MPUrl.getUrl(uri.toString(), generateDefaultURL(isDefaultDomain, uri, defaultDomain, (SERVICE_VERSION_1 + "/identity/" + pathPostfix)));
             case IDENTITY:
-                pathPrefix = SERVICE_VERSION_1 + "/";
-                subdirectory = overridesSubdirectory ? "" : SERVICE_VERSION_1 + "/";
+                pathPrefix = usingCustomBaseURL ? "/identity/v1/" : SERVICE_VERSION_1 + "/";
+                subdirectory = overridesSubdirectory ? "" : pathPrefix;
                 pathPostfix = identityPath;
                 uri = new Uri.Builder()
                         .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
                         .path(subdirectory + pathPostfix)
                         .build();
-                return MPUrl.getUrl(uri.toString(), generateDefaultURL(isDefaultDomain, uri, defaultDomain, (pathPrefix + pathPostfix)));
+                return MPUrl.getUrl(uri.toString(), generateDefaultURL(isDefaultDomain, uri, defaultDomain, (SERVICE_VERSION_1 + "/" + pathPostfix)));
             case AUDIENCE:
-                    pathPostfix = SERVICE_VERSION_1 + "/" + mApiKey + "/audience";
+                    pathPostfix = usingCustomBaseURL
+                            ? "/nativeevents/v1/" + mApiKey + "/audience"
+                            : SERVICE_VERSION_1 + "/" + mApiKey + "/audience";
                     uri = new Uri.Builder()
                             .scheme(BuildConfig.SCHEME)
                             .encodedAuthority(url)
                             .path(pathPostfix)
                             .appendQueryParameter("mpid", String.valueOf(mConfigManager.getMpid()))
                             .build();
-                    return MPUrl.getUrl(uri.toString(), generateDefaultURL(isDefaultDomain, uri, defaultDomain, pathPostfix));
+                    return MPUrl.getUrl(uri.toString(), generateDefaultURL(isDefaultDomain, uri, defaultDomain, (SERVICE_VERSION_1 + "/" + mApiKey + "/audience")));
             default:
                 return null;
         }

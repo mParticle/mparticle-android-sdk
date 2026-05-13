@@ -422,4 +422,152 @@ class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
             )
         assertEquals(null, result)
     }
+
+    @Test
+    @Throws(MalformedURLException::class)
+    fun testCustomBaseURLConfigEndpoint() {
+        val options =
+            MParticleOptions
+                .builder(mContext)
+                .credentials(apiKey, "secret")
+                .networkOptions(
+                    NetworkOptions
+                        .builder()
+                        .setCustomBaseURL("https://rkt.example.com")
+                        .build(),
+                ).build()
+        MParticle.start(options)
+        val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
+        val configUrl = baseClientImpl.getUrl(MParticleBaseClientImpl.Endpoint.CONFIG)
+        Assert.assertTrue(configUrl.toString().contains("rkt.example.com/config/v4/"))
+        Assert.assertFalse(configUrl.toString().contains("config2.mparticle.com"))
+    }
+
+    @Test
+    @Throws(MalformedURLException::class)
+    fun testCustomBaseURLEventsEndpoint() {
+        val options =
+            MParticleOptions
+                .builder(mContext)
+                .credentials(apiKey, "secret")
+                .networkOptions(
+                    NetworkOptions
+                        .builder()
+                        .setCustomBaseURL("https://rkt.example.com")
+                        .build(),
+                ).build()
+        MParticle.start(options)
+        val uploadSettings = UploadSettings(apiKey, "secret", options.networkOptions, "", "")
+        val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
+        val eventsUrl =
+            baseClientImpl.getUrl(MParticleBaseClientImpl.Endpoint.EVENTS, null, null, uploadSettings)
+        Assert.assertTrue(eventsUrl.toString().contains("rkt.example.com/nativeevents/v2/"))
+        Assert.assertFalse(eventsUrl.toString().contains("nativesdks"))
+    }
+
+    @Test
+    @Throws(MalformedURLException::class)
+    fun testCustomBaseURLIdentityEndpoint() {
+        val options =
+            MParticleOptions
+                .builder(mContext)
+                .credentials(apiKey, "secret")
+                .networkOptions(
+                    NetworkOptions
+                        .builder()
+                        .setCustomBaseURL("https://rkt.example.com")
+                        .build(),
+                ).build()
+        MParticle.start(options)
+        val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
+        val identityUrl =
+            baseClientImpl.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY, "login")
+        Assert.assertTrue(identityUrl.toString().contains("rkt.example.com/identity/v1/login"))
+        Assert.assertFalse(identityUrl.toString().contains("identity.us1.mparticle.com"))
+    }
+
+    @Test
+    @Throws(MalformedURLException::class)
+    fun testCustomBaseURLAliasEndpoint() {
+        val options =
+            MParticleOptions
+                .builder(mContext)
+                .credentials(apiKey, "secret")
+                .networkOptions(
+                    NetworkOptions
+                        .builder()
+                        .setCustomBaseURL("https://rkt.example.com")
+                        .build(),
+                ).build()
+        MParticle.start(options)
+        val uploadSettings = UploadSettings(apiKey, "secret", options.networkOptions, "", "")
+        val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
+        val aliasUrl =
+            baseClientImpl.getUrl(MParticleBaseClientImpl.Endpoint.ALIAS, null, null, uploadSettings)
+        Assert.assertTrue(aliasUrl.toString().contains("rkt.example.com/nativeevents/v1/identity/"))
+        Assert.assertTrue(aliasUrl.toString().endsWith("/alias"))
+        Assert.assertFalse(aliasUrl.toString().contains("nativesdks"))
+    }
+
+    @Test
+    @Throws(MalformedURLException::class)
+    fun testCustomBaseURLAudienceEndpoint() {
+        val options =
+            MParticleOptions
+                .builder(mContext)
+                .credentials(apiKey, "secret")
+                .networkOptions(
+                    NetworkOptions
+                        .builder()
+                        .setCustomBaseURL("https://rkt.example.com")
+                        .build(),
+                ).build()
+        MParticle.start(options)
+        val baseClientImpl = AccessUtils.getApiClient() as MParticleBaseClientImpl
+        val audienceUrl =
+            baseClientImpl.getUrl(MParticleBaseClientImpl.Endpoint.AUDIENCE, 12345L)
+        Assert.assertTrue(audienceUrl.toString().contains("rkt.example.com/nativeevents/v1/"))
+        Assert.assertTrue(audienceUrl.toString().contains("/audience"))
+        Assert.assertFalse(audienceUrl.toString().contains("nativesdks"))
+    }
+
+    @Test
+    fun testCustomBaseURLRejectsNonHTTPS() {
+        val opts =
+            NetworkOptions
+                .builder()
+                .setCustomBaseURL("http://rkt.example.com")
+                .build()
+        assertEquals(null, opts.customBaseURL)
+    }
+
+    @Test
+    fun testCustomBaseURLStripsPath() {
+        val opts =
+            NetworkOptions
+                .builder()
+                .setCustomBaseURL("https://rkt.example.com/some/path?q=1")
+                .build()
+        assertEquals("rkt.example.com", opts.customBaseURL)
+    }
+
+    @Test
+    fun testCustomBaseURLPreservesPort() {
+        val opts =
+            NetworkOptions
+                .builder()
+                .setCustomBaseURL("https://rkt.example.com:8443")
+                .build()
+        assertEquals("rkt.example.com:8443", opts.customBaseURL)
+    }
+
+    @Test
+    fun testCustomBaseURLRejectsMalformed() {
+        val opts =
+            NetworkOptions
+                .builder()
+                .setCustomBaseURL("not a url")
+                .build()
+        assertEquals(null, opts.customBaseURL)
+    }
 }
