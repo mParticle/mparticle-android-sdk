@@ -5,7 +5,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.mparticle.MpRoktEventCallback
 import com.mparticle.rokt.PlacementOptions
 import com.mparticle.rokt.RoktConfig
 import com.rokt.roktsdk.Rokt
@@ -18,7 +17,7 @@ fun RoktLayout(
     attributes: Map<String, String>,
     location: String,
     modifier: Modifier = Modifier,
-    mpRoktEventCallback: MpRoktEventCallback? = null,
+    roktCallback: Rokt.RoktCallback? = null,
     config: RoktConfig? = null,
 ) {
     var placementOptions: PlacementOptions? = null
@@ -33,7 +32,7 @@ fun RoktLayout(
         LaunchedEffect(Unit) {
             instance?.runComposableWithCallback(
                 HashMap(attributes),
-                mpRoktEventCallback,
+                roktCallback,
                 { resultMap, callback ->
                     resultMapState.value = RoktResult(resultMap, callback)
                 },

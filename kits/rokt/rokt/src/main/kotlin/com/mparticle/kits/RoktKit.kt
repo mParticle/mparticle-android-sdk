@@ -10,7 +10,6 @@ import com.mparticle.BuildConfig
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.MParticle.IdentityType
-import com.mparticle.MpRoktEventCallback
 import com.mparticle.WrapperSdk
 import com.mparticle.WrapperSdkVersion
 import com.mparticle.commerce.CommerceEvent
@@ -57,7 +56,7 @@ class RoktKit :
     RoktKitBridge,
     Rokt.RoktCallback {
     private var applicationContext: Context? = null
-    private var mpRoktEventCallback: MpRoktEventCallback? = null
+    private var roktCallback: RoktCallback? = null
     private var hashedEmailUserIdentityType: String? = null
     override fun getName(): String = NAME
 
@@ -182,7 +181,7 @@ class RoktKit :
     override fun selectPlacements(
         viewName: String,
         attributes: Map<String, String>,
-        mpRoktEventCallback: MpRoktEventCallback?,
+        roktCallback: RoktCallback?,
         placeHolders: MutableMap<String, WeakReference<RoktEmbeddedView>>?,
         fontTypefaces: MutableMap<String, WeakReference<Typeface>>?,
         filterUser: FilteredMParticleUser?,
@@ -209,7 +208,7 @@ class RoktKit :
             entry.key to WeakReference(widget)
         }?.toMap()
 
-        this.mpRoktEventCallback = mpRoktEventCallback
+        this.roktCallback = roktCallback
         val finalAttributes = prepareFinalAttributes(filterUser, attributes)
         val roktConfig = mpRoktConfig?.toRoktSdkConfig()
         Rokt.execute(
@@ -319,7 +318,7 @@ class RoktKit :
 
     suspend fun runComposableWithCallback(
         attributes: Map<String, String>,
-        mpRoktEventCallback: MpRoktEventCallback?,
+        roktCallback: RoktCallback?,
         onResult: (Map<String, String>, RoktCallback) -> Unit,
     ) {
         deferredAttributes = CompletableDeferred()
@@ -328,7 +327,7 @@ class RoktKit :
             roktListener = this,
             attributes = attributes,
         )
-        this.mpRoktEventCallback = mpRoktEventCallback
+        this.roktCallback = roktCallback
         CoroutineScope(Dispatchers.Default).launch {
             val resultAttributes = deferredAttributes!!.await()
             onResult(resultAttributes, this@RoktKit)
@@ -432,19 +431,19 @@ class RoktKit :
     }
 
     override fun onLoad() {
-        mpRoktEventCallback?.onLoad()
+        roktCallback?.onLoad()
     }
 
     override fun onShouldHideLoadingIndicator() {
-        mpRoktEventCallback?.onShouldHideLoadingIndicator()
+        roktCallback?.onShouldHideLoadingIndicator()
     }
 
     override fun onShouldShowLoadingIndicator() {
-        mpRoktEventCallback?.onShouldShowLoadingIndicator()
+        roktCallback?.onShouldShowLoadingIndicator()
     }
 
     override fun onUnload(reason: Rokt.UnloadReasons) {
-        mpRoktEventCallback?.onUnload(reason)
+        roktCallback?.onUnload(reason)
     }
 }
 

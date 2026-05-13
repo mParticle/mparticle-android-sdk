@@ -2,7 +2,6 @@ package com.mparticle.kits
 
 import android.graphics.Typeface
 import com.mparticle.MParticle
-import com.mparticle.MpRoktEventCallback
 import com.mparticle.identity.IdentityApi
 import com.mparticle.identity.IdentityApiRequest
 import com.mparticle.identity.MParticleUser
@@ -11,6 +10,7 @@ import com.mparticle.internal.MPUtility
 import com.mparticle.rokt.PlacementOptions
 import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
+import com.rokt.roktsdk.Rokt.RoktCallback
 import org.json.JSONException
 import java.lang.ref.WeakReference
 import java.util.Objects
@@ -21,7 +21,7 @@ internal object RoktKitRequestHelper {
         roktListener: RoktKitBridge,
         viewName: String,
         attributes: Map<String, String>,
-        mpRoktEventCallback: MpRoktEventCallback?,
+        roktCallback: RoktCallback?,
         placeHolders: Map<String, WeakReference<RoktEmbeddedView>>?,
         fontTypefaces: Map<String, WeakReference<Typeface>>?,
         config: RoktConfig?,
@@ -43,7 +43,7 @@ internal object RoktKitRequestHelper {
             roktListener.selectPlacements(
                 viewName,
                 finalAttributes,
-                mpRoktEventCallback,
+                roktCallback,
                 placeHolders?.toMutableMap(),
                 fontTypefaces?.toMutableMap(),
                 FilteredMParticleUser.getInstance(user?.id ?: 0L, kitIntegration),

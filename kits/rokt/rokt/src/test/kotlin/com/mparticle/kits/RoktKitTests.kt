@@ -160,7 +160,7 @@ class RoktKitTests {
         roktKit.selectPlacements(
             viewName = "test_view",
             attributes = inputAttributes,
-            mpRoktEventCallback = null,
+            roktCallback = null,
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
@@ -217,7 +217,7 @@ class RoktKitTests {
         roktKit.selectPlacements(
             viewName = "test_view",
             attributes = emptyMap(),
-            mpRoktEventCallback = null,
+            roktCallback = null,
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
@@ -266,7 +266,7 @@ class RoktKitTests {
         roktKit.selectPlacements(
             viewName = "test_view",
             attributes = emptyMap(),
-            mpRoktEventCallback = null,
+            roktCallback = null,
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
@@ -315,7 +315,7 @@ class RoktKitTests {
         roktKit.selectPlacements(
             viewName = "test_view",
             attributes = emptyMap(),
-            mpRoktEventCallback = null,
+            roktCallback = null,
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
@@ -382,7 +382,7 @@ class RoktKitTests {
         roktKit.selectPlacements(
             viewName = "test",
             attributes = inputAttributes,
-            mpRoktEventCallback = null,
+            roktCallback = null,
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
@@ -457,7 +457,7 @@ class RoktKitTests {
         roktKit.selectPlacements(
             viewName = "test",
             attributes = inputAttributes,
-            mpRoktEventCallback = null,
+            roktCallback = null,
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
@@ -1358,7 +1358,7 @@ class RoktKitTests {
         roktKit.selectPlacements(
             viewName = "test_view",
             attributes = testAttributes,
-            mpRoktEventCallback = null,
+            roktCallback = null,
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,

@@ -112,7 +112,7 @@ class RoktTest {
         val config = RoktConfig.Builder().colorMode(RoktConfig.ColorMode.DARK).build()
 
         val callbacks =
-            object : MpRoktEventCallback {
+            object : com.rokt.roktsdk.Rokt.RoktCallback {
                 override fun onLoad() {
                     println("View loaded")
                 }

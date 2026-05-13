@@ -9,6 +9,7 @@ import com.mparticle.kits.RoktKitRequestHelper
 import com.mparticle.rokt.PlacementOptions
 import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
+import com.rokt.roktsdk.Rokt.RoktCallback
 import com.rokt.roktsdk.RoktEvent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -30,7 +31,7 @@ class Rokt internal constructor(private val mConfigManager: Any, private val mKi
     fun selectPlacements(
         identifier: String,
         attributes: Map<String, String>,
-        callbacks: MpRoktEventCallback? = null,
+        callbacks: RoktCallback? = null,
         embeddedViews: Map<String, WeakReference<RoktEmbeddedView>>? = null,
         fontTypefaces: Map<String, WeakReference<Typeface>>? = null,
         config: RoktConfig? = null,
@@ -44,7 +45,7 @@ class Rokt internal constructor(private val mConfigManager: Any, private val mKi
                     roktListener = roktListener,
                     viewName = identifier,
                     attributes = HashMap(attributes),
-                    mpRoktEventCallback = callbacks,
+                    roktCallback = callbacks,
                     placeHolders = embeddedViews,
                     fontTypefaces = fontTypefaces,
                     config = config,
