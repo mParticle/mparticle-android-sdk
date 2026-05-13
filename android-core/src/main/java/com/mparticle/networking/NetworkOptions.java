@@ -28,6 +28,7 @@ public class NetworkOptions {
     Map<Endpoint, DomainMapping> domainMappings = new HashMap<Endpoint, DomainMapping>();
     boolean pinningDisabledInDevelopment = false;
     boolean pinningDisabled = false;
+    private String customBaseURL = null;
     private static Set<Endpoint> loggedDomainTypes = new HashSet<>();
 
     private NetworkOptions() {
@@ -43,6 +44,10 @@ public class NetworkOptions {
 
         if (builder.pinningDisabled != null) {
             pinningDisabled = builder.pinningDisabled;
+        }
+
+        if (builder.customBaseURL != null) {
+            customBaseURL = builder.customBaseURL;
         }
     }
 
@@ -106,6 +111,16 @@ public class NetworkOptions {
         return pinningDisabled;
     }
 
+    /**
+     * Returns the configured custom CNAME host (without scheme), or {@code null}
+     * if not set. When non-null, this host overrides individual domain mappings
+     * for all endpoints.
+     */
+    @Nullable
+    public String getCustomBaseURL() {
+        return customBaseURL;
+    }
+
     DomainMapping getDomain(Endpoint endpoint) {
         return domainMappings.get(endpoint);
     }
@@ -137,6 +152,7 @@ public class NetworkOptions {
         private Map<Endpoint, DomainMapping> domainMappings = new HashMap<Endpoint, DomainMapping>();
         private Boolean pinningDisabledInDevelopment;
         private Boolean pinningDisabled;
+        private String customBaseURL;
 
         private Builder() {
         }
@@ -184,6 +200,40 @@ public class NetworkOptions {
         @NonNull
         public Builder setPinningDisabled(boolean disabled) {
             this.pinningDisabled = disabled;
+            return this;
+        }
+
+        /**
+         * Routes all mParticle endpoint traffic (config, events, identity, alias, audience)
+         * through a single CNAME host. Must be an HTTPS URL (e.g. https://rkt.example.com).
+         * Non-HTTPS values are rejected with a warning log and the property is left unset.
+         *
+         * <p>When set, this property takes priority over any per-endpoint domain mapping.
+         * Any path, query, or fragment on the URL is ignored — only the scheme, host, and
+         * port are used.
+         *
+         * <p>Certificate pinning: if pinning is enabled (default), supply certificates for
+         * the CNAME domain via the relevant {@link DomainMapping}, or disable pinning via
+         * {@link #setPinningDisabled(boolean)} / {@link #setPinningDisabledInDevelopment(boolean)}.
+         *
+         * @param customBaseURL HTTPS URL containing the CNAME host
+         */
+        @NonNull
+        public Builder setCustomBaseURL(@NonNull String customBaseURL) {
+            try {
+                java.net.URL parsed = new java.net.URL(customBaseURL);
+                if (!"https".equalsIgnoreCase(parsed.getProtocol()) || MPUtility.isEmpty(parsed.getHost())) {
+                    Logger.warning("NetworkOptions: customBaseURL must use HTTPS and include a valid host — value ignored.");
+                    return this;
+                }
+                StringBuilder host = new StringBuilder(parsed.getHost());
+                if (parsed.getPort() != -1) {
+                    host.append(":").append(parsed.getPort());
+                }
+                this.customBaseURL = host.toString();
+            } catch (java.net.MalformedURLException e) {
+                Logger.warning("NetworkOptions: customBaseURL is malformed — value ignored.");
+            }
             return this;
         }
 

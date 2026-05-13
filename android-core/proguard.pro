@@ -84,6 +84,10 @@
 
 -keep class com.mparticle.MPEvent$* { *; }
 -keep class com.mparticle.MParticle { *; }
+-keep class com.mparticle.MParticle$Internal { *; }
+-keep class com.mparticle.internal.ConfigManager {
+    public com.mparticle.networking.NetworkOptions getNetworkOptions();
+}
 -keep class com.mparticle.MParticle$EventType { *; }
 -keep class com.mparticle.MParticle$InstallType { *; }
 -keep class com.mparticle.MParticle$IdentityType { *; }
