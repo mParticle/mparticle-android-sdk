@@ -8,7 +8,6 @@ import com.mparticle.BaseEvent
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
-import com.mparticle.MpRoktEventCallback
 import com.mparticle.WrapperSdk
 import com.mparticle.WrapperSdkVersion
 import com.mparticle.commerce.CommerceEvent
