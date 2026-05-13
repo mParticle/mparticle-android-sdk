@@ -37,7 +37,6 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 import java.math.BigDecimal
@@ -276,46 +275,7 @@ class RoktKit :
         return userAttributes
     }
 
-    override fun events(identifier: String): Flow<com.mparticle.RoktEvent> = Rokt.events(identifier).map { event ->
-        when (event) {
-            is RoktEvent.HideLoadingIndicator -> com.mparticle.RoktEvent.HideLoadingIndicator
-            is RoktEvent.ShowLoadingIndicator -> com.mparticle.RoktEvent.ShowLoadingIndicator
-            is RoktEvent.FirstPositiveEngagement -> com.mparticle.RoktEvent.FirstPositiveEngagement(
-                event.id,
-            )
-
-            is RoktEvent.PositiveEngagement -> com.mparticle.RoktEvent.PositiveEngagement(
-                event.id,
-            )
-
-            is RoktEvent.OfferEngagement -> com.mparticle.RoktEvent.OfferEngagement(event.id)
-            is RoktEvent.OpenUrl -> com.mparticle.RoktEvent.OpenUrl(event.id, event.url)
-            is RoktEvent.PlacementClosed -> com.mparticle.RoktEvent.PlacementClosed(event.id)
-            is RoktEvent.PlacementCompleted -> com.mparticle.RoktEvent.PlacementCompleted(
-                event.id,
-            )
-
-            is RoktEvent.PlacementFailure -> com.mparticle.RoktEvent.PlacementFailure(event.id)
-            is RoktEvent.PlacementInteractive -> com.mparticle.RoktEvent.PlacementInteractive(
-                event.id,
-            )
-
-            is RoktEvent.PlacementReady -> com.mparticle.RoktEvent.PlacementReady(event.id)
-            is RoktEvent.CartItemInstantPurchase -> com.mparticle.RoktEvent.CartItemInstantPurchase(
-                placementId = event.placementId,
-                cartItemId = event.cartItemId,
-                catalogItemId = event.catalogItemId,
-                currency = event.currency,
-                description = event.description,
-                linkedProductId = event.linkedProductId,
-                totalPrice = event.totalPrice,
-                quantity = event.quantity,
-                unitPrice = event.unitPrice,
-            )
-
-            is RoktEvent.InitComplete -> com.mparticle.RoktEvent.InitComplete(event.success)
-        }
-    }
+    override fun events(identifier: String): Flow<RoktEvent> = Rokt.events(identifier)
 
     override fun setWrapperSdkVersion(wrapperSdkVersion: WrapperSdkVersion) {
         val sdkFrameworkType = when (wrapperSdkVersion.sdk) {

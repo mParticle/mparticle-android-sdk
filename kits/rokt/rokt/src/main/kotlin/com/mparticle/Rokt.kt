@@ -9,6 +9,7 @@ import com.mparticle.kits.RoktKitRequestHelper
 import com.mparticle.rokt.PlacementOptions
 import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
+import com.rokt.roktsdk.RoktEvent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import java.lang.ref.WeakReference
@@ -59,7 +60,7 @@ class Rokt internal constructor(private val mConfigManager: Any, private val mKi
      * Get a Flow of Rokt events for the specified identifier.
      *
      * @param identifier The placement identifier to listen for events
-     * @return A Flow emitting RoktEvent objects
+     * @return A Flow emitting native RoktEvent objects
      */
     fun events(identifier: String): Flow<RoktEvent> = if (isEnabled()) {
         resolveRoktKit()?.second?.events(identifier) ?: flowOf()
