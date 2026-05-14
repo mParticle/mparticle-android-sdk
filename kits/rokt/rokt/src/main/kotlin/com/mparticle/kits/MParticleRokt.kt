@@ -1,4 +1,4 @@
-package com.mparticle.rokt
+package com.mparticle.kits
 
 import com.mparticle.MParticle
 import com.mparticle.kits.Rokt
