@@ -45,6 +45,27 @@ class UploadServiceTest : BaseMPServiceTest() {
         assertEquals(6, UploadService.getReadyUploads(database).size)
     }
 
+    @Test
+    @Throws(JSONException::class)
+    fun testUploadSettingsPreserveCustomBaseURL() {
+        val uploadSettings = UploadSettings(
+            "apiKey",
+            "secret",
+            NetworkOptions
+                .builder()
+                .setCustomBaseURL("https://rkt.example.com:8443")
+                .build(),
+            "",
+            "",
+        )
+        UploadService.insertUpload(database, uploadJson(System.currentTimeMillis()), uploadSettings)
+
+        val readyUploads = UploadService.getReadyUploads(database)
+
+        assertEquals(1, readyUploads.size)
+        assertEquals("rkt.example.com:8443", readyUploads[0].uploadSettings.networkOptions.customBaseURL)
+    }
+
     @Throws(JSONException::class)
     private fun uploadJson(timestampMillis: Long): JSONObject = JSONObject()
         .put(Constants.MessageKey.TIMESTAMP, timestampMillis)
