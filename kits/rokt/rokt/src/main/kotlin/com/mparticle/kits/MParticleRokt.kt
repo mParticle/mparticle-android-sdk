@@ -1,19 +1,28 @@
 package com.mparticle.kits
 
 import com.mparticle.MParticle
-import com.mparticle.kits.Rokt
 
 /**
  * Java-friendly accessors for the legacy Rokt API object.
  */
 object MParticleRokt {
+    @Volatile
+    private var rokt: Rokt? = null
+
     @Suppress("FunctionName")
     @JvmStatic
     fun Rokt(): Rokt {
         val mParticle = requireNotNull(MParticle.getInstance()) {
             "MParticle must be started before calling MParticleRokt.Rokt()"
         }
-        return createRokt(mParticle)
+
+        synchronized(this) {
+            rokt?.let { return it }
+
+            return createRokt(mParticle).also {
+                rokt = it
+            }
+        }
     }
 }
 
