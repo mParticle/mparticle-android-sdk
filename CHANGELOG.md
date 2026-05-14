@@ -1,3 +1,21 @@
+## [5.79.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.78.5...v5.79.0) (2026-05-14)
+
+
+### Features
+
+* add customBaseURL CNAME support to NetworkOptions ([#701](https://github.com/mParticle/mparticle-android-sdk/issues/701)) ([5285149](https://github.com/mParticle/mparticle-android-sdk/commit/5285149118b58cbd5cf4fb90cb58627deb7538b9)), closes [mparticle-apple-sdk#760](https://github.com/mParticle/mparticle-apple-sdk/issues/760)
+* Add max persistence age override option [TRIAGE-608] ([#699](https://github.com/mParticle/mparticle-android-sdk/issues/699)) ([ca88322](https://github.com/mParticle/mparticle-android-sdk/commit/ca88322ac7ef8649ed111cf28afb81d99cdb271a))
+
+
+### Bug Fixes
+
+* increase MPLatch timeout from 5s to 30s ([#695](https://github.com/mParticle/mparticle-android-sdk/issues/695)) ([20f723f](https://github.com/mParticle/mparticle-android-sdk/commit/20f723f27cf296c879ceebc9d234edca039ab371))
+
+
+### Updates & Maintenance
+
+* Update submodules ([59a4a9a](https://github.com/mParticle/mparticle-android-sdk/commit/59a4a9a68e3addfaf5c4eea1afd396889721819d))
+
 ## [5.78.5](https://github.com/mParticle/mparticle-android-sdk/compare/v5.78.4...v5.78.5) (2026-03-25)
 
 
