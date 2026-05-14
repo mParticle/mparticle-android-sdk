@@ -10,8 +10,6 @@ import com.mparticle.BuildConfig
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.MParticle.IdentityType
-import com.mparticle.MpRoktEventCallback
-import com.mparticle.UnloadReasons
 import com.mparticle.WrapperSdk
 import com.mparticle.WrapperSdkVersion
 import com.mparticle.commerce.CommerceEvent
@@ -20,15 +18,14 @@ import com.mparticle.internal.Logger
 import com.mparticle.kits.KitIntegration.CommerceListener
 import com.mparticle.kits.KitIntegration.IdentityListener
 import com.mparticle.kits.KitIntegration.RoktListener
-import com.mparticle.rokt.PlacementOptions
-import com.mparticle.rokt.RoktConfig
-import com.mparticle.rokt.RoktEmbeddedView
+import com.rokt.roktsdk.PlacementOptions
 import com.rokt.roktsdk.Rokt
 import com.rokt.roktsdk.Rokt.RoktCallback
 import com.rokt.roktsdk.Rokt.SdkFrameworkType.Android
 import com.rokt.roktsdk.Rokt.SdkFrameworkType.Cordova
 import com.rokt.roktsdk.Rokt.SdkFrameworkType.Flutter
 import com.rokt.roktsdk.Rokt.SdkFrameworkType.ReactNative
+import com.rokt.roktsdk.RoktConfig
 import com.rokt.roktsdk.RoktEvent
 import com.rokt.roktsdk.RoktWidgetDimensionCallBack
 import com.rokt.roktsdk.Widget
@@ -37,7 +34,6 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 import java.math.BigDecimal
@@ -56,9 +52,10 @@ class RoktKit :
     CommerceListener,
     IdentityListener,
     RoktListener,
+    RoktKitBridge,
     Rokt.RoktCallback {
     private var applicationContext: Context? = null
-    private var mpRoktEventCallback: MpRoktEventCallback? = null
+    private var roktCallback: RoktCallback? = null
     private var hashedEmailUserIdentityType: String? = null
     override fun getName(): String = NAME
 
@@ -183,11 +180,11 @@ class RoktKit :
     override fun selectPlacements(
         viewName: String,
         attributes: Map<String, String>,
-        mpRoktEventCallback: MpRoktEventCallback?,
+        roktCallback: RoktCallback?,
         placeHolders: MutableMap<String, WeakReference<RoktEmbeddedView>>?,
         fontTypefaces: MutableMap<String, WeakReference<Typeface>>?,
         filterUser: FilteredMParticleUser?,
-        mpRoktConfig: RoktConfig?,
+        roktConfig: RoktConfig?,
         placementOptions: PlacementOptions?,
     ) {
         val placeholders: Map<String, WeakReference<Widget>>? = placeHolders?.mapNotNull { entry ->
@@ -210,9 +207,8 @@ class RoktKit :
             entry.key to WeakReference(widget)
         }?.toMap()
 
-        this.mpRoktEventCallback = mpRoktEventCallback
+        this.roktCallback = roktCallback
         val finalAttributes = prepareFinalAttributes(filterUser, attributes)
-        val roktConfig = mpRoktConfig?.toRoktSdkConfig()
         Rokt.execute(
             viewName,
             finalAttributes,
@@ -221,7 +217,7 @@ class RoktKit :
             placeholders.takeIf { it?.isNotEmpty() == true },
             fontTypefaces.takeIf { it?.isNotEmpty() == true },
             roktConfig,
-            placementOptions?.toRoktSdkPlacementOptions(),
+            placementOptions,
         )
     }
 
@@ -275,46 +271,7 @@ class RoktKit :
         return userAttributes
     }
 
-    override fun events(identifier: String): Flow<com.mparticle.RoktEvent> = Rokt.events(identifier).map { event ->
-        when (event) {
-            is RoktEvent.HideLoadingIndicator -> com.mparticle.RoktEvent.HideLoadingIndicator
-            is RoktEvent.ShowLoadingIndicator -> com.mparticle.RoktEvent.ShowLoadingIndicator
-            is RoktEvent.FirstPositiveEngagement -> com.mparticle.RoktEvent.FirstPositiveEngagement(
-                event.id,
-            )
-
-            is RoktEvent.PositiveEngagement -> com.mparticle.RoktEvent.PositiveEngagement(
-                event.id,
-            )
-
-            is RoktEvent.OfferEngagement -> com.mparticle.RoktEvent.OfferEngagement(event.id)
-            is RoktEvent.OpenUrl -> com.mparticle.RoktEvent.OpenUrl(event.id, event.url)
-            is RoktEvent.PlacementClosed -> com.mparticle.RoktEvent.PlacementClosed(event.id)
-            is RoktEvent.PlacementCompleted -> com.mparticle.RoktEvent.PlacementCompleted(
-                event.id,
-            )
-
-            is RoktEvent.PlacementFailure -> com.mparticle.RoktEvent.PlacementFailure(event.id)
-            is RoktEvent.PlacementInteractive -> com.mparticle.RoktEvent.PlacementInteractive(
-                event.id,
-            )
-
-            is RoktEvent.PlacementReady -> com.mparticle.RoktEvent.PlacementReady(event.id)
-            is RoktEvent.CartItemInstantPurchase -> com.mparticle.RoktEvent.CartItemInstantPurchase(
-                placementId = event.placementId,
-                cartItemId = event.cartItemId,
-                catalogItemId = event.catalogItemId,
-                currency = event.currency,
-                description = event.description,
-                linkedProductId = event.linkedProductId,
-                totalPrice = event.totalPrice,
-                quantity = event.quantity,
-                unitPrice = event.unitPrice,
-            )
-
-            is RoktEvent.InitComplete -> com.mparticle.RoktEvent.InitComplete(event.success)
-        }
-    }
+    override fun events(identifier: String): Flow<RoktEvent> = Rokt.events(identifier)
 
     override fun setWrapperSdkVersion(wrapperSdkVersion: WrapperSdkVersion) {
         val sdkFrameworkType = when (wrapperSdkVersion.sdk) {
@@ -359,13 +316,16 @@ class RoktKit :
 
     suspend fun runComposableWithCallback(
         attributes: Map<String, String>,
-        mpRoktEventCallback: MpRoktEventCallback?,
+        roktCallback: RoktCallback?,
         onResult: (Map<String, String>, RoktCallback) -> Unit,
     ) {
-        val instance = MParticle.getInstance()
         deferredAttributes = CompletableDeferred()
-        instance?.Internal()?.kitManager?.roktKitApi?.prepareAttributesAsync(attributes)
-        this.mpRoktEventCallback = mpRoktEventCallback
+        RoktKitRequestHelper.prepareAttributesAsync(
+            kitIntegration = this,
+            roktListener = this,
+            attributes = attributes,
+        )
+        this.roktCallback = roktCallback
         CoroutineScope(Dispatchers.Default).launch {
             val resultAttributes = deferredAttributes!!.await()
             onResult(resultAttributes, this@RoktKit)
@@ -469,30 +429,19 @@ class RoktKit :
     }
 
     override fun onLoad() {
-        mpRoktEventCallback?.onLoad()
+        roktCallback?.onLoad()
     }
 
     override fun onShouldHideLoadingIndicator() {
-        mpRoktEventCallback?.onShouldHideLoadingIndicator()
+        roktCallback?.onShouldHideLoadingIndicator()
     }
 
     override fun onShouldShowLoadingIndicator() {
-        mpRoktEventCallback?.onShouldShowLoadingIndicator()
+        roktCallback?.onShouldShowLoadingIndicator()
     }
 
     override fun onUnload(reason: Rokt.UnloadReasons) {
-        mpRoktEventCallback?.onUnload(
-            when (reason) {
-                Rokt.UnloadReasons.NO_OFFERS -> UnloadReasons.NO_OFFERS
-                Rokt.UnloadReasons.FINISHED -> UnloadReasons.FINISHED
-                Rokt.UnloadReasons.TIMEOUT -> UnloadReasons.TIMEOUT
-                Rokt.UnloadReasons.NETWORK_ERROR -> UnloadReasons.NETWORK_ERROR
-                Rokt.UnloadReasons.NO_WIDGET -> UnloadReasons.NO_WIDGET
-                Rokt.UnloadReasons.INIT_FAILED -> UnloadReasons.INIT_FAILED
-                Rokt.UnloadReasons.UNKNOWN_PLACEHOLDER -> UnloadReasons.UNKNOWN_PLACEHOLDER
-                Rokt.UnloadReasons.UNKNOWN -> UnloadReasons.UNKNOWN
-            },
-        )
+        roktCallback?.onUnload(reason)
     }
 }
 

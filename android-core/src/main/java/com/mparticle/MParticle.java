@@ -110,7 +110,6 @@ public class MParticle {
     protected boolean locationTrackingEnabled = false;
     @NonNull
     protected Internal mInternal = new Internal();
-    protected Rokt rokt;
     private IdentityStateListener mDeferredModifyPushRegistrationListener;
     @NonNull
     private WrapperSdkVersion wrapperSdkVersion = new WrapperSdkVersion(WrapperSdk.WrapperNone, null);
@@ -190,7 +189,6 @@ public class MParticle {
                     instance = new MParticle(options);
                     instance.mKitManager = new KitFrameworkWrapper(options.getContext(), instance.mMessageManager, instance.Internal().getConfigManager(), instance.Internal().getAppStateManager(), options);
                     instance.mIdentityApi = new IdentityApi(options.getContext(), instance.mInternal.getAppStateManager(), instance.mMessageManager, instance.mConfigManager, instance.mKitManager, options.getOperatingSystem());
-                    instance.rokt = new Rokt(instance.mConfigManager, instance.mKitManager);
 
                     // Check if we've switched workspaces on startup
                     UploadSettings lastUploadSettings = instance.mConfigManager.getLastUploadSettings();
@@ -1128,11 +1126,6 @@ public class MParticle {
     public Internal Internal() {
         return mInternal;
     }
-    @NonNull
-    public Rokt Rokt() {
-        return rokt;
-    }
-
     void refreshConfiguration() {
         Logger.debug("Refreshing configuration...");
         mMessageManager.refreshConfiguration();
