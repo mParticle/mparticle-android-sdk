@@ -286,7 +286,7 @@ class RoktKit :
 
             is RoktEvent.PlacementReady -> com.mparticle.RoktEvent.PlacementReady(event.identifier)
             is RoktEvent.CartItemInstantPurchase -> com.mparticle.RoktEvent.CartItemInstantPurchase(
-                placementId = event.identifier,
+                identifier = event.identifier,
                 cartItemId = event.cartItemId,
                 catalogItemId = event.catalogItemId,
                 currency = event.currency,
@@ -311,8 +311,8 @@ class RoktKit :
         Rokt.setFrameworkType(sdkFrameworkType)
     }
 
-    override fun purchaseFinalized(placementId: String, catalogItemId: String, status: Boolean) {
-        Rokt.purchaseFinalized(placementId, catalogItemId, status)
+    override fun purchaseFinalized(identifier: String, catalogItemId: String, success: Boolean) {
+        Rokt.purchaseFinalized(identifier, catalogItemId, success)
     }
 
     override fun close() {

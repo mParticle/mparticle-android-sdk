@@ -72,9 +72,9 @@ internal class RoktKitApiImpl(private val roktListener: KitIntegration.RoktListe
         flowOf()
     }
 
-    override fun purchaseFinalized(placementId: String, catalogItemId: String, status: Boolean) {
+    override fun purchaseFinalized(identifier: String, catalogItemId: String, success: Boolean) {
         try {
-            roktListener.purchaseFinalized(placementId, catalogItemId, status)
+            roktListener.purchaseFinalized(identifier, catalogItemId, success)
         } catch (e: Exception) {
             Logger.warning("Failed to call purchaseFinalized for Rokt Kit: ${e.message}")
         }

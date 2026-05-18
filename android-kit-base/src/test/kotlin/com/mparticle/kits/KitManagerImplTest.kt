@@ -1835,11 +1835,11 @@ class KitManagerImplTest {
         }
 
         override fun purchaseFinalized(
-            placementId: String,
+            identifier: String,
             catalogItemId: String,
-            status: Boolean,
+            success: Boolean,
         ) {
-            Logger.info("purchaseFinalized with placementId: $placementId  catalogItemId : $catalogItemId status : $status ")
+            Logger.info("purchaseFinalized with identifier: $identifier  catalogItemId : $catalogItemId success : $success ")
         }
 
         override fun close() {

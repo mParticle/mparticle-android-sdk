@@ -45,11 +45,11 @@ interface RoktKitApi {
     /**
      * Notify Rokt that a purchase has been finalized.
      *
-     * @param placementId The placement identifier
+     * @param identifier The placement identifier
      * @param catalogItemId The catalog item identifier
-     * @param status Whether the purchase was successful
+     * @param success Whether the purchase was successful
      */
-    fun purchaseFinalized(placementId: String, catalogItemId: String, status: Boolean)
+    fun purchaseFinalized(identifier: String, catalogItemId: String, success: Boolean)
 
     /**
      * Close any active Rokt placements.

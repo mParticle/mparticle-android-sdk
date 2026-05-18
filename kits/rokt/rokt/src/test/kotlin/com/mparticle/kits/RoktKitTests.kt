@@ -942,7 +942,7 @@ class RoktKitTests {
         assertEquals(
             result,
             com.mparticle.RoktEvent.CartItemInstantPurchase(
-                placementId = "test-placement-purchase",
+                identifier = "test-placement-purchase",
                 cartItemId = "cart-item-123",
                 catalogItemId = "catalog-item-456",
                 currency = "USD",
