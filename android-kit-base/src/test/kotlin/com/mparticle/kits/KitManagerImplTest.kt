@@ -8,7 +8,6 @@ import com.mparticle.BaseEvent
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
-import com.mparticle.MpRoktEventCallback
 import com.mparticle.RoktEvent
 import com.mparticle.WrapperSdk
 import com.mparticle.WrapperSdkVersion
@@ -1317,11 +1316,10 @@ class KitManagerImplTest {
 
         val roktApi = manager.getRoktKitApi()
         Assert.assertNotNull(roktApi)
-        roktApi!!.selectPlacements("Test", attributes, null, null, null, null, placementOptions)
+        roktApi!!.selectPlacements("Test", attributes, null, null, null, placementOptions)
 
         val optionsCaptor = ArgumentCaptor.forClass(PlacementOptions::class.java)
         verify(roktListener as KitIntegration.RoktListener).selectPlacements(
-            any(),
             any(),
             any(),
             any(),
@@ -1354,11 +1352,10 @@ class KitManagerImplTest {
 
         val roktApi = manager.getRoktKitApi()
         Assert.assertNotNull(roktApi)
-        roktApi!!.selectPlacements("Test", attributes, null, null, null, null)
+        roktApi!!.selectPlacements("Test", attributes, null, null, null)
 
         val optionsCaptor = ArgumentCaptor.forClass(PlacementOptions::class.java)
         verify(roktListener as KitIntegration.RoktListener).selectPlacements(
-            any(),
             any(),
             any(),
             any(),
@@ -1809,7 +1806,6 @@ class KitManagerImplTest {
         override fun selectPlacements(
             viewName: String,
             attributes: MutableMap<String, String>,
-            mpRoktEventCallback: MpRoktEventCallback?,
             placeHolders: MutableMap<String, WeakReference<RoktEmbeddedView>>?,
             fontTypefaces: MutableMap<String, WeakReference<Typeface>>?,
             user: FilteredMParticleUser?,

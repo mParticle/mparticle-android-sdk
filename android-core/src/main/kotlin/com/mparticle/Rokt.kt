@@ -20,7 +20,6 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
      *
      * @param identifier The placement identifier
      * @param attributes User attributes to pass to Rokt
-     * @param callbacks Optional callback for Rokt events
      * @param embeddedViews Optional map of embedded view placeholders
      * @param fontTypefaces Optional map of font typefaces
      * @param config Optional Rokt configuration
@@ -29,7 +28,6 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
     fun selectPlacements(
         identifier: String,
         attributes: Map<String, String>,
-        callbacks: MpRoktEventCallback? = null,
         embeddedViews: Map<String, WeakReference<RoktEmbeddedView>>? = null,
         fontTypefaces: Map<String, WeakReference<Typeface>>? = null,
         config: RoktConfig? = null,
@@ -37,7 +35,7 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
         if (mConfigManager.isEnabled) {
             val roktApi = mKitManager.roktKitApi
             if (roktApi != null) {
-                roktApi.selectPlacements(identifier, HashMap(attributes), callbacks, embeddedViews, fontTypefaces, config, buildPlacementOptions())
+                roktApi.selectPlacements(identifier, HashMap(attributes), embeddedViews, fontTypefaces, config, buildPlacementOptions())
             } else {
                 Logger.warning("Rokt Kit is not available. Make sure the Rokt Kit is included in your app.")
             }

@@ -15,7 +15,6 @@ import androidx.annotation.Nullable;
 import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
-import com.mparticle.MpRoktEventCallback;
 import com.mparticle.RoktEvent;
 import com.mparticle.WrapperSdkVersion;
 import com.mparticle.commerce.CommerceEvent;
@@ -601,7 +600,6 @@ public abstract class KitIntegration {
 
         void selectPlacements(@NonNull String viewName,
                               @NonNull Map<String, String> attributes,
-                              @Nullable MpRoktEventCallback mpRoktEventCallback,
                               @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
                               @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
                               @Nullable FilteredMParticleUser user,

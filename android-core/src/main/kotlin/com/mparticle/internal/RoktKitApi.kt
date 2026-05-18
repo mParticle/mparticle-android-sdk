@@ -1,7 +1,6 @@
 package com.mparticle.internal
 
 import android.graphics.Typeface
-import com.mparticle.MpRoktEventCallback
 import com.mparticle.RoktEvent
 import com.mparticle.rokt.PlacementOptions
 import com.mparticle.rokt.RoktConfig
@@ -21,7 +20,6 @@ interface RoktKitApi {
      *
      * @param viewName The identifier for the placement view
      * @param attributes User attributes to pass to Rokt
-     * @param mpRoktEventCallback Optional callback for Rokt events
      * @param placeHolders Optional map of embedded view placeholders
      * @param fontTypefaces Optional map of font typefaces
      * @param config Optional Rokt configuration
@@ -30,7 +28,6 @@ interface RoktKitApi {
     fun selectPlacements(
         viewName: String,
         attributes: Map<String, String>,
-        mpRoktEventCallback: MpRoktEventCallback?,
         placeHolders: Map<String, WeakReference<RoktEmbeddedView>>?,
         fontTypefaces: Map<String, WeakReference<Typeface>>?,
         config: RoktConfig?,

@@ -2,7 +2,6 @@ package com.mparticle.kits
 
 import android.graphics.Typeface
 import com.mparticle.MParticle
-import com.mparticle.MpRoktEventCallback
 import com.mparticle.RoktEvent
 import com.mparticle.identity.IdentityApi
 import com.mparticle.identity.IdentityApiRequest
@@ -31,7 +30,6 @@ internal class RoktKitApiImpl(private val roktListener: KitIntegration.RoktListe
     override fun selectPlacements(
         viewName: String,
         attributes: Map<String, String>,
-        mpRoktEventCallback: MpRoktEventCallback?,
         placeHolders: Map<String, WeakReference<RoktEmbeddedView>>?,
         fontTypefaces: Map<String, WeakReference<Typeface>>?,
         config: RoktConfig?,
@@ -54,7 +52,6 @@ internal class RoktKitApiImpl(private val roktListener: KitIntegration.RoktListe
                 roktListener.selectPlacements(
                     viewName,
                     finalAttributes,
-                    mpRoktEventCallback,
                     placeHolders,
                     fontTypefaces,
                     FilteredMParticleUser.getInstance(user?.id ?: 0L, kitIntegration),

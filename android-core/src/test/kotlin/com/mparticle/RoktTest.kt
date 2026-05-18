@@ -84,28 +84,9 @@ class RoktTest {
 
         val config = RoktConfig.Builder().colorMode(RoktConfig.ColorMode.DARK).build()
 
-        val callbacks =
-            object : MpRoktEventCallback {
-                override fun onLoad() {
-                    println("View loaded")
-                }
-
-                override fun onUnload(reason: UnloadReasons) {
-                    println("View unloaded due to: $reason")
-                }
-
-                override fun onShouldShowLoadingIndicator() {
-                    println("Show loading indicator")
-                }
-
-                override fun onShouldHideLoadingIndicator() {
-                    println("Hide loading indicator")
-                }
-            }
         rokt.selectPlacements(
             identifier = "testView",
             attributes = attributes,
-            callbacks = callbacks,
             embeddedViews = placeholders,
             fontTypefaces = fonts,
             config = config,
@@ -114,7 +95,6 @@ class RoktTest {
         verify(roktKitApi).selectPlacements(
             eq("testView"),
             eq(attributes),
-            any(),
             any(),
             any(),
             any(),
@@ -138,7 +118,6 @@ class RoktTest {
             isNull(),
             isNull(),
             isNull(),
-            isNull(),
             any(),
         )
     }
@@ -153,7 +132,7 @@ class RoktTest {
             attributes = HashMap(),
         )
 
-        verify(roktKitApi, never()).selectPlacements(any(), any(), any(), any(), any(), any(), any())
+        verify(roktKitApi, never()).selectPlacements(any(), any(), any(), any(), any(), any())
     }
 
     @Test
@@ -276,7 +255,6 @@ class RoktTest {
         verify(roktKitApi).selectPlacements(
             eq("testView"),
             any(),
-            isNull(),
             isNull(),
             isNull(),
             isNull(),

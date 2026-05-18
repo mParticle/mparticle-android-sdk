@@ -61,14 +61,13 @@ class RoktKitApiImplTest {
                 "country" to "US",
             )
 
-        roktApi.selectPlacements("Test", attributes, null, null, null, null, null)
+        roktApi.selectPlacements("Test", attributes, null, null, null, null)
 
         @Suppress("UNCHECKED_CAST")
         val attributesCaptor = ArgumentCaptor.forClass(Map::class.java) as ArgumentCaptor<Map<String, String>>
         verify(roktListener).selectPlacements(
             any(),
             attributesCaptor.capture(),
-            any(),
             any(),
             any(),
             any(),
@@ -96,11 +95,10 @@ class RoktKitApiImplTest {
 
         val placementOptions = PlacementOptions(jointSdkSelectPlacements = 123L)
 
-        roktApi.selectPlacements("Test", emptyMap(), null, null, null, null, placementOptions)
+        roktApi.selectPlacements("Test", emptyMap(), null, null, null, placementOptions)
 
         val optionsCaptor = ArgumentCaptor.forClass(PlacementOptions::class.java)
         verify(roktListener).selectPlacements(
-            any(),
             any(),
             any(),
             any(),
