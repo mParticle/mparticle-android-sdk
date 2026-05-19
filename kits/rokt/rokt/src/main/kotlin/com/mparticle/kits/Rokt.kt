@@ -1,20 +1,20 @@
-package com.mparticle
+package com.mparticle.kits
 
 import android.graphics.Typeface
-import com.mparticle.internal.ConfigManager
+import com.mparticle.MParticle
 import com.mparticle.internal.KitManager
 import com.mparticle.internal.Logger
-import com.mparticle.internal.listeners.ApiClass
-import com.mparticle.rokt.PlacementOptions
-import com.mparticle.rokt.RoktConfig
-import com.mparticle.rokt.RoktEmbeddedView
+import com.rokt.roktsdk.PlacementOptions
+import com.rokt.roktsdk.RoktConfig
+import com.rokt.roktsdk.RoktEvent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import java.lang.ref.WeakReference
 
-@ApiClass
-class Rokt internal constructor(private val mConfigManager: ConfigManager, private val mKitManager: KitManager) {
-
+/**
+ * Public facade for interacting with the Rokt Kit through mParticle.
+ */
+class Rokt internal constructor(private val mKitManager: KitManager) {
     /**
      * Display a Rokt placement with the specified parameters.
      *
@@ -32,10 +32,20 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
         fontTypefaces: Map<String, WeakReference<Typeface>>? = null,
         config: RoktConfig? = null,
     ) {
-        if (mConfigManager.isEnabled) {
-            val roktApi = mKitManager.roktKitApi
-            if (roktApi != null) {
-                roktApi.selectPlacements(identifier, HashMap(attributes), embeddedViews, fontTypefaces, config, buildPlacementOptions())
+        if (isEnabled()) {
+            val resolved = resolveRoktKit()
+            if (resolved != null) {
+                val (kitIntegration, roktListener) = resolved
+                RoktKitRequestHelper.selectPlacements(
+                    kitIntegration = kitIntegration,
+                    roktListener = roktListener,
+                    viewName = identifier,
+                    attributes = HashMap(attributes),
+                    placeHolders = embeddedViews,
+                    fontTypefaces = fontTypefaces,
+                    config = config,
+                    options = buildPlacementOptions(),
+                )
             } else {
                 Logger.warning("Rokt Kit is not available. Make sure the Rokt Kit is included in your app.")
             }
@@ -48,8 +58,8 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
      * @param identifier The placement identifier to listen for events
      * @return A Flow emitting RoktEvent objects
      */
-    fun events(identifier: String): Flow<RoktEvent> = if (mConfigManager.isEnabled) {
-        mKitManager.roktKitApi?.events(identifier) ?: flowOf()
+    fun events(identifier: String): Flow<RoktEvent> = if (isEnabled()) {
+        resolveRoktKit()?.second?.events(identifier) ?: flowOf()
     } else {
         flowOf()
     }
@@ -62,8 +72,8 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
      * @param success Whether the purchase was successful
      */
     fun purchaseFinalized(identifier: String, catalogItemId: String, success: Boolean) {
-        if (mConfigManager.isEnabled) {
-            mKitManager.roktKitApi?.purchaseFinalized(identifier, catalogItemId, success)
+        if (isEnabled()) {
+            resolveRoktKit()?.second?.purchaseFinalized(identifier, catalogItemId, success)
         }
     }
 
@@ -71,8 +81,8 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
      * Close any active Rokt placements.
      */
     fun close() {
-        if (mConfigManager.isEnabled) {
-            mKitManager.roktKitApi?.close()
+        if (isEnabled()) {
+            resolveRoktKit()?.second?.close()
         }
     }
 
@@ -87,8 +97,8 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
      * @param sessionId The session id to be set. Must be a non-empty string.
      */
     fun setSessionId(sessionId: String) {
-        if (mConfigManager.isEnabled) {
-            mKitManager.roktKitApi?.setSessionId(sessionId)
+        if (isEnabled()) {
+            resolveRoktKit()?.second?.setSessionId(sessionId)
         }
     }
 
@@ -97,8 +107,8 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
      *
      * @return The session id or null if no session is present or SDK is not initialized.
      */
-    fun getSessionId(): String? = if (mConfigManager.isEnabled) {
-        mKitManager.roktKitApi?.getSessionId()
+    fun getSessionId(): String? = if (isEnabled()) {
+        resolveRoktKit()?.second?.getSessionId()
     } else {
         null
     }
@@ -108,13 +118,33 @@ class Rokt internal constructor(private val mConfigManager: ConfigManager, priva
      *
      * @param attributes The attributes to prepare
      */
-    fun prepareAttributesAsync(attributes: Map<String, String>) {
-        if (mConfigManager.isEnabled) {
-            mKitManager.roktKitApi?.prepareAttributesAsync(attributes)
+    internal fun prepareAttributesAsync(attributes: Map<String, String>) {
+        if (isEnabled()) {
+            val resolved = resolveRoktKit()
+            if (resolved != null) {
+                val (kitIntegration, roktListener) = resolved
+                RoktKitRequestHelper.prepareAttributesAsync(
+                    kitIntegration = kitIntegration,
+                    roktListener = roktListener,
+                    attributes = attributes,
+                )
+            }
         }
     }
 
+    private fun resolveRoktKit(): Pair<KitIntegration, RoktKitBridge>? {
+        if (!mKitManager.isKitActive(MParticle.ServiceProviders.ROKT)) {
+            return null
+        }
+        val kitInstance = mKitManager.getKitInstance(MParticle.ServiceProviders.ROKT) as? KitIntegration ?: return null
+        val roktBridge = kitInstance as? RoktKitBridge ?: return null
+        return kitInstance to roktBridge
+    }
+
+    private fun isEnabled(): Boolean = mKitManager.isEnabled
+
     private fun buildPlacementOptions(): PlacementOptions = PlacementOptions(
         jointSdkSelectPlacements = System.currentTimeMillis(),
+        dynamicPerformanceMarkers = mapOf(),
     )
 }

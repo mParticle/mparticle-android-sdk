@@ -18,14 +18,13 @@ import com.mparticle.internal.Logger
 import com.mparticle.kits.KitIntegration.CommerceListener
 import com.mparticle.kits.KitIntegration.IdentityListener
 import com.mparticle.kits.KitIntegration.RoktListener
-import com.mparticle.rokt.PlacementOptions
-import com.mparticle.rokt.RoktConfig
-import com.mparticle.rokt.RoktEmbeddedView
+import com.rokt.roktsdk.PlacementOptions
 import com.rokt.roktsdk.Rokt
 import com.rokt.roktsdk.Rokt.SdkFrameworkType.Android
 import com.rokt.roktsdk.Rokt.SdkFrameworkType.Cordova
 import com.rokt.roktsdk.Rokt.SdkFrameworkType.Flutter
 import com.rokt.roktsdk.Rokt.SdkFrameworkType.ReactNative
+import com.rokt.roktsdk.RoktConfig
 import com.rokt.roktsdk.RoktEvent
 import com.rokt.roktsdk.RoktWidgetDimensionCallBack
 import com.rokt.roktsdk.Widget
@@ -34,7 +33,6 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 import java.math.BigDecimal
@@ -52,7 +50,8 @@ class RoktKit :
     KitIntegration(),
     CommerceListener,
     IdentityListener,
-    RoktListener {
+    RoktListener,
+    RoktKitBridge {
     private var applicationContext: Context? = null
     private var hashedEmailUserIdentityType: String? = null
     override fun getName(): String = NAME
@@ -176,7 +175,7 @@ class RoktKit :
         placeHolders: MutableMap<String, WeakReference<RoktEmbeddedView>>?,
         fontTypefaces: MutableMap<String, WeakReference<Typeface>>?,
         filterUser: FilteredMParticleUser?,
-        mpRoktConfig: RoktConfig?,
+        roktConfig: RoktConfig?,
         placementOptions: PlacementOptions?,
     ) {
         val placeholders: Map<String, WeakReference<Widget>>? = placeHolders?.mapNotNull { entry ->
@@ -196,7 +195,6 @@ class RoktKit :
         }?.toMap()
 
         val finalAttributes = prepareFinalAttributes(filterUser, attributes)
-        val roktConfig = mpRoktConfig?.toRoktSdkConfig()
 
         Rokt.selectPlacements(
             identifier = viewName,
@@ -206,7 +204,7 @@ class RoktKit :
             placeholders = placeholders.takeIf { it?.isNotEmpty() == true },
             fontTypefaces = fontTypefaces.takeIf { it?.isNotEmpty() == true },
             config = roktConfig,
-            placementOptions = placementOptions?.toRoktSdkPlacementOptions(),
+            placementOptions = placementOptions,
         )
     }
 
@@ -260,46 +258,7 @@ class RoktKit :
         return userAttributes
     }
 
-    override fun events(identifier: String): Flow<com.mparticle.RoktEvent> = Rokt.events(identifier).map { event ->
-        when (event) {
-            is RoktEvent.HideLoadingIndicator -> com.mparticle.RoktEvent.HideLoadingIndicator
-            is RoktEvent.ShowLoadingIndicator -> com.mparticle.RoktEvent.ShowLoadingIndicator
-            is RoktEvent.FirstPositiveEngagement -> com.mparticle.RoktEvent.FirstPositiveEngagement(
-                event.identifier,
-            )
-
-            is RoktEvent.PositiveEngagement -> com.mparticle.RoktEvent.PositiveEngagement(
-                event.identifier,
-            )
-
-            is RoktEvent.OfferEngagement -> com.mparticle.RoktEvent.OfferEngagement(event.identifier)
-            is RoktEvent.OpenUrl -> com.mparticle.RoktEvent.OpenUrl(event.identifier, event.url)
-            is RoktEvent.PlacementClosed -> com.mparticle.RoktEvent.PlacementClosed(event.identifier)
-            is RoktEvent.PlacementCompleted -> com.mparticle.RoktEvent.PlacementCompleted(
-                event.identifier,
-            )
-
-            is RoktEvent.PlacementFailure -> com.mparticle.RoktEvent.PlacementFailure(event.identifier)
-            is RoktEvent.PlacementInteractive -> com.mparticle.RoktEvent.PlacementInteractive(
-                event.identifier,
-            )
-
-            is RoktEvent.PlacementReady -> com.mparticle.RoktEvent.PlacementReady(event.identifier)
-            is RoktEvent.CartItemInstantPurchase -> com.mparticle.RoktEvent.CartItemInstantPurchase(
-                identifier = event.identifier,
-                cartItemId = event.cartItemId,
-                catalogItemId = event.catalogItemId,
-                currency = event.currency,
-                description = event.description,
-                linkedProductId = event.linkedProductId,
-                totalPrice = event.totalPrice,
-                quantity = event.quantity,
-                unitPrice = event.unitPrice,
-            )
-
-            is RoktEvent.InitComplete -> com.mparticle.RoktEvent.InitComplete(event.success)
-        }
-    }
+    override fun events(identifier: String): Flow<RoktEvent> = Rokt.events(identifier)
 
     override fun setWrapperSdkVersion(wrapperSdkVersion: WrapperSdkVersion) {
         val sdkFrameworkType = when (wrapperSdkVersion.sdk) {
@@ -343,9 +302,12 @@ class RoktKit :
     }
 
     suspend fun prepareComposableAttributes(attributes: Map<String, String>, onResult: (Map<String, String>) -> Unit) {
-        val instance = MParticle.getInstance()
         deferredAttributes = CompletableDeferred()
-        instance?.Internal()?.kitManager?.roktKitApi?.prepareAttributesAsync(attributes)
+        RoktKitRequestHelper.prepareAttributesAsync(
+            kitIntegration = this,
+            roktListener = this,
+            attributes = attributes,
+        )
         CoroutineScope(Dispatchers.Default).launch {
             val resultAttributes = deferredAttributes!!.await()
             onResult(resultAttributes)

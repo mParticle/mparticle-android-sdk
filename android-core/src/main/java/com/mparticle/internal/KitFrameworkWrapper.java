@@ -458,6 +458,11 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     @Override
+    public boolean isEnabled() {
+        return mCoreCallbacks.isEnabled();
+    }
+
+    @Override
     public boolean isKitActive(int kitId) {
         if (mKitManager != null) {
             return mKitManager.isKitActive(kitId);
@@ -660,15 +665,6 @@ public class KitFrameworkWrapper implements KitManager {
         if (mKitManager != null) {
             mKitManager.reset();
         }
-    }
-
-    @Override
-    @Nullable
-    public RoktKitApi getRoktKitApi() {
-        if (mKitManager != null) {
-            return mKitManager.getRoktKitApi();
-        }
-        return null;
     }
 
     @Override

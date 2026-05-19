@@ -164,7 +164,7 @@ class RoktKitTests {
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
-            mpRoktConfig = null,
+            roktConfig = null,
             placementOptions = null,
         )
 
@@ -221,7 +221,7 @@ class RoktKitTests {
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
-            mpRoktConfig = null,
+            roktConfig = null,
             placementOptions = null,
         )
 
@@ -270,7 +270,7 @@ class RoktKitTests {
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
-            mpRoktConfig = null,
+            roktConfig = null,
             placementOptions = null,
         )
 
@@ -319,7 +319,7 @@ class RoktKitTests {
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
-            mpRoktConfig = null,
+            roktConfig = null,
             placementOptions = null,
         )
 
@@ -386,7 +386,7 @@ class RoktKitTests {
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
-            mpRoktConfig = null,
+            roktConfig = null,
             placementOptions = null,
         )
 
@@ -461,7 +461,7 @@ class RoktKitTests {
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
-            mpRoktConfig = null,
+            roktConfig = null,
             placementOptions = null,
         )
 
@@ -761,31 +761,31 @@ class RoktKitTests {
     }
 
     @Test
-    fun testRoktEventMapping_ShowLoadingIndicator() = runTest {
+    fun testRoktEvents_ShowLoadingIndicator() = runTest {
         mockkObject(Rokt)
         val roktEvent = RoktEvent.ShowLoadingIndicator
         every { Rokt.events(any()) } returns flowOf(roktEvent)
 
         val result = roktKit.events("").first()
 
-        assertEquals(result, com.mparticle.RoktEvent.ShowLoadingIndicator)
+        assertEquals(result, RoktEvent.ShowLoadingIndicator)
         unmockkObject(Rokt)
     }
 
     @Test
-    fun testRoktEventMapping_HideLoadingIndicator() = runTest {
+    fun testRoktEvents_HideLoadingIndicator() = runTest {
         mockkObject(Rokt)
         val roktEvent = RoktEvent.HideLoadingIndicator
         every { Rokt.events(any()) } returns flowOf(roktEvent)
 
         val result = roktKit.events("").first()
 
-        assertEquals(result, com.mparticle.RoktEvent.HideLoadingIndicator)
+        assertEquals(result, RoktEvent.HideLoadingIndicator)
         unmockkObject(Rokt)
     }
 
     @Test
-    fun testRoktEventMapping_FirstPositiveEngagement() = runTest {
+    fun testRoktEvents_FirstPositiveEngagement() = runTest {
         mockkObject(Rokt)
         val placementId = "test-placement-123"
         val roktEvent = RoktEvent.FirstPositiveEngagement(
@@ -799,12 +799,12 @@ class RoktKitTests {
 
         val result = roktKit.events("").first()
 
-        assertEquals(result, com.mparticle.RoktEvent.FirstPositiveEngagement(placementId))
+        assertEquals(placementId, (result as RoktEvent.FirstPositiveEngagement).identifier)
         unmockkObject(Rokt)
     }
 
     @Test
-    fun testRoktEventMapping_PositiveEngagement() = runTest {
+    fun testRoktEvents_PositiveEngagement() = runTest {
         mockkObject(Rokt)
         val placementId = "test-placement-456"
         val roktEvent = RoktEvent.PositiveEngagement(placementId)
@@ -812,12 +812,12 @@ class RoktKitTests {
 
         val result = roktKit.events("").first()
 
-        assertEquals(result, com.mparticle.RoktEvent.PositiveEngagement(placementId))
+        assertEquals(result, RoktEvent.PositiveEngagement(placementId))
         unmockkObject(Rokt)
     }
 
     @Test
-    fun testRoktEventMapping_OfferEngagement() = runTest {
+    fun testRoktEvents_OfferEngagement() = runTest {
         mockkObject(Rokt)
         val placementId = "test-placement-789"
         val roktEvent = RoktEvent.OfferEngagement(placementId)
@@ -825,12 +825,12 @@ class RoktKitTests {
 
         val result = roktKit.events("").first()
 
-        assertEquals(result, com.mparticle.RoktEvent.OfferEngagement(placementId))
+        assertEquals(result, RoktEvent.OfferEngagement(placementId))
         unmockkObject(Rokt)
     }
 
     @Test
-    fun testRoktEventMapping_OpenUrl() = runTest {
+    fun testRoktEvents_OpenUrl() = runTest {
         mockkObject(Rokt)
         val placementId = "test-placement-url"
         val url = "https://example.com"
@@ -839,12 +839,12 @@ class RoktKitTests {
 
         val result = roktKit.events("").first()
 
-        assertEquals(result, com.mparticle.RoktEvent.OpenUrl(placementId, url))
+        assertEquals(result, RoktEvent.OpenUrl(placementId, url))
         unmockkObject(Rokt)
     }
 
     @Test
-    fun testRoktEventMapping_PlacementClosed() = runTest {
+    fun testRoktEvents_PlacementClosed() = runTest {
         mockkObject(Rokt)
         val placementId = "test-placement-closed"
         val roktEvent = RoktEvent.PlacementClosed(placementId)
@@ -852,12 +852,12 @@ class RoktKitTests {
 
         val result = roktKit.events("").first()
 
-        assertEquals(result, com.mparticle.RoktEvent.PlacementClosed(placementId))
+        assertEquals(result, RoktEvent.PlacementClosed(placementId))
         unmockkObject(Rokt)
     }
 
     @Test
-    fun testRoktEventMapping_PlacementCompleted() = runTest {
+    fun testRoktEvents_PlacementCompleted() = runTest {
         mockkObject(Rokt)
         val placementId = "test-placement-completed"
         val roktEvent = RoktEvent.PlacementCompleted(placementId)
@@ -865,12 +865,12 @@ class RoktKitTests {
 
         val result = roktKit.events("").first()
 
-        assertEquals(result, com.mparticle.RoktEvent.PlacementCompleted(placementId))
+        assertEquals(result, RoktEvent.PlacementCompleted(placementId))
         unmockkObject(Rokt)
     }
 
     @Test
-    fun testRoktEventMapping_PlacementFailure() = runTest {
+    fun testRoktEvents_PlacementFailure() = runTest {
         mockkObject(Rokt)
         val placementId = "test-placement-failure"
         val roktEvent = RoktEvent.PlacementFailure(placementId)
@@ -878,12 +878,12 @@ class RoktKitTests {
 
         val result = roktKit.events("").first()
 
-        assertEquals(result, com.mparticle.RoktEvent.PlacementFailure(placementId))
+        assertEquals(result, RoktEvent.PlacementFailure(placementId))
         unmockkObject(Rokt)
     }
 
     @Test
-    fun testRoktEventMapping_PlacementInteractive() = runTest {
+    fun testRoktEvents_PlacementInteractive() = runTest {
         mockkObject(Rokt)
         val placementId = "test-placement-interactive"
         val roktEvent = RoktEvent.PlacementInteractive(placementId)
@@ -891,12 +891,12 @@ class RoktKitTests {
 
         val result = roktKit.events("").first()
 
-        assertEquals(result, com.mparticle.RoktEvent.PlacementInteractive(placementId))
+        assertEquals(result, RoktEvent.PlacementInteractive(placementId))
         unmockkObject(Rokt)
     }
 
     @Test
-    fun testRoktEventMapping_PlacementReady() = runTest {
+    fun testRoktEvents_PlacementReady() = runTest {
         mockkObject(Rokt)
         val placementId = "test-placement-ready"
         val roktEvent = RoktEvent.PlacementReady(placementId)
@@ -904,12 +904,12 @@ class RoktKitTests {
 
         val result = roktKit.events("").first()
 
-        assertEquals(result, com.mparticle.RoktEvent.PlacementReady(placementId))
+        assertEquals(result, RoktEvent.PlacementReady(placementId))
         unmockkObject(Rokt)
     }
 
     @Test
-    fun testRoktEventMapping_InitComplete() = runTest {
+    fun testRoktEvents_InitComplete() = runTest {
         mockkObject(Rokt)
         val success = true
         val roktEvent = RoktEvent.InitComplete(success)
@@ -917,12 +917,12 @@ class RoktKitTests {
 
         val result = roktKit.events("").first()
 
-        assertEquals(result, com.mparticle.RoktEvent.InitComplete(success))
+        assertEquals(result, RoktEvent.InitComplete(success))
         unmockkObject(Rokt)
     }
 
     @Test
-    fun testRoktEventMapping_CartItemInstantPurchase() = runTest {
+    fun testRoktEvents_CartItemInstantPurchase() = runTest {
         mockkObject(Rokt)
         val roktEvent = RoktEvent.CartItemInstantPurchase(
             identifier = "test-placement-purchase",
@@ -941,7 +941,7 @@ class RoktKitTests {
 
         assertEquals(
             result,
-            com.mparticle.RoktEvent.CartItemInstantPurchase(
+            RoktEvent.CartItemInstantPurchase(
                 identifier = "test-placement-purchase",
                 cartItemId = "cart-item-123",
                 catalogItemId = "catalog-item-456",
@@ -957,19 +957,19 @@ class RoktKitTests {
     }
 
     @Test
-    fun testRoktEventMapping_PlacementFailureWithNullId() = runTest {
+    fun testRoktEvents_PlacementFailureWithNullId() = runTest {
         mockkObject(Rokt)
         val roktEvent = RoktEvent.PlacementFailure(null)
         every { Rokt.events(any()) } returns flowOf(roktEvent)
 
         val result = roktKit.events("").first()
 
-        assertEquals(result, com.mparticle.RoktEvent.PlacementFailure(null))
+        assertEquals(result, RoktEvent.PlacementFailure(null))
         unmockkObject(Rokt)
     }
 
     @Test
-    fun testRoktEventMapping_InitCompleteWithFailure() = runTest {
+    fun testRoktEvents_InitCompleteWithFailure() = runTest {
         mockkObject(Rokt)
         val success = false
         val roktEvent = RoktEvent.InitComplete(success)
@@ -977,12 +977,12 @@ class RoktKitTests {
 
         val result = roktKit.events("").first()
 
-        assertEquals(result, com.mparticle.RoktEvent.InitComplete(success))
+        assertEquals(result, RoktEvent.InitComplete(success))
         unmockkObject(Rokt)
     }
 
     @Test
-    fun testRoktEventMapping_MultipleEventsInFlow() = runTest {
+    fun testRoktEvents_MultipleEventsInFlow() = runTest {
         mockkObject(Rokt)
         val events = listOf(
             RoktEvent.ShowLoadingIndicator,
@@ -994,15 +994,15 @@ class RoktKitTests {
         val results = roktKit.events("").toList()
 
         assertEquals(3, results.size)
-        assertEquals(com.mparticle.RoktEvent.ShowLoadingIndicator, results[0])
-        assertEquals(com.mparticle.RoktEvent.HideLoadingIndicator, results[1])
-        assertEquals(com.mparticle.RoktEvent.InitComplete(true), results[2])
+        assertEquals(RoktEvent.ShowLoadingIndicator, results[0])
+        assertEquals(RoktEvent.HideLoadingIndicator, results[1])
+        assertEquals(RoktEvent.InitComplete(true), results[2])
 
         unmockkObject(Rokt)
     }
 
     @Test
-    fun testRoktEventMapping_EmptyFlow() = runTest {
+    fun testRoktEvents_EmptyFlow() = runTest {
         mockkObject(Rokt)
         every { Rokt.events(any()) } returns flowOf()
 
@@ -1013,7 +1013,7 @@ class RoktKitTests {
     }
 
     @Test
-    fun testRoktEventMapping_WithDifferentIdentifiers() = runTest {
+    fun testRoktEvents_WithDifferentIdentifiers() = runTest {
         mockkObject(Rokt)
         val identifier1 = "test-identifier-1"
         val identifier2 = "test-identifier-2"
@@ -1024,8 +1024,8 @@ class RoktKitTests {
         val result1 = roktKit.events(identifier1).first()
         val result2 = roktKit.events(identifier2).first()
 
-        assertEquals(com.mparticle.RoktEvent.ShowLoadingIndicator, result1)
-        assertEquals(com.mparticle.RoktEvent.HideLoadingIndicator, result2)
+        assertEquals(RoktEvent.ShowLoadingIndicator, result1)
+        assertEquals(RoktEvent.HideLoadingIndicator, result2)
 
         verify { Rokt.events(identifier1) }
         verify { Rokt.events(identifier2) }
@@ -1362,7 +1362,7 @@ class RoktKitTests {
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
-            mpRoktConfig = null,
+            roktConfig = null,
             placementOptions = null,
         )
 
