@@ -5,7 +5,6 @@ import com.mparticle.MParticle
 import com.mparticle.internal.KitManager
 import com.mparticle.internal.Logger
 import com.rokt.roktsdk.PlacementOptions
-import com.rokt.roktsdk.Rokt.RoktCallback
 import com.rokt.roktsdk.RoktConfig
 import com.rokt.roktsdk.RoktEvent
 import kotlinx.coroutines.flow.Flow
@@ -21,7 +20,6 @@ class Rokt internal constructor(private val mKitManager: KitManager) {
      *
      * @param identifier The placement identifier
      * @param attributes User attributes to pass to Rokt
-     * @param callbacks Optional callback for Rokt events
      * @param embeddedViews Optional map of embedded view placeholders
      * @param fontTypefaces Optional map of font typefaces
      * @param config Optional Rokt configuration
@@ -30,7 +28,6 @@ class Rokt internal constructor(private val mKitManager: KitManager) {
     fun selectPlacements(
         identifier: String,
         attributes: Map<String, String>,
-        callbacks: RoktCallback? = null,
         embeddedViews: Map<String, WeakReference<RoktEmbeddedView>>? = null,
         fontTypefaces: Map<String, WeakReference<Typeface>>? = null,
         config: RoktConfig? = null,
@@ -44,7 +41,6 @@ class Rokt internal constructor(private val mKitManager: KitManager) {
                     roktListener = roktListener,
                     viewName = identifier,
                     attributes = HashMap(attributes),
-                    roktCallback = callbacks,
                     placeHolders = embeddedViews,
                     fontTypefaces = fontTypefaces,
                     config = config,
@@ -71,13 +67,13 @@ class Rokt internal constructor(private val mKitManager: KitManager) {
     /**
      * Notify Rokt that a purchase has been finalized.
      *
-     * @param placementId The placement identifier
+     * @param identifier The placement identifier
      * @param catalogItemId The catalog item identifier
-     * @param status Whether the purchase was successful
+     * @param success Whether the purchase was successful
      */
-    fun purchaseFinalized(placementId: String, catalogItemId: String, status: Boolean) {
+    fun purchaseFinalized(identifier: String, catalogItemId: String, success: Boolean) {
         if (isEnabled()) {
-            resolveRoktKit()?.second?.purchaseFinalized(placementId, catalogItemId, status)
+            resolveRoktKit()?.second?.purchaseFinalized(identifier, catalogItemId, success)
         }
     }
 

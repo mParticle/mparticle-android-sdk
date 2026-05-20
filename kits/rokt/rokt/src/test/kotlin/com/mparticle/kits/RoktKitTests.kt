@@ -131,13 +131,14 @@ class RoktKitTests {
         mockkObject(Rokt)
         val capturedAttributesSlot = slot<Map<String, String>>()
         every {
-            Rokt.execute(
+            Rokt.selectPlacements(
                 any<String>(),
                 capture(capturedAttributesSlot),
-                any<Rokt.RoktCallback>(),
-                null,
-                null,
-                null,
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
             )
         } just runs
 
@@ -160,7 +161,6 @@ class RoktKitTests {
         roktKit.selectPlacements(
             viewName = "test_view",
             attributes = inputAttributes,
-            roktCallback = null,
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
@@ -191,13 +191,14 @@ class RoktKitTests {
         mockkObject(Rokt)
         val capturedAttributesSlot = slot<Map<String, String>>()
         every {
-            Rokt.execute(
+            Rokt.selectPlacements(
                 any<String>(),
                 capture(capturedAttributesSlot),
-                any<Rokt.RoktCallback>(),
-                null,
-                null,
-                null,
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
             )
         } just runs
 
@@ -217,7 +218,6 @@ class RoktKitTests {
         roktKit.selectPlacements(
             viewName = "test_view",
             attributes = emptyMap(),
-            roktCallback = null,
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
@@ -240,13 +240,14 @@ class RoktKitTests {
         mockkObject(Rokt)
         val capturedAttributesSlot = slot<Map<String, String>>()
         every {
-            Rokt.execute(
+            Rokt.selectPlacements(
                 any<String>(),
                 capture(capturedAttributesSlot),
-                any<Rokt.RoktCallback>(),
-                null,
-                null,
-                null,
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
             )
         } just runs
 
@@ -266,7 +267,6 @@ class RoktKitTests {
         roktKit.selectPlacements(
             viewName = "test_view",
             attributes = emptyMap(),
-            roktCallback = null,
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
@@ -289,13 +289,14 @@ class RoktKitTests {
         mockkObject(Rokt)
         val capturedAttributesSlot = slot<Map<String, String>>()
         every {
-            Rokt.execute(
+            Rokt.selectPlacements(
                 any<String>(),
                 capture(capturedAttributesSlot),
-                any<Rokt.RoktCallback>(),
-                null,
-                null,
-                null,
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
             )
         } just runs
 
@@ -315,7 +316,6 @@ class RoktKitTests {
         roktKit.selectPlacements(
             viewName = "test_view",
             attributes = emptyMap(),
-            roktCallback = null,
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
@@ -338,13 +338,14 @@ class RoktKitTests {
         mockkObject(Rokt)
         val capturedAttributesSlot = slot<Map<String, String>>()
         every {
-            Rokt.execute(
+            Rokt.selectPlacements(
                 any<String>(),
                 capture(capturedAttributesSlot),
-                any<Rokt.RoktCallback>(),
-                null,
-                null,
-                null,
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
             )
         } just runs
 
@@ -382,7 +383,6 @@ class RoktKitTests {
         roktKit.selectPlacements(
             viewName = "test",
             attributes = inputAttributes,
-            roktCallback = null,
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
@@ -413,13 +413,14 @@ class RoktKitTests {
         mockkObject(Rokt)
         val capturedAttributesSlot = slot<Map<String, String>>()
         every {
-            Rokt.execute(
+            Rokt.selectPlacements(
                 any<String>(),
                 capture(capturedAttributesSlot),
-                any<Rokt.RoktCallback>(),
-                null,
-                null,
-                null,
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
             )
         } just runs
 
@@ -457,7 +458,6 @@ class RoktKitTests {
         roktKit.selectPlacements(
             viewName = "test",
             attributes = inputAttributes,
-            roktCallback = null,
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
@@ -799,7 +799,7 @@ class RoktKitTests {
 
         val result = roktKit.events("").first()
 
-        assertEquals(placementId, (result as RoktEvent.FirstPositiveEngagement).id)
+        assertEquals(placementId, (result as RoktEvent.FirstPositiveEngagement).identifier)
         unmockkObject(Rokt)
     }
 
@@ -925,7 +925,7 @@ class RoktKitTests {
     fun testRoktEvents_CartItemInstantPurchase() = runTest {
         mockkObject(Rokt)
         val roktEvent = RoktEvent.CartItemInstantPurchase(
-            placementId = "test-placement-purchase",
+            identifier = "test-placement-purchase",
             cartItemId = "cart-item-123",
             catalogItemId = "catalog-item-456",
             currency = "USD",
@@ -942,7 +942,7 @@ class RoktKitTests {
         assertEquals(
             result,
             RoktEvent.CartItemInstantPurchase(
-                placementId = "test-placement-purchase",
+                identifier = "test-placement-purchase",
                 cartItemId = "cart-item-123",
                 catalogItemId = "catalog-item-456",
                 currency = "USD",
@@ -1333,10 +1333,11 @@ class RoktKitTests {
         // Arrange
         mockkObject(Rokt)
         every {
-            Rokt.execute(
+            Rokt.selectPlacements(
                 any<String>(),
                 any<Map<String, String>>(),
-                any<Rokt.RoktCallback>(),
+                any(),
+                any(),
                 any(),
                 any(),
                 any(),
@@ -1358,7 +1359,6 @@ class RoktKitTests {
         roktKit.selectPlacements(
             viewName = "test_view",
             attributes = testAttributes,
-            roktCallback = null,
             placeHolders = null,
             fontTypefaces = null,
             filterUser = mockFilterUser,
@@ -1367,10 +1367,11 @@ class RoktKitTests {
         )
 
         verify(exactly = 1) {
-            Rokt.execute(
+            Rokt.selectPlacements(
                 any<String>(),
                 any<Map<String, String>>(),
-                any<Rokt.RoktCallback>(),
+                any(),
+                any(),
                 any(),
                 any(),
                 any(),

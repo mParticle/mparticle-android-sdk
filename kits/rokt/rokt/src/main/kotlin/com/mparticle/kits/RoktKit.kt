@@ -20,7 +20,6 @@ import com.mparticle.kits.KitIntegration.IdentityListener
 import com.mparticle.kits.KitIntegration.RoktListener
 import com.rokt.roktsdk.PlacementOptions
 import com.rokt.roktsdk.Rokt
-import com.rokt.roktsdk.Rokt.RoktCallback
 import com.rokt.roktsdk.Rokt.SdkFrameworkType.Android
 import com.rokt.roktsdk.Rokt.SdkFrameworkType.Cordova
 import com.rokt.roktsdk.Rokt.SdkFrameworkType.Flutter
@@ -52,10 +51,8 @@ class RoktKit :
     CommerceListener,
     IdentityListener,
     RoktListener,
-    RoktKitBridge,
-    Rokt.RoktCallback {
+    RoktKitBridge {
     private var applicationContext: Context? = null
-    private var roktCallback: RoktCallback? = null
     private var hashedEmailUserIdentityType: String? = null
     override fun getName(): String = NAME
 
@@ -93,11 +90,6 @@ class RoktKit :
                         application = application,
                         fontPostScriptNames = fontPostScriptNames,
                         fontFilePathMap = fontFilePathMap,
-                        callback = object : Rokt.RoktInitCallback {
-                            override fun onInitComplete(success: Boolean) {
-                                Logger.verbose("Rokt Kit Initialization success: $success")
-                            }
-                        },
                         mParticleSdkVersion = mparticleVersion,
                         mParticleKitVersion = mparticleVersion,
                     )
@@ -180,7 +172,6 @@ class RoktKit :
     override fun selectPlacements(
         viewName: String,
         attributes: Map<String, String>,
-        roktCallback: RoktCallback?,
         placeHolders: MutableMap<String, WeakReference<RoktEmbeddedView>>?,
         fontTypefaces: MutableMap<String, WeakReference<Typeface>>?,
         filterUser: FilteredMParticleUser?,
@@ -197,27 +188,23 @@ class RoktKit :
                         override fun onHeightChanged(height: Int) {
                             it.onHeightChanged(height)
                         }
-
-                        override fun onMarginChanged(start: Int, top: Int, end: Int, bottom: Int) {
-                            it.onMarginChanged(start, top, end, bottom)
-                        }
                     },
                 )
             }
             entry.key to WeakReference(widget)
         }?.toMap()
 
-        this.roktCallback = roktCallback
         val finalAttributes = prepareFinalAttributes(filterUser, attributes)
-        Rokt.execute(
-            viewName,
-            finalAttributes,
-            this,
+
+        Rokt.selectPlacements(
+            identifier = viewName,
+            attributes = finalAttributes,
+            eventCollector = null,
             // Pass placeholders and fontTypefaces only if they are not empty or null
-            placeholders.takeIf { it?.isNotEmpty() == true },
-            fontTypefaces.takeIf { it?.isNotEmpty() == true },
-            roktConfig,
-            placementOptions,
+            placeholders = placeholders.takeIf { it?.isNotEmpty() == true },
+            fontTypefaces = fontTypefaces.takeIf { it?.isNotEmpty() == true },
+            config = roktConfig,
+            placementOptions = placementOptions,
         )
     }
 
@@ -283,8 +270,8 @@ class RoktKit :
         Rokt.setFrameworkType(sdkFrameworkType)
     }
 
-    override fun purchaseFinalized(placementId: String, catalogItemId: String, status: Boolean) {
-        Rokt.purchaseFinalized(placementId, catalogItemId, status)
+    override fun purchaseFinalized(identifier: String, catalogItemId: String, success: Boolean) {
+        Rokt.purchaseFinalized(identifier, catalogItemId, success)
     }
 
     override fun close() {
@@ -314,21 +301,16 @@ class RoktKit :
         deferredAttributes?.complete(finalAttributes)
     }
 
-    suspend fun runComposableWithCallback(
-        attributes: Map<String, String>,
-        roktCallback: RoktCallback?,
-        onResult: (Map<String, String>, RoktCallback) -> Unit,
-    ) {
+    suspend fun prepareComposableAttributes(attributes: Map<String, String>, onResult: (Map<String, String>) -> Unit) {
         deferredAttributes = CompletableDeferred()
         RoktKitRequestHelper.prepareAttributesAsync(
             kitIntegration = this,
             roktListener = this,
             attributes = attributes,
         )
-        this.roktCallback = roktCallback
         CoroutineScope(Dispatchers.Default).launch {
             val resultAttributes = deferredAttributes!!.await()
-            onResult(resultAttributes, this@RoktKit)
+            onResult(resultAttributes)
         }
     }
 
@@ -426,22 +408,6 @@ class RoktKit :
         const val EVENT_NAME_SELECT_PLACEMENTS = "selectPlacements"
         const val NO_ROKT_ACCOUNT_ID = "No Rokt account ID provided, can't initialize kit."
         const val NO_APP_VERSION_FOUND = "No App version found, can't initialize kit."
-    }
-
-    override fun onLoad() {
-        roktCallback?.onLoad()
-    }
-
-    override fun onShouldHideLoadingIndicator() {
-        roktCallback?.onShouldHideLoadingIndicator()
-    }
-
-    override fun onShouldShowLoadingIndicator() {
-        roktCallback?.onShouldShowLoadingIndicator()
-    }
-
-    override fun onUnload(reason: Rokt.UnloadReasons) {
-        roktCallback?.onUnload(reason)
     }
 }
 

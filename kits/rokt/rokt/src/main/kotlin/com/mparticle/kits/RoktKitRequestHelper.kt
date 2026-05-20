@@ -8,7 +8,6 @@ import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.Logger
 import com.mparticle.internal.MPUtility
 import com.rokt.roktsdk.PlacementOptions
-import com.rokt.roktsdk.Rokt.RoktCallback
 import com.rokt.roktsdk.RoktConfig
 import org.json.JSONException
 import java.lang.ref.WeakReference
@@ -20,7 +19,6 @@ internal object RoktKitRequestHelper {
         roktListener: RoktKitBridge,
         viewName: String,
         attributes: Map<String, String>,
-        roktCallback: RoktCallback?,
         placeHolders: Map<String, WeakReference<RoktEmbeddedView>>?,
         fontTypefaces: Map<String, WeakReference<Typeface>>?,
         config: RoktConfig?,
@@ -42,7 +40,6 @@ internal object RoktKitRequestHelper {
             roktListener.selectPlacements(
                 viewName,
                 finalAttributes,
-                roktCallback,
                 placeHolders?.toMutableMap(),
                 fontTypefaces?.toMutableMap(),
                 FilteredMParticleUser.getInstance(user?.id ?: 0L, kitIntegration),
