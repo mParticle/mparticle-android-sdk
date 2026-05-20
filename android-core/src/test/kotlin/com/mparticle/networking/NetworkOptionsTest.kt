@@ -47,6 +47,50 @@ class NetworkOptionsTest {
         Assert.assertTrue(equals(options, optionsDeserialized))
     }
 
+    @Test
+    fun testLegacyDomainMappingWithoutOverridesSubdirectoryParses() {
+        val options =
+            NetworkOptions.withNetworkOptions(
+                """
+                {
+                  "disableDevPinning": false,
+                  "disablePinning": false,
+                  "domainMappings": [
+                    "{\"mType\":1,\"url\":\"www.configUrl.com\",\"mCertificates\":[]}"
+                  ]
+                }
+                """.trimIndent(),
+            )
+
+        Assert.assertNotNull(options)
+        Assert.assertNotNull(options!!.configDomain)
+        Assert.assertFalse(options.configDomain!!.isOverridesSubdirectory)
+        Assert.assertEquals("www.configUrl.com", options.configDomain!!.url)
+    }
+
+    @Test
+    fun testNetworkOptionsSkipsInvalidPersistedDomainMappings() {
+        val options =
+            NetworkOptions.withNetworkOptions(
+                """
+                {
+                  "disableDevPinning": false,
+                  "disablePinning": false,
+                  "domainMappings": [
+                    "{\"mType\":1,\"url\":\"www.configUrl.com\",\"overridesSubdirectory\":true,\"mCertificates\":[]}",
+                    "{\"mType\":1,\"url\":\"www.invalid.com\""
+                  ]
+                }
+                """.trimIndent(),
+            )
+
+        Assert.assertNotNull(options)
+        Assert.assertNotNull(options!!.configDomain)
+        Assert.assertEquals(1, options.domainMappings.size)
+        Assert.assertTrue(options.configDomain!!.isOverridesSubdirectory)
+        Assert.assertEquals("www.configUrl.com", options.configDomain!!.url)
+    }
+
     companion object {
         fun equals(
             networkOptions1: NetworkOptions,

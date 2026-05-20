@@ -326,7 +326,7 @@ public class DomainMapping {
                 JSONObject jsonObject = new JSONObject(jsonString);
                 int type = jsonObject.getInt("mType");
                 String newUrl = jsonObject.getString("url");
-                boolean overridesSubdirectory = jsonObject.getBoolean("overridesSubdirectory");
+                boolean overridesSubdirectory = jsonObject.optBoolean("overridesSubdirectory", false);
                 Builder builder = new Builder(Endpoint.parseInt(type), newUrl, overridesSubdirectory);
                 JSONArray certificatesJsonArray = jsonObject.getJSONArray("mCertificates");
                 for (int i = 0; i < certificatesJsonArray.length(); i++) {

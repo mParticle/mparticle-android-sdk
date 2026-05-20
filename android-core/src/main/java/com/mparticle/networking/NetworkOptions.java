@@ -77,9 +77,12 @@ public class NetworkOptions {
             }
             JSONArray domainMappingsJson = jsonObject.getJSONArray("domainMappings");
             for (int i = 0; i < domainMappingsJson.length(); i++) {
-                builder.addDomainMapping(DomainMapping
-                        .withDomainMapping(domainMappingsJson.getString(i))
-                        .build());
+                DomainMapping.Builder domainMappingBuilder = DomainMapping.withDomainMapping(domainMappingsJson.getString(i));
+                if (domainMappingBuilder == null) {
+                    Logger.warning("NetworkOptions: skipping invalid persisted domain mapping at index " + i + ".");
+                    continue;
+                }
+                builder.addDomainMapping(domainMappingBuilder.build());
             }
         } catch (Exception e) {
             Logger.error(e);
