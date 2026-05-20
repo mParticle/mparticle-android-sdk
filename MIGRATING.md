@@ -331,3 +331,69 @@ val state = ConsentState.builder()
 
 ConsentState.builder().removeCCPAConsentState()
 ```
+
+---
+
+### Rokt API moved from `android-core` to `rokt-kit`
+
+Rokt APIs are now owned by the Rokt kit module. Usage remains the same (`MParticle.getInstance().Rokt()`); update imports to use the kit package types.
+
+Kotlin:
+
+```kotlin
+// Before
+import com.mparticle.Rokt
+
+val rokt = MParticle.getInstance()?.Rokt()
+
+// After
+import com.mparticle.kits.Rokt
+
+val rokt = MParticle.getInstance()?.Rokt()
+```
+
+Java:
+
+```java
+// Before
+com.mparticle.Rokt rokt = MParticle.getInstance().Rokt();
+
+// After
+com.mparticle.kits.Rokt rokt = MParticle.getInstance().Rokt();
+```
+
+---
+
+### Rokt wrapper types replaced with native Rokt SDK types
+
+The following mParticle wrapper types were removed:
+
+- `com.mparticle.RoktEvent`
+- `com.mparticle.MpRoktEventCallback`
+- `com.mparticle.rokt.RoktConfig`
+- `com.mparticle.rokt.PlacementOptions`
+
+Use native Rokt SDK types instead:
+
+- `com.rokt.roktsdk.RoktEvent`
+- `com.rokt.roktsdk.Rokt.RoktCallback`
+- `com.rokt.roktsdk.RoktConfig`
+- `com.rokt.roktsdk.PlacementOptions`
+
+Kotlin:
+
+```kotlin
+// Before
+val callback = object : MpRoktEventCallback { /* ... */ }
+val config = com.mparticle.rokt.RoktConfig.Builder().build()
+
+// After
+val callback = object : com.rokt.roktsdk.Rokt.RoktCallback { /* ... */ }
+val config = com.rokt.roktsdk.RoktConfig.Builder().build()
+```
+
+---
+
+### `Rokt.prepareAttributesAsync(...)` is no longer public API
+
+`prepareAttributesAsync` is now internal to the kit implementation and should not be called directly from app code.
