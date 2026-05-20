@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '2.0.20'
+    ext.kotlin_version = '2.1.20'
     if (!project.hasProperty('version') || project.version.equals('unspecified')) {
         project.version = '+'
     }
@@ -20,7 +20,7 @@ buildscript {
 plugins {
     id "org.sonarqube" version "3.5.0.2730"
     id "org.jlleitschuh.gradle.ktlint" version "13.0.0"
-    id "org.jetbrains.kotlin.plugin.compose" version "2.0.20"
+    id "org.jetbrains.kotlin.plugin.compose" version "2.1.20"
 }
 
 sonarqube {
@@ -34,6 +34,11 @@ sonarqube {
 apply plugin: 'org.jlleitschuh.gradle.ktlint'
 apply plugin: 'kotlin-android'
 apply plugin: 'com.mparticle.kit'
+
+mparticleMavenPublish {
+    artifactId.set('android-rokt-kit')
+    description.set('Rokt kit for the mParticle SDK')
+}
 
 android {
     namespace 'com.mparticle.kits.rokt'
@@ -70,12 +75,13 @@ repositories {
 }
 
 dependencies {
-    def composeBom = platform('androidx.compose:compose-bom:2023.10.01')
+    def composeBom = platform('androidx.compose:compose-bom:2026.05.01')
     implementation composeBom
     implementation 'androidx.annotation:annotation:1.5.0'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0'
     implementation 'androidx.compose.runtime:runtime'
-    api 'com.rokt:roktsdk:5.1.0'
+    api 'com.rokt:roktsdk:6.0.0-alpha.1'
+    api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     testImplementation  files('libs/java-json.jar')
     testImplementation 'com.squareup.assertj:assertj-android:1.2.0'
@@ -85,7 +91,7 @@ dependencies {
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.2'
     testImplementation 'org.powermock:powermock-core:2.0.7'
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
-    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0'
     compileOnly 'androidx.compose.ui:ui'
     compileOnly 'androidx.compose.material:material'
     compileOnly 'androidx.compose.ui:ui-tooling'
