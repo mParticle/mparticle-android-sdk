@@ -16,11 +16,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.HashSet;
 import java.util.Set;
 
 public class NetworkOptions {
@@ -28,6 +30,7 @@ public class NetworkOptions {
     Map<Endpoint, DomainMapping> domainMappings = new HashMap<Endpoint, DomainMapping>();
     boolean pinningDisabledInDevelopment = false;
     boolean pinningDisabled = false;
+    private String customBaseURL = null;
     private static Set<Endpoint> loggedDomainTypes = new HashSet<>();
 
     private NetworkOptions() {
@@ -43,6 +46,10 @@ public class NetworkOptions {
 
         if (builder.pinningDisabled != null) {
             pinningDisabled = builder.pinningDisabled;
+        }
+
+        if (builder.customBaseURL != null) {
+            customBaseURL = builder.customBaseURL;
         }
     }
 
@@ -61,6 +68,13 @@ public class NetworkOptions {
             JSONObject jsonObject = new JSONObject(jsonString);
             builder.setPinningDisabledInDevelopment(jsonObject.optBoolean("disableDevPinning", false));
             builder.setPinningDisabled(jsonObject.optBoolean("disablePinning", false));
+            String storedCustomBaseURL = jsonObject.optString("customBaseURL", null);
+            if (!MPUtility.isEmpty(storedCustomBaseURL)) {
+                // Stored value is already host(:port). Skip the Builder setter (which expects a full
+                // HTTPS URL with scheme) and assign directly so a previously-validated value survives
+                // the JSON round-trip.
+                builder.customBaseURL = storedCustomBaseURL;
+            }
             JSONArray domainMappingsJson = jsonObject.getJSONArray("domainMappings");
             for (int i = 0; i < domainMappingsJson.length(); i++) {
                 builder.addDomainMapping(DomainMapping
@@ -106,6 +120,16 @@ public class NetworkOptions {
         return pinningDisabled;
     }
 
+    /**
+     * Returns the configured custom CNAME host (without scheme), or {@code null}
+     * if not set. When non-null, this host overrides individual domain mappings
+     * for all endpoints.
+     */
+    @Nullable
+    public String getCustomBaseURL() {
+        return customBaseURL;
+    }
+
     DomainMapping getDomain(Endpoint endpoint) {
         return domainMappings.get(endpoint);
     }
@@ -123,6 +147,9 @@ public class NetworkOptions {
             JSONArray domainMappingsJson = new JSONArray();
             networkOptions.put("disableDevPinning", pinningDisabledInDevelopment);
             networkOptions.put("disablePinning", pinningDisabled);
+            if (!MPUtility.isEmpty(customBaseURL)) {
+                networkOptions.put("customBaseURL", customBaseURL);
+            }
             networkOptions.put("domainMappings", domainMappingsJson);
             for (DomainMapping domainMapping : domainMappings.values()) {
                 domainMappingsJson.put(domainMapping.toString());
@@ -137,6 +164,7 @@ public class NetworkOptions {
         private Map<Endpoint, DomainMapping> domainMappings = new HashMap<Endpoint, DomainMapping>();
         private Boolean pinningDisabledInDevelopment;
         private Boolean pinningDisabled;
+        private String customBaseURL;
 
         private Builder() {
         }
@@ -184,6 +212,40 @@ public class NetworkOptions {
         @NonNull
         public Builder setPinningDisabled(boolean disabled) {
             this.pinningDisabled = disabled;
+            return this;
+        }
+
+        /**
+         * Routes all mParticle endpoint traffic (config, events, identity, alias, audience)
+         * through a single CNAME host. Must be an HTTPS URL (e.g. https://rkt.example.com).
+         * Non-HTTPS values are rejected with a warning log and the property is left unset.
+         *
+         * <p>When set, this property takes priority over any per-endpoint domain mapping.
+         * Any path, query, or fragment on the URL is ignored — only the scheme, host, and
+         * port are used.
+         *
+         * <p>Certificate pinning: if pinning is enabled (default), supply certificates for
+         * the CNAME domain via the relevant {@link DomainMapping}, or disable pinning via
+         * {@link #setPinningDisabled(boolean)} / {@link #setPinningDisabledInDevelopment(boolean)}.
+         *
+         * @param customBaseURL HTTPS URL containing the CNAME host
+         */
+        @NonNull
+        public Builder setCustomBaseURL(@NonNull String customBaseURL) {
+            try {
+                URL parsed = new URL(customBaseURL);
+                if (!"https".equalsIgnoreCase(parsed.getProtocol()) || MPUtility.isEmpty(parsed.getHost())) {
+                    Logger.warning("NetworkOptions: customBaseURL must use HTTPS and include a valid host — value ignored.");
+                    return this;
+                }
+                StringBuilder host = new StringBuilder(parsed.getHost());
+                if (parsed.getPort() != -1) {
+                    host.append(":").append(parsed.getPort());
+                }
+                this.customBaseURL = host.toString();
+            } catch (MalformedURLException e) {
+                Logger.warning("NetworkOptions: customBaseURL is malformed — value ignored.");
+            }
             return this;
         }
 

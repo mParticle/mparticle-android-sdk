@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 import java.math.BigDecimal
+import java.net.URL
 
 const val ROKT_ATTRIBUTE_SANDBOX_MODE: String = "sandbox"
 
@@ -83,6 +84,8 @@ class RoktKit :
 
                     val mappedLogLevel = Logger.getMinLogLevel().toRoktLogLevel()
                     Rokt.setLogLevel(mappedLogLevel)
+
+                    applyCustomBaseURLIfSet()
 
                     Rokt.init(
                         roktTagId = roktTagId,
@@ -164,6 +167,22 @@ class RoktKit :
     }
 
     private fun throwOnKitCreateError(message: String): Unit = throw IllegalArgumentException(message)
+
+    /**
+     * Reads `customBaseURL` from the mParticle network options and forwards it to the
+     * Rokt SDK as a CNAME override. No-op if MParticle is uninitialized, the host is
+     * absent, or it's an empty string.
+     */
+    private fun applyCustomBaseURLIfSet() {
+        val customBaseURL = MParticle.getInstance()
+            ?.Internal()
+            ?.configManager
+            ?.networkOptions
+            ?.customBaseURL
+        if (!customBaseURL.isNullOrEmpty()) {
+            Rokt.setCustomBaseURL(URL("https://$customBaseURL"))
+        }
+    }
 
     /*
       For more details, visit the official documentation:
