@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Typeface;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,15 +14,10 @@ import androidx.annotation.Nullable;
 import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
-import com.mparticle.MpRoktEventCallback;
-import com.mparticle.RoktEvent;
 import com.mparticle.WrapperSdkVersion;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.MParticleUser;
-import com.mparticle.rokt.PlacementOptions;
-import com.mparticle.rokt.RoktConfig;
-import com.mparticle.rokt.RoktEmbeddedView;
 
 import org.json.JSONObject;
 
@@ -32,8 +26,6 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import kotlinx.coroutines.flow.Flow;
 
 /**
  * Base Kit implementation - all Kits must subclass this.
@@ -590,28 +582,10 @@ public abstract class KitIntegration {
     /**
      * Interface for Rokt Kit implementations.
      *
-     * <p>This interface is internal to kit-base and is bridged to the
-     * {@link com.mparticle.internal.RoktKitApi} interface via a wrapper implementation
-     * in {@link KitManagerImpl}. The wrapper handles user resolution and
-     * attribute preparation before delegating to the kit's methods.</p>
-     *
-     * @see com.mparticle.internal.RoktKitApi
+     * <p>This interface is internal to kit-base and currently used only for wrapper SDK
+     * version propagation.</p>
      */
     public interface RoktListener {
-
-        void selectPlacements(@NonNull String viewName,
-                              @NonNull Map<String, String> attributes,
-                              @Nullable MpRoktEventCallback mpRoktEventCallback,
-                              @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
-                              @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
-                              @Nullable FilteredMParticleUser user,
-                              @Nullable RoktConfig config,
-                              @Nullable PlacementOptions options);
-
-        Flow<RoktEvent> events(@NonNull String identifier);
-
-        void enrichAttributes(
-                @NonNull Map<String, String> attributes, @Nullable FilteredMParticleUser user);
         /**
          * Set the SDK version of the mParticle SDK.
          * This should match the value set in MParticle.getWrapperSdkVersion()
@@ -619,26 +593,5 @@ public abstract class KitIntegration {
          * @param wrapperSdkVersion the version of the mParticle SDK
          */
         void setWrapperSdkVersion(@NonNull WrapperSdkVersion wrapperSdkVersion);
-
-        void purchaseFinalized(@NonNull String placementId, @NonNull String catalogItemId, boolean status);
-
-        void close();
-
-        /**
-         * Set the session id to use for the next execute call.
-         * This is useful for cases where you have a session id from a non-native integration,
-         * e.g. WebView, and you want the session to be consistent across integrations.
-         *
-         * @param sessionId The session id to be set. Must be a non-empty string.
-         */
-        void setSessionId(@NonNull String sessionId);
-
-        /**
-         * Get the session id to use within a non-native integration e.g. WebView.
-         *
-         * @return The session id or null if no session is present.
-         */
-        @Nullable
-        String getSessionId();
     }
 }

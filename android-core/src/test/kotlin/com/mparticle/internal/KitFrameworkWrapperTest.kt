@@ -29,7 +29,6 @@ import org.powermock.modules.junit4.PowerMockRunner
 import java.lang.ref.WeakReference
 import java.util.Random
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 @RunWith(PowerMockRunner::class)
 class KitFrameworkWrapperTest {
@@ -720,50 +719,5 @@ class KitFrameworkWrapperTest {
         wrapper.setWrapperSdkVersion(expectedSdkVersion)
 
         verify(mockKitManager).setWrapperSdkVersion(expectedSdkVersion)
-    }
-
-    @Test
-    fun testGetRoktKitApi_kitManagerNull_returnsNull() {
-        val wrapper =
-            KitFrameworkWrapper(
-                mock(
-                    Context::class.java,
-                ),
-                mock(ReportingManager::class.java),
-                mock(ConfigManager::class.java),
-                mock(AppStateManager::class.java),
-                true,
-                mock(MParticleOptions::class.java),
-            )
-
-        val result = wrapper.roktKitApi
-
-        assertNull(result)
-    }
-
-    @Test
-    fun testGetRoktKitApi_kitManagerSet_delegatesToKitManager() {
-        val wrapper =
-            KitFrameworkWrapper(
-                mock(
-                    Context::class.java,
-                ),
-                mock(ReportingManager::class.java),
-                mock(ConfigManager::class.java),
-                mock(AppStateManager::class.java),
-                true,
-                mock(MParticleOptions::class.java),
-            )
-
-        val mockKitManager = mock(KitManager::class.java)
-        val mockRoktKitApi = mock(RoktKitApi::class.java)
-
-        `when`(mockKitManager.roktKitApi).thenReturn(mockRoktKitApi)
-        wrapper.setKitManager(mockKitManager)
-
-        val result = wrapper.roktKitApi
-
-        verify(mockKitManager).roktKitApi
-        assertEquals(mockRoktKitApi, result)
     }
 }

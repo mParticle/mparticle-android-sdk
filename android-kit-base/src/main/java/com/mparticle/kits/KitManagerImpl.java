@@ -26,7 +26,6 @@ import com.mparticle.Configuration;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
-import com.mparticle.internal.RoktKitApi;
 import com.mparticle.WrapperSdkVersion;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
@@ -155,6 +154,11 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
 
     public int getUserBucket() {
         return mCoreCallbacks.getUserBucket();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return mCoreCallbacks.isEnabled();
     }
 
     public boolean isOptedOut() {
@@ -1307,17 +1311,6 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
                 Logger.warning("Failed to call reset for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
-    }
-
-    @Override
-    @Nullable
-    public RoktKitApi getRoktKitApi() {
-        for (KitIntegration provider : activeKits()) {
-            if (provider instanceof KitIntegration.RoktListener listener) {
-                return new RoktKitApiImpl(listener, provider);
-            }
-        }
-        return null;
     }
 
     @Override

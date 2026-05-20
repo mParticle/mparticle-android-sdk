@@ -1,4 +1,4 @@
-package com.mparticle.rokt
+package com.mparticle.kits
 
 import android.content.Context
 import android.util.AttributeSet
