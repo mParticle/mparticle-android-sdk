@@ -21,6 +21,9 @@ jobs:
           ref: ${{github.head_ref}}
           path: .sdks/android
 
+      - name: "Patch Gradle dependency substitution syntax"
+        run: sed -i 's/\.with(/.using(/g' settings.gradle.kts
+
       - name: Gradle cache
         uses: gradle/gradle-build-action@842c587ad8aa4c68eeba24c396e15af4c2e9f30a #v2.9.0
 
