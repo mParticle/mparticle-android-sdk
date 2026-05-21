@@ -31,6 +31,7 @@ jobs:
           perl -0pi -e 's/android \{\n    compileSdk = 31/android {\n    namespace = "com.mparticle.cpt.testing"\n    compileSdk = 31/' Tests/build.gradle.kts
           sed -i 's/ package="com.mparticle.mocking"//' mocking/src/androidMain/AndroidManifest.xml
           sed -i 's/ package="com.mparticle.cpt.testing"//' Tests/helpers/AndroidManifest.xml
+          echo "kotlin.jvm.target.validation.mode=warning" >> gradle.properties
 
       - name: Gradle cache
         uses: gradle/gradle-build-action@842c587ad8aa4c68eeba24c396e15af4c2e9f30a #v2.9.0
