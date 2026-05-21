@@ -131,7 +131,7 @@ jobs:
         with:
           token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
           commit-message: "chore: prepare release ${{ steps.compose-version.outputs.new-version }}"
-          branch: release/prep-${{ steps.compose-version.outputs.new-version }}
+          branch: release-prep/${{ steps.compose-version.outputs.new-version }}
           title: "Prepare release ${{ steps.compose-version.outputs.new-version }}"
           base: ${{ github.ref_name }}
           body: |
