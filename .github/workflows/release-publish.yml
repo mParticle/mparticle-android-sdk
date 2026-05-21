@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - workstation/*
     paths:
       - VERSION
 
@@ -15,6 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       final_version: ${{ steps.version-file.outputs.release-version }}
+      is_prerelease: ${{ steps.version-file.outputs.is-prerelease }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -24,6 +26,11 @@ jobs:
         run: |
           version_from_file=$(head -n 1 VERSION)
           echo "release-version=$version_from_file" >> $GITHUB_OUTPUT
+          if [[ "$version_from_file" == *"-"* ]]; then
+            echo "is-prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "is-prerelease=false" >> $GITHUB_OUTPUT
+          fi
 
   build-and-release:
     needs: setup-and-version
@@ -58,7 +65,8 @@ jobs:
       - name: Create GitHub release
         uses: ncipollo/release-action@b7eabc95ff50cbeeedec83973935c8f306dfcd0b # v1.20.0
         with:
-          makeLatest: true
+          makeLatest: ${{ needs.setup-and-version.outputs.is_prerelease != 'true' }}
+          prerelease: ${{ needs.setup-and-version.outputs.is_prerelease == 'true' }}
           tag: ${{ needs.setup-and-version.outputs.final_version }}
           body: |
             Release ${{ needs.setup-and-version.outputs.final_version }}

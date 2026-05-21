@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Changed
+
+- Add support for qualified alpha, beta, and release candidate versions in release workflows.
+
 ### Removed
 
 - Remove deprecated `KitIntegration.getAllUserAttributes()`. Custom kits must use `getCurrentUser().getUserAttributes()` (or other `FilteredMParticleUser` APIs) and `AttributeListener` callbacks instead ([#682](https://github.com/mParticle/mparticle-android-sdk/pull/682))
