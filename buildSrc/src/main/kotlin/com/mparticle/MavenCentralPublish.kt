@@ -99,5 +99,5 @@ fun Project.configureMavenPublishing(mparticleMavenPublish: MParticleMavenPublis
 private fun String.capitalizeForTaskName(): String = if (isEmpty()) {
     this
 } else {
-    Character.toUpperCase(this[0]).toString() + substring(1)
+    substring(0, 1).uppercase() + substring(1)
 }
