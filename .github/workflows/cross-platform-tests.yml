@@ -32,6 +32,11 @@ jobs:
           sed -i 's/ package="com.mparticle.mocking"//' mocking/src/androidMain/AndroidManifest.xml
           sed -i 's/ package="com.mparticle.cpt.testing"//' Tests/helpers/AndroidManifest.xml
           echo "kotlin.jvm.target.validation.mode=warning" >> gradle.properties
+          sed -i 's/mparticle.isAutoTrackingEnabled/false/g' api/src/androidMain/kotlin/com/mparticle/api/MParticle.kt
+          sed -i 's/mparticle.isProviderActive(serviceProviderId)/mparticle.isKitActive(serviceProviderId)/g' api/src/androidMain/kotlin/com/mparticle/api/MParticle.kt
+          sed -i 's/import com.mparticle.UserAttributeListener as UserAttributeListenerAndroid/import com.mparticle.TypedUserAttributeListener as UserAttributeListenerAndroid/g' api/src/androidMain/kotlin/com/mparticle/api/identity/Identity.kt
+          perl -0pi -e 's/override fun onUserAttributesReceived\(\n            userAttributes: Map<String, String\?>\?,\n            userAttributeLists: Map<String, List<String\?>>\?,\n            mpid: Long\?\n        \) \{\n            this\@toUserAttributeListener\.onUserAttributesReceived\(userAttributes, userAttributeLists, mpid\)\n        \}/override fun onUserAttributesReceived(\n            userAttributes: Map<String, Any?>,\n            userAttributeLists: Map<String, List<String?>?>,\n            mpid: Long\n        ) {\n            this\@toUserAttributeListener.onUserAttributesReceived(userAttributes.mapValues { it.value?.toString() }, userAttributeLists, mpid)\n        }/g' api/src/androidMain/kotlin/com/mparticle/api/identity/Identity.kt
+          sed -i '/fun UserAttributeListenerAndroid.toUserAttributeListener()/,$d' api/src/androidMain/kotlin/com/mparticle/api/identity/Identity.kt
 
       - name: Gradle cache
         uses: gradle/gradle-build-action@842c587ad8aa4c68eeba24c396e15af4c2e9f30a #v2.9.0
