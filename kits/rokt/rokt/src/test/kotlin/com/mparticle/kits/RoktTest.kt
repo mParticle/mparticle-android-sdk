@@ -54,6 +54,11 @@ class RoktTest {
     private lateinit var configManager: FakeConfigManager
     private lateinit var rokt: Rokt
 
+    private data class RoktFacadeFixture(
+        val mParticle: MParticle,
+        val roktListener: RoktKitBridge,
+    )
+
     class FakeConfigManager(var enabled: Boolean = true) {
         fun isEnabled(): Boolean = enabled
     }
@@ -278,5 +283,61 @@ class RoktTest {
             capture(optionsCaptor),
         )
         assertTrue(optionsCaptor.value.jointSdkSelectPlacements >= currentTimeMillis)
+    }
+
+    @Test
+    fun testMParticleRoktExtensionEvents_delegatesToCurrentInstance() {
+        val fixture = createMParticleWithRoktKit()
+        MParticle.setInstance(fixture.mParticle)
+        val expectedFlow: Flow<RoktEvent> = flowOf()
+        `when`(fixture.roktListener.events("identifier")).thenReturn(expectedFlow)
+
+        val result = MParticle.getInstance()!!.rokt.events("identifier")
+
+        verify(fixture.roktListener).events("identifier")
+        assertEquals(expectedFlow, result)
+    }
+
+    @Test
+    fun testMParticleRoktExtensionUsesNewFacadeAfterInstanceChanges() {
+        val firstFixture = createMParticleWithRoktKit()
+        val secondFixture = createMParticleWithRoktKit()
+        val firstFlow: Flow<RoktEvent> = flowOf()
+        val secondFlow: Flow<RoktEvent> = flowOf()
+        `when`(firstFixture.roktListener.events("first")).thenReturn(firstFlow)
+        `when`(secondFixture.roktListener.events("second")).thenReturn(secondFlow)
+
+        MParticle.setInstance(firstFixture.mParticle)
+        val firstResult = MParticle.getInstance()!!.rokt.events("first")
+
+        MParticle.setInstance(secondFixture.mParticle)
+        val secondResult = MParticle.getInstance()!!.rokt.events("second")
+
+        assertEquals(firstFlow, firstResult)
+        assertEquals(secondFlow, secondResult)
+        verify(firstFixture.roktListener).events("first")
+        verify(secondFixture.roktListener).events("second")
+        verify(firstFixture.roktListener, never()).events("second")
+    }
+
+    private fun createMParticleWithRoktKit(): RoktFacadeFixture {
+        val mParticle = org.mockito.Mockito.mock(MParticle::class.java)
+        val internal = org.mockito.Mockito.mock(MParticle.Internal::class.java)
+        val kitManager =
+            org.mockito.Mockito.mock(MParticle.Internal::class.java.getMethod("getKitManager").returnType) as KitManager
+        val roktKit =
+            org.mockito.Mockito.mock(
+                KitIntegration::class.java,
+                withSettings().extraInterfaces(RoktKitBridge::class.java),
+            )
+        val roktListener = roktKit as RoktKitBridge
+
+        `when`(mParticle.Internal()).thenReturn(internal)
+        org.mockito.Mockito.doReturn(kitManager).`when`(internal).kitManager
+        `when`(kitManager.isEnabled).thenReturn(true)
+        `when`(kitManager.isKitActive(MParticle.ServiceProviders.ROKT)).thenReturn(true)
+        `when`(kitManager.getKitInstance(MParticle.ServiceProviders.ROKT)).thenReturn(roktKit)
+
+        return RoktFacadeFixture(mParticle, roktListener)
     }
 }

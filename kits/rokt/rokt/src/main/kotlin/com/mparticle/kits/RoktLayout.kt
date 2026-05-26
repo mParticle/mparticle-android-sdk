@@ -7,7 +7,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.rokt.roktsdk.PlacementOptions
 import com.rokt.roktsdk.RoktConfig
+import com.rokt.roktsdk.RoktEvent
 
+/**
+ * Rokt Jetpack Compose placement wrapper with mParticle attribute enrichment.
+ *
+ * @param sdkTriggered Whether the Rokt SDK should trigger placement selection.
+ * @param identifier The placement identifier.
+ * @param attributes Attributes to enrich through mParticle before rendering.
+ * @param location The Rokt placement location.
+ * @param modifier Optional Compose modifier for the placement.
+ * @param config Optional Rokt SDK configuration.
+ * @param onEvent Callback for native Rokt SDK placement events.
+ */
 @Composable
 @Suppress("FunctionName")
 fun RoktLayout(
@@ -17,6 +29,7 @@ fun RoktLayout(
     location: String,
     modifier: Modifier = Modifier,
     config: RoktConfig? = null,
+    onEvent: (RoktEvent) -> Unit = {},
 ) {
     var placementOptions: PlacementOptions? = null
     val instance = RoktKit.instance
@@ -43,6 +56,7 @@ fun RoktLayout(
             location = location,
             config = config,
             placementOptions = placementOptions,
+            onEvent = onEvent,
         )
     }
 }

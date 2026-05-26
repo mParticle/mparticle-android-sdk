@@ -1,8 +1,11 @@
+<!-- markdownlint-disable MD024 MD041 -->
+
 ## [Unreleased]
 
 ### Changed
 
 - Add support for qualified alpha, beta, and release candidate versions in release workflows.
+- Add Kotlin `MParticle.rokt` access and `RoktLayout` event callbacks for the Rokt kit.
 
 ### Removed
 
