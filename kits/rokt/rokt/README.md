@@ -35,6 +35,31 @@ Java consumers can use the kit helper:
 MParticleRokt.Rokt().selectPlacements("RoktExperience", attributes);
 ```
 
+### Shoppable Ads
+
+Add the optional Rokt payment extension dependency in your app, then register the extension after mParticle starts. The Rokt kit reads `stripePublishableKey` from the mParticle dashboard configuration and forwards it to the Rokt SDK during registration.
+
+Kotlin:
+
+```kotlin
+import com.mparticle.MParticle
+import com.mparticle.kits.rokt
+import com.rokt.payment.extension.StripePaymentExtension
+
+MParticle.getInstance()?.rokt?.registerPaymentExtension(StripePaymentExtension())
+MParticle.getInstance()?.rokt?.selectShoppableAds(
+    identifier = "RoktShoppableExperience",
+    attributes = attributes,
+)
+```
+
+Java:
+
+```java
+MParticleRokt.Rokt().registerPaymentExtension(new StripePaymentExtension());
+MParticleRokt.Rokt().selectShoppableAds("RoktShoppableExperience", attributes);
+```
+
 Compose integrations can receive native Rokt SDK events from `RoktLayout`:
 
 ```kotlin

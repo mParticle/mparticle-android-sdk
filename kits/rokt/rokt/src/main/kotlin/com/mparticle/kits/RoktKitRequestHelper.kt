@@ -74,6 +74,35 @@ internal object RoktKitRequestHelper {
         }
     }
 
+    fun selectShoppableAds(
+        kitIntegration: KitIntegration,
+        roktListener: RoktKitBridge,
+        viewName: String,
+        attributes: Map<String, String>,
+        config: RoktConfig?,
+    ) {
+        val mutableAttributes = attributes.toMutableMap()
+        val instance = MParticle.getInstance()
+        if (instance == null) {
+            Logger.warning("MParticle instance is null, cannot execute Rokt Shoppable Ads placement")
+            return
+        }
+        val user = instance.Identity().currentUser
+        val email = getValueIgnoreCase(mutableAttributes, "email")
+        val hashedEmail = getValueIgnoreCase(mutableAttributes, "emailsha256")
+        val kitConfig = kitIntegration.configuration
+
+        confirmEmail(email, hashedEmail, user, instance.Identity(), kitConfig) {
+            val finalAttributes = prepareAttributes(mutableAttributes, user, kitConfig)
+            roktListener.selectShoppableAds(
+                viewName,
+                finalAttributes,
+                FilteredMParticleUser.getInstance(user?.id ?: 0L, kitIntegration),
+                config,
+            )
+        }
+    }
+
     private fun getValueIgnoreCase(map: Map<String, String>, searchKey: String): String? {
         for ((key, value) in map) {
             if (key.equals(searchKey, ignoreCase = true)) {

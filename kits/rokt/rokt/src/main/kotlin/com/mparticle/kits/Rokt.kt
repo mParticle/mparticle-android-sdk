@@ -7,6 +7,7 @@ import com.mparticle.internal.Logger
 import com.rokt.roktsdk.PlacementOptions
 import com.rokt.roktsdk.RoktConfig
 import com.rokt.roktsdk.RoktEvent
+import com.rokt.roktsdk.payment.PaymentExtension
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import java.lang.ref.WeakReference
@@ -62,6 +63,56 @@ class Rokt internal constructor(private val mKitManager: KitManager) {
         resolveRoktKit()?.second?.events(identifier) ?: flowOf()
     } else {
         flowOf()
+    }
+
+    /**
+     * Register a payment extension for Shoppable Ads.
+     *
+     * The Rokt Kit adds mParticle dashboard configuration before forwarding to the Rokt SDK.
+     *
+     * @param paymentExtension The payment extension implementation to register
+     * @return true if the Rokt SDK accepts the payment extension configuration
+     */
+    fun registerPaymentExtension(paymentExtension: PaymentExtension): Boolean = if (isEnabled()) {
+        val resolved = resolveRoktKit()
+        if (resolved != null) {
+            resolved.second.registerPaymentExtension(paymentExtension)
+        } else {
+            Logger.warning("Rokt Kit is not available. Make sure the Rokt Kit is included in your app.")
+            false
+        }
+    } else {
+        false
+    }
+
+    /**
+     * Display a Rokt Shoppable Ads placement with the specified parameters.
+     *
+     * @param identifier The placement identifier
+     * @param attributes User attributes to pass to Rokt
+     * @param config Optional Rokt configuration
+     */
+    @JvmOverloads
+    fun selectShoppableAds(
+        identifier: String,
+        attributes: Map<String, String> = emptyMap(),
+        config: RoktConfig? = null,
+    ) {
+        if (isEnabled()) {
+            val resolved = resolveRoktKit()
+            if (resolved != null) {
+                val (kitIntegration, roktListener) = resolved
+                RoktKitRequestHelper.selectShoppableAds(
+                    kitIntegration = kitIntegration,
+                    roktListener = roktListener,
+                    viewName = identifier,
+                    attributes = HashMap(attributes),
+                    config = config,
+                )
+            } else {
+                Logger.warning("Rokt Kit is not available. Make sure the Rokt Kit is included in your app.")
+            }
+        }
     }
 
     /**
