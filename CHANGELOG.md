@@ -1,3 +1,16 @@
+## [5.79.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.79.0...v5.79.1) (2026-05-27)
+
+
+### Bug Fixes
+
+* **ci:** pin isolated-kit gradle version to prevent 6.0.0-rc.1 pull ([#714](https://github.com/mParticle/mparticle-android-sdk/issues/714)) ([eff10ea](https://github.com/mParticle/mparticle-android-sdk/commit/eff10ead69167f0ea3df248b2bbed089397600cd))
+
+
+### Updates & Maintenance
+
+* bump trunk-io/trunk-action from 1.2.4 to 1.3.1 ([#705](https://github.com/mParticle/mparticle-android-sdk/issues/705)) ([f4ceca7](https://github.com/mParticle/mparticle-android-sdk/commit/f4ceca7de2c2ba01ea87c98698ef7bb84991b4ab))
+* Update submodules ([e435979](https://github.com/mParticle/mparticle-android-sdk/commit/e435979e1e966ef2b318bb29135852f9d55df55a))
+
 ## [5.79.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.78.5...v5.79.0) (2026-05-14)
 
 
