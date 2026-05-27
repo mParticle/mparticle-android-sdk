@@ -245,9 +245,12 @@ jobs:
         run: ./gradlew publishReleaseLocal
       - name: "Run Android Kit Lint"
         run: ./gradlew publishReleaseLocal -c settings-kits.gradle lint
+      - name: "Get SDK version for isolated kits"
+        id: sdk-version
+        run: echo "version=$(./gradlew -q properties | grep '^version:' | awk '{print $2}')" >> $GITHUB_OUTPUT
       - name: "Run Isolated Kit Lint (urbanairship-kit)"
         working-directory: kits/urbanairship-kit
-        run: ./gradlew lint
+        run: ./gradlew -Pversion=${{ steps.sdk-version.outputs.version }} lint
       - name: "Archive Test Results"
         uses: actions/upload-artifact@v7
         if: always()
@@ -284,9 +287,12 @@ jobs:
         run: ./gradlew publishReleaseLocal
       - name: "Run Android Kit Kotlin Lint"
         run: ./gradlew publishReleaseLocal -c settings-kits.gradle ktlintCheck
+      - name: "Get SDK version for isolated kits"
+        id: sdk-version
+        run: echo "version=$(./gradlew -q properties | grep '^version:' | awk '{print $2}')" >> $GITHUB_OUTPUT
       - name: "Run Isolated Kit Kotlin Lint (urbanairship-kit)"
         working-directory: kits/urbanairship-kit
-        run: ./gradlew ktlintCheck
+        run: ./gradlew -Pversion=${{ steps.sdk-version.outputs.version }} ktlintCheck
       - name: "Archive Test Results"
         uses: actions/upload-artifact@v7
         if: always()
@@ -326,9 +332,12 @@ jobs:
         run: ./gradlew -PisRelease=true clean publishReleaseLocal
       - name: "Test Kits"
         run: ./gradlew -PisRelease=true clean testRelease publishReleaseLocal -c settings-kits.gradle
+      - name: "Get SDK version for isolated kits"
+        id: sdk-version
+        run: echo "version=$(./gradlew -PisRelease=true -q properties | grep '^version:' | awk '{print $2}')" >> $GITHUB_OUTPUT
       - name: "Test Isolated Kits (urbanairship-kit)"
         working-directory: kits/urbanairship-kit
-        run: ./gradlew -PisRelease=true clean testRelease publishReleaseLocal
+        run: ./gradlew -PisRelease=true -Pversion=${{ steps.sdk-version.outputs.version }} clean testRelease publishReleaseLocal
 
   semantic-release-dryrun:
     name: "Test Semantic Release - Dry Run"
