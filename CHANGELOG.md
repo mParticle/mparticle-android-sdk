@@ -5,12 +5,14 @@
 ### Added
 
 - Add Rokt Shoppable Ads payment extension registration and selection APIs.
+- Add the `com.rokt:rokt-sdk-plus` umbrella artifact: a single dependency bundling the mParticle core SDK, the mParticle Rokt kit, and the Rokt Payment Extension (Shoppable Ads), mirroring the iOS `RoktSDKPlus` umbrella.
 
 ### Changed
 
 - Upgrade Kotlin to 2.1.20 across the core SDK, buildSrc, and all integrated kits.
 - Add support for qualified alpha, beta, and release candidate versions in release workflows.
 - Add Kotlin `MParticle.rokt` access and `RoktLayout` event callbacks for the Rokt kit.
+- Centralize the Rokt SDK / payment extension versions in root `gradle.properties` (`roktSdkVersion`, `roktPaymentExtensionVersion`), shared by the Rokt kit and `rokt-sdk-plus`.
 
 ### Removed
 

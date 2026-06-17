@@ -40,14 +40,21 @@ fun Project.configureMavenPublishing(mparticleMavenPublish: MParticleMavenPublis
             } else {
                 logger.lifecycle("Skipping signAllPublications for ${project.name} (no signingInMemoryKey)")
             }
+            val mparticleRepoUrl = "https://github.com/mparticle/mparticle-android-sdk"
             pom {
                 name.set(mparticleMavenPublish.description.getOrElse(project.name))
                 description.set(mparticleMavenPublish.description.getOrElse(project.name))
-                url.set("https://github.com/mparticle/mparticle-android-sdk")
+                url.set(mparticleMavenPublish.pomUrl.getOrElse(mparticleRepoUrl))
                 licenses {
                     license {
-                        name.set("The Apache Software License, Version 2.0")
-                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                        name.set(
+                            mparticleMavenPublish.licenseName
+                                .getOrElse("The Apache Software License, Version 2.0"),
+                        )
+                        url.set(
+                            mparticleMavenPublish.licenseUrl
+                                .getOrElse("https://www.apache.org/licenses/LICENSE-2.0.txt"),
+                        )
                     }
                 }
                 developers {
