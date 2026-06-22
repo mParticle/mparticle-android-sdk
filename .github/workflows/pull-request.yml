@@ -153,6 +153,9 @@ jobs:
     with:
       base_branch: main
 
+  build-kits:
+    uses: ./.github/workflows/build-kits.yml
+
   kit-compatibility-test:
     name: "Kit Compatibility Test"
     runs-on: ubuntu-latest
@@ -188,6 +191,7 @@ jobs:
         lint-checks,
         kotlin-lint-checks,
         kit-compatibility-test,
+        build-kits,
       ]
     uses: mParticle/mparticle-workflows/.github/workflows/dependabot-save-pr-number.yml@main
 
