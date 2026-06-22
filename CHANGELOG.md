@@ -1,3 +1,12 @@
+## [5.79.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.79.1...v5.79.2) (2026-06-22)
+
+
+### Updates & Maintenance
+
+* bump actions/checkout from 6.0.2 to 6.0.3 ([#720](https://github.com/mParticle/mparticle-android-sdk/issues/720)) ([d904edb](https://github.com/mParticle/mparticle-android-sdk/commit/d904edb0a944a2ce813e7dc31c026f0b2f7ccecb))
+* remove cross-platform-tests and semantic PR/branch checks ([#712](https://github.com/mParticle/mparticle-android-sdk/issues/712)) ([6cdacf2](https://github.com/mParticle/mparticle-android-sdk/commit/6cdacf2926e02e2359352dbcf12b4e4bb66236fa))
+* Update submodules ([976dd0d](https://github.com/mParticle/mparticle-android-sdk/commit/976dd0d13d6aa27f805a6b06a73d923f1a207e80))
+
 ## [5.79.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.79.0...v5.79.1) (2026-05-27)
 
 
