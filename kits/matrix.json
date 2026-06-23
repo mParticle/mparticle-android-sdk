@@ -1,0 +1,8 @@
+[
+  {
+    "name": "adjust-5",
+    "local_path": "kits/adjust/adjust-5",
+    "kit_project": ":kits:android-adjust:adjust-5",
+    "example_kotlin_project": ":kits:android-adjust:adjust-5:example-kotlin"
+  }
+]

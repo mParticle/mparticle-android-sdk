@@ -1,0 +1,69 @@
+name: Build Kits
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  load-matrix:
+    name: Load kit matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          sparse-checkout: kits/matrix.json
+          sparse-checkout-cone-mode: false
+      - id: set
+        run: echo "matrix=$(jq -c . kits/matrix.json)" >> "$GITHUB_OUTPUT"
+
+  build-kits:
+    name: Build ${{ matrix.kit.name }}
+    needs: load-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        kit: ${{ fromJson(needs.load-matrix.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Set SDK version
+        run: |
+          echo "ORG_GRADLE_PROJECT_VERSION=$(head -n 1 VERSION)" >> $GITHUB_ENV
+          echo "ORG_GRADLE_PROJECT_version=$(head -n 1 VERSION)" >> $GITHUB_ENV
+
+      - name: Install JDK 17
+        uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5
+        with:
+          distribution: zulu
+          java-version: "17"
+
+      - name: Publish core SDK to Maven Local
+        run: ./gradlew publishMavenPublicationToMavenLocal
+
+      - name: Run kit unit tests
+        if: ${{ matrix.kit.skip_unit_tests != true }}
+        run: |
+          ./gradlew "${{ matrix.kit.kit_project }}:testRelease" \
+            -c settings-kits.gradle \
+            -Pmparticle.kit.mparticleFromMavenLocalOnly=true
+
+      - name: Build Kotlin example
+        if: ${{ matrix.kit.skip_example_builds != true && matrix.kit.example_kotlin_project != '' }}
+        run: |
+          ./gradlew "${{ matrix.kit.example_kotlin_project }}:assembleDebug" \
+            -c settings-kit-examples.gradle \
+            -Pmparticle.kit.mparticleFromMavenLocalOnly=true
+
+      - name: Build Java example
+        if: ${{ matrix.kit.skip_example_builds != true && matrix.kit.example_java_project != '' }}
+        run: |
+          ./gradlew "${{ matrix.kit.example_java_project }}:assembleDebug" \
+            -c settings-kit-examples.gradle \
+            -Pmparticle.kit.mparticleFromMavenLocalOnly=true
