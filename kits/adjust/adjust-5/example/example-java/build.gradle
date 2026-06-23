@@ -27,7 +27,7 @@ android {
 }
 
 dependencies {
-    implementation project(':kits:android-adjust:adjust-5')
+    implementation project(':kits:adjust:adjust-5')
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
 }
