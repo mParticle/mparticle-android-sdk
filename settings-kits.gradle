@@ -1,35 +1,39 @@
 //keep things alphabetical like readme
 
 include (
-        ':kits:adjust:adjust-5',
-        ':kits:adobe:adobe-5',
-        ':kits:adobemedia:adobemedia-5',
-        ':kits:appsflyer:appsflyer-6',
-        ':kits:apptentive:apptentive-6',
-        ':kits:apptimize:apptimize-3',
+        ':kits:android-adjust:adjust-5',
+        ':kits:android-adobe:adobe-5',
+        ':kits:android-adobemedia:adobemedia-5',
+        ':kits:android-appsflyer:appsflyer-6',
+        ':kits:android-apptentive:apptentive-6',
+        ':kits:android-apptimize:apptimize-3',
         //blueshift hosts kit
-        ':kits:braze:braze-38',
-        ':kits:braze:braze-39',
-        ':kits:braze:braze-40',
-        ':kits:braze:braze-41',
-        ':kits:branch:branch-5',
-        ':kits:clevertap:clevertap-7',
-        ':kits:comscore:comscore-6',
-        ':kits:ga:ga-23',
-        ':kits:ga4:ga4-23',
-        ':kits:iterable:iterable-3',
-        ':kits:kochava:kochava-5',
-        ':kits:localytics:localytics-6',
-        ':kits:leanplum:leanplum-7',
+        ':kits:android-braze:braze-38',
+        ':kits:android-braze:braze-39',
+        ':kits:android-braze:braze-40',
+        ':kits:android-braze:braze-41',
+        ':kits:android-branch:branch-5',
+        ':kits:android-clevertap:clevertap-7',
+        ':kits:android-comscore:comscore-6',
+        ':kits:android-ga:ga-23',
+        ':kits:android-ga4:ga4-23',
+        ':kits:android-iterable:iterable-3',
+        ':kits:android-kochava:kochava-5',
+        ':kits:android-localytics:localytics-6',
+        ':kits:android-leanplum:leanplum-7',
         //Neura hosts kit
-        ':kits:onetrust:onetrust',
-        ':kits:optimizely:optimizely-3',
-        ':kits:radar:radar-3',
-        ':kits:rokt:rokt',
-        ':kits:singular:singular-12',
+        ':kits:android-onetrust:onetrust',
+        ':kits:android-optimizely:optimizely-3',
+        ':kits:android-radar:radar-3',
+        ':kits:android-rokt:rokt',
+        ':kits:android-singular:singular-12',
         //Swrve hosts kit
-        //  ':kits:urbanairship:urbanairship-20',  // Kotlin 2.2.x -- built standalone (see ONBOARDING.md)
+        //  ':kits:android-urbanairship:urbanairship-20',  // Kotlin 2.2.x -- built standalone (see ONBOARDING.md)
 )
-project(':kits').getChildren().each {
-    proj -> proj.name = 'android-' + proj.name
+
+project(':kits').getChildren().each { vendorProject ->
+    def diskVendorName = vendorProject.name - 'android-'
+    vendorProject.children.each { kitProject ->
+        kitProject.projectDir = file("kits/${diskVendorName}/${kitProject.name}")
+    }
 }

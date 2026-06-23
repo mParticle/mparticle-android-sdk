@@ -1,8 +1,8 @@
 // CI-only settings for kit sample apps. Keeps example modules out of settings-kits.gradle.
 apply from: 'settings-kits.gradle'
 
-include ':kits:adjust:adjust-5:example-kotlin',
-        ':kits:adjust:adjust-5:example-java'
+include ':kits:android-adjust:adjust-5:example-kotlin',
+        ':kits:android-adjust:adjust-5:example-java'
 
-project(':kits:adjust:adjust-5:example-kotlin').projectDir = file('kits/adjust/adjust-5/example/example-kotlin')
-project(':kits:adjust:adjust-5:example-java').projectDir = file('kits/adjust/adjust-5/example/example-java')
+project(':kits:android-adjust:adjust-5:example-kotlin').projectDir = file('kits/adjust/adjust-5/example/example-kotlin')
+project(':kits:android-adjust:adjust-5:example-java').projectDir = file('kits/adjust/adjust-5/example/example-java')
