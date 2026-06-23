@@ -4,5 +4,147 @@
     "local_path": "kits/adjust/adjust-5",
     "kit_project": ":kits:android-adjust:adjust-5",
     "example_kotlin_project": ":kits:android-adjust:adjust-5:example-kotlin"
+  },
+  {
+    "name": "adobe-5",
+    "local_path": "kits/adobe/adobe-5",
+    "kit_project": ":kits:android-adobe:adobe-5",
+    "example_kotlin_project": ":kits:android-adobe:adobe-5:example-kotlin"
+  },
+  {
+    "name": "adobemedia-5",
+    "local_path": "kits/adobemedia/adobemedia-5",
+    "kit_project": ":kits:android-adobemedia:adobemedia-5",
+    "example_kotlin_project": ":kits:android-adobemedia:adobemedia-5:example-kotlin"
+  },
+  {
+    "name": "appsflyer-6",
+    "local_path": "kits/appsflyer/appsflyer-6",
+    "kit_project": ":kits:android-appsflyer:appsflyer-6",
+    "example_kotlin_project": ":kits:android-appsflyer:appsflyer-6:example-kotlin"
+  },
+  {
+    "name": "apptentive-6",
+    "local_path": "kits/apptentive/apptentive-6",
+    "kit_project": ":kits:android-apptentive:apptentive-6",
+    "example_kotlin_project": ":kits:android-apptentive:apptentive-6:example-kotlin"
+  },
+  {
+    "name": "apptimize-3",
+    "local_path": "kits/apptimize/apptimize-3",
+    "kit_project": ":kits:android-apptimize:apptimize-3",
+    "example_kotlin_project": ":kits:android-apptimize:apptimize-3:example-kotlin",
+    "skip_example_builds": true
+  },
+  {
+    "name": "braze-38",
+    "local_path": "kits/braze/braze-38",
+    "kit_project": ":kits:android-braze:braze-38",
+    "example_kotlin_project": ":kits:android-braze:braze-38:example-kotlin"
+  },
+  {
+    "name": "braze-39",
+    "local_path": "kits/braze/braze-39",
+    "kit_project": ":kits:android-braze:braze-39",
+    "example_kotlin_project": ":kits:android-braze:braze-39:example-kotlin"
+  },
+  {
+    "name": "braze-40",
+    "local_path": "kits/braze/braze-40",
+    "kit_project": ":kits:android-braze:braze-40",
+    "example_kotlin_project": ":kits:android-braze:braze-40:example-kotlin"
+  },
+  {
+    "name": "braze-41",
+    "local_path": "kits/braze/braze-41",
+    "kit_project": ":kits:android-braze:braze-41",
+    "example_kotlin_project": ":kits:android-braze:braze-41:example-kotlin"
+  },
+  {
+    "name": "branch-5",
+    "local_path": "kits/branch/branch-5",
+    "kit_project": ":kits:android-branch:branch-5",
+    "example_kotlin_project": ":kits:android-branch:branch-5:example-kotlin"
+  },
+  {
+    "name": "clevertap-7",
+    "local_path": "kits/clevertap/clevertap-7",
+    "kit_project": ":kits:android-clevertap:clevertap-7",
+    "example_kotlin_project": ":kits:android-clevertap:clevertap-7:example-kotlin"
+  },
+  {
+    "name": "comscore-6",
+    "local_path": "kits/comscore/comscore-6",
+    "kit_project": ":kits:android-comscore:comscore-6",
+    "example_kotlin_project": ":kits:android-comscore:comscore-6:example-kotlin"
+  },
+  {
+    "name": "ga-23",
+    "local_path": "kits/ga/ga-23",
+    "kit_project": ":kits:android-ga:ga-23",
+    "example_kotlin_project": ":kits:android-ga:ga-23:example-kotlin"
+  },
+  {
+    "name": "ga4-23",
+    "local_path": "kits/ga4/ga4-23",
+    "kit_project": ":kits:android-ga4:ga4-23",
+    "example_kotlin_project": ":kits:android-ga4:ga4-23:example-kotlin"
+  },
+  {
+    "name": "iterable-3",
+    "local_path": "kits/iterable/iterable-3",
+    "kit_project": ":kits:android-iterable:iterable-3",
+    "example_kotlin_project": ":kits:android-iterable:iterable-3:example-kotlin"
+  },
+  {
+    "name": "kochava-5",
+    "local_path": "kits/kochava/kochava-5",
+    "kit_project": ":kits:android-kochava:kochava-5",
+    "example_kotlin_project": ":kits:android-kochava:kochava-5:example-kotlin"
+  },
+  {
+    "name": "localytics-6",
+    "local_path": "kits/localytics/localytics-6",
+    "kit_project": ":kits:android-localytics:localytics-6",
+    "example_kotlin_project": ":kits:android-localytics:localytics-6:example-kotlin",
+    "skip_example_builds": true
+  },
+  {
+    "name": "leanplum-7",
+    "local_path": "kits/leanplum/leanplum-7",
+    "kit_project": ":kits:android-leanplum:leanplum-7",
+    "example_kotlin_project": ":kits:android-leanplum:leanplum-7:example-kotlin"
+  },
+  {
+    "name": "onetrust",
+    "local_path": "kits/onetrust/onetrust",
+    "kit_project": ":kits:android-onetrust:onetrust",
+    "example_kotlin_project": ":kits:android-onetrust:onetrust:example-kotlin"
+  },
+  {
+    "name": "optimizely-3",
+    "local_path": "kits/optimizely/optimizely-3",
+    "kit_project": ":kits:android-optimizely:optimizely-3",
+    "example_kotlin_project": ":kits:android-optimizely:optimizely-3:example-kotlin"
+  },
+  {
+    "name": "radar-3",
+    "local_path": "kits/radar/radar-3",
+    "kit_project": ":kits:android-radar:radar-3",
+    "example_kotlin_project": ":kits:android-radar:radar-3:example-kotlin"
+  },
+  {
+    "name": "rokt",
+    "local_path": "kits/rokt/rokt",
+    "kit_project": ":kits:android-rokt:rokt",
+    "example_kotlin_project": ":kits:android-rokt:rokt:example-kotlin",
+    "skip_example_builds": true
+  },
+  {
+    "name": "singular-12",
+    "local_path": "kits/singular/singular-12",
+    "kit_project": ":kits:android-singular:singular-12",
+    "example_kotlin_project": ":kits:android-singular:singular-12:example-kotlin",
+    "skip_example_builds": true
   }
 ]
