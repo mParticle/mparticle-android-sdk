@@ -57,7 +57,7 @@ android {
 }
 
 dependencies {
-    api 'com.optimizely.ab:android-sdk:3.13.3'
+    api 'com.optimizely.ab:android-sdk:[3.13.3,4.0.0)'
     testImplementation files('libs/java-json.jar')
     testImplementation files('libs/test-utils.aar')
 }

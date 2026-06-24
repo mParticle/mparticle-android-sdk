@@ -57,5 +57,5 @@ android {
 }
 
 dependencies {
-    api 'com.iterable:iterableapi:3.5.10'
+    api 'com.iterable:iterableapi:[3.5.10,4.0.0)'
 }

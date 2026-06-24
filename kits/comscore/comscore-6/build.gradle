@@ -57,5 +57,5 @@ android {
 }
 
 dependencies {
-    api 'com.comscore:android-analytics:6.9.2'
+    api 'com.comscore:android-analytics:[6.9.2,7.0.0)'
 }

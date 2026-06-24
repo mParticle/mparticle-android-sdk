@@ -64,7 +64,7 @@ android {
 }
 
 dependencies {
-    api 'com.singular.sdk:singular_sdk:12.5.4'
+    api 'com.singular.sdk:singular_sdk:[12.5.4,13.0.0)'
 
     androidTestImplementation 'androidx.test:runner:1.5.2'
     testImplementation 'org.powermock:powermock-core:2.0.9'

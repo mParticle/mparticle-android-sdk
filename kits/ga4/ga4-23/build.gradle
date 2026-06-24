@@ -60,7 +60,7 @@ android {
 dependencies {
     testImplementation files('libs/java-json.jar')
     testImplementation files('libs/test-utils.aar')
-    testImplementation 'com.google.android.gms:play-services-measurement-api:22.1.0'
+    testImplementation 'com.google.android.gms:play-services-measurement-api:[22.1.0,23.0.0)'
 
-    compileOnly 'com.google.firebase:firebase-analytics:22.1.0'
+    compileOnly 'com.google.firebase:firebase-analytics:[22.1.0,23.0.0)'
 }

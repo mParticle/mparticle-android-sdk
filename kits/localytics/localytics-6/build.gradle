@@ -63,7 +63,7 @@ repositories {
 }
 
 dependencies {
-    api 'com.localytics.androidx:library:6.3.7'
+    api 'com.localytics.androidx:library:[6.3.7,7.0.0)'
     compileOnly 'androidx.appcompat:appcompat:1.6.1'
     testImplementation  files('libs/java-json.jar')
 }

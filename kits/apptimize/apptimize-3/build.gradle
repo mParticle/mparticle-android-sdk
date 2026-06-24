@@ -62,5 +62,5 @@ repositories {
 }
 
 dependencies {
-    api 'com.apptimize:apptimize-android:3.10.18@aar'
+    api 'com.apptimize:apptimize-android:[3.10.18,4.0.0)@aar'
 }
