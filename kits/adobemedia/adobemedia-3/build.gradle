@@ -85,13 +85,6 @@ configurations.all {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     api 'com.mparticle:android-media:1.5.0'
-
-    // Adobe Experience Platform Mobile SDK.
-    // The BOM (Bill of Materials) pins every Adobe extension to a single
-    // mutually-compatible version set. The range on the BOM coordinate tracks
-    // the latest 3.x release automatically (newest minor + patch within the
-    // major) — the Gradle equivalent of iOS SPM .upToNextMajor(from: "3.0.0").
-    // Individual extensions are declared without versions; the BOM supplies them.
     api platform('com.adobe.marketing.mobile:sdk-bom:[3.0.0,4.0.0)')
     api 'com.adobe.marketing.mobile:core'
     api 'com.adobe.marketing.mobile:analytics'

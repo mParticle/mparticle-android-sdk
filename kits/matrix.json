@@ -6,10 +6,10 @@
     "example_kotlin_project": ":kits:android-adjust:adjust-5:example-kotlin"
   },
   {
-    "name": "adobe-5",
-    "local_path": "kits/adobe/adobe-5",
-    "kit_project": ":kits:android-adobe:adobe-5",
-    "example_kotlin_project": ":kits:android-adobe:adobe-5:example-kotlin"
+    "name": "adobe",
+    "local_path": "kits/adobe/adobe",
+    "kit_project": ":kits:android-adobe:adobe",
+    "example_kotlin_project": ":kits:android-adobe:adobe:example-kotlin"
   },
   {
     "name": "adobemedia-3",
