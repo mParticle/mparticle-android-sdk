@@ -3,7 +3,7 @@
 include (
         ':kits:adjust:adjust-5',
         ':kits:adobe:adobe-5',
-        ':kits:adobemedia:adobemedia-5',
+        ':kits:adobemedia:adobemedia-3',
         ':kits:appsflyer:appsflyer-6',
         ':kits:apptentive:apptentive-6',
         ':kits:apptimize:apptimize-3',

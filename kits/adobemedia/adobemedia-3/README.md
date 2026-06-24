@@ -10,7 +10,7 @@ Please note that the `adobemedia-kit` contains all the functionality of the `ado
 
     ```groovy
     dependencies {
-        implementation 'com.mparticle:android-adobemedia-kit:5+'
+        implementation 'com.mparticle:android-adobemedia-kit:3+'
     }
     ```
 

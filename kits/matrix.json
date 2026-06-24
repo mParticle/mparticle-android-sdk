@@ -12,10 +12,10 @@
     "example_kotlin_project": ":kits:android-adobe:adobe-5:example-kotlin"
   },
   {
-    "name": "adobemedia-5",
-    "local_path": "kits/adobemedia/adobemedia-5",
-    "kit_project": ":kits:android-adobemedia:adobemedia-5",
-    "example_kotlin_project": ":kits:android-adobemedia:adobemedia-5:example-kotlin"
+    "name": "adobemedia-3",
+    "local_path": "kits/adobemedia/adobemedia-3",
+    "kit_project": ":kits:android-adobemedia:adobemedia-3",
+    "example_kotlin_project": ":kits:android-adobemedia:adobemedia-3:example-kotlin"
   },
   {
     "name": "appsflyer-6",
