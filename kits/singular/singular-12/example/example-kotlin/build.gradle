@@ -13,6 +13,7 @@ android {
         targetSdk 35
         versionCode 1
         versionName '1.0'
+        multiDexEnabled true
     }
 
     compileOptions {
@@ -31,8 +32,15 @@ android {
     }
 }
 
+repositories {
+    maven { url 'https://maven.singular.net' }
+    google()
+    mavenCentral()
+}
+
 dependencies {
     implementation project(':kits:singular:singular-12')
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.multidex:multidex:2.0.1'
 }

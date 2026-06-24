@@ -31,6 +31,12 @@ android {
     }
 }
 
+repositories {
+    maven { url 'https://maven.localytics.com/public' }
+    google()
+    mavenCentral()
+}
+
 dependencies {
     implementation project(':kits:localytics:localytics-6')
     implementation 'androidx.appcompat:appcompat:1.6.1'

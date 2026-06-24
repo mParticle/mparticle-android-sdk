@@ -33,8 +33,7 @@
     "name": "apptimize-3",
     "local_path": "kits/apptimize/apptimize-3",
     "kit_project": ":kits:android-apptimize:apptimize-3",
-    "example_kotlin_project": ":kits:android-apptimize:apptimize-3:example-kotlin",
-    "skip_example_builds": true
+    "example_kotlin_project": ":kits:android-apptimize:apptimize-3:example-kotlin"
   },
   {
     "name": "braze-38",
@@ -106,8 +105,7 @@
     "name": "localytics-6",
     "local_path": "kits/localytics/localytics-6",
     "kit_project": ":kits:android-localytics:localytics-6",
-    "example_kotlin_project": ":kits:android-localytics:localytics-6:example-kotlin",
-    "skip_example_builds": true
+    "example_kotlin_project": ":kits:android-localytics:localytics-6:example-kotlin"
   },
   {
     "name": "leanplum-7",
@@ -144,7 +142,6 @@
     "name": "singular-12",
     "local_path": "kits/singular/singular-12",
     "kit_project": ":kits:android-singular:singular-12",
-    "example_kotlin_project": ":kits:android-singular:singular-12:example-kotlin",
-    "skip_example_builds": true
+    "example_kotlin_project": ":kits:android-singular:singular-12:example-kotlin"
   }
 ]

@@ -1,11 +1,11 @@
 package com.mparticle.kits.leanplum.example.kotlin
 
-import android.app.Application
+import androidx.multidex.MultiDexApplication
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 
-class ExampleApplication : Application() {
+class ExampleApplication : MultiDexApplication() {
     override fun onCreate() {
         super.onCreate()
         val options =
