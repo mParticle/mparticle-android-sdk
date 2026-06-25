@@ -60,7 +60,7 @@ ktlint {
 }
 
 dependencies {
-    api 'com.appsflyer:af-android-sdk:6.17.3'
+    api 'com.appsflyer:af-android-sdk:[6.17.3,7.0.0)'
     testImplementation files('libs/java-json.jar')
     testImplementation files('libs/testutils.aar')
 }

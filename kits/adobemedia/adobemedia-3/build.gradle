@@ -85,12 +85,12 @@ configurations.all {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     api 'com.mparticle:android-media:1.5.0'
-    api 'com.adobe.marketing.mobile:mobileservices:1.1.5'
-    api 'com.adobe.marketing.mobile:analytics:3.0.1'
-    api 'com.adobe.marketing.mobile:media:3.1.0'
-    api 'com.adobe.marketing.mobile:userprofile:3.0.0'
-    api 'com.adobe.marketing.mobile:lifecycle:3.0.0'
-    api 'com.adobe.marketing.mobile:identity:3.0.0'
-    api 'com.adobe.marketing.mobile:signal:3.0.0'
-    api 'com.adobe.marketing.mobile:sdk-core:1.11.7'
+    api platform('com.adobe.marketing.mobile:sdk-bom:[3.0.0,4.0.0)')
+    api 'com.adobe.marketing.mobile:core'
+    api 'com.adobe.marketing.mobile:analytics'
+    api 'com.adobe.marketing.mobile:media'
+    api 'com.adobe.marketing.mobile:userprofile'
+    api 'com.adobe.marketing.mobile:lifecycle'
+    api 'com.adobe.marketing.mobile:identity'
+    api 'com.adobe.marketing.mobile:signal'
 }

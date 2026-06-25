@@ -57,5 +57,5 @@ android {
 
 dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    api 'com.clevertap.android:clevertap-android-sdk:7.5.0'
+    api 'com.clevertap.android:clevertap-android-sdk:[7.5.0,8.0.0)'
 }

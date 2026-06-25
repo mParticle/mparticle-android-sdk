@@ -59,7 +59,7 @@ android {
 dependencies {
     testImplementation fileTree(dir: 'libs', include: ['*.jar'])
     //note that compileOnly requires kit users to define the dependency themselves
-    compileOnly 'com.onetrust.cmp:native-sdk:202411.2.0.0'
+    compileOnly 'com.onetrust.cmp:native-sdk:[202411.2.0.0,202412.0.0.0)'
     // Add as testImplementation so tests can load OneTrustKit class
-    testImplementation 'com.onetrust.cmp:native-sdk:202411.2.0.0'
+    testImplementation 'com.onetrust.cmp:native-sdk:[202411.2.0.0,202412.0.0.0)'
 }
