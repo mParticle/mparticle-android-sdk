@@ -38,6 +38,7 @@ public class MParticleOptions {
     private String mApiSecret;
     private IdentityApiRequest mIdentifyRequest;
     private Boolean mDevicePerformanceMetricsDisabled = false;
+    private Boolean mDeviceBasedConsentEnabled = false;
     private Boolean mAndroidIdEnabled = false;
     private Integer mUploadInterval = ConfigManager.DEFAULT_UPLOAD_INTERVAL;  //seconds
     private Integer mSessionTimeout = ConfigManager.DEFAULT_SESSION_TIMEOUT_SECONDS; //seconds
@@ -92,6 +93,9 @@ public class MParticleOptions {
         }
         if (builder.devicePerformanceMetricsDisabled != null) {
             this.mDevicePerformanceMetricsDisabled = builder.devicePerformanceMetricsDisabled;
+        }
+        if (builder.deviceBasedConsentEnabled != null) {
+            this.mDeviceBasedConsentEnabled = builder.deviceBasedConsentEnabled;
         }
         if (builder.androidIdEnabled != null) {
             this.mAndroidIdEnabled = builder.androidIdEnabled;
@@ -252,6 +256,20 @@ public class MParticleOptions {
     @NonNull
     public Boolean isDevicePerformanceMetricsDisabled() {
         return mDevicePerformanceMetricsDisabled;
+    }
+
+    /**
+     * Query whether device-based consent is enabled.
+     * <p>
+     * When enabled, {@link com.mparticle.identity.MParticleUser#setConsentState(ConsentState)}
+     * will persist consent at the device level in addition to the current MPID. Device-level
+     * consent overrides MPID-based consent when applying consent forwarding rules and uploading events.
+     *
+     * @return true if device-based consent is enabled
+     */
+    @NonNull
+    public Boolean isDeviceBasedConsentEnabled() {
+        return mDeviceBasedConsentEnabled;
     }
 
     /**
@@ -423,6 +441,7 @@ public class MParticleOptions {
         private MParticle.Environment environment;
         private IdentityApiRequest identifyRequest;
         private Boolean devicePerformanceMetricsDisabled = null;
+        private Boolean deviceBasedConsentEnabled = null;
         private Boolean androidIdEnabled = null;
         private Integer uploadInterval = null;
         private Integer sessionTimeout = null;
@@ -567,6 +586,23 @@ public class MParticleOptions {
         @NonNull
         public Builder devicePerformanceMetricsDisabled(boolean disabled) {
             this.devicePerformanceMetricsDisabled = disabled;
+            return this;
+        }
+
+        /**
+         * Enable device-based consent.
+         * <p>
+         * When enabled, consent set via {@link com.mparticle.identity.MParticleUser#setConsentState(ConsentState)}
+         * is stored at the device level and overrides MPID-based consent when applying consent forwarding
+         * rules and uploading events. This is useful when consent is collected before the user's MPID is known
+         * or when the MPID changes during a flow such as checkout.
+         *
+         * @param enabled true to enable device-based consent
+         * @return the instance of the builder, for chaining calls
+         */
+        @NonNull
+        public Builder deviceBasedConsentEnabled(boolean enabled) {
+            this.deviceBasedConsentEnabled = enabled;
             return this;
         }
 

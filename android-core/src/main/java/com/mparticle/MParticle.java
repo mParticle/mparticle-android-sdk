@@ -20,6 +20,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApi;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.IdentityApiResult;
@@ -909,6 +910,48 @@ public class MParticle {
             }
             mKitManager.setOptOut(optOutStatus);
         }
+    }
+
+    /**
+     * Query the device-level consent state.
+     * <p>
+     * Device-level consent, when set, overrides MPID-based consent when applying consent forwarding
+     * rules and uploading events.
+     *
+     * @return the device-level consent state, or an empty state if none has been set
+     */
+    @NonNull
+    public ConsentState getDeviceConsentState() {
+        return mConfigManager.getDeviceConsentState();
+    }
+
+    /**
+     * Set the device-level consent state.
+     * <p>
+     * Device-level consent overrides MPID-based consent when applying consent forwarding rules
+     * and uploading events. Pass {@code null} to clear the device-level override and fall back to
+     * MPID-based consent.
+     *
+     * @param state the device-level consent state, or {@code null} to clear the override
+     */
+    public void setDeviceConsentState(@Nullable ConsentState state) {
+        ConsentState oldState = mConfigManager.getEffectiveConsentState(mConfigManager.getMpid());
+        mConfigManager.setDeviceConsentState(state);
+        ConsentState newState = mConfigManager.getEffectiveConsentState(mConfigManager.getMpid());
+        mKitManager.onConsentStateUpdated(oldState, newState, mConfigManager.getMpid());
+    }
+
+    /**
+     * Query whether device-based consent is enabled.
+     * <p>
+     * When enabled, {@link com.mparticle.identity.MParticleUser#setConsentState(ConsentState)}
+     * also persists consent at the device level.
+     *
+     * @return true if device-based consent is enabled
+     */
+    @NonNull
+    public Boolean isDeviceBasedConsentEnabled() {
+        return mConfigManager.isDeviceBasedConsentEnabled();
     }
 
     /**
