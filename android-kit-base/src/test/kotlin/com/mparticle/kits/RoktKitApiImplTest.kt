@@ -2,6 +2,7 @@ package com.mparticle.kits
 
 import com.mparticle.MParticle
 import com.mparticle.identity.IdentityApi
+import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.MPUtility
 import com.mparticle.mock.MockMParticle
 import com.mparticle.rokt.PlacementOptions
@@ -15,6 +16,7 @@ import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.withSettings
@@ -80,6 +82,61 @@ class RoktKitApiImplTest {
         assertEquals("55555", captured["minorcatid"])
         assertEquals("US", captured["country"])
         assertEquals(MPUtility.isDevEnv().toString(), captured["sandbox"])
+    }
+
+    @Test
+    fun testSelectPlacements_waitsForUserAttributesBeforeDelegating() {
+        val kitConfig = KitConfiguration.createKitConfiguration(JSONObject().put("id", 42))
+        val kitIntegration =
+            mock(
+                KitIntegration::class.java,
+                withSettings().extraInterfaces(KitIntegration.RoktListener::class.java),
+            )
+        `when`(kitIntegration.configuration).thenReturn(kitConfig)
+        val roktListener = kitIntegration as KitIntegration.RoktListener
+        val roktApi = RoktKitApiImpl(roktListener, kitIntegration)
+
+        val identityApi = mock(IdentityApi::class.java)
+        val user = mock(MParticleUser::class.java)
+        `when`(user.id).thenReturn(12345L)
+        `when`(identityApi.currentUser).thenReturn(user)
+        val instance = MockMParticle()
+        instance.setIdentityApi(identityApi)
+        MParticle.setInstance(instance)
+
+        var capturedListener: com.mparticle.TypedUserAttributeListener? = null
+        `when`(user.getUserAttributes(any())).thenAnswer { invocation ->
+            capturedListener = invocation.arguments[0] as com.mparticle.TypedUserAttributeListener
+            null
+        }
+
+        val attributes = mapOf("country" to "US")
+        roktApi.selectPlacements("Test", attributes, null, null, null, null, null)
+
+        verify(user).setUserAttributes(any())
+        verify(roktListener, never()).selectPlacements(
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+        )
+
+        capturedListener!!.onUserAttributesReceived(emptyMap(), emptyMap(), 12345L)
+
+        verify(roktListener).selectPlacements(
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+        )
     }
 
     @Test
