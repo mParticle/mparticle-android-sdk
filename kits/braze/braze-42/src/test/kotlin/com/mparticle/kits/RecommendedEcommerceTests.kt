@@ -85,6 +85,8 @@ class RecommendedEcommerceTests {
         // Product-level custom props are nested in metadata, never at the top level.
         Assert.assertEquals("testBrand", lineItem.metadata?.properties?.get("brand"))
         Assert.assertEquals("customProductValue", lineItem.metadata?.properties?.get("customProductKey"))
+        // cart_id is promoted to the typed cartId field, so it must not be duplicated in metadata.
+        Assert.assertNull(event.metadata?.properties?.get("cart_id"))
     }
 
     @Test
@@ -169,6 +171,8 @@ class RecommendedEcommerceTests {
         Assert.assertEquals(5.0, event.metadata?.properties?.get("tax"))
         Assert.assertEquals(7.0, event.metadata?.properties?.get("shipping"))
         Assert.assertEquals("the affiliation", event.metadata?.properties?.get("affiliation"))
+        // total_discounts is promoted to a typed field, so it must not be duplicated in metadata.
+        Assert.assertNull(event.metadata?.properties?.get("total_discounts"))
     }
 
     @Test

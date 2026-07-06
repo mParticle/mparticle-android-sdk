@@ -1185,7 +1185,9 @@ open class AppboyKit :
     private fun buildEventMetadataMap(event: CommerceEvent): Map<String, Any> {
         val metadata = linkedMapOf<String, Any>()
         event.customAttributeStrings?.forEach { (key, value) ->
-            if (!value.isNullOrEmpty()) {
+            // Skip attributes already promoted to typed recommended-event fields to avoid
+            // emitting them both at the top level and inside metadata.
+            if (key !in PROMOTED_METADATA_ATTRIBUTES && !value.isNullOrEmpty()) {
                 metadata[key] = value
             }
         }
@@ -1720,6 +1722,10 @@ open class AppboyKit :
         private const val CART_ID_ATTRIBUTE = "cart_id"
         private const val CHECKOUT_ID_ATTRIBUTE = "checkout_id"
         private const val TOTAL_DISCOUNTS_ATTRIBUTE = "total_discounts"
+
+        // Custom attributes promoted to typed recommended-event fields; excluded from metadata.
+        private val PROMOTED_METADATA_ATTRIBUTES =
+            setOf(CART_ID_ATTRIBUTE, CHECKOUT_ID_ATTRIBUTE, TOTAL_DISCOUNTS_ATTRIBUTE)
         private val IMAGE_URL_ATTRIBUTES = listOf("image_url", "Image URL")
         private val PRODUCT_URL_ATTRIBUTES = listOf("product_url", "Product URL")
         private const val METADATA_KEY = "metadata"
