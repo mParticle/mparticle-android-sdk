@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Add a `braze-42` kit track supporting Braze Android SDK 42.x, with an opt-in `useEcommerceRecommendedEvents` setting that forwards mParticle commerce events using Braze's recommended eCommerce event schema (`ecommerce.cart_updated`, `ecommerce.checkout_started`, `ecommerce.product_viewed`, `ecommerce.order_placed`, `ecommerce.order_refunded`). Legacy commerce forwarding remains the default. The `braze-42` track is built standalone (Kotlin 2.2.x).
+
 ### Changed
 
 - Add support for qualified alpha, beta, and release candidate versions in release workflows.

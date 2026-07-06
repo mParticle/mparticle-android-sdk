@@ -240,6 +240,8 @@ jobs:
         run: ./gradlew lint -c settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true
       - name: "Run Isolated Kit Lint (urbanairship-kit)"
         run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 lint
+      - name: "Run Isolated Kit Lint (braze-42)"
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/braze/braze-42 lint
       - name: "Archive Test Results"
         uses: actions/upload-artifact@v7
         if: always()
@@ -279,6 +281,8 @@ jobs:
         run: ./gradlew ktlintCheck -c settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true
       - name: "Run Isolated Kit Kotlin Lint (urbanairship-kit)"
         run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 ktlintCheck
+      - name: "Run Isolated Kit Kotlin Lint (braze-42)"
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/braze/braze-42 ktlintCheck
       - name: "Archive Test Results"
         uses: actions/upload-artifact@v7
         if: always()
@@ -321,6 +325,8 @@ jobs:
         run: ./gradlew clean testRelease -c settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true
       - name: "Test Isolated Kits (urbanairship-kit)"
         run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 clean testRelease
+      - name: "Test Isolated Kits (braze-42)"
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/braze/braze-42 clean testRelease
 
   semantic-release-dryrun:
     name: "Test Semantic Release - Dry Run"
