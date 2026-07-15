@@ -14,8 +14,6 @@ include ':kits:adjust:adjust-5:example-kotlin',
         ':kits:branch:branch-5:example-kotlin',
         ':kits:clevertap:clevertap-7:example-kotlin',
         ':kits:comscore:comscore-6:example-kotlin',
-        ':kits:ga:ga-23:example-kotlin',
-        ':kits:ga4:ga4-23:example-kotlin',
         ':kits:iterable:iterable-3:example-kotlin',
         ':kits:kochava:kochava-5:example-kotlin',
         ':kits:localytics:localytics-6:example-kotlin',
@@ -39,8 +37,6 @@ project(':kits:braze:braze-41:example-kotlin').projectDir = file('kits/braze/bra
 project(':kits:branch:branch-5:example-kotlin').projectDir = file('kits/branch/branch-5/example/example-kotlin')
 project(':kits:clevertap:clevertap-7:example-kotlin').projectDir = file('kits/clevertap/clevertap-7/example/example-kotlin')
 project(':kits:comscore:comscore-6:example-kotlin').projectDir = file('kits/comscore/comscore-6/example/example-kotlin')
-project(':kits:ga:ga-23:example-kotlin').projectDir = file('kits/ga/ga-23/example/example-kotlin')
-project(':kits:ga4:ga4-23:example-kotlin').projectDir = file('kits/ga4/ga4-23/example/example-kotlin')
 project(':kits:iterable:iterable-3:example-kotlin').projectDir = file('kits/iterable/iterable-3/example/example-kotlin')
 project(':kits:kochava:kochava-5:example-kotlin').projectDir = file('kits/kochava/kochava-5/example/example-kotlin')
 project(':kits:localytics:localytics-6:example-kotlin').projectDir = file('kits/localytics/localytics-6/example/example-kotlin')
