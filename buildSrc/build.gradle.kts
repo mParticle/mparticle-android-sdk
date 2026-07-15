@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.0.20"
+    kotlin("jvm") version "2.1.20"
     `kotlin-dsl`
 }
 
@@ -22,7 +22,7 @@ tasks.withType<KotlinCompile>().configureEach {
 
 dependencies {
     implementation("com.android.tools.build:gradle:8.3.2")
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.20")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.20")
     implementation("com.vanniktech:gradle-maven-publish-plugin:0.31.0")
 }
 
