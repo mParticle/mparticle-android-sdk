@@ -265,13 +265,17 @@ class MParticleUserDelegate {
     }
 
     public ConsentState getConsentState(long mpid) {
-        return mConfigManager.getConsentState(mpid);
+        return mConfigManager.getEffectiveConsentState(mpid);
     }
 
     public void setConsentState(ConsentState state, long mpid) {
         ConsentState oldState = getConsentState(mpid);
         mConfigManager.setConsentState(state, mpid);
-        mKitManager.onConsentStateUpdated(oldState, state, mpid);
+        if (mConfigManager.isDeviceBasedConsentEnabled()) {
+            mConfigManager.setDeviceConsentState(state);
+        }
+        ConsentState newState = getConsentState(mpid);
+        mKitManager.onConsentStateUpdated(oldState, newState, mpid);
     }
 
     public boolean isLoggedIn(Long mpid) {

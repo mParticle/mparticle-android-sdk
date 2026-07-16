@@ -105,6 +105,22 @@ public class MessageService extends MessageTable {
                 selectionArgs);
     }
 
+    /**
+     * Delete messages whose {@link MessageTableColumns#CREATED_AT} is strictly less than
+     * {@code cutoffMillis}.
+     *
+     * @param database     the message database
+     * @param cutoffMillis the unix-epoch millisecond cutoff; rows older than this are removed
+     * @return the number of rows deleted
+     */
+    public static int deleteMessagesOlderThan(MPDatabase database, long cutoffMillis) {
+        String[] whereArgs = new String[]{Long.toString(cutoffMillis)};
+        return database.delete(
+                MessageTableColumns.TABLE_NAME,
+                MessageTableColumns.CREATED_AT + " < ?",
+                whereArgs);
+    }
+
     public static boolean hasMessagesForUpload(MPDatabase database) {
         Cursor messageIds = null;
         try {

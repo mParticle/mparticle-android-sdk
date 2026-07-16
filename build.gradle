@@ -64,7 +64,6 @@ subprojects {
 
 allprojects {
     group = 'com.mparticle'
-
     repositories {
         mavenLocal()
         google()
