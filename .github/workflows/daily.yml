@@ -242,6 +242,10 @@ jobs:
         run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 lint
       - name: "Run Isolated Kit Lint (braze-42)"
         run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/braze/braze-42 lint
+      - name: "Run Isolated Kit Lint (ga-kit)"
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga/ga-23 lint
+      - name: "Run Isolated Kit Lint (ga4-kit)"
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga4/ga4-23 lint
       - name: "Archive Test Results"
         uses: actions/upload-artifact@v7
         if: always()
@@ -283,6 +287,10 @@ jobs:
         run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 ktlintCheck
       - name: "Run Isolated Kit Kotlin Lint (braze-42)"
         run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/braze/braze-42 ktlintCheck
+      - name: "Run Isolated Kit Kotlin Lint (ga-kit)"
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga/ga-23 ktlintCheck
+      - name: "Run Isolated Kit Kotlin Lint (ga4-kit)"
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga4/ga4-23 ktlintCheck
       - name: "Archive Test Results"
         uses: actions/upload-artifact@v7
         if: always()
@@ -327,6 +335,10 @@ jobs:
         run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 clean testRelease
       - name: "Test Isolated Kits (braze-42)"
         run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/braze/braze-42 clean testRelease
+      - name: "Test Isolated Kits (ga-kit)"
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga/ga-23 clean testRelease
+      - name: "Test Isolated Kits (ga4-kit)"
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga4/ga4-23 clean testRelease
 
   semantic-release-dryrun:
     name: "Test Semantic Release - Dry Run"

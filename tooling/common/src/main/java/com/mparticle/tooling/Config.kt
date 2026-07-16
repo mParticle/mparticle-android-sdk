@@ -36,10 +36,10 @@ data class Config(
                 } else {
                     Config::class.java.declaredMethods
                         .firstOrNull {
-                            it.name.removePrefix("set").toLowerCase() ==
+                            it.name.removePrefix("set").lowercase() ==
                                 key
                                     ?.toString()
-                                    ?.toLowerCase()
+                                    ?.lowercase()
                         }?.invoke(config, json.opt(key.toString()))
                 }
             }

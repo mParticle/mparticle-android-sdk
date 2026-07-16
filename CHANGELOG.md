@@ -8,6 +8,7 @@
 
 ### Changed
 
+- Upgrade Kotlin to 2.1.20 across the core SDK, buildSrc, and all integrated kits.
 - Add support for qualified alpha, beta, and release candidate versions in release workflows.
 - Add Kotlin `MParticle.rokt` access and `RoktLayout` event callbacks for the Rokt kit.
 

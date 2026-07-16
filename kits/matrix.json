@@ -78,18 +78,6 @@
     "example_kotlin_project": ":kits:android-comscore:comscore-6:example-kotlin"
   },
   {
-    "name": "ga-23",
-    "local_path": "kits/ga/ga-23",
-    "kit_project": ":kits:android-ga:ga-23",
-    "example_kotlin_project": ":kits:android-ga:ga-23:example-kotlin"
-  },
-  {
-    "name": "ga4-23",
-    "local_path": "kits/ga4/ga4-23",
-    "kit_project": ":kits:android-ga4:ga4-23",
-    "example_kotlin_project": ":kits:android-ga4:ga4-23:example-kotlin"
-  },
-  {
     "name": "iterable-3",
     "local_path": "kits/iterable/iterable-3",
     "kit_project": ":kits:android-iterable:iterable-3",

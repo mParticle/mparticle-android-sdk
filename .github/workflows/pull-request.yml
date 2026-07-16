@@ -180,6 +180,10 @@ jobs:
         run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 -PisRelease=true testRelease
       - name: "Run Isolated Kit Compatibility Tests (braze-42)"
         run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/braze/braze-42 -PisRelease=true testRelease
+      - name: "Run Isolated Kit Compatibility Tests (ga)"
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga/ga-23 -PisRelease=true testRelease
+      - name: "Run Isolated Kit Compatibility Tests (ga4)"
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga4/ga4-23 -PisRelease=true testRelease
 
   automerge-dependabot:
     name: "Save PR Number for Dependabot Automerge"

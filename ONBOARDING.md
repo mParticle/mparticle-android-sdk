@@ -143,6 +143,8 @@ Kotlin version.
 
 - `kits/urbanairship/urbanairship-20` (Kotlin 2.2.x, `urbanairship-core:20.3.0`)
 - `kits/braze/braze-42` (Kotlin 2.2.x, `com.braze:android-sdk-ui:[42.3.0,43.0.0)`)
+- `kits/ga/ga-23` (Kotlin 2.2.x, `firebase-analytics:23.x`)
+- `kits/ga4/ga4-23` (Kotlin 2.2.x, `firebase-analytics:23.x`)
 
 To build an isolated kit after publishing core to mavenLocal:
 
@@ -163,7 +165,7 @@ cd kits/urbanairship/urbanairship-20 && ./gradlew -PisRelease=true testRelease
 ```
 
 **Adding a new isolated kit:** If a kit upgrades to a Kotlin version
-incompatible with the root KGP (2.0.20), remove it from
+incompatible with the root KGP (2.1.20), remove it from
 `settings-kits.gradle` with a comment, and add standalone build steps
 to the CI workflows following the urbanairship pattern.
 
