@@ -122,10 +122,9 @@
 
 ## [5.80.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.79.2...v5.80.0) (2026-06-25)
 
-
 ### Features
 
-* add device-based consent to override MPID-scoped consent ([#726](https://github.com/mParticle/mparticle-android-sdk/issues/726)) ([e92d352](https://github.com/mParticle/mparticle-android-sdk/commit/e92d3522a350be90a1f15eb3b81d5e6f089f1aed))
+- add device-based consent to override MPID-scoped consent ([#726](https://github.com/mParticle/mparticle-android-sdk/issues/726)) ([e92d352](https://github.com/mParticle/mparticle-android-sdk/commit/e92d3522a350be90a1f15eb3b81d5e6f089f1aed))
 
 ## Unreleased
 
