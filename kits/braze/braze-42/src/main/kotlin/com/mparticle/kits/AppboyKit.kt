@@ -190,7 +190,7 @@ open class AppboyKit :
         } else {
             val properties = BrazeProperties()
             val brazePropertiesSetter = BrazePropertiesSetter(properties, enableTypeDetection)
-            event.customAttributeStrings?.let { it ->
+            event.customAttributeStrings?.let {
                 for ((key, value) in it) {
                     newAttributes[key] = brazePropertiesSetter.parseValue(key, value)
                 }
@@ -202,7 +202,7 @@ open class AppboyKit :
                     object : IValueCallback<BrazeUser> {
                         override fun onSuccess(value: BrazeUser) {
                             val userAttributeSetter = UserAttributeSetter(value, enableTypeDetection)
-                            event.customAttributeStrings?.let { it ->
+                            event.customAttributeStrings?.let {
                                 for ((key, attributeValue) in it) {
                                     val hashedKey =
                                         KitUtils.hashForFiltering(event.eventType.value.toString() + event.eventName + key)
@@ -1018,7 +1018,7 @@ open class AppboyKit :
                 for (product in products) {
                     braze.logEcommerceEvent(
                         ProductViewedEvent(
-                            productId = product.sku,
+                            productId = recommendedProductId(product),
                             productName = product.name,
                             variantId = recommendedVariantId(product),
                             price = product.unitPrice,
@@ -1100,6 +1100,14 @@ open class AppboyKit :
         return if (variant.isNullOrEmpty()) product.sku else variant
     }
 
+    private fun recommendedProductId(product: Product): String =
+        try {
+            if (settings[REPLACE_SKU_AS_PRODUCT_NAME] == "True") product.name else product.sku
+        } catch (e: Exception) {
+            Logger.error(e, "The Braze kit threw an exception while searching for forward sku as product name flag.")
+            product.sku
+        }
+
     private fun recommendedImageUrl(product: Product): String? = recommendedProductAttribute(product, IMAGE_URL_ATTRIBUTES)
 
     private fun recommendedProductUrl(product: Product): String? = recommendedProductAttribute(product, PRODUCT_URL_ATTRIBUTES)
@@ -1136,7 +1144,7 @@ open class AppboyKit :
     private fun recommendedLineItems(products: List<Product>): List<EcommerceProduct> =
         products.map { product ->
             EcommerceProduct(
-                productId = product.sku,
+                productId = recommendedProductId(product),
                 productName = product.name,
                 variantId = recommendedVariantId(product),
                 price = product.unitPrice,
@@ -1151,7 +1159,7 @@ open class AppboyKit :
         val array = JSONArray()
         for (product in products) {
             val obj = JSONObject()
-            obj.put(RECOMMENDED_PRODUCT_ID_KEY, product.sku)
+            obj.put(RECOMMENDED_PRODUCT_ID_KEY, recommendedProductId(product))
             obj.put(RECOMMENDED_PRODUCT_NAME_KEY, product.name)
             obj.put(RECOMMENDED_VARIANT_ID_KEY, recommendedVariantId(product))
             obj.put(RECOMMENDED_QUANTITY_KEY, product.quantity.toLong().coerceAtLeast(1L))

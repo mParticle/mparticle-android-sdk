@@ -14,6 +14,8 @@ import com.mparticle.commerce.TransactionAttributes
 import com.mparticle.identity.IdentityApi
 import com.mparticle.kits.mocks.MockAppboyKit
 import com.mparticle.kits.mocks.MockKitConfiguration
+import org.json.JSONArray
+import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -57,6 +59,14 @@ class RecommendedEcommerceTests {
                     "customProductKey" to "customProductValue",
                 ),
             ).build()
+
+    private fun kitWithReplaceSkuFlag(): MockAppboyKit {
+        val settings = hashMapOf<String, String?>(AppboyKit.REPLACE_SKU_AS_PRODUCT_NAME to "True")
+        return MockAppboyKit().apply {
+            configuration = KitConfiguration.createKitConfiguration(JSONObject().put("as", JSONObject(settings as Map<*, *>)))
+            useEcommerceRecommendedEvents = true
+        }
+    }
 
     @Test
     fun testAddToCartLogsCartUpdatedAddEvent() {
@@ -146,6 +156,33 @@ class RecommendedEcommerceTests {
     }
 
     @Test
+    fun testViewDetailHonorsReplaceSkuWithProductNameFlag() {
+        kitWithReplaceSkuFlag().logEvent(
+            CommerceEvent
+                .Builder(Product.DETAIL, productWithUrls())
+                .currency("USD")
+                .build(),
+        )
+        Assert.assertEquals(1, Braze.ecommerceEvents.size)
+        val event = Braze.ecommerceEvents[0] as ProductViewedEvent
+        Assert.assertEquals("product name", event.productId)
+        Assert.assertEquals("product name", event.productName)
+    }
+
+    @Test
+    fun testLineItemsHonorReplaceSkuWithProductNameFlag() {
+        kitWithReplaceSkuFlag().logEvent(
+            CommerceEvent
+                .Builder(Product.ADD_TO_CART, productWithUrls())
+                .currency("USD")
+                .build(),
+        )
+        Assert.assertEquals(1, Braze.ecommerceEvents.size)
+        val event = Braze.ecommerceEvents[0] as CartUpdatedEvent
+        Assert.assertEquals("product name", event.products[0].productId)
+    }
+
+    @Test
     fun testPurchaseLogsOrderPlacedEvent() {
         val transactionAttributes =
             TransactionAttributes("order-42")
@@ -194,6 +231,20 @@ class RecommendedEcommerceTests {
         Assert.assertEquals(99.0, refund?.properties?.get("total_value"))
         Assert.assertEquals("android", refund?.properties?.get("source"))
         Assert.assertNotNull(refund?.properties?.get("products"))
+    }
+
+    @Test
+    fun testRefundProductsJsonHonorsReplaceSkuWithProductNameFlag() {
+        kitWithReplaceSkuFlag().logEvent(
+            CommerceEvent
+                .Builder(Product.REFUND, productWithUrls())
+                .currency("USD")
+                .transactionAttributes(TransactionAttributes("order-42").setRevenue(99.0))
+                .build(),
+        )
+        val refund = Braze.events["ecommerce.order_refunded"]
+        val products = refund?.properties?.get("products") as JSONArray
+        Assert.assertEquals("product name", products.getJSONObject(0).getString("product_id"))
     }
 
     @Test
