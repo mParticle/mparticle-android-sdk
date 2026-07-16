@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '2.1.20'
+    ext.kotlin_version = '2.2.20'
     if (!project.hasProperty('version') || project.version.equals('unspecified')) {
         project.version = '+'
     }
@@ -60,7 +60,7 @@ android {
 dependencies {
     testImplementation files('libs/java-json.jar')
     testImplementation files('libs/test-utils.aar')
-    testImplementation 'com.google.android.gms:play-services-measurement-api:[22.1.0,23.0.0)'
+    testImplementation 'com.google.android.gms:play-services-measurement-api:[23.0.0,24.0.0)'
 
-    compileOnly 'com.google.firebase:firebase-analytics:[22.1.0,23.0.0)'
+    compileOnly 'com.google.firebase:firebase-analytics:[23.0.0,24.0.0)'
 }
