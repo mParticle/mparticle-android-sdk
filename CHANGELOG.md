@@ -126,12 +126,6 @@
 
 - add device-based consent to override MPID-scoped consent ([#726](https://github.com/mParticle/mparticle-android-sdk/issues/726)) ([e92d352](https://github.com/mParticle/mparticle-android-sdk/commit/e92d3522a350be90a1f15eb3b81d5e6f089f1aed))
 
-## Unreleased
-
-### Added
-
-- Add device-based consent APIs (`MParticle.getDeviceConsentState()`, `MParticle.setDeviceConsentState()`) and `MParticleOptions.Builder.deviceBasedConsentEnabled()` so consent can be stored and applied at the device level, overriding MPID-based consent for kit forwarding rules and event uploads.
-
 ## [5.79.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.79.1...v5.79.2) (2026-06-22)
 
 ### Updates & Maintenance
