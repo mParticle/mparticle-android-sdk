@@ -209,7 +209,7 @@ class AppsflyerKitTests {
         map["defaultAdPersonalizationConsent"] = "Denied"
 
         kit.configuration =
-            KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
+            KitConfiguration.createKitConfiguration(JSONObject().put("as", JSONObject(map as Map<*, *>)))
 
         val marketingConsent =
             GDPRConsent
@@ -256,7 +256,7 @@ class AppsflyerKitTests {
         map["defaultAdPersonalizationConsent"] = "Unspecified"
 
         kit.configuration =
-            KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
+            KitConfiguration.createKitConfiguration(JSONObject().put("as", JSONObject(map as Map<*, *>)))
 
         val marketingConsent =
             GDPRConsent
@@ -303,7 +303,7 @@ class AppsflyerKitTests {
         map["defaultAdPersonalizationConsent"] = "Granted"
 
         kit.configuration =
-            KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
+            KitConfiguration.createKitConfiguration(JSONObject().put("as", JSONObject(map as Map<*, *>)))
 
         val marketingConsent =
             GDPRConsent
@@ -353,7 +353,7 @@ class AppsflyerKitTests {
         map["defaultAdPersonalizationConsent"] = "Granted"
 
         kit.configuration =
-            KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
+            KitConfiguration.createKitConfiguration(JSONObject().put("as", JSONObject(map as Map<*, *>)))
 
         val performanceConsent =
             GDPRConsent
@@ -418,7 +418,7 @@ class AppsflyerKitTests {
         map["defaultAdPersonalizationConsent"] = "Granted"
 
         kit.configuration =
-            KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
+            KitConfiguration.createKitConfiguration(JSONObject().put("as", JSONObject(map as Map<*, *>)))
 
         val performanceConsent =
             GDPRConsent
@@ -474,7 +474,7 @@ class AppsflyerKitTests {
             "[{\\\"jsmap\\\":null,\\\"map\\\":\\\"Performance\\\",\\\"maptype\\\":\\\"ConsentPurposes\\\",\\\"value\\\":\\\"ad_user_data\\\"},{\\\"jsmap\\\":null,\\\"map\\\":\\\"Marketing\\\",\\\"maptype\\\":\\\"ConsentPurposes\\\",\\\"value\\\":\\\"ad_personalization\\\"},{\\\"jsmap\\\":null,\\\"map\\\":\\\"testconsent\\\",\\\"maptype\\\":\\\"ConsentPurposes\\\",\\\"value\\\":\\\"ad_storage\\\"}]"
 
         kit.configuration =
-            KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
+            KitConfiguration.createKitConfiguration(JSONObject().put("as", JSONObject(map as Map<*, *>)))
 
         val marketingConsent =
             GDPRConsent
@@ -558,7 +558,7 @@ class AppsflyerKitTests {
         map["defaultAdPersonalizationConsent"] = "Denied"
 
         kit.configuration =
-            KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
+            KitConfiguration.createKitConfiguration(JSONObject().put("as", JSONObject(map as Map<*, *>)))
 
         val marketingConsent =
             GDPRConsent
@@ -615,7 +615,7 @@ class AppsflyerKitTests {
         map["defaultAdPersonalizationConsent"] = "Unspecified"
 
         kit.configuration =
-            KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
+            KitConfiguration.createKitConfiguration(JSONObject().put("as", JSONObject(map as Map<*, *>)))
 
         val marketingConsent =
             GDPRConsent
