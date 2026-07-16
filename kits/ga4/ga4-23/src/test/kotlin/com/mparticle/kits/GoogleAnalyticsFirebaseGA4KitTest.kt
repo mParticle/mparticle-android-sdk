@@ -150,7 +150,7 @@ class GoogleAnalyticsFirebaseGA4KitTest {
         map["defaultAdPersonalizationConsentSDK"] = "Denied"
 
         kitInstance.configuration =
-            KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
+            KitConfiguration.createKitConfiguration(JSONObject().put("as", JSONObject(map as Map<*, *>)))
 
         val marketingConsent =
             GDPRConsent
@@ -191,7 +191,7 @@ class GoogleAnalyticsFirebaseGA4KitTest {
         map["defaultAdPersonalizationConsentSDK"] = "Denied"
 
         kitInstance.configuration =
-            KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
+            KitConfiguration.createKitConfiguration(JSONObject().put("as", JSONObject(map as Map<*, *>)))
 
         val marketingConsent =
             GDPRConsent
@@ -232,7 +232,7 @@ class GoogleAnalyticsFirebaseGA4KitTest {
         map["defaultAdPersonalizationConsentSDK"] = "Denied"
 
         kitInstance.configuration =
-            KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
+            KitConfiguration.createKitConfiguration(JSONObject().put("as", JSONObject(map as Map<*, *>)))
 
         val performanceConsent =
             GDPRConsent
@@ -273,7 +273,7 @@ class GoogleAnalyticsFirebaseGA4KitTest {
         map["defaultAdPersonalizationConsentSDK"] = "Denied"
 
         kitInstance.configuration =
-            KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
+            KitConfiguration.createKitConfiguration(JSONObject().put("as", JSONObject(map as Map<*, *>)))
 
         val performanceConsent =
             GDPRConsent
@@ -315,7 +315,7 @@ class GoogleAnalyticsFirebaseGA4KitTest {
         map["defaultAdPersonalizationConsentSDK"] = "Denied"
 
         kitInstance.configuration =
-            KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
+            KitConfiguration.createKitConfiguration(JSONObject().put("as", JSONObject(map as Map<*, *>)))
 
         val marketingConsent =
             GDPRConsent
@@ -362,7 +362,7 @@ class GoogleAnalyticsFirebaseGA4KitTest {
             "[{\\\"jsmap\\\":null,\\\"map\\\":\\\"Performance\\\",\\\"maptype\\\":\\\"ConsentPurposes\\\",\\\"value\\\":\\\"ad_user_data\\\"},{\\\"jsmap\\\":null,\\\"map\\\":\\\"Marketing\\\",\\\"maptype\\\":\\\"ConsentPurposes\\\",\\\"value\\\":\\\"ad_personalization\\\"},{\\\"jsmap\\\":null,\\\"map\\\":\\\"testconsent\\\",\\\"maptype\\\":\\\"ConsentPurposes\\\",\\\"value\\\":\\\"ad_storage\\\"}]"
 
         kitInstance.configuration =
-            KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
+            KitConfiguration.createKitConfiguration(JSONObject().put("as", JSONObject(map as Map<*, *>)))
 
         val marketingConsent =
             GDPRConsent
@@ -435,7 +435,7 @@ class GoogleAnalyticsFirebaseGA4KitTest {
         map["defaultAdPersonalizationConsentSDK"] = "Denied"
 
         kitInstance.configuration =
-            KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
+            KitConfiguration.createKitConfiguration(JSONObject().put("as", JSONObject(map as Map<*, *>)))
 
         val marketingConsent =
             GDPRConsent
@@ -485,7 +485,7 @@ class GoogleAnalyticsFirebaseGA4KitTest {
         map["defaultAdPersonalizationConsentSDK"] = "Unspecified"
 
         kitInstance.configuration =
-            KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
+            KitConfiguration.createKitConfiguration(JSONObject().put("as", JSONObject(map as Map<*, *>)))
 
         val marketingConsent =
             GDPRConsent
@@ -524,7 +524,7 @@ class GoogleAnalyticsFirebaseGA4KitTest {
         map["defaultAdPersonalizationConsentSDK"] = "Unspecified"
 
         kitInstance.configuration =
-            KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
+            KitConfiguration.createKitConfiguration(JSONObject().put("as", JSONObject(map as Map<*, *>)))
 
         val marketingConsent =
             GDPRConsent

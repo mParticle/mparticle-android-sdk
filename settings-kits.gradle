@@ -15,8 +15,8 @@ include (
         ':kits:branch:branch-5',
         ':kits:clevertap:clevertap-7',
         ':kits:comscore:comscore-6',
-        ':kits:ga:ga-23',
-        ':kits:ga4:ga4-23',
+        //  ':kits:ga:ga-23',  // Kotlin 2.2.x -- built standalone (see ONBOARDING.md)
+        //  ':kits:ga4:ga4-23',  // Kotlin 2.2.x -- built standalone (see ONBOARDING.md)
         ':kits:iterable:iterable-3',
         ':kits:kochava:kochava-5',
         ':kits:localytics:localytics-6',
