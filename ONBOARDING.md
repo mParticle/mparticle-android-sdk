@@ -142,6 +142,7 @@ Kotlin version.
 **Currently isolated:**
 
 - `kits/urbanairship/urbanairship-20` (Kotlin 2.2.x, `urbanairship-core:20.3.0`)
+- `kits/braze/braze-42` (Kotlin 2.2.x, `com.braze:android-sdk-ui:[42.3.0,43.0.0)`)
 - `kits/ga/ga-23` (Kotlin 2.2.x, `firebase-analytics:23.x`)
 - `kits/ga4/ga4-23` (Kotlin 2.2.x, `firebase-analytics:23.x`)
 

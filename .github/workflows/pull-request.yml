@@ -172,6 +172,8 @@ jobs:
         run: ./gradlew -p kits testRelease -c ../settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true
       - name: "Run Isolated Kit Compatibility Tests (urbanairship)"
         run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 -PisRelease=true testRelease
+      - name: "Run Isolated Kit Compatibility Tests (braze-42)"
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/braze/braze-42 -PisRelease=true testRelease
       - name: "Run Isolated Kit Compatibility Tests (ga)"
         run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga/ga-23 -PisRelease=true testRelease
       - name: "Run Isolated Kit Compatibility Tests (ga4)"
