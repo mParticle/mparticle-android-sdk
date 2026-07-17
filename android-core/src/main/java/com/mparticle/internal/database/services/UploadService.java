@@ -23,6 +23,22 @@ public class UploadService extends UploadTable {
     }
 
     /**
+     * Delete uploads whose {@link UploadTableColumns#CREATED_AT} is strictly less than
+     * {@code cutoffMillis}.
+     *
+     * @param database     the upload database
+     * @param cutoffMillis the unix-epoch millisecond cutoff; rows older than this are removed
+     * @return the number of rows deleted
+     */
+    public static int deleteUploadsOlderThan(MPDatabase database, long cutoffMillis) {
+        String[] whereArgs = new String[]{Long.toString(cutoffMillis)};
+        return database.delete(
+                UploadTableColumns.TABLE_NAME,
+                UploadTableColumns.CREATED_AT + " < ?",
+                whereArgs);
+    }
+
+    /**
      * Generic method to insert a new upload,
      * either a regular message batch, or a session history.
      *

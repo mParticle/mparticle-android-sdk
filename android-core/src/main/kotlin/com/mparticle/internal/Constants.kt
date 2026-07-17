@@ -608,6 +608,8 @@ object Constants {
             const val IF_MODIFIED: String = "mp::ifmodified"
             const val IDENTITY_API_CONTEXT: String = "mp::identity::api::context"
             const val DEVICE_APPLICATION_STAMP: String = "mp::device-app-stamp"
+            const val DEVICE_CONSENT_STATE: String = "mp::device::consent"
+            const val DEVICE_BASED_CONSENT_ENABLED: String = "mp::device::consent::enabled"
             const val PREVIOUS_ANDROID_ID: String = "mp::previous::android::id"
             const val DISPLAY_PUSH_NOTIFICATIONS: String = "mp::displaypushnotifications"
             const val IDENTITY_CONNECTION_TIMEOUT: String = "mp::connection:timeout:identity"

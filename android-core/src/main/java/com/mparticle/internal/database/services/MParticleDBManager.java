@@ -7,6 +7,7 @@ import android.location.Location;
 import android.os.Handler;
 import android.os.Looper;
 
+import androidx.annotation.CheckResult;
 import androidx.annotation.Nullable;
 
 import com.mparticle.MParticle;
@@ -201,6 +202,37 @@ public class MParticleDBManager {
             MessageService.deleteOldMessages(db, currentSessionId);
             SessionService.deleteSessions(db, currentSessionId);
             db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    /**
+     * Age-based retention sweep across the three persistence tables.
+     * <p>
+     * Deletes any messages and uploads whose {@code CREATED_AT} is strictly less than
+     * {@code cutoffMillis}, and any sessions whose {@code END_TIME} is strictly less than
+     * {@code cutoffMillis}.
+     * {@code MPPersistenceController.deleteRecordsOlderThan:}, but reports success so
+     * callers can decide whether to arm retry/throttle state.
+     *
+     * @param cutoffMillis the unix-epoch millisecond cutoff; rows older than this are removed
+     * @return {@code true} if the transaction committed successfully, {@code false} if any
+     *         exception was caught (and logged) during the sweep
+     */
+    @CheckResult
+    public boolean deleteRecordsOlderThan(long cutoffMillis) {
+        MPDatabase db = getDatabase();
+        try {
+            db.beginTransaction();
+            MessageService.deleteMessagesOlderThan(db, cutoffMillis);
+            UploadService.deleteUploadsOlderThan(db, cutoffMillis);
+            SessionService.deleteSessionsOlderThan(db, cutoffMillis);
+            db.setTransactionSuccessful();
+            return true;
+        } catch (Exception e) {
+            Logger.warning(e, "Error pruning persisted records older than " + cutoffMillis + " ms.");
+            return false;
         } finally {
             db.endTransaction();
         }

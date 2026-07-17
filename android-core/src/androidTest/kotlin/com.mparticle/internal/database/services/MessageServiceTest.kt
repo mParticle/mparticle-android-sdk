@@ -400,6 +400,72 @@ class MessageServiceTest : BaseMPServiceTest() {
         Assert.assertEquals(MessageService.getMessagesForUpload(database).size.toLong(), 20)
     }
 
+    @Test
+    @Throws(JSONException::class)
+    fun testDeleteMessagesOlderThan() {
+        val sessionId = UUID.randomUUID().toString()
+        val now = System.currentTimeMillis()
+        val oneDayMillis = 24L * 60L * 60L * 1000L
+        // Insert 5 "old" messages dated 10 days ago and 5 "recent" messages dated 1 hour ago.
+        for (i in 0 until 5) {
+            val oldMessage =
+                BaseMPMessage
+                    .Builder("custom_event")
+                    .timestamp(now - 10L * oneDayMillis)
+                    .build(
+                        InternalSession().apply { mSessionID = sessionId },
+                        null,
+                        1L,
+                    )
+            MessageService.insertMessage(database, "apiKey", oldMessage, 1L, null, null)
+        }
+        for (i in 0 until 5) {
+            val recentMessage =
+                BaseMPMessage
+                    .Builder("custom_event")
+                    .timestamp(now - 60L * 60L * 1000L)
+                    .build(
+                        InternalSession().apply { mSessionID = sessionId },
+                        null,
+                        1L,
+                    )
+            MessageService.insertMessage(database, "apiKey", recentMessage, 1L, null, null)
+        }
+        Assert.assertEquals(
+            10L,
+            MessageService.getMessagesForUpload(database).size.toLong(),
+        )
+
+        // Cut off at 7 days ago - the 5 old messages should be removed and the 5 recent kept.
+        val cutoffMillis = now - 7L * oneDayMillis
+        val deleted = MessageService.deleteMessagesOlderThan(database, cutoffMillis)
+        Assert.assertEquals(5, deleted.toLong())
+        Assert.assertEquals(
+            5L,
+            MessageService.getMessagesForUpload(database).size.toLong(),
+        )
+
+        // Rows exactly at the cutoff must not be removed (strict `<` predicate).
+        val exactlyAtCutoffMessage =
+            BaseMPMessage
+                .Builder("custom_event")
+                .timestamp(cutoffMillis)
+                .build(
+                    InternalSession().apply { mSessionID = sessionId },
+                    null,
+                    1L,
+                )
+        MessageService.insertMessage(database, "apiKey", exactlyAtCutoffMessage, 1L, null, null)
+        Assert.assertEquals(
+            0,
+            MessageService.deleteMessagesOlderThan(database, cutoffMillis).toLong(),
+        )
+        Assert.assertEquals(
+            6L,
+            MessageService.getMessagesForUpload(database).size.toLong(),
+        )
+    }
+
     private fun getMaxId(messages: List<ReadyMessage>): Int {
         var max = 0
         for (message in messages) {

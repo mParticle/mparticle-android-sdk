@@ -54,7 +54,7 @@ public class MessageBatch extends JSONObject {
         uploadMessage.put(Constants.MessageKey.COOKIES, cookies);
         uploadMessage.put(Constants.MessageKey.PROVIDER_PERSISTENCE, configManager.getProviderPersistence());
         uploadMessage.put(Constants.MessageKey.INTEGRATION_ATTRIBUTES, configManager.getIntegrationAttributes());
-        uploadMessage.addConsentState(configManager.getConsentState(batchId.getMpid()));
+        uploadMessage.addConsentState(configManager.getEffectiveConsentState(batchId.getMpid()));
         uploadMessage.addDataplanContext(batchId.getDataplanId(), batchId.getDataplanVersion());
         return uploadMessage;
     }

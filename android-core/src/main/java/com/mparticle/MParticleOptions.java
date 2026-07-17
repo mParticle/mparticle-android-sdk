@@ -38,10 +38,12 @@ public class MParticleOptions {
     private String mApiSecret;
     private IdentityApiRequest mIdentifyRequest;
     private Boolean mDevicePerformanceMetricsDisabled = false;
+    private Boolean mDeviceBasedConsentEnabled = false;
     private Boolean mAndroidIdEnabled = false;
     private Integer mUploadInterval = ConfigManager.DEFAULT_UPLOAD_INTERVAL;  //seconds
     private Integer mSessionTimeout = ConfigManager.DEFAULT_SESSION_TIMEOUT_SECONDS; //seconds
     private Integer mConfigMaxAge = null;
+    private Integer mPersistenceMaxAgeSeconds = null;
     private Boolean mUnCaughtExceptionLogging = false;
     private MParticle.LogLevel mLogLevel = MParticle.LogLevel.DEBUG;
     private AttributionListener mAttributionListener;
@@ -92,6 +94,9 @@ public class MParticleOptions {
         if (builder.devicePerformanceMetricsDisabled != null) {
             this.mDevicePerformanceMetricsDisabled = builder.devicePerformanceMetricsDisabled;
         }
+        if (builder.deviceBasedConsentEnabled != null) {
+            this.mDeviceBasedConsentEnabled = builder.deviceBasedConsentEnabled;
+        }
         if (builder.androidIdEnabled != null) {
             this.mAndroidIdEnabled = builder.androidIdEnabled;
         }
@@ -116,6 +121,13 @@ public class MParticleOptions {
                 Logger.warning("Config Max Age must be a positive number, disregarding value.");
             } else {
                 this.mConfigMaxAge = builder.configMaxAge;
+            }
+        }
+        if (builder.persistenceMaxAgeSeconds != null) {
+            if (builder.persistenceMaxAgeSeconds <= 0) {
+                Logger.warning("Persistence Max Age must be a positive number, disregarding value.");
+            } else {
+                this.mPersistenceMaxAgeSeconds = builder.persistenceMaxAgeSeconds;
             }
         }
         if (builder.unCaughtExceptionLogging != null) {
@@ -247,6 +259,20 @@ public class MParticleOptions {
     }
 
     /**
+     * Query whether device-based consent is enabled.
+     * <p>
+     * When enabled, {@link com.mparticle.identity.MParticleUser#setConsentState(ConsentState)}
+     * will persist consent at the device level in addition to the current MPID. Device-level
+     * consent overrides MPID-based consent when applying consent forwarding rules and uploading events.
+     *
+     * @return true if device-based consent is enabled
+     */
+    @NonNull
+    public Boolean isDeviceBasedConsentEnabled() {
+        return mDeviceBasedConsentEnabled;
+    }
+
+    /**
      * Query whether Android Id collection is enabled or disabled.
      *
      * @return true if collection is enabled, false if it is disabled
@@ -275,6 +301,22 @@ public class MParticleOptions {
     @NonNull
     public Integer getConfigMaxAge() {
         return mConfigMaxAge;
+    }
+
+    /**
+     * The maximum threshold (in seconds) for locally persisted events, batches, and sessions.
+     * <p>
+     * When {@code null} (the default), records are retained for 90 days before being deleted.
+     * Values less than or equal to zero are rejected at build time and result in the default
+     * being used.
+     *
+     * @return the configured maximum persistence age in seconds, or {@code null} when the default
+     *         (90 days) applies
+     * @see Builder#persistenceMaxAgeSeconds(int)
+     */
+    @Nullable
+    public Integer getPersistenceMaxAgeSeconds() {
+        return mPersistenceMaxAgeSeconds;
     }
 
     @NonNull
@@ -386,10 +428,12 @@ public class MParticleOptions {
         private MParticle.Environment environment;
         private IdentityApiRequest identifyRequest;
         private Boolean devicePerformanceMetricsDisabled = null;
+        private Boolean deviceBasedConsentEnabled = null;
         private Boolean androidIdEnabled = null;
         private Integer uploadInterval = null;
         private Integer sessionTimeout = null;
         private Integer configMaxAge = null;
+        private Integer persistenceMaxAgeSeconds = null;
         private Boolean unCaughtExceptionLogging = null;
         MParticle.LogLevel logLevel = null;
         BaseIdentityTask identityTask;
@@ -533,6 +577,23 @@ public class MParticleOptions {
         }
 
         /**
+         * Enable device-based consent.
+         * <p>
+         * When enabled, consent set via {@link com.mparticle.identity.MParticleUser#setConsentState(ConsentState)}
+         * is stored at the device level and overrides MPID-based consent when applying consent forwarding
+         * rules and uploading events. This is useful when consent is collected before the user's MPID is known
+         * or when the MPID changes during a flow such as checkout.
+         *
+         * @param enabled true to enable device-based consent
+         * @return the instance of the builder, for chaining calls
+         */
+        @NonNull
+        public Builder deviceBasedConsentEnabled(boolean enabled) {
+            this.deviceBasedConsentEnabled = enabled;
+            return this;
+        }
+
+        /**
          * By default, the SDK will NOT collect <a href="http://developer.android.com/reference/android/provider/Settings.Secure.html#ANDROID_ID">Android Id</a> for the purpose
          * of anonymous analytics. If you're not using an mParticle integration that consumes Android ID and you would like to collect it, use this API to enable collection
          *
@@ -589,6 +650,32 @@ public class MParticleOptions {
         @NonNull
         public Builder configMaxAgeSeconds(int configMaxAge) {
             this.configMaxAge = configMaxAge;
+            return this;
+        }
+
+        /**
+         * Set a maximum threshold for locally persisted events, batches, and sessions, in seconds.
+         * <p>
+         * By default, data is persisted for 90 days before being deleted to minimize data loss;
+         * however, this can lead to excessive storage usage on some users' devices. This is
+         * exacerbated if your app logs a large number of events, or events carrying a lot of data
+         * (attributes, etc.).
+         * <p>
+         * Set a lower value (for example, 48 hours or 1 week) if you have storage usage concerns.
+         * Alternatively, if you have data loss concerns, set a longer value than the default.
+         * <p>
+         * This is the Android equivalent of the iOS SDK's
+         * {@code MParticleOptions.persistenceMaxAgeSeconds} option.
+         *
+         * @param persistenceMaxAgeSeconds the upper limit, in seconds, for how long persisted
+         *                                 data may live on disk. Must be greater than zero;
+         *                                 non-positive values are rejected and the default
+         *                                 (90 days) is used instead
+         * @return the instance of the builder, for chaining calls
+         */
+        @NonNull
+        public Builder persistenceMaxAgeSeconds(int persistenceMaxAgeSeconds) {
+            this.persistenceMaxAgeSeconds = persistenceMaxAgeSeconds;
             return this;
         }
 

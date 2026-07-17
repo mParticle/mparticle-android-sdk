@@ -91,6 +91,7 @@ public class ConfigManager {
     private UserStorage mUserStorage;
     private String mLogUnhandledExceptions = VALUE_APP_DEFINED;
     private boolean audienceAPIFlag = false;
+    private boolean mDeviceBasedConsentEnabled = false;
 
     private boolean mSendOoEvents;
     private JSONObject mProviderPersistence;
@@ -106,6 +107,8 @@ public class ConfigManager {
     private String mDataplanId;
     private Integer mDataplanVersion;
     private Integer mMaxConfigAge;
+    @Nullable
+    private Integer mPersistenceMaxAgeSeconds;
     public static final int DEFAULT_CONNECTION_TIMEOUT_SECONDS = 30;
     public static final int MINIMUM_CONNECTION_TIMEOUT_SECONDS = 1;
     public static final int DEFAULT_SESSION_TIMEOUT_SECONDS = 60;
@@ -132,10 +135,23 @@ public class ConfigManager {
     public ConfigManager(Context context) {
         mContext = context;
         sPreferences = getPreferences(mContext);
+        mDeviceBasedConsentEnabled = sPreferences.getBoolean(Constants.PrefKeys.DEVICE_BASED_CONSENT_ENABLED, false);
     }
 
     public ConfigManager(@NonNull MParticleOptions options) {
         this(options.getContext(), options.getEnvironment(), options.getApiKey(), options.getApiSecret(), options.getDataplanOptions(), options.getDataplanId(), options.getDataplanVersion(), options.getConfigMaxAge(), options.getConfigurationsForTarget(ConfigManager.class), options.getSideloadedKits());
+        mPersistenceMaxAgeSeconds = options.getPersistenceMaxAgeSeconds();
+        setDeviceBasedConsentEnabled(options.isDeviceBasedConsentEnabled());
+    }
+
+    /**
+     * @return the configured maximum persistence age in seconds, or {@code null} when the SDK
+     *         should fall back to its 90-day default.
+     * @see MParticleOptions.Builder#persistenceMaxAgeSeconds(int)
+     */
+    @Nullable
+    public Integer getPersistenceMaxAgeSeconds() {
+        return mPersistenceMaxAgeSeconds;
     }
 
     public ConfigManager(@NonNull Context context, @Nullable MParticle.Environment environment, @Nullable String apiKey, @Nullable String apiSecret, @Nullable MParticleOptions.DataplanOptions dataplanOptions, @Nullable String dataplanId, @Nullable Integer dataplanVersion, @Nullable Integer configMaxAge, @Nullable List<Configuration<ConfigManager>> configurations, @Nullable List<SideloadedKit> sideloadedKits) {
@@ -164,6 +180,7 @@ public class ConfigManager {
                 configuration.apply(this);
             }
         }
+        mDeviceBasedConsentEnabled = sPreferences.getBoolean(Constants.PrefKeys.DEVICE_BASED_CONSENT_ENABLED, false);
     }
 
     public void onMParticleStarted() {
@@ -1320,6 +1337,50 @@ public class ConfigManager {
     public ConsentState getConsentState(long mpid) {
         String serializedConsent = getUserStorage(mpid).getSerializedConsentState();
         return ConsentState.withConsentState(serializedConsent).build();
+    }
+
+    public boolean isDeviceBasedConsentEnabled() {
+        return mDeviceBasedConsentEnabled;
+    }
+
+    public void setDeviceBasedConsentEnabled(boolean deviceBasedConsentEnabled) {
+        mDeviceBasedConsentEnabled = deviceBasedConsentEnabled;
+        sPreferences.edit()
+                .putBoolean(Constants.PrefKeys.DEVICE_BASED_CONSENT_ENABLED, deviceBasedConsentEnabled)
+                .apply();
+    }
+
+    public boolean hasDeviceConsentOverride() {
+        return sPreferences.contains(Constants.PrefKeys.DEVICE_CONSENT_STATE);
+    }
+
+    @NonNull
+    public ConsentState getDeviceConsentState() {
+        if (!hasDeviceConsentOverride()) {
+            return ConsentState.withConsentState((String) null).build();
+        }
+        String serializedConsent = sPreferences.getString(Constants.PrefKeys.DEVICE_CONSENT_STATE, null);
+        return ConsentState.withConsentState(serializedConsent).build();
+    }
+
+    public void setDeviceConsentState(@Nullable ConsentState state) {
+        if (state != null) {
+            sPreferences.edit()
+                    .putString(Constants.PrefKeys.DEVICE_CONSENT_STATE, state.toString())
+                    .apply();
+        } else {
+            sPreferences.edit()
+                    .remove(Constants.PrefKeys.DEVICE_CONSENT_STATE)
+                    .apply();
+        }
+    }
+
+    @NonNull
+    public ConsentState getEffectiveConsentState(long mpid) {
+        if (hasDeviceConsentOverride()) {
+            return getDeviceConsentState();
+        }
+        return getConsentState(mpid);
     }
 
     public boolean isDirectUrlRoutingEnabled() {

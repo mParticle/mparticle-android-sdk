@@ -120,6 +120,65 @@
 
 - Migrate Rokt contracts and facade ownership to rokt-kit ([#700](https://github.com/mParticle/mparticle-android-sdk/pull/700))
 
+## [5.80.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.79.2...v5.80.0) (2026-06-25)
+
+### Features
+
+- add device-based consent to override MPID-scoped consent ([#726](https://github.com/mParticle/mparticle-android-sdk/issues/726)) ([e92d352](https://github.com/mParticle/mparticle-android-sdk/commit/e92d3522a350be90a1f15eb3b81d5e6f089f1aed))
+
+## [5.79.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.79.1...v5.79.2) (2026-06-22)
+
+### Updates & Maintenance
+
+- bump actions/checkout from 6.0.2 to 6.0.3 ([#720](https://github.com/mParticle/mparticle-android-sdk/issues/720)) ([d904edb](https://github.com/mParticle/mparticle-android-sdk/commit/d904edb0a944a2ce813e7dc31c026f0b2f7ccecb))
+- remove cross-platform-tests and semantic PR/branch checks ([#712](https://github.com/mParticle/mparticle-android-sdk/issues/712)) ([6cdacf2](https://github.com/mParticle/mparticle-android-sdk/commit/6cdacf2926e02e2359352dbcf12b4e4bb66236fa))
+- Update submodules ([976dd0d](https://github.com/mParticle/mparticle-android-sdk/commit/976dd0d13d6aa27f805a6b06a73d923f1a207e80))
+
+## [5.79.1](https://github.com/mParticle/mparticle-android-sdk/compare/v5.79.0...v5.79.1) (2026-05-27)
+
+### Bug Fixes
+
+- **ci:** pin isolated-kit gradle version to prevent 6.0.0-rc.1 pull ([#714](https://github.com/mParticle/mparticle-android-sdk/issues/714)) ([eff10ea](https://github.com/mParticle/mparticle-android-sdk/commit/eff10ead69167f0ea3df248b2bbed089397600cd))
+
+### Updates & Maintenance
+
+- bump trunk-io/trunk-action from 1.2.4 to 1.3.1 ([#705](https://github.com/mParticle/mparticle-android-sdk/issues/705)) ([f4ceca7](https://github.com/mParticle/mparticle-android-sdk/commit/f4ceca7de2c2ba01ea87c98698ef7bb84991b4ab))
+- Update submodules ([e435979](https://github.com/mParticle/mparticle-android-sdk/commit/e435979e1e966ef2b318bb29135852f9d55df55a))
+
+## [5.79.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.78.5...v5.79.0) (2026-05-14)
+
+### Features
+
+- add customBaseURL CNAME support to NetworkOptions ([#701](https://github.com/mParticle/mparticle-android-sdk/issues/701)) ([5285149](https://github.com/mParticle/mparticle-android-sdk/commit/5285149118b58cbd5cf4fb90cb58627deb7538b9)), closes [mparticle-apple-sdk#760](https://github.com/mParticle/mparticle-apple-sdk/issues/760)
+- Add max persistence age override option [TRIAGE-608] ([#699](https://github.com/mParticle/mparticle-android-sdk/issues/699)) ([ca88322](https://github.com/mParticle/mparticle-android-sdk/commit/ca88322ac7ef8649ed111cf28afb81d99cdb271a))
+
+### Bug Fixes
+
+- increase MPLatch timeout from 5s to 30s ([#695](https://github.com/mParticle/mparticle-android-sdk/issues/695)) ([20f723f](https://github.com/mParticle/mparticle-android-sdk/commit/20f723f27cf296c879ceebc9d234edca039ab371))
+
+### Updates & Maintenance
+
+- Update submodules ([59a4a9a](https://github.com/mParticle/mparticle-android-sdk/commit/59a4a9a68e3addfaf5c4eea1afd396889721819d))
+
+## [5.78.5](https://github.com/mParticle/mparticle-android-sdk/compare/v5.78.4...v5.78.5) (2026-03-25)
+
+### Updates & Maintenance
+
+- Update submodules ([86d8d97](https://github.com/mParticle/mparticle-android-sdk/commit/86d8d9748a0c7a796dd0b0be6722f92acef301ea))
+
+## [5.78.4](https://github.com/mParticle/mparticle-android-sdk/compare/v5.78.3...v5.78.4) (2026-03-23)
+
+### Updates & Maintenance
+
+- Update submodules ([08dab75](https://github.com/mParticle/mparticle-android-sdk/commit/08dab75e3715733f6f5655fbf39fbce16a2e01a2))
+
+## [5.78.3](https://github.com/mParticle/mparticle-android-sdk/compare/v5.78.2...v5.78.3) (2026-03-11)
+
+### Updates & Maintenance
+
+- bump actions/upload-artifact from 6 to 7 ([#649](https://github.com/mParticle/mparticle-android-sdk/issues/649)) ([0a188b1](https://github.com/mParticle/mparticle-android-sdk/commit/0a188b1f88efde471f8d6bff2aa8611b1b4bf956))
+- Update submodules ([cbb17d7](https://github.com/mParticle/mparticle-android-sdk/commit/cbb17d7e359d41d8d7577a9516cf7788c7288442))
+
 ## [5.78.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.78.1...v5.78.2) (2026-02-27)
 
 ### Bug Fixes

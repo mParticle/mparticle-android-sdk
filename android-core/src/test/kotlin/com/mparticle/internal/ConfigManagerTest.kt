@@ -2,6 +2,8 @@ package com.mparticle.internal
 
 import com.mparticle.MParticle
 import com.mparticle.MockMParticle
+import com.mparticle.consent.ConsentState
+import com.mparticle.consent.GDPRConsent
 import com.mparticle.internal.KitManager.KitStatus
 import com.mparticle.internal.PushRegistrationHelper.PushRegistration
 import com.mparticle.internal.messages.BaseMPMessage
@@ -727,6 +729,40 @@ class ConfigManagerTest {
         Assert.assertEquals("my ETag", manager.etag)
         Assert.assertEquals("12345", manager.ifModified)
         Assert.assertNotNull(manager.configTimestamp)
+    }
+
+    @Test
+    fun testDeviceConsentOverridesMpidConsent() {
+        val mpid = ran.nextLong()
+        val mpidConsent = ConsentState.builder()
+            .addGDPRConsentState("mpid-purpose", GDPRConsent.builder(false).build())
+            .build()
+        val deviceConsent = ConsentState.builder()
+            .addGDPRConsentState("device-purpose", GDPRConsent.builder(true).build())
+            .build()
+
+        manager.setConsentState(mpidConsent, mpid)
+        Assert.assertFalse(manager.hasDeviceConsentOverride())
+        Assert.assertTrue(manager.getEffectiveConsentState(mpid).gdprConsentState.containsKey("mpid-purpose"))
+
+        manager.setDeviceConsentState(deviceConsent)
+        Assert.assertTrue(manager.hasDeviceConsentOverride())
+        Assert.assertTrue(manager.getEffectiveConsentState(mpid).gdprConsentState.containsKey("device-purpose"))
+        Assert.assertFalse(manager.getEffectiveConsentState(mpid).gdprConsentState.containsKey("mpid-purpose"))
+
+        manager.setDeviceConsentState(null)
+        Assert.assertFalse(manager.hasDeviceConsentOverride())
+        Assert.assertTrue(manager.getEffectiveConsentState(mpid).gdprConsentState.containsKey("mpid-purpose"))
+    }
+
+    @Test
+    fun testDeviceBasedConsentEnabledPersists() {
+        Assert.assertFalse(manager.isDeviceBasedConsentEnabled())
+        manager.setDeviceBasedConsentEnabled(true)
+        Assert.assertTrue(manager.isDeviceBasedConsentEnabled())
+
+        val reloadedManager = ConfigManager(context)
+        Assert.assertTrue(reloadedManager.isDeviceBasedConsentEnabled())
     }
 
     companion object {
