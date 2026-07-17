@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Rokt Kit Kotlin Example</string>
+    <string name="show_overlay">Show overlay placement</string>
+    <string name="show_embedded">Show embedded placement</string>
+    <string name="close_placements">Close placements</string>
 </resources>

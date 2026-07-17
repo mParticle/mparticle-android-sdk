@@ -21,7 +21,7 @@ include ':kits:adjust:adjust-5:example-kotlin',
         ':kits:onetrust:onetrust:example-kotlin',
         ':kits:optimizely:optimizely-3:example-kotlin',
         ':kits:radar:radar-3:example-kotlin',
-        ':kits:rokt:rokt:example-kotlin',
+        //  ':kits:rokt:rokt:example-kotlin',  // requires AGP 8.6+ -- built standalone (see kits/rokt/rokt/example/example-kotlin/README.md)
         ':kits:singular:singular-12:example-kotlin'
 
 project(':kits:adjust:adjust-5:example-kotlin').projectDir = file('kits/adjust/adjust-5/example/example-kotlin')
@@ -44,5 +44,4 @@ project(':kits:leanplum:leanplum-7:example-kotlin').projectDir = file('kits/lean
 project(':kits:onetrust:onetrust:example-kotlin').projectDir = file('kits/onetrust/onetrust/example/example-kotlin')
 project(':kits:optimizely:optimizely-3:example-kotlin').projectDir = file('kits/optimizely/optimizely-3/example/example-kotlin')
 project(':kits:radar:radar-3:example-kotlin').projectDir = file('kits/radar/radar-3/example/example-kotlin')
-project(':kits:rokt:rokt:example-kotlin').projectDir = file('kits/rokt/rokt/example/example-kotlin')
 project(':kits:singular:singular-12:example-kotlin').projectDir = file('kits/singular/singular-12/example/example-kotlin')

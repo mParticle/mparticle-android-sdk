@@ -122,9 +122,7 @@
   {
     "name": "rokt",
     "local_path": "kits/rokt/rokt",
-    "kit_project": ":kits:android-rokt:rokt",
-    "example_kotlin_project": ":kits:android-rokt:rokt:example-kotlin",
-    "skip_example_builds": true
+    "kit_project": ":kits:android-rokt:rokt"
   },
   {
     "name": "singular-12",
