@@ -4,6 +4,7 @@ import android.graphics.Typeface
 import com.mparticle.MParticle
 import com.mparticle.MpRoktEventCallback
 import com.mparticle.RoktEvent
+import com.mparticle.TypedUserAttributeListener
 import com.mparticle.identity.IdentityApi
 import com.mparticle.identity.IdentityApiRequest
 import com.mparticle.identity.MParticleUser
@@ -50,17 +51,20 @@ internal class RoktKitApiImpl(private val roktListener: KitIntegration.RoktListe
             val kitConfig = kitIntegration.configuration
 
             confirmEmail(email, hashedEmail, user, instance.Identity(), kitConfig) {
-                val finalAttributes = prepareAttributes(mutableAttributes, user)
-                roktListener.selectPlacements(
-                    viewName,
-                    finalAttributes,
-                    mpRoktEventCallback,
-                    placeHolders,
-                    fontTypefaces,
-                    FilteredMParticleUser.getInstance(user?.id ?: 0L, kitIntegration),
-                    config,
-                    options,
-                )
+                val finalAttributes = applyPlacementAttributeMapping(mutableAttributes)
+                setRoktAttributesOnUser(finalAttributes, user) {
+                    ensureSandboxMode(finalAttributes)
+                    roktListener.selectPlacements(
+                        viewName,
+                        finalAttributes,
+                        mpRoktEventCallback,
+                        placeHolders,
+                        fontTypefaces,
+                        FilteredMParticleUser.getInstance(user?.id ?: 0L, kitIntegration),
+                        config,
+                        options,
+                    )
+                }
             }
         } catch (e: Exception) {
             Logger.warning("Failed to call execute for Rokt Kit: ${e.message}")
@@ -115,16 +119,19 @@ internal class RoktKitApiImpl(private val roktListener: KitIntegration.RoktListe
                 return
             }
             val user = instance.Identity().currentUser
-            val email = mutableAttributes["email"]
+            val email = getValueIgnoreCase(mutableAttributes, "email")
             val hashedEmail = getValueIgnoreCase(mutableAttributes, "emailsha256")
             val kitConfig = kitIntegration.configuration
 
             confirmEmail(email, hashedEmail, user, instance.Identity(), kitConfig) {
-                val finalAttributes = prepareAttributes(mutableAttributes, user)
-                roktListener.enrichAttributes(
-                    finalAttributes,
-                    FilteredMParticleUser.getInstance(user?.id ?: 0L, kitIntegration),
-                )
+                val finalAttributes = applyPlacementAttributeMapping(mutableAttributes)
+                setRoktAttributesOnUser(finalAttributes, user) {
+                    ensureSandboxMode(finalAttributes)
+                    roktListener.enrichAttributes(
+                        finalAttributes,
+                        FilteredMParticleUser.getInstance(user?.id ?: 0L, kitIntegration),
+                    )
+                }
             }
         } catch (e: Exception) {
             Logger.warning("Failed to call prepareAttributesAsync for Rokt Kit: ${e.message}")
@@ -142,7 +149,7 @@ internal class RoktKitApiImpl(private val roktListener: KitIntegration.RoktListe
         return null
     }
 
-    private fun prepareAttributes(finalAttributes: MutableMap<String, String>, user: MParticleUser?): MutableMap<String, String> {
+    private fun applyPlacementAttributeMapping(attributes: MutableMap<String, String>): MutableMap<String, String> {
         val kitConfig = kitIntegration.configuration
         val jsonArray = try {
             kitConfig?.placementAttributesMapping ?: org.json.JSONArray()
@@ -155,27 +162,51 @@ internal class RoktKitApiImpl(private val roktListener: KitIntegration.RoktListe
             val obj = jsonArray.optJSONObject(i) ?: continue
             val mapFrom = obj.optString("map")
             val mapTo = obj.optString("value")
-            if (finalAttributes.containsKey(mapFrom)) {
-                val value = finalAttributes.remove(mapFrom)
+            if (attributes.containsKey(mapFrom)) {
+                val value = attributes.remove(mapFrom)
                 if (value != null) {
-                    finalAttributes[mapTo] = value
+                    attributes[mapTo] = value
                 }
             }
         }
+        return attributes
+    }
 
+    private fun ensureSandboxMode(finalAttributes: MutableMap<String, String>) {
+        if (!finalAttributes.containsKey(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
+            finalAttributes[Constants.MessageKey.SANDBOX_MODE_ROKT] =
+                Objects.toString(MPUtility.isDevEnv(), "false")
+        }
+    }
+
+    /**
+     * Persists placement attributes on the mParticle user, then invokes [onReady] after the
+     * attributes have been applied. This ensures the Rokt kit reads an up-to-date user profile
+     * when merging attributes for the placement.
+     */
+    private fun setRoktAttributesOnUser(finalAttributes: Map<String, String>, user: MParticleUser?, onReady: Runnable) {
         val objectAttributes = mutableMapOf<String, Any>()
         for ((key, value) in finalAttributes) {
             if (key != Constants.MessageKey.SANDBOX_MODE_ROKT) {
                 objectAttributes[key] = value
             }
         }
-        user?.setUserAttributes(objectAttributes)
-
-        if (!finalAttributes.containsKey(Constants.MessageKey.SANDBOX_MODE_ROKT)) {
-            finalAttributes[Constants.MessageKey.SANDBOX_MODE_ROKT] =
-                Objects.toString(MPUtility.isDevEnv(), "false")
+        if (user != null) {
+            user.setUserAttributes(objectAttributes)
+            user.getUserAttributes(
+                object : TypedUserAttributeListener {
+                    override fun onUserAttributesReceived(
+                        userAttributes: Map<String, Any?>,
+                        userAttributeLists: Map<String, List<String?>?>,
+                        mpid: Long,
+                    ) {
+                        onReady.run()
+                    }
+                },
+            )
+        } else {
+            onReady.run()
         }
-        return finalAttributes
     }
 
     private fun confirmEmail(

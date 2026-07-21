@@ -10,6 +10,7 @@ import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.MpRoktEventCallback
 import com.mparticle.RoktEvent
+import com.mparticle.TypedUserAttributeListener
 import com.mparticle.WrapperSdk
 import com.mparticle.WrapperSdkVersion
 import com.mparticle.commerce.CommerceEvent
@@ -1277,6 +1278,7 @@ class KitManagerImplTest {
     @Test
     fun testRokt_selectPlacements_with_PlacementOptions() {
         val mockUser = mock(MParticleUser::class.java)
+        stubUserAttributesCallback(mockUser)
         `when`(mockIdentity!!.currentUser).thenReturn(mockUser)
 
         val manager: KitManagerImpl = MockKitManagerImpl()
@@ -1315,6 +1317,7 @@ class KitManagerImplTest {
     @Test
     fun testRokt_selectPlacements_without_PlacementOptions() {
         val mockUser = mock(MParticleUser::class.java)
+        stubUserAttributesCallback(mockUser)
         `when`(mockIdentity!!.currentUser).thenReturn(mockUser)
 
         val manager: KitManagerImpl = MockKitManagerImpl()
@@ -1757,6 +1760,14 @@ class KitManagerImplTest {
         runTest {
             val elements = result.toList()
             assertTrue(elements.isEmpty())
+        }
+    }
+
+    private fun stubUserAttributesCallback(user: MParticleUser) {
+        `when`(user.getUserAttributes(any())).thenAnswer { invocation ->
+            val listener = invocation.arguments[0] as TypedUserAttributeListener
+            listener.onUserAttributesReceived(emptyMap(), emptyMap(), 0L)
+            null
         }
     }
 
