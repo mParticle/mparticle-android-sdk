@@ -3,7 +3,7 @@
 include (
         ':kits:adjust:adjust-5',
         ':kits:adobe:adobe',
-        ':kits:adobemedia:adobemedia-3',
+        //  ':kits:adobemedia:adobemedia-3',  // Adobe BOM leaves dependency versions unresolved in POM -- excluded until pinned
         ':kits:appsflyer:appsflyer-6',
         ':kits:apptentive:apptentive-6',
         ':kits:apptimize:apptimize-3',
