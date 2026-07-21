@@ -1,15 +1,30 @@
 plugins {
-    id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
+    id 'com.android.application' version '8.9.1'
+    id 'org.jetbrains.kotlin.android' version '2.1.20'
+}
+
+// Standalone build: the Rokt SDK requires a newer AGP than the shared
+// multi-kit build, so this example resolves the published Rokt SDK+ umbrella
+// (mavenLocal first) instead of the in-repo kit project.
+def mparticleVersion = providers.gradleProperty('mparticleVersion').getOrElse('6.0.0-rc.1')
+
+configurations.all {
+    resolutionStrategy {
+        // android-rokt-kit floats android-kit-base with a dynamic '+' version, which would
+        // otherwise pull a higher published core/kit-base from Maven Central instead of the
+        // locally published build. Pin the mParticle chain to the umbrella's version.
+        force "com.mparticle:android-core:${mparticleVersion}"
+        force "com.mparticle:android-kit-base:${mparticleVersion}"
+    }
 }
 
 android {
     namespace 'com.mparticle.kits.rokt.example.kotlin'
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         applicationId 'com.mparticle.kits.rokt.example.kotlin'
-        minSdk 21
+        minSdk 23
         targetSdk 35
         versionCode 1
         versionName '1.0'
@@ -32,7 +47,10 @@ android {
 }
 
 dependencies {
-    implementation project(':kits:rokt:rokt')
+    // Rokt SDK+ umbrella: transitively provides android-core, android-rokt-kit,
+    // com.rokt:roktsdk, and com.rokt:payment-extension.
+    implementation "com.rokt:rokt-sdk-plus:${mparticleVersion}"
     implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
     implementation 'com.google.android.material:material:1.11.0'
 }

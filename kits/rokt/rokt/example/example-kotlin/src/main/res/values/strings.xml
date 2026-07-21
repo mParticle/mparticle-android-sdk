@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Rokt Kit Kotlin Example</string>
+    <string name="api_key_hint">mParticle API key</string>
+    <string name="api_secret_hint">mParticle API secret</string>
+    <string name="save_and_restart">Apply credentials</string>
+    <string name="workspace_switched">Switching workspace…</string>
+    <string name="show_overlay">Show overlay placement</string>
+    <string name="show_bottom_sheet">Show bottom sheet placement</string>
+    <string name="show_embedded">Show embedded placement</string>
+    <string name="close_placements">Close placements</string>
 </resources>
