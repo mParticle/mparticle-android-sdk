@@ -1,0 +1,12 @@
+// Isolated settings for the `com.rokt:rokt-sdk-plus` umbrella artifact.
+//
+// rokt-sdk-plus is intentionally kept OUT of the main settings.gradle so it is not picked up
+// by the com.mparticle-credentialed publish steps. It is built and published in its own Gradle
+// invocation with the Rokt Maven Central credentials — see .github/workflows/release-publish.yml.
+//
+// Its dependencies resolve as follows during a release build:
+//   * com.mparticle:android-rokt-kit -> android-kit-base -> android-core  ... from mavenLocal
+//     (published earlier in the same release run; see the "Publish ... to Maven local" steps)
+//   * com.rokt:payment-extension + com.rokt:roktsdk ........................ from Maven Central
+//     (released independently from the ROKT sdk-android-source repo)
+include ':rokt-sdk-plus'

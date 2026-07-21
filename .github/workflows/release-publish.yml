@@ -62,6 +62,25 @@ jobs:
       - name: Publish kits to Maven Central
         run: ./gradlew publishMavenPublicationToMavenCentralRepository -PVERSION=${{ needs.setup-and-version.outputs.final_version }} -c settings-kits.gradle
 
+      # rokt-sdk-plus (com.rokt:rokt-sdk-plus) is an umbrella over the mParticle Rokt kit + the
+      # Rokt Payment Extension. The "Publish core to Maven local" step above already placed
+      # android-core/android-kit-base/android-kit-plugin in mavenLocal; we also need the Rokt
+      # kit there so the umbrella resolves its mParticle dependencies locally rather than racing
+      # Maven Central propagation. com.rokt:payment-extension (+ roktsdk) come from Central,
+      # released independently from the ROKT sdk-android-source repo.
+      - name: Publish Rokt kit to Maven local (so rokt-sdk-plus resolves it locally)
+        run: ./gradlew :kits:android-rokt:rokt:publishMavenPublicationToMavenLocal -PVERSION=${{ needs.setup-and-version.outputs.final_version }} -c settings-kits.gradle
+
+      # Published under the com.rokt namespace, so this step uses the Rokt Maven Central
+      # credentials/signing key (separate from the com.mparticle secrets used above).
+      - name: Publish rokt-sdk-plus to Maven Central
+        env:
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.ROKT_MAVEN_CENTRAL_SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.ROKT_MAVEN_CENTRAL_SIGNING_KEY_PASSWORD }}
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.ROKT_SONATYPE_NEXUS_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.ROKT_SONATYPE_NEXUS_PASSWORD }}
+        run: ./gradlew publishMavenPublicationToMavenCentralRepository -PVERSION=${{ needs.setup-and-version.outputs.final_version }} -c settings-rokt-sdk-plus.gradle
+
       - name: Create GitHub release
         uses: ncipollo/release-action@b7eabc95ff50cbeeedec83973935c8f306dfcd0b # v1.20.0
         with:
