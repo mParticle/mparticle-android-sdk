@@ -69,16 +69,10 @@ version in the **Gradle JDK** dropdown menu.
 Remember to close and reopen your project after you've made your changes or the error message may
 persist.
 
-### Downloading the mParticle Kits
+### mParticle Kits
 
-Now we will download the different available Kits which are developed as individual submodules each
-having a dedicated repository. First make sure you have set both a SSH key and GPG key in your
-GitHub account, SSH is used for authentication while GPG is used for signing tags and commits.
-
-Now type the following commands `git submodule init` (creates the local configuration file for the
-submodules). followed by `git submodule update --recursive` (updates all available submodules).
-
-Or you can do it in one line with `git submodule update --init`
+All kits are included in the monorepo under the `kits/` directory. Clone the repository and you
+will have the full SDK with all available kits. No submodule initialization is required.
 
 An error regarding the Javadoc file generation, **Illegal Package Name** may come up referencing
 some files with the .kt extension, a current quick fix for this is adding the following code in
@@ -90,8 +84,7 @@ tasks.withType(Javadoc) {
 }
 ```
 
-Once you have run both commands you should see your newly populated kit files easily in the Project
-view -> **Kits** folder.
+Kit files are located in the Project view -> **Kits** folder.
 
 ### Building and publishing core modules to the Maven Local Repository
 
@@ -148,12 +141,14 @@ Kotlin version.
 
 **Currently isolated:**
 
-- `urbanairship-kit` (Kotlin 2.2.x, `urbanairship-core:20.3.0`)
+- `kits/urbanairship/urbanairship-20` (Kotlin 2.2.x, `urbanairship-core:20.3.0`)
+- `kits/ga/ga-23` (Kotlin 2.2.x, `firebase-analytics:23.x`)
+- `kits/ga4/ga4-23` (Kotlin 2.2.x, `firebase-analytics:23.x`)
 
 To build an isolated kit after publishing core to mavenLocal:
 
 ```bash
-cd kits/urbanairship-kit
+cd kits/urbanairship/urbanairship-20
 ./gradlew testRelease publishReleaseLocal
 ```
 
@@ -165,13 +160,13 @@ To verify all kits (main + isolated):
 ```bash
 ./gradlew -PisRelease=true publishReleaseLocal
 ./gradlew -PisRelease=true testRelease publishReleaseLocal -c settings-kits.gradle
-cd kits/urbanairship-kit && ./gradlew -PisRelease=true testRelease
+cd kits/urbanairship/urbanairship-20 && ./gradlew -PisRelease=true testRelease
 ```
 
 **Adding a new isolated kit:** If a kit upgrades to a Kotlin version
-incompatible with the root KGP (2.0.20), remove it from
+incompatible with the root KGP (2.1.20), remove it from
 `settings-kits.gradle` with a comment, and add standalone build steps
-to the CI workflows following the urbanairship-kit pattern.
+to the CI workflows following the urbanairship pattern.
 
 ## Read More
 

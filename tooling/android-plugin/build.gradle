@@ -1,15 +1,14 @@
 apply plugin: 'groovy'
 apply plugin: 'kotlin'
+apply plugin: 'mparticle.android.library.publish'
 
 sourceCompatibility = JavaVersion.toVersion(JAVA_VERSION)
 targetCompatibility = JavaVersion.toVersion(JAVA_VERSION)
 
-
-ext {
-    kitDescription = 'mParticle Gradle Plugin for managing Dataplanning functionality'
+mparticleMavenPublish {
+    artifactId.set('android-plugin')
+    description.set('mParticle Gradle Plugin for managing Dataplanning functionality')
 }
-
-apply from: '../../scripts/maven.gradle'
 
 buildscript {
     repositories {
@@ -40,12 +39,3 @@ jar {
     }
 }
 
-task generateJavadocsJar(type: Jar, dependsOn: groovydoc) {
-    archiveClassifier.set("javadoc")
-    from groovydoc.destinationDir
-}
-
-task generateSourcesJar(type: Jar) {
-    archiveClassifier.set("sources")
-    from sourceSets.main.allJava
-}

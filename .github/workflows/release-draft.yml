@@ -1,0 +1,139 @@
+name: Release – Draft
+
+on:
+  workflow_dispatch: # checkov:skip=CKV_GHA_7
+    inputs:
+      bump-type:
+        description: |
+          How to bump the base version (X.Y.Z). Use `none` to keep the base unchanged
+          and only re-qualify an existing pre-release (e.g. rc1 -> rc2).
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - none
+      qualifier:
+        description: |
+          Optional pre-release qualifier to append, without the leading hyphen
+          (e.g. `rc1`, `alpha2`, `beta`). Leave blank for a stable release.
+          Allowed characters: alphanumerics, dot, hyphen.
+        required: false
+        type: string
+        default: ""
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  publish-draft-release:
+    runs-on: ubuntu-latest
+    env:
+      ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY }}
+      ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_PASSWORD }}
+      ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+      ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Install JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: "zulu"
+          java-version: "17"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
+
+      - name: Validate qualifier input
+        env:
+          QUALIFIER: ${{ github.event.inputs.qualifier }}
+        run: |
+          if [ -n "$QUALIFIER" ] && ! [[ "$QUALIFIER" =~ ^[A-Za-z0-9][A-Za-z0-9.-]*$ ]]; then
+            echo "::error::qualifier '$QUALIFIER' is invalid. It must start with an alphanumeric character and may only contain alphanumerics, dot, and hyphen."
+            exit 1
+          fi
+
+      - name: Get current version
+        id: version-file
+        run: |
+          version_from_file=$(head -n 1 VERSION)
+          echo "release-version=$version_from_file" >> $GITHUB_OUTPUT
+          base_version="${version_from_file%%-*}"
+          echo "base-version=$base_version" >> $GITHUB_OUTPUT
+
+      - name: Bump base version
+        id: bump-version
+        if: ${{ github.event.inputs.bump-type != 'none' }}
+        uses: actions-ecosystem/action-bump-semver@34e334551143a5301f38c830e44a22273c6ff5c5 # v1.0.0
+        with:
+          current_version: ${{ steps.version-file.outputs.base-version }}
+          level: ${{ github.event.inputs.bump-type }}
+
+      - name: Compose new version
+        id: compose-version
+        env:
+          CURRENT: ${{ steps.version-file.outputs.release-version }}
+          BUMPED: ${{ steps.bump-version.outputs.new_version }}
+          BASE: ${{ steps.version-file.outputs.base-version }}
+          BUMP_TYPE: ${{ github.event.inputs.bump-type }}
+          QUALIFIER: ${{ github.event.inputs.qualifier }}
+        run: |
+          if [ "$BUMP_TYPE" = "none" ]; then
+            new_base="$BASE"
+          else
+            new_base="$BUMPED"
+          fi
+
+          if [ -n "$QUALIFIER" ]; then
+            new_version="${new_base}-${QUALIFIER}"
+          else
+            new_version="$new_base"
+          fi
+
+          if [ "$new_version" = "$CURRENT" ]; then
+            echo "::error::Computed version '$new_version' is identical to the current VERSION. Pick a different bump-type or qualifier."
+            exit 1
+          fi
+
+          echo "new-version=$new_version" >> $GITHUB_OUTPUT
+
+      - name: Save bumped version to file
+        run: |
+          echo "${{ steps.compose-version.outputs.new-version }}" > VERSION
+
+      - name: Publish to Maven local (smoke test)
+        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=${{ steps.compose-version.outputs.new-version }}
+
+      - name: Generate changelog entry
+        id: changelog
+        # Pinned SHA for Semgrep (no mutable @main); bump when upgrading the action.
+        uses: ROKT/rokt-workflows/actions/generate-changelog@c5c93e92107c520fb8b8cf71070995abdf4c403f
+        with:
+          version: ${{ steps.compose-version.outputs.new-version }}
+          repo-url: https://github.com/${{ github.repository }}
+          changelog-path: CHANGELOG.md
+          exclude-types: chore,ci,test,build
+          kits-path: kits
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
+        with:
+          token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
+          commit-message: "chore: prepare release ${{ steps.compose-version.outputs.new-version }}"
+          branch: release-prep/${{ steps.compose-version.outputs.new-version }}
+          title: "Prepare release ${{ steps.compose-version.outputs.new-version }}"
+          base: ${{ github.ref_name }}
+          body: |
+            Preparing for release ${{ steps.compose-version.outputs.new-version }} from `${{ github.ref_name }}`.
+            - Bumped version to ${{ steps.compose-version.outputs.new-version }}

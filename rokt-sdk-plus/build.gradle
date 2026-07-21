@@ -1,0 +1,62 @@
+apply plugin: 'com.android.library'
+apply plugin: 'mparticle.android.library.publish'
+
+// No Kotlin plugin: the umbrella ships a single Java metadata class (RoktSdkPlus) and only
+// aggregates dependencies. Avoiding the Kotlin toolchain sidesteps a stdlib-metadata version
+// mismatch — the bundled Rokt artifacts are built with Kotlin 2.2, newer than this repo's
+// compiler. Consumers still receive kotlin-stdlib transitively from those artifacts.
+
+// Rokt SDK+ is a thin umbrella artifact: it ships no runtime logic of its own and simply
+// aggregates the mParticle core SDK, the mParticle Rokt kit, and the Rokt Payment Extension
+// as a single dependency (the Android analog of the iOS `RoktSDKPlus` umbrella). It is NOT a
+// kit, so it applies `com.android.library` + the publish convention plugin directly rather
+// than `com.mparticle.kit`.
+
+// The umbrella tracks the mParticle SDK release line; the Rokt artifacts ride their own line.
+def mpVersion = (project.findProperty('VERSION') ?: '0.0.0').toString()
+def roktPaymentExtensionVersion =
+        (project.findProperty('roktPaymentExtensionVersion') ?: '6.0.1').toString()
+
+mparticleMavenPublish {
+    groupId.set('com.rokt')
+    artifactId.set('rokt-sdk-plus')
+    description.set('Rokt SDK+ umbrella for Android: bundles the mParticle core SDK, the ' +
+            'mParticle Rokt kit, and the Rokt Payment Extension (Shoppable Ads) as a single dependency.')
+    pomUrl.set('https://docs.rokt.com/developers/integration-guides/android/overview')
+    licenseName.set('Rokt SDK License')
+    licenseUrl.set('https://rokt.com/sdk-license-2-0/')
+}
+
+android {
+    namespace 'com.rokt.sdkplus'
+    compileSdk 34
+
+    compileOptions {
+        sourceCompatibility JavaVersion.toVersion(JAVA_VERSION)
+        targetCompatibility JavaVersion.toVersion(JAVA_VERSION)
+    }
+
+    defaultConfig {
+        minSdk 21
+        versionName mpVersion
+        versionCode Integer.parseInt(new Date().format('yyyyMMdd'))
+        buildConfigField 'String', 'VERSION_NAME', '\"' + mpVersion + '\"'
+    }
+
+    buildFeatures {
+        buildConfig = true
+    }
+}
+
+dependencies {
+    // mParticle artifacts share the umbrella's version (this repo's VERSION). `android-core`
+    // is reached transitively through android-rokt-kit -> android-kit-base, but is listed
+    // explicitly so the published POM is self-documenting and pins a coherent core version.
+    api "com.mparticle:android-core:$mpVersion"
+    api "com.mparticle:android-rokt-kit:$mpVersion"
+
+    // The Rokt Payment Extension (Stripe + Google Pay) rides the Rokt SDK release line and
+    // pulls com.rokt:roktsdk transitively. This is the dependency the mParticle Rokt kit
+    // deliberately omits — adding it here is the whole reason the umbrella exists.
+    api "com.rokt:payment-extension:$roktPaymentExtensionVersion"
+}

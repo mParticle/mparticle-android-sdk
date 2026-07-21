@@ -201,22 +201,10 @@ public final class ConsentState {
             return this;
         }
 
-        @Deprecated
-        @NonNull
-        public Builder setCCPAConsent(@NonNull CCPAConsent ccpaConsent) {
-            return setCCPAConsentState(ccpaConsent);
-        }
-
         @NonNull
         public Builder setCCPAConsentState(@NonNull CCPAConsent ccpaConsent) {
             this.ccpaConsent = ccpaConsent;
             return this;
-        }
-
-        @Deprecated
-        @NonNull
-        public Builder removeCCPAConsent() {
-            return removeCCPAConsentState();
         }
 
         @NonNull

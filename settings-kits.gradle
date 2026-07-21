@@ -1,43 +1,34 @@
 //keep things alphabetical like readme
 
 include (
-        ':kits:adjust-kit',
-        ':kits:adobe-kit',
-        ':kits:adobemedia-kit',
-        ':kits:appboy-kit',
-        ':kits:appsflyer-kit',
-        ':kits:apptentive-kit',
-        ':kits:apptimize-kit',
-        ':kits:apteligent-kit',
+        ':kits:adjust:adjust-5',
+        ':kits:adobe:adobe',
+        ':kits:adobemedia:adobemedia-3',
+        ':kits:appsflyer:appsflyer-6',
+        ':kits:apptentive:apptentive-6',
+        ':kits:apptimize:apptimize-3',
         //blueshift hosts kit
-        ':kits:branch-kit',
-        ':kits:button-kit',
-        ':kits:clevertap-kit',
-        ':kits:comscore-kit',
-        ':kits:flurry-kit',
-        ':kits:foresee-kit',
-        ':kits:googleanalyticsfirebase-kit',
-        ':kits:googleanalyticsfirebasega4-kit',
-        ':kits:iterable-kit',
-        ':kits:kochava-kit',
-        ':kits:leanplum-kit',
-        ':kits:localytics-kit',
+        ':kits:braze:braze-38',
+        ':kits:braze:braze-39',
+        ':kits:braze:braze-40',
+        ':kits:braze:braze-41',
+        ':kits:branch:branch-5',
+        ':kits:clevertap:clevertap-7',
+        ':kits:comscore:comscore-6',
+        //  ':kits:ga:ga-23',  // Kotlin 2.2.x -- built standalone (see ONBOARDING.md)
+        //  ':kits:ga4:ga4-23',  // Kotlin 2.2.x -- built standalone (see ONBOARDING.md)
+        ':kits:iterable:iterable-3',
+        ':kits:kochava:kochava-5',
+        ':kits:localytics:localytics-6',
+        ':kits:leanplum:leanplum-7',
         //Neura hosts kit
-        ':kits:onetrust-kit',
-        ':kits:optimizely-kit',
-      //  ':kits:pilgrim-kit',
-        ':kits:radar-kit',
-        ':kits:responsys-kit',
-        ':kits:revealmobile-kit',
-        ':kits:rokt-kit',
-        ':kits:singular-kit',
-        ':kits:skyhook-kit',
+        ':kits:onetrust:onetrust',
+        ':kits:optimizely:optimizely-3',
+        ':kits:radar:radar-3',
+        ':kits:rokt:rokt',
+        ':kits:singular:singular-12',
         //Swrve hosts kit
-        ':kits:taplytics-kit',
-        ':kits:tune-kit',
-        //  ':kits:urbanairship-kit',  // Kotlin 2.2.x -- built standalone (see ONBOARDING.md)
-        ':kits:wootric-kit',
-        ':kits:example-kit'
+        //  ':kits:urbanairship:urbanairship-20',  // Kotlin 2.2.x -- built standalone (see ONBOARDING.md)
 )
 project(':kits').getChildren().each {
     proj -> proj.name = 'android-' + proj.name

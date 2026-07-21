@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Typeface;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,26 +14,18 @@ import androidx.annotation.Nullable;
 import com.mparticle.BaseEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
-import com.mparticle.MpRoktEventCallback;
-import com.mparticle.RoktEvent;
 import com.mparticle.WrapperSdkVersion;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.MParticleUser;
-import com.mparticle.rokt.PlacementOptions;
-import com.mparticle.rokt.RoktConfig;
-import com.mparticle.rokt.RoktEmbeddedView;
 
 import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import kotlinx.coroutines.flow.Flow;
 
 /**
  * Base Kit implementation - all Kits must subclass this.
@@ -117,66 +108,6 @@ public abstract class KitIntegration {
     public boolean isDisabled(boolean isOptOutEvent) {
         return !getConfiguration().passesBracketing(kitManager.getUserBucket()) ||
             (getConfiguration().shouldHonorOptOut() && kitManager.isOptedOut() && !isOptOutEvent);
-    }
-
-    @Deprecated
-    public final Map<MParticle.IdentityType, String> getUserIdentities() {
-        MParticle instance = MParticle.getInstance();
-        if (instance != null) {
-            MParticleUser user = instance.Identity().getCurrentUser();
-            if (user != null) {
-                Map<MParticle.IdentityType, String> identities = user.getUserIdentities();
-                identities = getKitManager().getDataplanFilter().transformIdentities(identities);
-                Map<MParticle.IdentityType, String> filteredIdentities = new HashMap<MParticle.IdentityType, String>(identities.size());
-                for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()) {
-                    if (getConfiguration().shouldSetIdentity(entry.getKey())) {
-                        filteredIdentities.put(entry.getKey(), entry.getValue());
-                    }
-                }
-                return identities;
-            }
-        }
-        return new HashMap<MParticle.IdentityType, String>();
-    }
-
-    /**
-     * Retrieve filtered user attributes. Use this method to retrieve user attributes at any time.
-     * To ensure that filtering is respected, kits must use this method rather than the public API.
-     * <p>
-     * If the KitIntegration implements the {@link AttributeListener} interface and returns true
-     * for {@link AttributeListener#supportsAttributeLists()}, this method will pass back all attributes
-     * as they are (as String values or as List&lt;String&gt; values). Otherwise, this method will comma-separate
-     * the List values and return back all String values.
-     *
-     * @return a Map of attributes according to the logic above.
-     */
-    @Deprecated
-    public final Map<String, Object> getAllUserAttributes() {
-        MParticle instance = MParticle.getInstance();
-        if (instance != null) {
-            MParticleUser user = instance.Identity().getCurrentUser();
-            if (user != null) {
-                Map<String, Object> userAttributes = user.getUserAttributes();
-                if (kitManager != null) {
-                    userAttributes = kitManager.getDataplanFilter().transformUserAttributes(userAttributes);
-                }
-                Map<String, Object> attributes = (Map<String, Object>) KitConfiguration.filterAttributes(
-                    getConfiguration().getUserAttributeFilters(),
-                    userAttributes
-                );
-                if ((this instanceof AttributeListener) && ((AttributeListener) this).supportsAttributeLists()) {
-                    return attributes;
-                } else {
-                    for (Map.Entry<String, Object> entry : attributes.entrySet()) {
-                        if (entry.getValue() instanceof List) {
-                            attributes.put(entry.getKey(), KitUtils.join((List) entry.getValue()));
-                        }
-                    }
-                    return attributes;
-                }
-            }
-        }
-        return new HashMap<String, Object>();
     }
 
     public final MParticleUser getCurrentUser() {
@@ -407,33 +338,9 @@ public abstract class KitIntegration {
     }
 
     /**
-     * Kits should implement this interface when their underlying service has the notion
-     * of a user with attributes.
+     * Kits may implement this interface to respond when the mParticle Identity API performs a logout.
      */
-    @Deprecated
-    public interface AttributeListener {
-
-        void setUserAttribute(String attributeKey, String attributeValue);
-
-        void setUserAttributeList(String attributeKey, List<String> attributeValueList);
-
-        /**
-         * Indicate to the mParticle Kit framework if this AttributeListener supports attribute-values as lists.
-         * <p>
-         * If an AttributeListener returns false, the setUserAttributeList method will never be called. Instead, setUserAttribute
-         * will be called with the attribute-value lists combined as a csv.
-         *
-         * @return true if this AttributeListener supports attribute values as lists.
-         */
-        boolean supportsAttributeLists();
-
-        void setAllUserAttributes(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists);
-
-        void removeUserAttribute(String key);
-
-        void setUserIdentity(MParticle.IdentityType identityType, String identity);
-
-        void removeUserIdentity(MParticle.IdentityType identityType);
+    public interface LogoutListener {
 
         /**
          * The mParticle SDK exposes a logout API, allowing developers to track an event
@@ -443,6 +350,17 @@ public abstract class KitIntegration {
          * @return Kits should return a List of ReportingMessages indicating that the logout was processed one or more times, or null if it was not processed
          */
         List<ReportingMessage> logout();
+    }
+
+    /**
+     * Identity forwarding for kits that also receive user attribute callbacks. Implement together with
+     * {@link UserAttributeListener} when the kit should receive user attribute updates.
+     */
+    public interface ModifyIdentityListener {
+
+        void setUserIdentity(MParticle.IdentityType identityType, String identity);
+
+        void removeUserIdentity(MParticle.IdentityType identityType);
 
     }
 
@@ -595,23 +513,66 @@ public abstract class KitIntegration {
 
     }
 
+    /**
+     * Kits should implement this interface to receive user attribute updates, tags, increments, consent changes,
+     * and full attribute syncs from the mParticle SDK.
+     */
     public interface UserAttributeListener {
 
-        void onIncrementUserAttribute(String key, Number incrementedBy, String value, FilteredMParticleUser user);
-
-        void onRemoveUserAttribute(String key, FilteredMParticleUser user);
-
-        void onSetUserAttribute(String key, Object value, FilteredMParticleUser user);
-
-        void onSetUserTag(String key, FilteredMParticleUser user);
-
-        void onSetUserAttributeList(String attributeKey, List<String> attributeValueList, FilteredMParticleUser user);
-
-        void onSetAllUserAttributes(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists, FilteredMParticleUser user);
-
+        /**
+         * Indicate to the mParticle Kit framework if this listener supports attribute-values as lists.
+         * <p>
+         * If false, list-specific APIs are not used; values are passed via scalar/csv paths instead.
+         *
+         * @return true if this listener supports attribute values as lists.
+         */
         boolean supportsAttributeLists();
 
-        void onConsentStateUpdated(ConsentState oldState, ConsentState newState, FilteredMParticleUser user);
+        /**
+         * Called when a user attribute is removed for the current user.
+         *
+         * @param key attribute key
+         */
+        void onRemoveUserAttribute(String key);
+
+        /**
+         * Called when a scalar user attribute is set for the current user.
+         *
+         * @param key   attribute key
+         * @param value attribute value (may be non-String for some call paths)
+         */
+        void onSetUserAttribute(String key, Object value);
+
+        /**
+         * Called when a list-valued user attribute is set and {@link #supportsAttributeLists()} returns true.
+         *
+         * @param attributeKey       attribute key (may be null)
+         * @param attributeValueList attribute values (may be null)
+         */
+        void onSetUserAttributeList(
+                @Nullable String attributeKey,
+                @Nullable List<String> attributeValueList);
+
+        /**
+         * Called when the full set of user attributes is synchronized for the current user.
+         *
+         * @param userAttributes     scalar user attributes
+         * @param userAttributeLists list-valued user attributes when {@link #supportsAttributeLists()} is true;
+         *                           otherwise list values may be merged into scalars by the framework
+         */
+        void onSetAllUserAttributes(
+                Map<String, String> userAttributes,
+                Map<String, List<String>> userAttributeLists);
+
+        void onIncrementUserAttribute(String key, Number incrementedBy, String value);
+
+        void onSetUserTag(String key);
+
+        void onConsentStateUpdated(ConsentState oldState, ConsentState newState);
+
+        KitConfiguration getConfiguration();
+
+        String getName();
     }
 
     public interface BatchListener {
@@ -621,28 +582,10 @@ public abstract class KitIntegration {
     /**
      * Interface for Rokt Kit implementations.
      *
-     * <p>This interface is internal to kit-base and is bridged to the
-     * {@link com.mparticle.internal.RoktKitApi} interface via a wrapper implementation
-     * in {@link KitManagerImpl}. The wrapper handles user resolution and
-     * attribute preparation before delegating to the kit's methods.</p>
-     *
-     * @see com.mparticle.internal.RoktKitApi
+     * <p>This interface is internal to kit-base and currently used only for wrapper SDK
+     * version propagation.</p>
      */
     public interface RoktListener {
-
-        void selectPlacements(@NonNull String viewName,
-                              @NonNull Map<String, String> attributes,
-                              @Nullable MpRoktEventCallback mpRoktEventCallback,
-                              @Nullable Map<String, WeakReference<RoktEmbeddedView>> placeHolders,
-                              @Nullable Map<String, WeakReference<Typeface>> fontTypefaces,
-                              @Nullable FilteredMParticleUser user,
-                              @Nullable RoktConfig config,
-                              @Nullable PlacementOptions options);
-
-        Flow<RoktEvent> events(@NonNull String identifier);
-
-        void enrichAttributes(
-                @NonNull Map<String, String> attributes, @Nullable FilteredMParticleUser user);
         /**
          * Set the SDK version of the mParticle SDK.
          * This should match the value set in MParticle.getWrapperSdkVersion()
@@ -650,26 +593,5 @@ public abstract class KitIntegration {
          * @param wrapperSdkVersion the version of the mParticle SDK
          */
         void setWrapperSdkVersion(@NonNull WrapperSdkVersion wrapperSdkVersion);
-
-        void purchaseFinalized(@NonNull String placementId, @NonNull String catalogItemId, boolean status);
-
-        void close();
-
-        /**
-         * Set the session id to use for the next execute call.
-         * This is useful for cases where you have a session id from a non-native integration,
-         * e.g. WebView, and you want the session to be consistent across integrations.
-         *
-         * @param sessionId The session id to be set. Must be a non-empty string.
-         */
-        void setSessionId(@NonNull String sessionId);
-
-        /**
-         * Get the session id to use within a non-native integration e.g. WebView.
-         *
-         * @return The session id or null if no session is present.
-         */
-        @Nullable
-        String getSessionId();
     }
 }

@@ -1,0 +1,47 @@
+// CI-only settings for kit sample apps. Keeps example modules out of settings-kits.gradle.
+apply from: 'settings-kits.gradle'
+
+include ':kits:adjust:adjust-5:example-kotlin',
+        ':kits:adobe:adobe:example-kotlin',
+        ':kits:adobemedia:adobemedia-3:example-kotlin',
+        ':kits:appsflyer:appsflyer-6:example-kotlin',
+        ':kits:apptentive:apptentive-6:example-kotlin',
+        ':kits:apptimize:apptimize-3:example-kotlin',
+        ':kits:braze:braze-38:example-kotlin',
+        ':kits:braze:braze-39:example-kotlin',
+        ':kits:braze:braze-40:example-kotlin',
+        ':kits:braze:braze-41:example-kotlin',
+        ':kits:branch:branch-5:example-kotlin',
+        ':kits:clevertap:clevertap-7:example-kotlin',
+        ':kits:comscore:comscore-6:example-kotlin',
+        ':kits:iterable:iterable-3:example-kotlin',
+        ':kits:kochava:kochava-5:example-kotlin',
+        ':kits:localytics:localytics-6:example-kotlin',
+        ':kits:leanplum:leanplum-7:example-kotlin',
+        ':kits:onetrust:onetrust:example-kotlin',
+        ':kits:optimizely:optimizely-3:example-kotlin',
+        ':kits:radar:radar-3:example-kotlin',
+        //  ':kits:rokt:rokt:example-kotlin',  // requires AGP 8.6+ -- built standalone (see kits/rokt/rokt/example/example-kotlin/README.md)
+        ':kits:singular:singular-12:example-kotlin'
+
+project(':kits:adjust:adjust-5:example-kotlin').projectDir = file('kits/adjust/adjust-5/example/example-kotlin')
+project(':kits:adobe:adobe:example-kotlin').projectDir = file('kits/adobe/adobe/example/example-kotlin')
+project(':kits:adobemedia:adobemedia-3:example-kotlin').projectDir = file('kits/adobemedia/adobemedia-3/example/example-kotlin')
+project(':kits:appsflyer:appsflyer-6:example-kotlin').projectDir = file('kits/appsflyer/appsflyer-6/example/example-kotlin')
+project(':kits:apptentive:apptentive-6:example-kotlin').projectDir = file('kits/apptentive/apptentive-6/example/example-kotlin')
+project(':kits:apptimize:apptimize-3:example-kotlin').projectDir = file('kits/apptimize/apptimize-3/example/example-kotlin')
+project(':kits:braze:braze-38:example-kotlin').projectDir = file('kits/braze/braze-38/example/example-kotlin')
+project(':kits:braze:braze-39:example-kotlin').projectDir = file('kits/braze/braze-39/example/example-kotlin')
+project(':kits:braze:braze-40:example-kotlin').projectDir = file('kits/braze/braze-40/example/example-kotlin')
+project(':kits:braze:braze-41:example-kotlin').projectDir = file('kits/braze/braze-41/example/example-kotlin')
+project(':kits:branch:branch-5:example-kotlin').projectDir = file('kits/branch/branch-5/example/example-kotlin')
+project(':kits:clevertap:clevertap-7:example-kotlin').projectDir = file('kits/clevertap/clevertap-7/example/example-kotlin')
+project(':kits:comscore:comscore-6:example-kotlin').projectDir = file('kits/comscore/comscore-6/example/example-kotlin')
+project(':kits:iterable:iterable-3:example-kotlin').projectDir = file('kits/iterable/iterable-3/example/example-kotlin')
+project(':kits:kochava:kochava-5:example-kotlin').projectDir = file('kits/kochava/kochava-5/example/example-kotlin')
+project(':kits:localytics:localytics-6:example-kotlin').projectDir = file('kits/localytics/localytics-6/example/example-kotlin')
+project(':kits:leanplum:leanplum-7:example-kotlin').projectDir = file('kits/leanplum/leanplum-7/example/example-kotlin')
+project(':kits:onetrust:onetrust:example-kotlin').projectDir = file('kits/onetrust/onetrust/example/example-kotlin')
+project(':kits:optimizely:optimizely-3:example-kotlin').projectDir = file('kits/optimizely/optimizely-3/example/example-kotlin')
+project(':kits:radar:radar-3:example-kotlin').projectDir = file('kits/radar/radar-3/example/example-kotlin')
+project(':kits:singular:singular-12:example-kotlin').projectDir = file('kits/singular/singular-12/example/example-kotlin')

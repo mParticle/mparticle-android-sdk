@@ -22,7 +22,6 @@ import java.util.Map;
  * @see IdentityApi#modify(IdentityApiRequest)
  */
 public final class IdentityApiRequest {
-    private UserAliasHandler userAliasHandler = null;
     private Map<MParticle.IdentityType, String> userIdentities = new HashMap<MParticle.IdentityType, String>();
     // for /modify requests
     private Map<String, String> otherOldIdentities = new HashMap<String, String>();
@@ -32,9 +31,6 @@ public final class IdentityApiRequest {
     private IdentityApiRequest(IdentityApiRequest.Builder builder) {
         if (builder.userIdentities != null) {
             this.userIdentities = builder.userIdentities;
-        }
-        if (builder.userAliasHandler != null) {
-            this.userAliasHandler = builder.userAliasHandler;
         }
         if (builder.otherOldIdentities.size() == builder.otherNewIdentities.size()) {
             this.otherNewIdentities = builder.otherNewIdentities;
@@ -83,11 +79,6 @@ public final class IdentityApiRequest {
         return otherNewIdentities;
     }
 
-    @Nullable
-    public UserAliasHandler getUserAliasHandler() {
-        return userAliasHandler;
-    }
-
     /**
      * A class used for constructing IdentityApiRequest.
      */
@@ -96,7 +87,6 @@ public final class IdentityApiRequest {
         private Map<MParticle.IdentityType, String> userIdentities = new HashMap<MParticle.IdentityType, String>();
         private Map<String, String> otherOldIdentities = new HashMap<String, String>();
         private Map<String, String> otherNewIdentities = new HashMap<String, String>();
-        private UserAliasHandler userAliasHandler;
 
         protected Builder(@Nullable MParticleUser currentUser) {
             if (currentUser != null) {
@@ -191,24 +181,6 @@ public final class IdentityApiRequest {
         @NonNull
         public IdentityApiRequest build() {
             return new IdentityApiRequest(this);
-        }
-
-        /**
-         * Deprecated. To easily migrate your existing code, add a success listener
-         * to the {@link BaseIdentityTask} that is being returned from this method ){@link BaseIdentityTask#addSuccessListener(TaskSuccessListener)}. Within the
-         * {@link IdentityApiResult} returned by the success listener, you can run the same code you do
-         * in you {@link UserAliasHandler}, using the {@link MParticleUser}s returned by
-         * {@link IdentityApiResult#getUser()} and {@link IdentityApiResult#getPreviousUser()} in place
-         * of "newUser" and "previousUser" respectively
-         *
-         * @param userAliasHandler
-         * @return
-         */
-        @Deprecated
-        @NonNull
-        public Builder userAliasHandler(@Nullable UserAliasHandler userAliasHandler) {
-            this.userAliasHandler = userAliasHandler;
-            return this;
         }
     }
 }

@@ -111,7 +111,6 @@ public class MParticle {
     protected boolean locationTrackingEnabled = false;
     @NonNull
     protected Internal mInternal = new Internal();
-    protected Rokt rokt;
     private IdentityStateListener mDeferredModifyPushRegistrationListener;
     @NonNull
     private WrapperSdkVersion wrapperSdkVersion = new WrapperSdkVersion(WrapperSdk.WrapperNone, null);
@@ -191,7 +190,6 @@ public class MParticle {
                     instance = new MParticle(options);
                     instance.mKitManager = new KitFrameworkWrapper(options.getContext(), instance.mMessageManager, instance.Internal().getConfigManager(), instance.Internal().getAppStateManager(), options);
                     instance.mIdentityApi = new IdentityApi(options.getContext(), instance.mInternal.getAppStateManager(), instance.mMessageManager, instance.mConfigManager, instance.mKitManager, options.getOperatingSystem());
-                    instance.rokt = new Rokt(instance.mConfigManager, instance.mKitManager);
 
                     // Check if we've switched workspaces on startup
                     UploadSettings lastUploadSettings = instance.mConfigManager.getLastUploadSettings();
@@ -334,23 +332,6 @@ public class MParticle {
 
             handlerThread.quit();
         });
-    }
-
-    /**
-     * @return false if Android ID collection is enabled. (true by default)
-     * @see MParticleOptions.Builder#androidIdEnabled(boolean)
-     * @deprecated This method has been replaced as the behavior has been inverted - Android ID collection is now disabled by default.
-     * <p> Use {@link MParticle#isAndroidIdEnabled()} instead.
-     * <p>
-     * <p>
-     * Query the status of Android ID collection.
-     * <p>
-     * By default, the SDK will NOT collect <a href="http://developer.android.com/reference/android/provider/Settings.Secure.html#ANDROID_ID">Android Id</a> for the purpose
-     * of anonymous analytics. If you're not using an mParticle integration that consumes Android ID and you would like to collect it, use this API to enable collection
-     */
-    @Deprecated
-    public static boolean isAndroidIdDisabled() {
-        return !sAndroidIdEnabled;
     }
 
     /**
@@ -992,16 +973,6 @@ public class MParticle {
     }
 
     /**
-     * @return The current setting of automatic screen tracking.
-     * @deprecated Retrieves the current setting of automatic screen tracking.
-     */
-    @NonNull
-    @Deprecated
-    public Boolean isAutoTrackingEnabled() {
-        return false;
-    }
-
-    /**
      * Retrieves the current session timeout setting in seconds
      *
      * @return The current session timeout setting in seconds
@@ -1112,28 +1083,6 @@ public class MParticle {
     }
 
     /**
-     * Detect whether the given service provider is active. Use this method
-     * only when you need to make direct calls to an embedded SDK.
-     * <p>
-     * You can also register a {@link android.content.BroadcastReceiver} with an {@link android.content.IntentFilter}, using an action of
-     * {@link MParticle.ServiceProviders#BROADCAST_ACTIVE} or {@link MParticle.ServiceProviders#BROADCAST_DISABLED}
-     * concatenated with the service provider ID:
-     *
-     * <pre>
-     * {@code
-     * Context.registerReceiver(yourReceiver, new IntentFilter(MParticle.ServiceProviders.BROADCAST_ACTIVE + MParticle.ServiceProviders.APPBOY));}
-     * </pre>
-     *
-     * @param serviceProviderId
-     * @return True if you can safely make direct calls to the given service provider.
-     * @see MParticle.ServiceProviders
-     * @deprecated
-     */
-    public boolean isProviderActive(int serviceProviderId) {
-        return isKitActive(serviceProviderId);
-    }
-
-    /**
      * Detect whether the given service provider kit is active. Use this method
      * only when you need to make direct calls to an embedded SDK.
      * <p>
@@ -1220,11 +1169,6 @@ public class MParticle {
     public Internal Internal() {
         return mInternal;
     }
-    @NonNull
-    public Rokt Rokt() {
-        return rokt;
-    }
-
     void refreshConfiguration() {
         Logger.debug("Refreshing configuration...");
         mMessageManager.refreshConfiguration();

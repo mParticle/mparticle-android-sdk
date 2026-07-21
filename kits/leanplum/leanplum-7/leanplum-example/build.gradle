@@ -1,0 +1,74 @@
+apply plugin: 'com.android.application'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+
+        // REQUIRED:
+        // For Firebase Cloud Messaging.
+        classpath 'com.google.gms:google-services:3.1.1'
+    }
+}
+
+android {
+    compileSdkVersion 26
+
+
+
+    defaultConfig {
+        applicationId "com.mparticle.example.leanplum"
+        minSdkVersion 14
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+repositories {
+    // REQUIRED:
+    maven {
+        url "https://repo.leanplum.com/"
+    }
+}
+
+dependencies {
+
+    // REQUIRED:
+    // Firebase Cloud Messaging
+    implementation 'com.google.firebase:firebase-messaging:11.6.2'
+    // Only needed if you plan to use Location.
+    implementation 'com.google.android.gms:play-services-location:11.6.2'
+
+    //In a typical app:
+    //implementation 'com.mparticle:android-leanplum-kit:+'
+
+    //if you're building the entire mParticle SDK
+    implementation project(':kits:android-leanplum-kit')
+
+    //if you're building just the Leanplum Kit
+    //implementation project(':leanplum-kit')
+
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+
+}
+// REQUIRED:
+// For Firebase Cloud Messaging.
+apply plugin: 'com.google.gms.google-services'
