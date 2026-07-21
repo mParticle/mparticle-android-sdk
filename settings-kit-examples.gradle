@@ -3,7 +3,6 @@ apply from: 'settings-kits.gradle'
 
 include ':kits:adjust:adjust-5:example-kotlin',
         ':kits:adobe:adobe:example-kotlin',
-        ':kits:adobemedia:adobemedia-3:example-kotlin',
         ':kits:appsflyer:appsflyer-6:example-kotlin',
         ':kits:apptentive:apptentive-6:example-kotlin',
         ':kits:apptimize:apptimize-3:example-kotlin',
@@ -26,7 +25,6 @@ include ':kits:adjust:adjust-5:example-kotlin',
 
 project(':kits:adjust:adjust-5:example-kotlin').projectDir = file('kits/adjust/adjust-5/example/example-kotlin')
 project(':kits:adobe:adobe:example-kotlin').projectDir = file('kits/adobe/adobe/example/example-kotlin')
-project(':kits:adobemedia:adobemedia-3:example-kotlin').projectDir = file('kits/adobemedia/adobemedia-3/example/example-kotlin')
 project(':kits:appsflyer:appsflyer-6:example-kotlin').projectDir = file('kits/appsflyer/appsflyer-6/example/example-kotlin')
 project(':kits:apptentive:apptentive-6:example-kotlin').projectDir = file('kits/apptentive/apptentive-6/example/example-kotlin')
 project(':kits:apptimize:apptimize-3:example-kotlin').projectDir = file('kits/apptimize/apptimize-3/example/example-kotlin')
