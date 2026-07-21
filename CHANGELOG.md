@@ -19,6 +19,14 @@
 - Remove deprecated `KitIntegration.getAllUserAttributes()`. Custom kits must use `getCurrentUser().getUserAttributes()` (or other `FilteredMParticleUser` APIs) and `AttributeListener` callbacks instead ([#682](https://github.com/mParticle/mparticle-android-sdk/pull/682))
 - Remove deprecated `KitIntegration.getUserIdentities()`. Custom kits must use identity data from kit callbacks and request objects instead ([#681](https://github.com/mParticle/mparticle-android-sdk/pull/681)) ([8d3a23c8](https://github.com/mParticle/mparticle-android-sdk/commit/8d3a23c84c96d11f0ee1f80763adacc4f964b544))
 
+## [6.0.0] - 2026-07-21
+
+### Core
+
+#### Fixed
+
+- Wait for User Attributes to persist before Rokt selectPlacements ([#727](https://github.com/mParticle/mparticle-android-sdk/pull/727))
+
 ## [6.0.0-rc.1] - 2026-05-22
 
 ### Core
