@@ -29,6 +29,7 @@ import com.rokt.roktsdk.RoktEvent
 import com.rokt.roktsdk.RoktWidgetDimensionCallBack
 import com.rokt.roktsdk.Widget
 import com.rokt.roktsdk.logging.RoktLogLevel
+import com.rokt.roktsdk.payment.PaymentExtension
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -230,6 +231,12 @@ class RoktKit :
     private fun prepareFinalAttributes(
         filterUser: FilteredMParticleUser?,
         attributes: Map<String, String>,
+    ): Map<String, String> = prepareFinalAttributesForEvent(filterUser, attributes, EVENT_NAME_SELECT_PLACEMENTS)
+
+    private fun prepareFinalAttributesForEvent(
+        filterUser: FilteredMParticleUser?,
+        attributes: Map<String, String>,
+        eventName: String,
     ): Map<String, String> {
         val finalAttributes = mutableMapOf<String, String>()
 
@@ -251,7 +258,7 @@ class RoktKit :
 
         verifyHashedEmail(finalAttributes)
 
-        logSelectPlacementEvent(finalAttributes)
+        logRoktEvent(eventName, finalAttributes)
         return finalAttributes
     }
 
@@ -278,6 +285,32 @@ class RoktKit :
     }
 
     override fun events(identifier: String): Flow<RoktEvent> = Rokt.events(identifier)
+
+    override fun registerPaymentExtension(paymentExtension: PaymentExtension): Boolean {
+        val stripeKey = configuration?.settings?.get(STRIPE_PUBLISHABLE_KEY)
+        val paymentConfig = if (stripeKey.isNullOrEmpty()) {
+            emptyMap()
+        } else {
+            mapOf(STRIPE_KEY_ALIAS to stripeKey)
+        }
+        return Rokt.registerPaymentExtension(paymentExtension, paymentConfig)
+    }
+
+    override fun selectShoppableAds(
+        viewName: String,
+        attributes: Map<String, String>,
+        filterUser: FilteredMParticleUser?,
+        roktConfig: RoktConfig?,
+    ) {
+        val finalAttributes = prepareFinalAttributesForEvent(filterUser, attributes, EVENT_NAME_SELECT_SHOPPABLE_ADS)
+
+        Rokt.selectShoppableAds(
+            identifier = viewName,
+            attributes = finalAttributes,
+            config = roktConfig,
+            eventCollector = null,
+        )
+    }
 
     override fun setWrapperSdkVersion(wrapperSdkVersion: WrapperSdkVersion) {
         val sdkFrameworkType = when (wrapperSdkVersion.sdk) {
@@ -378,8 +411,8 @@ class RoktKit :
         }
     }
 
-    private fun logSelectPlacementEvent(attributes: Map<String, String>) {
-        val event = MPEvent.Builder(EVENT_NAME_SELECT_PLACEMENTS, MParticle.EventType.Other)
+    private fun logRoktEvent(eventName: String, attributes: Map<String, String>) {
+        val event = MPEvent.Builder(eventName, MParticle.EventType.Other)
             .customAttributes(attributes)
             .build()
         MParticle.getInstance()?.logEvent(event)
@@ -423,8 +456,11 @@ class RoktKit :
         const val NAME = "Rokt"
         const val ROKT_ACCOUNT_ID = "accountId"
         const val HASHED_EMAIL_USER_IDENTITY_TYPE = "hashedEmailUserIdentityType"
+        const val STRIPE_PUBLISHABLE_KEY = "stripePublishableKey"
+        const val STRIPE_KEY_ALIAS = "stripeKey"
         const val MPID = "mpid"
         const val EVENT_NAME_SELECT_PLACEMENTS = "selectPlacements"
+        const val EVENT_NAME_SELECT_SHOPPABLE_ADS = "selectShoppableAds"
         const val NO_ROKT_ACCOUNT_ID = "No Rokt account ID provided, can't initialize kit."
         const val NO_APP_VERSION_FOUND = "No App version found, can't initialize kit."
     }

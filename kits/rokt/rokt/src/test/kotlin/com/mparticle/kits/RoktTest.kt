@@ -10,6 +10,7 @@ import com.mparticle.internal.KitManager
 import com.rokt.roktsdk.PlacementOptions
 import com.rokt.roktsdk.RoktConfig
 import com.rokt.roktsdk.RoktEvent
+import com.rokt.roktsdk.payment.PaymentExtension
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
@@ -30,6 +31,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
 import java.lang.ref.WeakReference
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -226,6 +228,72 @@ class RoktTest {
             val elements = result.toList()
             assertTrue(elements.isEmpty())
         }
+    }
+
+    @Test
+    fun testRegisterPaymentExtension_whenEnabled_delegatesToKitManager() {
+        configManager.enabled = true
+        val paymentExtension = org.mockito.Mockito.mock(PaymentExtension::class.java)
+        `when`(roktListener.registerPaymentExtension(paymentExtension)).thenReturn(true)
+
+        val result = rokt.registerPaymentExtension(paymentExtension)
+
+        assertTrue(result)
+        verify(roktListener).registerPaymentExtension(paymentExtension)
+    }
+
+    @Test
+    fun testRegisterPaymentExtension_whenDisabled_returnsFalse() {
+        configManager.enabled = false
+        val paymentExtension = org.mockito.Mockito.mock(PaymentExtension::class.java)
+
+        val result = rokt.registerPaymentExtension(paymentExtension)
+
+        assertFalse(result)
+        verify(roktListener, never()).registerPaymentExtension(any())
+    }
+
+    @Test
+    fun testRegisterPaymentExtension_whenRoktKitMissing_returnsFalse() {
+        val paymentExtension = org.mockito.Mockito.mock(PaymentExtension::class.java)
+        `when`(kitManager.isKitActive(MParticle.ServiceProviders.ROKT)).thenReturn(false)
+
+        val result = rokt.registerPaymentExtension(paymentExtension)
+
+        assertFalse(result)
+        verify(roktListener, never()).registerPaymentExtension(any())
+    }
+
+    @Test
+    fun testSelectShoppableAds_whenEnabled_delegatesToKitManager() {
+        configManager.enabled = true
+        val attributes = mapOf("key" to "value")
+        val config = RoktConfig.Builder().colorMode(RoktConfig.ColorMode.DARK).build()
+
+        rokt.selectShoppableAds(
+            identifier = "shoppableView",
+            attributes = attributes,
+            config = config,
+        )
+
+        verify(roktListener).selectShoppableAds(
+            eq("shoppableView"),
+            any(),
+            any(),
+            eq(config),
+        )
+    }
+
+    @Test
+    fun testSelectShoppableAds_whenDisabled_doesNotCallKitManager() {
+        configManager.enabled = false
+
+        rokt.selectShoppableAds(
+            identifier = "shoppableView",
+            attributes = emptyMap(),
+        )
+
+        verify(roktListener, never()).selectShoppableAds(any(), any(), any(), any())
     }
 
     @Test

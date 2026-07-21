@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Add Rokt Shoppable Ads payment extension registration and selection APIs.
+
 ### Changed
 
 - Upgrade Kotlin to 2.1.20 across the core SDK, buildSrc, and all integrated kits.

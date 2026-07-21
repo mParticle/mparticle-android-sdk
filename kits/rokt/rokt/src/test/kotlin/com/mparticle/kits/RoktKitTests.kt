@@ -19,8 +19,10 @@ import com.mparticle.internal.CoreCallbacks.KitListener
 import com.mparticle.kits.mocks.MockKitConfiguration
 import com.rokt.roktsdk.FulfillmentAttributes
 import com.rokt.roktsdk.Rokt
+import com.rokt.roktsdk.RoktConfig
 import com.rokt.roktsdk.RoktEvent
 import com.rokt.roktsdk.logging.RoktLogLevel
+import com.rokt.roktsdk.payment.PaymentExtension
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -1328,6 +1330,109 @@ class RoktKitTests {
             ),
             loggedEvent.customAttributes,
         )
+    }
+
+    @Test
+    fun testRegisterPaymentExtensionPassesStripeKeyFromKitConfiguration() {
+        val paymentExtension = mock(PaymentExtension::class.java)
+        var registrationConfig: Map<*, *>? = null
+        Mockito.`when`(paymentExtension.id).thenReturn("capturing-payment-extension")
+        Mockito.doAnswer {
+            registrationConfig = it.arguments[0] as Map<*, *>
+            true
+        }.`when`(paymentExtension).onRegister(Mockito.anyMap())
+        roktKit.configuration = MockKitConfiguration.createKitConfiguration(
+            JSONObject()
+                .put("as", JSONObject().put("stripePublishableKey", "pk_test_123"))
+                .put("hs", JSONObject()),
+        )
+
+        val result = roktKit.registerPaymentExtension(paymentExtension)
+
+        assertTrue(result)
+        assertEquals(mapOf("stripeKey" to "pk_test_123"), registrationConfig)
+    }
+
+    @Test
+    fun testRegisterPaymentExtensionPassesEmptyConfigWhenStripeKeyAbsent() {
+        val paymentExtension = mock(PaymentExtension::class.java)
+        var registrationConfig: Map<*, *>? = null
+        Mockito.`when`(paymentExtension.id).thenReturn("capturing-payment-extension")
+        Mockito.doAnswer {
+            registrationConfig = it.arguments[0] as Map<*, *>
+            false
+        }.`when`(paymentExtension).onRegister(Mockito.anyMap())
+        roktKit.configuration = MockKitConfiguration.createKitConfiguration(JSONObject().put("hs", JSONObject()))
+
+        val result = roktKit.registerPaymentExtension(paymentExtension)
+
+        assertFalse(result)
+        assertTrue(registrationConfig?.isEmpty() == true)
+    }
+
+    @Test
+    fun testSelectShoppableAdsInvokesRoktAndLogsEvent() {
+        mockkObject(Rokt)
+        try {
+            val capturedAttributesSlot = slot<Map<String, String>>()
+            every {
+                Rokt.selectPlacements(
+                    any<String>(),
+                    capture(capturedAttributesSlot),
+                    isNull(),
+                    isNull(),
+                    isNull(),
+                    any(),
+                    isNull(),
+                )
+            } just runs
+
+            val mockFilterUser = mock(FilteredMParticleUser::class.java)
+            val userIdentities = HashMap<IdentityType, String>()
+            userIdentities[IdentityType.Email] = "test@example.com"
+            Mockito.`when`(mockFilterUser.userIdentities).thenReturn(userIdentities)
+            Mockito.`when`(mockFilterUser.id).thenReturn(9876L)
+            val userAttributes = HashMap<String, Any>()
+            userAttributes["user_key"] = "user_val"
+            Mockito.`when`(mockFilterUser.userAttributes).thenReturn(userAttributes)
+            roktKit.configuration = MockKitConfiguration.createKitConfiguration(JSONObject().put("hs", JSONObject()))
+            val config = RoktConfig.Builder().colorMode(RoktConfig.ColorMode.DARK).build()
+
+            roktKit.selectShoppableAds(
+                viewName = "ShopView",
+                attributes = mapOf("attr1" to "val1"),
+                filterUser = mockFilterUser,
+                roktConfig = config,
+            )
+
+            assertEquals(
+                mapOf(
+                    "user_key" to "user_val",
+                    "attr1" to "val1",
+                    "mpid" to "9876",
+                    "email" to "test@example.com",
+                    "adsExperience" to "shoppable",
+                ),
+                capturedAttributesSlot.captured,
+            )
+
+            val eventCaptor = ArgumentCaptor.forClass(MPEvent::class.java)
+            Mockito.verify(MParticle.getInstance()!!).logEvent(eventCaptor.capture())
+            val loggedEvent = eventCaptor.value
+            assertEquals("selectShoppableAds", loggedEvent.eventName)
+            assertEquals(MParticle.EventType.Other, loggedEvent.eventType)
+            assertEquals(
+                mapOf(
+                    "user_key" to "user_val",
+                    "attr1" to "val1",
+                    "mpid" to "9876",
+                    "email" to "test@example.com",
+                ),
+                loggedEvent.customAttributes,
+            )
+        } finally {
+            unmockkObject(Rokt)
+        }
     }
 
     @Test
