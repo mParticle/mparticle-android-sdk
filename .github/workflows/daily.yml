@@ -45,12 +45,11 @@ jobs:
       GIT_COMMITTER_EMAIL: developers@mparticle.com
     steps:
       - name: "Clone branch"
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
           repository: mparticle/mparticle-android-sdk
           ref: ${{ inputs.branch_name }}
-          submodules: recursive
       - name: "Import GPG Key"
         uses: crazy-max/ghaction-import-gpg@e89d40939c28e39f97cf32126055eeae86ba74ec #v6.0
         with:
@@ -62,13 +61,6 @@ jobs:
         run: |
           git checkout -b regression/${{ github.run_number }}
           git push origin regression/${{ github.run_number }}
-      - name: "Commit Kit Updates"
-        run: |
-          git submodule foreach "git fetch; git reset --hard origin/main";
-          git add .
-          git diff-index --quiet HEAD || git commit -m 'chore: Update Submodules'
-      - name: "Push kit updates to release branch"
-        run: git push origin regression/${{ github.run_number }}
 
   #  instrumented-tests:
   #    name: "Instrumented Tests"
@@ -77,7 +69,7 @@ jobs:
   #    needs: create-regression-branch
   #    steps:
   #      - name: "Checkout future release branch"
-  #        uses: actions/checkout@v6.0.3
+  #        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
   #        with:
   #          repository: mparticle/mparticle-android-sdk
   #          ref: regression/${{ github.run_number }}
@@ -110,7 +102,7 @@ jobs:
   #    needs: create-regression-branch
   #    steps:
   #      - name: "Checkout Branch"
-  #        uses: actions/checkout@v6.0.3
+  #        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
   #        with:
   #          repository: mparticle/mparticle-android-sdk
   #          ref: regression/${{ github.run_number }}
@@ -200,7 +192,7 @@ jobs:
     needs: create-regression-branch
     steps:
       - name: "Checkout future release branch"
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           repository: mparticle/mparticle-android-sdk
           ref: regression/${{ github.run_number }}
@@ -229,10 +221,11 @@ jobs:
     needs: create-regression-branch
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: regression/${{ github.run_number }}
-          submodules: recursive
+      - run: echo "ORG_GRADLE_PROJECT_VERSION=$(head -n 1 VERSION)" >> $GITHUB_ENV
+      - run: echo "ORG_GRADLE_PROJECT_version=$(head -n 1 VERSION)" >> $GITHUB_ENV
       - name: "Install JDK 17"
         uses: actions/setup-java@v5
         with:
@@ -242,15 +235,15 @@ jobs:
       - name: "Run Android Core SDK Lint"
         run: ./gradlew lint
       - name: "Setup Android Kit Lint"
-        run: ./gradlew publishReleaseLocal
+        run: ./gradlew publishMavenPublicationToMavenLocal
       - name: "Run Android Kit Lint"
-        run: ./gradlew publishReleaseLocal -c settings-kits.gradle lint
-      - name: "Get SDK version for isolated kits"
-        id: sdk-version
-        run: echo "version=$(./gradlew -q properties | grep '^version:' | awk '{print $2}')" >> $GITHUB_OUTPUT
+        run: ./gradlew lint -c settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true
       - name: "Run Isolated Kit Lint (urbanairship-kit)"
-        working-directory: kits/urbanairship-kit
-        run: ./gradlew -Pversion=${{ steps.sdk-version.outputs.version }} lint
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 lint
+      - name: "Run Isolated Kit Lint (ga-kit)"
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga/ga-23 lint
+      - name: "Run Isolated Kit Lint (ga4-kit)"
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga4/ga4-23 lint
       - name: "Archive Test Results"
         uses: actions/upload-artifact@v7
         if: always()
@@ -271,10 +264,11 @@ jobs:
     needs: create-regression-branch
     steps:
       - name: "Checkout Branch"
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: regression/${{ github.run_number }}
-          submodules: recursive
+      - run: echo "ORG_GRADLE_PROJECT_VERSION=$(head -n 1 VERSION)" >> $GITHUB_ENV
+      - run: echo "ORG_GRADLE_PROJECT_version=$(head -n 1 VERSION)" >> $GITHUB_ENV
       - name: "Install JDK 17"
         uses: actions/setup-java@v5
         with:
@@ -284,15 +278,15 @@ jobs:
       - name: "Run Android Core SDK Kotlin Lint"
         run: ./gradlew ktlintCheck
       - name: "Setup Android Kit Kotlin Lint"
-        run: ./gradlew publishReleaseLocal
+        run: ./gradlew publishMavenPublicationToMavenLocal
       - name: "Run Android Kit Kotlin Lint"
-        run: ./gradlew publishReleaseLocal -c settings-kits.gradle ktlintCheck
-      - name: "Get SDK version for isolated kits"
-        id: sdk-version
-        run: echo "version=$(./gradlew -q properties | grep '^version:' | awk '{print $2}')" >> $GITHUB_OUTPUT
+        run: ./gradlew ktlintCheck -c settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true
       - name: "Run Isolated Kit Kotlin Lint (urbanairship-kit)"
-        working-directory: kits/urbanairship-kit
-        run: ./gradlew -Pversion=${{ steps.sdk-version.outputs.version }} ktlintCheck
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 ktlintCheck
+      - name: "Run Isolated Kit Kotlin Lint (ga-kit)"
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga/ga-23 ktlintCheck
+      - name: "Run Isolated Kit Kotlin Lint (ga4-kit)"
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga4/ga4-23 ktlintCheck
       - name: "Archive Test Results"
         uses: actions/upload-artifact@v7
         if: always()
@@ -317,11 +311,12 @@ jobs:
       GIT_COMMITTER_EMAIL: developers@mparticle.com
     steps:
       - name: "Checkout future release branch"
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           repository: mparticle/mparticle-android-sdk
           ref: regression/${{ github.run_number }}
-          submodules: recursive
+      - run: echo "ORG_GRADLE_PROJECT_VERSION=$(head -n 1 VERSION)" >> $GITHUB_ENV
+      - run: echo "ORG_GRADLE_PROJECT_version=$(head -n 1 VERSION)" >> $GITHUB_ENV
       - name: "Install JDK 17"
         uses: actions/setup-java@v5
         with:
@@ -329,15 +324,15 @@ jobs:
           java-version: "17"
           cache: "gradle"
       - name: "Build Android Core"
-        run: ./gradlew -PisRelease=true clean publishReleaseLocal
+        run: ./gradlew clean publishMavenPublicationToMavenLocal
       - name: "Test Kits"
-        run: ./gradlew -PisRelease=true clean testRelease publishReleaseLocal -c settings-kits.gradle
-      - name: "Get SDK version for isolated kits"
-        id: sdk-version
-        run: echo "version=$(./gradlew -PisRelease=true -q properties | grep '^version:' | awk '{print $2}')" >> $GITHUB_OUTPUT
+        run: ./gradlew clean testRelease -c settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true
       - name: "Test Isolated Kits (urbanairship-kit)"
-        working-directory: kits/urbanairship-kit
-        run: ./gradlew -PisRelease=true -Pversion=${{ steps.sdk-version.outputs.version }} clean testRelease publishReleaseLocal
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 clean testRelease
+      - name: "Test Isolated Kits (ga-kit)"
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga/ga-23 clean testRelease
+      - name: "Test Isolated Kits (ga4-kit)"
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga4/ga4-23 clean testRelease
 
   semantic-release-dryrun:
     name: "Test Semantic Release - Dry Run"
@@ -351,7 +346,7 @@ jobs:
       GIT_COMMITTER_EMAIL: developers@mparticle.com
     steps:
       - name: "Checkout public main branch"
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0
           ref: main
@@ -382,7 +377,7 @@ jobs:
       GIT_COMMITTER_EMAIL: developers@mparticle.com
     steps:
       - name: "Checkout repo"
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
           fetch-depth: 0

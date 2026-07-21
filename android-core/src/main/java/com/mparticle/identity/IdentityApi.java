@@ -373,7 +373,7 @@ public class IdentityApi {
                             long newMpid = result.getMpId();
                             boolean isLoggedIn = result.isLoggedIn();
                             ConfigManager.setIdentityRequestInProgress(false);
-                            mUserDelegate.setUser(mContext, startingMpid, newMpid, identityApiRequest.getUserIdentities(), identityApiRequest.getUserAliasHandler(), isLoggedIn);
+                            mUserDelegate.setUser(mContext, startingMpid, newMpid, identityApiRequest.getUserIdentities(), isLoggedIn);
                             final MParticleUser previousUser = startingMpid != newMpid ? getUser(startingMpid) : null;
                             task.setSuccessful(new IdentityApiResult(MParticleUserImpl.getInstance(mContext, newMpid, mUserDelegate), previousUser));
                             new Handler(Looper.getMainLooper()).post(new Runnable() {

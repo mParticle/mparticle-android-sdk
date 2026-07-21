@@ -249,7 +249,9 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
         String customBaseURL = networkOptions.getCustomBaseURL();
 
         if (!MPUtility.isEmpty(customBaseURL)) {
-            if (domainMapping != null && !MPUtility.isEmpty(domainMapping.getUrl())) {
+            if (domainMapping != null
+                    && !MPUtility.isEmpty(domainMapping.getUrl())
+                    && !defaultUrl.equals(domainMapping.getUrl())) {
                 Logger.warning("NetworkOptions: customBaseURL is set; domain mapping for " + endpoint.name() + " is ignored.");
             }
             // When custom CNAME is used, the default-domain URL still needs the pod prefix

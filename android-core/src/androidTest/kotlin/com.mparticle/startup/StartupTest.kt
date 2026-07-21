@@ -119,7 +119,7 @@ class StartupTest : BaseStartupTest() {
                         .userIdentities(identityMap)
                         .build(),
                 ).logLevel(MParticle.LogLevel.DEBUG)
-                .androidIdDisabled(false)
+                .androidIdEnabled(true)
                 .attributionListener(
                     object : AttributionListener {
                         override fun onResult(result: AttributionResult) {

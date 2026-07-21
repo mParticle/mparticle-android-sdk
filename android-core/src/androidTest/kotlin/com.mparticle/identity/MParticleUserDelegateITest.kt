@@ -5,7 +5,7 @@ import android.os.Looper
 import android.util.Log
 import com.mparticle.MParticle
 import com.mparticle.MParticle.IdentityType
-import com.mparticle.UserAttributeListener
+import com.mparticle.TypedUserAttributeListener
 import com.mparticle.consent.CCPAConsent
 import com.mparticle.consent.ConsentState
 import com.mparticle.consent.GDPRConsent
@@ -191,14 +191,20 @@ class MParticleUserDelegateITest : BaseCleanStartedEachTest() {
             mUserDelegate.setUserAttribute(key, value, mStartingMpid)
         }
         AccessUtils.awaitMessageHandler()
-        val userAttributesResults = AndroidUtils.Mutable<Map<String, String>?>(null)
-        val userAttributeListResults = AndroidUtils.Mutable<Map<String, List<String>>?>(null)
+        val userAttributesResults = AndroidUtils.Mutable<Map<String, Any?>?>(null)
+        val userAttributeListResults = AndroidUtils.Mutable<Map<String, List<String?>?>?>(null)
 
         // fetch on the current (non-main) thread
         mUserDelegate.getUserAttributes(
-            UserAttributeListener { userAttributes, userAttributeLists, mpid ->
-                userAttributesResults.value = userAttributes
-                userAttributeListResults.value = userAttributeLists
+            object : TypedUserAttributeListener {
+                override fun onUserAttributesReceived(
+                    userAttributes: Map<String, Any?>,
+                    userAttributeLists: Map<String, List<String?>?>,
+                    mpid: Long,
+                ) {
+                    userAttributesResults.value = userAttributes
+                    userAttributeListResults.value = userAttributeLists
+                }
             },
             mStartingMpid,
         )
@@ -211,10 +217,16 @@ class MParticleUserDelegateITest : BaseCleanStartedEachTest() {
         val latch: CountDownLatch = MPLatch(1)
         Handler(Looper.getMainLooper()).post {
             mUserDelegate.getUserAttributes(
-                UserAttributeListener { userAttributes, userAttributeLists, mpid ->
-                    userAttributesResults.value = userAttributes
-                    userAttributeListResults.value = userAttributeLists
-                    latch.countDown()
+                object : TypedUserAttributeListener {
+                    override fun onUserAttributesReceived(
+                        userAttributes: Map<String, Any?>,
+                        userAttributeLists: Map<String, List<String?>?>,
+                        mpid: Long,
+                    ) {
+                        userAttributesResults.value = userAttributes
+                        userAttributeListResults.value = userAttributeLists
+                        latch.countDown()
+                    }
                 },
                 mStartingMpid,
             )

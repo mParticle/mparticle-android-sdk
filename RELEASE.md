@@ -2,82 +2,81 @@
 
 This document outlines the process for releasing the mParticle Android SDK and its kits.
 
-## Step 1: Preparing the SDK for Release
+The Android SDK and kits are released together from this monorepo using GitHub Actions.
 
-The Android SDK and kits are released using GitHub Actions. The SDK and kits are currently coupled together in the release process.
+## Release workflows
 
-### Pre-release Checklist
+### Release - Draft
 
-- Ensure all commits are in the public main branch
-- Review `release.yml` in the repo for specific workflow details
-- The release job deploys the most current snapshot of main branch release tag to main branch
+Use `Release - Draft` to prepare a release PR. The workflow:
 
-## Step 2: Release via GitHub Actions
+1. Reads the current version from `VERSION`.
+2. Computes the next release version from `bump-type` and optional `qualifier`.
+3. Writes the computed version back to `VERSION`.
+4. Publishes to Maven local as a smoke test.
+5. Generates the changelog entry.
+6. Opens a PR back into the branch selected in the workflow dispatch UI.
 
-### What the GitHub Release Job Does
+Generated release PR branches use `release/prep-<version>`, for example `release/prep-6.0.0-rc1`.
 
-1. **Initial Setup**
-    - Verifies job is running from public repo and on main branch
-    - Creates temporary `release/{run_number}` branch
+### Release - Publish
 
-2. **Testing Phase**
-    - Runs unit and instrumented tests in parallel
-        - Instrumented tests require an emulator
-        - Unit tests run independently
-    - Updates kits and runs additional tests
+`Release - Publish` runs when `VERSION` changes on:
 
-3. **Version Management**
-    - Runs semantic version action
-        - Automatically bumps `build.gradle` version based on commit messages
-        - No version bump if no new commits (e.g., feat/fix)
-        - Generates release notes automatically
-        - Requires linear history between development and main branches
+- `main`
+- `workstation/*`
 
-4. **Artifact Publishing**
-    - Uploads artifacts to Sonatype (core and kits)
-        - Builds and signs the core SDK and all kit artifacts
-        - Uploads to Sonatype Nexus (staging area)
-        - Syncs artifacts to Maven Central
-            > Note: This step will be moved before version bump during semantic release
+The workflow publishes the SDK and kits to Maven Central using the exact version in `VERSION`, then creates a GitHub release with the same tag.
 
-5. **Branch Synchronization**
-    - Pushes release branch to:
-        - Public main branch
-        - Public development branch
-        - Internal repo main branch
-    - Deletes release branch on success (preserved on failure for debugging)
+## Stable releases
 
-### How to Release
+1. Run `Release - Draft` from the target branch.
+2. Choose `patch`, `minor`, or `major` for `bump-type`.
+3. Leave `qualifier` empty.
+4. Review, approve, and merge the generated release PR.
+5. Confirm `Release - Publish` succeeds.
 
-1. Navigate to the Actions tab
-2. Select "release SDK"
-3. Run the workflow from main branch with "true" first to perform a dry run
-    > Important: Always start with a dry run to validate the release process. This will perform all steps up to semantic release without actually publishing, helping catch potential issues early.
-4. If the dry run succeeds, run the workflow again with "false" option to perform the actual release
-    > Note: Only proceed with the actual release after confirming a successful dry run
+Stable releases are marked as the latest GitHub release.
 
-### Important Notes
+## Alpha, beta, and RC releases
 
-- **Release Duration**: Expect ~20 minutes due to comprehensive test suite
-- **Emulator Issues**:
-    - Sometimes GitHub Actions emulators fail
-    - We have a custom script to install and start the emulator `scripts/install-start-emulator.sh`
-    - OS version is hardcoded to avoid issues with new releases
-- **Code Reusability**:
-    - Reusable GitHub Actions are defined in the [mparticle-workflows repo](https://github.com/mParticle/mparticle-workflows)
-    - This enables other platforms to reuse similar jobs
+Use a qualified release when a partner or internal validation flow needs a fixed Maven Central version before the stable release, for example `6.0.0-alpha1`, `6.0.0-beta1`, or `6.0.0-rc1`.
 
-## Post-Release Verification
+1. Run `Release - Draft` from the target branch, such as `workstation/6.0-Release`.
+2. Choose the base `bump-type`:
+    - `patch`, `minor`, or `major` to bump the base version.
+    - `none` to keep the base version unchanged and only change or remove the qualifier.
+3. Set `qualifier` to the pre-release identifier without the leading hyphen, for example `alpha1`, `beta1`, or `rc1`.
+4. Review, approve, and merge the generated release PR.
+5. Confirm `Release - Publish` succeeds.
 
-After a successful build through GitHub Actions, verify:
+Qualified releases are published to Maven Central with the exact qualified version. Their GitHub releases are marked as pre-releases and are not marked as latest.
 
-1. Public repo has a new semantic release tag
-2. New artifact is present in [Sonatype](https://central.sonatype.com/publishing)
+The qualifier must start with an alphanumeric character and may only contain alphanumerics, dots, and hyphens.
+
+## Version examples
+
+- `5.78.2` with `bump-type=minor` and `qualifier=alpha1` produces `5.79.0-alpha1`.
+- `5.79.0-alpha1` with `bump-type=none` and `qualifier=beta1` produces `5.79.0-beta1`.
+- `5.79.0-beta1` with `bump-type=none` and `qualifier=rc1` produces `5.79.0-rc1`.
+- `5.79.0-rc1` with `bump-type=none` and an empty `qualifier` produces `5.79.0`.
+
+The draft workflow rejects any input combination that would produce the same version already stored in `VERSION`.
+
+## Post-release verification
+
+After a successful publish workflow, verify:
+
+1. The GitHub release exists with the expected tag.
+2. The SDK artifact is present in [Sonatype](https://central.sonatype.com/publishing).
+3. The kit artifacts are present in [Sonatype](https://central.sonatype.com/publishing).
+4. Pre-release tags are marked as pre-releases and stable tags are marked as latest.
 
 ## Troubleshooting
 
-If you encounter emulator issues during testing, check:
+If release validation fails:
 
-- [Emulator setup script](https://github.com/mParticle/mparticle-android-sdk/blob/main/scripts/install-start-emulator.sh)
-- Current OS version compatibility
-- GitHub Actions logs for specific error messages
+- Check the generated release PR for the computed `VERSION` and changelog changes.
+- Check the Maven local smoke-test step in `Release - Draft`.
+- Check the Maven Central publish steps in `Release - Publish`.
+- For emulator-related validation issues, check `scripts/install-start-emulator.sh` and the GitHub Actions logs.

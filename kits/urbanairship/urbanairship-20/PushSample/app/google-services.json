@@ -1,0 +1,51 @@
+/**
+*
+*   Replace this with the real google-services.json from your project, available in the Firebase console
+*
+**/
+{
+  "project_info": {
+    "project_number": "12345sample54321",
+    "firebase_url": "https://sample.sampe.com",
+    "project_id": "sampleprojectid",
+    "storage_bucket": "sample.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:12345:android:12345",
+        "android_client_info": {
+          "package_name": "com.mparticle.kits.pushsample"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "12345sample54321.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "12345sample54321.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "ABcdEFghIJ_k12345LMmnp6789"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

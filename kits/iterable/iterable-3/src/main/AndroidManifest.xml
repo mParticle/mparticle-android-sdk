@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <application>
+        <service
+            android:name="com.iterable.iterableapi.IterableFirebaseMessagingService"
+            tools:node="remove" />
+    </application>
+</manifest>

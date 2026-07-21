@@ -1,18 +1,136 @@
+<!-- markdownlint-disable MD024 MD041 -->
+
+## [Unreleased]
+
+### Added
+
+- Add Rokt Shoppable Ads payment extension registration and selection APIs.
+- Add the `com.rokt:rokt-sdk-plus` umbrella artifact: a single dependency bundling the mParticle core SDK, the mParticle Rokt kit, and the Rokt Payment Extension (Shoppable Ads), mirroring the iOS `RoktSDKPlus` umbrella.
+
+### Changed
+
+- Upgrade Kotlin to 2.1.20 across the core SDK, buildSrc, and all integrated kits.
+- Add support for qualified alpha, beta, and release candidate versions in release workflows.
+- Add Kotlin `MParticle.rokt` access and `RoktLayout` event callbacks for the Rokt kit.
+- Centralize the Rokt SDK / payment extension versions in root `gradle.properties` (`roktSdkVersion`, `roktPaymentExtensionVersion`), shared by the Rokt kit and `rokt-sdk-plus`.
+
+### Removed
+
+- Remove deprecated `KitIntegration.getAllUserAttributes()`. Custom kits must use `getCurrentUser().getUserAttributes()` (or other `FilteredMParticleUser` APIs) and `AttributeListener` callbacks instead ([#682](https://github.com/mParticle/mparticle-android-sdk/pull/682))
+- Remove deprecated `KitIntegration.getUserIdentities()`. Custom kits must use identity data from kit callbacks and request objects instead ([#681](https://github.com/mParticle/mparticle-android-sdk/pull/681)) ([8d3a23c8](https://github.com/mParticle/mparticle-android-sdk/commit/8d3a23c84c96d11f0ee1f80763adacc4f964b544))
+
+## [6.0.0-rc.1] - 2026-05-22
+
+### Core
+
+#### Added
+
+- Split instrumented tests in CI for parallel execution ([#662](https://github.com/mParticle/mparticle-android-sdk/pull/662))
+
+#### Changed
+
+- Centralize active kit filtering in KitManagerImpl ([#697](https://github.com/mParticle/mparticle-android-sdk/pull/697))
+
+### Kits
+
+#### Kits
+
+##### Added
+
+- Migrate OneTrust kit ([#672](https://github.com/mParticle/mparticle-android-sdk/pull/672))
+- Migrate Optimizely kit ([#664](https://github.com/mParticle/mparticle-android-sdk/pull/664))
+- Migrate Singular 12 kit ([#667](https://github.com/mParticle/mparticle-android-sdk/pull/667))
+- Migrate Radar kit ([#665](https://github.com/mParticle/mparticle-android-sdk/pull/665))
+- Migrate ComScore 6 kit ([#668](https://github.com/mParticle/mparticle-android-sdk/pull/668))
+- Migrate Iterable 3 kit ([#669](https://github.com/mParticle/mparticle-android-sdk/pull/669))
+- Migrate Adobe 5 kit ([#670](https://github.com/mParticle/mparticle-android-sdk/pull/670))
+- Migrate Adobe Media 5 kit ([#671](https://github.com/mParticle/mparticle-android-sdk/pull/671))
+- Migrate Apptimize kit ([#658](https://github.com/mParticle/mparticle-android-sdk/pull/658))
+- Migrate Apptentive kit ([#657](https://github.com/mParticle/mparticle-android-sdk/pull/657))
+- Migrate CleverTap kit ([#660](https://github.com/mParticle/mparticle-android-sdk/pull/660))
+- Migrate Localytics kit ([#661](https://github.com/mParticle/mparticle-android-sdk/pull/661))
+- Migrate Adjust kit ([#656](https://github.com/mParticle/mparticle-android-sdk/pull/656))
+- Kochava 5 Kit Migrate ([#654](https://github.com/mParticle/mparticle-android-sdk/pull/654))
+- Migrate Rokt kit ([#659](https://github.com/mParticle/mparticle-android-sdk/pull/659))
+- Braze 38 Kit Migrate ([#651](https://github.com/mParticle/mparticle-android-sdk/pull/651))
+- Migrate appsflyer-kit from submodule to regular directory ([#650](https://github.com/mParticle/mparticle-android-sdk/pull/650))
+
+#### Adjust
+
+##### Fixed
+
+- Resolve trunk issues for all kits ([#675](https://github.com/mParticle/mparticle-android-sdk/pull/675))
+
+#### Adobe
+
+##### Added
+
+- Move onSetUserAttributeList to BaseAttributeListener ([#690](https://github.com/mParticle/mparticle-android-sdk/pull/690))
+- Migrate setUserAttribute ([#689](https://github.com/mParticle/mparticle-android-sdk/pull/689))
+- Inline user attribute removal in onRemoveUserAttribute ([#687](https://github.com/mParticle/mparticle-android-sdk/pull/687))
+- Split LogoutListener from AttributeListener ([#685](https://github.com/mParticle/mparticle-android-sdk/pull/685))
+
+##### Changed
+
+- KitManagerImpl user-attribute forwarding and UserAttributeListener cleanup ([#693](https://github.com/mParticle/mparticle-android-sdk/pull/693))
+- Rename AttributeListener to ModifyIdentityListener ([#692](https://github.com/mParticle/mparticle-android-sdk/pull/692))
+- Route bulk user attribute sync through onSetAllUserAttributes ([#691](https://github.com/mParticle/mparticle-android-sdk/pull/691))
+
+#### Apptentive
+
+##### Added
+
+- Migrate Branch 5 kit ([#666](https://github.com/mParticle/mparticle-android-sdk/pull/666))
+
+#### Branch
+
+##### Added
+
+- Removing deprecations - Part 1 ([#676](https://github.com/mParticle/mparticle-android-sdk/pull/676))
+
+#### Braze
+
+##### Added
+
+- Add Braze SDK 40 kit (braze-40) ([#679](https://github.com/mParticle/mparticle-android-sdk/pull/679))
+- Add Braze SDK 41 kit (braze-41) ([#680](https://github.com/mParticle/mparticle-android-sdk/pull/680))
+- Add Braze 39 kit ([#677](https://github.com/mParticle/mparticle-android-sdk/pull/677))
+- Leanplum 7 Kit Migrate ([#655](https://github.com/mParticle/mparticle-android-sdk/pull/655))
+
+#### Ga
+
+##### Added
+
+- GA 23 Kit Migrate ([#652](https://github.com/mParticle/mparticle-android-sdk/pull/652))
+
+#### Ga4
+
+##### Added
+
+- GA4 23 Kit Migrate ([#653](https://github.com/mParticle/mparticle-android-sdk/pull/653))
+
+#### Iterable
+
+##### Added
+
+- Migrate Urban Airship kit ([#673](https://github.com/mParticle/mparticle-android-sdk/pull/673))
+
+#### Rokt
+
+##### Added
+
+- Add customBaseURL CNAME support to NetworkOptions ([#702](https://github.com/mParticle/mparticle-android-sdk/pull/702))
+- Migrate Rokt kit to Rokt SDK 5.x and remove MpRoktEventCallback ([#704](https://github.com/mParticle/mparticle-android-sdk/pull/704))
+
+##### Changed
+
+- Migrate Rokt contracts and facade ownership to rokt-kit ([#700](https://github.com/mParticle/mparticle-android-sdk/pull/700))
+
 ## [5.80.0](https://github.com/mParticle/mparticle-android-sdk/compare/v5.79.2...v5.80.0) (2026-06-25)
 
 ### Features
 
 - add device-based consent to override MPID-scoped consent ([#726](https://github.com/mParticle/mparticle-android-sdk/issues/726)) ([e92d352](https://github.com/mParticle/mparticle-android-sdk/commit/e92d3522a350be90a1f15eb3b81d5e6f089f1aed))
-
-## Unreleased
-
-### Fixed
-
-- Restore async wait for user attributes to persist before Rokt `selectPlacements` delegates to the kit, fixing a regression where placement attributes could be missing in mParticle and Rokt.
-
-### Added
-
-- Add device-based consent APIs (`MParticle.getDeviceConsentState()`, `MParticle.setDeviceConsentState()`) and `MParticleOptions.Builder.deviceBasedConsentEnabled()` so consent can be stored and applied at the device level, overriding MPID-based consent for kit forwarding rules and event uploads.
 
 ## [5.79.2](https://github.com/mParticle/mparticle-android-sdk/compare/v5.79.1...v5.79.2) (2026-06-22)
 

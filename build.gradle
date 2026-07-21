@@ -1,6 +1,7 @@
 buildscript {
-    ext.kotlin_version = '1.9.0'
-    ext.gradle_version = '8.1.4'
+    ext.kotlin_version = '2.1.20'
+    ext.coroutines_version = '1.9.0'
+    ext.gradle_version = '8.3.2'
 
     repositories {
         mavenCentral()
@@ -8,7 +9,7 @@ buildscript {
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$gradle_version"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.20"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
@@ -63,11 +64,6 @@ subprojects {
 
 allprojects {
     group = 'com.mparticle'
-    version = '5.80.0-SNAPSHOT'
-    if (project.hasProperty('isRelease') && project.isRelease) {
-        version = version.toString().replace("-SNAPSHOT", "")
-    }
-
     repositories {
         mavenLocal()
         google()

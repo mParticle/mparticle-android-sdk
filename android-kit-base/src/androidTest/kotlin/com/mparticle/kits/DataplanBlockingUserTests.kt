@@ -11,9 +11,9 @@ import com.mparticle.Utils.randomString
 import com.mparticle.identity.IdentityApiRequest
 import com.mparticle.internal.AccessUtils
 import com.mparticle.kits.DataplanFilterImpl.Companion.getEventsApiName
-import com.mparticle.kits.testkits.AttributeListenerTestKit
 import com.mparticle.kits.testkits.IdentityListenerTestKit
 import com.mparticle.kits.testkits.ListenerTestKit
+import com.mparticle.kits.testkits.ModifyIdentityListenerTestKit
 import com.mparticle.kits.testkits.UserAttributeListenerTestKit
 import com.mparticle.testutils.MPLatch
 import org.junit.Assert.assertEquals
@@ -25,7 +25,7 @@ import org.junit.Test
 import kotlin.random.Random
 
 class DataplanBlockingUserTests : BaseKitOptionsTest() {
-    private lateinit var attributeListenerKitKit: AttributeListenerTestKit
+    private lateinit var attributeListenerKitKit: ModifyIdentityListenerTestKit
     private lateinit var identityListenerKitKit: IdentityListenerTestKit
     private lateinit var userAttributeListenerKitKit: UserAttributeListenerTestKit
     private lateinit var kitIntegrationTestKits: List<ListenerTestKit>
@@ -36,7 +36,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
             .builder(mContext)
             .configuration(
                 KitOptions {
-                    addKit(-1, AttributeListenerTestKit::class.java)
+                    addKit(-1, ModifyIdentityListenerTestKit::class.java)
                     addKit(-2, IdentityListenerTestKit::class.java)
                     addKit(-3, UserAttributeListenerTestKit::class.java)
                 },
@@ -44,7 +44,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
                 startMParticle(it)
             }
         attributeListenerKitKit =
-            MParticle.getInstance()?.getKitInstance(-1) as AttributeListenerTestKit
+            MParticle.getInstance()?.getKitInstance(-1) as ModifyIdentityListenerTestKit
         identityListenerKitKit =
             MParticle.getInstance()?.getKitInstance(-2) as IdentityListenerTestKit
         userAttributeListenerKitKit =
@@ -73,11 +73,11 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
             ),
         )
 
-        userAttributeListenerKitKit.onSetUserAttribute = { key, _, _ ->
+        userAttributeListenerKitKit.onSetUserAttribute = { key, _ ->
             assertTrue(allowedAttributes.containsKey(key))
             assertFalse(blockedAttributes.containsKey(key))
         }
-        attributeListenerKitKit.setUserAttribute = { key, _ ->
+        attributeListenerKitKit.setUserAttributeCallback = { key, _ ->
             assertTrue(allowedAttributes.containsKey(key))
             assertFalse(blockedAttributes.containsKey(key))
         }
@@ -90,7 +90,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         AccessUtils.awaitMessageHandler()
 
         kitIntegrationTestKits.forEach { kit ->
-            assertEquals(kit.name, allowedAttributes, kit.allUserAttributes)
+            assertEquals(kit.name, allowedAttributes, kit.getCurrentUser()?.userAttributes)
         }
         // sanity check to make sure the non-filtered User has the blocked identities
         assertEquals(
@@ -146,13 +146,13 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
                 count++
             }
         }
-        userAttributeListenerKitKit.onRemoveUserAttribute = { key, _ ->
+        userAttributeListenerKitKit.onRemoveUserAttribute = { key ->
             assertTrue(allowedAttributes.containsKey(key))
             assertFalse(blockedAttributes.containsKey(key))
             // make sure these are the attributes that are being removed
             count++
         }
-        attributeListenerKitKit.removeUserAttribute = {
+        attributeListenerKitKit.removeUserAttributeListener = {
             assertTrue(allowedAttributes.containsKey(it))
             assertFalse(blockedAttributes.containsKey(it))
             count++
@@ -174,7 +174,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         assertEquals(count, allowedAttributes.size * 4)
 
         kitIntegrationTestKits.forEach {
-            assertEquals(0, it.allUserAttributes.size)
+            assertEquals(0, it.getCurrentUser()?.userAttributes?.size ?: 0)
         }
         // sanity check to make sure the non-filtered User has the blocked identities
         assertEquals(
@@ -221,7 +221,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
                 count++
             }
         }
-        userAttributeListenerKitKit.onSetUserAttributeList = { key, _, _ ->
+        userAttributeListenerKitKit.onSetUserAttributeList = { key, _ ->
             assertTrue(allowedAttributes.containsKey(key))
             assertFalse(blockedAttributes.containsKey(key))
             count++
@@ -241,8 +241,9 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
 
         assertEquals(count, allowedAttributes.size * 4)
         kitIntegrationTestKits.forEach { kit ->
-            assertEquals(allowedAttributes.size, kit.allUserAttributes.size)
-            assertEquals(allowedAttributes.keys, kit.allUserAttributes.keys)
+            val filtered = kit.getCurrentUser()?.userAttributes
+            assertEquals(allowedAttributes.size, filtered?.size ?: 0)
+            assertEquals(allowedAttributes.keys, filtered?.keys)
         }
         // sanity check to make sure the non-filtered User has the blocked attributes
         assertEquals(
@@ -292,7 +293,7 @@ class DataplanBlockingUserTests : BaseKitOptionsTest() {
         }
         latch.await()
         kitIntegrationTestKits.forEach { kit ->
-            assertEquals(allowedIdentities, kit.userIdentities)
+            assertEquals(allowedIdentities, kit.getCurrentUser()?.userIdentities)
         }
         // sanity check to make sure the non-filtered User has the blocked identities
         assertEquals(

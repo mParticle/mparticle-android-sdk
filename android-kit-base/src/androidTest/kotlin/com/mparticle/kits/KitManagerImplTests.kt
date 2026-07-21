@@ -7,8 +7,8 @@ import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.internal.ConfigManager
 import com.mparticle.internal.KitManager
-import com.mparticle.kits.testkits.AttributeListenerTestKit
 import com.mparticle.kits.testkits.IdentityListenerTestKit
+import com.mparticle.kits.testkits.ModifyIdentityListenerTestKit
 import com.mparticle.kits.testkits.UserAttributeListenerTestKit
 import com.mparticle.networking.Matcher
 import com.mparticle.testutils.MPLatch
@@ -22,7 +22,7 @@ class KitManagerImplTests : BaseKitOptionsTest() {
     @Test
     fun testKitIntializationViaKitOptions() {
         KitOptions()
-            .addKit(1001, AttributeListenerTestKit::class.java)
+            .addKit(1001, ModifyIdentityListenerTestKit::class.java)
             .addKit(1002, IdentityListenerTestKit::class.java)
             .addKit(1003, UserAttributeListenerTestKit::class.java)
             .let {
@@ -35,7 +35,7 @@ class KitManagerImplTests : BaseKitOptionsTest() {
 
         fun getKit(kitId: Int) = MParticle.getInstance()?.getKitInstance(kitId)
 
-        assertTrue(getKit(1001) is AttributeListenerTestKit)
+        assertTrue(getKit(1001) is ModifyIdentityListenerTestKit)
         assertTrue(getKit(1002) is IdentityListenerTestKit)
         assertTrue(getKit(1003) is UserAttributeListenerTestKit)
     }
@@ -62,10 +62,10 @@ class KitManagerImplTests : BaseKitOptionsTest() {
             .builder(mContext)
             .configuration(
                 ConfiguredKitOptions {
-                    addKit(-1, AttributeListenerTestKit::class.java, JSONObject().put("eau", true))
+                    addKit(-1, ModifyIdentityListenerTestKit::class.java, JSONObject().put("eau", true))
                     addKit(-2, IdentityListenerTestKit::class.java)
                     addKit(-3, UserAttributeListenerTestKit::class.java)
-                    addKit(-4, AttributeListenerTestKit::class.java, JSONObject().put("eau", true))
+                    addKit(-4, ModifyIdentityListenerTestKit::class.java, JSONObject().put("eau", true))
                     addKit(-5, IdentityListenerTestKit::class.java)
                     addKit(-6, UserAttributeListenerTestKit::class.java)
                 }.apply {
