@@ -4,8 +4,10 @@ Standalone sample app for exercising the Rokt Kit through the mParticle SDK
 (identify, user attributes, overlay and embedded placements, event stream).
 
 This module is built standalone (own Gradle wrapper and settings) because the
-Rokt SDK requires a newer AGP than the shared multi-kit build. It resolves
-published `com.mparticle` artifacts instead of the in-repo kit project.
+Rokt SDK requires a newer AGP than the shared multi-kit build. It depends on the
+single `com.rokt:rokt-sdk-plus` umbrella, which transitively provides
+`android-core`, `android-rokt-kit`, `com.rokt:roktsdk`, and
+`com.rokt:payment-extension`.
 
 ## Setup
 
@@ -27,19 +29,22 @@ published `com.mparticle` artifacts instead of the in-repo kit project.
 The Rokt account id and the Stripe publishable key are not configured in the
 app: both arrive with the kit configuration for the selected workspace.
 
-By default the app uses the latest published release candidate
-(`6.0.0-rc.1`) of `android-core` and `android-rokt-kit` from Maven Central.
+The `com.rokt:rokt-sdk-plus` umbrella is not published to Maven Central, so the
+example is built against a locally published copy (see below). The published
+`com.rokt:payment-extension` / `com.rokt:roktsdk` it pulls in transitively come
+from Maven Central.
 
 ## Joint testing against local builds
 
-To test unreleased SDK + kit changes end to end, publish them to Maven Local
-from the repository root and point the example at the local version (`0.0.0`):
+The umbrella (and the mParticle core + Rokt kit it bundles) are published to
+Maven Local, then the example resolves them at the local version (`0.0.0`):
 
 ```bash
 # from the repository root
 ./gradlew publishMavenPublicationToMavenLocal
 ./gradlew -c settings-kits.gradle :kits:android-rokt:rokt:publishMavenPublicationToMavenLocal \
   -Pmparticle.kit.mparticleFromMavenLocalOnly=true
+./gradlew -c settings-rokt-sdk-plus.gradle :rokt-sdk-plus:publishMavenPublicationToMavenLocal
 
 # from this directory
 ./gradlew installDebug -PmparticleVersion=0.0.0
