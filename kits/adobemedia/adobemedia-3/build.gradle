@@ -94,3 +94,22 @@ dependencies {
     api 'com.adobe.marketing.mobile:identity'
     api 'com.adobe.marketing.mobile:signal'
 }
+
+// The Adobe extensions above take their versions from the sdk-bom, so they are declared without
+// an explicit version. Without version mapping the generated POM lists them with an empty
+// <version>, which Maven Central rejects. Map each dependency to the version resolved on the
+// release variant classpaths so the published POM carries concrete versions.
+afterEvaluate {
+    publishing {
+        publications.withType(org.gradle.api.publish.maven.MavenPublication).configureEach {
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('releaseCompileClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionOf('releaseRuntimeClasspath')
+                }
+            }
+        }
+    }
+}
