@@ -71,14 +71,15 @@ jobs:
       - name: Publish Rokt kit to Maven local (so rokt-sdk-plus resolves it locally)
         run: ./gradlew :kits:android-rokt:rokt:publishMavenPublicationToMavenLocal -PVERSION=${{ needs.setup-and-version.outputs.final_version }} -c settings-kits.gradle
 
-      # Published under the com.rokt namespace, so this step uses the Rokt Maven Central
-      # credentials/signing key (separate from the com.mparticle secrets used above).
+      # Published under the com.rokt namespace, so this step signs with the Rokt signing key.
+      # The Sonatype account is shared with the com.mparticle publish (that account owns both
+      # namespaces), so it reuses the non-prefixed SONATYPE_NEXUS_* credentials.
       - name: Publish rokt-sdk-plus to Maven Central
         env:
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.ROKT_MAVEN_CENTRAL_SIGNING_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.ROKT_MAVEN_CENTRAL_SIGNING_KEY_PASSWORD }}
-          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.ROKT_SONATYPE_NEXUS_USERNAME }}
-          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.ROKT_SONATYPE_NEXUS_PASSWORD }}
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
         run: ./gradlew publishMavenPublicationToMavenCentralRepository -PVERSION=${{ needs.setup-and-version.outputs.final_version }} -c settings-rokt-sdk-plus.gradle
 
       - name: Create GitHub release
