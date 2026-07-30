@@ -21,9 +21,47 @@ jobs:
       - id: set
         run: echo "matrix=$(jq -c . kits/matrix.json)" >> "$GITHUB_OUTPUT"
 
+  # Builds the core SDK once and shares the resulting Maven Local repository with
+  # every build-kits matrix job, instead of each of them rebuilding it.
+  publish-core:
+    name: Publish core SDK to Maven Local
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Set SDK version
+        run: |
+          echo "ORG_GRADLE_PROJECT_VERSION=$(head -n 1 VERSION)" >> "$GITHUB_ENV"
+          echo "ORG_GRADLE_PROJECT_version=$(head -n 1 VERSION)" >> "$GITHUB_ENV"
+
+      - name: Install JDK 17
+        uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5
+        with:
+          distribution: zulu
+          java-version: "17"
+
+      # Writable, unlike build-kits below: one job, so one cache entry per run.
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
+
+      - name: Publish core SDK to Maven Local
+        run: ./gradlew publishMavenPublicationToMavenLocal
+
+      - name: Archive Maven Local repository
+        run: tar -czf maven-local.tar.gz -C "$HOME/.m2" repository
+
+      - name: Upload Maven Local repository
+        uses: actions/upload-artifact@v7
+        with:
+          name: maven-local-core
+          path: maven-local.tar.gz
+          retention-days: 1
+          compression-level: 0
+
   build-kits:
     name: Build ${{ matrix.kit.name }}
-    needs: load-matrix
+    needs: [load-matrix, publish-core]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -35,8 +73,8 @@ jobs:
 
       - name: Set SDK version
         run: |
-          echo "ORG_GRADLE_PROJECT_VERSION=$(head -n 1 VERSION)" >> $GITHUB_ENV
-          echo "ORG_GRADLE_PROJECT_version=$(head -n 1 VERSION)" >> $GITHUB_ENV
+          echo "ORG_GRADLE_PROJECT_VERSION=$(head -n 1 VERSION)" >> "$GITHUB_ENV"
+          echo "ORG_GRADLE_PROJECT_version=$(head -n 1 VERSION)" >> "$GITHUB_ENV"
 
       - name: Install JDK 17
         uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5
@@ -49,8 +87,16 @@ jobs:
         with:
           cache-read-only: true
 
-      - name: Publish core SDK to Maven Local
-        run: ./gradlew publishMavenPublicationToMavenLocal
+      - name: Download Maven Local repository
+        uses: actions/download-artifact@v7
+        with:
+          name: maven-local-core
+
+      - name: Restore core SDK into Maven Local
+        run: |
+          mkdir -p "$HOME/.m2"
+          tar -xzf maven-local.tar.gz -C "$HOME/.m2"
+          rm maven-local.tar.gz
 
       - name: Run kit unit tests
         if: ${{ matrix.kit.skip_unit_tests != true }}
