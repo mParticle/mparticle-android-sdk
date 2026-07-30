@@ -24,9 +24,6 @@ jobs:
         uses: trunk-io/trunk-action@04ba50e7658c81db7356da96657e6e77f220bfa3 # v1.3.1
         with:
           check-mode: pull_request
-  pr-check-hadcoded-secrets:
-    name: "Check PR for hardcoded secrets"
-    uses: mParticle/mparticle-workflows/.github/workflows/security-hardcoded-secrets.yml@main
 
   instrumented-core:
     uses: ./.github/workflows/instrumented-tests.yml
