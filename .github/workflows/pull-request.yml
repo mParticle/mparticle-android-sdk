@@ -193,7 +193,8 @@ jobs:
   pr-notify:
     if: >
       github.event_name == 'pull_request' &&
-      github.event.pull_request.draft == false
+      github.event.pull_request.draft == false &&
+      github.actor != 'dependabot[bot]'
     needs:
       - instrumented-core
       - instrumented-kit-base
