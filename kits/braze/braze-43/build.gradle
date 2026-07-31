@@ -23,7 +23,7 @@ plugins {
 
 sonarqube {
     properties {
-        property "sonar.projectKey", "mparticle-android-integration-appboy-42"
+        property "sonar.projectKey", "mparticle-android-integration-appboy-43"
         property "sonar.organization", "mparticle"
         property "sonar.host.url", "https://sonarcloud.io"
     }
@@ -34,7 +34,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'com.mparticle.kit'
 
 android {
-    namespace 'com.mparticle.kits.appboy42'
+    namespace 'com.mparticle.kits.appboy43'
     buildFeatures {
         buildConfig = true
     }
@@ -68,6 +68,6 @@ repositories {
 
 dependencies {
     compileOnly 'com.google.firebase:firebase-messaging:[10.2.1, )'
-    api 'com.braze:android-sdk-ui:[42.3.0,43.0.0)'
+    api 'com.braze:android-sdk-ui:[43.0.0,44.0.0)'
     testImplementation  files('libs/java-json.jar')
 }

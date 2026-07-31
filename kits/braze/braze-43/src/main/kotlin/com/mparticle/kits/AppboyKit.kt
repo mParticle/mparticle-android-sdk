@@ -995,6 +995,9 @@ open class AppboyKit :
                         currency = currency,
                         source = ECOMMERCE_SOURCE,
                         totalValue = recommendedTotalValue(event),
+                        subtotalValue = recommendedSubtotalValue(event),
+                        tax = recommendedTax(event),
+                        shipping = recommendedShipping(event),
                         products = recommendedLineItems(products),
                         metadata = eventMetadata,
                         action = cartAction,
@@ -1010,6 +1013,9 @@ open class AppboyKit :
                         totalValue = recommendedTotalValue(event),
                         products = recommendedLineItems(products),
                         cartId = recommendedCartId(event),
+                        subtotalValue = recommendedSubtotalValue(event),
+                        tax = recommendedTax(event),
+                        shipping = recommendedShipping(event),
                         metadata = eventMetadata,
                     ),
                 )
@@ -1041,6 +1047,9 @@ open class AppboyKit :
                         products = recommendedLineItems(products),
                         cartId = recommendedCartId(event),
                         totalDiscounts = recommendedTotalDiscounts(event),
+                        subtotalValue = recommendedSubtotalValue(event),
+                        tax = recommendedTax(event),
+                        shipping = recommendedShipping(event),
                         metadata = eventMetadata,
                     ),
                 )
@@ -1056,6 +1065,15 @@ open class AppboyKit :
                 properties.addProperty(PRODUCT_KEY, recommendedProductsJson(products))
                 recommendedTotalDiscounts(event)?.let {
                     properties.addProperty(RECOMMENDED_TOTAL_DISCOUNTS_KEY, it)
+                }
+                recommendedSubtotalValue(event)?.let {
+                    properties.addProperty(RECOMMENDED_SUBTOTAL_VALUE_KEY, it)
+                }
+                recommendedTax(event)?.let {
+                    properties.addProperty(RECOMMENDED_TAX_KEY, it)
+                }
+                recommendedShipping(event)?.let {
+                    properties.addProperty(RECOMMENDED_SHIPPING_KEY, it)
                 }
                 if (eventMetadataMap.isNotEmpty()) {
                     properties.addProperty(METADATA_KEY, JSONObject(eventMetadataMap as Map<*, *>))
@@ -1133,6 +1151,15 @@ open class AppboyKit :
         return value.toDoubleOrNull()
     }
 
+    private fun recommendedSubtotalValue(event: CommerceEvent): Double? {
+        val value = recommendedCustomAttribute(event, SUBTOTAL_VALUE_ATTRIBUTE) ?: return null
+        return value.toDoubleOrNull()
+    }
+
+    private fun recommendedTax(event: CommerceEvent): Double? = event.transactionAttributes?.tax
+
+    private fun recommendedShipping(event: CommerceEvent): Double? = event.transactionAttributes?.shipping
+
     private fun recommendedLineItems(products: List<Product>): List<EcommerceProduct> =
         products.map { product ->
             EcommerceProduct(
@@ -1193,8 +1220,7 @@ open class AppboyKit :
         }
         event.transactionAttributes?.affiliation?.let { if (it.isNotEmpty()) metadata[METADATA_AFFILIATION_KEY] = it }
         event.transactionAttributes?.couponCode?.let { if (it.isNotEmpty()) metadata[METADATA_COUPON_CODE_KEY] = it }
-        event.transactionAttributes?.tax?.let { metadata[METADATA_TAX_KEY] = it }
-        event.transactionAttributes?.shipping?.let { metadata[METADATA_SHIPPING_KEY] = it }
+        // tax/shipping are promoted to typed recommended-event fields (Braze 43+).
         return metadata
     }
 
@@ -1722,10 +1748,16 @@ open class AppboyKit :
         private const val CART_ID_ATTRIBUTE = "cart_id"
         private const val CHECKOUT_ID_ATTRIBUTE = "checkout_id"
         private const val TOTAL_DISCOUNTS_ATTRIBUTE = "total_discounts"
+        private const val SUBTOTAL_VALUE_ATTRIBUTE = "subtotal_value"
 
         // Custom attributes promoted to typed recommended-event fields; excluded from metadata.
         private val PROMOTED_METADATA_ATTRIBUTES =
-            setOf(CART_ID_ATTRIBUTE, CHECKOUT_ID_ATTRIBUTE, TOTAL_DISCOUNTS_ATTRIBUTE)
+            setOf(
+                CART_ID_ATTRIBUTE,
+                CHECKOUT_ID_ATTRIBUTE,
+                TOTAL_DISCOUNTS_ATTRIBUTE,
+                SUBTOTAL_VALUE_ATTRIBUTE,
+            )
         private val IMAGE_URL_ATTRIBUTES = listOf("image_url", "Image URL")
         private val PRODUCT_URL_ATTRIBUTES = listOf("product_url", "Product URL")
         private const val METADATA_KEY = "metadata"
@@ -1735,13 +1767,14 @@ open class AppboyKit :
         private const val METADATA_POSITION_KEY = "position"
         private const val METADATA_SKU_KEY = "sku"
         private const val METADATA_AFFILIATION_KEY = "affiliation"
-        private const val METADATA_TAX_KEY = "tax"
-        private const val METADATA_SHIPPING_KEY = "shipping"
         private const val RECOMMENDED_ORDER_ID_KEY = "order_id"
         private const val RECOMMENDED_TOTAL_VALUE_KEY = "total_value"
         private const val RECOMMENDED_CURRENCY_KEY = "currency"
         private const val RECOMMENDED_SOURCE_KEY = "source"
         private const val RECOMMENDED_TOTAL_DISCOUNTS_KEY = "total_discounts"
+        private const val RECOMMENDED_SUBTOTAL_VALUE_KEY = "subtotal_value"
+        private const val RECOMMENDED_TAX_KEY = "tax"
+        private const val RECOMMENDED_SHIPPING_KEY = "shipping"
         private const val RECOMMENDED_PRODUCT_ID_KEY = "product_id"
         private const val RECOMMENDED_PRODUCT_NAME_KEY = "product_name"
         private const val RECOMMENDED_VARIANT_ID_KEY = "variant_id"

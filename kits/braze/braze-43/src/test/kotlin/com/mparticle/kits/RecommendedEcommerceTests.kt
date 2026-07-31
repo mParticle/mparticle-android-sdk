@@ -60,12 +60,21 @@ class RecommendedEcommerceTests {
 
     @Test
     fun testAddToCartLogsCartUpdatedAddEvent() {
+        val transactionAttributes =
+            TransactionAttributes()
+                .setTax(5.0)
+                .setShipping(7.0)
         kit.logEvent(
             CommerceEvent
                 .Builder(Product.ADD_TO_CART, productWithUrls())
                 .currency("USD")
-                .customAttributes(hashMapOf("cart_id" to "cart-123"))
-                .build(),
+                .transactionAttributes(transactionAttributes)
+                .customAttributes(
+                    hashMapOf(
+                        "cart_id" to "cart-123",
+                        "subtotal_value" to "80.0",
+                    ),
+                ).build(),
         )
         Assert.assertEquals(1, Braze.ecommerceEvents.size)
         val event = Braze.ecommerceEvents[0] as CartUpdatedEvent
@@ -74,6 +83,9 @@ class RecommendedEcommerceTests {
         Assert.assertEquals("cart-123", event.cartId)
         Assert.assertEquals("USD", event.currency)
         Assert.assertEquals("android", event.source)
+        Assert.assertEquals(80.0, event.subtotalValue!!, 0.001)
+        Assert.assertEquals(5.0, event.tax!!, 0.001)
+        Assert.assertEquals(7.0, event.shipping!!, 0.001)
         Assert.assertEquals(1, event.products.size)
         val lineItem = event.products[0]
         Assert.assertEquals("sku1", lineItem.productId)
@@ -85,8 +97,11 @@ class RecommendedEcommerceTests {
         // Product-level custom props are nested in metadata, never at the top level.
         Assert.assertEquals("testBrand", lineItem.metadata?.properties?.get("brand"))
         Assert.assertEquals("customProductValue", lineItem.metadata?.properties?.get("customProductKey"))
-        // cart_id is promoted to the typed cartId field, so it must not be duplicated in metadata.
+        // Promoted typed fields must not be duplicated in metadata.
         Assert.assertNull(event.metadata?.properties?.get("cart_id"))
+        Assert.assertNull(event.metadata?.properties?.get("subtotal_value"))
+        Assert.assertNull(event.metadata?.properties?.get("tax"))
+        Assert.assertNull(event.metadata?.properties?.get("shipping"))
     }
 
     @Test
@@ -105,12 +120,22 @@ class RecommendedEcommerceTests {
 
     @Test
     fun testCheckoutLogsCheckoutStartedEvent() {
+        val transactionAttributes =
+            TransactionAttributes()
+                .setTax(2.5)
+                .setShipping(3.5)
         kit.logEvent(
             CommerceEvent
                 .Builder(Product.CHECKOUT, productWithUrls())
                 .currency("USD")
-                .customAttributes(hashMapOf("checkout_id" to "checkout-9", "cart_id" to "cart-123"))
-                .build(),
+                .transactionAttributes(transactionAttributes)
+                .customAttributes(
+                    hashMapOf(
+                        "checkout_id" to "checkout-9",
+                        "cart_id" to "cart-123",
+                        "subtotal_value" to "9.0",
+                    ),
+                ).build(),
         )
         Assert.assertEquals(1, Braze.ecommerceEvents.size)
         val event = Braze.ecommerceEvents[0] as CheckoutStartedEvent
@@ -118,6 +143,12 @@ class RecommendedEcommerceTests {
         Assert.assertEquals("checkout-9", event.checkoutId)
         Assert.assertEquals("cart-123", event.cartId)
         Assert.assertEquals(9.0, event.totalValue, 0.001)
+        Assert.assertEquals(9.0, event.subtotalValue!!, 0.001)
+        Assert.assertEquals(2.5, event.tax!!, 0.001)
+        Assert.assertEquals(3.5, event.shipping!!, 0.001)
+        Assert.assertNull(event.metadata?.properties?.get("subtotal_value"))
+        Assert.assertNull(event.metadata?.properties?.get("tax"))
+        Assert.assertNull(event.metadata?.properties?.get("shipping"))
     }
 
     @Test
@@ -158,8 +189,12 @@ class RecommendedEcommerceTests {
                 .Builder(Product.PURCHASE, productWithUrls())
                 .currency("USD")
                 .transactionAttributes(transactionAttributes)
-                .customAttributes(hashMapOf("total_discounts" to "3.5"))
-                .build(),
+                .customAttributes(
+                    hashMapOf(
+                        "total_discounts" to "3.5",
+                        "subtotal_value" to "91.0",
+                    ),
+                ).build(),
         )
         Assert.assertEquals(1, Braze.ecommerceEvents.size)
         val event = Braze.ecommerceEvents[0] as OrderPlacedEvent
@@ -167,23 +202,31 @@ class RecommendedEcommerceTests {
         Assert.assertEquals("order-42", event.orderId)
         Assert.assertEquals(99.0, event.totalValue, 0.001)
         Assert.assertEquals(3.5, event.totalDiscounts!!, 0.001)
-        // tax/shipping/affiliation have no typed field; they are preserved in metadata.
-        Assert.assertEquals(5.0, event.metadata?.properties?.get("tax"))
-        Assert.assertEquals(7.0, event.metadata?.properties?.get("shipping"))
+        Assert.assertEquals(91.0, event.subtotalValue!!, 0.001)
+        Assert.assertEquals(5.0, event.tax!!, 0.001)
+        Assert.assertEquals(7.0, event.shipping!!, 0.001)
+        // affiliation has no typed field; it is preserved in metadata.
         Assert.assertEquals("the affiliation", event.metadata?.properties?.get("affiliation"))
-        // total_discounts is promoted to a typed field, so it must not be duplicated in metadata.
+        // Promoted typed fields must not be duplicated in metadata.
         Assert.assertNull(event.metadata?.properties?.get("total_discounts"))
+        Assert.assertNull(event.metadata?.properties?.get("subtotal_value"))
+        Assert.assertNull(event.metadata?.properties?.get("tax"))
+        Assert.assertNull(event.metadata?.properties?.get("shipping"))
     }
 
     @Test
     fun testRefundLogsOrderRefundedCustomEvent() {
         val transactionAttributes =
-            TransactionAttributes("order-42").setRevenue(99.0)
+            TransactionAttributes("order-42")
+                .setRevenue(99.0)
+                .setTax(5.0)
+                .setShipping(7.0)
         kit.logEvent(
             CommerceEvent
                 .Builder(Product.REFUND, productWithUrls())
                 .currency("USD")
                 .transactionAttributes(transactionAttributes)
+                .customAttributes(hashMapOf("subtotal_value" to "87.0"))
                 .build(),
         )
         // Refund has no typed Braze event; it is forwarded as a custom event.
@@ -193,6 +236,9 @@ class RecommendedEcommerceTests {
         Assert.assertEquals("order-42", refund?.properties?.get("order_id"))
         Assert.assertEquals(99.0, refund?.properties?.get("total_value"))
         Assert.assertEquals("android", refund?.properties?.get("source"))
+        Assert.assertEquals(87.0, refund?.properties?.get("subtotal_value"))
+        Assert.assertEquals(5.0, refund?.properties?.get("tax"))
+        Assert.assertEquals(7.0, refund?.properties?.get("shipping"))
         Assert.assertNotNull(refund?.properties?.get("products"))
     }
 

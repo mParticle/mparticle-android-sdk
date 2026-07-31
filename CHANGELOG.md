@@ -6,7 +6,7 @@
 
 - Add Rokt Shoppable Ads payment extension registration and selection APIs.
 - Add the `com.rokt:rokt-sdk-plus` umbrella artifact: a single dependency bundling the mParticle core SDK, the mParticle Rokt kit, and the Rokt Payment Extension (Shoppable Ads), mirroring the iOS `RoktSDKPlus` umbrella.
-- Add a `braze-42` kit track supporting Braze Android SDK 42.x, with an opt-in `useEcommerceRecommendedEvents` setting that forwards mParticle commerce events using Braze's recommended eCommerce event schema (`ecommerce.cart_updated`, `ecommerce.checkout_started`, `ecommerce.product_viewed`, `ecommerce.order_placed`, `ecommerce.order_refunded`). Legacy commerce forwarding remains the default. The `braze-42` track is built standalone (Kotlin 2.2.x).
+- Add a `braze-43` kit track supporting Braze Android SDK 43.x, with an opt-in `useEcommerceRecommendedEvents` setting that forwards mParticle commerce events using Braze's recommended eCommerce event schema (`ecommerce.cart_updated`, `ecommerce.checkout_started`, `ecommerce.product_viewed`, `ecommerce.order_placed`, `ecommerce.order_refunded`). Typed `subtotalValue`, `tax`, and `shipping` fields are populated from commerce custom attribute `subtotal_value` and `TransactionAttributes`. Legacy commerce forwarding remains the default. The `braze-43` track is built standalone (Kotlin 2.2.x).
 
 ### Changed
 

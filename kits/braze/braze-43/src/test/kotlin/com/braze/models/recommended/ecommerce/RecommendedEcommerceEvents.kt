@@ -35,6 +35,9 @@ class CartUpdatedEvent(
     val currency: String,
     val source: String,
     val totalValue: Double? = null,
+    val subtotalValue: Double? = null,
+    val tax: Double? = null,
+    val shipping: Double? = null,
     val products: List<EcommerceProduct>,
     val metadata: BrazeProperties? = null,
     val action: CartUpdatedAction = CartUpdatedAction.REPLACE,
@@ -49,6 +52,9 @@ class CheckoutStartedEvent(
     val totalValue: Double,
     val products: List<EcommerceProduct>,
     val cartId: String? = null,
+    val subtotalValue: Double? = null,
+    val tax: Double? = null,
+    val shipping: Double? = null,
     val metadata: BrazeProperties? = null,
 ) : EcommerceEvent() {
     override val eventName: String = "ecommerce.checkout_started"
@@ -63,6 +69,9 @@ class OrderPlacedEvent(
     val cartId: String? = null,
     val totalDiscounts: Double? = null,
     val discounts: List<Any>? = null,
+    val subtotalValue: Double? = null,
+    val tax: Double? = null,
+    val shipping: Double? = null,
     val metadata: BrazeProperties? = null,
 ) : EcommerceEvent() {
     override val eventName: String = "ecommerce.order_placed"

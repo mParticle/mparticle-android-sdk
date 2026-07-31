@@ -1,4 +1,4 @@
-package com.mparticle.kits.braze.braze42.example.kotlin
+package com.mparticle.kits.braze.braze43.example.kotlin
 
 import android.app.Application
 import com.mparticle.MPEvent

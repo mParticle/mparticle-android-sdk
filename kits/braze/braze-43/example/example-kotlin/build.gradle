@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.mparticle.kits.braze.braze42.example.kotlin'
+    namespace 'com.mparticle.kits.braze.braze43.example.kotlin'
     compileSdk 35
 
     defaultConfig {
-        applicationId 'com.mparticle.kits.braze.braze42.example.kotlin'
+        applicationId 'com.mparticle.kits.braze.braze43.example.kotlin'
         minSdk 21
         targetSdk 35
         versionCode 1
@@ -32,7 +32,7 @@ android {
 }
 
 dependencies {
-    implementation project(':kits:braze:braze-42')
+    implementation project(':kits:braze:braze-43')
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
 }
