@@ -1,6 +1,6 @@
 # Adobe Kit Integration
 
-This repository contains the Adobe integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
+This directory contains the Adobe integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
 
 ## Adding the integration
 
@@ -8,7 +8,7 @@ This repository contains the Adobe integration for the [mParticle Android SDK](h
 
     ```groovy
     dependencies {
-        implementation 'com.mparticle:android-adobe-kit:5+'
+        implementation 'com.mparticle:adobe:6.0.0'
     }
     ```
 

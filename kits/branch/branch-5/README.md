@@ -1,6 +1,6 @@
 # Branch Kit Integration
 
-This repository contains the [Branch](https://www.branch.io/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
+This directory contains the [Branch](https://www.branch.io/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
 
 ## Adding the integration
 
@@ -8,7 +8,7 @@ This repository contains the [Branch](https://www.branch.io/) integration for th
 
     ```groovy
     dependencies {
-        implementation 'com.mparticle:android-branch-kit:5+'
+        implementation 'com.mparticle:branch-5:6.0.0'
     }
     ```
 

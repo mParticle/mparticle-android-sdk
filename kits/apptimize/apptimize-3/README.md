@@ -1,6 +1,6 @@
 # Apptimize Kit Integration
 
-This repository contains the [Apptimize](https://www.apptimize.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
+This directory contains the [Apptimize](https://www.apptimize.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
 
 ## Adding the integration
 
@@ -18,7 +18,7 @@ This repository contains the [Apptimize](https://www.apptimize.com/) integration
 
     ```groovy
     dependencies {
-        implementation 'com.mparticle:android-apptimize-kit:5+'
+        implementation 'com.mparticle:apptimize-3:6.0.0'
     }
     ```
 

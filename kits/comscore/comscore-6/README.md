@@ -1,6 +1,6 @@
 # comScore Kit Integration
 
-This repository contains the [comScore](https://www.comscore.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
+This directory contains the [comScore](https://www.comscore.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
 
 ## Adding the integration
 
@@ -8,7 +8,7 @@ This repository contains the [comScore](https://www.comscore.com/) integration f
 
     ```groovy
     dependencies {
-        implementation 'com.mparticle:android-comscore-kit:5+'
+        implementation 'com.mparticle:comscore-6:6.0.0'
     }
     ```
 
