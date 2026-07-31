@@ -5,6 +5,7 @@ include (
         ':kits:adobe:adobe',
         ':kits:adobemedia:adobemedia-3',
         ':kits:appsflyer:appsflyer-6',
+        ':kits:appsflyer:appsflyer-7',
         ':kits:apptentive:apptentive-6',
         ':kits:apptimize:apptimize-3',
         //blueshift hosts kit

@@ -24,6 +24,12 @@
     "example_kotlin_project": ":kits:android-appsflyer:appsflyer-6:example-kotlin"
   },
   {
+    "name": "appsflyer-7",
+    "local_path": "kits/appsflyer/appsflyer-7",
+    "kit_project": ":kits:android-appsflyer:appsflyer-7",
+    "example_kotlin_project": ":kits:android-appsflyer:appsflyer-7:example-kotlin"
+  },
+  {
     "name": "apptentive-6",
     "local_path": "kits/apptentive/apptentive-6",
     "kit_project": ":kits:android-apptentive:apptentive-6",
