@@ -87,7 +87,7 @@ jobs:
   lint-checks:
     name: "Lint Checks"
     timeout-minutes: 20
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - name: "Checkout Branch"
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -114,7 +114,7 @@ jobs:
   kotlin-lint-checks:
     name: "Kotlin Lint Checks"
     timeout-minutes: 15
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - name: "Checkout Branch"
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
