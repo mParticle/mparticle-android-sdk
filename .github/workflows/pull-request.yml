@@ -1,6 +1,11 @@
 name: "Build and Test"
 
-on: [workflow_dispatch, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -17,6 +22,7 @@ jobs:
   trunk-check:
     name: Trunk code check
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     steps:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -72,6 +78,8 @@ jobs:
         with:
           distribution: "zulu"
           java-version: "17"
+      - name: "Setup Gradle"
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
       - name: "Run Unit Tests"
         run: ./gradlew test
       - name: "Print Android Unit Tests Report"
@@ -98,6 +106,8 @@ jobs:
         with:
           distribution: "zulu"
           java-version: "17"
+      - name: "Setup Gradle"
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
       - name: "Run Android Core SDK Lint"
         run: ./gradlew lint
       - name: "Setup Android Kit Lint"
@@ -125,6 +135,8 @@ jobs:
         with:
           distribution: "zulu"
           java-version: "17"
+      - name: "Setup Gradle"
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
       - name: "Run Android Core SDK Kotlin Lint"
         run: ./gradlew ktlintCheck
       - name: "Setup Android Kit Kotlin Lint"
@@ -140,6 +152,7 @@ jobs:
 
   security-checks:
     name: "Security Lint Checks"
+    if: github.event_name == 'pull_request'
     uses: mparticle/mparticle-workflows/.github/workflows/security-checks.yml@main
     with:
       base_branch: main
@@ -161,6 +174,8 @@ jobs:
         with:
           distribution: "zulu"
           java-version: "17"
+      - name: "Setup Gradle"
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
       - name: "Generate Core Release Build"
         run: ./gradlew publishMavenPublicationToMavenLocal
       - name: "Run Kit-Base Release Tests and Build"
@@ -176,6 +191,7 @@ jobs:
 
   automerge-dependabot:
     name: "Save PR Number for Dependabot Automerge"
+    if: github.event_name == 'pull_request'
     needs:
       [
         instrumented-core,
