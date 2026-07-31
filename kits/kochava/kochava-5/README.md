@@ -1,6 +1,6 @@
 # Kochava Kit Integration
 
-This repository contains the [Kochava](https://www.kochava.com) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
+This directory contains the [Kochava](https://www.kochava.com) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
 
 ## Adding the integration
 
@@ -8,7 +8,7 @@ This repository contains the [Kochava](https://www.kochava.com) integration for 
 
     ```groovy
     dependencies {
-        implementation 'com.mparticle:android-kochava-kit:5+'
+        implementation 'com.mparticle:kochava-5:6.0.0'
     }
     ```
 

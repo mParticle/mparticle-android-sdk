@@ -1,6 +1,6 @@
 # Leanplum Kit Integration
 
-This repository contains the [Leanplum](https://www.leanplum.com/) integration for the [mParticle Android SDK](https://github.com/mParticle.mparticle-android-sdk).
+This directory contains the [Leanplum](https://www.leanplum.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
 
 ## Adding the integration
 
@@ -17,7 +17,7 @@ This repository contains the [Leanplum](https://www.leanplum.com/) integration f
 
     ```groovy
     dependencies {
-        implementation 'com.mparticle:android-leanplum-kit:5+'
+        implementation 'com.mparticle:leanplum-7:6.0.0'
     }
     ```
 
@@ -32,7 +32,7 @@ Leanplum is deprecating GCM support, but it is still available. While we recomme
 
     ```groovy
     dependencies {
-        implementation ('com.mparticle:android-leanplum-kit:REPLACE-ME') {
+        implementation ('com.mparticle:leanplum-7:6.0.0') {
                 exclude module: 'leanplum-fcm'
         }
         implementation 'com.leanplum:leanplum-gcm:4.1.1'

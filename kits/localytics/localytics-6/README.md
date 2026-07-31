@@ -1,6 +1,6 @@
 # Localytics Kit Integration
 
-This repository contains the [Localytics](https://www.localytics.com) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
+This directory contains the [Localytics](https://www.localytics.com) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
 
 ## Adding the integration
 
@@ -17,7 +17,7 @@ This repository contains the [Localytics](https://www.localytics.com) integratio
 
     ```groovy
     dependencies {
-        implementation 'com.mparticle:android-localytics-kit:5+'
+        implementation 'com.mparticle:localytics-6:6.0.0'
     }
     ```
 

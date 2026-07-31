@@ -1,17 +1,17 @@
 # Braze (formerly Appboy) Kit Integration
 
-This repository contains the [Braze](https://www.braze.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
+This directory contains the [Braze](https://www.braze.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
 
 ## Example App
 
-This repository contains an [example app](https://github.com/mparticle-integrations/mparticle-android-integration-appboy/tree/master/example) showing how to implement mParticle, Braze, and Firebase Cloud Messaging. The key changes you need to make to your app are below, and please also reference mParticle and Braze's documentation:
+This directory includes an [example app](example) showing how to implement mParticle, Braze, and Firebase Cloud Messaging. The key changes you need to make to your app are below, and please also reference mParticle and Braze's documentation:
 
 - [Instrumenting Push](https://docs.mparticle.com/developers/sdk/android/push-notifications)
 - [Braze Documentation](https://docs.mparticle.com/integrations/braze/event)
 
 ## 1. Adding the integration
 
-[See a full build.gradle example here](https://github.com/mparticle-integrations/mparticle-android-integration-appboy/blob/master/example/build.gradle)
+[See a full build.gradle example here](example/build.gradle)
 
 1. The Braze Kit requires that you add Braze's Maven server to your buildscript:
 
@@ -28,7 +28,7 @@ This repository contains an [example app](https://github.com/mparticle-integrati
 
     ```groovy
     dependencies {
-        implementation 'com.mparticle:android-appboy-kit:5+'
+        implementation 'com.mparticle:braze-39:6.0.0'
     }
     ```
 
@@ -38,7 +38,7 @@ mParticle's SDK takes care of registering for push notifications and passing tok
 
 ## 3. Displaying Push
 
-[See a full example of an AndroidManifest.xml here](https://github.com/mparticle-integrations/mparticle-android-integration-appboy/blob/master/example/src/main/AndroidManifest.xml).
+[See a full example of an AndroidManifest.xml here](example/src/main/AndroidManifest.xml).
 
 mParticle's SDK also takes care of capturing incoming push notifications and passing the resulting `Intent` to Braze's `BrazePushReceiver`. Follow the [mParticle push notification documentation](https://docs.mparticle.com/developers/sdk/android/push-notifications#display-push-notifications) to ensure you add the correct services and receivers to your app's AndroidManifest.xml.
 

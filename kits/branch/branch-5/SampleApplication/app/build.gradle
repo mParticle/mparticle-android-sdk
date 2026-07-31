@@ -33,7 +33,7 @@ dependencies {
     api project(':local-mParticle-Branch-kit')
 
     // Uncomment below to use published version instead
-    // implementation 'com.mparticle:android-branch-kit:5+'
+    // implementation 'com.mparticle:branch-5:6.0.0'
 
     testImplementation 'junit:junit:4.13.2'
 
