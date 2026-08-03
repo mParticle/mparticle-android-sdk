@@ -142,7 +142,8 @@ class RecommendedEcommerceTests {
         Assert.assertEquals("ecommerce.checkout_started", event.eventName)
         Assert.assertEquals("checkout-9", event.checkoutId)
         Assert.assertEquals("cart-123", event.cartId)
-        Assert.assertEquals(9.0, event.totalValue, 0.001)
+        // CommerceEvent derives revenue as products (4.5 x 2) + tax + shipping when revenue is unset.
+        Assert.assertEquals(15.0, event.totalValue, 0.001)
         Assert.assertEquals(9.0, event.subtotalValue!!, 0.001)
         Assert.assertEquals(2.5, event.tax!!, 0.001)
         Assert.assertEquals(3.5, event.shipping!!, 0.001)

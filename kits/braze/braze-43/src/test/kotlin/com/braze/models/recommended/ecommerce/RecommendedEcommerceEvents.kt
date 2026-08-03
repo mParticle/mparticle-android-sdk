@@ -4,8 +4,11 @@ import com.braze.models.outgoing.BrazeProperties
 
 /**
  * Test doubles for Braze's recommended eCommerce event API (com.braze.models.recommended.ecommerce).
- * These mirror the real SDK's public constructors so the kit compiles and its forwarding behavior
- * can be asserted in unit tests without the Braze AAR on the classpath.
+ *
+ * The kit's production code is compiled against the real Braze AAR, so these doubles must declare
+ * constructor parameters in the same order, with the same types and the same defaults as Braze 43.
+ * Any divergence changes the generated constructor descriptor and fails at runtime with
+ * NoSuchMethodError rather than at compile time.
  */
 enum class CartUpdatedAction(
     val wireValue: String,
@@ -35,12 +38,12 @@ class CartUpdatedEvent(
     val currency: String,
     val source: String,
     val totalValue: Double? = null,
-    val subtotalValue: Double? = null,
-    val tax: Double? = null,
-    val shipping: Double? = null,
     val products: List<EcommerceProduct>,
     val metadata: BrazeProperties? = null,
     val action: CartUpdatedAction = CartUpdatedAction.REPLACE,
+    val subtotalValue: Double? = null,
+    val tax: Double? = null,
+    val shipping: Double? = null,
 ) : EcommerceEvent() {
     override val eventName: String = "ecommerce.cart_updated"
 }
@@ -52,10 +55,10 @@ class CheckoutStartedEvent(
     val totalValue: Double,
     val products: List<EcommerceProduct>,
     val cartId: String? = null,
+    val metadata: BrazeProperties? = null,
     val subtotalValue: Double? = null,
     val tax: Double? = null,
     val shipping: Double? = null,
-    val metadata: BrazeProperties? = null,
 ) : EcommerceEvent() {
     override val eventName: String = "ecommerce.checkout_started"
 }
@@ -69,10 +72,10 @@ class OrderPlacedEvent(
     val cartId: String? = null,
     val totalDiscounts: Double? = null,
     val discounts: List<Any>? = null,
+    val metadata: BrazeProperties? = null,
     val subtotalValue: Double? = null,
     val tax: Double? = null,
     val shipping: Double? = null,
-    val metadata: BrazeProperties? = null,
 ) : EcommerceEvent() {
     override val eventName: String = "ecommerce.order_placed"
 }
@@ -87,6 +90,7 @@ class ProductViewedEvent(
     val imageUrl: String? = null,
     val productUrl: String? = null,
     val metadata: BrazeProperties? = null,
+    val type: List<String>? = null,
 ) : EcommerceEvent() {
     override val eventName: String = "ecommerce.product_viewed"
 }
