@@ -1,6 +1,6 @@
 # Iterable Kit Integration
 
-This repository contains the [Iterable](https://www.iterable.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
+This directory contains the [Iterable](https://www.iterable.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
 
 mParticle's Iterable integration is predominantly server-side. This kit is an optional add-on to handle Iterable deep links.
 
@@ -10,7 +10,7 @@ mParticle's Iterable integration is predominantly server-side. This kit is an op
 
     ```groovy
     dependencies {
-        implementation 'com.mparticle:android-iterable-kit:5+'
+        implementation 'com.mparticle:iterable-3:6.0.0'
     }
     ```
 

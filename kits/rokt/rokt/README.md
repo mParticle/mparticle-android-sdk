@@ -1,6 +1,6 @@
 # Rokt Kit Integration
 
-This repository contains the [Rokt](https://docs.rokt.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
+This directory contains the [Rokt](https://docs.rokt.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
 
 ## Adding the integration
 
@@ -8,7 +8,7 @@ This repository contains the [Rokt](https://docs.rokt.com/) integration for the 
 
     ```groovy
     dependencies {
-        implementation 'com.mparticle:android-rokt-kit:6+'
+        implementation 'com.mparticle:android-rokt-kit:6.0.0'
     }
     ```
 

@@ -41,7 +41,7 @@ jobs:
       ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.ref_name }}
           fetch-depth: 0
@@ -113,7 +113,7 @@ jobs:
           echo "${{ steps.compose-version.outputs.new-version }}" > VERSION
 
       - name: Publish to Maven local (smoke test)
-        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=${{ steps.compose-version.outputs.new-version }}
+        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=${{ steps.compose-version.outputs.new-version }} --no-build-cache
 
       - name: Generate changelog entry
         id: changelog

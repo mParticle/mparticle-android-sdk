@@ -1,6 +1,6 @@
 # Optimizely Kit Integration
 
-This repository contains the [Optimizely](https://developers.optimizely.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
+This directory contains the [Optimizely](https://developers.optimizely.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
 
 ## Adding the integration
 
@@ -8,7 +8,7 @@ This repository contains the [Optimizely](https://developers.optimizely.com/) in
 
     ```groovy
     dependencies {
-        implementation 'com.mparticle:android-optimizely-kit:5+'
+        implementation 'com.mparticle:optimizely-3:6.0.0'
     }
     ```
 
