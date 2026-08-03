@@ -1,6 +1,6 @@
 # Braze (formerly Appboy) Kit Integration
 
-This repository contains the [Braze](https://www.braze.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
+This directory contains the [Braze](https://www.braze.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
 
 This `braze-43` kit track targets **Braze Android SDK 43.x** (`com.braze:android-sdk-ui:[43.0.0,44.0.0)`). Because Braze 43 requires Kotlin 2.2.x, this track is built standalone from the rest of the mParticle SDK (see the repository `ONBOARDING.md`).
 
@@ -28,7 +28,7 @@ Requirements and behavior:
 
 ## Example App
 
-This repository contains an [example app](https://github.com/mparticle-integrations/mparticle-android-integration-appboy/tree/master/example) showing how to implement mParticle, Braze, and Firebase Cloud Messaging. The key changes you need to make to your app are below, and please also reference mParticle and Braze's documentation:
+This repository contains an [example app](example) showing how to implement mParticle, Braze, and Firebase Cloud Messaging. The key changes you need to make to your app are below, and please also reference mParticle and Braze's documentation:
 
 - [Instrumenting Push](https://docs.mparticle.com/developers/sdk/android/push-notifications)
 - [Braze Documentation](https://docs.mparticle.com/integrations/braze/event)
@@ -37,12 +37,11 @@ This repository contains an [example app](https://github.com/mparticle-integrati
 
 [See a full build.gradle example here](https://github.com/mparticle-integrations/mparticle-android-integration-appboy/blob/master/example/build.gradle)
 
-1. The Braze Kit requires that you add Braze's Maven server to your buildscript:
+1. Ensure `mavenCentral()` is included in your repositories (Braze is hosted on Maven Central; the legacy Appboy GitHub Pages Maven repo is not required):
 
     ```groovy
     repositories {
-        maven { url "https://appboy.github.io/appboy-android-sdk/sdk" }
-        //Braze's library depends on the Google Support Library
+        mavenCentral()
         google()
         ...
     }
@@ -52,7 +51,7 @@ This repository contains an [example app](https://github.com/mparticle-integrati
 
     ```groovy
     dependencies {
-        implementation 'com.mparticle:braze-43:5+'
+        implementation 'com.mparticle:braze-43:6+'
     }
     ```
 

@@ -31,7 +31,6 @@ android {
 
 repositories {
     mavenCentral()
-    maven { url "https://appboy.github.io/appboy-android-sdk/sdk" } //REQUIRED: Braze isn't available in jCenter or Maven Central - so you need to add their Maven Server
     google()
 }
 
@@ -53,7 +52,7 @@ dependencies {
 
     // REQUIRED: Add the Braze (formerly Appboy) kit here
     // this will also pull in mParticle's Core SDK (com.mparticle:android-core) as a transitive dependency
-    implementation 'com.mparticle:braze-43:5+'
+    implementation 'com.mparticle:braze-43:6+'
 
     // REQUIRED for Firebase
     implementation 'com.google.firebase:firebase-messaging:17.3.4'

@@ -1,8 +1,3 @@
-# These are the proguard rules specified by the Appboy SDK's documentation
-
--dontwarn com.amazon.device.messaging.**
--dontwarn bo.app.**
--dontwarn com.braze.ui.**
--dontwarn com.google.android.gms.**
--keep class bo.app.** { *; }
--keep class com.braze.** { *; }
+# Braze ships its own consumer ProGuard/R8 rules via android-sdk-ui.
+# Because this kit declares Braze as an `api` dependency, those rules are
+# applied transitively to consuming apps — no kit-level Braze keeps needed.
