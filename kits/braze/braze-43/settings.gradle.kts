@@ -1,2 +1,2 @@
-rootProject.name = "android-appboy-kit"
+rootProject.name = "android-braze-kit"
 include(":")

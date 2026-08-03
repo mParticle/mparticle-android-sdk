@@ -23,7 +23,7 @@ plugins {
 
 sonarqube {
     properties {
-        property "sonar.projectKey", "mparticle-android-integration-appboy-43"
+        property "sonar.projectKey", "mparticle-android-integration-braze-43"
         property "sonar.organization", "mparticle"
         property "sonar.host.url", "https://sonarcloud.io"
     }
@@ -34,7 +34,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'com.mparticle.kit'
 
 android {
-    namespace 'com.mparticle.kits.appboy43'
+    namespace 'com.mparticle.kits.braze43'
     buildFeatures {
         buildConfig = true
     }
