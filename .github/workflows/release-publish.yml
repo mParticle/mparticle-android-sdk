@@ -19,7 +19,7 @@ jobs:
       is_prerelease: ${{ steps.version-file.outputs.is-prerelease }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Get current version
         id: version-file
@@ -42,7 +42,7 @@ jobs:
       ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install JDK 17
         uses: actions/setup-java@v5
