@@ -1,6 +1,11 @@
 name: "Build and Test"
 
-on: [workflow_dispatch, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -17,6 +22,7 @@ jobs:
   trunk-check:
     name: Trunk code check
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -24,9 +30,6 @@ jobs:
         uses: trunk-io/trunk-action@04ba50e7658c81db7356da96657e6e77f220bfa3 # v1.3.1
         with:
           check-mode: pull_request
-  pr-check-hadcoded-secrets:
-    name: "Check PR for hardcoded secrets"
-    uses: mParticle/mparticle-workflows/.github/workflows/security-hardcoded-secrets.yml@main
 
   instrumented-core:
     uses: ./.github/workflows/instrumented-tests.yml
@@ -75,6 +78,8 @@ jobs:
         with:
           distribution: "zulu"
           java-version: "17"
+      - name: "Setup Gradle"
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
       - name: "Run Unit Tests"
         run: ./gradlew test
       - name: "Print Android Unit Tests Report"
@@ -90,7 +95,7 @@ jobs:
   lint-checks:
     name: "Lint Checks"
     timeout-minutes: 20
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - name: "Checkout Branch"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -101,6 +106,8 @@ jobs:
         with:
           distribution: "zulu"
           java-version: "17"
+      - name: "Setup Gradle"
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
       - name: "Run Android Core SDK Lint"
         run: ./gradlew lint
       - name: "Setup Android Kit Lint"
@@ -117,7 +124,7 @@ jobs:
   kotlin-lint-checks:
     name: "Kotlin Lint Checks"
     timeout-minutes: 15
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - name: "Checkout Branch"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -128,6 +135,8 @@ jobs:
         with:
           distribution: "zulu"
           java-version: "17"
+      - name: "Setup Gradle"
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
       - name: "Run Android Core SDK Kotlin Lint"
         run: ./gradlew ktlintCheck
       - name: "Setup Android Kit Kotlin Lint"
@@ -143,6 +152,7 @@ jobs:
 
   security-checks:
     name: "Security Lint Checks"
+    if: github.event_name == 'pull_request'
     uses: mparticle/mparticle-workflows/.github/workflows/security-checks.yml@main
     with:
       base_branch: main
@@ -164,6 +174,8 @@ jobs:
         with:
           distribution: "zulu"
           java-version: "17"
+      - name: "Setup Gradle"
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
       - name: "Generate Core Release Build"
         run: ./gradlew publishMavenPublicationToMavenLocal
       - name: "Run Kit-Base Release Tests and Build"
@@ -179,6 +191,7 @@ jobs:
 
   automerge-dependabot:
     name: "Save PR Number for Dependabot Automerge"
+    if: github.event_name == 'pull_request'
     needs:
       [
         instrumented-core,
@@ -196,7 +209,8 @@ jobs:
   pr-notify:
     if: >
       github.event_name == 'pull_request' &&
-      github.event.pull_request.draft == false
+      github.event.pull_request.draft == false &&
+      github.actor != 'dependabot[bot]'
     needs:
       - instrumented-core
       - instrumented-kit-base

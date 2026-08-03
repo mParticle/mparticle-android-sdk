@@ -53,7 +53,7 @@ dependencies {
 
     // REQUIRED: Add the Braze (formerly Appboy) kit here
     // this will also pull in mParticle's Core SDK (com.mparticle:android-core) as a transitive dependency
-    implementation 'com.mparticle:android-appboy-kit:5.6.5'
+    implementation 'com.mparticle:braze-38:6.0.0'
 
     // REQUIRED for Firebase
     implementation 'com.google.firebase:firebase-messaging:17.3.4'

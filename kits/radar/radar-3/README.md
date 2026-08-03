@@ -1,6 +1,6 @@
 # Radar Kit Integration
 
-This repository contains the [Radar](https://www.onradar.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
+This directory contains the [Radar](https://www.onradar.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
 
 ## Adding the integration
 
@@ -8,7 +8,7 @@ This repository contains the [Radar](https://www.onradar.com/) integration for t
 
     ```groovy
     dependencies {
-        implementation 'com.mparticle:android-radar-kit:5+'
+        implementation 'com.mparticle:radar-3:6.0.0'
     }
     ```
 

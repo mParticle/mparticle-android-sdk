@@ -116,10 +116,10 @@ needed:
 
 ```groovy
 include(
-        ':kits:adjust-kit',
-        ':kits:adobe-kit'
-        /* ':kits:adobemedia-kit',
-            ':kits:appboy-kit',
+        ':kits:adjust:adjust-5',
+        ':kits:adobe:adobe',
+        /* ':kits:appsflyer:appsflyer-6',
+            ':kits:braze:braze-41',
             ...                     */
 )
 ```

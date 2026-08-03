@@ -35,6 +35,10 @@ lint:
     - shellcheck@0.11.0
     - shfmt@3.6.0
     - trufflehog@3.90.6
+    # Scans the commits a PR adds (--since-commit ${upstream-ref}), which catches
+    # secrets that were committed and then removed later on the same branch --
+    # the working-tree scan above cannot see those.
+    - trufflehog-git@3.90.6
     - mparticle-api-key-check # Custom rule to prevent mParticle API keys from being committed
   definitions:
     - name: mparticle-api-key-check

@@ -54,13 +54,13 @@ jobs:
         uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
 
       - name: Publish core to Maven local (required before kits can compile)
-        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=${{ needs.setup-and-version.outputs.final_version }}
+        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=${{ needs.setup-and-version.outputs.final_version }} --no-build-cache
 
       - name: Publish core to Maven Central
-        run: ./gradlew publishMavenPublicationToMavenCentralRepository -PVERSION=${{ needs.setup-and-version.outputs.final_version }}
+        run: ./gradlew publishMavenPublicationToMavenCentralRepository -PVERSION=${{ needs.setup-and-version.outputs.final_version }} --no-build-cache
 
       - name: Publish kits to Maven Central
-        run: ./gradlew publishMavenPublicationToMavenCentralRepository -PVERSION=${{ needs.setup-and-version.outputs.final_version }} -c settings-kits.gradle
+        run: ./gradlew publishMavenPublicationToMavenCentralRepository -PVERSION=${{ needs.setup-and-version.outputs.final_version }} -c settings-kits.gradle --no-build-cache
 
       # rokt-sdk-plus (com.rokt:rokt-sdk-plus) is an umbrella over the mParticle Rokt kit + the
       # Rokt Payment Extension. The "Publish core to Maven local" step above already placed
@@ -69,7 +69,7 @@ jobs:
       # Maven Central propagation. com.rokt:payment-extension (+ roktsdk) come from Central,
       # released independently from the ROKT sdk-android-source repo.
       - name: Publish Rokt kit to Maven local (so rokt-sdk-plus resolves it locally)
-        run: ./gradlew :kits:android-rokt:rokt:publishMavenPublicationToMavenLocal -PVERSION=${{ needs.setup-and-version.outputs.final_version }} -c settings-kits.gradle
+        run: ./gradlew :kits:android-rokt:rokt:publishMavenPublicationToMavenLocal -PVERSION=${{ needs.setup-and-version.outputs.final_version }} -c settings-kits.gradle --no-build-cache
 
       # Published under the com.rokt namespace, so this step signs with the Rokt signing key.
       # The Sonatype account is shared with the com.mparticle publish (that account owns both
@@ -80,7 +80,7 @@ jobs:
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.ROKT_MAVEN_CENTRAL_SIGNING_KEY_PASSWORD }}
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
-        run: ./gradlew publishMavenPublicationToMavenCentralRepository -PVERSION=${{ needs.setup-and-version.outputs.final_version }} -c settings-rokt-sdk-plus.gradle
+        run: ./gradlew publishMavenPublicationToMavenCentralRepository -PVERSION=${{ needs.setup-and-version.outputs.final_version }} -c settings-rokt-sdk-plus.gradle --no-build-cache
 
       - name: Create GitHub release
         uses: ncipollo/release-action@b7eabc95ff50cbeeedec83973935c8f306dfcd0b # v1.20.0

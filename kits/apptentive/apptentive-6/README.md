@@ -1,6 +1,6 @@
 # Apptentive Kit Integration
 
-This repository contains the [Apptentive](https://www.apptentive.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
+This directory contains the [Apptentive](https://www.apptentive.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
 
 ## Adding the integration
 
@@ -8,7 +8,7 @@ This repository contains the [Apptentive](https://www.apptentive.com/) integrati
 
     ```groovy
     dependencies {
-        implementation 'com.mparticle:android-apptentive-kit:5+'
+        implementation 'com.mparticle:apptentive-6:6.0.0'
     }
     ```
 
