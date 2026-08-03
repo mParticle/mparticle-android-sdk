@@ -53,7 +53,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-location:11.6.2'
 
     //In a typical app:
-    //implementation 'com.mparticle:android-leanplum-kit:+'
+    //implementation 'com.mparticle:leanplum-7:6.0.0'
 
     //if you're building the entire mParticle SDK
     implementation project(':kits:android-leanplum-kit')

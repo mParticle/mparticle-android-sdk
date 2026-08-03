@@ -1,6 +1,6 @@
 # AppsFlyer Kit Integration
 
-This repository contains the [AppsFlyer](https://www.appsflyer.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
+This directory contains the [AppsFlyer](https://www.appsflyer.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
 
 ## Adding the integration
 
@@ -8,7 +8,7 @@ This repository contains the [AppsFlyer](https://www.appsflyer.com/) integration
 
     ```groovy
     dependencies {
-        implementation 'com.mparticle:android-appsflyer-kit:5+'
+        implementation 'com.mparticle:appsflyer-6:6.0.0'
     }
     ```
 

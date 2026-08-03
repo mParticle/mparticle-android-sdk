@@ -1,6 +1,6 @@
 # Adjust Kit Integration
 
-This repository contains the [Adjust](https://www.adjust.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
+This directory contains the [Adjust](https://www.adjust.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
 
 ## Adding the integration
 
@@ -8,7 +8,7 @@ This repository contains the [Adjust](https://www.adjust.com/) integration for t
 
     ```groovy
     dependencies {
-        implementation 'com.mparticle:android-adjust-kit:5+'
+        implementation 'com.mparticle:adjust-5:6.0.0'
     }
     ```
 
