@@ -2,7 +2,11 @@ package com.mparticle.testutils;
 
 import com.mparticle.MParticle;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -16,20 +20,39 @@ public class RandomUtils {
     private static final String sNumbers = "0123456789";
     private static final String sCharacters = " ,.";
 
+    /**
+     * Every IdentityType that can legitimately appear in a user identity map. Alias is excluded
+     * from the pool rather than removed after the draw -- removing it afterwards can leave the
+     * map empty, which silently changes the meaning of any request built from it.
+     */
+    private static final List<MParticle.IdentityType> ASSIGNABLE_IDENTITY_TYPES =
+            assignableIdentityTypes();
+
+    private static List<MParticle.IdentityType> assignableIdentityTypes() {
+        List<MParticle.IdentityType> types =
+                new ArrayList<MParticle.IdentityType>(Arrays.asList(MParticle.IdentityType.values()));
+        types.remove(MParticle.IdentityType.Alias);
+        return Collections.unmodifiableList(types);
+    }
+
     public Map<MParticle.IdentityType, String> getRandomUserIdentities() {
         return getRandomUserIdentities(null);
     }
 
+    /**
+     * @param max the most identities to return, or null for no limit
+     * @return between 1 and {@code max} distinct random user identities. Never empty.
+     */
     public Map<MParticle.IdentityType, String> getRandomUserIdentities(Integer max) {
-        Map<MParticle.IdentityType, String> randomIdentities = new HashMap<MParticle.IdentityType, String>();
+        int poolSize = ASSIGNABLE_IDENTITY_TYPES.size();
+        int upperBound = (max != null && max < poolSize) ? Math.max(1, max) : poolSize;
+        int numIdentities = randomInt(1, upperBound + 1);
 
-        int identityTypeLength = MParticle.IdentityType.values().length;
-        int numIdentities = randomInt(1, (max != null && max < identityTypeLength) ? max : identityTypeLength);
-        Set<Integer> identityIndices = randomIntSet(0, identityTypeLength, numIdentities);
+        Map<MParticle.IdentityType, String> randomIdentities = new HashMap<MParticle.IdentityType, String>();
+        Set<Integer> identityIndices = randomIntSet(0, poolSize, numIdentities);
         for (Integer identityIndex : identityIndices) {
-            randomIdentities.put(MParticle.IdentityType.values()[identityIndex], getAlphaNumericString(randomInt(1, 55)));
+            randomIdentities.put(ASSIGNABLE_IDENTITY_TYPES.get(identityIndex), getAlphaNumericString(randomInt(1, 55)));
         }
-        randomIdentities.remove(MParticle.IdentityType.Alias);
         return randomIdentities;
     }
 
