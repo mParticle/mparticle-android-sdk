@@ -3,6 +3,7 @@ package com.mparticle.internal;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemClock;
 
 import com.mparticle.internal.listeners.InternalListenerManager;
 
@@ -11,6 +12,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
 public class BaseHandler extends Handler {
+    /**
+     * Longest that {@link #disable(boolean)} will wait for an in-flight message to finish before
+     * giving up and returning. The handler is already flagged disabled and its queue already
+     * cleared by that point, so returning early only means one in-flight message may still be
+     * completing on the handler thread.
+     */
+    private static final long DISABLE_DRAIN_TIMEOUT_MS = 5000;
+
     private volatile boolean disabled;
     private volatile boolean handling;
 
@@ -24,7 +33,18 @@ public class BaseHandler extends Handler {
     public void disable(boolean disable) {
         this.disabled = disable;
         removeCallbacksAndMessages(null);
-        while (handling) {
+        // Wait for any in-flight handleMessage() to finish, but never spin without yielding: a
+        // tight `while (handling) {}` loop contains no suspend point, so it can starve the
+        // garbage collector indefinitely. If the handler thread is itself blocked waiting on a
+        // GC that this thread is preventing, neither side can progress. Thread.yield() gives the
+        // runtime a suspend point, and the deadline bounds the wait either way.
+        long deadline = SystemClock.uptimeMillis() + DISABLE_DRAIN_TIMEOUT_MS;
+        while (handling && SystemClock.uptimeMillis() < deadline) {
+            Thread.yield();
+        }
+        if (handling) {
+            Logger.error("Handler: " + getClass().getName() + " still had a message in flight after "
+                    + DISABLE_DRAIN_TIMEOUT_MS + "ms; giving up waiting for it to drain.");
         }
     }
 
