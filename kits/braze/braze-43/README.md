@@ -22,9 +22,12 @@ When enabled, supported mParticle commerce actions map to Braze recommended even
 Requirements and behavior:
 
 - **Minimum Braze Android SDK version: 43.0.0** (recommended eCommerce APIs plus typed `subtotalValue`/`tax`/`shipping`). Any commerce action not in the table above continues to use legacy forwarding.
-- `TransactionAttributes.tax` / `shipping` map to Braze's typed `tax` / `shipping` fields. Optional commerce custom attribute `subtotal_value` maps to typed `subtotalValue`.
-- Attributes without a direct Braze equivalent (`affiliation`, product `brand`/`category`/`coupon_code`/`position`, etc.) are placed inside the event- or product-level `metadata` object, per Braze's strict recommended-event schema. `source` is reported as `"android"`.
-- `cart_id`/`checkout_id` fall back to the current mParticle session id and then a generated UUID when not supplied as commerce custom attributes.
+- `TransactionAttributes.tax` / `shipping` map to Braze's typed `tax` / `shipping` fields.
+- Cart/checkout IDs, subtotal, and product image/product URLs are resolved from kit attribute mappings (`cartIdAttribute`, `checkoutIdAttribute`, `subtotalValueAttribute`, `imageUrlAttribute`, `productUrlAttribute`). Each mapping's JSON `value` field is the mParticle attribute name to look up on the commerce event or product. Plain attribute-name strings are also accepted for local/test configs.
+- Kit setting `source` is used as a direct Braze `source` value when set; otherwise `"android"`.
+- `total_discounts` continues to be read from a commerce custom attribute named `total_discounts` (not kit-mapped).
+- Attributes without a direct Braze equivalent (`affiliation`, product `brand`/`category`/`coupon_code`/`position`, etc.) are placed inside the event- or product-level `metadata` object, per Braze's strict recommended-event schema. Mapped attribute names that were promoted to typed fields are excluded from metadata.
+- `cartId`/`checkoutId` fall back to the current mParticle session id and then a generated UUID when unmapped or missing. Image/product URLs are `null` when their mappings are unset or the mapped attribute is absent.
 
 ## Example App
 

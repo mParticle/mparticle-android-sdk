@@ -980,6 +980,7 @@ open class AppboyKit :
                 ?: CommerceEventUtils.Constants.DEFAULT_CURRENCY_CODE
         val eventMetadataMap = buildEventMetadataMap(event)
         val eventMetadata = mapToBrazeProperties(eventMetadataMap)
+        val source = recommendedEcommerceSource()
         val braze = Braze.getInstance(context)
         when {
             action.equals(Product.ADD_TO_CART, true) || action.equals(Product.REMOVE_FROM_CART, true) -> {
@@ -993,7 +994,7 @@ open class AppboyKit :
                     CartUpdatedEvent(
                         cartId = recommendedCartId(event),
                         currency = currency,
-                        source = ECOMMERCE_SOURCE,
+                        source = source,
                         totalValue = recommendedTotalValue(event),
                         subtotalValue = recommendedSubtotalValue(event),
                         tax = recommendedTax(event),
@@ -1009,7 +1010,7 @@ open class AppboyKit :
                     CheckoutStartedEvent(
                         checkoutId = recommendedCheckoutId(event),
                         currency = currency,
-                        source = ECOMMERCE_SOURCE,
+                        source = source,
                         totalValue = recommendedTotalValue(event),
                         products = recommendedLineItems(products),
                         cartId = recommendedCartId(event),
@@ -1029,7 +1030,7 @@ open class AppboyKit :
                             variantId = recommendedVariantId(product),
                             price = product.unitPrice,
                             currency = currency,
-                            source = ECOMMERCE_SOURCE,
+                            source = source,
                             imageUrl = recommendedImageUrl(product),
                             productUrl = recommendedProductUrl(product),
                             metadata = combinedProductMetadata(product, eventMetadataMap),
@@ -1042,7 +1043,7 @@ open class AppboyKit :
                     OrderPlacedEvent(
                         orderId = recommendedOrderId(event),
                         currency = currency,
-                        source = ECOMMERCE_SOURCE,
+                        source = source,
                         totalValue = recommendedTotalValue(event),
                         products = recommendedLineItems(products),
                         cartId = recommendedCartId(event),
@@ -1061,7 +1062,7 @@ open class AppboyKit :
                 properties.addProperty(RECOMMENDED_ORDER_ID_KEY, recommendedOrderId(event))
                 properties.addProperty(RECOMMENDED_TOTAL_VALUE_KEY, recommendedTotalValue(event))
                 properties.addProperty(RECOMMENDED_CURRENCY_KEY, currency)
-                properties.addProperty(RECOMMENDED_SOURCE_KEY, ECOMMERCE_SOURCE)
+                properties.addProperty(RECOMMENDED_SOURCE_KEY, source)
                 properties.addProperty(PRODUCT_KEY, recommendedProductsJson(products))
                 recommendedTotalDiscounts(event)?.let {
                     properties.addProperty(RECOMMENDED_TOTAL_DISCOUNTS_KEY, it)
@@ -1087,6 +1088,41 @@ open class AppboyKit :
 
     private fun recommendedSessionId(): String? = MParticle.getInstance()?.currentSession?.sessionUUID
 
+    /**
+     * Resolves the mParticle attribute name configured for a kit mapping setting.
+     *
+     * The UI stores mappings as a JSON array of objects with a `value` field naming the attribute.
+     * A plain attribute-name string is also accepted for simpler local/test configs.
+     */
+    private fun mappedAttributeName(mappingConfigKey: String): String? {
+        val configString = settings?.get(mappingConfigKey)
+        if (configString.isNullOrEmpty()) {
+            return null
+        }
+        val trimmed = configString.trim()
+        if (trimmed.startsWith("[")) {
+            return try {
+                val array = JSONArray(trimmed)
+                if (array.length() == 0) {
+                    return null
+                }
+                val first = array.optJSONObject(0) ?: return null
+                first.optString(MAPPING_VALUE_KEY, "").takeIf { it.isNotEmpty() }
+            } catch (_: JSONException) {
+                null
+            }
+        }
+        return configString
+    }
+
+    private fun mappedCustomAttributeValue(
+        event: CommerceEvent,
+        mappingConfigKey: String,
+    ): String? {
+        val attributeKey = mappedAttributeName(mappingConfigKey) ?: return null
+        return recommendedCustomAttribute(event, attributeKey)
+    }
+
     private fun recommendedCustomAttribute(
         event: CommerceEvent,
         key: String,
@@ -1095,13 +1131,18 @@ open class AppboyKit :
         return if (value.isNullOrEmpty()) null else value
     }
 
+    private fun recommendedEcommerceSource(): String {
+        val configured = settings?.get(ECOMMERCE_SOURCE_SETTING)
+        return if (!configured.isNullOrEmpty()) configured else ECOMMERCE_SOURCE_DEFAULT
+    }
+
     private fun recommendedCartId(event: CommerceEvent): String =
-        recommendedCustomAttribute(event, CART_ID_ATTRIBUTE)
+        mappedCustomAttributeValue(event, CART_ID_ATTRIBUTE_MAPPING)
             ?: recommendedSessionId()
             ?: java.util.UUID.randomUUID().toString()
 
     private fun recommendedCheckoutId(event: CommerceEvent): String =
-        recommendedCustomAttribute(event, CHECKOUT_ID_ATTRIBUTE)
+        mappedCustomAttributeValue(event, CHECKOUT_ID_ATTRIBUTE_MAPPING)
             ?: recommendedSessionId()
             ?: java.util.UUID.randomUUID().toString()
 
@@ -1118,22 +1159,16 @@ open class AppboyKit :
         return if (variant.isNullOrEmpty()) product.sku else variant
     }
 
-    private fun recommendedImageUrl(product: Product): String? = recommendedProductAttribute(product, IMAGE_URL_ATTRIBUTES)
+    private fun recommendedImageUrl(product: Product): String? {
+        val attributeKey = mappedAttributeName(IMAGE_URL_ATTRIBUTE_MAPPING) ?: return null
+        val value = product.customAttributes?.get(attributeKey)
+        return value?.takeIf { it.isNotEmpty() }
+    }
 
-    private fun recommendedProductUrl(product: Product): String? = recommendedProductAttribute(product, PRODUCT_URL_ATTRIBUTES)
-
-    private fun recommendedProductAttribute(
-        product: Product,
-        keys: List<String>,
-    ): String? {
-        val attributes = product.customAttributes ?: return null
-        for (key in keys) {
-            val value = attributes[key]
-            if (!value.isNullOrEmpty()) {
-                return value
-            }
-        }
-        return null
+    private fun recommendedProductUrl(product: Product): String? {
+        val attributeKey = mappedAttributeName(PRODUCT_URL_ATTRIBUTE_MAPPING) ?: return null
+        val value = product.customAttributes?.get(attributeKey)
+        return value?.takeIf { it.isNotEmpty() }
     }
 
     private fun recommendedTotalValue(event: CommerceEvent): Double {
@@ -1152,7 +1187,7 @@ open class AppboyKit :
     }
 
     private fun recommendedSubtotalValue(event: CommerceEvent): Double? {
-        val value = recommendedCustomAttribute(event, SUBTOTAL_VALUE_ATTRIBUTE) ?: return null
+        val value = mappedCustomAttributeValue(event, SUBTOTAL_VALUE_ATTRIBUTE_MAPPING) ?: return null
         return value.toDoubleOrNull()
     }
 
@@ -1194,15 +1229,31 @@ open class AppboyKit :
         return array
     }
 
+    private fun promotedEventMetadataAttributeNames(): Set<String> {
+        val promoted = mutableSetOf(TOTAL_DISCOUNTS_ATTRIBUTE)
+        mappedAttributeName(CART_ID_ATTRIBUTE_MAPPING)?.let { promoted.add(it) }
+        mappedAttributeName(CHECKOUT_ID_ATTRIBUTE_MAPPING)?.let { promoted.add(it) }
+        mappedAttributeName(SUBTOTAL_VALUE_ATTRIBUTE_MAPPING)?.let { promoted.add(it) }
+        return promoted
+    }
+
+    private fun promotedProductMetadataAttributeNames(): Set<String> {
+        val promoted = mutableSetOf<String>()
+        mappedAttributeName(IMAGE_URL_ATTRIBUTE_MAPPING)?.let { promoted.add(it) }
+        mappedAttributeName(PRODUCT_URL_ATTRIBUTE_MAPPING)?.let { promoted.add(it) }
+        return promoted
+    }
+
     private fun buildProductMetadataMap(product: Product): Map<String, Any> {
         val metadata = linkedMapOf<String, Any>()
+        val promotedProductAttributes = promotedProductMetadataAttributeNames()
         product.brand?.let { if (it.isNotEmpty()) metadata[METADATA_BRAND_KEY] = it }
         product.category?.let { if (it.isNotEmpty()) metadata[METADATA_CATEGORY_KEY] = it }
         product.couponCode?.let { if (it.isNotEmpty()) metadata[METADATA_COUPON_CODE_KEY] = it }
         product.position?.let { metadata[METADATA_POSITION_KEY] = it }
         metadata[METADATA_SKU_KEY] = product.sku
         product.customAttributes?.forEach { (key, value) ->
-            if (key !in IMAGE_URL_ATTRIBUTES && key !in PRODUCT_URL_ATTRIBUTES && !value.isNullOrEmpty()) {
+            if (key !in promotedProductAttributes && !value.isNullOrEmpty()) {
                 metadata[key] = value
             }
         }
@@ -1211,10 +1262,11 @@ open class AppboyKit :
 
     private fun buildEventMetadataMap(event: CommerceEvent): Map<String, Any> {
         val metadata = linkedMapOf<String, Any>()
+        val promotedAttributes = promotedEventMetadataAttributeNames()
         event.customAttributeStrings?.forEach { (key, value) ->
             // Skip attributes already promoted to typed recommended-event fields to avoid
             // emitting them both at the top level and inside metadata.
-            if (key !in PROMOTED_METADATA_ATTRIBUTES && !value.isNullOrEmpty()) {
+            if (key !in promotedAttributes && !value.isNullOrEmpty()) {
                 metadata[key] = value
             }
         }
@@ -1742,24 +1794,18 @@ open class AppboyKit :
         const val PROMOTION_KEY = "promotions"
         const val IMPRESSION_KEY = "impressions"
 
-        // Braze recommended eCommerce events
-        private const val ECOMMERCE_SOURCE = "android"
-        private const val ORDER_REFUNDED_EVENT_NAME = "ecommerce.order_refunded"
-        private const val CART_ID_ATTRIBUTE = "cart_id"
-        private const val CHECKOUT_ID_ATTRIBUTE = "checkout_id"
-        private const val TOTAL_DISCOUNTS_ATTRIBUTE = "total_discounts"
-        private const val SUBTOTAL_VALUE_ATTRIBUTE = "subtotal_value"
+        // Braze recommended eCommerce events — kit attribute-mapping settings (mParticle UI keys)
+        const val CART_ID_ATTRIBUTE_MAPPING = "cartIdAttribute"
+        const val CHECKOUT_ID_ATTRIBUTE_MAPPING = "checkoutIdAttribute"
+        const val SUBTOTAL_VALUE_ATTRIBUTE_MAPPING = "subtotalValueAttribute"
+        const val IMAGE_URL_ATTRIBUTE_MAPPING = "imageUrlAttribute"
+        const val PRODUCT_URL_ATTRIBUTE_MAPPING = "productUrlAttribute"
+        const val ECOMMERCE_SOURCE_SETTING = "source"
 
-        // Custom attributes promoted to typed recommended-event fields; excluded from metadata.
-        private val PROMOTED_METADATA_ATTRIBUTES =
-            setOf(
-                CART_ID_ATTRIBUTE,
-                CHECKOUT_ID_ATTRIBUTE,
-                TOTAL_DISCOUNTS_ATTRIBUTE,
-                SUBTOTAL_VALUE_ATTRIBUTE,
-            )
-        private val IMAGE_URL_ATTRIBUTES = listOf("image_url", "Image URL")
-        private val PRODUCT_URL_ATTRIBUTES = listOf("product_url", "Product URL")
+        private const val ECOMMERCE_SOURCE_DEFAULT = "android"
+        private const val ORDER_REFUNDED_EVENT_NAME = "ecommerce.order_refunded"
+        private const val TOTAL_DISCOUNTS_ATTRIBUTE = "total_discounts"
+        private const val MAPPING_VALUE_KEY = "value"
         private const val METADATA_KEY = "metadata"
         private const val METADATA_BRAND_KEY = "brand"
         private const val METADATA_CATEGORY_KEY = "category"
