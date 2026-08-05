@@ -2,25 +2,6 @@
 
 ## [Unreleased]
 
-### Added
-
-- Add Rokt Shoppable Ads payment extension registration and selection APIs.
-- Add the `com.rokt:rokt-sdk-plus` umbrella artifact: a single dependency bundling the mParticle core SDK, the mParticle Rokt kit, and the Rokt Payment Extension (Shoppable Ads), mirroring the iOS `RoktSDKPlus` umbrella.
-- Add a `braze-43` kit track supporting Braze Android SDK 43.x, with an opt-in `useEcommerceRecommendedEvents` setting that forwards mParticle commerce events using Braze's recommended eCommerce event schema (`ecommerce.cart_updated`, `ecommerce.checkout_started`, `ecommerce.product_viewed`, `ecommerce.order_placed`, `ecommerce.order_refunded`). Typed `subtotalValue`, `tax`, and `shipping` fields are populated from the kit `subtotalValueAttribute` mapping and `TransactionAttributes`. Cart/checkout IDs and product image/product URLs are resolved from kit attribute mappings (`cartIdAttribute`, `checkoutIdAttribute`, `imageUrlAttribute`, `productUrlAttribute`); kit `source` is used as a direct value when set (default `"android"`). Legacy commerce forwarding remains the default. The `braze-43` track is built standalone (Kotlin 2.2.x) and published from an isolated release step.
-
-### Changed
-
-- Rename the `braze-43` kit entry class from `AppboyKit` to `BrazeKit` (`getName()` now returns `"Braze"`). A deprecated `AppboyKit` subclass is retained so `KitIntegrationFactory` can still load `com.mparticle.kits.AppboyKit`.
-- Upgrade Kotlin to 2.1.20 across the core SDK, buildSrc, and all integrated kits.
-- Add support for qualified alpha, beta, and release candidate versions in release workflows.
-- Add Kotlin `MParticle.rokt` access and `RoktLayout` event callbacks for the Rokt kit.
-- Centralize the Rokt SDK / payment extension versions in root `gradle.properties` (`roktSdkVersion`, `roktPaymentExtensionVersion`), shared by the Rokt kit and `rokt-sdk-plus`.
-
-### Removed
-
-- Remove deprecated `KitIntegration.getAllUserAttributes()`. Custom kits must use `getCurrentUser().getUserAttributes()` (or other `FilteredMParticleUser` APIs) and `AttributeListener` callbacks instead ([#682](https://github.com/mParticle/mparticle-android-sdk/pull/682))
-- Remove deprecated `KitIntegration.getUserIdentities()`. Custom kits must use identity data from kit callbacks and request objects instead ([#681](https://github.com/mParticle/mparticle-android-sdk/pull/681)) ([8d3a23c8](https://github.com/mParticle/mparticle-android-sdk/commit/8d3a23c84c96d11f0ee1f80763adacc4f964b544))
-
 ## [6.0.1] - 2026-08-05
 
 ### Kits
