@@ -6,10 +6,11 @@
 
 - Add Rokt Shoppable Ads payment extension registration and selection APIs.
 - Add the `com.rokt:rokt-sdk-plus` umbrella artifact: a single dependency bundling the mParticle core SDK, the mParticle Rokt kit, and the Rokt Payment Extension (Shoppable Ads), mirroring the iOS `RoktSDKPlus` umbrella.
-- Add a `braze-43` kit track supporting Braze Android SDK 43.x, with an opt-in `useEcommerceRecommendedEvents` setting that forwards mParticle commerce events using Braze's recommended eCommerce event schema (`ecommerce.cart_updated`, `ecommerce.checkout_started`, `ecommerce.product_viewed`, `ecommerce.order_placed`, `ecommerce.order_refunded`). Typed `subtotalValue`, `tax`, and `shipping` fields are populated from the kit `subtotalValueAttribute` mapping and `TransactionAttributes`. Cart/checkout IDs and product image/product URLs are resolved from kit attribute mappings (`cartIdAttribute`, `checkoutIdAttribute`, `imageUrlAttribute`, `productUrlAttribute`); kit `source` is used as a direct value when set (default `"android"`). Legacy commerce forwarding remains the default. The `braze-43` track is built standalone (Kotlin 2.2.x).
+- Add a `braze-43` kit track supporting Braze Android SDK 43.x, with an opt-in `useEcommerceRecommendedEvents` setting that forwards mParticle commerce events using Braze's recommended eCommerce event schema (`ecommerce.cart_updated`, `ecommerce.checkout_started`, `ecommerce.product_viewed`, `ecommerce.order_placed`, `ecommerce.order_refunded`). Typed `subtotalValue`, `tax`, and `shipping` fields are populated from the kit `subtotalValueAttribute` mapping and `TransactionAttributes`. Cart/checkout IDs and product image/product URLs are resolved from kit attribute mappings (`cartIdAttribute`, `checkoutIdAttribute`, `imageUrlAttribute`, `productUrlAttribute`); kit `source` is used as a direct value when set (default `"android"`). Legacy commerce forwarding remains the default. The `braze-43` track is built standalone (Kotlin 2.2.x) and published from an isolated release step.
 
 ### Changed
 
+- Rename the `braze-43` kit entry class from `AppboyKit` to `BrazeKit` (`getName()` now returns `"Braze"`). A deprecated `AppboyKit` subclass is retained so `KitIntegrationFactory` can still load `com.mparticle.kits.AppboyKit`.
 - Upgrade Kotlin to 2.1.20 across the core SDK, buildSrc, and all integrated kits.
 - Add support for qualified alpha, beta, and release candidate versions in release workflows.
 - Add Kotlin `MParticle.rokt` access and `RoktLayout` event callbacks for the Rokt kit.

@@ -16,7 +16,7 @@ import com.mparticle.consent.ConsentState
 import com.mparticle.consent.GDPRConsent
 import com.mparticle.identity.IdentityApi
 import com.mparticle.identity.MParticleUser
-import com.mparticle.kits.mocks.MockAppboyKit
+import com.mparticle.kits.mocks.MockBrazeKit
 import com.mparticle.kits.mocks.MockContextApplication
 import com.mparticle.kits.mocks.MockKitConfiguration
 import com.mparticle.kits.mocks.MockUser
@@ -35,7 +35,7 @@ import java.security.SecureRandom
 import java.util.Calendar
 import java.util.Locale
 
-class AppboyKitTests {
+class BrazeKitTests {
     private var random = SecureRandom()
 
     private lateinit var braze: Braze.Companion
@@ -46,8 +46,8 @@ class AppboyKitTests {
     @Mock
     lateinit var user: MParticleUser
 
-    private val kit: AppboyKit
-        get() = AppboyKit()
+    private val kit: BrazeKit
+        get() = BrazeKit()
 
     @Before
     fun setup() {
@@ -95,7 +95,8 @@ class AppboyKitTests {
         val options = Mockito.mock(MParticleOptions::class.java)
         val factory = KitIntegrationFactory(options)
         val integrations = factory.supportedKits.values
-        val className = kit.javaClass.name
+        // KitIntegrationFactory maps the Braze module id to the legacy AppboyKit FQCN.
+        val className = AppboyKit::class.java.name
         for (integration in integrations) {
             if (integration.name == className) {
                 return
@@ -110,9 +111,9 @@ class AppboyKitTests {
     @Throws(Exception::class)
     fun testHostSetting() {
         val settings = HashMap<String, String>()
-        settings[AppboyKit.HOST] = hostName
-        settings[AppboyKit.APPBOY_KEY] = "key"
-        val kit = MockAppboyKit()
+        settings[BrazeKit.HOST] = hostName
+        settings[BrazeKit.APPBOY_KEY] = "key"
+        val kit = MockBrazeKit()
         kit.onKitCreate(settings, MockContextApplication())
         Assert.assertTrue(kit.calledAuthority[0] == hostName)
     }
@@ -122,8 +123,8 @@ class AppboyKitTests {
     fun testHostSettingNull() {
         // test that the key is set when it is passed in by the settings map
         val missingSettings = HashMap<String, String>()
-        missingSettings[AppboyKit.APPBOY_KEY] = "key"
-        val kit = MockAppboyKit()
+        missingSettings[BrazeKit.APPBOY_KEY] = "key"
+        val kit = MockBrazeKit()
         try {
             kit.onKitCreate(missingSettings, MockContextApplication())
         } catch (e: Exception) {
@@ -135,18 +136,18 @@ class AppboyKitTests {
     @Throws(Exception::class)
     fun testHostSettingEmpty() {
         var nullSettings = HashMap<String, String?>()
-        nullSettings[AppboyKit.HOST] = null
-        nullSettings[AppboyKit.APPBOY_KEY] = "key"
-        var kit = MockAppboyKit()
+        nullSettings[BrazeKit.HOST] = null
+        nullSettings[BrazeKit.APPBOY_KEY] = "key"
+        var kit = MockBrazeKit()
         try {
             kit.onKitCreate(nullSettings, MockContextApplication())
         } catch (e: Exception) {
         }
         Assert.assertTrue(kit.calledAuthority[0] == null)
         nullSettings = HashMap()
-        nullSettings[AppboyKit.HOST] = ""
-        nullSettings[AppboyKit.APPBOY_KEY] = "key"
-        kit = MockAppboyKit()
+        nullSettings[BrazeKit.HOST] = ""
+        nullSettings[BrazeKit.APPBOY_KEY] = "key"
+        kit = MockBrazeKit()
         try {
             kit.onKitCreate(nullSettings, MockContextApplication())
         } catch (e: Exception) {
@@ -159,7 +160,7 @@ class AppboyKitTests {
         // make sure it doesn't crash if there is no email or customerId
         var e: Exception? = null
         try {
-            AppboyKit().onModifyCompleted(MockUser(HashMap()), null)
+            BrazeKit().onModifyCompleted(MockUser(HashMap()), null)
         } catch (ex: Exception) {
             e = ex
         }
@@ -168,8 +169,8 @@ class AppboyKitTests {
             val values = arrayOfNulls<String>(2)
             val mockEmail = "mockEmail$i"
             val mockCustomerId = "12345$i"
-            val kit: AppboyKit =
-                object : AppboyKit() {
+            val kit: BrazeKit =
+                object : BrazeKit() {
                     override fun setId(customerId: String) {
                         values[0] = customerId
                     }
@@ -213,7 +214,7 @@ class AppboyKitTests {
 
     @Test
     fun testAgeToDob() {
-        val kit: AppboyKit = MockAppboyKit()
+        val kit: BrazeKit = MockBrazeKit()
         val currentYear = Calendar.getInstance()[Calendar.YEAR]
         var calendar = kit.getCalendarMinusYears("5")
         calendar
@@ -242,8 +243,8 @@ class AppboyKitTests {
     @Test
     fun testSetSubscriptionGroupIds() {
         val settings = HashMap<String, String>()
-        settings[AppboyKit.APPBOY_KEY] = "key"
-        settings[AppboyKit.HOST] = hostName
+        settings[BrazeKit.APPBOY_KEY] = "key"
+        settings[BrazeKit.HOST] = hostName
         settings["subscriptionGroupMapping"] =
             "[{\"jsmap\":null,\"map\":\"test1\",\"maptype\":\"UserAttributeClass.Name\"," +
             "\"value\":\"00000000-0000-0000-0000-000000000000\"}," +
@@ -251,7 +252,7 @@ class AppboyKitTests {
             "\"value\":\"00000000-0000-0000-0000-000000000001\"}," +
             "{\"jsmap\":null,\"map\":\"test3\",\"maptype\":\"UserAttributeClass.Name\"," +
             "\"value\":\"00000000-0000-0000-0000-000000000002\"}]"
-        val kit = MockAppboyKit()
+        val kit = MockBrazeKit()
         val currentUser = braze.currentUser
 
         kit.onKitCreate(settings, MockContextApplication())
@@ -264,7 +265,7 @@ class AppboyKitTests {
 //    @Test
 //    fun testSetUserAttributeAge() {
 //        val currentYear = Calendar.getInstance()[Calendar.YEAR]
-//        val kit: AppboyKit = MockAppboyKit()
+//        val kit: BrazeKit = MockBrazeKit()
 //        val currentUser = Braze.currentUser
 //        Assert.assertEquals(-1, currentUser.dobDay.toLong())
 //        Assert.assertEquals(-1, currentUser.dobYear.toLong())
@@ -277,7 +278,7 @@ class AppboyKitTests {
 
 //    @Test
 //    fun testSetUserDoB() {
-//        val kit = MockAppboyKit()
+//        val kit = MockBrazeKit()
 //        val currentUser = Braze.currentUser
 //        val errorMessage = arrayOfNulls<String>(1)
 //        Logger.setLogHandler(object : DefaultLogHandler() {
@@ -335,7 +336,7 @@ class AppboyKitTests {
         for (`val` in possibleValues) {
             val kit = kit
             val settings = HashMap<String, String>()
-            settings[AppboyKit.USER_IDENTIFICATION_TYPE] = `val`
+            settings[BrazeKit.USER_IDENTIFICATION_TYPE] = `val`
             kit.setIdentityType(settings)
             Assert.assertNotNull(kit.identityType)
             Assert.assertEquals(
@@ -345,7 +346,7 @@ class AppboyKitTests {
             Assert.assertFalse(kit.isMpidIdentityType)
         }
         val settings = HashMap<String, String>()
-        settings[AppboyKit.USER_IDENTIFICATION_TYPE] = mpid
+        settings[BrazeKit.USER_IDENTIFICATION_TYPE] = mpid
         val kit = kit
         kit.setIdentityType(settings)
         Assert.assertNull(kit.identityType)
@@ -370,7 +371,7 @@ class AppboyKitTests {
 
 //    @Test
 //    fun addRemoveAttributeFromEventTest() {
-//        val kit = MockAppboyKit()
+//        val kit = MockBrazeKit()
 //        val currentUser = Braze.currentUser
 //        kit.configuration = object : MockKitConfiguration() {
 //
@@ -417,7 +418,7 @@ class AppboyKitTests {
 
     @Test
     fun testPurchaseCurrency() {
-        val kit = MockAppboyKit()
+        val kit = MockBrazeKit()
         val product =
             Product
                 .Builder("product name", "sku1", 4.5)
@@ -440,7 +441,7 @@ class AppboyKitTests {
 
     @Test
     fun testPurchaseDefaultCurrency() {
-        val kit = MockAppboyKit()
+        val kit = MockBrazeKit()
         val product =
             Product
                 .Builder("product name", "sku1", 4.5)
@@ -462,7 +463,7 @@ class AppboyKitTests {
 
     @Test
     fun testPurchase() {
-        val kit = MockAppboyKit()
+        val kit = MockBrazeKit()
         val customAttributes = HashMap<String, String>()
         customAttributes["key1"] = "value1"
         customAttributes["key #2"] = "value #3"
@@ -565,7 +566,7 @@ class AppboyKitTests {
     @Test
     fun testEnhancedPurchase() {
         val emptyAttributes = HashMap<String, String>()
-        val kit = MockAppboyKit()
+        val kit = MockBrazeKit()
         val customAttributes = HashMap<String, String>()
         customAttributes["key1"] = "value1"
         customAttributes["key #2"] = "value #3"
@@ -601,7 +602,7 @@ class AppboyKitTests {
         Assert.assertEquals(BigDecimal(99.0), purchase.unitPrice)
         Assert.assertNotNull(purchase.purchaseProperties)
         val properties = purchase.purchaseProperties.properties
-        val productArray = properties.remove(AppboyKit.PRODUCT_KEY)
+        val productArray = properties.remove(BrazeKit.PRODUCT_KEY)
         Assert.assertTrue(productArray is JSONArray)
         if (productArray is Array<*>) {
             Assert.assertEquals(1, productArray.size.toLong())
@@ -655,7 +656,7 @@ class AppboyKitTests {
             "the id",
         )
 
-        val brazeCustomAttributesDictionary = properties.remove(AppboyKit.CUSTOM_ATTRIBUTES_KEY)
+        val brazeCustomAttributesDictionary = properties.remove(BrazeKit.CUSTOM_ATTRIBUTES_KEY)
         if (brazeCustomAttributesDictionary is BrazeProperties) {
             val customAttributesDictionary = brazeCustomAttributesDictionary.properties
             Assert.assertEquals(customAttributesDictionary.remove("key1"), "value1")
@@ -668,7 +669,7 @@ class AppboyKitTests {
 //    @Test
 //    fun testPromotion() {
 //        val emptyAttributes = HashMap<String, String>()
-//        val kit = MockAppboyKit()
+//        val kit = MockBrazeKit()
 //        kit.configuration = MockKitConfiguration()
 //        val customAttributes = HashMap<String, String>()
 //        customAttributes["key1"] = "value1"
@@ -704,7 +705,7 @@ class AppboyKitTests {
     @Test
     fun testEnhancedPromotion() {
         val emptyAttributes = HashMap<String, String>()
-        val kit = MockAppboyKit()
+        val kit = MockBrazeKit()
         kit.configuration = MockKitConfiguration()
         val customAttributes = HashMap<String, String>()
         customAttributes["key1"] = "value1"
@@ -729,7 +730,7 @@ class AppboyKitTests {
         Assert.assertNotNull(event.properties)
         val properties = event.properties
 
-        val promotionArray = properties.remove(AppboyKit.PROMOTION_KEY)
+        val promotionArray = properties.remove(BrazeKit.PROMOTION_KEY)
         Assert.assertTrue(promotionArray is JSONArray)
         if (promotionArray is Array<*>) {
             Assert.assertEquals(1, promotionArray.size.toLong())
@@ -756,7 +757,7 @@ class AppboyKitTests {
             }
         }
 
-        val brazeCustomAttributesDictionary = properties.remove(AppboyKit.CUSTOM_ATTRIBUTES_KEY)
+        val brazeCustomAttributesDictionary = properties.remove(BrazeKit.CUSTOM_ATTRIBUTES_KEY)
         if (brazeCustomAttributesDictionary is BrazeProperties) {
             val customAttributesDictionary = brazeCustomAttributesDictionary.properties
             Assert.assertEquals(customAttributesDictionary.remove("key1"), "value1")
@@ -771,7 +772,7 @@ class AppboyKitTests {
 
 //    @Test
 //    fun testImpression() {
-//        val kit = MockAppboyKit()
+//        val kit = MockBrazeKit()
 //        kit.configuration = MockKitConfiguration()
 //        val customAttributes = HashMap<String, String>()
 //        customAttributes["key1"] = "value1"
@@ -821,7 +822,7 @@ class AppboyKitTests {
     @Test
     fun testEnhancedImpression() {
         val emptyAttributes = HashMap<String, String>()
-        val kit = MockAppboyKit()
+        val kit = MockBrazeKit()
         kit.configuration = MockKitConfiguration()
         val customAttributes = HashMap<String, String>()
         customAttributes["key1"] = "value1"
@@ -849,7 +850,7 @@ class AppboyKitTests {
         Assert.assertNotNull(event.properties)
         val properties = event.properties
 
-        val impressionArray = properties.remove(AppboyKit.IMPRESSION_KEY)
+        val impressionArray = properties.remove(BrazeKit.IMPRESSION_KEY)
         Assert.assertTrue(impressionArray is JSONArray)
         if (impressionArray is Array<*>) {
             Assert.assertEquals(1, impressionArray.size.toLong())
@@ -860,7 +861,7 @@ class AppboyKitTests {
                     impressionProperties.remove("Product Impression List"),
                     "Suggested Products List",
                 )
-                val productArray = impressionProperties.remove(AppboyKit.PRODUCT_KEY)
+                val productArray = impressionProperties.remove(BrazeKit.PRODUCT_KEY)
                 Assert.assertTrue(productArray is Array<*>)
                 if (productArray is Array<*>) {
                     Assert.assertEquals(1, productArray.size.toLong())
@@ -894,7 +895,7 @@ class AppboyKitTests {
                             4.5,
                         )
                         val brazeProductCustomAttributesDictionary =
-                            productProperties.remove(AppboyKit.CUSTOM_ATTRIBUTES_KEY)
+                            productProperties.remove(BrazeKit.CUSTOM_ATTRIBUTES_KEY)
                         if (brazeProductCustomAttributesDictionary is BrazeProperties) {
                             val customProductAttributesDictionary =
                                 brazeProductCustomAttributesDictionary.properties
@@ -915,7 +916,7 @@ class AppboyKitTests {
             }
         }
 
-        val brazeCustomAttributesDictionary = properties.remove(AppboyKit.CUSTOM_ATTRIBUTES_KEY)
+        val brazeCustomAttributesDictionary = properties.remove(BrazeKit.CUSTOM_ATTRIBUTES_KEY)
         if (brazeCustomAttributesDictionary is BrazeProperties) {
             val customAttributesDictionary = brazeCustomAttributesDictionary.properties
             Assert.assertEquals(customAttributesDictionary.remove("key1"), "value1")
@@ -930,7 +931,7 @@ class AppboyKitTests {
 
 //    @Test
 //    fun setUserAttributeTyped() {
-//        val kit = MockAppboyKit()
+//        val kit = MockBrazeKit()
 //        kit.enableTypeDetection = true
 //        val currentUser = Braze.currentUser
 //        kit.setUserAttribute("foo", "true")
@@ -949,7 +950,7 @@ class AppboyKitTests {
 
 //    @Test
 //    fun testEventStringType() {
-//        val kit = MockAppboyKit()
+//        val kit = MockBrazeKit()
 //        kit.configuration = MockKitConfiguration()
 //        val customAttributes = HashMap<String, String?>()
 //        customAttributes["foo"] = "false"
@@ -975,7 +976,7 @@ class AppboyKitTests {
 
 //    @Test
 //    fun testLogCommerceEvent() {
-//        val kit = MockAppboyKit()
+//        val kit = MockBrazeKit()
 //
 //        val product: Product = Product.Builder("La Enchilada", "13061043670", 12.5)
 //            .quantity(1.0)
@@ -1035,7 +1036,7 @@ class AppboyKitTests {
 
 //    @Test
 //    fun testEventStringTypeNotEnabled() {
-//        val kit = MockAppboyKit()
+//        val kit = MockBrazeKit()
 //        kit.configuration = MockKitConfiguration()
 //        val customAttributes = HashMap<String, String?>()
 //        customAttributes["foo"] = "false"
@@ -1061,7 +1062,7 @@ class AppboyKitTests {
 
     @Test
     fun testCustomAttributes_log_add_attribute_event() {
-        val kit = MockAppboyKit()
+        val kit = MockBrazeKit()
         val currentUser = braze.currentUser
 
         kit.configuration = MockKitConfiguration()
@@ -1100,7 +1101,7 @@ class AppboyKitTests {
 
     @Test
     fun testCustomAttributes_log_remove_attribute_event() {
-        val kit = MockAppboyKit()
+        val kit = MockBrazeKit()
         val currentUser = braze.currentUser
 
         kit.configuration = MockKitConfiguration()
@@ -1134,7 +1135,7 @@ class AppboyKitTests {
 
     @Test
     fun testCustomAttributes_log_add_customUserAttribute_event() {
-        val kit = MockAppboyKit()
+        val kit = MockBrazeKit()
         val currentUser = braze.currentUser
 
         kit.configuration = MockKitConfiguration()
@@ -1173,7 +1174,7 @@ class AppboyKitTests {
 
     @Test
     fun testParseToNestedMap_When_JSON_Is_INVALID() {
-        val kit = MockAppboyKit()
+        val kit = MockBrazeKit()
         var jsonInput =
             "{'GDPR':{'marketing':'{:false,'timestamp':1711038269644:'Test consent'," +
                 "'location':'17 Cherry Tree Lane','hardware_id':'IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702'}," +
@@ -1185,7 +1186,7 @@ class AppboyKitTests {
                 "'hardware_id':'IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702'}'}"
 
         val method: Method =
-            AppboyKit::class.java.getDeclaredMethod(
+            BrazeKit::class.java.getDeclaredMethod(
                 "parseToNestedMap",
                 String::class.java,
             )
@@ -1196,11 +1197,11 @@ class AppboyKitTests {
 
     @Test
     fun testParseToNestedMap_When_JSON_Is_Empty() {
-        val kit = MockAppboyKit()
+        val kit = MockBrazeKit()
         var jsonInput = ""
 
         val method: Method =
-            AppboyKit::class.java.getDeclaredMethod(
+            BrazeKit::class.java.getDeclaredMethod(
                 "parseToNestedMap",
                 String::class.java,
             )
@@ -1211,7 +1212,7 @@ class AppboyKitTests {
 
     @Test
     fun testSearchKeyInNestedMap_When_Input_Key_Is_Empty_String() {
-        val kit = MockAppboyKit()
+        val kit = MockBrazeKit()
         val map =
             mapOf(
                 "FeatureEnabled" to true,
@@ -1227,7 +1228,7 @@ class AppboyKitTests {
                     ),
             )
         val method: Method =
-            AppboyKit::class.java.getDeclaredMethod(
+            BrazeKit::class.java.getDeclaredMethod(
                 "searchKeyInNestedMap",
                 Map::class.java,
                 Any::class.java,
@@ -1239,10 +1240,10 @@ class AppboyKitTests {
 
     @Test
     fun testSearchKeyInNestedMap_When_Input_Is_Empty_Map() {
-        val kit = MockAppboyKit()
+        val kit = MockBrazeKit()
         val emptyMap: Map<String, Int> = emptyMap()
         val method: Method =
-            AppboyKit::class.java.getDeclaredMethod(
+            BrazeKit::class.java.getDeclaredMethod(
                 "searchKeyInNestedMap",
                 Map::class.java,
                 Any::class.java,
@@ -1254,10 +1255,10 @@ class AppboyKitTests {
 
     @Test
     fun testParseConsentMapping_When_Input_Is_Empty_Json() {
-        val kit = MockAppboyKit()
+        val kit = MockBrazeKit()
         val emptyJson = ""
         val method: Method =
-            AppboyKit::class.java.getDeclaredMethod(
+            BrazeKit::class.java.getDeclaredMethod(
                 "parseConsentMapping",
                 String::class.java,
             )
@@ -1268,7 +1269,7 @@ class AppboyKitTests {
 
     @Test
     fun testParseConsentMapping_When_Input_Is_Invalid_Json() {
-        val kit = MockAppboyKit()
+        val kit = MockBrazeKit()
         var jsonInput =
             "{'GDPR':{'marketing':'{:false,'timestamp':1711038269644:'Test consent'," +
                 "'location':'17 Cherry Tree Lane','hardware_id':'IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702'}," +
@@ -1279,7 +1280,7 @@ class AppboyKitTests {
                 "'document':'ccpa_consent_agreement_v3','location':'17 Cherry Tree Lane'," +
                 "'hardware_id':'IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702'}'}"
         val method: Method =
-            AppboyKit::class.java.getDeclaredMethod(
+            BrazeKit::class.java.getDeclaredMethod(
                 "parseConsentMapping",
                 String::class.java,
             )
@@ -1290,9 +1291,9 @@ class AppboyKitTests {
 
     @Test
     fun testParseConsentMapping_When_Input_Is_NULL() {
-        val kit = MockAppboyKit()
+        val kit = MockBrazeKit()
         val method: Method =
-            AppboyKit::class.java.getDeclaredMethod(
+            BrazeKit::class.java.getDeclaredMethod(
                 "parseConsentMapping",
                 String::class.java,
             )
@@ -1303,7 +1304,7 @@ class AppboyKitTests {
 
     @Test
     fun onConsentStateUpdatedTest() {
-        val kit = MockAppboyKit()
+        val kit = MockBrazeKit()
         val currentUser = braze.currentUser
         kit.configuration = MockKitConfiguration()
         val map = java.util.HashMap<String, String>()
@@ -1339,7 +1340,7 @@ class AppboyKitTests {
 
     @Test
     fun onConsentStateUpdatedTest_When_Both_The_consents_Are_True() {
-        val kit = MockAppboyKit()
+        val kit = MockBrazeKit()
         val currentUser = braze.currentUser
         kit.configuration = MockKitConfiguration()
         val map = java.util.HashMap<String, String>()
@@ -1386,7 +1387,7 @@ class AppboyKitTests {
 
     @Test
     fun onConsentStateUpdatedTest_When_No_DATA_From_Server() {
-        val kit = MockAppboyKit()
+        val kit = MockBrazeKit()
         val currentUser = braze.currentUser
         kit.configuration = MockKitConfiguration()
         val marketingConsent =
@@ -1417,7 +1418,7 @@ class AppboyKitTests {
 
     @Test
     fun testOnConsentStateUpdatedTest_No_consentMappingSDK() {
-        val kit = MockAppboyKit()
+        val kit = MockBrazeKit()
         val currentUser = braze.currentUser
         kit.configuration = MockKitConfiguration()
         val map = java.util.HashMap<String, String>()
@@ -1459,9 +1460,9 @@ class AppboyKitTests {
     @Test
     fun testPurchase_Forward_product_name() {
         var settings = HashMap<String, String?>()
-        settings[AppboyKit.APPBOY_KEY] = "key"
-        settings[AppboyKit.REPLACE_SKU_AS_PRODUCT_NAME] = "True"
-        val kit = MockAppboyKit()
+        settings[BrazeKit.APPBOY_KEY] = "key"
+        settings[BrazeKit.REPLACE_SKU_AS_PRODUCT_NAME] = "True"
+        val kit = MockBrazeKit()
 
         kit.configuration =
             KitConfiguration.createKitConfiguration(JSONObject().put("as", JSONObject(settings as Map<*, *>)))
@@ -1489,9 +1490,9 @@ class AppboyKitTests {
     @Test
     fun testPurchase_Forward_product_name_When_flag_IS_FALSE() {
         var settings = HashMap<String, String?>()
-        settings[AppboyKit.APPBOY_KEY] = "key"
-        settings[AppboyKit.REPLACE_SKU_AS_PRODUCT_NAME] = "False"
-        val kit = MockAppboyKit()
+        settings[BrazeKit.APPBOY_KEY] = "key"
+        settings[BrazeKit.REPLACE_SKU_AS_PRODUCT_NAME] = "False"
+        val kit = MockBrazeKit()
 
         kit.configuration =
             KitConfiguration.createKitConfiguration(JSONObject().put("as", JSONObject(settings as Map<*, *>)))
@@ -1519,8 +1520,8 @@ class AppboyKitTests {
     @Test
     fun testPurchase_Forward_product_name_When_flag_IS_Null() {
         var settings = HashMap<String, String?>()
-        settings[AppboyKit.APPBOY_KEY] = "key"
-        val kit = MockAppboyKit()
+        settings[BrazeKit.APPBOY_KEY] = "key"
+        val kit = MockBrazeKit()
 
         kit.configuration =
             KitConfiguration.createKitConfiguration(JSONObject().put("as", JSONObject(settings as Map<*, *>)))

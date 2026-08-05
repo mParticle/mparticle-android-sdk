@@ -1,6 +1,6 @@
 package com.mparticle.kits
 
-import com.mparticle.kits.AppboyKit.StringTypeParser
+import com.mparticle.kits.BrazeKit.StringTypeParser
 import org.junit.Assert
 import org.junit.Test
 

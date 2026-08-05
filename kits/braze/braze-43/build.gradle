@@ -33,6 +33,15 @@ apply plugin: 'org.jlleitschuh.gradle.ktlint'
 apply plugin: 'kotlin-android'
 apply plugin: 'com.mparticle.kit'
 
+// Standalone builds use rootProject.name "android-braze-kit"; force the published
+// Maven coordinate consumers expect (com.mparticle:braze-43).
+if (extensions.findByName('mparticleMavenPublish') != null) {
+    mparticleMavenPublish {
+        artifactId.set('braze-43')
+        description.set('Braze 43 kit for the mParticle SDK')
+    }
+}
+
 android {
     namespace 'com.mparticle.kits.braze43'
     buildFeatures {

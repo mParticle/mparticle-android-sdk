@@ -48,17 +48,17 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.math.BigDecimal
-import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
-import java.util.Date
 import java.util.EnumSet
 import java.util.LinkedList
 import kotlin.collections.HashMap
 
 /**
- * mParticle client-side Appboy integration
+ * mParticle client-side Braze integration
  */
-open class AppboyKit :
+open class BrazeKit :
     KitIntegration(),
     ModifyIdentityListener,
     LogoutListener,
@@ -139,7 +139,7 @@ open class AppboyKit :
                 }
             }
         queueDataFlush()
-        if (setDefaultAppboyLifecycleCallbackListener) {
+        if (setDefaultBrazeLifecycleCallbackListener) {
             (context.applicationContext as Application).registerActivityLifecycleCallbacks(
                 BrazeActivityLifecycleCallbackListener() as ActivityLifecycleCallbacks,
             )
@@ -313,7 +313,7 @@ open class AppboyKit :
                             logEvent(e)
                             messages.add(ReportingMessage.fromEvent(this, event))
                         } catch (e: Exception) {
-                            Logger.warning("Failed to call logCustomEvent to Appboy kit: $e")
+                            Logger.warning("Failed to call logCustomEvent to Braze kit: $e")
                         }
                     }
                 }
@@ -448,18 +448,21 @@ open class AppboyKit :
         value: String,
         user: BrazeUser,
     ) {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd")
-        try {
-            val calendar = Calendar.getInstance()
-            calendar.time = dateFormat.parse(value) as Date
-            val year = calendar[Calendar.YEAR]
-            val monthNum = calendar[Calendar.MONTH]
-            val month = Month.values()[monthNum] //
-            val day = calendar[Calendar.DAY_OF_MONTH]
-            user.setDateOfBirth(year, month, day)
-        } catch (e: Exception) {
-            Logger.warning("unable to set DateOfBirth for \"dob\" = " + value + ". Exception: " + e.message)
-        }
+        val date =
+            runCatching {
+                LocalDate.parse(value, DateTimeFormatter.ISO_LOCAL_DATE)
+            }.getOrElse { exception ->
+                Logger.warning(
+                    """Unable to set DateOfBirth for "dob"="$value". Exception: ${exception.message}""",
+                )
+                return
+            }
+
+        user.setDateOfBirth(
+            date.year,
+            Month.values()[date.monthValue - 1],
+            date.dayOfMonth,
+        )
     }
 
     override fun onIncrementUserAttribute(
@@ -1767,14 +1770,14 @@ open class AppboyKit :
         const val SUBSCRIPTION_GROUP_MAPPING = "subscriptionGroupMapping"
         const val HOST = "host"
         const val PUSH_ENABLED = "push_enabled"
-        const val NAME = "Appboy"
+        const val NAME = "Braze"
 
         // if this flag is true, kit will send Product name as sku
         const val REPLACE_SKU_AS_PRODUCT_NAME = "replaceSkuWithProductName"
         private const val PREF_KEY_HAS_SYNCED_ATTRIBUTES = "appboy::has_synced_attributes"
         private const val PREF_KEY_CURRENT_EMAIL = "appboy::current_email"
         private const val FLUSH_DELAY = 5000
-        var setDefaultAppboyLifecycleCallbackListener = true
+        var setDefaultBrazeLifecycleCallbackListener = true
 
         private const val EMAIL_SUBSCRIBE = "email_subscribe"
         private const val PUSH_SUBSCRIBE = "push_subscribe"
@@ -1830,3 +1833,10 @@ open class AppboyKit :
         private const val RECOMMENDED_PRODUCT_URL_KEY = "product_url"
     }
 }
+
+/**
+ * Legacy class name retained so [com.mparticle.kits.KitIntegrationFactory] can still load
+ * `com.mparticle.kits.AppboyKit` for the Braze module id. Prefer [BrazeKit].
+ */
+@Deprecated("Renamed to BrazeKit", ReplaceWith("BrazeKit"))
+open class AppboyKit : BrazeKit()

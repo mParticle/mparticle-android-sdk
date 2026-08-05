@@ -2,10 +2,10 @@ package com.mparticle.kits.mocks
 
 import android.content.Context
 import com.mparticle.internal.ReportingManager
-import com.mparticle.kits.AppboyKit
+import com.mparticle.kits.BrazeKit
 import org.mockito.Mockito
 
-class MockAppboyKit : AppboyKit() {
+class MockBrazeKit : BrazeKit() {
     val calledAuthority = arrayOfNulls<String>(1)
 
     override fun setAuthority(authority: String?) {

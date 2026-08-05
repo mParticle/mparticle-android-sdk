@@ -12,7 +12,7 @@ import com.mparticle.commerce.Product
 import com.mparticle.commerce.Promotion
 import com.mparticle.commerce.TransactionAttributes
 import com.mparticle.identity.IdentityApi
-import com.mparticle.kits.mocks.MockAppboyKit
+import com.mparticle.kits.mocks.MockBrazeKit
 import com.mparticle.kits.mocks.MockKitConfiguration
 import org.json.JSONObject
 import org.junit.Assert
@@ -31,9 +31,9 @@ class RecommendedEcommerceTests {
     private fun productAttributeMapping(attributeName: String): String =
         "[{\"jsmap\":null,\"map\":null,\"maptype\":\"ProductAttributeSelector.Name\",\"value\":\"$attributeName\"}]"
 
-    private fun kitWithMappings(vararg settings: Pair<String, String>): MockAppboyKit {
+    private fun kitWithMappings(vararg settings: Pair<String, String>): MockBrazeKit {
         val settingsMap = hashMapOf(*settings)
-        return MockAppboyKit().apply {
+        return MockBrazeKit().apply {
             configuration =
                 KitConfiguration.createKitConfiguration(
                     JSONObject().put("as", JSONObject(settingsMap as Map<*, *>)),
@@ -43,14 +43,14 @@ class RecommendedEcommerceTests {
     }
 
     /** Default mappings matching common attribute names used by most tests. */
-    private val kit: MockAppboyKit
+    private val kit: MockBrazeKit
         get() =
             kitWithMappings(
-                AppboyKit.CART_ID_ATTRIBUTE_MAPPING to eventAttributeMapping("cart_id"),
-                AppboyKit.CHECKOUT_ID_ATTRIBUTE_MAPPING to eventAttributeMapping("checkout_id"),
-                AppboyKit.SUBTOTAL_VALUE_ATTRIBUTE_MAPPING to eventAttributeMapping("subtotal_value"),
-                AppboyKit.IMAGE_URL_ATTRIBUTE_MAPPING to productAttributeMapping("image_url"),
-                AppboyKit.PRODUCT_URL_ATTRIBUTE_MAPPING to productAttributeMapping("product_url"),
+                BrazeKit.CART_ID_ATTRIBUTE_MAPPING to eventAttributeMapping("cart_id"),
+                BrazeKit.CHECKOUT_ID_ATTRIBUTE_MAPPING to eventAttributeMapping("checkout_id"),
+                BrazeKit.SUBTOTAL_VALUE_ATTRIBUTE_MAPPING to eventAttributeMapping("subtotal_value"),
+                BrazeKit.IMAGE_URL_ATTRIBUTE_MAPPING to productAttributeMapping("image_url"),
+                BrazeKit.PRODUCT_URL_ATTRIBUTE_MAPPING to productAttributeMapping("product_url"),
             )
 
     @Before
@@ -272,12 +272,12 @@ class RecommendedEcommerceTests {
     fun testMappedCustomAttributesAndConfiguredSource() {
         val mappedKit =
             kitWithMappings(
-                AppboyKit.CART_ID_ATTRIBUTE_MAPPING to eventAttributeMapping("mapped_cart_id"),
-                AppboyKit.CHECKOUT_ID_ATTRIBUTE_MAPPING to eventAttributeMapping("mapped_checkout_id"),
-                AppboyKit.SUBTOTAL_VALUE_ATTRIBUTE_MAPPING to eventAttributeMapping("order_subtotal"),
-                AppboyKit.IMAGE_URL_ATTRIBUTE_MAPPING to productAttributeMapping("mapped_image_url"),
-                AppboyKit.PRODUCT_URL_ATTRIBUTE_MAPPING to productAttributeMapping("mapped_product_url"),
-                AppboyKit.ECOMMERCE_SOURCE_SETTING to "mobile_app",
+                BrazeKit.CART_ID_ATTRIBUTE_MAPPING to eventAttributeMapping("mapped_cart_id"),
+                BrazeKit.CHECKOUT_ID_ATTRIBUTE_MAPPING to eventAttributeMapping("mapped_checkout_id"),
+                BrazeKit.SUBTOTAL_VALUE_ATTRIBUTE_MAPPING to eventAttributeMapping("order_subtotal"),
+                BrazeKit.IMAGE_URL_ATTRIBUTE_MAPPING to productAttributeMapping("mapped_image_url"),
+                BrazeKit.PRODUCT_URL_ATTRIBUTE_MAPPING to productAttributeMapping("mapped_product_url"),
+                BrazeKit.ECOMMERCE_SOURCE_SETTING to "mobile_app",
             )
         val product =
             Product
@@ -325,7 +325,7 @@ class RecommendedEcommerceTests {
     fun testMissingUrlMappingsYieldNullUrls() {
         val kitWithoutUrlMappings =
             kitWithMappings(
-                AppboyKit.CART_ID_ATTRIBUTE_MAPPING to eventAttributeMapping("cart_id"),
+                BrazeKit.CART_ID_ATTRIBUTE_MAPPING to eventAttributeMapping("cart_id"),
             )
         kitWithoutUrlMappings.logEvent(
             CommerceEvent
@@ -354,8 +354,8 @@ class RecommendedEcommerceTests {
     fun testPlainStringMappingConfigIsAccepted() {
         val plainKit =
             kitWithMappings(
-                AppboyKit.CART_ID_ATTRIBUTE_MAPPING to "cart_id",
-                AppboyKit.SUBTOTAL_VALUE_ATTRIBUTE_MAPPING to "cart_subtotal",
+                BrazeKit.CART_ID_ATTRIBUTE_MAPPING to "cart_id",
+                BrazeKit.SUBTOTAL_VALUE_ATTRIBUTE_MAPPING to "cart_subtotal",
             )
         plainKit.logEvent(
             CommerceEvent
@@ -377,7 +377,7 @@ class RecommendedEcommerceTests {
     @Test
     fun testToggleOffFallsBackToLegacyPurchase() {
         val kit =
-            MockAppboyKit().apply {
+            MockBrazeKit().apply {
                 // useEcommerceRecommendedEvents defaults to false
                 configuration = MockKitConfiguration()
             }

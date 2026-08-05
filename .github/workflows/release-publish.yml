@@ -62,6 +62,20 @@ jobs:
       - name: Publish kits to Maven Central
         run: ./gradlew publishMavenPublicationToMavenCentralRepository -PVERSION=${{ needs.setup-and-version.outputs.final_version }} -c settings-kits.gradle --no-build-cache
 
+      # Isolated Kotlin 2.2.x kits are excluded from settings-kits.gradle and must be
+      # published from their own project roots (same pattern as CI test/lint steps).
+      - name: Publish Isolated Kits (urbanairship-20)
+        run: ./gradlew -p kits/urbanairship/urbanairship-20 -PisRelease=true -PVERSION=${{ needs.setup-and-version.outputs.final_version }} publishMavenPublicationToMavenCentralRepository --no-build-cache
+
+      - name: Publish Isolated Kits (braze-43)
+        run: ./gradlew -p kits/braze/braze-43 -PisRelease=true -PVERSION=${{ needs.setup-and-version.outputs.final_version }} publishMavenPublicationToMavenCentralRepository --no-build-cache
+
+      - name: Publish Isolated Kits (ga-23)
+        run: ./gradlew -p kits/ga/ga-23 -PisRelease=true -PVERSION=${{ needs.setup-and-version.outputs.final_version }} publishMavenPublicationToMavenCentralRepository --no-build-cache
+
+      - name: Publish Isolated Kits (ga4-23)
+        run: ./gradlew -p kits/ga4/ga4-23 -PisRelease=true -PVERSION=${{ needs.setup-and-version.outputs.final_version }} publishMavenPublicationToMavenCentralRepository --no-build-cache
+
       # rokt-sdk-plus (com.rokt:rokt-sdk-plus) is an umbrella over the mParticle Rokt kit + the
       # Rokt Payment Extension. The "Publish core to Maven local" step above already placed
       # android-core/android-kit-base/android-kit-plugin in mavenLocal; we also need the Rokt
