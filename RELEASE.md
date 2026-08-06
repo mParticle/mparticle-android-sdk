@@ -28,8 +28,6 @@ Generated release PR branches use `release/prep-<version>`, for example `release
 
 The workflow validates every publication in Maven local before publishing the SDK, aggregate kits, and isolated kits to Maven Central using the exact version in `VERSION`. It creates a GitHub release with the same tag only after every publication succeeds.
 
-The workflow can also be started manually to retry a release after fixing the publication pipeline without changing `VERSION` again.
-
 ## Stable releases
 
 1. Run `Release - Draft` from the target branch.
