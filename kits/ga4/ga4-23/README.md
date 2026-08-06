@@ -8,9 +8,11 @@ This repository contains the [Firebase for GA4](https://firebase.google.com/docs
 
     ```groovy
     dependencies {
-        implementation 'com.mparticle:android-googleanalyticsfirebasega4-kit:5+'
+        implementation 'com.mparticle:ga4-23:6.0.1'
     }
     ```
+
+    SDK 5.x releases use the legacy `com.mparticle:android-googleanalyticsfirebasega4-kit` coordinate.
 
 2. Follow the mParticle Android SDK [quick-start](https://github.com/mParticle/mparticle-android-sdk), then rebuild and launch your app, and verify that you see `"GA4 for Firebase detected"` in the output of `adb logcat`.
 3. Reference mParticle's integration docs below to enable the integration.

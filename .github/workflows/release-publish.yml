@@ -1,6 +1,7 @@
 name: Release – Publish
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -13,6 +14,7 @@ permissions:
 
 jobs:
   setup-and-version:
+    if: github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/workstation/')
     runs-on: ubuntu-latest
     outputs:
       final_version: ${{ steps.version-file.outputs.release-version }}
@@ -56,6 +58,21 @@ jobs:
       - name: Publish core to Maven local (required before kits can compile)
         run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=${{ needs.setup-and-version.outputs.final_version }} --no-build-cache
 
+      - name: Validate aggregate kit publications in Maven local
+        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=${{ needs.setup-and-version.outputs.final_version }} -c settings-kits.gradle --no-build-cache
+
+      - name: Validate isolated kit publication (urbanairship-20)
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 -PVERSION=${{ needs.setup-and-version.outputs.final_version }} publishMavenPublicationToMavenLocal --no-build-cache
+
+      - name: Validate isolated kit publication (braze-43)
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/braze/braze-43 -PVERSION=${{ needs.setup-and-version.outputs.final_version }} publishMavenPublicationToMavenLocal --no-build-cache
+
+      - name: Validate isolated kit publication (ga-23)
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga/ga-23 -PVERSION=${{ needs.setup-and-version.outputs.final_version }} publishMavenPublicationToMavenLocal --no-build-cache
+
+      - name: Validate isolated kit publication (ga4-23)
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga4/ga4-23 -PVERSION=${{ needs.setup-and-version.outputs.final_version }} publishMavenPublicationToMavenLocal --no-build-cache
+
       - name: Publish core to Maven Central
         run: ./gradlew publishMavenPublicationToMavenCentralRepository -PVERSION=${{ needs.setup-and-version.outputs.final_version }} --no-build-cache
 
@@ -65,16 +82,16 @@ jobs:
       # Isolated Kotlin 2.2.x kits are excluded from settings-kits.gradle and must be
       # published from their own project roots (same pattern as CI test/lint steps).
       - name: Publish Isolated Kits (urbanairship-20)
-        run: ./gradlew -p kits/urbanairship/urbanairship-20 -PisRelease=true -PVERSION=${{ needs.setup-and-version.outputs.final_version }} publishMavenPublicationToMavenCentralRepository --no-build-cache
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 -PVERSION=${{ needs.setup-and-version.outputs.final_version }} publishMavenPublicationToMavenCentralRepository --no-build-cache
 
       - name: Publish Isolated Kits (braze-43)
-        run: ./gradlew -p kits/braze/braze-43 -PisRelease=true -PVERSION=${{ needs.setup-and-version.outputs.final_version }} publishMavenPublicationToMavenCentralRepository --no-build-cache
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/braze/braze-43 -PVERSION=${{ needs.setup-and-version.outputs.final_version }} publishMavenPublicationToMavenCentralRepository --no-build-cache
 
       - name: Publish Isolated Kits (ga-23)
-        run: ./gradlew -p kits/ga/ga-23 -PisRelease=true -PVERSION=${{ needs.setup-and-version.outputs.final_version }} publishMavenPublicationToMavenCentralRepository --no-build-cache
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga/ga-23 -PVERSION=${{ needs.setup-and-version.outputs.final_version }} publishMavenPublicationToMavenCentralRepository --no-build-cache
 
       - name: Publish Isolated Kits (ga4-23)
-        run: ./gradlew -p kits/ga4/ga4-23 -PisRelease=true -PVERSION=${{ needs.setup-and-version.outputs.final_version }} publishMavenPublicationToMavenCentralRepository --no-build-cache
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga4/ga4-23 -PVERSION=${{ needs.setup-and-version.outputs.final_version }} publishMavenPublicationToMavenCentralRepository --no-build-cache
 
       # rokt-sdk-plus (com.rokt:rokt-sdk-plus) is an umbrella over the mParticle Rokt kit + the
       # Rokt Payment Extension. The "Publish core to Maven local" step above already placed

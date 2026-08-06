@@ -1,2 +1,6 @@
-rootProject.name = "android-googleanalyticsfirebasega4-kit"
+pluginManagement {
+    includeBuild("../../../build-logic")
+}
+
+rootProject.name = "ga4-23"
 include(":")

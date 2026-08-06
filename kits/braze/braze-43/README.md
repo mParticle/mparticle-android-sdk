@@ -54,7 +54,7 @@ This repository contains an [example app](example) showing how to implement mPar
 
     ```groovy
     dependencies {
-        implementation 'com.mparticle:braze-43:6+'
+        implementation 'com.mparticle:braze-43:6.0.1'
     }
     ```
 

@@ -8,6 +8,7 @@ import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.tasks.PublishToMavenLocal
+import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.gradle.jvm.tasks.Jar
 
 fun Project.configureMavenPublishing(mparticleMavenPublish: MParticleMavenPublishExtension) {
@@ -96,6 +97,12 @@ fun Project.configureMavenPublishing(mparticleMavenPublish: MParticleMavenPublis
         }
 
         tasks.withType(PublishToMavenLocal::class.java).configureEach {
+            if (name.contains(publicationName, ignoreCase = true)) {
+                dependsOn(validateTaskName)
+            }
+        }
+
+        tasks.withType(PublishToMavenRepository::class.java).configureEach {
             if (name.contains(publicationName, ignoreCase = true)) {
                 dependsOn(validateTaskName)
             }

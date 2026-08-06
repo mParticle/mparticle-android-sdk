@@ -8,9 +8,10 @@ This repository contains the [Urban Airship](https://www.urbanairship.com) integ
 
     ```groovy
     dependencies {
-        implementation 'com.mparticle:android-urbanairship-kit:5+'
+        implementation 'com.mparticle:urbanairship-20:6.0.1'
     }
     ```
+    SDK 5.x releases use the legacy `com.mparticle:android-urbanairship-kit` coordinate.
 2. Follow the mParticle Android SDK [quick-start](https://github.com/mParticle/mparticle-android-sdk), then rebuild and launch your app, and verify that you see `"Urban Airship detected"` in the output of `adb logcat`.
 3. Reference mParticle's integration docs below to enable the integration.
 4. If you wish to utilize Urban Airship's Push Messaging capabilities, please refer to the Push Message Considerations section below

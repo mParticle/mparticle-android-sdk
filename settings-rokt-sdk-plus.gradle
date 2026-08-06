@@ -1,3 +1,7 @@
+pluginManagement {
+    includeBuild('build-logic')
+}
+
 // Isolated settings for the `com.rokt:rokt-sdk-plus` umbrella artifact.
 //
 // rokt-sdk-plus is intentionally kept OUT of the main settings.gradle so it is not picked up
