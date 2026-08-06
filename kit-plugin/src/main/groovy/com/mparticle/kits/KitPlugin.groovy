@@ -43,9 +43,8 @@ class KitPlugin implements Plugin<Project> {
             jvmArgs += ['--add-opens', 'java.base/java.util.concurrent=ALL-UNNAMED'] }
 
 
-        // mparticle.android.library.publish is only available when building inside the
-        // monorepo (buildSrc on classpath). Standalone kit builds and test fixtures skip
-        // Maven publishing configuration — kits will be migrated to the monorepo.
+        // The publication convention is available to monorepo builds and maintained standalone
+        // kits that include the shared build logic. External kit builds can omit it.
         try {
             target.apply(plugin: 'mparticle.android.library.publish')
             def publishExt = target.extensions.getByName('mparticleMavenPublish')
@@ -101,4 +100,3 @@ class KitPlugin implements Plugin<Project> {
         }
     }
 }
-

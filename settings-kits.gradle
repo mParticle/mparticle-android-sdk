@@ -1,3 +1,7 @@
+settings.pluginManagement {
+    includeBuild('build-logic')
+}
+
 //keep things alphabetical like readme
 
 include (

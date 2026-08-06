@@ -13,7 +13,7 @@ Use `Release - Draft` to prepare a release PR. The workflow:
 1. Reads the current version from `VERSION`.
 2. Computes the next release version from `bump-type` and optional `qualifier`.
 3. Writes the computed version back to `VERSION`.
-4. Publishes to Maven local as a smoke test.
+4. Publishes core, aggregate kits, and isolated kits to Maven local as a smoke test.
 5. Generates the changelog entry.
 6. Opens a PR back into the branch selected in the workflow dispatch UI.
 
@@ -26,7 +26,7 @@ Generated release PR branches use `release/prep-<version>`, for example `release
 - `main`
 - `workstation/*`
 
-The workflow publishes the SDK and kits to Maven Central using the exact version in `VERSION`, then creates a GitHub release with the same tag.
+The workflow validates every publication in Maven local before publishing the SDK, aggregate kits, and isolated kits to Maven Central using the exact version in `VERSION`. It creates a GitHub release with the same tag only after every publication succeeds.
 
 ## Stable releases
 
@@ -70,7 +70,9 @@ After a successful publish workflow, verify:
 1. The GitHub release exists with the expected tag.
 2. The SDK artifact is present in [Sonatype](https://central.sonatype.com/publishing).
 3. The kit artifacts are present in [Sonatype](https://central.sonatype.com/publishing).
-4. Pre-release tags are marked as pre-releases and stable tags are marked as latest.
+4. `urbanairship-20`, `braze-43`, `ga-23`, and `ga4-23` are present at the release version.
+5. Every kit POM depends on `android-kit-base` at the exact release version.
+6. Pre-release tags are marked as pre-releases and stable tags are marked as latest.
 
 ## Troubleshooting
 

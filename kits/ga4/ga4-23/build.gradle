@@ -1,6 +1,8 @@
 buildscript {
     ext.kotlin_version = '2.2.20'
-    if (!project.hasProperty('version') || project.version.equals('unspecified')) {
+    if (project.hasProperty('VERSION')) {
+        project.version = project.property('VERSION')
+    } else if (!project.hasProperty('version') || project.version.equals('unspecified')) {
         project.version = '+'
     }
 
@@ -19,6 +21,7 @@ buildscript {
 }
 
 plugins {
+    id "mparticle.android.library.publish" apply false
     id "org.sonarqube" version "3.5.0.2730"
     id "org.jlleitschuh.gradle.ktlint" version "13.0.0"
 }
@@ -34,6 +37,11 @@ sonarqube {
 apply plugin: 'org.jlleitschuh.gradle.ktlint'
 apply plugin: 'kotlin-android'
 apply plugin: 'com.mparticle.kit'
+
+mparticleMavenPublish {
+    artifactId.set('ga4-23')
+    description.set('Google Analytics 4 for Firebase 23 kit for the mParticle SDK')
+}
 
 android {
     namespace 'com.mparticle.kits.googleanalyticsfirebasega4'

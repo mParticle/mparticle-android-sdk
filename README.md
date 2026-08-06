@@ -38,29 +38,33 @@ dependencies {
 Kits maintained by mParticle are developed in this monorepo under the [`kits/`](kits) directory and deployed as individual Maven Central
 artifacts. The table below lists kits with a final v6 artifact available on Maven Central:
 
-| Kit                                        | Maven artifact                                                                                           |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| [Adjust](kits/adjust/adjust-5)             | [`com.mparticle:adjust-5`](https://central.sonatype.com/artifact/com.mparticle/adjust-5)                 |
-| [Adobe](kits/adobe/adobe)                  | [`com.mparticle:adobe`](https://central.sonatype.com/artifact/com.mparticle/adobe)                       |
-| [AppsFlyer](kits/appsflyer/appsflyer-6)    | [`com.mparticle:appsflyer-6`](https://central.sonatype.com/artifact/com.mparticle/appsflyer-6)           |
-| [Apptentive](kits/apptentive/apptentive-6) | [`com.mparticle:apptentive-6`](https://central.sonatype.com/artifact/com.mparticle/apptentive-6)         |
-| [Apptimize](kits/apptimize/apptimize-3)    | [`com.mparticle:apptimize-3`](https://central.sonatype.com/artifact/com.mparticle/apptimize-3)           |
-| [Branch Metrics](kits/branch/branch-5)     | [`com.mparticle:branch-5`](https://central.sonatype.com/artifact/com.mparticle/branch-5)                 |
-| [Braze 38](kits/braze/braze-38)            | [`com.mparticle:braze-38`](https://central.sonatype.com/artifact/com.mparticle/braze-38)                 |
-| [Braze 39](kits/braze/braze-39)            | [`com.mparticle:braze-39`](https://central.sonatype.com/artifact/com.mparticle/braze-39)                 |
-| [Braze 40](kits/braze/braze-40)            | [`com.mparticle:braze-40`](https://central.sonatype.com/artifact/com.mparticle/braze-40)                 |
-| [Braze 41](kits/braze/braze-41)            | [`com.mparticle:braze-41`](https://central.sonatype.com/artifact/com.mparticle/braze-41)                 |
-| [CleverTap](kits/clevertap/clevertap-7)    | [`com.mparticle:clevertap-7`](https://central.sonatype.com/artifact/com.mparticle/clevertap-7)           |
-| [comScore](kits/comscore/comscore-6)       | [`com.mparticle:comscore-6`](https://central.sonatype.com/artifact/com.mparticle/comscore-6)             |
-| [Iterable](kits/iterable/iterable-3)       | [`com.mparticle:iterable-3`](https://central.sonatype.com/artifact/com.mparticle/iterable-3)             |
-| [Kochava](kits/kochava/kochava-5)          | [`com.mparticle:kochava-5`](https://central.sonatype.com/artifact/com.mparticle/kochava-5)               |
-| [Leanplum](kits/leanplum/leanplum-7)       | [`com.mparticle:leanplum-7`](https://central.sonatype.com/artifact/com.mparticle/leanplum-7)             |
-| [Localytics](kits/localytics/localytics-6) | [`com.mparticle:localytics-6`](https://central.sonatype.com/artifact/com.mparticle/localytics-6)         |
-| [OneTrust](kits/onetrust/onetrust)         | [`com.mparticle:onetrust`](https://central.sonatype.com/artifact/com.mparticle/onetrust)                 |
-| [Optimizely](kits/optimizely/optimizely-3) | [`com.mparticle:optimizely-3`](https://central.sonatype.com/artifact/com.mparticle/optimizely-3)         |
-| [Radar](kits/radar/radar-3)                | [`com.mparticle:radar-3`](https://central.sonatype.com/artifact/com.mparticle/radar-3)                   |
-| [Rokt](kits/rokt/rokt)                     | [`com.mparticle:android-rokt-kit`](https://central.sonatype.com/artifact/com.mparticle/android-rokt-kit) |
-| [Singular](kits/singular/singular-12)      | [`com.mparticle:singular-12`](https://central.sonatype.com/artifact/com.mparticle/singular-12)           |
+| Kit                                                | Maven artifact                                                                                           |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| [Adjust](kits/adjust/adjust-5)                     | [`com.mparticle:adjust-5`](https://central.sonatype.com/artifact/com.mparticle/adjust-5)                 |
+| [Adobe](kits/adobe/adobe)                          | [`com.mparticle:adobe`](https://central.sonatype.com/artifact/com.mparticle/adobe)                       |
+| [AppsFlyer](kits/appsflyer/appsflyer-6)            | [`com.mparticle:appsflyer-6`](https://central.sonatype.com/artifact/com.mparticle/appsflyer-6)           |
+| [Apptentive](kits/apptentive/apptentive-6)         | [`com.mparticle:apptentive-6`](https://central.sonatype.com/artifact/com.mparticle/apptentive-6)         |
+| [Apptimize](kits/apptimize/apptimize-3)            | [`com.mparticle:apptimize-3`](https://central.sonatype.com/artifact/com.mparticle/apptimize-3)           |
+| [Branch Metrics](kits/branch/branch-5)             | [`com.mparticle:branch-5`](https://central.sonatype.com/artifact/com.mparticle/branch-5)                 |
+| [Braze 38](kits/braze/braze-38)                    | [`com.mparticle:braze-38`](https://central.sonatype.com/artifact/com.mparticle/braze-38)                 |
+| [Braze 39](kits/braze/braze-39)                    | [`com.mparticle:braze-39`](https://central.sonatype.com/artifact/com.mparticle/braze-39)                 |
+| [Braze 40](kits/braze/braze-40)                    | [`com.mparticle:braze-40`](https://central.sonatype.com/artifact/com.mparticle/braze-40)                 |
+| [Braze 41](kits/braze/braze-41)                    | [`com.mparticle:braze-41`](https://central.sonatype.com/artifact/com.mparticle/braze-41)                 |
+| [Braze 43](kits/braze/braze-43)                    | [`com.mparticle:braze-43`](https://central.sonatype.com/artifact/com.mparticle/braze-43)                 |
+| [CleverTap](kits/clevertap/clevertap-7)            | [`com.mparticle:clevertap-7`](https://central.sonatype.com/artifact/com.mparticle/clevertap-7)           |
+| [comScore](kits/comscore/comscore-6)               | [`com.mparticle:comscore-6`](https://central.sonatype.com/artifact/com.mparticle/comscore-6)             |
+| [Google Analytics](kits/ga/ga-23)                  | [`com.mparticle:ga-23`](https://central.sonatype.com/artifact/com.mparticle/ga-23)                       |
+| [Google Analytics 4](kits/ga4/ga4-23)              | [`com.mparticle:ga4-23`](https://central.sonatype.com/artifact/com.mparticle/ga4-23)                     |
+| [Iterable](kits/iterable/iterable-3)               | [`com.mparticle:iterable-3`](https://central.sonatype.com/artifact/com.mparticle/iterable-3)             |
+| [Kochava](kits/kochava/kochava-5)                  | [`com.mparticle:kochava-5`](https://central.sonatype.com/artifact/com.mparticle/kochava-5)               |
+| [Leanplum](kits/leanplum/leanplum-7)               | [`com.mparticle:leanplum-7`](https://central.sonatype.com/artifact/com.mparticle/leanplum-7)             |
+| [Localytics](kits/localytics/localytics-6)         | [`com.mparticle:localytics-6`](https://central.sonatype.com/artifact/com.mparticle/localytics-6)         |
+| [OneTrust](kits/onetrust/onetrust)                 | [`com.mparticle:onetrust`](https://central.sonatype.com/artifact/com.mparticle/onetrust)                 |
+| [Optimizely](kits/optimizely/optimizely-3)         | [`com.mparticle:optimizely-3`](https://central.sonatype.com/artifact/com.mparticle/optimizely-3)         |
+| [Radar](kits/radar/radar-3)                        | [`com.mparticle:radar-3`](https://central.sonatype.com/artifact/com.mparticle/radar-3)                   |
+| [Rokt](kits/rokt/rokt)                             | [`com.mparticle:android-rokt-kit`](https://central.sonatype.com/artifact/com.mparticle/android-rokt-kit) |
+| [Singular](kits/singular/singular-12)              | [`com.mparticle:singular-12`](https://central.sonatype.com/artifact/com.mparticle/singular-12)           |
+| [Urban Airship](kits/urbanairship/urbanairship-20) | [`com.mparticle:urbanairship-20`](https://central.sonatype.com/artifact/com.mparticle/urbanairship-20)   |
 
 ### Google Play Services Ads
 

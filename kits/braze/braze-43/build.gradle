@@ -1,6 +1,8 @@
 buildscript {
     ext.kotlin_version = '2.2.20'
-    if (!project.hasProperty('version') || project.version.equals('unspecified')) {
+    if (project.hasProperty('VERSION')) {
+        project.version = project.property('VERSION')
+    } else if (!project.hasProperty('version') || project.version.equals('unspecified')) {
         project.version = '+'
     }
 
@@ -17,6 +19,7 @@ buildscript {
 }
 
 plugins {
+    id "mparticle.android.library.publish" apply false
     id "org.sonarqube" version "3.5.0.2730"
     id "org.jlleitschuh.gradle.ktlint" version "13.0.0"
 }
@@ -33,13 +36,9 @@ apply plugin: 'org.jlleitschuh.gradle.ktlint'
 apply plugin: 'kotlin-android'
 apply plugin: 'com.mparticle.kit'
 
-// Standalone builds use rootProject.name "android-braze-kit"; force the published
-// Maven coordinate consumers expect (com.mparticle:braze-43).
-if (extensions.findByName('mparticleMavenPublish') != null) {
-    mparticleMavenPublish {
-        artifactId.set('braze-43')
-        description.set('Braze 43 kit for the mParticle SDK')
-    }
+mparticleMavenPublish {
+    artifactId.set('braze-43')
+    description.set('Braze 43 kit for the mParticle SDK')
 }
 
 android {

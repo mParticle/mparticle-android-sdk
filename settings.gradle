@@ -1,4 +1,6 @@
 pluginManagement {
+    includeBuild('build-logic')
+
     buildscript {
         repositories {
             mavenCentral()

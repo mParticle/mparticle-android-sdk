@@ -92,8 +92,7 @@ Now we will build our Local Maven repository, this will allow us to make changes
 publish it locally so that we can test them.
 
 Run the following command in the terminal:
-`./gradlew buildLocal`
-`./gradlew -PisRelease=true clean publishReleaseLocal`
+`./gradlew clean publishMavenPublicationToMavenLocal -PVERSION="$(head -n 1 VERSION)"`
 
 This will publish the core modules to mavenLocal(), you should see all .pom and .aar files located
 in your local /.m2 folder.)
@@ -128,7 +127,7 @@ This will ensure faster running times and easier error troubleshooting.
 
 Now run the following command in the terminal:
 
-`./gradlew -PisRelease=true clean testRelease publishReleaseLocal -c settings-kits.gradle`
+`./gradlew clean testRelease publishMavenPublicationToMavenLocal -PVERSION="$(head -n 1 VERSION)" -c settings-kits.gradle`
 
 You can now work on the specific kits you need, test them and even contribute through pull requests.
 
@@ -146,22 +145,29 @@ Kotlin version.
 - `kits/ga/ga-23` (Kotlin 2.2.x, `firebase-analytics:23.x`)
 - `kits/ga4/ga4-23` (Kotlin 2.2.x, `firebase-analytics:23.x`)
 
-To build an isolated kit after publishing core to mavenLocal:
+To build an isolated kit after publishing core to mavenLocal, run from the repository root:
 
 ```bash
-cd kits/urbanairship/urbanairship-20
-./gradlew testRelease publishReleaseLocal
+./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true \
+  -p kits/urbanairship/urbanairship-20 \
+  -PVERSION="$(head -n 1 VERSION)" \
+  testRelease publishMavenPublicationToMavenLocal
 ```
 
 The kit resolves `android-kit-base` from mavenLocal, so you must publish
-the core first (`./gradlew -PisRelease=true publishReleaseLocal`).
+the core first with the same exact `VERSION`.
 
 To verify all kits (main + isolated):
 
 ```bash
-./gradlew -PisRelease=true publishReleaseLocal
-./gradlew -PisRelease=true testRelease publishReleaseLocal -c settings-kits.gradle
-cd kits/urbanairship/urbanairship-20 && ./gradlew -PisRelease=true testRelease
+./gradlew publishMavenPublicationToMavenLocal -PVERSION="$(head -n 1 VERSION)"
+./gradlew testRelease publishMavenPublicationToMavenLocal \
+  -PVERSION="$(head -n 1 VERSION)" \
+  -c settings-kits.gradle
+./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true \
+  -p kits/urbanairship/urbanairship-20 \
+  -PVERSION="$(head -n 1 VERSION)" \
+  testRelease publishMavenPublicationToMavenLocal
 ```
 
 **Adding a new isolated kit:** If a kit upgrades to a Kotlin version
@@ -170,9 +176,9 @@ incompatible with the root KGP (2.1.20), remove it from
 to the CI workflows following the urbanairship pattern. Also add a
 matching isolated publish step in `.github/workflows/release-publish.yml`
 (the aggregate `settings-kits.gradle` publish will not include it).
-If the kit's standalone `rootProject.name` differs from the Maven
-artifact id consumers expect, set `mparticleMavenPublish.artifactId`
-explicitly in the kit `build.gradle` (see `braze-43`).
+Include `build-logic` from the standalone settings file, declare the shared
+publication plugin with `apply false`, and set `mparticleMavenPublish.artifactId`
+explicitly in the kit `build.gradle`.
 
 ## Read More
 
