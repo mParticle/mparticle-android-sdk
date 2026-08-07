@@ -2,6 +2,45 @@
 
 ## [Unreleased]
 
+## [6.0.2] - 2026-08-07
+
+### Core
+
+#### Fixed
+
+- Bound BaseHandler.disable() instead of spinning indefinitely ([#751](https://github.com/mParticle/mparticle-android-sdk/pull/751))
+- Never generate empty random user identities ([#750](https://github.com/mParticle/mparticle-android-sdk/pull/750))
+
+### Kits
+
+#### Adjust
+
+##### Changed
+
+- Correct v6 Maven coordinates and source links ([#749](https://github.com/mParticle/mparticle-android-sdk/pull/749))
+
+#### Adobemedia
+
+##### Fixed
+
+- Write resolved dependency versions into POM and re-include in publish ([#741](https://github.com/mParticle/mparticle-android-sdk/pull/741))
+
+#### Braze
+
+##### Added
+
+- Support Braze 43 and recommended eCommerce events ([#728](https://github.com/mParticle/mparticle-android-sdk/pull/728))
+
+##### Fixed
+
+- Restore Maven Central publishing for isolated kits ([#753](https://github.com/mParticle/mparticle-android-sdk/pull/753))
+
+#### Singular
+
+##### Fixed
+
+- Raise singular-12 sample app minSdk to 21 ([#745](https://github.com/mParticle/mparticle-android-sdk/pull/745))
+
 ## [6.0.1] - 2026-08-05
 
 ### Kits
