@@ -94,21 +94,25 @@ public class MParticleUserImpl implements MParticleUser {
 
     @Override
     public boolean setUserAttributeList(String key, Object value) {
+        MParticle.logRoktApiUsage("SET_USER_ATTRIBUTE_LIST");
         return mUserDelegate.setUserAttributeList(key, value, getId());
     }
 
     @Override
     public boolean incrementUserAttribute(String key, Number value) {
+        MParticle.logRoktApiUsage("INCREMENT_USER_ATTRIBUTE");
         return mUserDelegate.incrementUserAttribute(key, value, getId());
     }
 
     @Override
     public boolean removeUserAttribute(String key) {
+        MParticle.logRoktApiUsage("REMOVE_USER_ATTRIBUTE");
         return mUserDelegate.removeUserAttribute(key, getId());
     }
 
     @Override
     public boolean setUserTag(@NonNull String tag) {
+        MParticle.logRoktApiUsage("SET_USER_TAG");
         return setUserAttribute(tag, null);
     }
 
@@ -120,11 +124,13 @@ public class MParticleUserImpl implements MParticleUser {
 
     @Override
     public ConsentState getConsentState() {
+        MParticle.logRoktApiUsage("GET_CONSENT_STATE");
         return mUserDelegate.getConsentState(getId());
     }
 
     @Override
     public void setConsentState(ConsentState state) {
+        MParticle.logRoktApiUsage("SET_CONSENT_STATE");
         mUserDelegate.setConsentState(state, getId());
     }
 
@@ -145,6 +151,7 @@ public class MParticleUserImpl implements MParticleUser {
 
     @Override
     public AudienceTask<AudienceResponse> getUserAudiences() {
+        MParticle.logRoktApiUsage("GET_USER_AUDIENCES");
         return mUserDelegate.getUserAudiences(getId());
     }
 

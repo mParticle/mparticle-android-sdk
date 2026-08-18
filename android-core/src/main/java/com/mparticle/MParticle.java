@@ -148,6 +148,7 @@ public class MParticle {
      * @param interval in seconds
      */
     public void setUpdateInterval(int interval) {
+        MParticle.logRoktApiUsage("SET_UPLOAD_INTERVAL");
         long intervalMillis = interval * 1000L;
         if ((intervalMillis >= 1 && mConfigManager.getUploadInterval() != intervalMillis)) {
             upload();
@@ -281,6 +282,45 @@ public class MParticle {
         MParticle.instance = instance;
     }
 
+    // Rokt public-API-usage diagnostics are suppressed while SDK/kit internals invoke a public API
+    // (auto-upload, the Rokt kit's attribute enrichment, deferred push-token modify, etc.) so only
+    // genuine partner calls are reported. Synchronous by design: logRoktApiUsage runs at each
+    // instrumented method's first line, on the caller's thread, before any dispatch — so this flag
+    // is active for that call. ponytail: covers synchronous re-entry only, which is exactly how the
+    // instrumented methods emit; async internal paths that need it call withoutRoktApiUsage directly.
+    private static final ThreadLocal<Boolean> sSuppressRoktApiUsage = new ThreadLocal<>();
+
+    /**
+     * @hide Internal: forwards a bounded, non-PII public-API-usage diagnostic code to the Rokt kit
+     * (only when the kit is active). No-op when mParticle isn't started, Rokt isn't integrated, or
+     * the call originates from SDK/kit internals (see {@link #withoutRoktApiUsage(Runnable)}).
+     * Reads the static instance directly so it stays quiet (no getInstance() warning) on the hot path.
+     * Not intended for partner use.
+     */
+    public static void logRoktApiUsage(@Nullable String code) {
+        if (Boolean.TRUE.equals(sSuppressRoktApiUsage.get())) {
+            return;
+        }
+        MParticle mp = instance;
+        if (mp != null && mp.mKitManager != null) {
+            mp.mKitManager.logRoktApiDiagnostic(code);
+        }
+    }
+
+    /**
+     * @hide Internal: run SDK/kit work that invokes public APIs without emitting Rokt usage
+     * diagnostics, so internal re-entry isn't misreported as a partner call. Not for partner use.
+     */
+    public static void withoutRoktApiUsage(@NonNull Runnable action) {
+        boolean previous = Boolean.TRUE.equals(sSuppressRoktApiUsage.get());
+        sSuppressRoktApiUsage.set(true);
+        try {
+            action.run();
+        } finally {
+            sSuppressRoktApiUsage.set(previous);
+        }
+    }
+
     /**
      * Switch the SDK to a new API key and secret.
      * Will first batch all events that have not been sent to mParticle into upload records,
@@ -291,6 +331,7 @@ public class MParticle {
      @param options Required to initialize the SDK properly
      */
     public static void switchWorkspace(@NonNull MParticleOptions options) {
+        MParticle.logRoktApiUsage("SWITCH_WORKSPACE");
         synchronized (MParticle.class) {
             MParticle localInstance = instance;
             if (localInstance == null) {
@@ -446,6 +487,7 @@ public class MParticle {
      * Force upload all queued messages to the mParticle server.
      */
     public void upload() {
+        MParticle.logRoktApiUsage("UPLOAD");
         mMessageManager.doUpload();
     }
 
@@ -454,6 +496,7 @@ public class MParticle {
      * automatically retrieved upon installation from Google Play.
      */
     public void setInstallReferrer(@Nullable String referrer) {
+        MParticle.logRoktApiUsage("SET_INSTALL_REFERRER");
         InstallReferrerHelper.setInstallReferrer(mAppContext, referrer);
     }
 
@@ -468,6 +511,7 @@ public class MParticle {
     }
 
     public void logEvent(@NonNull BaseEvent event) {
+        MParticle.logRoktApiUsage("LOG_EVENT");
         if (event instanceof MPEvent && event.isShouldUploadEvent()) {
             logMPEvent((MPEvent) event);
         } else if (event instanceof CommerceEvent && event.isShouldUploadEvent()) {
@@ -519,6 +563,7 @@ public class MParticle {
      * @param contextInfo    An MPProduct or any set of data to associate with this increase in LTV (optional)
      */
     public void logLtvIncrease(@NonNull BigDecimal valueIncreased, @Nullable String eventName, @Nullable Map<String, String> contextInfo) {
+        MParticle.logRoktApiUsage("LOG_LTV_INCREASE");
         if (valueIncreased == null) {
             Logger.error("ValueIncreased must not be null.");
             return;
@@ -528,11 +573,13 @@ public class MParticle {
         }
         contextInfo.put(MessageKey.RESERVED_KEY_LTV, valueIncreased.toPlainString());
         contextInfo.put(Constants.MethodName.METHOD_NAME, Constants.MethodName.LOG_LTV);
-        logEvent(
+        final Map<String, String> ltvContextInfo = contextInfo;
+        // Internal re-entry: this is LOG_LTV_INCREASE, not a partner LOG_EVENT call.
+        withoutRoktApiUsage(() -> logEvent(
                 new MPEvent.Builder(eventName == null ? "Increase LTV" : eventName, EventType.Transaction)
-                        .customAttributes(contextInfo)
+                        .customAttributes(ltvContextInfo)
                         .build()
-        );
+        ));
     }
 
     /**
@@ -572,6 +619,7 @@ public class MParticle {
      * @param screenEvent an event object, the name of the event will be used as the screen name
      */
     public void logScreen(@NonNull MPEvent screenEvent) {
+        MParticle.logRoktApiUsage("LOG_SCREEN");
         screenEvent.setScreenEvent(true);
         if (MPUtility.isEmpty(screenEvent.getEventName())) {
             Logger.error("screenName is required for logScreen.");
@@ -598,6 +646,7 @@ public class MParticle {
      * @param breadcrumb
      */
     public void leaveBreadcrumb(@NonNull String breadcrumb) {
+        MParticle.logRoktApiUsage("LEAVE_BREADCRUMB");
         if (mConfigManager.isEnabled()) {
             if (MPUtility.isEmpty(breadcrumb)) {
                 Logger.error("breadcrumb is required for leaveBreadcrumb.");
@@ -630,6 +679,7 @@ public class MParticle {
      * @param errorAttributes a Map of data attributes to associate with this error
      */
     public void logError(@NonNull String message, @Nullable Map<String, String> errorAttributes) {
+        MParticle.logRoktApiUsage("LOG_ERROR");
         if (mConfigManager.isEnabled()) {
             if (MPUtility.isEmpty(message)) {
                 Logger.error("message is required for logErrorEvent.");
@@ -646,6 +696,7 @@ public class MParticle {
     }
 
     public void logNetworkPerformance(@NonNull String url, long startTime, @NonNull String method, long length, long bytesSent, long bytesReceived, @Nullable String requestString, int responseCode) {
+        MParticle.logRoktApiUsage("LOG_NETWORK_PERFORMANCE");
         if (mConfigManager.isEnabled()) {
             mAppStateManager.ensureActiveSession();
             mMessageManager.logNetworkPerformanceEvent(startTime, method, url, length, bytesSent, bytesReceived, requestString);
@@ -694,6 +745,7 @@ public class MParticle {
      */
     @NonNull
     public Map<Integer, AttributionResult> getAttributionResults() {
+        MParticle.logRoktApiUsage("GET_ATTRIBUTION_INFO");
         return mKitManager.getAttributionResults();
     }
 
@@ -706,6 +758,7 @@ public class MParticle {
      * @param message   the name of the error event to be tracked
      */
     public void logException(@NonNull Exception exception, @Nullable Map<String, String> eventData, @Nullable String message) {
+        MParticle.logRoktApiUsage("LOG_EXCEPTION");
         if (mConfigManager.isEnabled()) {
             mAppStateManager.ensureActiveSession();
             JSONObject eventDataJSON = MPUtility.enforceAttributeConstraints(eventData);
@@ -821,6 +874,7 @@ public class MParticle {
      * @param value the attribute value. This value will be converted to its String representation as dictated by its <code>toString()</code> method.
      */
     public void setSessionAttribute(@NonNull String key, @Nullable Object value) {
+        MParticle.logRoktApiUsage("SET_SESSION_ATTRIBUTE");
         if (key == null) {
             Logger.warning("setSessionAttribute called with null key. Ignoring...");
             return;
@@ -845,6 +899,7 @@ public class MParticle {
      * @param value the attribute value
      */
     public void incrementSessionAttribute(@NonNull String key, int value) {
+        MParticle.logRoktApiUsage("INCREMENT_SESSION_ATTRIBUTE");
         if (key == null) {
             Logger.warning("incrementSessionAttribute called with null key. Ignoring...");
             return;
@@ -875,6 +930,7 @@ public class MParticle {
      * @param optOutStatus set to <code>true</code> to opt out of event tracking
      */
     public void setOptOut(@NonNull Boolean optOutStatus) {
+        MParticle.logRoktApiUsage("SET_OPT_OUT");
         if (optOutStatus != null) {
             if (optOutStatus != mConfigManager.getOptedOut()) {
                 if (!optOutStatus) {
@@ -916,6 +972,7 @@ public class MParticle {
      * @param state the device-level consent state, or {@code null} to clear the override
      */
     public void setDeviceConsentState(@Nullable ConsentState state) {
+        MParticle.logRoktApiUsage("SET_DEVICE_CONSENT_STATE");
         ConsentState oldState = mConfigManager.getEffectiveConsentState(mConfigManager.getMpid());
         mConfigManager.setDeviceConsentState(state);
         ConsentState newState = mConfigManager.getEffectiveConsentState(mConfigManager.getMpid());
@@ -945,6 +1002,7 @@ public class MParticle {
      */
     @Nullable
     public Uri getSurveyUrl(final int kitId) {
+        MParticle.logRoktApiUsage("GET_SURVEY_URL");
         return mKitManager.getSurveyUrl(kitId, null, null);
     }
 
@@ -1009,6 +1067,7 @@ public class MParticle {
     @SuppressLint("AddJavascriptInterface")
     @RequiresApi(17)
     public void registerWebView(@NonNull WebView webView, String requiredBridgeName) {
+        MParticle.logRoktApiUsage("REGISTER_WEBVIEW");
         MParticleJSInterface.registerWebView(webView, requiredBridgeName);
     }
 
@@ -1022,6 +1081,7 @@ public class MParticle {
      * @see MParticle.LogLevel
      */
     public static void setLogLevel(@NonNull LogLevel level) {
+        MParticle.logRoktApiUsage("SET_LOG_LEVEL");
         if (level != null) {
             Logger.setMinLogLevel(level, true);
         }
@@ -1100,6 +1160,7 @@ public class MParticle {
      * @see MParticle.ServiceProviders
      */
     public boolean isKitActive(int serviceProviderId) {
+        MParticle.logRoktApiUsage("IS_KIT_ACTIVE");
         return mKitManager.isKitActive(serviceProviderId);
     }
 
@@ -1112,6 +1173,7 @@ public class MParticle {
      */
     @Nullable
     public Object getKitInstance(int kitId) {
+        MParticle.logRoktApiUsage("GET_KIT_INSTANCE");
         return mKitManager.getKitInstance(kitId);
     }
 
@@ -1131,6 +1193,7 @@ public class MParticle {
      * @param intent
      */
     public void logNotification(@NonNull Intent intent) {
+        MParticle.logRoktApiUsage("LOG_NOTIFICATION");
         if (mConfigManager.isEnabled()) {
             ProviderCloudMessage message = ProviderCloudMessage.createMessage(intent, ConfigManager.getPushKeys(mAppContext));
             mMessageManager.logNotification(message, getAppState());
@@ -1161,6 +1224,7 @@ public class MParticle {
      * @param intent
      */
     public void logNotificationOpened(@NonNull Intent intent) {
+        MParticle.logRoktApiUsage("LOG_NOTIFICATION_OPENED");
         logNotification(ProviderCloudMessage.createMessage(intent, ConfigManager.getPushKeys(mAppContext)),
                 true, MParticle.getAppState(), ProviderCloudMessage.FLAG_READ | ProviderCloudMessage.FLAG_DIRECT_OPEN);
     }
@@ -1219,6 +1283,7 @@ public class MParticle {
      * @param context
      */
     public static void reset(@NonNull Context context) {
+        MParticle.logRoktApiUsage("RESET");
         reset(context, true, false);
     }
 
@@ -1604,9 +1669,10 @@ public class MParticle {
     }
 
     private void sendPushTokenModifyRequest(MParticleUser user, @Nullable String instanceId, @Nullable String oldInstanceId) {
-        Identity().modify(new Builder(user)
+        // Internal SDK bookkeeping (push-token refresh) — must not be reported as a partner MODIFY call.
+        withoutRoktApiUsage(() -> Identity().modify(new Builder(user)
                 .pushToken(instanceId, oldInstanceId)
-                .build());
+                .build()));
     }
 
     class Builder extends IdentityApiRequest.Builder {
@@ -1641,6 +1707,7 @@ public class MParticle {
      *                      also pass a null or empty map here to remove all of the attributes.
      */
     public void setIntegrationAttributes(int integrationId, @Nullable Map<String, String> attributes) {
+        MParticle.logRoktApiUsage("SET_INTEGRATION_ATTRIBUTES");
         this.Internal().getConfigManager().setIntegrationAttributes(integrationId, attributes);
     }
 
@@ -1658,6 +1725,7 @@ public class MParticle {
      */
     @NonNull
     public Map<String, String> getIntegrationAttributes(int integrationId) {
+        MParticle.logRoktApiUsage("GET_INTEGRATION_ATTRIBUTES");
         return this.Internal().getConfigManager().getIntegrationAttributes(integrationId);
     }
 

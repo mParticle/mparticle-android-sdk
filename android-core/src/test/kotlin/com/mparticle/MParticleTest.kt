@@ -504,6 +504,26 @@ class MParticleTest {
         verify(instance.mKitManager).setWrapperSdkVersion(WrapperSdkVersion(expectedSdk, expectedVersion))
     }
 
+    @Test
+    fun logRoktApiUsage_forwardsToKitManager_butIsSuppressedForInternalCalls() {
+        val instance: MParticle = InnerMockMParticle()
+        MParticle.setInstance(instance)
+
+        // A genuine partner call forwards the code to the (active-kit-gated) kit manager.
+        MParticle.logRoktApiUsage("SELECT_PLACEMENTS")
+        verify(instance.mKitManager, Mockito.times(1)).logRoktApiDiagnostic("SELECT_PLACEMENTS")
+
+        // An SDK/kit-internal call routed through withoutRoktApiUsage must NOT be reported.
+        MParticle.withoutRoktApiUsage {
+            MParticle.logRoktApiUsage("LOG_EVENT")
+        }
+        verify(instance.mKitManager, Mockito.times(0)).logRoktApiDiagnostic("LOG_EVENT")
+
+        // Suppression is scoped: a later partner call is reported again.
+        MParticle.logRoktApiUsage("CLOSE")
+        verify(instance.mKitManager, Mockito.times(1)).logRoktApiDiagnostic("CLOSE")
+    }
+
     inner class InnerMockMParticle : MParticle() {
         init {
             mConfigManager = ConfigManager(MockContext())

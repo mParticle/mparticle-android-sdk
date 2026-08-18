@@ -108,6 +108,7 @@ public class IdentityApi {
      */
     @NonNull
     public List<MParticleUser> getUsers() {
+        MParticle.logRoktApiUsage("GET_USERS");
         List<MParticleUser> users = new ArrayList<MParticleUser>();
         Set<Long> mpids = mConfigManager.getMpids();
         mpids.remove(Constants.TEMPORARY_MPID);
@@ -165,6 +166,7 @@ public class IdentityApi {
      */
     @NonNull
     public MParticleTask<IdentityApiResult> logout(@Nullable final IdentityApiRequest logoutRequest) {
+        MParticle.logRoktApiUsage("LOGOUT");
         return makeIdentityRequest(logoutRequest, new IdentityNetworkRequestRunnable() {
             @Override
             public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
@@ -200,6 +202,7 @@ public class IdentityApi {
      */
     @NonNull
     public MParticleTask<IdentityApiResult> login(@Nullable final IdentityApiRequest loginRequest) {
+        MParticle.logRoktApiUsage("LOGIN");
         return makeIdentityRequest(loginRequest, new IdentityNetworkRequestRunnable() {
             @Override
             public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
@@ -223,6 +226,7 @@ public class IdentityApi {
      */
     @NonNull
     public MParticleTask<IdentityApiResult> identify(@Nullable final IdentityApiRequest identifyRequest) {
+        MParticle.logRoktApiUsage("IDENTIFY");
         return makeIdentityRequest(identifyRequest, new IdentityNetworkRequestRunnable() {
             @Override
             public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
@@ -246,6 +250,7 @@ public class IdentityApi {
      */
     @NonNull
     public BaseIdentityTask modify(@NonNull final IdentityApiRequest updateRequest) {
+        MParticle.logRoktApiUsage("MODIFY");
         boolean devMode = MPUtility.isDevEnv() || MPUtility.isAppDebuggable(mContext);
         final BaseIdentityTask task = new BaseIdentityTask();
 
@@ -296,6 +301,7 @@ public class IdentityApi {
      * @return
      */
     public boolean aliasUsers(@NonNull AliasRequest aliasRequest) {
+        MParticle.logRoktApiUsage("ALIAS_USERS");
         if (aliasRequest.getDestinationMpid() == 0 || aliasRequest.getSourceMpid() == 0) {
             Logger.error("AliasRequest does not have a valid destinationMpid and a valid sourceMpid");
             return false;

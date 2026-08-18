@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.mparticle.MPService;
+import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
@@ -76,10 +77,12 @@ public class MPMessagingAPI {
      * Unregister the application for FCM notifications.
      */
     public void disablePushNotifications() {
+        MParticle.logRoktApiUsage("DISABLE_PUSH_NOTIFICATIONS");
         ConfigManager.getInstance(mContext).clearPushRegistration();
     }
 
     public void displayPushNotificationByDefault(@Nullable Boolean enabled) {
+        MParticle.logRoktApiUsage("DISPLAY_PUSH_NOTIFICATION_BY_DEFAULT");
         ConfigManager.getInstance(mContext).setDisplayPushNotifications(enabled);
     }
 
@@ -91,6 +94,7 @@ public class MPMessagingAPI {
      * @see PushAnalyticsReceiver
      */
     public void registerPushAnalyticsReceiver(@NonNull PushAnalyticsReceiver receiver) {
+        MParticle.logRoktApiUsage("REGISTER_PUSH_ANALYTICS_RECEIVER");
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BROADCAST_NOTIFICATION_RECEIVED);
         intentFilter.addAction(BROADCAST_NOTIFICATION_TAPPED);
@@ -105,6 +109,7 @@ public class MPMessagingAPI {
      * @see PushAnalyticsReceiver
      */
     public void unregisterPushAnalyticsReceiver(@Nullable PushAnalyticsReceiver receiver) {
+        MParticle.logRoktApiUsage("UNREGISTER_PUSH_ANALYTICS_RECEIVER");
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(receiver);
     }
 }

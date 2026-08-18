@@ -12,6 +12,7 @@ import com.mparticle.WrapperSdk
 import com.mparticle.WrapperSdkVersion
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.internal.PushRegistrationHelper.PushRegistration
+import com.mparticle.rokt.RoktApiDiagnosticsForwarder
 import com.mparticle.testutils.RandomUtils
 import org.json.JSONArray
 import org.junit.Assert
@@ -32,6 +33,43 @@ import kotlin.test.assertEquals
 
 @RunWith(PowerMockRunner::class)
 class KitFrameworkWrapperTest {
+    private fun newWrapper(): KitFrameworkWrapper = KitFrameworkWrapper(
+        Mockito.mock(Context::class.java),
+        Mockito.mock(ReportingManager::class.java),
+        Mockito.mock(ConfigManager::class.java),
+        Mockito.mock(AppStateManager::class.java),
+        true,
+        Mockito.mock(MParticleOptions::class.java),
+    )
+
+    @Test
+    fun logRoktApiDiagnostic_forwardsToActiveRoktKit() {
+        val wrapper = newWrapper()
+        val mockKitManager = Mockito.mock(KitManager::class.java)
+        wrapper.setKitManager(mockKitManager)
+        val forwarder = Mockito.mock(RoktApiDiagnosticsForwarder::class.java)
+        `when`(mockKitManager.isKitActive(MParticle.ServiceProviders.ROKT)).thenReturn(true)
+        `when`(mockKitManager.getKitInstance(MParticle.ServiceProviders.ROKT)).thenReturn(forwarder)
+
+        wrapper.logRoktApiDiagnostic("LOG_EVENT")
+
+        verify(forwarder, times(1)).onMParticleApiCall("LOG_EVENT")
+    }
+
+    @Test
+    fun logRoktApiDiagnostic_noOpWhenRoktKitInactive() {
+        val wrapper = newWrapper()
+        val mockKitManager = Mockito.mock(KitManager::class.java)
+        wrapper.setKitManager(mockKitManager)
+        val forwarder = Mockito.mock(RoktApiDiagnosticsForwarder::class.java)
+        `when`(mockKitManager.isKitActive(MParticle.ServiceProviders.ROKT)).thenReturn(false)
+        `when`(mockKitManager.getKitInstance(MParticle.ServiceProviders.ROKT)).thenReturn(forwarder)
+
+        wrapper.logRoktApiDiagnostic("LOG_EVENT")
+
+        verify(forwarder, times(0)).onMParticleApiCall(Mockito.anyString())
+    }
+
     @Test
     @Throws(Exception::class)
     fun testLoadKitLibrary() {
