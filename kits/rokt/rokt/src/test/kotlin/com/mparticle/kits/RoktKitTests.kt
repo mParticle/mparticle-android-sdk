@@ -1489,6 +1489,61 @@ class RoktKitTests {
     }
 
     @Test
+    fun testSetSession_delegatesToRoktSdk() {
+        mockkObject(Rokt)
+        every { Rokt.setSession(any()) } just runs
+
+        roktKit.setSession(com.mparticle.rokt.RoktSession("sid", "jwt", 123L))
+
+        verify {
+            Rokt.setSession(
+                match {
+                    it.sessionId == "sid" && it.sessionToken == "jwt" && it.expiresAt == 123L
+                },
+            )
+        }
+        verify(exactly = 0) { Rokt.setSessionId(any()) }
+        unmockkObject(Rokt)
+    }
+
+    @Test
+    fun testSetSession_idOnlyFallsBackToSetSessionId() {
+        mockkObject(Rokt)
+        every { Rokt.setSessionId(any()) } just runs
+
+        roktKit.setSession(com.mparticle.rokt.RoktSession("sid"))
+
+        verify { Rokt.setSessionId("sid") }
+        verify(exactly = 0) { Rokt.setSession(any()) }
+        unmockkObject(Rokt)
+    }
+
+    @Test
+    fun testSetSession_blankIdIsIgnored() {
+        mockkObject(Rokt)
+
+        roktKit.setSession(com.mparticle.rokt.RoktSession("  ", "jwt"))
+
+        verify(exactly = 0) { Rokt.setSession(any()) }
+        verify(exactly = 0) { Rokt.setSessionId(any()) }
+        unmockkObject(Rokt)
+    }
+
+    @Test
+    fun testGetSession_mapsValueFromRoktSdk() {
+        mockkObject(Rokt)
+        every { Rokt.getSession() } returns com.rokt.roktsdk.RoktSession("sid", "jwt", 456L)
+
+        val result = roktKit.getSession()
+
+        assertEquals("sid", result?.sessionId)
+        assertEquals("jwt", result?.sessionToken)
+        assertEquals(456L, result?.expiresAt)
+        verify { Rokt.getSession() }
+        unmockkObject(Rokt)
+    }
+
+    @Test
     fun testSetSessionId_delegatesToRoktSdk() {
         mockkObject(Rokt)
         every { Rokt.setSessionId(any()) } just runs

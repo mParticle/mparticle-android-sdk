@@ -1,6 +1,7 @@
 package com.mparticle.kits
 
 import android.graphics.Typeface
+import com.mparticle.rokt.RoktSession
 import com.rokt.roktsdk.PlacementOptions
 import com.rokt.roktsdk.RoktConfig
 import com.rokt.roktsdk.RoktEvent
@@ -35,6 +36,10 @@ internal interface RoktKitBridge {
     fun purchaseFinalized(identifier: String, catalogItemId: String, success: Boolean)
 
     fun close()
+
+    fun setSession(session: RoktSession)
+
+    fun getSession(): RoktSession?
 
     fun setSessionId(sessionId: String)
 
