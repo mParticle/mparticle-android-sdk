@@ -17,7 +17,7 @@ class ApiVisibilityTest {
                 publicMethodCount++
             }
         }
-        Assert.assertEquals(65, publicMethodCount)
+        Assert.assertEquals(67, publicMethodCount)
     }
 
     @Test
