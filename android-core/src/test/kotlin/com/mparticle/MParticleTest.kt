@@ -3,6 +3,11 @@ package com.mparticle
 import android.os.Looper
 import android.os.SystemClock
 import android.webkit.WebView
+import com.mparticle.commerce.CommerceEvent
+import com.mparticle.commerce.Impression
+import com.mparticle.commerce.Product
+import com.mparticle.commerce.Promotion
+import com.mparticle.commerce.TransactionAttributes
 import com.mparticle.identity.IdentityApi
 import com.mparticle.identity.IdentityApiRequest
 import com.mparticle.identity.MParticleUser
@@ -522,6 +527,69 @@ class MParticleTest {
         // Suppression is scoped: a later partner call is reported again.
         MParticle.logRoktApiUsage("CLOSE")
         verify(instance.mKitManager, Mockito.times(1)).logRoktApiDiagnostic("CLOSE")
+    }
+
+    @Test
+    fun logEvent_reportsBoundedEventTypes() {
+        val instance: MParticle = InnerMockMParticle()
+        MParticle.setInstance(instance)
+        val expectedCodes = mutableListOf<String>()
+
+        linkedMapOf(
+            MParticle.EventType.Unknown to "LOG_EVENT_UNKNOWN",
+            MParticle.EventType.Navigation to "LOG_EVENT_NAVIGATION",
+            MParticle.EventType.Location to "LOG_EVENT_LOCATION",
+            MParticle.EventType.Search to "LOG_EVENT_SEARCH",
+            MParticle.EventType.Transaction to "LOG_EVENT_TRANSACTION",
+            MParticle.EventType.UserContent to "LOG_EVENT_USER_CONTENT",
+            MParticle.EventType.UserPreference to "LOG_EVENT_USER_PREFERENCE",
+            MParticle.EventType.Social to "LOG_EVENT_SOCIAL",
+            MParticle.EventType.Other to "LOG_EVENT_OTHER",
+            MParticle.EventType.Media to "LOG_EVENT_MEDIA",
+        ).forEach { (eventType, code) ->
+            instance.logEvent(MPEvent.Builder("event", eventType).shouldUploadEvent(false).build())
+            expectedCodes.add(code)
+        }
+
+        val product = Product.Builder("name", "sku", 1.0).build()
+        linkedMapOf(
+            Product.ADD_TO_CART to "LOG_EVENT_PRODUCT_ADD_TO_CART",
+            Product.REMOVE_FROM_CART to "LOG_EVENT_PRODUCT_REMOVE_FROM_CART",
+            Product.ADD_TO_WISHLIST to "LOG_EVENT_PRODUCT_ADD_TO_WISHLIST",
+            Product.REMOVE_FROM_WISHLIST to "LOG_EVENT_PRODUCT_REMOVE_FROM_WISHLIST",
+            Product.CHECKOUT to "LOG_EVENT_PRODUCT_CHECKOUT",
+            Product.CHECKOUT_OPTION to "LOG_EVENT_PRODUCT_CHECKOUT_OPTION",
+            Product.CLICK to "LOG_EVENT_PRODUCT_CLICK",
+            Product.DETAIL to "LOG_EVENT_PRODUCT_VIEW_DETAIL",
+            Product.PURCHASE to "LOG_EVENT_PRODUCT_PURCHASE",
+            Product.REFUND to "LOG_EVENT_PRODUCT_REFUND",
+        ).forEach { (action, code) ->
+            val builder = CommerceEvent.Builder(action, product).shouldUploadEvent(false)
+            if (action == Product.PURCHASE || action == Product.REFUND) {
+                builder.transactionAttributes(TransactionAttributes().setId(action))
+            }
+            instance.logEvent(builder.build())
+            expectedCodes.add(code)
+        }
+
+        linkedMapOf(
+            Promotion.VIEW to "LOG_EVENT_PROMOTION_VIEW",
+            Promotion.CLICK to "LOG_EVENT_PROMOTION_CLICK",
+        ).forEach { (action, code) ->
+            instance.logEvent(CommerceEvent.Builder(action, Promotion()).shouldUploadEvent(false).build())
+            expectedCodes.add(code)
+        }
+
+        instance.logEvent(CommerceEvent.Builder(Impression("list", product)).shouldUploadEvent(false).build())
+        expectedCodes.add("LOG_EVENT_PRODUCT_IMPRESSION")
+        instance.logEvent(CommerceEvent.Builder("partner-supplied", product).shouldUploadEvent(false).build())
+        expectedCodes.add("LOG_EVENT_COMMERCE_OTHER")
+        instance.logEvent(Mockito.mock(BaseEvent::class.java))
+        expectedCodes.add("LOG_EVENT_OTHER")
+
+        val codeCaptor = ArgumentCaptor.forClass(String::class.java)
+        verify(instance.mKitManager, Mockito.times(expectedCodes.size)).logRoktApiDiagnostic(codeCaptor.capture())
+        Assert.assertEquals(expectedCodes, codeCaptor.allValues)
     }
 
     @Test

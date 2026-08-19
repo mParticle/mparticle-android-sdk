@@ -20,6 +20,9 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.commerce.Impression;
+import com.mparticle.commerce.Product;
+import com.mparticle.commerce.Promotion;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApi;
 import com.mparticle.identity.IdentityApiRequest;
@@ -60,6 +63,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -511,7 +515,7 @@ public class MParticle {
     }
 
     public void logEvent(@NonNull BaseEvent event) {
-        MParticle.logRoktApiUsage("LOG_EVENT");
+        MParticle.logRoktApiUsage(getRoktLogEventDiagnosticCode(event));
         if (event instanceof MPEvent && event.isShouldUploadEvent()) {
             logMPEvent((MPEvent) event);
         } else if (event instanceof CommerceEvent && event.isShouldUploadEvent()) {
@@ -523,6 +527,86 @@ public class MParticle {
                 mKitManager.logEvent(event);
             }
         }
+    }
+
+    @NonNull
+    private static String getRoktLogEventDiagnosticCode(@Nullable BaseEvent event) {
+        if (event instanceof MPEvent) {
+            EventType eventType = ((MPEvent) event).getEventType();
+            if (eventType == null) {
+                return "LOG_EVENT_UNKNOWN";
+            }
+            switch (eventType) {
+                case Navigation:
+                    return "LOG_EVENT_NAVIGATION";
+                case Location:
+                    return "LOG_EVENT_LOCATION";
+                case Search:
+                    return "LOG_EVENT_SEARCH";
+                case Transaction:
+                    return "LOG_EVENT_TRANSACTION";
+                case UserContent:
+                    return "LOG_EVENT_USER_CONTENT";
+                case UserPreference:
+                    return "LOG_EVENT_USER_PREFERENCE";
+                case Social:
+                    return "LOG_EVENT_SOCIAL";
+                case Other:
+                    return "LOG_EVENT_OTHER";
+                case Media:
+                    return "LOG_EVENT_MEDIA";
+                case Unknown:
+                default:
+                    return "LOG_EVENT_UNKNOWN";
+            }
+        }
+        if (event instanceof CommerceEvent) {
+            return getRoktCommerceEventDiagnosticCode((CommerceEvent) event);
+        }
+        return "LOG_EVENT_OTHER";
+    }
+
+    @NonNull
+    private static String getRoktCommerceEventDiagnosticCode(@NonNull CommerceEvent event) {
+        String productAction = event.getProductAction();
+        if (Product.ADD_TO_CART.equals(productAction)) {
+            return "LOG_EVENT_PRODUCT_ADD_TO_CART";
+        } else if (Product.REMOVE_FROM_CART.equals(productAction)) {
+            return "LOG_EVENT_PRODUCT_REMOVE_FROM_CART";
+        } else if (Product.ADD_TO_WISHLIST.equals(productAction)) {
+            return "LOG_EVENT_PRODUCT_ADD_TO_WISHLIST";
+        } else if (Product.REMOVE_FROM_WISHLIST.equals(productAction)) {
+            return "LOG_EVENT_PRODUCT_REMOVE_FROM_WISHLIST";
+        } else if (Product.CHECKOUT.equals(productAction)) {
+            return "LOG_EVENT_PRODUCT_CHECKOUT";
+        } else if (Product.CHECKOUT_OPTION.equals(productAction)) {
+            return "LOG_EVENT_PRODUCT_CHECKOUT_OPTION";
+        } else if (Product.CLICK.equals(productAction)) {
+            return "LOG_EVENT_PRODUCT_CLICK";
+        } else if (Product.DETAIL.equals(productAction)) {
+            return "LOG_EVENT_PRODUCT_VIEW_DETAIL";
+        } else if (Product.PURCHASE.equals(productAction)) {
+            return "LOG_EVENT_PRODUCT_PURCHASE";
+        } else if (Product.REFUND.equals(productAction)) {
+            return "LOG_EVENT_PRODUCT_REFUND";
+        } else if (productAction != null) {
+            return "LOG_EVENT_COMMERCE_OTHER";
+        }
+
+        String promotionAction = event.getPromotionAction();
+        if (Promotion.VIEW.equals(promotionAction)) {
+            return "LOG_EVENT_PROMOTION_VIEW";
+        } else if (Promotion.CLICK.equals(promotionAction)) {
+            return "LOG_EVENT_PROMOTION_CLICK";
+        } else if (promotionAction != null) {
+            return "LOG_EVENT_COMMERCE_OTHER";
+        }
+
+        List<Impression> impressions = event.getImpressions();
+        if (impressions != null && !impressions.isEmpty()) {
+            return "LOG_EVENT_PRODUCT_IMPRESSION";
+        }
+        return "LOG_EVENT_COMMERCE_OTHER";
     }
 
     /**
