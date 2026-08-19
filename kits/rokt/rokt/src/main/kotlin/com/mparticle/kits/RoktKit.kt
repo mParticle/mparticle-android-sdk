@@ -337,8 +337,8 @@ class RoktKit :
      *
      * Matches Web launcher options: non-empty [RoktSession.sessionId] + [RoktSession.sessionToken]
      * seeds Bearer continuity via [Rokt.setSession]; id-only falls back to [Rokt.setSessionId].
-     * Token without a non-empty id is ignored. Requires a Rokt Android SDK that exposes
-     * [Rokt.setSession] / [NativeRoktSession] (Brandon `feat/Update-To-Session-Token` and successors).
+     * Token without a non-empty id is ignored. Requires a Rokt Android SDK version that exposes
+     * [Rokt.setSession] / [NativeRoktSession].
      */
     override fun setSession(session: RoktSession) {
         val sessionId = session.sessionId.trim()
