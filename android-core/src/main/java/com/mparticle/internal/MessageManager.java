@@ -826,7 +826,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     @Override
     public void endUploadLoop() {
         mUploadHandler.removeMessages(UploadHandler.UPLOAD_MESSAGES);
-        MParticle.getInstance().upload();
+        MParticle.withoutRoktApiUsage(MParticle.getInstance()::upload);
     }
 
     @Override

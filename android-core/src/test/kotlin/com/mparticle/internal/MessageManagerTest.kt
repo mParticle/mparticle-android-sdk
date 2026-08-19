@@ -578,6 +578,17 @@ class MessageManagerTest {
     }
 
     @Test
+    fun testEndUploadLoopDoesNotReportInternalUpload() {
+        val instance = checkNotNull(MParticle.getInstance())
+
+        manager.endUploadLoop()
+
+        Mockito.verify(uploadHandler).removeMessages(UploadHandler.UPLOAD_MESSAGES)
+        Mockito.verify(instance.Internal().messageManager).doUpload()
+        Mockito.verify(instance.Internal().kitManager, Mockito.never()).logRoktApiDiagnostic("UPLOAD")
+    }
+
+    @Test
     @Throws(Exception::class)
     fun testSetLocation() {
         val location =

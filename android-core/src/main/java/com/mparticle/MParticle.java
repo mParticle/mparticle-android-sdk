@@ -151,7 +151,7 @@ public class MParticle {
         MParticle.logRoktApiUsage("SET_UPLOAD_INTERVAL");
         long intervalMillis = interval * 1000L;
         if ((intervalMillis >= 1 && mConfigManager.getUploadInterval() != intervalMillis)) {
-            upload();
+            withoutRoktApiUsage(this::upload);
             mConfigManager.setUploadInterval(interval);
         }
     }

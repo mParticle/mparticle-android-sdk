@@ -246,7 +246,7 @@ import java.util.UUID;
 
                     MParticle instance = MParticle.getInstance();
                     if (instance != null) {
-                        instance.upload();
+                        MParticle.withoutRoktApiUsage(instance::upload);
                     }
                 } catch (MParticleApiClientImpl.MPNoConfigException ex) {
                     Logger.error("Unable to Alias Request, API key and or API Secret is missing");

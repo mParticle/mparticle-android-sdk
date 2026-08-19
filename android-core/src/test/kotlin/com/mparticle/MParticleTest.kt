@@ -524,6 +524,23 @@ class MParticleTest {
         verify(instance.mKitManager, Mockito.times(1)).logRoktApiDiagnostic("CLOSE")
     }
 
+    @Test
+    fun setUpdateInterval_doesNotReportItsInternalUpload() {
+        val instance: MParticle = InnerMockMParticle()
+        MParticle.setInstance(instance)
+
+        instance.setUpdateInterval(60)
+
+        verify(instance.mKitManager).logRoktApiDiagnostic("SET_UPLOAD_INTERVAL")
+        verify(instance.mKitManager, Mockito.never()).logRoktApiDiagnostic("UPLOAD")
+        verify(instance.mMessageManager).doUpload()
+
+        instance.upload()
+
+        verify(instance.mKitManager).logRoktApiDiagnostic("UPLOAD")
+        verify(instance.mMessageManager, Mockito.times(2)).doUpload()
+    }
+
     inner class InnerMockMParticle : MParticle() {
         init {
             mConfigManager = ConfigManager(MockContext())
