@@ -14,8 +14,4 @@ package com.mparticle.rokt
  * @param expiresAt Optional Unix epoch milliseconds when [sessionToken] expires (matches server
  * `expires_at` when known). Ignored when [sessionToken] is absent.
  */
-data class RoktSession @JvmOverloads constructor(
-    val sessionId: String,
-    val sessionToken: String? = null,
-    val expiresAt: Long? = null,
-)
+data class RoktSession @JvmOverloads constructor(val sessionId: String, val sessionToken: String? = null, val expiresAt: Long? = null)
