@@ -34,6 +34,7 @@ class Rokt internal constructor(private val mKitManager: KitManager) {
         fontTypefaces: Map<String, WeakReference<Typeface>>? = null,
         config: RoktConfig? = null,
     ) {
+        MParticle.logRoktApiUsage("SELECT_PLACEMENTS")
         if (isEnabled()) {
             val resolved = resolveRoktKit()
             if (resolved != null) {
@@ -60,10 +61,13 @@ class Rokt internal constructor(private val mKitManager: KitManager) {
      * @param identifier The placement identifier to listen for events
      * @return A Flow emitting RoktEvent objects
      */
-    fun events(identifier: String): Flow<RoktEvent> = if (isEnabled()) {
-        resolveRoktKit()?.second?.events(identifier) ?: flowOf()
-    } else {
-        flowOf()
+    fun events(identifier: String): Flow<RoktEvent> {
+        MParticle.logRoktApiUsage("ROKT_EVENTS")
+        return if (isEnabled()) {
+            resolveRoktKit()?.second?.events(identifier) ?: flowOf()
+        } else {
+            flowOf()
+        }
     }
 
     /**
@@ -74,16 +78,19 @@ class Rokt internal constructor(private val mKitManager: KitManager) {
      * @param paymentExtension The payment extension implementation to register
      * @return true if the Rokt SDK accepts the payment extension configuration
      */
-    fun registerPaymentExtension(paymentExtension: PaymentExtension): Boolean = if (isEnabled()) {
-        val resolved = resolveRoktKit()
-        if (resolved != null) {
-            resolved.second.registerPaymentExtension(paymentExtension)
+    fun registerPaymentExtension(paymentExtension: PaymentExtension): Boolean {
+        MParticle.logRoktApiUsage("REGISTER_PAYMENT_EXTENSION")
+        return if (isEnabled()) {
+            val resolved = resolveRoktKit()
+            if (resolved != null) {
+                resolved.second.registerPaymentExtension(paymentExtension)
+            } else {
+                Logger.warning("Rokt Kit is not available. Make sure the Rokt Kit is included in your app.")
+                false
+            }
         } else {
-            Logger.warning("Rokt Kit is not available. Make sure the Rokt Kit is included in your app.")
             false
         }
-    } else {
-        false
     }
 
     /**
@@ -99,6 +106,7 @@ class Rokt internal constructor(private val mKitManager: KitManager) {
         attributes: Map<String, String> = emptyMap(),
         config: RoktConfig? = null,
     ) {
+        MParticle.logRoktApiUsage("SELECT_SHOPPABLE_ADS")
         if (isEnabled()) {
             val resolved = resolveRoktKit()
             if (resolved != null) {
@@ -124,6 +132,7 @@ class Rokt internal constructor(private val mKitManager: KitManager) {
      * @param success Whether the purchase was successful
      */
     fun purchaseFinalized(identifier: String, catalogItemId: String, success: Boolean) {
+        MParticle.logRoktApiUsage("PURCHASE_FINALIZED")
         if (isEnabled()) {
             resolveRoktKit()?.second?.purchaseFinalized(identifier, catalogItemId, success)
         }
@@ -133,6 +142,7 @@ class Rokt internal constructor(private val mKitManager: KitManager) {
      * Close any active Rokt placements.
      */
     fun close() {
+        MParticle.logRoktApiUsage("ROKT_CLOSE")
         if (isEnabled()) {
             resolveRoktKit()?.second?.close()
         }
@@ -153,6 +163,7 @@ class Rokt internal constructor(private val mKitManager: KitManager) {
      * @param session The session id and optional JWT session token (optional expiry).
      */
     fun setSession(session: RoktSession) {
+        MParticle.logRoktApiUsage("ROKT_SET_SESSION")
         if (isEnabled()) {
             resolveRoktKit()?.second?.setSession(session)
         }
@@ -163,10 +174,13 @@ class Rokt internal constructor(private val mKitManager: KitManager) {
      *
      * @return The session, or null if disabled, no session is present, or the token has expired.
      */
-    fun getSession(): RoktSession? = if (isEnabled()) {
-        resolveRoktKit()?.second?.getSession()
-    } else {
-        null
+    fun getSession(): RoktSession? {
+        MParticle.logRoktApiUsage("ROKT_GET_SESSION")
+        return if (isEnabled()) {
+            resolveRoktKit()?.second?.getSession()
+        } else {
+            null
+        }
     }
 
     /**
@@ -182,6 +196,7 @@ class Rokt internal constructor(private val mKitManager: KitManager) {
      */
     @Deprecated("Use setSession to set session id and session token.")
     fun setSessionId(sessionId: String) {
+        MParticle.logRoktApiUsage("ROKT_SET_SESSION_ID")
         if (isEnabled()) {
             resolveRoktKit()?.second?.setSessionId(sessionId)
         }
@@ -195,10 +210,13 @@ class Rokt internal constructor(private val mKitManager: KitManager) {
      * @return The session id or null if no session is present or SDK is not initialized.
      */
     @Deprecated("Use getSession to read session id and session token.")
-    fun getSessionId(): String? = if (isEnabled()) {
-        resolveRoktKit()?.second?.getSessionId()
-    } else {
-        null
+    fun getSessionId(): String? {
+        MParticle.logRoktApiUsage("ROKT_GET_SESSION_ID")
+        return if (isEnabled()) {
+            resolveRoktKit()?.second?.getSessionId()
+        } else {
+            null
+        }
     }
 
     /**

@@ -2,8 +2,10 @@ package com.mparticle.kits
 
 import android.graphics.Typeface
 import com.mparticle.MParticle
+import com.mparticle.MParticleTask
 import com.mparticle.identity.IdentityApi
 import com.mparticle.identity.IdentityApiRequest
+import com.mparticle.identity.IdentityApiResult
 import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.Logger
 import com.mparticle.internal.MPUtility
@@ -213,19 +215,26 @@ internal object RoktKitRequestHelper {
                 }
 
                 val identityRequest = identityBuilder.build()
-                val task = identityApi.identify(identityRequest)
-
-                task.addFailureListener { result ->
-                    Logger.error("Failed to sync email from selectPlacement to user: ${result?.errors}")
+                // Kit-internal identity sync (email carried on selectPlacement) — suppress so it
+                // isn't reported as a partner IDENTIFY call.
+                var identifyTask: MParticleTask<IdentityApiResult>? = null
+                MParticle.withoutRoktApiUsage { identifyTask = identityApi.identify(identityRequest) }
+                val task = identifyTask
+                if (task == null) {
                     runnable.run()
-                }
+                } else {
+                    task.addFailureListener { result ->
+                        Logger.error("Failed to sync email from selectPlacement to user: ${result?.errors}")
+                        runnable.run()
+                    }
 
-                task.addSuccessListener { result ->
-                    Logger.debug(
-                        "Updated email identity based on selectPlacement's attributes: " +
-                            result.user.userIdentities[MParticle.IdentityType.Email],
-                    )
-                    runnable.run()
+                    task.addSuccessListener { result ->
+                        Logger.debug(
+                            "Updated email identity based on selectPlacement's attributes: " +
+                                result.user.userIdentities[MParticle.IdentityType.Email],
+                        )
+                        runnable.run()
+                    }
                 }
             } else {
                 runnable.run()

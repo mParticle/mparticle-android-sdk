@@ -85,6 +85,17 @@ class RoktKitTests {
     }
 
     @Test
+    fun onMParticleApiCall_forwards_the_code_to_Rokt_logMParticleApiCall() {
+        mockkObject(Rokt)
+        every { Rokt.logMParticleApiCall(any()) } just runs
+
+        roktKit.onMParticleApiCall("LOG_EVENT")
+
+        verify { Rokt.logMParticleApiCall("LOG_EVENT") }
+        unmockkObject(Rokt)
+    }
+
+    @Test
     fun test_prepareFinalAttributes_filters_out_null_user_attributes() {
         val mockFilterUser = mock(FilteredMParticleUser::class.java)
         Mockito.`when`(mockFilterUser.userIdentities).thenReturn(HashMap())

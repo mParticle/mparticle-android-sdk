@@ -5,6 +5,8 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.mparticle.MParticle;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -37,6 +39,7 @@ public class MPMediaAPI {
      * @param playing Is your app currently playing music for the user.
      */
     public void setAudioPlaying(boolean playing) {
+        MParticle.logRoktApiUsage("SET_AUDIO_PLAYING");
         mAudioPlaying.set(playing);
         if (playing) {
             mCallbacks.onAudioPlaying();
@@ -46,6 +49,7 @@ public class MPMediaAPI {
     }
 
     public boolean getAudioPlaying() {
+        MParticle.logRoktApiUsage("GET_AUDIO_PLAYING");
         return mAudioPlaying.get();
     }
 }
