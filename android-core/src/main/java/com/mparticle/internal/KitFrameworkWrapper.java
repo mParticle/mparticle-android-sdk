@@ -24,6 +24,7 @@ import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.listeners.InternalListenerManager;
+import com.mparticle.rokt.RoktApiDiagnosticsForwarder;
 import com.mparticle.rokt.RoktOptions;
 
 import org.json.JSONArray;
@@ -476,6 +477,23 @@ public class KitFrameworkWrapper implements KitManager {
             return mKitManager.getKitInstance(kitId);
         }
         return null;
+    }
+
+    /**
+     * Forwards a bounded public-API-usage diagnostic code to the Rokt kit, but only when the kit is
+     * active. Core stays decoupled from kit types via the {@link RoktApiDiagnosticsForwarder}
+     * interface. No-op when Rokt isn't integrated/active.
+     */
+    public void logRoktApiDiagnostic(String code) {
+        if (code == null || code.isEmpty()) {
+            return;
+        }
+        if (isKitActive(MParticle.ServiceProviders.ROKT)) {
+            Object kit = getKitInstance(MParticle.ServiceProviders.ROKT);
+            if (kit instanceof RoktApiDiagnosticsForwarder) {
+                ((RoktApiDiagnosticsForwarder) kit).onMParticleApiCall(code);
+            }
+        }
     }
 
     @Override

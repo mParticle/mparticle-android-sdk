@@ -60,6 +60,7 @@ class MessageHandlerTest {
     @Test
     @Throws(JSONException::class)
     fun testInsertAliasRequest() {
+        val instance = checkNotNull(MParticle.getInstance())
         val insertedAliasRequest = AndroidUtils.Mutable<JSONObject?>(null)
         Mockito.`when`(mConfigManager.deviceApplicationStamp).thenReturn("das")
         val database: MParticleDBManager =
@@ -88,5 +89,6 @@ class MessageHandlerTest {
         aliasMessage.remove(MessageKey.REQUEST_ID)
         insertedAliasRequest.value?.remove(MessageKey.REQUEST_ID)
         TestingUtils.assertJsonEqual(aliasMessage, insertedAliasRequest.value)
+        Mockito.verify(instance.Internal().kitManager, Mockito.never()).logRoktApiDiagnostic("UPLOAD")
     }
 }

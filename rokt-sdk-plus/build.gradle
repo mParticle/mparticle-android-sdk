@@ -15,7 +15,7 @@ apply plugin: 'mparticle.android.library.publish'
 // The umbrella tracks the mParticle SDK release line; the Rokt artifacts ride their own line.
 def mpVersion = (project.findProperty('VERSION') ?: '0.0.0').toString()
 def roktPaymentExtensionVersion =
-        (project.findProperty('roktPaymentExtensionVersion') ?: '6.0.1').toString()
+        (project.findProperty('roktPaymentExtensionVersion') ?: '6.0.3').toString()
 
 mparticleMavenPublish {
     groupId.set('com.rokt')

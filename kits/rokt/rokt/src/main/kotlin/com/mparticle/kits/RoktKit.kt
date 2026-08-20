@@ -18,6 +18,7 @@ import com.mparticle.internal.Logger
 import com.mparticle.kits.KitIntegration.CommerceListener
 import com.mparticle.kits.KitIntegration.IdentityListener
 import com.mparticle.kits.KitIntegration.RoktListener
+import com.mparticle.rokt.RoktApiDiagnosticsForwarder
 import com.rokt.roktsdk.PlacementOptions
 import com.rokt.roktsdk.Rokt
 import com.rokt.roktsdk.Rokt.SdkFrameworkType.Android
@@ -53,12 +54,18 @@ class RoktKit :
     CommerceListener,
     IdentityListener,
     RoktListener,
-    RoktKitBridge {
+    RoktKitBridge,
+    RoktApiDiagnosticsForwarder {
     private var applicationContext: Context? = null
     private var hashedEmailUserIdentityType: String? = null
     override fun getName(): String = NAME
 
     override fun getInstance(): RoktKit = this
+
+    /** Forwards a bounded public-API-usage diagnostic code from mParticle core into the Rokt SDK. */
+    override fun onMParticleApiCall(code: String) {
+        Rokt.logMParticleApiCall(code)
+    }
 
     private var deferredAttributes: CompletableDeferred<Map<String, String>>? = null
 
@@ -415,7 +422,11 @@ class RoktKit :
         val event = MPEvent.Builder(eventName, MParticle.EventType.Other)
             .customAttributes(attributes)
             .build()
-        MParticle.getInstance()?.logEvent(event)
+        // Kit-internal telemetry (forwarding a Rokt engagement as an mParticle event) — not a
+        // partner LOG_EVENT call, so suppress the usage diagnostic.
+        MParticle.withoutRoktApiUsage {
+            MParticle.getInstance()?.logEvent(event)
+        }
     }
 
     private fun getStringForIdentity(identityType: IdentityType): String = when (identityType) {
