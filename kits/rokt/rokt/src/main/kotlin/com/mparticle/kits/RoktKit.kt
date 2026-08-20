@@ -134,23 +134,31 @@ class RoktKit :
 
     /*
      * Overrides for IdentityListener
+     *
+     * The Rokt session must end when the person using the device changes — on shared
+     * self-service terminals successive customers otherwise continue one another's session.
+     * The kit is never told "the MPID changed" directly (identity completions are forwarded
+     * regardless), so the comparison is made here against the last MPID this kit acted on.
      */
     override fun onIdentifyCompleted(
         mParticleUser: MParticleUser,
         filteredIdentityApiRequest: FilteredIdentityApiRequest,
     ) {
+        clearRoktSessionIfKnownUserChanged(mParticleUser)
     }
 
     override fun onLoginCompleted(
         mParticleUser: MParticleUser,
         filteredIdentityApiRequest: FilteredIdentityApiRequest,
     ) {
+        clearRoktSessionIfKnownUserChanged(mParticleUser)
     }
 
     override fun onLogoutCompleted(
         mParticleUser: MParticleUser,
         filteredIdentityApiRequest: FilteredIdentityApiRequest,
     ) {
+        clearRoktSessionIfKnownUserChanged(mParticleUser)
     }
 
     override fun onModifyCompleted(
@@ -160,6 +168,55 @@ class RoktKit :
     }
 
     override fun onUserIdentified(mParticleUser: MParticleUser) {}
+
+    /**
+     * Resets the Rokt session when a KNOWN user is replaced or departs.
+     *
+     * The MPID transition is typed — not every change means a different person:
+     * - anonymous → known: the same person acquiring an identity (unknown on the payment page,
+     *   known on the confirmation page). The session must survive, or one shopper's journey is
+     *   split and attribution breaks.
+     * - known → different known: a different person (the kiosk case) — reset.
+     * - known → anonymous: a logout — reset.
+     * - anonymous → anonymous: placeholder churn — no-op.
+     *
+     * "Known" means the user holds any user identity or is logged in; identity-set emptiness is
+     * used rather than isLoggedIn alone because kiosk customers identify() without logging in.
+     * onModifyCompleted stays empty: modify() cannot change the MPID.
+     *
+     * State is persisted rather than held in memory so a terminal app relaunched mid-queue still
+     * recognises the next customer as a different person.
+     */
+    private fun clearRoktSessionIfKnownUserChanged(mParticleUser: MParticleUser) {
+        val mpid = mParticleUser.id
+        // 0 is mParticle's "no MPID assigned yet" sentinel, not a customer.
+        if (mpid == 0L) {
+            return
+        }
+        val isIdentified = mParticleUser.userIdentities.isNotEmpty() || mParticleUser.isLoggedIn
+        val prefs = kitPreferences ?: return
+        val lastSeenMpid = if (prefs.contains(LAST_SEEN_MPID)) prefs.getLong(LAST_SEEN_MPID, 0L) else null
+        val lastSeenIdentified = prefs.getBoolean(LAST_SEEN_IDENTIFIED, false)
+        prefs.edit()
+            .putLong(LAST_SEEN_MPID, mpid)
+            .putBoolean(LAST_SEEN_IDENTIFIED, isIdentified)
+            .apply()
+
+        if (lastSeenMpid == null) {
+            Logger.debug("RoktKit: recording first observed MPID; no session reset")
+            return
+        }
+        if (lastSeenMpid == mpid) {
+            return
+        }
+        if (!lastSeenIdentified) {
+            Logger.debug("RoktKit: anonymous user was identified; keeping the Rokt session")
+            return
+        }
+
+        Logger.debug("RoktKit: known user changed; resetting the Rokt session")
+        Rokt.clearSession()
+    }
 
     private fun logError(message: String, t: Throwable) {
         Logger.error(t, "RoktKit: $message")
@@ -471,6 +528,12 @@ class RoktKit :
         const val STRIPE_KEY_ALIAS = "stripeKey"
         const val MPID = "mpid"
         const val EVENT_NAME_SELECT_PLACEMENTS = "selectPlacements"
+
+        /** Last MPID this kit acted on, persisted so a relaunch still detects a customer change. */
+        const val LAST_SEEN_MPID = "rokt_last_seen_mpid"
+
+        /** Whether the last-seen user was identified; types the MPID transition (see above). */
+        const val LAST_SEEN_IDENTIFIED = "rokt_last_seen_mpid_was_identified"
         const val EVENT_NAME_SELECT_SHOPPABLE_ADS = "selectShoppableAds"
         const val NO_ROKT_ACCOUNT_ID = "No Rokt account ID provided, can't initialize kit."
         const val NO_APP_VERSION_FOUND = "No App version found, can't initialize kit."
