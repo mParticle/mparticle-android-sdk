@@ -31,6 +31,8 @@ class NetworkOptionsManagerTest {
         ) {
             if (certificate.alias == "godaddy_root_g2") {
                 Assert.assertEquals(certificate.certificate, Constants.GODADDY_ROOT_G2_CRT)
+            } else if (certificate.alias == "godaddy_tls_root_r1") {
+                Assert.assertEquals(certificate.certificate, Constants.GODADDY_TLS_ROOT_R1_CRT)
             } else if (certificate.alias == "godaddy_root_class2") {
                 Assert.assertEquals(certificate.certificate, Constants.GODADDY_CLASS_2_ROOT_CRT)
             } else if (certificate.alias == "lets_encrypt_root_x1") {

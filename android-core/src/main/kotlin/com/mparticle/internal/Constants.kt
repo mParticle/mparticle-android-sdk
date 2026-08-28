@@ -89,6 +89,39 @@ object Constants {
             "4uJEvlz36hz1\n" +
             "-----END CERTIFICATE-----"
 
+    const val GODADDY_TLS_ROOT_R1_CRT: String =
+        "-----BEGIN CERTIFICATE-----\n" +
+            "MIIFWTCCA0GgAwIBAgIRANpi/54mGbElekgJNo7o4/cwDQYJKoZIhvcNAQELBQAw\n" +
+            "RjELMAkGA1UEBhMCVVMxFDASBgNVBAoTC0dvRGFkZHkuY29tMSEwHwYDVQQDExhH\n" +
+            "b0RhZGR5IFRMUyBSb290IENBIC0gUjEwHhcNMjUwODI4MTIwMDAwWhcNNDAwODI0\n" +
+            "MTE1OTU5WjBGMQswCQYDVQQGEwJVUzEUMBIGA1UEChMLR29EYWRkeS5jb20xITAf\n" +
+            "BgNVBAMTGEdvRGFkZHkgVExTIFJvb3QgQ0EgLSBSMTCCAiIwDQYJKoZIhvcNAQEB\n" +
+            "BQADggIPADCCAgoCggIBAMLrcp3XnknkTvY9I1IzsQA8K/vp5TJRiYsCZWMitXxG\n" +
+            "H+yD1+dPuC5nVzu6BLlXWZ8f7E7cs7lGBUeygeb2CsrESx1uFtB8R3JR4UOAMNE/\n" +
+            "KrlYFwHBydF1JhcttMEEkojBqt9If+Ks8Go2Be4rIAj495yFzArAPc8Ax2kyGgqf\n" +
+            "9Sl0S1SUbxkuvNRomsb3uNg+rcSWg4zUVixQijIZm2AIBxNW9gzaghs6dnog6rgq\n" +
+            "wBYKk7WNhZOfATkq/GHU9glnmiiMMeFPK2kqo9YNWk17NzEYmrBp6ELJwMwhuupX\n" +
+            "LifmoOAL2axvkO1ci66WKBxPB5OPgy5WfdhYp7l2Az8d9MDKWCYwPTpRjwf41AgG\n" +
+            "KhrwMjEJ+H/tG+wu7vWH0Bk+Bfl2gBtNyGjvObGJHMgJusPASDbWThBaw4PrA6sK\n" +
+            "TNPaQCYtVCYi6h/JXB39P2ilTixeC9hiEFmPkwplgjf/t/7CvF6XoCRIFkU2vUYN\n" +
+            "5WQ9upLYRTMZIVrHOxHOcxevvbD2jSuIz2ZydWWdwSzoQb8g5/bmhfrXwLPlCAZh\n" +
+            "hx+E5ljM/OLlkaySoi35mGE4MVOfld94J7m11UeY76t43RIGW0HF7fwm556C3thd\n" +
+            "70RZ3KWwSiOBJQGzDMzjY+R53kJnUljPSlSqDemUE1fsG7evOPgrZSXc8rP2WTAx\n" +
+            "AgMBAAGjQjBAMA4GA1UdDwEB/wQEAwIBhjAPBgNVHRMBAf8EBTADAQH/MB0GA1Ud\n" +
+            "DgQWBBTsUhGVcHMZyN7KSEOXSxw1JCJDUDANBgkqhkiG9w0BAQsFAAOCAgEAndbU\n" +
+            "wF1KXURZgNLhfC0UkO0qBS2tHXhqJ2AGVMrOkX2+WFwPZ4jOqDTQoobcOXRBlE6O\n" +
+            "eLSGYquyTEW43gWHVy6+UKP1jnBLhpcaib56F5Wp8Fi3eZpT+3MojZEofMtZg7rG\n" +
+            "Jmn6vf1QLztm66JBb7uh1yVruHZupfT0TXZ8Sbpf8xVVWnq+owgVzTFsfSjWyBps\n" +
+            "5G9e/IWYfl6r9rmAPmPdo8LqxUmJXfjL06RlZ2K7HghBQgefEuBjUkSXFR73SyZH\n" +
+            "f8IR+CRbwjV0hmhn2NWDos1MB9TLKm/C8HQ49acBybtLmsTai+i+RT/N6UB1TNTw\n" +
+            "Ts+eZ42z5Danmw+KDO7JI6m/WrlDOuDkyRmY2TKI8vvEeKHfaBehGHUMEWQZe2d2\n" +
+            "AHFvmAonhB10aXUhjAbUMZs4SCo241iuz28FMoVCC6pa07l8A84IRbUfu9OMRkmm\n" +
+            "Ydmd5Pa4ggfkhtJwFxMbR/3bhsDi8tRwkgS6XNOixXK/azf9TA2RqyOsiiJFjffO\n" +
+            "xS4nnYkLtgzqf7hs+Qe3D5UDWUgJyx8AYiwKJIMDlLz+CO8yYIx+YMsKS8jHvclI\n" +
+            "X5DePkFKKNWCUz5x2wlfPbXUPhTjsKO2m3F6009Gf4bQgBL60rzBOuo1Wp6fSlDE\n" +
+            "b9J1nSdKq7qIj1IJ5icFCDhzV+P1LjVv77My5Rw=\n" +
+            "-----END CERTIFICATE-----"
+
     const val LETS_ENCRYPTS_ROOT_X1_CRT: String =
         "-----BEGIN CERTIFICATE-----\n" +
             "MIIFazCCA1OgAwIBAgIRAIIQz7DSQONZRGPgu2OCiwAwDQYJKoZIhvcNAQELBQAw\n" +
