@@ -147,8 +147,30 @@ jobs:
           token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
           commit-message: "chore: prepare release ${{ steps.compose-version.outputs.new-version }}"
           branch: release-prep/${{ steps.compose-version.outputs.new-version }}
-          title: "Prepare release ${{ steps.compose-version.outputs.new-version }}"
+          title: "chore: prepare release ${{ steps.compose-version.outputs.new-version }}"
           base: ${{ github.ref_name }}
           body: |
-            Preparing for release ${{ steps.compose-version.outputs.new-version }} from `${{ github.ref_name }}`.
-            - Bumped version to ${{ steps.compose-version.outputs.new-version }}
+            ## Release ${{ steps.compose-version.outputs.new-version }}
+
+            ### Release details
+
+            - Version: `${{ steps.compose-version.outputs.new-version }}`
+            - Bump type: `${{ github.event.inputs.bump-type }}`
+            - Base branch: `${{ github.ref_name }}`
+
+            ### Files updated
+
+            - `VERSION` set to `${{ steps.compose-version.outputs.new-version }}`
+            - `CHANGELOG.md` updated with the generated release notes
+
+            ### Validation
+
+            The Release – Draft workflow successfully smoke-tested Maven local publication for the core SDK, aggregate kits, and isolated kits before opening this PR.
+
+            ## Changelog
+
+            ${{ steps.changelog.outputs.release-notes }}
+
+            ---
+
+            **On merge:** The [Release – Publish](https://github.com/${{ github.repository }}/actions/workflows/release-publish.yml) workflow will publish the core SDK, aggregate and isolated kits, and `rokt-sdk-plus` to Maven Central, tag the release, and create the GitHub release.
