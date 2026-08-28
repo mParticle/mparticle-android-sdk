@@ -65,6 +65,7 @@ public class NetworkOptionsManager {
     private static final List<Certificate> defaultCertificates = Collections.unmodifiableList(new LinkedList<Certificate>() {
         {
             add(Certificate.with("godaddy_root_g2", Constants.GODADDY_ROOT_G2_CRT));
+            add(Certificate.with("godaddy_tls_root_r1", Constants.GODADDY_TLS_ROOT_R1_CRT));
             add(Certificate.with("godaddy_root_class2", Constants.GODADDY_CLASS_2_ROOT_CRT));
             add(Certificate.with("lets_encrypt_root_x1", Constants.LETS_ENCRYPTS_ROOT_X1_CRT));
             add(Certificate.with("lets_encrypt_root_x2_self", Constants.LETS_ENCRYPTS_ROOT_X2_SELF_SIGN_CRT));
