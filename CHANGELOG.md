@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+## [6.0.3] - 2026-08-28
+
+### Core
+
+#### Added
+
+- Accept native GoDaddy R1 certificate chains ([#766](https://github.com/mParticle/mparticle-android-sdk/pull/766))
+
+### Kits
+
+#### Rokt
+
+##### Added
+
+- Report mParticle API usage through the Rokt kit ([#761](https://github.com/mParticle/mparticle-android-sdk/pull/761))
+
 ## [6.0.2] - 2026-08-07
 
 ### Core
