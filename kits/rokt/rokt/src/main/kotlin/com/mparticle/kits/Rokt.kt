@@ -4,6 +4,7 @@ import android.graphics.Typeface
 import com.mparticle.MParticle
 import com.mparticle.internal.KitManager
 import com.mparticle.internal.Logger
+import com.mparticle.rokt.RoktSession
 import com.rokt.roktsdk.PlacementOptions
 import com.rokt.roktsdk.RoktConfig
 import com.rokt.roktsdk.RoktEvent
@@ -148,15 +149,52 @@ class Rokt internal constructor(private val mKitManager: KitManager) {
     }
 
     /**
+     * Set the session to use for the next execute call.
+     *
+     * Use this when you have a session from a non-native integration (e.g. WebView)
+     * and want the session to stay consistent across integrations. Call before the next
+     * selectPlacements.
+     *
+     * Matches Web launcher options: pass [RoktSession.sessionId] with optional
+     * [RoktSession.sessionToken]. When the token is present, offers/events can send
+     * `Authorization: Bearer`. When only the id is present, the id is applied without Bearer
+     * seeding. Empty `sessionId` (or token without id) is ignored.
+     *
+     * @param session The session id and optional JWT session token (optional expiry).
+     */
+    fun setSession(session: RoktSession) {
+        MParticle.logRoktApiUsage("ROKT_SET_SESSION")
+        if (isEnabled()) {
+            resolveRoktKit()?.second?.setSession(session)
+        }
+    }
+
+    /**
+     * Get the current session (id + token) for use within a non-native integration e.g. WebView.
+     *
+     * @return The session, or null if disabled, no session is present, or the token has expired.
+     */
+    fun getSession(): RoktSession? {
+        MParticle.logRoktApiUsage("ROKT_GET_SESSION")
+        return if (isEnabled()) {
+            resolveRoktKit()?.second?.getSession()
+        } else {
+            null
+        }
+    }
+
+    /**
      * Set the session id to use for the next execute call.
      *
      * This is useful for cases where you have a session id from a non-native integration,
      * e.g. WebView, and you want the session to be consistent across integrations.
      *
      * **Note:** Empty strings are ignored and will not update the session.
+     * Prefer [setSession] so the session token is also applied for offers and events.
      *
      * @param sessionId The session id to be set. Must be a non-empty string.
      */
+    @Deprecated("Use setSession to set session id and session token.")
     fun setSessionId(sessionId: String) {
         MParticle.logRoktApiUsage("ROKT_SET_SESSION_ID")
         if (isEnabled()) {
@@ -167,8 +205,11 @@ class Rokt internal constructor(private val mKitManager: KitManager) {
     /**
      * Get the session id to use within a non-native integration e.g. WebView.
      *
+     * Prefer [getSession] to also read the session token.
+     *
      * @return The session id or null if no session is present or SDK is not initialized.
      */
+    @Deprecated("Use getSession to read session id and session token.")
     fun getSessionId(): String? {
         MParticle.logRoktApiUsage("ROKT_GET_SESSION_ID")
         return if (isEnabled()) {
