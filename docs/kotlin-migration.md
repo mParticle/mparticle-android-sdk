@@ -14,8 +14,8 @@ the public interface**. Every line that is not part of the customer- or kit-auth
 API surface should be Kotlin by the end of the migration.
 
 This is the Android translation of the principle the Apple SDK is following on
-`workstation`: *do not attempt a wholesale rewrite — slice pure subsystems out and leave
-the public facade in the original language as the orchestrator.*
+`workstation`: _do not attempt a wholesale rewrite — slice pure subsystems out and leave
+the public facade in the original language as the orchestrator._
 
 For Apple, ObjC keeps the singleton, `sqlite3`, and dynamic dispatch. For Android,
 **Java keeps the public API declarations** — the classes and signatures that customers and
@@ -23,12 +23,12 @@ external kit authors compile against — and everything behind them becomes Kotl
 
 ### Baseline (Sep 2, 2026)
 
-| Module | Kotlin LOC | Java LOC | Java that stays (public facade) | Java left to migrate | Kotlin % |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| `android-core` | 3,225 | 22,457 | 9,241 | **13,216** | 12.6% |
-| `android-kit-base` | 557 | 5,380 | 1,651 | **3,729** | 9.4% |
-| `kits/rokt/rokt` | 1,122 | 0 | 0 | **0** | 100.0% |
-| **Total** | **4,904** | **27,837** | **10,892** | **16,945** | **15.0%** |
+| Module             | Kotlin LOC |   Java LOC | Java that stays (public facade) | Java left to migrate |  Kotlin % |
+| ------------------ | ---------: | ---------: | ------------------------------: | -------------------: | --------: |
+| `android-core`     |      3,225 |     22,457 |                           9,241 |           **13,216** |     12.6% |
+| `android-kit-base` |        557 |      5,380 |                           1,651 |            **3,729** |      9.4% |
+| `kits/rokt/rokt`   |      1,122 |          0 |                               0 |                **0** |    100.0% |
+| **Total**          |  **4,904** | **27,837** |                      **10,892** |           **16,945** | **15.0%** |
 
 **Migration goal progress: 22.4%** — Kotlin as a share of everything that is not a
 designated public-API facade. This is the number the CI job reports, and it is the number
@@ -51,19 +51,19 @@ that needs to reach 100%.
 A Java → Kotlin conversion is **not** automatically ABI-safe. These are the ways a
 mechanical conversion silently breaks customers, and the rule for each.
 
-| Hazard | What breaks | Rule |
-| --- | --- | --- |
-| `public` field → Kotlin property | Field access becomes `getX()`/`setX()`; source **and** binary break | `@JvmField`, or leave the declaration in Java |
-| `public static final` constant | Becomes `Foo.Companion.getBar()` | `const val` (primitives/`String`) or `@JvmField` in a `companion object` |
-| `public static` method | Becomes `Foo.Companion.baz()` | `@JvmStatic` on every one |
-| Kotlin classes are `final` by default | Anything a customer or kit subclasses stops compiling | Mark `open` — mandatory for `KitIntegration`, `MPReceiver`, `MPService`, `BaseIdentityTask`, every listener |
-| Platform types become explicit nullability | A non-null param emits `checkNotNullParameter` — a Java caller that used to pass `null` now throws | Mirror the existing `@NonNull`/`@Nullable` exactly. **Unannotated parameter → `T?`.** Never tighten |
-| Default arguments | Generates a different overload set | Do not introduce defaults on public signatures. Keep explicit overloads. Use `@JvmOverloads` only to reproduce an existing set |
-| Checked exceptions | `throws` clause disappears from the signature | `@Throws(...)` |
-| `synchronized` / `volatile` / `transient` | Modifier is dropped | `@Synchronized` / `@Volatile` / `@Transient` |
-| Generic variance | Kotlin inserts `? extends` wildcards | `@JvmSuppressWildcards` where the Java signature had none |
-| Getter naming | `val fooEnabled` → `getFooEnabled()`, not `isFooEnabled()` | Match the existing accessor name exactly; `@get:JvmName` if needed |
-| `package-info.java` | Has no Kotlin equivalent at all | Stays Java, permanently |
+| Hazard                                     | What breaks                                                                                        | Rule                                                                                                                           |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `public` field → Kotlin property           | Field access becomes `getX()`/`setX()`; source **and** binary break                                | `@JvmField`, or leave the declaration in Java                                                                                  |
+| `public static final` constant             | Becomes `Foo.Companion.getBar()`                                                                   | `const val` (primitives/`String`) or `@JvmField` in a `companion object`                                                       |
+| `public static` method                     | Becomes `Foo.Companion.baz()`                                                                      | `@JvmStatic` on every one                                                                                                      |
+| Kotlin classes are `final` by default      | Anything a customer or kit subclasses stops compiling                                              | Mark `open` — mandatory for `KitIntegration`, `MPReceiver`, `MPService`, `BaseIdentityTask`, every listener                    |
+| Platform types become explicit nullability | A non-null param emits `checkNotNullParameter` — a Java caller that used to pass `null` now throws | Mirror the existing `@NonNull`/`@Nullable` exactly. **Unannotated parameter → `T?`.** Never tighten                            |
+| Default arguments                          | Generates a different overload set                                                                 | Do not introduce defaults on public signatures. Keep explicit overloads. Use `@JvmOverloads` only to reproduce an existing set |
+| Checked exceptions                         | `throws` clause disappears from the signature                                                      | `@Throws(...)`                                                                                                                 |
+| `synchronized` / `volatile` / `transient`  | Modifier is dropped                                                                                | `@Synchronized` / `@Volatile` / `@Transient`                                                                                   |
+| Generic variance                           | Kotlin inserts `? extends` wildcards                                                               | `@JvmSuppressWildcards` where the Java signature had none                                                                      |
+| Getter naming                              | `val fooEnabled` → `getFooEnabled()`, not `isFooEnabled()`                                         | Match the existing accessor name exactly; `@get:JvmName` if needed                                                             |
+| `package-info.java`                        | Has no Kotlin equivalent at all                                                                    | Stays Java, permanently                                                                                                        |
 
 **Two things in our favour:**
 
@@ -77,7 +77,7 @@ mechanical conversion silently breaks customers, and the rule for each.
 
 [`scripts/kotlin-migration-facades.txt`](../scripts/kotlin-migration-facades.txt) is the
 explicit, reviewed list of Java files that stay Java. A file goes on that list only if it
-*declares* public API or is a `package-info.java`. Adding to it is an API-surface decision
+_declares_ public API or is a `package-info.java`. Adding to it is an API-surface decision
 and needs an SDK owner's review, not just the PR author's.
 
 Facade files are still expected to **shrink** — their bodies move into internal Kotlin and
@@ -92,9 +92,9 @@ the Java file thins out to declarations that delegate. They are just excluded fr
    that belongs to another lane; if you need a change there, ask the lane owner to stack
    it, or note it in the Cleanup section.
 2. **Characterization test first.** If the file has no meaningful test coverage, the PR
-   *below* it in the stack adds tests against the current Java behaviour. Converting an
+   _below_ it in the stack adds tests against the current Java behaviour. Converting an
    untested file is how a silent behaviour change ships.
-3. **Convert, do not refactor.** Use IntelliJ's *Convert Java File to Kotlin File*, then
+3. **Convert, do not refactor.** Use IntelliJ's _Convert Java File to Kotlin File_, then
    clean up only what the compiler and ktlint demand. Renames, redesigns, coroutine
    adoption, and null-safety improvements are all separate follow-up PRs.
 4. **Land the file in `src/main/kotlin/`,** matching the package path. (We currently have
@@ -130,7 +130,7 @@ the Java file thins out to declarations that delegate. They are just excluded fr
   (`EventType`, `IdentityType`, `Environment`, …), `ServiceProviders`, and the builder
   chain keep their current Java declarations and signatures.
 - **Reflection sites.** `MPUtility`, `PushRegistrationHelper`, `MPReceiver`, and
-  `MPServiceUtil` all do `Class.forName` on *third-party* classes (Play Services, Firebase,
+  `MPServiceUtil` all do `Class.forName` on _third-party_ classes (Play Services, Firebase,
   Install Referrer). Those strings are external contracts — copy them verbatim, do not
   "clean them up".
 
@@ -146,7 +146,8 @@ goes last** — it is the cross-cutting code everything else touches.
 
 ### Lane A — Persistence · 2,488 LOC · owner: _unassigned_
 
-*Easy*
+**Easy** — leaf classes; convert straight across.
+
 - [ ] `internal/database/tables/MpIdDependentTable.java` — 17
 - [ ] `internal/database/tables/UserAttributesTable.java` — 30
 - [ ] `internal/database/tables/BreadcrumbTable.java` — 32
@@ -160,9 +161,10 @@ goes last** — it is the cross-cutting code everything else touches.
 - [ ] `internal/SegmentDatabase.java` — 66
 - [ ] `internal/database/UploadSettings.java` — 76
 - [ ] `internal/database/MPDatabaseImpl.java` — 127
-- [ ] `internal/database/tables/MParticleDatabaseHelper.java` — 175 *(schema versions — read carefully)*
+- [ ] `internal/database/tables/MParticleDatabaseHelper.java` — 175 _(schema versions — read carefully)_
 
-*Medium*
+**Medium** — split the larger files into stacked PRs.
+
 - [ ] `internal/database/services/UserAttributesService.java` — 86
 - [ ] `internal/database/services/UploadService.java` — 104
 - [ ] `internal/database/services/BreadcrumbService.java` — 112
@@ -170,21 +172,24 @@ goes last** — it is the cross-cutting code everything else touches.
 - [ ] `internal/database/services/SessionService.java` — 205
 - [ ] `internal/database/services/MessageService.java` — 297
 
-*Hard*
+**Hard** — split by concern, orchestrator last.
+
 - [ ] `internal/database/services/MParticleDBManager.java` — 786 — split into ≥3 stacked PRs (message/session ops, user-attribute ops, upload+alias ops)
 
 ### Lane B — Networking · 1,270 LOC · owner: _unassigned_
 
-*Easy*
+**Easy** — leaf classes; convert straight across.
+
 - [ ] `networking/MParticleBaseClient.java` — 7
 - [ ] `networking/MPUrlImpl.java` — 51
 - [ ] `networking/NetworkOptionsManager.java` — 91
 - [ ] `networking/MPConnectionImpl.java` — 113
 - [ ] `internal/MParticleApiClient.java` — 57
 
-*Medium*
+**Medium** — split the larger files into stacked PRs.
+
 - [ ] `networking/NetworkConnection.java` — 147
-- [ ] `networking/MParticleBaseClientImpl.java` — 322 *(URL construction, cert pinning — see the Sept 2026 pinning incident)*
+- [ ] `networking/MParticleBaseClientImpl.java` — 322 _(URL construction, cert pinning — see the Sept 2026 pinning incident)_
 - [ ] `internal/MParticleApiClientImpl.java` — 482 — split: request building / response parsing / retry+throttle
 
 `NetworkOptions`, `DomainMapping`, `Certificate`, `MPUrl`, `MPConnection`,
@@ -192,11 +197,13 @@ goes last** — it is the cross-cutting code everything else touches.
 
 ### Lane C — Identity internals · 907 LOC · owner: _unassigned_
 
-*Easy*
+**Easy** — leaf classes; convert straight across.
+
 - [ ] `identity/MParticleIdentityClient.java` — 13
 - [ ] `identity/MParticleUserImpl.java` — 157
 
-*Medium*
+**Medium** — split the larger files into stacked PRs.
+
 - [ ] `identity/MParticleUserDelegate.java` — 306
 - [ ] `identity/MParticleIdentityClientImpl.java` — 431 — split: request serialization / response handling
 
@@ -205,7 +212,8 @@ task/listener types are public and stay Java.
 
 ### Lane D — Event pipeline · 2,726 LOC · owner: _unassigned_
 
-*Easy*
+**Easy** — leaf classes; convert straight across.
+
 - [ ] `internal/MessageManagerCallbacks.java` — 26
 - [ ] `internal/messages/MPEventMessage.java` — 39
 - [ ] `internal/messages/MPAliasMessage.java` — 77
@@ -216,40 +224,47 @@ task/listener types are public and stay Java.
 - [ ] `internal/messages/MPCommerceMessage.java` — 173
 - [ ] `internal/MessageBatch.java` — 198
 
-*Medium*
+**Medium** — split the larger files into stacked PRs.
+
 - [ ] `internal/MessageHandler.java` — 319
 - [ ] `internal/UploadHandler.java` — 375
 
-*Hard*
+**Hard** — split by concern, orchestrator last.
+
 - [ ] `internal/MessageManager.java` — 1,089 — split into ≥4 stacked PRs (message construction, session lifecycle, attribute messages, the handler/queue orchestrator last)
 
 ### Lane E — Kit infrastructure, core side · 1,002 LOC · owner: _unassigned_
 
-*Easy*
+**Easy** — leaf classes; convert straight across.
+
 - [ ] `internal/KitsLoadedListener.java` — 6
 - [ ] `internal/ReportingManager.java` — 10
 - [ ] `internal/JsonReportingMessage.java` — 17
 - [ ] `internal/KitContext.java` — 21
-- [ ] `internal/KitManager.java` — 139 *(interface — referenced by 4 kit files)*
+- [ ] `internal/KitManager.java` — 139 _(interface — referenced by 4 kit files)_
 
-*Hard*
+**Hard** — split by concern, orchestrator last.
+
 - [ ] `internal/KitFrameworkWrapper.java` — 809 — split: kit-availability checks / queued-call replay / the reflective `KitManagerImpl` loader last. **The `Class.forName("com.mparticle.kits.KitManagerImpl")` call and its 4-arg constructor must not change.**
 
 ### Lane F — Kit base internals · 3,729 LOC · owner: _unassigned_
 
-*Medium*
+**Medium** — split the larger files into stacked PRs.
+
 - [ ] `kits/KitIntegrationFactory.java` — 159
 - [ ] `kits/mappings/EventWrapper.java` — 279
 - [ ] `kits/mappings/CustomMappingMatch.java` — 291
 - [ ] `kits/mappings/CustomMapping.java` — 490 — split: match evaluation / projection application
 
-*Hard*
+**Hard** — split by concern, orchestrator last.
+
 - [ ] `kits/KitConfiguration.java` — 1,069 — split: filter maps parsing / bracketing+sampling / config accessors. Referenced by 29 kit files — audit every public member before touching it
 - [ ] `kits/KitManagerImpl.java` — 1,441 — split into ≥4 stacked PRs (kit lifecycle, event forwarding, commerce forwarding, identity/user forwarding). Referenced by 12 kit files; class name and constructor are load-bearing
 
 ### Lane G — Platform surface · 1,411 LOC · owner: _unassigned_
 
-*Easy*
+**Easy** — leaf classes; convert straight across.
+
 - [ ] `messaging/MessagingConfigCallbacks.java` — 7
 - [ ] `messaging/PushAnalyticsReceiverCallback.java` — 19
 - [ ] `messaging/InstanceIdService.java` — 20
@@ -257,8 +272,9 @@ task/listener types are public and stay Java.
 - [ ] `messaging/PushAnalyticsReceiver.java` — 41
 - [ ] `ExceptionHandler.java` — 50
 
-*Medium*
-- [ ] `internal/PushRegistrationHelper.java` — 114 *(Firebase reflection — copy strings verbatim)*
+**Medium** — split the larger files into stacked PRs.
+
+- [ ] `internal/PushRegistrationHelper.java` — 114 _(Firebase reflection — copy strings verbatim)_
 - [ ] `InstallReferrerHelper.java` — 142
 - [ ] `internal/ProviderPersistence.java` — 149
 - [ ] `MPServiceUtil.java` — 211
@@ -270,14 +286,14 @@ and stay Java.
 
 ### Lane H — Cross-cutting internals · 3,412 LOC · single owner, goes last
 
-- [ ] `internal/Logger.java` — 200 *(referenced by 32 kit files — `@JvmStatic` everywhere)*
+- [ ] `internal/Logger.java` — 200 _(referenced by 32 kit files — `@JvmStatic` everywhere)_
 - [ ] `internal/MPUtility.java` — 858 — split by concern (JSON helpers, device/ID helpers, reflection probes, hashing). Referenced by 14 kit files
 - [ ] `internal/ConfigManager.java` — 1,514 — split into ≥5 stacked PRs (prefs accessors, kit-config parsing, data-plan config, listener registration, the orchestrator last)
 - [ ] `internal/MParticleJSInterface.java` — 840 — **last file in the migration.** Every `@JavascriptInterface` name and signature is frozen
 
 ### Lane I — Facade thinning (after H)
 
-Once internal Java is at zero, the remaining Java is the facade. Move the *bodies* into
+Once internal Java is at zero, the remaining Java is the facade. Move the _bodies_ into
 internal Kotlin while the Java declarations stay put. Highest value first:
 
 - [ ] `MParticle.java` — 1,958 → pull opt-out checks, session policy, and attribute
@@ -308,10 +324,10 @@ internal Kotlin while the Java declarations stay put. Highest value first:
   `build/`, tests, and sample apps.
 - The `kotlin-migration-progress` job in
   [`.github/workflows/pull-request.yml`](../.github/workflows/pull-request.yml) runs it on
-  the PR head *and* on the base commit, then posts a single sticky PR comment with:
+  the PR head _and_ on the base commit, then posts a single sticky PR comment with:
   the lines this PR moved, the per-module table, the overall goal percentage, and the 15
   largest Java files still outstanding. The same content goes to the job summary.
-- The base measurement always uses the PR's *current* facade list, so adding or removing a
+- The base measurement always uses the PR's _current_ facade list, so adding or removing a
   facade entry can never masquerade as migration progress.
 
 ### Ratchet (landed)
@@ -335,7 +351,7 @@ fails when a public signature changes.
 - [ ] **Fallback if BCV fights AGP:** a ~60-line Gradle task that runs `javap -public` over
       the release variant's classes, writes a sorted `api/android-core.api` text file, and
       fails on diff. Zero new plugin dependencies, same effect, and it reviews well —
-      the diff *is* the API change, visible in the PR.
+      the diff _is_ the API change, visible in the PR.
 - [ ] Either way: a changed `.api` file requires an SDK owner's approval, exactly like the
       facade list.
 
@@ -346,6 +362,7 @@ fails when a public signature changes.
 > Assumes 3–4 engineers with lanes running in parallel. Dates are Fridays.
 
 ### M0 — Sep 4 · Foundations
+
 - [x] Progress tracker script + CI job + ratchet
 - [x] Facade list agreed and committed
 - [ ] `allow-new-java` label created
@@ -354,6 +371,7 @@ fails when a public signature changes.
 - [ ] Stray `.kt` files moved to `src/main/kotlin`
 
 ### M1 — Sep 11 · Easy tier · 2,581 LOC · target ≈ 34% goal progress
+
 - [ ] Lane A easy (14 files, 781 LOC)
 - [ ] Lane B easy (5 files, 319 LOC)
 - [ ] Lane D easy (9 files, 943 LOC)
@@ -362,6 +380,7 @@ fails when a public signature changes.
 - [ ] Lane C easy (2 files, 170 LOC)
 
 ### M2 — Sep 18 · Medium tier · 5,758 LOC · target ≈ 61%
+
 - [ ] Lane A services (6 files, 921 LOC)
 - [ ] Lane B medium (3 files, 951 LOC)
 - [ ] Lane C medium (2 files, 737 LOC)
@@ -370,6 +389,7 @@ fails when a public signature changes.
 - [ ] Lane F medium (4 files, 1,219 LOC)
 
 ### M3 — Sep 25 · Hard tier, part 1 · 3,753 LOC · target ≈ 78%
+
 - [ ] `MParticleDBManager` (786)
 - [ ] `MessageManager` (1,089)
 - [ ] `KitFrameworkWrapper` (809)
@@ -377,6 +397,7 @@ fails when a public signature changes.
 - [ ] **Manual QA pass 1** — event stream, identity, kit forwarding, Rokt kit
 
 ### M4 — Oct 2 · Hard tier, part 2 · 4,853 LOC · target 100% of internal Java
+
 - [ ] `KitManagerImpl` (1,441)
 - [ ] `Logger` (200), `MPUtility` (858)
 - [ ] `ConfigManager` (1,514)
@@ -384,6 +405,7 @@ fails when a public signature changes.
 - [ ] **Internal Java LOC = 0** — the tracker reads 100%
 
 ### M5 — Oct 9 · Facade thinning, QA, release
+
 - [ ] Lane I: `MParticle`, `MParticleOptions`, `CommerceEvent`/`Product`, `MPEvent`, `IdentityApi` bodies moved to Kotlin
 - [ ] `apiCheck` diff across the whole migration reviewed and confirmed empty
 - [ ] **Manual QA pass 2** (full)
@@ -413,11 +435,11 @@ Run at M3 and M5, against a real workspace, on a minSdk and a current-SDK device
 
 ## 8. Risks
 
-| Risk | Mitigation |
-| --- | --- |
-| A conversion silently tightens nullability and a customer's `null` starts throwing | The unannotated-param → `T?` rule; API guard diff; characterization tests |
-| A Kotlin class becomes `final` and breaks a kit author | Facade list keeps the kit ABI in Java; kit-compatibility CI job runs on every PR |
-| `MParticleJSInterface` method renamed by the converter | Converted last, JS bridge instrumented tests must pass, names frozen |
-| `KitManagerImpl` reflective load breaks | Class name and constructor arity are explicitly frozen; kit-compatibility job covers it |
-| Merge conflicts across a 17k-LOC migration | Directory-scoped lanes, one file per PR, Graphite stacks within a lane |
-| Migration drags past the window | Ratchet stops the problem growing; the facade split means we can stop at any milestone and still be in a shippable, non-breaking state |
+| Risk                                                                               | Mitigation                                                                                                                             |
+| ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| A conversion silently tightens nullability and a customer's `null` starts throwing | The unannotated-param → `T?` rule; API guard diff; characterization tests                                                              |
+| A Kotlin class becomes `final` and breaks a kit author                             | Facade list keeps the kit ABI in Java; kit-compatibility CI job runs on every PR                                                       |
+| `MParticleJSInterface` method renamed by the converter                             | Converted last, JS bridge instrumented tests must pass, names frozen                                                                   |
+| `KitManagerImpl` reflective load breaks                                            | Class name and constructor arity are explicitly frozen; kit-compatibility job covers it                                                |
+| Merge conflicts across a 17k-LOC migration                                         | Directory-scoped lanes, one file per PR, Graphite stacks within a lane                                                                 |
+| Migration drags past the window                                                    | Ratchet stops the problem growing; the facade split means we can stop at any milestone and still be in a shippable, non-breaking state |
