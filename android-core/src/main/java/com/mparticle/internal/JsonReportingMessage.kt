@@ -5,13 +5,11 @@ import org.json.JSONObject
 interface JsonReportingMessage {
     fun setDevMode(development: Boolean)
 
-    fun getTimestamp(): Long
+    val timestamp: Long
 
-    fun getModuleId(): Int
+    val moduleId: Int
 
     fun toJson(): JSONObject
 
-    fun getSessionId(): String
-
-    fun setSessionId(sessionId: String)
+    var sessionId: String
 }
