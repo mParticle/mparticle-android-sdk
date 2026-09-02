@@ -191,6 +191,47 @@ jobs:
       - name: "Run Isolated Kit Compatibility Tests (ga4)"
         run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga4/ga4-23 -PisRelease=true testRelease
 
+  public-api-guard:
+    name: "Public API Guard"
+    timeout-minutes: 25
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout Branch"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: echo "ORG_GRADLE_PROJECT_VERSION=$(head -n 1 VERSION)" >> "$GITHUB_ENV"
+      - run: echo "ORG_GRADLE_PROJECT_version=$(head -n 1 VERSION)" >> "$GITHUB_ENV"
+      - name: "Install JDK 17"
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: "zulu"
+          java-version: "17"
+      - name: "Setup Gradle"
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
+      # The check runs first. The self-test's clean-tree case fails whenever the
+      # branch has a real API diff, so running it first would mask the diff and
+      # the explanation behind a confusing self-test failure.
+      - name: "Check the public API against the committed baselines"
+        id: guard
+        run: ./scripts/api-guard.sh check
+      - name: "Explain a failure"
+        if: failure() && steps.guard.outcome == 'failure'
+        run: |
+          echo "The public JVM surface of android-core or android-kit-base moved." >&2
+          echo "" >&2
+          echo "Exit 2 means a frozen contract changed — a class outside" >&2
+          echo "com.mparticle.internal, or one listed in" >&2
+          echo "scripts/api-guard-frozen-internals.txt. Fix the conversion; do not" >&2
+          echo "update the baseline." >&2
+          echo "" >&2
+          echo "Exit 1 means an internal implementation changed. That is allowed:" >&2
+          echo "run 'scripts/api-guard.sh update', commit the baseline in this PR," >&2
+          echo "and record the diff and a kit-usage audit in the description." >&2
+          echo "" >&2
+          echo "See docs/kotlin-migration/PR-GATE.md, item 1." >&2
+      - name: "Prove the guard detects breakage"
+        if: always()
+        run: ./scripts/api-guard-selftest.sh
+
   kotlin-migration-progress:
     name: "Kotlin Migration Progress"
     timeout-minutes: 10
