@@ -116,8 +116,12 @@ is_frozen_class() {
     fi
     if [[ -f ${FROZEN_INTERNALS} ]]; then
         while IFS= read -r entry; do
+            # Strip trailing comments, then surrounding whitespace. Most entries
+            # carry a `# N kit files` note; without this they never match.
+            entry="${entry%%#*}"
+            entry="${entry#"${entry%%[![:space:]]*}"}"
+            entry="${entry%"${entry##*[![:space:]]}"}"
             [[ -z ${entry} ]] && continue
-            [[ ${entry} == \#* ]] && continue
             # shellcheck disable=SC2254 # entries are intentionally glob patterns
             case "${class}" in
             ${entry}) return 0 ;;

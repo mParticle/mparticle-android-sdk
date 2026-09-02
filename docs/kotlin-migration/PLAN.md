@@ -97,8 +97,12 @@ the Java file thins out to declarations that delegate. They are just excluded fr
 3. **Convert, do not refactor.** Use IntelliJ's _Convert Java File to Kotlin File_, then
    clean up only what the compiler and ktlint demand. Renames, redesigns, coroutine
    adoption, and null-safety improvements are all separate follow-up PRs.
-4. **Land the file in `src/main/kotlin/`,** matching the package path. (We currently have
-   5 stragglers under `src/main/java/` — see Cleanup.)
+4. **Convert in place.** Leave the file in the directory it already lives in and change
+   the extension. Both `src/main/java` and `src/main/kotlin` are configured as Kotlin
+   source directories in every module and Kotlin already compiles from both today, so
+   there is no separation to maintain and nothing to move. A conversion should be a
+   content diff, not a rename plus a content diff — and a rename is exactly the kind of
+   noise that hides a signature change in review.
 5. **Armour the JVM signature** per the table above, even for internal classes: `kits/`
    and `testutils` compile against a lot of `com.mparticle.internal`.
 6. **Run the module's tests** — `./gradlew :android-core:test :android-core:cAT` — plus
@@ -306,10 +310,6 @@ internal Kotlin while the Java declarations stay put. Highest value first:
 
 ### Cleanup — opportunistic wins, add as you find them
 
-- [ ] Move 5 stray `.kt` files out of `src/main/java/` into `src/main/kotlin/`:
-      `internal/KitsLoadedCallback.kt`, `internal/UserAudiencesRetriever.kt`,
-      `internal/SideloadedKitsUtils.kt`, `internal/KitsLoadedListenerConfiguration.kt`,
-      `kits/MPSideloadedKit.kt` + `kits/MPSideloadedFilters.kt`
 - [ ] `testutils` — 43 Java files, no release risk
 - [ ] Remaining 3 Java files in core/kit-base test source sets
 
@@ -378,7 +378,6 @@ Policy and the full working agreement: [`PR-GATE.md`](PR-GATE.md).
 - [ ] `allow-new-java` label created
 - [x] API guard, self-test and baselines shipped; `public-api-guard` job wired into CI
 - [ ] Lane owners assigned
-- [ ] Stray `.kt` files moved to `src/main/kotlin`
 
 ### M1 — Sep 11 · Easy tier · 2,581 LOC · target ≈ 34% goal progress
 

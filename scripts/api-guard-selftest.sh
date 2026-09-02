@@ -16,6 +16,10 @@ MODULE="android-core"
 
 # A public class in a documented package: removing it must be a gate failure.
 FROZEN_VICTIM="com/mparticle/AttributionError.class"
+# A class frozen by scripts/api-guard-frozen-internals.txt rather than by its
+# package. Its entry carries a trailing `# 32 kit files` comment, so this case
+# is the regression test for the guard reading those entries verbatim.
+FROZEN_LIST_VICTIM="com/mparticle/internal/Logger.class"
 # A public class inside com.mparticle.internal that no kit compiles against:
 # removing it must be reported, but as a reviewable internal change.
 # shellcheck disable=SC2016 # `$` is a literal in the jar entry name, not an expansion
@@ -32,10 +36,13 @@ note() { echo "api-guard-selftest: $*"; }
 
 # 1. The real, unmodified tree must PASS.
 note "case 1 — clean tree must pass"
-bash "${GUARD}" check --module "${MODULE}" >/dev/null
+clean_output="$(bash "${GUARD}" check --module "${MODULE}" 2>&1)"
 clean_status=$?
 if [[ ${clean_status} -ne 0 ]]; then
     echo "  FAIL: clean check exited ${clean_status}, expected 0" >&2
+    echo "  This usually means the branch has a real public API diff rather than a" >&2
+    echo "  broken guard. Run 'scripts/api-guard.sh check' and read PR-GATE.md item 1." >&2
+    echo "${clean_output}" >&2
     fail=1
 else
     note "  ok"
@@ -86,6 +93,25 @@ elif grep -q "FROZEN CONTRACT CHANGED" <<<"${reviewed_output}"; then
     fail=1
 elif ! grep -q "Internal implementation changed" <<<"${reviewed_output}"; then
     echo "  FAIL: output did not classify the change as internal" >&2
+    fail=1
+else
+    note "  ok"
+fi
+
+# 4. Removing a class frozen by the list rather than by its package must also be
+#    a FROZEN failure. Regression test: the list entries carry trailing comments,
+#    and reading them verbatim silently demoted every kit-ABI class to reviewable.
+note "case 4 — removing ${FROZEN_LIST_VICTIM} must fail via the frozen-internals list"
+list_jar="${WORKDIR}/frozen-list.jar"
+mutate "${FROZEN_LIST_VICTIM}" "${list_jar}"
+list_output="$(bash "${GUARD}" check --module "${MODULE}" --jar "${list_jar}" 2>&1)"
+list_status=$?
+if [[ ${list_status} -ne 2 ]]; then
+    echo "  FAIL: expected exit 2, got ${list_status}" >&2
+    echo "  A frozen-internals entry is not matching — check comment/whitespace parsing." >&2
+    fail=1
+elif ! grep -q "FROZEN CONTRACT CHANGED" <<<"${list_output}"; then
+    echo "  FAIL: output did not classify the change as a frozen contract" >&2
     fail=1
 else
     note "  ok"

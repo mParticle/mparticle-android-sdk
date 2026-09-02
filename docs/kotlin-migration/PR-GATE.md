@@ -106,7 +106,10 @@ rules still apply to every conversion, and the reviewer checks them by reading:
    unchanged.
 5. **No default arguments on any signature the guard tracks.** Reproduce the
    existing overload set explicitly.
-6. **Land the file in `src/main/kotlin/`**, matching its package path.
+6. **Convert in place.** Leave the file where it is and change the extension. Both
+   `src/main/java` and `src/main/kotlin` are configured as Kotlin source directories, so
+   there is no separation to maintain. A rename on top of a conversion is noise that hides
+   a signature change in review.
 
 ## What "done" means
 

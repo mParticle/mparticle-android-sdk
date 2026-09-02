@@ -207,8 +207,9 @@ jobs:
           java-version: "17"
       - name: "Setup Gradle"
         uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
-      - name: "Prove the guard detects breakage"
-        run: ./scripts/api-guard-selftest.sh
+      # The check runs first. The self-test's clean-tree case fails whenever the
+      # branch has a real API diff, so running it first would mask the diff and
+      # the explanation behind a confusing self-test failure.
       - name: "Check the public API against the committed baselines"
         id: guard
         run: ./scripts/api-guard.sh check
@@ -227,7 +228,9 @@ jobs:
           echo "and record the diff and a kit-usage audit in the description." >&2
           echo "" >&2
           echo "See docs/kotlin-migration/PR-GATE.md, item 1." >&2
-          exit 1
+      - name: "Prove the guard detects breakage"
+        if: always()
+        run: ./scripts/api-guard-selftest.sh
 
   kotlin-migration-progress:
     name: "Kotlin Migration Progress"
