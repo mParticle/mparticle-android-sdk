@@ -75,7 +75,7 @@ mechanical conversion silently breaks customers, and the rule for each.
 
 ### The facade list
 
-[`scripts/kotlin-migration-facades.txt`](../scripts/kotlin-migration-facades.txt) is the
+[`scripts/kotlin-migration-facades.txt`](../../scripts/kotlin-migration-facades.txt) is the
 explicit, reviewed list of Java files that stay Java. A file goes on that list only if it
 _declares_ public API or is a `package-info.java`. Adding to it is an API-surface decision
 and needs an SDK owner's review, not just the PR author's.
@@ -319,11 +319,11 @@ internal Kotlin while the Java declarations stay put. Highest value first:
 
 ### Progress tracker (landed)
 
-- [`scripts/kotlin-migration-progress.sh`](../scripts/kotlin-migration-progress.sh)
+- [`scripts/kotlin-migration-progress.sh`](../../scripts/kotlin-migration-progress.sh)
   measures Kotlin vs Java LOC across the three in-scope `src/main` source sets, excluding
   `build/`, tests, and sample apps.
 - The `kotlin-migration-progress` job in
-  [`.github/workflows/pull-request.yml`](../.github/workflows/pull-request.yml) runs it on
+  [`.github/workflows/pull-request.yml`](../../.github/workflows/pull-request.yml) runs it on
   the PR head _and_ on the base commit, then posts a single sticky PR comment with:
   the lines this PR moved, the per-module table, the overall goal percentage, and the 15
   largest Java files still outstanding. The same content goes to the job summary.
@@ -339,21 +339,31 @@ hatch is the `allow-new-java` label plus a reason in the PR description.
 > **Setup needed:** create the `allow-new-java` label in the repo. The job requests
 > `pull-requests: write` at the job level; the workflow default stays `read`.
 
-### API guard (M0 — not yet built)
+### API guard (landed)
 
-The tracker measures progress; it does not prove we kept the promise. We need a check that
-fails when a public signature changes.
+The tracker measures progress; it does not prove we kept the promise.
+[`scripts/api-guard.sh`](../../scripts/api-guard.sh) does.
 
-- [ ] **Spike (½ day):** try
-      `org.jetbrains.kotlinx.binary-compatibility-validator` on `:android-core` and
-      `:android-kit-base`. If it cooperates with AGP 8.3, commit `api/*.api` dumps and wire
-      `apiCheck` into the PR workflow.
-- [ ] **Fallback if BCV fights AGP:** a ~60-line Gradle task that runs `javap -public` over
-      the release variant's classes, writes a sorted `api/android-core.api` text file, and
-      fails on diff. Zero new plugin dependencies, same effect, and it reviews well —
-      the diff _is_ the API change, visible in the PR.
-- [ ] Either way: a changed `.api` file requires an SDK owner's approval, exactly like the
-      facade list.
+- It compiles both modules to their AGP compile jars — the exact jars a consumer compiles
+  against — and diffs every public class, method and field signature against committed
+  baselines in `android-core/api/` and `android-kit-base/api/`. 3,075 declarations for core,
+  453 for kit-base at the baseline. It reads signatures with `javap`; it never runs SDK code.
+- Compiled signatures are the right surface because Kotlin breaks a Java contract in ways
+  that are invisible in source: a property replacing a public field, `Companion` indirection
+  on statics, a `DefaultConstructorMarker` overload from a default argument, a `final` class,
+  a synthetic public lambda class.
+- A diff outside `com.mparticle.internal`, or touching one of the internal classes listed in
+  [`scripts/api-guard-frozen-internals.txt`](../../scripts/api-guard-frozen-internals.txt),
+  exits **2** and is a gate failure. A diff confined to other internals exits **1**:
+  regenerate the baseline in the same PR with the diff and a kit-usage audit in the
+  description.
+- [`scripts/api-guard-selftest.sh`](../../scripts/api-guard-selftest.sh) proves the guard
+  catches breakage, by mutating a copy of the compile jar in a temp directory and asserting
+  the clean tree passes, a deleted public class fails as frozen, and a deleted internal-only
+  class is reported as reviewable.
+- The `public-api-guard` job runs the self-test and the check on every PR.
+
+Policy and the full working agreement: [`PR-GATE.md`](PR-GATE.md).
 
 ---
 
@@ -366,7 +376,7 @@ fails when a public signature changes.
 - [x] Progress tracker script + CI job + ratchet
 - [x] Facade list agreed and committed
 - [ ] `allow-new-java` label created
-- [ ] API guard spike done, `apiCheck` (or the `javap` fallback) wired into CI
+- [x] API guard, self-test and baselines shipped; `public-api-guard` job wired into CI
 - [ ] Lane owners assigned
 - [ ] Stray `.kt` files moved to `src/main/kotlin`
 

@@ -1,0 +1,48 @@
+# Classes inside com.mparticle.internal that are nonetheless contracts.
+#
+# Everything outside com.mparticle.internal is frozen automatically: those
+# packages are the documented customer API and the kit-author API. The classes
+# below live in `internal` by package name but are compiled against from
+# outside this repository, so api-guard treats a change to them as a gate
+# failure rather than a reviewable internal diff.
+#
+# Counts are references from files under kits/ and android-kit-base/src as of
+# Sep 2026. Re-audit before removing an entry; adding one is always safe.
+#
+# Format: one glob per line, matched against the fully-qualified class name.
+# `#` comments and blank lines are ignored. Nested classes need their own
+# entry or a trailing `$*`.
+
+# --- The kit ABI ---
+com.mparticle.internal.Logger                    # 32 kit files
+com.mparticle.internal.Logger$*
+com.mparticle.internal.CoreCallbacks             # 17 kit files
+com.mparticle.internal.CoreCallbacks$*           # incl. KitListener, 15 kit files
+com.mparticle.internal.MPUtility                 # 14 kit files
+com.mparticle.internal.MPUtility$*               # incl. AdIdInfo
+com.mparticle.internal.ReportingManager          # 12 kit files
+com.mparticle.internal.KitManager                # 4 kit files
+com.mparticle.internal.KitManager$*              # incl. KitStatus
+com.mparticle.internal.JsonReportingMessage
+com.mparticle.internal.KitsLoadedCallback
+com.mparticle.internal.SideloadedKit
+com.mparticle.internal.Constants                 # Constants.REFERRER
+com.mparticle.internal.Constants$*
+
+# --- Reached by name at runtime, so the signature is a contract ---
+# KitFrameworkWrapper does Class.forName("com.mparticle.kits.KitManagerImpl")
+# and invokes a 4-arg constructor. The WebView bridge resolves
+# MParticleJSInterface methods by name from JavaScript that lives outside this
+# repository.
+com.mparticle.internal.MParticleJSInterface
+com.mparticle.internal.MParticleJSInterface$*
+
+# --- Named explicitly in android-core/proguard.pro's -keep list ---
+# A -keep entry is a statement that the class is reachable from outside.
+com.mparticle.internal.ConfigManager
+com.mparticle.internal.InternalSession
+com.mparticle.internal.PushRegistrationHelper
+com.mparticle.internal.PushRegistrationHelper$*
+com.mparticle.internal.RoktKitApi
+com.mparticle.internal.listeners.GraphListener
+com.mparticle.internal.listeners.InternalListenerManager
