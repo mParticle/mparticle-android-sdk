@@ -1,6 +1,6 @@
 # AppsFlyer Kit Integration
 
-This repository contains the [AppsFlyer](https://www.appsflyer.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
+This directory contains the [AppsFlyer](https://www.appsflyer.com/) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
 
 This kit targets **AppsFlyer Android SDK 7.x**. For AppsFlyer 6.x, use the `appsflyer-6` kit instead.
 AppsFlyer 7.x requires `minSdk 21`.
