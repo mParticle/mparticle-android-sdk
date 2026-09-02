@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Kits
+
+#### Rokt
+
+##### Changed
+
+- Bump Rokt SDK (`com.rokt:roktsdk`) and payment extension (`com.rokt:payment-extension`) to 6.1.1
+
 ## [6.0.3] - 2026-08-28
 
 ### Core
