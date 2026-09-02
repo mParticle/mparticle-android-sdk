@@ -11,7 +11,7 @@ AppsFlyer 7.x requires `minSdk 21`.
 
     ```groovy
     dependencies {
-        implementation 'com.mparticle:appsflyer-7:5+'
+        implementation 'com.mparticle:appsflyer-7:6+'
     }
     ```
 
