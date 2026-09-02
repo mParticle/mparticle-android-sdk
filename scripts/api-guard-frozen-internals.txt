@@ -6,8 +6,8 @@
 # outside this repository, so api-guard treats a change to them as a gate
 # failure rather than a reviewable internal diff.
 #
-# Counts are references from files under kits/ and android-kit-base/src as of
-# Sep 2026. Re-audit before removing an entry; adding one is always safe.
+# Counts are references from files under kits/ and android-kit-base/src at the
+# baseline commit. Re-audit before removing an entry; adding one is always safe.
 #
 # Format: one glob per line, matched against the fully-qualified class name.
 # `#` comments and blank lines are ignored. Nested classes need their own

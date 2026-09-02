@@ -93,8 +93,11 @@ rules than the existing tree. Run `trunk fmt` before `trunk check`.
 The gate catches contract breaks. It does not catch behaviour changes, so these
 rules still apply to every conversion, and the reviewer checks them by reading:
 
-1. **One file per PR**, stacked within your lane. Never edit a file that belongs
-   to another lane.
+1. **Batch the easy tier per lane directory; one file per PR for medium and hard.**
+   Leaf classes — table schemas, message types, small interfaces — review just as well
+   in a batch of seven, and there is no sense spending 41 separate PRs on them. Anything larger stays one file per PR, stacked within your lane. Never edit a
+   file that belongs to another lane. A batch whose API-guard output is anything other
+   than "no diff" gets split before review.
 2. **Characterization test first.** If the file has no meaningful coverage, the
    PR _below_ it in the stack adds tests against the current Java behaviour.
 3. **Convert, don't refactor.** IntelliJ's _Convert Java File to Kotlin File_,
@@ -135,6 +138,19 @@ Two consequences for a conversion PR:
   name, signatures and nullability while its body moves to internal Kotlin, so
   it thins over time. That thinning moves the Kotlin % and leaves the goal
   progress flat.
+
+## Review turnaround
+
+The gate is only as fast as the review behind it, and review throughput — not conversion
+speed — is what decides how fast the percentage moves. With three engineers who are also
+each other's reviewers, each lane has a named reviewer and a same-day turnaround.
+
+A mechanical conversion is approved on **evidence**, not on a line-by-line reading of a
+language port: the API guard reports no frozen change, the module's tests pass, the diff
+is the same code in the other language, and the nullability rule above was followed. A
+reviewer who wants to read every line of 130 converted files becomes the bottleneck that
+sinks the project. Spend that attention on the hard-tier files and on anything where the
+guard exited 1.
 
 ## Scope note
 
