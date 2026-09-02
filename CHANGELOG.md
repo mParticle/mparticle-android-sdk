@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+## [6.0.4] - 2026-09-02
+
+### Kits
+
+#### Appsflyer
+
+##### Added
+
+- Add AppsFlyer SDK 7 kit (appsflyer-7) ([#748](https://github.com/mParticle/mparticle-android-sdk/pull/748))
+
+#### Rokt
+
+##### Added
+
+- Bump Rokt SDK and payment extension to 6.1.1 ([#774](https://github.com/mParticle/mparticle-android-sdk/pull/774))
+
 ## [6.0.3] - 2026-08-28
 
 ### Core
