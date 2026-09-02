@@ -1,0 +1,75 @@
+# Java files that stay Java for the duration of the short-term Kotlin migration.
+#
+# A file belongs here only if it DECLARES public API that customers or external
+# kit authors compile against, or if it cannot be expressed in Kotlin at all
+# (package-info.java). These files are expected to SHRINK as their bodies move
+# into internal Kotlin, but they are not expected to reach zero, so they are
+# excluded from the "Java left to migrate" number.
+#
+# Adding a file here is an API-surface decision. It needs a reviewer from the
+# SDK owners, not just the PR author.
+#
+# Glob patterns, relative to the repository root. One per line.
+
+# --- No Kotlin equivalent ---
+*/package-info.java
+
+# --- android-core: public entry points and value types ---
+android-core/src/main/java/com/mparticle/MParticle.java
+android-core/src/main/java/com/mparticle/MParticleOptions.java
+android-core/src/main/java/com/mparticle/MPEvent.java
+android-core/src/main/java/com/mparticle/BaseEvent.java
+android-core/src/main/java/com/mparticle/SdkListener.java
+android-core/src/main/java/com/mparticle/Session.java
+android-core/src/main/java/com/mparticle/Configuration.java
+android-core/src/main/java/com/mparticle/MParticleTask.java
+android-core/src/main/java/com/mparticle/AttributionResult.java
+android-core/src/main/java/com/mparticle/AttributionError.java
+android-core/src/main/java/com/mparticle/AttributionListener.java
+android-core/src/main/java/com/mparticle/MPService.java
+android-core/src/main/java/com/mparticle/MPReceiver.java
+
+android-core/src/main/java/com/mparticle/commerce/CommerceEvent.java
+android-core/src/main/java/com/mparticle/commerce/Product.java
+android-core/src/main/java/com/mparticle/commerce/Promotion.java
+android-core/src/main/java/com/mparticle/commerce/Impression.java
+android-core/src/main/java/com/mparticle/commerce/TransactionAttributes.java
+
+android-core/src/main/java/com/mparticle/consent/ConsentState.java
+android-core/src/main/java/com/mparticle/consent/ConsentInstance.java
+android-core/src/main/java/com/mparticle/consent/CCPAConsent.java
+android-core/src/main/java/com/mparticle/consent/GDPRConsent.java
+
+android-core/src/main/java/com/mparticle/identity/IdentityApi.java
+android-core/src/main/java/com/mparticle/identity/IdentityApiRequest.java
+android-core/src/main/java/com/mparticle/identity/IdentityApiResult.java
+android-core/src/main/java/com/mparticle/identity/IdentityHttpResponse.java
+android-core/src/main/java/com/mparticle/identity/IdentityStateListener.java
+android-core/src/main/java/com/mparticle/identity/MParticleUser.java
+android-core/src/main/java/com/mparticle/identity/AliasRequest.java
+android-core/src/main/java/com/mparticle/identity/AliasResponse.java
+android-core/src/main/java/com/mparticle/identity/BaseIdentityTask.java
+android-core/src/main/java/com/mparticle/identity/TaskSuccessListener.java
+android-core/src/main/java/com/mparticle/identity/TaskFailureListener.java
+
+android-core/src/main/java/com/mparticle/networking/NetworkOptions.java
+android-core/src/main/java/com/mparticle/networking/DomainMapping.java
+android-core/src/main/java/com/mparticle/networking/Certificate.java
+android-core/src/main/java/com/mparticle/networking/MPUrl.java
+android-core/src/main/java/com/mparticle/networking/MPConnection.java
+android-core/src/main/java/com/mparticle/networking/BaseNetworkConnection.java
+
+android-core/src/main/java/com/mparticle/media/MPMediaAPI.java
+android-core/src/main/java/com/mparticle/media/MediaCallbacks.java
+android-core/src/main/java/com/mparticle/messaging/MPMessagingAPI.java
+android-core/src/main/java/com/mparticle/segmentation/Segment.java
+android-core/src/main/java/com/mparticle/segmentation/SegmentListener.java
+android-core/src/main/java/com/mparticle/segmentation/SegmentMembership.java
+
+# --- android-kit-base: the ABI every external kit compiles against ---
+android-kit-base/src/main/java/com/mparticle/kits/KitIntegration.java
+android-kit-base/src/main/java/com/mparticle/kits/KitUtils.java
+android-kit-base/src/main/java/com/mparticle/kits/ReportingMessage.java
+android-kit-base/src/main/java/com/mparticle/kits/CommerceEventUtils.java
+android-kit-base/src/main/java/com/mparticle/kits/FilteredMParticleUser.java
+android-kit-base/src/main/java/com/mparticle/kits/FilteredIdentityApiRequest.java
