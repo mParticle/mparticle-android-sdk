@@ -21,11 +21,11 @@ import java.lang.ref.WeakReference
 
 interface KitManager {
 
-    fun getCurrentActivity(): WeakReference<Activity>
+    val currentActivity: WeakReference<Activity>
 
     fun logEvent(event: BaseEvent)
 
-    fun logScreen(screenEvent: MPEvent)
+    fun logScreen(screenEvent: MPEvent?)
 
     fun logBatch(jsonObject: String)
 
@@ -46,15 +46,15 @@ interface KitManager {
 
     fun logException(exception: Exception, eventData: Map<String, String>, message: String)
 
-    fun setLocation(location: Location)
+    fun setLocation(location: Location?)
 
     fun logout()
 
-    fun setUserAttribute(key: String, value: String, mpid: Long)
+    fun setUserAttribute(key: String?, value: String?, mpid: Long)
 
     fun setUserAttributeList(key: String, value: List<String>, mpid: Long)
 
-    fun removeUserAttribute(key: String, mpid: Long)
+    fun removeUserAttribute(key: String?, mpid: Long)
 
     fun setUserTag(tag: String, mpid: Long)
 
@@ -62,7 +62,7 @@ interface KitManager {
 
     fun onConsentStateUpdated(oldState: ConsentState, newState: ConsentState, mpid: Long)
 
-    fun setUserIdentity(id: String, identityType: MParticle.IdentityType)
+    fun setUserIdentity(id: String?, identityType: MParticle.IdentityType?)
 
     fun removeUserIdentity(id: MParticle.IdentityType)
 
@@ -74,21 +74,21 @@ interface KitManager {
 
     fun onPushRegistration(instanceId: String, senderId: String): Boolean
 
-    fun isEnabled(): Boolean
+    val isEnabled: Boolean
 
     fun isKitActive(kitId: Int): Boolean
 
     fun getKitInstance(kitId: Int): Any
 
-    fun getSupportedKits(): Set<Int>
+    val supportedKits: Set<Int>
 
-    fun updateKits(jsonArray: JSONArray): KitsLoadedCallback
+    fun updateKits(jsonArray: JSONArray?): KitsLoadedCallback
 
     fun updateDataplan(dataplanOptions: MParticleOptions.DataplanOptions)
 
-    fun getRoktOptions(): RoktOptions
+    val roktOptions: RoktOptions
 
-    fun getKitStatus(): Map<Int, KitStatus>
+    val kitStatus: Map<Int, KitStatus>
 
     fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?)
 
@@ -114,7 +114,7 @@ interface KitManager {
 
     fun onApplicationBackground()
 
-    fun getAttributionResults(): Map<Int, AttributionResult>
+    val attributionResults: Map<Int, AttributionResult>
 
     fun onIdentifyCompleted(user: MParticleUser, request: IdentityApiRequest)
 
