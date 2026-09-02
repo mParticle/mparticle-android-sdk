@@ -191,6 +191,101 @@ jobs:
       - name: "Run Isolated Kit Compatibility Tests (ga4)"
         run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga4/ga4-23 -PisRelease=true testRelease
 
+  kotlin-migration-progress:
+    name: "Kotlin Migration Progress"
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: "Checkout Branch"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: "Measure migration progress"
+        id: measure
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+
+          read_metric() {
+            grep "^$2=" "$1" | cut -d= -f2
+          }
+
+          scripts/kotlin-migration-progress.sh --format env >"$RUNNER_TEMP/head.env"
+          scripts/kotlin-migration-progress.sh >"$RUNNER_TEMP/head.md"
+
+          # Measure the base branch with the *current* facade list, so that adding
+          # or removing a facade entry cannot masquerade as migration progress.
+          git worktree add --detach "$RUNNER_TEMP/base" "$BASE_SHA" >/dev/null
+          mkdir -p "$RUNNER_TEMP/base/scripts"
+          cp scripts/kotlin-migration-facades.txt "$RUNNER_TEMP/base/scripts/"
+          scripts/kotlin-migration-progress.sh --root "$RUNNER_TEMP/base" --format env >"$RUNNER_TEMP/base.env"
+
+          head_remaining=$(read_metric "$RUNNER_TEMP/head.env" JAVA_REMAINING_LOC)
+          head_goal=$(read_metric "$RUNNER_TEMP/head.env" GOAL_PCT)
+          base_remaining=$(read_metric "$RUNNER_TEMP/base.env" JAVA_REMAINING_LOC)
+          base_goal=$(read_metric "$RUNNER_TEMP/base.env" GOAL_PCT)
+
+          delta_loc=$((head_remaining - base_remaining))
+          delta_pct=$(awk -v a="$head_goal" -v b="$base_goal" 'BEGIN { printf "%+.1f", a - b }')
+
+          adds_java=false
+          if [ "$delta_loc" -lt 0 ]; then
+            headline="This PR migrates **$((-delta_loc)) lines** of Java to Kotlin (${delta_pct} pp)."
+          elif [ "$delta_loc" -eq 0 ]; then
+            headline="No change to the Java/Kotlin balance in this PR."
+          else
+            headline=":warning: This PR **adds ${delta_loc} lines** of Java (${delta_pct} pp)."
+            adds_java=true
+          fi
+
+          {
+            echo "<!-- kotlin-migration-progress -->"
+            echo "### Kotlin migration progress"
+            echo
+            echo "$headline"
+            echo
+            cat "$RUNNER_TEMP/head.md"
+          } >"$RUNNER_TEMP/comment.md"
+
+          cat "$RUNNER_TEMP/comment.md" >>"$GITHUB_STEP_SUMMARY"
+          echo "delta_loc=$delta_loc" >>"$GITHUB_OUTPUT"
+          echo "adds_java=$adds_java" >>"$GITHUB_OUTPUT"
+      - name: "Upsert progress comment"
+        if: github.event.pull_request.head.repo.fork == false
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          marker="<!-- kotlin-migration-progress -->"
+          existing=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments" --paginate \
+            --jq "[.[] | select(.body | startswith(\"$marker\")) | .id] | first // empty")
+          if [ -n "$existing" ]; then
+            gh api -X PATCH "repos/$REPO/issues/comments/$existing" \
+              -F "body=@$RUNNER_TEMP/comment.md" >/dev/null
+          else
+            gh api -X POST "repos/$REPO/issues/$PR_NUMBER/comments" \
+              -F "body=@$RUNNER_TEMP/comment.md" >/dev/null
+          fi
+      - name: "Ratchet: no new Java in the migrated modules"
+        if: >
+          steps.measure.outputs.adds_java == 'true' &&
+          !contains(github.event.pull_request.labels.*.name, 'allow-new-java')
+        env:
+          DELTA_LOC: ${{ steps.measure.outputs.delta_loc }}
+        run: |
+          echo "This PR adds $DELTA_LOC lines of Java to android-core, android-kit-base or" >&2
+          echo "the Rokt kit. New code in these modules should be written in Kotlin." >&2
+          echo "If the Java is genuinely unavoidable, add the 'allow-new-java' label and" >&2
+          echo "say why in the PR description." >&2
+          exit 1
+
   automerge-dependabot:
     name: "Save PR Number for Dependabot Automerge"
     if: github.event_name == 'pull_request'
