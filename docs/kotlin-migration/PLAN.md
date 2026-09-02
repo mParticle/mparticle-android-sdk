@@ -1,6 +1,6 @@
 # mParticle Android SDK — Java → Kotlin migration
 
-**Status:** planning · **Owner:** Android SDK team · **Started:** Sep 2, 2026 · **Target:** Oct 9, 2026
+**Status:** planning · **Owner:** Android SDK team · **Timebox:** Wed Sep 2 → Wed Sep 16, 2026 (10 working days)
 
 This is the living tracker. Strike through items and append the PR link as they land,
 the same way the Apple SDK's Swift migration doc works.
@@ -88,9 +88,17 @@ the Java file thins out to declarations that delegate. They are just excluded fr
 
 ## 3. How to do a conversion
 
-1. **One file per PR.** Stack them with Graphite inside your lane. Do not touch a file
-   that belongs to another lane; if you need a change there, ask the lane owner to stack
-   it, or note it in the Cleanup section.
+1. **Batch the easy tier, one file per PR for everything else.** Easy-tier files are
+   leaf classes — table schemas, message types, small interfaces — and reviewing seven of
+   them together is no harder than reviewing one. Batch them per lane directory: roughly
+   8 PRs instead of 41. Medium and hard files stay one per PR, stacked with Graphite
+   inside your lane. Never touch a file that belongs to another lane; ask that owner to
+   stack it, or note it in Cleanup.
+
+    This is the change that makes a two-week timebox arithmetic rather than hope. It is
+    only safe because the API guard reports exactly which signatures moved and the ratchet
+    blocks new Java — without both, batch conversions are how a silent break ships.
+
 2. **Characterization test first.** If the file has no meaningful test coverage, the PR
    _below_ it in the stack adds tests against the current Java behaviour. Converting an
    untested file is how a silent behaviour change ships.
@@ -143,10 +151,30 @@ the Java file thins out to declarations that delegate. They are just excluded fr
 ## 4. Work breakdown
 
 Eight lanes, split by directory so that two people never edit the same file. Stack PRs
-within a lane; lanes are independent and can run fully in parallel.
+within a lane; lanes are independent and run fully in parallel.
 
-Assumes 3–4 engineers; one person can own two adjacent lanes. **Lane H is single-owner and
-goes last** — it is the cross-cutting code everything else touches.
+**The two-week timebox needs five engineers.** 16,945 lines over 10 working days is
+~1,700 lines a day; split five ways that is ~340 lines per engineer per day of mechanical,
+tested, reviewed conversion. A balanced assignment:
+
+| Engineer | Lanes                                    |   LOC |
+| -------- | ---------------------------------------- | ----: |
+| 1        | F — kit base internals                   | 3,729 |
+| 2        | H — cross-cutting                        | 3,412 |
+| 3        | D + C — event pipeline, identity         | 3,633 |
+| 4        | A + E — persistence, kit infra core side | 3,490 |
+| 5        | B + G — networking, platform surface     | 2,681 |
+
+With four engineers the same work is ~424 lines per engineer per day and there is no
+slack; drop lane B or G out of the timebox rather than pretending. With three, two weeks
+is not achievable and the honest move is to keep the six-week plan.
+
+**Lane H now runs in parallel rather than last.** That was conservatism, and a two-week
+box cannot afford to serialise 3,412 lines behind everything else. It is safe because
+lanes are file-scoped and Java and Kotlin interoperate inside one module, so nobody is
+blocked on H converting. The residual risk is a semantic conflict between a caller in
+another lane and an H callee converted the same day — tests catch that, the API guard
+does not. Lane H's owner posts in the team channel when each file merges.
 
 ### Lane A — Persistence · 2,488 LOC · owner: _unassigned_
 
@@ -295,7 +323,7 @@ and stay Java.
 - [ ] `internal/ConfigManager.java` — 1,514 — split into ≥5 stacked PRs (prefs accessors, kit-config parsing, data-plan config, listener registration, the orchestrator last)
 - [ ] `internal/MParticleJSInterface.java` — 840 — **last file in the migration.** Every `@JavascriptInterface` name and signature is frozen
 
-### Lane I — Facade thinning (after H)
+### Lane I — Facade thinning (deferred past the timebox)
 
 Once internal Java is at zero, the remaining Java is the facade. Move the _bodies_ into
 internal Kotlin while the Java declarations stay put. Highest value first:
@@ -369,63 +397,112 @@ Policy and the full working agreement: [`PR-GATE.md`](PR-GATE.md).
 
 ## 6. Milestones
 
-> Assumes 3–4 engineers with lanes running in parallel. Dates are Fridays.
+**Timebox: Wed Sep 2 → Wed Sep 16, 2026.** Ten working days — **Mon Sep 7 is Labor
+Day**. 16,945 lines to move, so ~1,700 lines a day, every day, with no recovery week.
 
-### M0 — Sep 4 · Foundations
+Percentages are the tracker's goal metric at the end of each milestone, assuming the
+listed lines land.
 
-- [x] Progress tracker script + CI job + ratchet
+### M0 — Thu Sep 3 · Set up and prove the pipeline
+
+- [x] Progress tracker, CI job and ratchet
 - [x] Facade list agreed and committed
+- [x] API guard, self-test and baselines; `public-api-guard` job wired into CI
 - [ ] `allow-new-java` label created
-- [x] API guard, self-test and baselines shipped; `public-api-guard` job wired into CI
-- [ ] Lane owners assigned
+- [ ] Five lane owners assigned (see §4)
+- [ ] Batching rule agreed — easy tier per directory, one file per PR after that
+- [ ] **Every owner has one conversion PR merged.** The point is to find the friction in
+      review and CI on day one, not on day six.
 
-### M1 — Sep 11 · Easy tier · 2,581 LOC · target ≈ 34% goal progress
+Goal progress: **22.4%**
 
-- [ ] Lane A easy (14 files, 781 LOC)
-- [ ] Lane B easy (5 files, 319 LOC)
-- [ ] Lane D easy (9 files, 943 LOC)
-- [ ] Lane E easy (5 files, 193 LOC)
-- [ ] Lane G easy (6 files, 175 LOC)
-- [ ] Lane C easy (2 files, 170 LOC)
+### M1 — Fri Sep 4 · Easy tier, every lane · 2,581 LOC
 
-### M2 — Sep 18 · Medium tier · 5,758 LOC · target ≈ 61%
+41 leaf files, batched into ~8 PRs. Lane A easy (781) · Lane D easy (943) · Lane B easy
+(319) · Lane E easy (193) · Lane G easy (175) · Lane C easy (170).
 
-- [ ] Lane A services (6 files, 921 LOC)
-- [ ] Lane B medium (3 files, 951 LOC)
-- [ ] Lane C medium (2 files, 737 LOC)
-- [ ] Lane D medium (2 files, 694 LOC)
-- [ ] Lane G medium (6 files, 1,236 LOC)
-- [ ] Lane F medium (4 files, 1,219 LOC)
+Goal progress: **34.3%**
 
-### M3 — Sep 25 · Hard tier, part 1 · 3,753 LOC · target ≈ 78%
+### M2 — Wed Sep 9 · Medium tier, every lane · 5,758 LOC
 
-- [ ] `MParticleDBManager` (786)
-- [ ] `MessageManager` (1,089)
-- [ ] `KitFrameworkWrapper` (809)
-- [ ] `KitConfiguration` (1,069)
-- [ ] **Manual QA pass 1** — event stream, identity, kit forwarding, Rokt kit
+Lane G (1,236) · Lane F mappings (1,219) · Lane B (951) · Lane A services (921) · Lane C
+(737) · Lane D handlers (694).
 
-### M4 — Oct 2 · Hard tier, part 2 · 4,853 LOC · target 100% of internal Java
+- [ ] **Manual QA pass 1 — full checklist (§7).** The medium tier is where behaviour
+      actually lives: network clients, identity, the DB services, push, device attributes,
+      kit mappings. 5,758 lines of it land in five days. Finding a regression here leaves a
+      week to fix it; finding it on Sep 16 does not.
 
-- [ ] `KitManagerImpl` (1,441)
-- [ ] `Logger` (200), `MPUtility` (858)
-- [ ] `ConfigManager` (1,514)
-- [ ] `MParticleJSInterface` (840)
-- [ ] **Internal Java LOC = 0** — the tracker reads 100%
+**Mid-point checkpoint.** This is the day to cut scope, not day nine. If a lane is behind
+here, take work out of it now — see the pressure valve below. A QA failure counts as being
+behind.
 
-### M5 — Oct 9 · Facade thinning, QA, release
+Goal progress: **60.6%**
 
-- [ ] Lane I: `MParticle`, `MParticleOptions`, `CommerceEvent`/`Product`, `MPEvent`, `IdentityApi` bodies moved to Kotlin
-- [ ] `apiCheck` diff across the whole migration reviewed and confirmed empty
-- [ ] **Manual QA pass 2** (full)
-- [ ] Cleanup items
+### M3 — Fri Sep 11 · Hard tier, first half · 3,753 LOC
+
+`MessageManager` (1,089) · `KitConfiguration` (1,069) · `KitFrameworkWrapper` (809) ·
+`MParticleDBManager` (786).
+
+- [ ] **Smoke QA** on the integration branch: event stream, identity, one kit, Rokt kit.
+      Half an hour, not the full pass — QA pass 1 was four days earlier.
+
+Goal progress: **77.8%**
+
+### M4 — Tue Sep 15 · Hard tier, second half · 4,853 LOC
+
+`ConfigManager` (1,514) · `KitManagerImpl` (1,441) · `MPUtility` (858) ·
+`MParticleJSInterface` (840, last file in) · `Logger` (200).
+
+- [ ] **Internal Java = 0.** The tracker reads 100%.
+
+Goal progress: **100%**
+
+### M5 — Wed Sep 16 · QA and release
+
+- [ ] **Manual QA pass 2 — full checklist (§7)**
+- [ ] `scripts/api-guard.sh check` across the whole migration: confirm no frozen contract
+      moved, and that every reviewed internal diff has its audit in the PR that made it
 - [ ] Release
 
----
+### Explicitly outside the timebox
+
+Deferred on purpose, not forgotten. None of it is required for internal Java to reach
+zero, and all of it is either delicate or zero-risk:
+
+- **Lane I — facade thinning** (~5,000 LOC). The most delicate work in the project:
+  moving `MParticle`, `MParticleOptions`, `CommerceEvent`, `MPEvent` and `IdentityApi`
+  bodies into Kotlin while their declarations stay put. It moves the Kotlin % and not the
+  goal metric, so it can follow the release.
+- **`testutils`** (43 files) and the three remaining Java files in test source sets.
+- **Cleanup** items.
+
+### Pressure valve
+
+If the tracker is short of 60% at the M2 checkpoint on Wed Sep 9, cut in this order and
+say so in the team channel the same day:
+
+1. **`KitConfiguration` + `KitManagerImpl`** (2,510). Biggest, riskiest, and referenced by
+   29 and 12 kit files respectively. Cutting these keeps the release safe and costs 15
+   points of goal metric.
+2. **`MParticleJSInterface`** (840). Highest blast radius per line — the WebView bridge
+   resolves its methods by name from JavaScript outside this repo.
+3. **Lane G medium** (1,236). Lowest value per line and the most platform-coupled.
+
+Cutting all three still lands ~72%, with every easy and medium file converted and the
+public API provably unchanged. That is a good two-week outcome. Missing the QA pass
+because the last hard file landed on Sep 16 is not.
 
 ## 7. Manual QA checklist
 
-Run at M3 and M5, against a real workspace, on a minSdk and a current-SDK device.
+Two full passes and one smoke pass, against a real workspace, on a minSdk device and a
+current-SDK device:
+
+- **M2, Wed Sep 9 — full pass.** Straight after the medium tier, which is where most of the
+  behaviour-carrying code lands. A week of runway left to fix whatever it finds.
+- **M3, Fri Sep 11 — smoke pass.** First four items only, half an hour, on the integration
+  branch, to catch a systemic break from the first hard-tier files.
+- **M5, Wed Sep 16 — full pass.** The release gate.
 
 - [ ] Event stream — custom events, screen views, commerce events reach the dashboard with
       correct attributes
@@ -444,11 +521,15 @@ Run at M3 and M5, against a real workspace, on a minSdk and a current-SDK device
 
 ## 8. Risks
 
-| Risk                                                                               | Mitigation                                                                                                                             |
-| ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| A conversion silently tightens nullability and a customer's `null` starts throwing | The unannotated-param → `T?` rule; API guard diff; characterization tests                                                              |
-| A Kotlin class becomes `final` and breaks a kit author                             | Facade list keeps the kit ABI in Java; kit-compatibility CI job runs on every PR                                                       |
-| `MParticleJSInterface` method renamed by the converter                             | Converted last, JS bridge instrumented tests must pass, names frozen                                                                   |
-| `KitManagerImpl` reflective load breaks                                            | Class name and constructor arity are explicitly frozen; kit-compatibility job covers it                                                |
-| Merge conflicts across a 17k-LOC migration                                         | Directory-scoped lanes, one file per PR, Graphite stacks within a lane                                                                 |
-| Migration drags past the window                                                    | Ratchet stops the problem growing; the facade split means we can stop at any milestone and still be in a shippable, non-breaking state |
+| Risk                                                                               | Mitigation                                                                                                                                                                                                                             |
+| ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A conversion silently tightens nullability and a customer's `null` starts throwing | The unannotated-param → `T?` rule; API guard diff; characterization tests                                                                                                                                                              |
+| A Kotlin class becomes `final` and breaks a kit author                             | Facade list keeps the kit ABI in Java; kit-compatibility CI job runs on every PR                                                                                                                                                       |
+| `MParticleJSInterface` method renamed by the converter                             | Converted last, JS bridge instrumented tests must pass, names frozen                                                                                                                                                                   |
+| `KitManagerImpl` reflective load breaks                                            | Class name and constructor arity are explicitly frozen; kit-compatibility job covers it                                                                                                                                                |
+| Merge conflicts across a 17k-LOC migration                                         | Directory-scoped lanes, Graphite stacks within a lane, batching confined to a single lane directory                                                                                                                                    |
+| Migration drags past the window                                                    | Ratchet stops the problem growing; the facade split means we can stop at any milestone and still be in a shippable, non-breaking state                                                                                                 |
+| **Review throughput, not conversion speed, is the binding constraint**             | ~60–80 PRs in 10 days. Named reviewer per lane, four-hour turnaround, and mechanical conversions approved on evidence — green API guard, green tests, diff is a language port — rather than line-by-line                               |
+| **Labor Day, Mon Sep 7**                                                           | Already excluded from the 10-day count. Do not quietly re-plan as if it were 11 days                                                                                                                                                   |
+| **Lane H runs in parallel instead of last**                                        | Lanes are file-scoped and Java/Kotlin interoperate in-module, so nobody is blocked. Residual risk is a same-day semantic conflict between a caller and an H callee; tests catch it, the guard does not. H's owner announces each merge |
+| **Batched easy-tier PRs hide a bad conversion**                                    | Only viable because the API guard reports exactly which signatures moved. A batch whose guard output is anything but "no diff" gets split before review                                                                                |
