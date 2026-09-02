@@ -44,9 +44,9 @@ Kotlin:
 ```kotlin
 import com.mparticle.MParticle
 import com.mparticle.kits.rokt
-import com.rokt.payment.extension.StripePaymentExtension
+import com.rokt.payment.extension.RoktPaymentExtension
 
-MParticle.getInstance()?.rokt?.registerPaymentExtension(StripePaymentExtension())
+MParticle.getInstance()?.rokt?.registerPaymentExtension(RoktPaymentExtension())
 MParticle.getInstance()?.rokt?.selectShoppableAds(
     identifier = "RoktShoppableExperience",
     attributes = attributes,
@@ -56,7 +56,7 @@ MParticle.getInstance()?.rokt?.selectShoppableAds(
 Java:
 
 ```java
-MParticleRokt.Rokt().registerPaymentExtension(new StripePaymentExtension());
+MParticleRokt.Rokt().registerPaymentExtension(new RoktPaymentExtension());
 MParticleRokt.Rokt().selectShoppableAds("RoktShoppableExperience", attributes);
 ```
 
