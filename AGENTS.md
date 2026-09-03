@@ -1,160 +1,125 @@
-# AGENTS
+# mParticle Android SDK - Agent Instructions
 
-## About mParticle SDKs
+This file holds only what an agent cannot get by reading the repository. Anything a config file
+already states — plugin and dependency versions, SDK levels, ktlint rules, the kit list — is
+deliberately absent, because the config cannot go stale and this file can. Read `build.gradle`,
+`gradle.properties`, `.editorconfig`, `.trunk/trunk.yaml` and the `settings*.gradle` files instead.
 
-mParticle is a Customer Data Platform that collects, validates, and forwards event data to analytics and marketing integrations. The SDK is responsible for:
+Environment setup, the Maven-local workflow and the isolated-kit builds are in
+[ONBOARDING.md](ONBOARDING.md). Commit and PR conventions are in
+[CONTRIBUTING.md](CONTRIBUTING.md). API reference lives in the
+[public docs](https://docs.mparticle.com/developers/sdk/android/).
 
-- **Event Collection**: Capturing user interactions, commerce events, and custom events
-- **Identity Management**: Managing user identity across sessions and platforms
-- **Event Forwarding**: Routing events to configured integrations (kits/forwarders)
-- **Data Validation**: Enforcing data quality through data plans
-- **Consent Management**: Handling user consent preferences (GDPR, CCPA)
-- **Session Management**: Tracking user sessions and engagement
-- **Batch Upload**: Efficiently uploading events to mParticle servers
+## What this repo is
 
-### Glossary of Terms
+A public, multi-module Gradle library published to Maven Central, plus the integration kits that
+forward events into third-party SDKs. It is not an app. Treat every `public` symbol as consumer
+API: prefer additive changes and `@Deprecated` over removals, keep the APK-size impact of any
+change in mind, and do not raise `android-core`'s `minSdk` — it is the advertised compatibility
+floor, not a build detail.
 
-- **MPID (mParticle ID)**: Unique identifier for a user across sessions and devices
-- **Kit/Forwarder**: Third-party integration (e.g., Google Analytics, Braze) that receives events from the SDK
-- **Data Plan**: Validation schema that defines expected events and their attributes
-- **Workspace**: A customer's mParticle environment (identified by API key)
-- **Batch**: Collection of events grouped together for efficient server upload
-- **Identity Request**: API call to identify, login, logout, or modify a user's identity
-- **Session**: Period of user activity with automatic timeout (typically 30 minutes)
-- **Consent State**: User's privacy preferences (GDPR, CCPA) that control data collection and forwarding
-- **User Attributes**: Key-value pairs describing user properties (e.g., email, age, preferences)
-- **Custom Events**: Application-specific events defined by the developer
-- **Commerce Events**: Predefined events for e-commerce tracking (purchases, product views, etc.)
-- **Event Type**: Category of event (Navigation, Location, Transaction, UserContent, UserPreference, Social, Other)
+## Repository shape (non-obvious parts only)
 
-## Role for agents
+Gradle is split across several settings files, and a bare `./gradlew` invocation sees only the
+first one:
 
-You are a senior Android SDK engineer specializing in customer data platform (CDP) SDK development.
+| Settings file                   | Contains                                                                     |
+| ------------------------------- | ---------------------------------------------------------------------------- |
+| `settings.gradle`               | `android-core`, `android-kit-base`, `testutils`, `kit-plugin`, `tooling/*`   |
+| `settings-kits.gradle`          | the kits under `kits/`; needs `-c settings-kits.gradle`                      |
+| `settings-kit-examples.gradle`  | kit sample apps (CI only); applies `settings-kits.gradle` on top             |
+| `settings-rokt-sdk-plus.gradle` | `rokt-sdk-plus`, held out of the main build so it publishes on its own creds |
 
-- Treat this as a **public SDK** (multi-module Gradle library published to Maven Central), not a full consumer app.
-- Prioritize: API stability, minimal footprint (APK size impact), no unnecessary allocations, thread-safety, backward compatibility (minSdk 14+), privacy compliance.
-- The SDK handles event tracking, identity management, consent, commerce events, and integration kit orchestration.
-- Avoid proposing big refactors unless explicitly asked; prefer additive changes + deprecations.
+- `build-logic/` is an included build; it supplies the `mparticle.android.library.publish` plugin
+  that every publishable module applies.
+- `tooling/custom-lint-rules` is shipped to consumer apps through `lintPublish` in
+  `android-core/build.gradle`, so a change there runs inside other people's builds.
+- `kits/matrix.json` drives the CI `build-kits` matrix and is a **separate list** from
+  `settings-kits.gradle`. A new kit must be added to both or CI silently never builds it.
+- Gradle project paths do not match directory paths for kits: `settings-kits.gradle` prefixes each
+  kit group with `android-`, so `kits/braze/braze-41` is `:kits:android-braze:braze-41`.
+  `settings.gradle` likewise renames `kit-plugin` to `android-kit-plugin`.
 
-## Quick Start for Agents
+## Commands
 
-- Use latest Android Studio + JDK 17.
-- Run all commands with `./gradlew` (wrapper).
-- Primary tasks:
-    - Build: `./gradlew build`
-    - Run unit tests: `./gradlew test`
-    - Lint: `trunk check` (primary), `./gradlew ktlintCheck`, `./gradlew lint`
-    - Instrumented tests: `./gradlew connectedAndroidTest` (requires emulator, API 28)
-    - Isolated kit tests: `cd kits/urbanairship-kit && ./gradlew testRelease` (for kits excluded from `settings-kits.gradle` due to Kotlin version)
-- Always validate changes with the full sequence in "Code style, quality, and validation" below before proposing or committing.
+JDK 17 — `gradle.properties` sets `JAVA_VERSION` and every CI job installs Zulu 17. ONBOARDING.md's
+`JAVA_HOME` section still tells you to install Java 11; ignore that part of it.
 
-## Strict Do's and Don'ts
+- Core + tooling unit tests — `./gradlew test`
+- Android lint — `./gradlew lint`; Kotlin lint — `./gradlew ktlintCheck`
+- Instrumented tests — `./gradlew :android-core:cAT :android-kit-base:cAT --stacktrace`, needs an
+  API 28 emulator
+- Kit unit tests — `./gradlew -p kits testRelease -c ../settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true`
+- Everything trunk gates — `trunk check`
 
-### Always Do
+### Command traps
 
-- Maintain compatibility with mParticle's kit/integration ecosystem.
-- Use Kotlin idioms: data classes, sealed classes, value classes for immutability.
-- Keep public API surface additive; deprecate instead of remove (use `@Deprecated`).
-- Mark public APIs with thorough KDoc (`/** ... */`).
-- Dispatch work safely off the main thread.
-- Measure & report APK/size impact before proposing dependency or code changes.
-- Run `trunk check` and unit tests before any commit.
+1. **`./gradlew test` and `./gradlew build` never touch a kit.** Kits are a separate Gradle build.
+   A green root build says nothing about anything under `kits/`.
+2. **A Gradle test task that matched zero tests still passes.** `testutils` has no `src/test` at
+   all — only `src/androidTest` — so `./gradlew :testutils:test` succeeds having run nothing. Read
+   the test report, not the exit code, when you expect a specific test to have run.
+3. **Unit tests are not the bulk of the suite.** `android-core` and `android-kit-base` both keep
+   substantial suites under `src/androidTest`, which only `cAT` on an emulator executes. "Tests
+   pass" is ambiguous here — say which of the two you ran.
+4. **Some kits are commented out of `settings-kits.gradle`** because they need a newer Kotlin than
+   the root plugin, and they build standalone from their own directory with their own wrapper. The
+   commented-out lines name the current set; see
+   [ONBOARDING.md](ONBOARDING.md#isolated-kits-different-kotlin-version) for the invocation. Adding
+   another one also requires its own publish step in `.github/workflows/release-publish.yml` — the
+   aggregate kit publish will not pick it up.
+5. **Publish core to Maven local before building any kit, and always pass `-PVERSION`.** Kits
+   resolve `android-core`/`android-kit-base` from `mavenLocal()` at an exact version. With no
+   `-PVERSION` the version falls back to `0.0.0` and kit resolution fails with a confusing
+   "could not find" error. CI derives it from the `VERSION` file into
+   `ORG_GRADLE_PROJECT_VERSION`.
+6. **`trunk check` does not lint everything.** `.trunk/trunk.yaml` has an `ignore` block that
+   excludes an isolated kit directory, `**/gradlew` and one script from _all_ linters. Check it
+   before assuming a file is covered.
+7. **Kit lint is advisory in several kits.** Grep the kit `build.gradle` files for
+   `abortOnError false`: in those modules `lint` prints findings and still exits 0. `android-core`
+   sets `abortOnError true`, so core lint does fail the build.
+8. **`android-core/lint-baseline.xml` is not a baseline.** Despite the name it is wired in as
+   `lintConfig`, and its contents are a `<lint>` config suppressing `UnknownNullness` on an
+   explicit path list. It will not absorb a newly introduced lint finding.
+9. **`org.sonarqube` is applied in the root `build.gradle` but no workflow invokes it.** There is
+   no Sonar analysis on a pull request. Do not treat it as a gate or wait for it.
 
-### Never
+## Pull requests
 
-- Introduce new third-party dependencies without size/performance justification and approval.
-- Block the main thread (no synchronous network, heavy computation, etc.).
-- Crash on bad input/network — always provide fallback / error callback.
-- Touch CI configs (`.github/`), release scripts (`scripts/`), or CI YAML without explicit request.
-- Propose raising minSdk beyond current (API 14+).
-- Break kit/integration compatibility without explicit coordination.
-- Modify ProGuard rules without verifying impact on consumer apps.
+- Branch from and target `main`. A `development` branch still exists and is stale — do not use it.
+- Conventional-commit PR titles (`feat`, `fix`, `chore`, `ci`, `docs`, …) are the house convention;
+  [CONTRIBUTING.md](CONTRIBUTING.md) has the full type list. No CI job actually enforces the title
+  or the branch name, so a malformed one will merge — match the convention anyway.
+- The release version bump is a **manual** `bump-type` input on the `Release – Draft` workflow.
+  Commit type does not decide it, whatever CONTRIBUTING.md implies about automatic releases.
+- Merges are squash-only and need an approving review plus a CODEOWNERS review
+  (`.github/CODEOWNERS` assigns everything to `@mParticle/sdk-team`). Force-pushing `main` is
+  blocked, and commits GitHub cannot attribute to a user require an extra approval.
+- **The required-check set is much narrower than the check list.** On `main` the repository ruleset
+  currently requires only `Unit Tests`, `Lint Checks` and `Kotlin Lint Checks`. `Trunk code check`,
+  every `Instrumented Tests (…)` job, `Security Lint Checks`, `Kit Compatibility Test` and
+  `build-kits` all run and are reported but are **not** required, so a PR can merge with them red.
+  Re-read the ruleset rather than trusting this list, and never say "CI is green" — name the job.
+- Add a `CHANGELOG.md` entry for anything user-visible, under one of `Added`, `Changed`,
+  `Deprecated`, `Fixed`, `Removed`, `Security`, in imperative mood. Never invent or auto-generate
+  one; if the right wording is unclear, leave it for a human.
 
-## When to Ask for Clarification
+## Conventions no config enforces
 
-- Before adding any new dependency.
-- Before dropping support for API levels.
-- Before making breaking API changes.
-- When changes affect the kit/integration interface.
-- When test failures suggest the original code may have had bugs.
+- Kit modules ship their own `.editorconfig` files, some with `root = true`, which would otherwise
+  shadow the repository one. The root `build.gradle` compensates by injecting
+  `additionalEditorconfig` overrides for `kits/` paths only, so ktlint is deliberately stricter in
+  core than in kits. Fix a kit inside the kit — never by relaxing the core rules.
+- Every Android module must declare an explicit `namespace`; the root build fails the configuration
+  phase with a named error if one is missing.
+- Add comments only where the code cannot be made clearer. If you are reaching for a comment to
+  explain confusing code, rewrite the code instead.
+- Ask before you add a third-party dependency, change an SDK level, edit a ProGuard or
+  consumer-ProGuard rule, or touch anything under `.github/` or `scripts/`. Each of those changes
+  what consumer apps ship or how a release is cut, and none of them are reversible after publish.
 
-## Project overview
+## External references
 
-- mParticle Android SDK (Rokt fork): a multi-module Gradle library for customer data platform functionality on Android.
-- Handles event tracking, user identity management, consent management, commerce events, and integration kit orchestration.
-- Published to Maven Central.
-- Integration kits (like the Rokt kit) plug into this SDK to forward events to third-party services.
-
-## Key paths
-
-- `android-core/` — Core SDK library (Java + Kotlin source).
-- `android-kit-base/` — Base classes for kit implementations.
-- `kits/` — Integration kit implementations.
-- `kit-plugin/` — Gradle plugin for kit development.
-- `tooling/` — Build tools and utilities.
-- `testutils/` — Shared testing infrastructure.
-- `scripts/` — Build, release, and CI scripts.
-    - `release.sh` — Release automation.
-    - `maven.gradle` — Maven Central publishing config.
-    - `install-start-emulator.sh` — Emulator setup for CI.
-    - `startup_perf_tests.sh` — Performance testing.
-- `.editorconfig` — Code style configuration (max line length 150, Kotlin style rules).
-- `android-core/lint-baseline.xml` — Lint baseline.
-- `android-core/proguard.pro` — ProGuard rules.
-- `android-core/consumer-proguard.pro` — Consumer ProGuard rules.
-- `CHANGELOG.md` — Release notes (extensive).
-- `RELEASE.md` — Release process documentation.
-- `settings-kits.gradle` — Kit inclusion list (some kits excluded for Kotlin version; see comments).
-- `CONTRIBUTING.md` — Contribution guidelines.
-- `ONBOARDING.md` — Onboarding guide.
-
-## Code style, quality, and validation
-
-- **Lint & format tools**:
-    - ktlint: v13.0.0 (configured via `.editorconfig` with intellij_idea code style, max line 150).
-    - Android Lint: with baseline file.
-    - SonarQube: v3.5.0 (sonarcloud.io analysis).
-    - **Primary enforcement tool**: `trunk check` (via Trunk.io). If Trunk unavailable, fall back to `./gradlew ktlintCheck lint`.
-    - Important: Only add comments if absolutely necessary. If you're adding comments, review why the code is hard to reason with and rewrite that first.
-
-- **Strict post-change validation rule (always follow this)**:
-  After **any** code change, refactor, or addition — even small ones — you **must** run the full validation sequence:
-    1. `trunk check` — to lint, format-check, and catch style/quality issues.
-    2. Build: `./gradlew build`.
-    3. Run unit tests: `./gradlew test`.
-    4. `./gradlew ktlintCheck` — Kotlin lint verification.
-    5. If change affects core SDK: run instrumented tests with emulator (API 28).
-    6. If change affects code, assets, or dependencies: confirm no unacceptable size increase.
-    - Only propose / commit changes if all steps pass cleanly.
-    - If `trunk check` suggests auto-fixes, apply them first and re-validate.
-    - Never bypass this — it's required to maintain SDK stability, footprint, and public API quality.
-
-- **Style preferences**:
-    - Prefer `val` over `var`; use immutable data structures (data class, List, Map).
-    - Use coroutines for async code where appropriate.
-    - Write thorough KDoc for all public APIs.
-    - Avoid `!!` force-unwraps; prefer safe calls/elvis/let.
-    - Follow `.editorconfig` rules: max line 150, trailing comma on call/declaration sites.
-    - Use `@JvmStatic`, `@JvmOverloads` for Java interop where needed.
-
-- **Testing expectations**:
-    - Unit tests in `android-core/src/test/` (JUnit 4, Mockito 2.0.2, PowerMock 2.0.7).
-    - Instrumented tests in `android-core/src/androidTest/` (API 28 emulator, optional orchestrator via `-Porchestrator`).
-    - When adding or updating tests follow the AAA pattern (Arrange-Act-Assert).
-    - After changes, always re-run affected tests + full suite if core/shared code is touched.
-
-- **CHANGELOG.md maintenance**:
-    - For **substantial changes**, **always add a clear entry** to `CHANGELOG.md`.
-    - Use standard categories: `Added`, `Changed`, `Deprecated`, `Fixed`, `Removed`, `Security`.
-    - Keep entries concise and written in imperative mood.
-    - Update `CHANGELOG.md` **before** finalizing a change.
-    - Never auto-generate or hallucinate changelog entries — flag for human review.
-
-## Pull request and branching
-
-- PR checks include: Trunk checks, hardcoded secrets detection, branch name validation, PR title semantic checks, unit tests, instrumented tests, code coverage, and SonarQube analysis.
-
-## External Resources
-
-- [mParticle Android SDK Documentation](https://docs.mparticle.com/developers/sdk/android/)
-- [Rokt mParticle Integration Docs](https://docs.rokt.com/developers/integration-guides/rokt-ads/customer-data-platforms/mparticle/)
+- [mParticle Android SDK docs](https://docs.mparticle.com/developers/sdk/android/)
+- [Rokt mParticle integration guide](https://docs.rokt.com/developers/integration-guides/rokt-ads/customer-data-platforms/mparticle/)
