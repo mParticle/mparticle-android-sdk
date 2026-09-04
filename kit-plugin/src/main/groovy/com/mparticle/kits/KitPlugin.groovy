@@ -136,7 +136,7 @@ class KitPlugin implements Plugin<Project> {
                     username System.getenv('sonatypeUsername') ?: ""
                     password System.getenv('sonatypePassword') ?: ""
                 }
-                url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+                url = 'https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/'
             }
 
             def signingKey = System.getenv("mavenSigningKeyId")
