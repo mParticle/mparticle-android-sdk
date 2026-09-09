@@ -6,7 +6,7 @@
 
 #### Added
 
-- Cache Identity API identify and login responses, and clear the cache on modify and logout
+- Cache Identity API identify and login responses, and clear the cache on modify and logout ([#786](https://github.com/mParticle/mparticle-android-sdk/pull/786))
 
 ## [6.0.4] - 2026-09-02
 
