@@ -652,8 +652,6 @@ object Constants {
             const val REPORT_UNCAUGHT_EXCEPTIONS: String = "mp::reportUncaughtExceptions"
             const val ENVIRONMENT: String = "mp::environment"
             const val IDENTITY_API_REQUEST: String = "mp::identity::api::request"
-            const val IDENTITY_API_CACHE_TIME: String = "mp::identity::cache::time"
-            const val IDENTITY_MAX_AGE: String = "mp::max:age::time"
         }
     }
 

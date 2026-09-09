@@ -990,27 +990,9 @@ public class ConfigManager {
         sPreferences.edit().putString(Constants.PrefKeys.IDENTITY_API_REQUEST, cache.toString()).apply();
     }
 
-    public void saveIdentityCacheTime(long time) {
-        sPreferences.edit().putLong(Constants.PrefKeys.IDENTITY_API_CACHE_TIME, time).apply();
-    }
-
-    public void saveIdentityMaxAge(long time) {
-        sPreferences.edit().putLong(Constants.PrefKeys.IDENTITY_MAX_AGE, time).apply();
-    }
-
-    public synchronized Long getIdentityCacheTime() {
-        return sPreferences.getLong(Constants.PrefKeys.IDENTITY_API_CACHE_TIME, 0);
-    }
-
-    public Long getIdentityMaxAge() {
-        return sPreferences.getLong(Constants.PrefKeys.IDENTITY_MAX_AGE, 0);
-    }
-
     public void clearIdentityCache() {
         sPreferences.edit()
                 .remove(Constants.PrefKeys.IDENTITY_API_REQUEST)
-                .remove(Constants.PrefKeys.IDENTITY_API_CACHE_TIME)
-                .remove(Constants.PrefKeys.IDENTITY_MAX_AGE)
                 .apply();
     }
 

@@ -18,6 +18,7 @@ public final class IdentityHttpResponse {
     private String context;
     private int httpCode;
     private boolean loggedIn;
+    private long cacheExpirationMillis;
 
     @NonNull
     public static final String MPID = "mpid";
@@ -105,6 +106,14 @@ public final class IdentityHttpResponse {
         return loggedIn;
     }
 
+    public long getCacheExpirationMillis() {
+        return cacheExpirationMillis;
+    }
+
+    public void setCacheExpirationMillis(long cacheExpirationMillis) {
+        this.cacheExpirationMillis = cacheExpirationMillis;
+    }
+
     public static class Error {
         @NonNull
         public final String message;
@@ -138,7 +147,9 @@ public final class IdentityHttpResponse {
 
     public static IdentityHttpResponse fromJson(@NonNull JSONObject jsonObject) throws JSONException {
         int httpCode = jsonObject.optInt("http_code", 0);
-        return new IdentityHttpResponse(httpCode, jsonObject);
+        IdentityHttpResponse response = new IdentityHttpResponse(httpCode, jsonObject);
+        response.setCacheExpirationMillis(jsonObject.optLong("cache_expiration_millis", 0));
+        return response;
     }
 
     @NonNull
@@ -148,6 +159,7 @@ public final class IdentityHttpResponse {
         jsonObject.put(MPID, String.valueOf(mpId));
         jsonObject.put(CONTEXT, context != null ? context : JSONObject.NULL);
         jsonObject.put(LOGGED_IN, loggedIn);
+        jsonObject.put("cache_expiration_millis", cacheExpirationMillis);
 
         if (!errors.isEmpty()) {
             JSONArray errorsArray = new JSONArray();

@@ -18,6 +18,7 @@ import org.junit.Before
 import org.junit.Test
 import java.io.IOException
 import java.lang.reflect.Field
+import java.util.HashMap
 import java.util.concurrent.CountDownLatch
 
 class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
@@ -262,11 +263,14 @@ class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
             ?.addSuccessListener {
                 latch.countDown()
                 val client = MParticle.getInstance()?.Identity()?.apiClient as MParticleIdentityClientImpl
-                val field: Field =
-                    MParticleIdentityClientImpl::class.java.getDeclaredField("identityCacheTime")
-                field.isAccessible = true
-                // 0 reloads the persisted timestamp; 1ms is treated as expired.
-                field.set(client, 1L)
+                val mapField =
+                    MParticleIdentityClientImpl::class.java.getDeclaredField("identityCacheMap")
+                mapField.isAccessible = true
+                @Suppress("UNCHECKED_CAST")
+                val cacheMap = mapField.get(client) as HashMap<String, IdentityHttpResponse>
+                for (response in cacheMap.values) {
+                    response.cacheExpirationMillis = 1L
+                }
                 MParticle
                     .getInstance()
                     ?.Identity()

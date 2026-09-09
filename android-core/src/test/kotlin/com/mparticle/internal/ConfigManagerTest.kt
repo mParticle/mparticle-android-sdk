@@ -774,25 +774,21 @@ class ConfigManagerTest {
         Assert.assertTrue(manager.isIdentityCacheFlagEnabled)
 
         val response = IdentityHttpResponse(200, 123456789L, "ctx", null)
-        manager.saveIdentityCache("abcidentify", response)
-        manager.saveIdentityCacheTime(1000L)
-        manager.saveIdentityMaxAge(86400L)
+        response.cacheExpirationMillis = 999L
+        manager.saveIdentityCache("login::abc", response)
 
         val fetched = manager.fetchIdentityCache()
         Assert.assertEquals(1, fetched.size)
-        Assert.assertEquals(123456789L, fetched["abcidentify"]?.mpId)
-        Assert.assertEquals("ctx", fetched["abcidentify"]?.context)
-        Assert.assertEquals(1000L, manager.identityCacheTime)
-        Assert.assertEquals(86400L, manager.identityMaxAge)
+        Assert.assertEquals(123456789L, fetched["login::abc"]?.mpId)
+        Assert.assertEquals("ctx", fetched["login::abc"]?.context)
+        Assert.assertEquals(999L, fetched["login::abc"]?.cacheExpirationMillis)
 
-        manager.saveIdentityCache("abcidentify", IdentityHttpResponse(200, 999L, "ctx2", null))
+        manager.saveIdentityCache("login::abc", IdentityHttpResponse(200, 999L, "ctx2", null))
         Assert.assertEquals(1, manager.fetchIdentityCache().size)
-        Assert.assertEquals(999L, manager.fetchIdentityCache()["abcidentify"]?.mpId)
+        Assert.assertEquals(999L, manager.fetchIdentityCache()["login::abc"]?.mpId)
 
         manager.clearIdentityCache()
         Assert.assertTrue(manager.fetchIdentityCache().isEmpty())
-        Assert.assertEquals(0L, manager.identityCacheTime)
-        Assert.assertEquals(0L, manager.identityMaxAge)
     }
 
     companion object {
