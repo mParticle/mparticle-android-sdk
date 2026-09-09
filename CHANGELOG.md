@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Core
+
+#### Added
+
+- Cache Identity API identify and login responses, and clear the cache on modify and logout
+
 ## [6.0.4] - 2026-09-02
 
 ### Kits

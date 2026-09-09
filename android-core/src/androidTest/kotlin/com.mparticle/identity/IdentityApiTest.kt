@@ -108,7 +108,7 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
                 latch.countDown()
             }
         }
-        var request = IdentityApiRequest.withEmptyUser().build()
+        var request = IdentityApiRequest.withEmptyUser().customerId("listener-user-1").build()
         var result = MParticle.getInstance()!!.Identity().identify(request)
 
         // test that change actually took place
@@ -118,7 +118,7 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
         }
         com.mparticle.internal.AccessUtils
             .awaitUploadHandler()
-        request = IdentityApiRequest.withEmptyUser().build()
+        request = IdentityApiRequest.withEmptyUser().customerId("listener-user-2").build()
         result = MParticle.getInstance()!!.Identity().identify(request)
         result.addSuccessListener { identityApiResult ->
             Assert.assertEquals(identityApiResult.user.id, mpid2)
@@ -205,12 +205,16 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
         MParticle.getInstance()!!.Identity().addIdentityStateListener(removeIdStateListener1)
         MParticle.getInstance()!!.Identity().addIdentityStateListener(removeIdStateListener2)
         MParticle.getInstance()!!.Identity().addIdentityStateListener(removeIdStateListener3)
-        MParticle.getInstance()!!.Identity().identify(IdentityApiRequest.withEmptyUser().build())
+        MParticle.getInstance()!!.Identity().identify(
+            IdentityApiRequest.withEmptyUser().customerId("remove-listener-1").build(),
+        )
         mpid1Latch.await()
         MParticle.getInstance()!!.Identity().removeIdentityStateListener(removeIdStateListener1)
         MParticle.getInstance()!!.Identity().removeIdentityStateListener(removeIdStateListener2)
         MParticle.getInstance()!!.Identity().removeIdentityStateListener(removeIdStateListener3)
-        MParticle.getInstance()!!.Identity().identify(IdentityApiRequest.withEmptyUser().build())
+        MParticle.getInstance()!!.Identity().identify(
+            IdentityApiRequest.withEmptyUser().customerId("remove-listener-2").build(),
+        )
         mpid2Latch.await()
     }
 

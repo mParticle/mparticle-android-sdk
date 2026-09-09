@@ -1,10 +1,14 @@
 package com.mparticle.networking;
 
+import java.util.HashMap;
+import java.util.Map;
+
 class Response {
 
     int responseCode = 200;
     String responseBody = "";
     long delay;
+    Map<String, String> headers = new HashMap<>();
 
     Response() {
     }
@@ -24,5 +28,13 @@ class Response {
         if (onRequestCallback != null) {
             onRequestCallback.onRequest(this, connection);
         }
+    }
+
+    void setHeader(String key, String value) {
+        headers.put(key, value);
+    }
+
+    String getHeader(String key) {
+        return headers.get(key);
     }
 }

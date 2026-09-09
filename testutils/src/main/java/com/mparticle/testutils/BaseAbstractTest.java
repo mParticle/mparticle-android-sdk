@@ -107,6 +107,7 @@ public abstract class BaseAbstractTest {
         mServer.setupHappyIdentify(mStartingMpid);
         latch.await();
         assertTrue(called.value);
+        com.mparticle.identity.AccessUtils.clearIdentityCache();
     }
 
     protected void goToBackground() {

@@ -17,6 +17,7 @@ import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApi;
+import com.mparticle.identity.IdentityHttpResponse;
 import com.mparticle.internal.database.UploadSettings;
 import com.mparticle.internal.messages.BaseMPMessage;
 import com.mparticle.networking.NetworkOptions;
@@ -950,6 +951,71 @@ public class ConfigManager {
 
     public Set<Long> getMpids() {
         return UserStorage.getMpIdSet(mContext);
+    }
+
+    private static synchronized JSONObject getIdentityCache() {
+        String json = sPreferences.getString(Constants.PrefKeys.IDENTITY_API_REQUEST, null);
+        if (json != null) {
+            try {
+                return new JSONObject(json);
+            } catch (JSONException e) {
+                Logger.error("Failed to fetch identity cache from storage : " + e.getMessage());
+            }
+        }
+        return new JSONObject();
+    }
+
+    public synchronized HashMap<String, IdentityHttpResponse> fetchIdentityCache() {
+        HashMap<String, IdentityHttpResponse> identityCache = new HashMap<String, IdentityHttpResponse>();
+        try {
+            JSONObject jsonObject = getIdentityCache();
+            Iterator<String> keys = jsonObject.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                JSONObject identityJson = jsonObject.getJSONObject(key);
+                identityCache.put(key, IdentityHttpResponse.fromJson(identityJson));
+            }
+        } catch (Exception e) {
+            Logger.error("Error while fetching identity cache: " + e.getMessage());
+        }
+        return identityCache;
+    }
+
+    public synchronized void saveIdentityCache(String key, IdentityHttpResponse identityHttpResponse) throws JSONException {
+        if (key == null || identityHttpResponse == null) {
+            return;
+        }
+        JSONObject cache = getIdentityCache();
+        cache.put(key, identityHttpResponse.toJson());
+        sPreferences.edit().putString(Constants.PrefKeys.IDENTITY_API_REQUEST, cache.toString()).apply();
+    }
+
+    public void saveIdentityCacheTime(long time) {
+        sPreferences.edit().putLong(Constants.PrefKeys.IDENTITY_API_CACHE_TIME, time).apply();
+    }
+
+    public void saveIdentityMaxAge(long time) {
+        sPreferences.edit().putLong(Constants.PrefKeys.IDENTITY_MAX_AGE, time).apply();
+    }
+
+    public synchronized Long getIdentityCacheTime() {
+        return sPreferences.getLong(Constants.PrefKeys.IDENTITY_API_CACHE_TIME, 0);
+    }
+
+    public Long getIdentityMaxAge() {
+        return sPreferences.getLong(Constants.PrefKeys.IDENTITY_MAX_AGE, 0);
+    }
+
+    public void clearIdentityCache() {
+        sPreferences.edit()
+                .remove(Constants.PrefKeys.IDENTITY_API_REQUEST)
+                .remove(Constants.PrefKeys.IDENTITY_API_CACHE_TIME)
+                .remove(Constants.PrefKeys.IDENTITY_MAX_AGE)
+                .apply();
+    }
+
+    public boolean isIdentityCacheFlagEnabled() {
+        return true;
     }
 
     private static boolean sInProgress;

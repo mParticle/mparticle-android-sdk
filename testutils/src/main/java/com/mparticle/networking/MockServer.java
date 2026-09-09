@@ -120,6 +120,11 @@ public class MockServer {
                         response.setRequest(mockConnection);
                         mockConnection.response = response.responseBody;
                         mockConnection.responseCode = response.responseCode;
+                        if (response.headers != null) {
+                            for (Map.Entry<String, String> header : response.headers.entrySet()) {
+                                mockConnection.setRequestProperty(header.getKey(), header.getValue());
+                            }
+                        }
                         if (!entry.getKey().keepAfterMatch) {
                             serverLogic.remove(entry.getKey());
                         }
@@ -451,6 +456,7 @@ public class MockServer {
                     IdentityRequest.IdentityRequestBody request = new IdentityRequest(connection).getBody();
                     response.responseCode = 200;
                     response.responseBody = getIdentityResponse(request.previousMpid != null && request.previousMpid != 0 ? request.previousMpid : ran.nextLong(), ran.nextBoolean());
+                    response.setHeader("X-MP-Max-Age", "86400");
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }

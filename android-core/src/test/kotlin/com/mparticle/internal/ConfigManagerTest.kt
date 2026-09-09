@@ -4,6 +4,7 @@ import com.mparticle.MParticle
 import com.mparticle.MockMParticle
 import com.mparticle.consent.ConsentState
 import com.mparticle.consent.GDPRConsent
+import com.mparticle.identity.IdentityHttpResponse
 import com.mparticle.internal.KitManager.KitStatus
 import com.mparticle.internal.PushRegistrationHelper.PushRegistration
 import com.mparticle.internal.messages.BaseMPMessage
@@ -763,6 +764,35 @@ class ConfigManagerTest {
 
         val reloadedManager = ConfigManager(context)
         Assert.assertTrue(reloadedManager.isDeviceBasedConsentEnabled())
+    }
+
+    @Test
+    @Throws(JSONException::class)
+    fun testIdentityCacheRoundTrip() {
+        manager.clearIdentityCache()
+        Assert.assertTrue(manager.fetchIdentityCache().isEmpty())
+        Assert.assertTrue(manager.isIdentityCacheFlagEnabled)
+
+        val response = IdentityHttpResponse(200, 123456789L, "ctx", null)
+        manager.saveIdentityCache("abcidentify", response)
+        manager.saveIdentityCacheTime(1000L)
+        manager.saveIdentityMaxAge(86400L)
+
+        val fetched = manager.fetchIdentityCache()
+        Assert.assertEquals(1, fetched.size)
+        Assert.assertEquals(123456789L, fetched["abcidentify"]?.mpId)
+        Assert.assertEquals("ctx", fetched["abcidentify"]?.context)
+        Assert.assertEquals(1000L, manager.identityCacheTime)
+        Assert.assertEquals(86400L, manager.identityMaxAge)
+
+        manager.saveIdentityCache("abcidentify", IdentityHttpResponse(200, 999L, "ctx2", null))
+        Assert.assertEquals(1, manager.fetchIdentityCache().size)
+        Assert.assertEquals(999L, manager.fetchIdentityCache()["abcidentify"]?.mpId)
+
+        manager.clearIdentityCache()
+        Assert.assertTrue(manager.fetchIdentityCache().isEmpty())
+        Assert.assertEquals(0L, manager.identityCacheTime)
+        Assert.assertEquals(0L, manager.identityMaxAge)
     }
 
     companion object {

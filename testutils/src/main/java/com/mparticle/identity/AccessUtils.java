@@ -130,6 +130,16 @@ public class AccessUtils {
         MParticle.getInstance().Identity().mKitManager = kitManager;
     }
 
+    public static void clearIdentityCache() {
+        if (MParticle.getInstance() == null) {
+            return;
+        }
+        MParticleIdentityClient client = MParticle.getInstance().Identity().getApiClient();
+        if (client instanceof MParticleIdentityClientImpl) {
+            ((MParticleIdentityClientImpl) client).clearCache();
+        }
+    }
+
     public static Set<IdentityStateListener> getIdentityStateListeners() {
         return MParticle.getInstance().Identity().identityStateListeners;
     }

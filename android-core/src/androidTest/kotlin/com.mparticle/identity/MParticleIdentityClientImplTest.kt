@@ -17,6 +17,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import java.io.IOException
+import java.lang.reflect.Field
 import java.util.concurrent.CountDownLatch
 
 class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
@@ -57,6 +58,225 @@ class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
                         latch.countDown()
                     }?.addFailureListener { Assert.fail("task failed") }
             }?.addFailureListener { Assert.fail("task failed") }
+        latch.await()
+        Assert.assertTrue(called.value)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testLoginWithTwoDifferentUsers() {
+        clearIdentityCache()
+        val latch: CountDownLatch = MPLatch(2)
+        val called = AndroidUtils.Mutable(false)
+        val identityRequest =
+            IdentityApiRequest
+                .withEmptyUser()
+                .email("TestEmail@mparticle6.com")
+                .customerId("TestUser777777")
+                .build()
+        MParticle
+            .getInstance()
+            ?.Identity()
+            ?.login(identityRequest)
+            ?.addSuccessListener {
+                latch.countDown()
+                MParticle
+                    .getInstance()
+                    ?.Identity()
+                    ?.login(IdentityApiRequest.withEmptyUser().build())
+                    ?.addSuccessListener {
+                        Assert.assertEquals(2, mServer.Requests().login.size)
+                        called.value = true
+                        latch.countDown()
+                    }
+            }
+        latch.await()
+        Assert.assertTrue(called.value)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testLoginWithTwoSameUsers() {
+        clearIdentityCache()
+        val latch: CountDownLatch = MPLatch(2)
+        val called = AndroidUtils.Mutable(false)
+        val identityRequest =
+            IdentityApiRequest
+                .withEmptyUser()
+                .email("TestEmail@mparticle6.com")
+                .customerId("TestUser777777")
+                .build()
+        MParticle
+            .getInstance()
+            ?.Identity()
+            ?.login(identityRequest)
+            ?.addSuccessListener {
+                latch.countDown()
+                MParticle
+                    .getInstance()
+                    ?.Identity()
+                    ?.login(identityRequest)
+                    ?.addSuccessListener {
+                        Assert.assertEquals(1, mServer.Requests().login.size)
+                        called.value = true
+                        latch.countDown()
+                    }
+            }
+        latch.await()
+        Assert.assertTrue(called.value)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testLoginWithTwoSameUsers_withLogout() {
+        clearIdentityCache()
+        val latch: CountDownLatch = MPLatch(3)
+        val called = AndroidUtils.Mutable(false)
+        val identityRequest =
+            IdentityApiRequest
+                .withEmptyUser()
+                .email("TestEmail@mparticle6.com")
+                .customerId("TestUser777777")
+                .build()
+        MParticle
+            .getInstance()
+            ?.Identity()
+            ?.login(identityRequest)
+            ?.addSuccessListener {
+                latch.countDown()
+                MParticle
+                    .getInstance()
+                    ?.Identity()
+                    ?.logout()
+                    ?.addSuccessListener {
+                        latch.countDown()
+                        MParticle
+                            .getInstance()
+                            ?.Identity()
+                            ?.login(identityRequest)
+                            ?.addSuccessListener {
+                                Assert.assertEquals(2, mServer.Requests().login.size)
+                                called.value = true
+                                latch.countDown()
+                            }
+                    }
+            }
+        latch.await()
+        Assert.assertTrue(called.value)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testLoginAndIdentifySameUser() {
+        clearIdentityCache()
+        val latch: CountDownLatch = MPLatch(2)
+        val called = AndroidUtils.Mutable(false)
+        val identityRequest =
+            IdentityApiRequest
+                .withEmptyUser()
+                .email("TestEmail@mparticle6.com")
+                .customerId("TestUser777777")
+                .build()
+        MParticle
+            .getInstance()
+            ?.Identity()
+            ?.identify(identityRequest)
+            ?.addSuccessListener {
+                latch.countDown()
+                MParticle
+                    .getInstance()
+                    ?.Identity()
+                    ?.login(identityRequest)
+                    ?.addSuccessListener {
+                        Assert.assertEquals(1, mServer.Requests().login.size)
+                        Assert.assertEquals(1, mServer.Requests().identify.size)
+                        called.value = true
+                        latch.countDown()
+                    }
+            }
+        latch.await()
+        Assert.assertTrue(called.value)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testTwoIdentifySameUser_WithModify() {
+        clearIdentityCache()
+        val latch: CountDownLatch = MPLatch(3)
+        val called = AndroidUtils.Mutable(false)
+        val identityRequest =
+            IdentityApiRequest
+                .withEmptyUser()
+                .email("TestEmail@mparticle6.com")
+                .customerId("TestUser777777")
+                .build()
+        val identityRequestModify =
+            IdentityApiRequest
+                .withEmptyUser()
+                .email("NewTest@mparticle6.com")
+                .customerId("TestUser777777")
+                .build()
+        MParticle
+            .getInstance()
+            ?.Identity()
+            ?.identify(identityRequest)
+            ?.addSuccessListener {
+                latch.countDown()
+                MParticle
+                    .getInstance()
+                    ?.Identity()
+                    ?.modify(identityRequestModify)
+                    ?.addSuccessListener {
+                        latch.countDown()
+                        MParticle
+                            .getInstance()
+                            ?.Identity()
+                            ?.identify(identityRequest)
+                            ?.addSuccessListener {
+                                Assert.assertEquals(2, mServer.Requests().identify.size)
+                                called.value = true
+                                latch.countDown()
+                            }
+                    }
+            }
+        latch.await()
+        Assert.assertTrue(called.value)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testLoginWithTwoSameUsers_WithTimeout() {
+        clearIdentityCache()
+        val latch: CountDownLatch = MPLatch(2)
+        val called = AndroidUtils.Mutable(false)
+        val identityRequest =
+            IdentityApiRequest
+                .withEmptyUser()
+                .email("TestEmail@mparticle6.com")
+                .customerId("TestUser777777")
+                .build()
+        MParticle
+            .getInstance()
+            ?.Identity()
+            ?.login(identityRequest)
+            ?.addSuccessListener {
+                latch.countDown()
+                val client = MParticle.getInstance()?.Identity()?.apiClient as MParticleIdentityClientImpl
+                val field: Field =
+                    MParticleIdentityClientImpl::class.java.getDeclaredField("identityCacheTime")
+                field.isAccessible = true
+                // 0 reloads the persisted timestamp; 1ms is treated as expired.
+                field.set(client, 1L)
+                MParticle
+                    .getInstance()
+                    ?.Identity()
+                    ?.login(identityRequest)
+                    ?.addSuccessListener {
+                        Assert.assertEquals(2, mServer.Requests().login.size)
+                        called.value = true
+                        latch.countDown()
+                    }
+            }
         latch.await()
         Assert.assertTrue(called.value)
     }
@@ -332,6 +552,10 @@ class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
                 }
             }
         MParticle.getInstance()?.Identity()?.apiClient = mApiClient
+    }
+
+    private fun clearIdentityCache() {
+        AccessUtils.clearIdentityCache()
     }
 
     @Throws(JSONException::class)

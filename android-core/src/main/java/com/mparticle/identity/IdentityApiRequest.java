@@ -7,8 +7,12 @@ import com.mparticle.MParticle;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Class that represents observed changes in user state, can be used as a parameter in an Identity Request.
@@ -181,6 +185,69 @@ public final class IdentityApiRequest {
         @NonNull
         public IdentityApiRequest build() {
             return new IdentityApiRequest(this);
+        }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        IdentityApiRequest that = (IdentityApiRequest) obj;
+        return Objects.equals(userIdentities, that.userIdentities) &&
+                Objects.equals(otherOldIdentities, that.otherOldIdentities) &&
+                Objects.equals(otherNewIdentities, that.otherNewIdentities) &&
+                Objects.equals(mpid, that.mpid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userIdentities, otherOldIdentities, otherNewIdentities, mpid);
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "userIdentities" + userIdentities + " otherOldIdentities " + otherOldIdentities
+                + " otherNewIdentities " + otherNewIdentities + " mpid " + String.valueOf(mpid);
+    }
+
+    String objectToHash() {
+        String input = toString();
+        try {
+            MessageDigest md = messageDigest();
+            if (md == null) {
+                return null;
+            }
+            byte[] hashBytes = md.digest(input.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hashBytes) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return hexString.substring(0, Math.min(16, hexString.length()));
+        } catch (Exception e) {
+            Logger.error("Exception while hashing IdentityApiRequest: " + e);
+            return null;
+        }
+    }
+
+    private static MessageDigest messageDigest() {
+        try {
+            return MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException ignored) {
+            try {
+                return MessageDigest.getInstance("SHA-1");
+            } catch (NoSuchAlgorithmException e) {
+                Logger.error("No SHA-256 or SHA-1 MessageDigest available: " + e);
+                return null;
+            }
         }
     }
 }
