@@ -25,3 +25,10 @@ include ':android-core',
 
 project(':kit-plugin').name = 'android-kit-plugin'
 project(':tooling:android-plugin').name = 'android-plugin'
+
+// Size-report fixture. Deliberately NOT in the include list above: `./gradlew test`, `lint`
+// and `ktlintCheck` are whole-build sweeps and a throwaway app has no business in any of
+// them. Opt in with -Psize.report=true.
+if (settings.startParameter.projectProperties['size.report'] == 'true') {
+    include ':size-report'
+}
