@@ -42,6 +42,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -1496,6 +1497,72 @@ class RoktKitTests {
             )
         }
 
+        unmockkObject(Rokt)
+    }
+
+    @Test
+    fun testSetSession_delegatesToRoktSdk() {
+        mockkObject(Rokt)
+        every { Rokt.setSession(any()) } just runs
+
+        roktKit.setSession(com.mparticle.rokt.RoktSession("sid", "jwt", 123L))
+
+        verify {
+            Rokt.setSession(
+                match {
+                    it.sessionId == "sid" && it.sessionToken == "jwt" && it.expiresAt == 123L
+                },
+            )
+        }
+        verify(exactly = 0) { Rokt.setSessionId(any()) }
+        unmockkObject(Rokt)
+    }
+
+    @Test
+    fun testSetSession_blankTokenIsIgnored() {
+        mockkObject(Rokt)
+
+        roktKit.setSession(com.mparticle.rokt.RoktSession("sid", "  "))
+
+        verify(exactly = 0) { Rokt.setSession(any()) }
+        verify(exactly = 0) { Rokt.setSessionId(any()) }
+        unmockkObject(Rokt)
+    }
+
+    @Test
+    fun testSetSession_blankIdIsIgnored() {
+        mockkObject(Rokt)
+
+        roktKit.setSession(com.mparticle.rokt.RoktSession("  ", "jwt"))
+
+        verify(exactly = 0) { Rokt.setSession(any()) }
+        verify(exactly = 0) { Rokt.setSessionId(any()) }
+        unmockkObject(Rokt)
+    }
+
+    @Test
+    fun testGetSession_mapsValueFromRoktSdk() {
+        mockkObject(Rokt)
+        every { Rokt.getSession() } returns com.rokt.roktsdk.RoktSession("sid", "jwt", 456L)
+
+        val result = roktKit.getSession()
+
+        assertEquals("sid", result?.sessionId)
+        assertEquals("jwt", result?.sessionToken)
+        assertEquals(456L, result?.expiresAt)
+        verify { Rokt.getSession() }
+        unmockkObject(Rokt)
+    }
+
+    @Test
+    fun testGetSession_whenNativeSessionIsAbsent_returnsNull() {
+        mockkObject(Rokt)
+        every { Rokt.getSession() } returns null
+
+        val result = roktKit.getSession()
+
+        assertNull(result)
+        verify { Rokt.getSession() }
         unmockkObject(Rokt)
     }
 

@@ -297,6 +297,60 @@ class RoktTest {
     }
 
     @Test
+    fun testSetSession_whenEnabled_delegatesToKitManager() {
+        configManager.enabled = true
+        val session = com.mparticle.rokt.RoktSession("sid", "jwt", 123L)
+        rokt.setSession(session)
+        verify(roktListener).setSession(session)
+    }
+
+    @Test
+    fun testSetSession_whenDisabled_doesNotCallKitManager() {
+        configManager.enabled = false
+        val session = com.mparticle.rokt.RoktSession("sid", "jwt", 123L)
+        rokt.setSession(session)
+        verify(roktListener, never()).setSession(any())
+    }
+
+    @Test
+    fun testSetSession_whenRoktKitMissing_doesNotCallKitManager() {
+        `when`(kitManager.isKitActive(MParticle.ServiceProviders.ROKT)).thenReturn(false)
+        val session = com.mparticle.rokt.RoktSession("sid", "jwt")
+
+        rokt.setSession(session)
+
+        verify(roktListener, never()).setSession(any())
+    }
+
+    @Test
+    fun testGetSession_whenEnabled_delegatesToKitManager() {
+        configManager.enabled = true
+        val expected = com.mparticle.rokt.RoktSession("sid", "jwt", 123L)
+        `when`(roktListener.getSession()).thenReturn(expected)
+        val result = rokt.getSession()
+        verify(roktListener).getSession()
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun testGetSession_whenDisabled_returnsNull() {
+        configManager.enabled = false
+        val result = rokt.getSession()
+        verify(roktListener, never()).getSession()
+        assertNull(result)
+    }
+
+    @Test
+    fun testGetSession_whenRoktKitMissing_returnsNull() {
+        `when`(kitManager.isKitActive(MParticle.ServiceProviders.ROKT)).thenReturn(false)
+
+        val result = rokt.getSession()
+
+        verify(roktListener, never()).getSession()
+        assertNull(result)
+    }
+
+    @Test
     fun testSetSessionId_whenEnabled_delegatesToKitManager() {
         configManager.enabled = true
         rokt.setSessionId("test-session-id")

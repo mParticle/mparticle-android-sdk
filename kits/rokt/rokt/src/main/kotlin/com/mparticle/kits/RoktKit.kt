@@ -19,6 +19,7 @@ import com.mparticle.kits.KitIntegration.CommerceListener
 import com.mparticle.kits.KitIntegration.IdentityListener
 import com.mparticle.kits.KitIntegration.RoktListener
 import com.mparticle.rokt.RoktApiDiagnosticsForwarder
+import com.mparticle.rokt.RoktSession
 import com.rokt.roktsdk.PlacementOptions
 import com.rokt.roktsdk.Rokt
 import com.rokt.roktsdk.Rokt.SdkFrameworkType.Android
@@ -39,6 +40,7 @@ import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 import java.math.BigDecimal
 import java.net.URL
+import com.rokt.roktsdk.RoktSession as NativeRoktSession
 
 const val ROKT_ATTRIBUTE_SANDBOX_MODE: String = "sandbox"
 
@@ -338,12 +340,48 @@ class RoktKit :
     }
 
     /**
+     * Set the session to use for the next execute call.
+     *
+     * Non-empty [RoktSession.sessionId] and [RoktSession.sessionToken] values seed session
+     * continuity through [Rokt.setSession]. Blank values are ignored.
+     */
+    override fun setSession(session: RoktSession) {
+        val sessionId = session.sessionId.trim()
+        val sessionToken = session.sessionToken.trim()
+        if (sessionId.isEmpty() || sessionToken.isEmpty()) {
+            return
+        }
+        Rokt.setSession(
+            NativeRoktSession(
+                sessionId = sessionId,
+                sessionToken = sessionToken,
+                expiresAt = session.expiresAt,
+            ),
+        )
+    }
+
+    /**
+     * Get the current session (id + token) for WebView / non-native handoff.
+     */
+    override fun getSession(): RoktSession? {
+        val session = Rokt.getSession() ?: return null
+        return RoktSession(
+            sessionId = session.sessionId,
+            sessionToken = session.sessionToken,
+            expiresAt = session.expiresAt,
+        )
+    }
+
+    /**
      * Set the session id to use for the next execute call.
      * This is useful for cases where you have a session id from a non-native integration,
      * e.g. WebView, and you want the session to be consistent across integrations.
      *
+     * Prefer [setSession] so the session token is also applied for offers and events.
+     *
      * @param sessionId The session id to be set. Must be a non-empty string.
      */
+    @Deprecated("Use setSession to set session id and session token.")
     override fun setSessionId(sessionId: String) {
         Rokt.setSessionId(sessionId)
     }
@@ -351,8 +389,11 @@ class RoktKit :
     /**
      * Get the session id to use within a non-native integration e.g. WebView.
      *
+     * Prefer [getSession] to also read the session token.
+     *
      * @return The session id or null if no session is present.
      */
+    @Deprecated("Use getSession to read session id and session token.")
     override fun getSessionId(): String? = Rokt.getSessionId()
 
     override fun enrichAttributes(attributes: MutableMap<String, String>, user: FilteredMParticleUser?) {

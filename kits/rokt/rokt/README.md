@@ -35,6 +35,39 @@ Java consumers can use the kit helper:
 MParticleRokt.Rokt().selectPlacements("RoktExperience", attributes);
 ```
 
+### Session handoff
+
+Use a token-backed session to preserve Rokt continuity when moving between native and non-native experiences. Both the session ID and token are required; expiry is optional.
+
+Kotlin:
+
+```kotlin
+import com.mparticle.MParticle
+import com.mparticle.kits.rokt
+import com.mparticle.rokt.RoktSession
+
+MParticle.getInstance()?.rokt?.setSession(
+    RoktSession(
+        sessionId = sessionId,
+        sessionToken = sessionToken,
+        expiresAt = expiresAt,
+    ),
+)
+
+val currentSession = MParticle.getInstance()?.rokt?.getSession()
+```
+
+Java:
+
+```java
+import com.mparticle.rokt.RoktSession;
+
+MParticleRokt.Rokt().setSession(new RoktSession(sessionId, sessionToken, expiresAt));
+RoktSession currentSession = MParticleRokt.Rokt().getSession();
+```
+
+Pass `expiresAt` as Unix epoch milliseconds when the value is available, or use the two-argument constructor to omit it. When expiry is omitted or already in the past, Rokt Android SDK 6.1.1 applies its standard 30-minute session expiry. Blank session IDs or tokens are ignored.
+
 ### Shoppable Ads
 
 Add the optional Rokt payment extension dependency in your app, then register the extension after mParticle starts. The Rokt kit reads `stripePublishableKey` from the mParticle dashboard configuration and forwards it to the Rokt SDK during registration.
