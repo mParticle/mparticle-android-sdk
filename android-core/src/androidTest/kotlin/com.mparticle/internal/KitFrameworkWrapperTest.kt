@@ -28,13 +28,13 @@ class KitFrameworkWrapperTest : BaseCleanStartedEachTest() {
         setKitManager(
             object : StubKitManager(mContext) {
                 override fun onIdentifyCompleted(
-                    user: MParticleUser,
-                    request: IdentityApiRequest,
+                    user: MParticleUser?,
+                    request: IdentityApiRequest?,
                 ) {
-                    if (user.id == mStartingMpid) {
+                    if (user?.id == mStartingMpid) {
                         return
                     }
-                    Assert.assertEquals(mpid, user.id)
+                    Assert.assertEquals(mpid, user?.id)
                     called.value = true
                     latch.countDown()
                 }
@@ -55,13 +55,13 @@ class KitFrameworkWrapperTest : BaseCleanStartedEachTest() {
         setKitManager(
             object : StubKitManager(mContext) {
                 override fun onLoginCompleted(
-                    user: MParticleUser,
-                    request: IdentityApiRequest,
+                    user: MParticleUser?,
+                    request: IdentityApiRequest?,
                 ) {
-                    if (user.id == mStartingMpid) {
+                    if (user?.id == mStartingMpid) {
                         return
                     }
-                    Assert.assertEquals(mpid, user.id)
+                    Assert.assertEquals(mpid, user?.id)
                     called.value = true
                     latch.countDown()
                 }
@@ -82,13 +82,13 @@ class KitFrameworkWrapperTest : BaseCleanStartedEachTest() {
         setKitManager(
             object : StubKitManager(mContext) {
                 override fun onLogoutCompleted(
-                    user: MParticleUser,
-                    request: IdentityApiRequest,
+                    user: MParticleUser?,
+                    request: IdentityApiRequest?,
                 ) {
-                    if (user.id == mStartingMpid) {
+                    if (user?.id == mStartingMpid) {
                         return
                     }
-                    Assert.assertEquals(mpid, user.id)
+                    Assert.assertEquals(mpid, user?.id)
                     called.value = true
                     latch.countDown()
                 }
@@ -108,10 +108,10 @@ class KitFrameworkWrapperTest : BaseCleanStartedEachTest() {
         setKitManager(
             object : StubKitManager(mContext) {
                 override fun onModifyCompleted(
-                    user: MParticleUser,
-                    request: IdentityApiRequest,
+                    user: MParticleUser?,
+                    request: IdentityApiRequest?,
                 ) {
-                    Assert.assertEquals(mStartingMpid.toLong(), user.id)
+                    Assert.assertEquals(mStartingMpid.toLong(), user?.id)
                     called.value = true
                     latch.countDown()
                 }
@@ -137,10 +137,10 @@ class KitFrameworkWrapperTest : BaseCleanStartedEachTest() {
         setKitManager(
             object : StubKitManager(mContext) {
                 override fun onModifyCompleted(
-                    user: MParticleUser,
-                    request: IdentityApiRequest,
+                    user: MParticleUser?,
+                    request: IdentityApiRequest?,
                 ) {
-                    Assert.assertEquals(mStartingMpid.toLong(), user.id)
+                    Assert.assertEquals(mStartingMpid.toLong(), user?.id)
                     called.value = true
                     latch.countDown()
                 }
@@ -165,10 +165,10 @@ class KitFrameworkWrapperTest : BaseCleanStartedEachTest() {
         setKitManager(
             object : StubKitManager(mContext) {
                 override fun onModifyCompleted(
-                    user: MParticleUser,
-                    request: IdentityApiRequest,
+                    user: MParticleUser?,
+                    request: IdentityApiRequest?,
                 ) {
-                    Assert.assertEquals(mpid2, user.id)
+                    Assert.assertEquals(mpid2, user?.id)
                     called.value = true
                     latch2.countDown()
                 }
