@@ -135,7 +135,7 @@ jobs:
   #          repository: mparticle/mparticle-android-sdk
   #          ref: regression/${{ github.run_number }}
   #      - name: "Install JDK 17"
-  #        uses: actions/setup-java@v5
+  #        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6
   #        with:
   #          distribution: "zulu"
   #          java-version: "17"
@@ -168,7 +168,7 @@ jobs:
   #          repository: mparticle/mparticle-android-sdk
   #          ref: regression/${{ github.run_number }}
   #      - name: "Install JDK 17"
-  #        uses: actions/setup-java@v5
+  #        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6
   #        with:
   #          distribution: "zulu"
   #          java-version: "17"
@@ -197,7 +197,7 @@ jobs:
           repository: mparticle/mparticle-android-sdk
           ref: regression/${{ github.run_number }}
       - name: "Install JDK 17"
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6
         with:
           distribution: "zulu"
           java-version: "17"
@@ -227,7 +227,7 @@ jobs:
       - run: echo "ORG_GRADLE_PROJECT_VERSION=$(head -n 1 VERSION)" >> $GITHUB_ENV
       - run: echo "ORG_GRADLE_PROJECT_version=$(head -n 1 VERSION)" >> $GITHUB_ENV
       - name: "Install JDK 17"
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6
         with:
           distribution: "zulu"
           java-version: "17"
@@ -272,7 +272,7 @@ jobs:
       - run: echo "ORG_GRADLE_PROJECT_VERSION=$(head -n 1 VERSION)" >> $GITHUB_ENV
       - run: echo "ORG_GRADLE_PROJECT_version=$(head -n 1 VERSION)" >> $GITHUB_ENV
       - name: "Install JDK 17"
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6
         with:
           distribution: "zulu"
           java-version: "17"
@@ -322,7 +322,7 @@ jobs:
       - run: echo "ORG_GRADLE_PROJECT_VERSION=$(head -n 1 VERSION)" >> $GITHUB_ENV
       - run: echo "ORG_GRADLE_PROJECT_version=$(head -n 1 VERSION)" >> $GITHUB_ENV
       - name: "Install JDK 17"
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6
         with:
           distribution: "zulu"
           java-version: "17"

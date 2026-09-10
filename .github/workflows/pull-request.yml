@@ -27,7 +27,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Trunk Check
-        uses: trunk-io/trunk-action@04ba50e7658c81db7356da96657e6e77f220bfa3 # v1.3.1
+        uses: trunk-io/trunk-action@e1234e67a86010d61ddac8d8ebf4b783e2ffd2fa # v2.0.0
         with:
           check-mode: pull_request
 
@@ -74,12 +74,12 @@ jobs:
       - name: "Checkout Branch"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: "Install JDK 17"
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6
         with:
           distribution: "zulu"
           java-version: "17"
       - name: "Setup Gradle"
-        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
       - name: "Run Unit Tests"
         run: ./gradlew test
       - name: "Print Android Unit Tests Report"
@@ -102,12 +102,12 @@ jobs:
       - run: echo "ORG_GRADLE_PROJECT_VERSION=$(head -n 1 VERSION)" >> $GITHUB_ENV
       - run: echo "ORG_GRADLE_PROJECT_version=$(head -n 1 VERSION)" >> $GITHUB_ENV
       - name: "Install JDK 17"
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6
         with:
           distribution: "zulu"
           java-version: "17"
       - name: "Setup Gradle"
-        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
       - name: "Run Android Core SDK Lint"
         run: ./gradlew lint
       - name: "Setup Android Kit Lint"
@@ -131,12 +131,12 @@ jobs:
       - run: echo "ORG_GRADLE_PROJECT_VERSION=$(head -n 1 VERSION)" >> $GITHUB_ENV
       - run: echo "ORG_GRADLE_PROJECT_version=$(head -n 1 VERSION)" >> $GITHUB_ENV
       - name: "Install JDK 17"
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6
         with:
           distribution: "zulu"
           java-version: "17"
       - name: "Setup Gradle"
-        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
       - name: "Run Android Core SDK Kotlin Lint"
         run: ./gradlew ktlintCheck
       - name: "Setup Android Kit Kotlin Lint"
@@ -170,12 +170,12 @@ jobs:
       - run: echo "ORG_GRADLE_PROJECT_VERSION=$(head -n 1 VERSION)" >> $GITHUB_ENV
       - run: echo "ORG_GRADLE_PROJECT_version=$(head -n 1 VERSION)" >> $GITHUB_ENV
       - name: "Install JDK 17"
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6
         with:
           distribution: "zulu"
           java-version: "17"
       - name: "Setup Gradle"
-        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
       - name: "Generate Core Release Build"
         run: ./gradlew publishMavenPublicationToMavenLocal
       - name: "Run Kit-Base Release Tests and Build"
