@@ -155,14 +155,14 @@ class Rokt internal constructor(private val mKitManager: KitManager) {
      * and want the session to stay consistent across integrations. Call before the next
      * selectPlacements.
      *
-     * Matches Web launcher options: pass [RoktSession.sessionId] with optional
-     * [RoktSession.sessionToken]. When the token is present, offers/events can send
-     * `Authorization: Bearer`. When only the id is present, the id is applied without Bearer
-     * seeding. Empty `sessionId` (or token without id) is ignored.
+     * Both [RoktSession.sessionId] and [RoktSession.sessionToken] must be non-empty. The optional
+     * [RoktSession.expiresAt] value is passed to the Rokt SDK, which applies its default expiry when
+     * the value is omitted or already in the past.
      *
-     * @param session The session id and optional JWT session token (optional expiry).
+     * @param session The session id, session token, and optional expiry.
      */
     fun setSession(session: RoktSession) {
+        MParticle.logRoktApiUsage("ROKT_SET_SESSION")
         if (isEnabled()) {
             resolveRoktKit()?.second?.setSession(session)
         }
@@ -173,10 +173,13 @@ class Rokt internal constructor(private val mKitManager: KitManager) {
      *
      * @return The session, or null if disabled, no session is present, or the token has expired.
      */
-    fun getSession(): RoktSession? = if (isEnabled()) {
-        resolveRoktKit()?.second?.getSession()
-    } else {
-        null
+    fun getSession(): RoktSession? {
+        MParticle.logRoktApiUsage("ROKT_GET_SESSION")
+        return if (isEnabled()) {
+            resolveRoktKit()?.second?.getSession()
+        } else {
+            null
+        }
     }
 
     /**

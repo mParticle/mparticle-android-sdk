@@ -42,6 +42,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -1518,14 +1519,13 @@ class RoktKitTests {
     }
 
     @Test
-    fun testSetSession_idOnlyFallsBackToSetSessionId() {
+    fun testSetSession_blankTokenIsIgnored() {
         mockkObject(Rokt)
-        every { Rokt.setSessionId(any()) } just runs
 
-        roktKit.setSession(com.mparticle.rokt.RoktSession("sid"))
+        roktKit.setSession(com.mparticle.rokt.RoktSession("sid", "  "))
 
-        verify { Rokt.setSessionId("sid") }
         verify(exactly = 0) { Rokt.setSession(any()) }
+        verify(exactly = 0) { Rokt.setSessionId(any()) }
         unmockkObject(Rokt)
     }
 
@@ -1550,6 +1550,18 @@ class RoktKitTests {
         assertEquals("sid", result?.sessionId)
         assertEquals("jwt", result?.sessionToken)
         assertEquals(456L, result?.expiresAt)
+        verify { Rokt.getSession() }
+        unmockkObject(Rokt)
+    }
+
+    @Test
+    fun testGetSession_whenNativeSessionIsAbsent_returnsNull() {
+        mockkObject(Rokt)
+        every { Rokt.getSession() } returns null
+
+        val result = roktKit.getSession()
+
+        assertNull(result)
         verify { Rokt.getSession() }
         unmockkObject(Rokt)
     }

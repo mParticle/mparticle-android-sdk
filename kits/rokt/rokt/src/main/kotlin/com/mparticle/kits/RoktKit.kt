@@ -342,28 +342,22 @@ class RoktKit :
     /**
      * Set the session to use for the next execute call.
      *
-     * Matches Web launcher options: non-empty [RoktSession.sessionId] + [RoktSession.sessionToken]
-     * seeds Bearer continuity via [Rokt.setSession]; id-only falls back to [Rokt.setSessionId].
-     * Token without a non-empty id is ignored. Requires a Rokt Android SDK version that exposes
-     * [Rokt.setSession] / [NativeRoktSession].
+     * Non-empty [RoktSession.sessionId] and [RoktSession.sessionToken] values seed session
+     * continuity through [Rokt.setSession]. Blank values are ignored.
      */
     override fun setSession(session: RoktSession) {
         val sessionId = session.sessionId.trim()
-        if (sessionId.isEmpty()) {
+        val sessionToken = session.sessionToken.trim()
+        if (sessionId.isEmpty() || sessionToken.isEmpty()) {
             return
         }
-        val sessionToken = session.sessionToken?.trim().orEmpty()
-        if (sessionToken.isNotEmpty()) {
-            Rokt.setSession(
-                NativeRoktSession(
-                    sessionId = sessionId,
-                    sessionToken = sessionToken,
-                    expiresAt = session.expiresAt,
-                ),
-            )
-        } else {
-            Rokt.setSessionId(sessionId)
-        }
+        Rokt.setSession(
+            NativeRoktSession(
+                sessionId = sessionId,
+                sessionToken = sessionToken,
+                expiresAt = session.expiresAt,
+            ),
+        )
     }
 
     /**
