@@ -4,7 +4,10 @@ on:
   push:
     branches:
       - main
-      - workstation/*
+      # Release lines only (e.g. workstation/6.0-Release). Do not match
+      # workstation/kotlin-migration: it is an integration branch, and a VERSION
+      # bump synced from main would re-publish that already-released version.
+      - workstation/*-Release
     paths:
       - VERSION
 

@@ -24,7 +24,7 @@ Generated release PR branches use `release/prep-<version>`, for example `release
 `Release - Publish` runs when `VERSION` changes on:
 
 - `main`
-- `workstation/*`
+- `workstation/*-Release` (for example `workstation/6.0-Release`; not integration branches such as `workstation/kotlin-migration`)
 
 The workflow validates every publication in Maven local before publishing the SDK, aggregate kits, and isolated kits to Maven Central using the exact version in `VERSION`. It creates a GitHub release with the same tag only after every publication succeeds.
 
