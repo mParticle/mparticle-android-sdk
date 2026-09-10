@@ -17,7 +17,6 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import java.io.IOException
-import java.lang.reflect.Field
 import java.util.HashMap
 import java.util.concurrent.CountDownLatch
 
