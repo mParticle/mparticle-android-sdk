@@ -288,15 +288,27 @@ class IdentityApiStartTest : BaseCleanInstallEachTest() {
             called.value = true
             latch.countDown()
         }
+        val started = AndroidUtils.Mutable(false)
+        val startLatch: CountDownLatch = MPLatch(1)
         MParticle.start(
             MParticleOptions
                 .builder(mContext)
                 .credentials("key", "secret")
                 .operatingSystem(MParticle.OperatingSystem.FIRE_OS)
+                .identifyTask(
+                    BaseIdentityTask()
+                        .addSuccessListener {
+                            started.value = true
+                            startLatch.countDown()
+                        }.addFailureListener { Assert.fail(it?.toString()) },
+                )
                 .build(),
         )
         latch.await()
+        startLatch.await()
         Assert.assertTrue(called.value)
+        Assert.assertTrue(started.value)
+        AccessUtils.clearIdentityCache()
         MParticle.setInstance(null)
         called.value = false
         val latch1: CountDownLatch = MPLatch(1)

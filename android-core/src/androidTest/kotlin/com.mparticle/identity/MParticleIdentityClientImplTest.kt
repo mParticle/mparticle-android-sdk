@@ -171,6 +171,7 @@ class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
         clearIdentityCache()
         val latch: CountDownLatch = MPLatch(2)
         val called = AndroidUtils.Mutable(false)
+        val identifyBefore = mServer.Requests().identify.size
         val identityRequest =
             IdentityApiRequest
                 .withEmptyUser()
@@ -189,7 +190,7 @@ class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
                     ?.login(identityRequest)
                     ?.addSuccessListener {
                         Assert.assertEquals(1, mServer.Requests().login.size)
-                        Assert.assertEquals(1, mServer.Requests().identify.size)
+                        Assert.assertEquals(identifyBefore + 1, mServer.Requests().identify.size)
                         called.value = true
                         latch.countDown()
                     }
@@ -204,6 +205,7 @@ class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
         clearIdentityCache()
         val latch: CountDownLatch = MPLatch(3)
         val called = AndroidUtils.Mutable(false)
+        val identifyBefore = mServer.Requests().identify.size
         val identityRequest =
             IdentityApiRequest
                 .withEmptyUser()
@@ -233,7 +235,7 @@ class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
                             ?.Identity()
                             ?.identify(identityRequest)
                             ?.addSuccessListener {
-                                Assert.assertEquals(2, mServer.Requests().identify.size)
+                                Assert.assertEquals(identifyBefore + 2, mServer.Requests().identify.size)
                                 called.value = true
                                 latch.countDown()
                             }
