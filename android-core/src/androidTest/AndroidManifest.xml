@@ -3,7 +3,7 @@
 
     <uses-sdk
         android:minSdkVersion="21"
-        tools:overrideLibrary="com.mparticle.testutils" />
+        tools:overrideLibrary="com.mparticle.testutils,androidx.test.ext.junit,androidx.test.core,androidx.test.monitor,androidx.test.services.storage" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
