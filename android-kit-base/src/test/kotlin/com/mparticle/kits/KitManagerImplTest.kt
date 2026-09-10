@@ -937,7 +937,7 @@ class KitManagerImplTest {
         var logCommerceEventCalled = 0
         var logMPEventCalled = 0
 
-        override fun logEvent(event: BaseEvent) {
+        override fun logEvent(event: BaseEvent?) {
             super.logEvent(event)
             logBaseEventCalled++
         }

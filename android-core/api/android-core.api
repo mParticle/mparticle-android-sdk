@@ -2060,6 +2060,7 @@ com.mparticle.internal.KitManager$KitStatus|MEMBER|public static com.mparticle.i
 com.mparticle.internal.KitManager$KitStatus|MEMBER|public static final com.mparticle.internal.KitManager$KitStatus ACTIVE;
 com.mparticle.internal.KitManager$KitStatus|MEMBER|public static final com.mparticle.internal.KitManager$KitStatus NOT_CONFIGURED;
 com.mparticle.internal.KitManager$KitStatus|MEMBER|public static final com.mparticle.internal.KitManager$KitStatus STOPPED;
+com.mparticle.internal.KitManager$KitStatus|MEMBER|public static kotlin.enums.EnumEntries<com.mparticle.internal.KitManager$KitStatus> getEntries();
 com.mparticle.internal.KitManager|CLASS|public interface com.mparticle.internal.KitManager
 com.mparticle.internal.KitManager|MEMBER|public abstract android.net.Uri getSurveyUrl(int, java.util.Map<java.lang.String, java.lang.String>, java.util.Map<java.lang.String, java.util.List<java.lang.String>>);
 com.mparticle.internal.KitManager|MEMBER|public abstract boolean isEnabled();
