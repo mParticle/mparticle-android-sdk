@@ -2,10 +2,6 @@
 
 ## [Unreleased]
 
-### Changed
-
-- Allow consuming apps to shrink unused SDK code while preserving kit discovery, JavaScript bridges, and optional integrations.
-
 ## [6.0.4] - 2026-09-02
 
 ### Kits
