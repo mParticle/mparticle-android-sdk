@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <application android:label="size-report-rokt" />
+    <application android:label="size-report-rokt">
+        <!-- Declared so aapt's generated keep rules make it an R8 root; without that the whole
+             reference app is dead code and Compose is shrunk out of the baseline. -->
+        <activity
+            android:name=".ReferenceAppActivity"
+            android:exported="true" />
+    </application>
 </manifest>

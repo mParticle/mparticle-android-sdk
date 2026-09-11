@@ -106,7 +106,9 @@ dex_bytes() { unzip -l "$1" | awk '$4 ~ /\.dex$/ { s += $1 } END { print s + 0 }
 # A fixture that silently stops linking the kit or the payment extension still produces a
 # perfectly valid APK, and the report would present that as a large size *saving*. Fail closed
 # instead: the workflow leaves the JSON empty and the comment reads "not measured".
-MAX_BASELINE_BYTES=$((128 * 1024))
+# Floors are set well below the figures actually observed (baseline 1.24 MB, kit +2.09 MB,
+# payment extension +5.46 MB), so they catch a collapse rather than tracking normal drift.
+MIN_BASELINE_BYTES=$((768 * 1024))
 MIN_KIT_OVER_BASELINE_BYTES=$((1024 * 1024))
 MIN_SDKPLUS_OVER_KIT_BYTES=$((1024 * 1024))
 
@@ -114,9 +116,13 @@ assert_plausible() {
     local baseline="$1" kit="$2" sdkplus="$3"
     local ok=true
 
-    if ((baseline > MAX_BASELINE_BYTES)); then
-        log "IMPLAUSIBLE: baseline APK is ${baseline} bytes, expected under ${MAX_BASELINE_BYTES}."
-        log "  The baseline flavor should depend on nothing -- check its dependencies."
+    # The baseline is a Compose + Material3 reference app. If R8 shrinks Compose out of it --
+    # because the reference screen stopped being reachable -- the baseline collapses towards an
+    # empty APK and every delta silently reverts to charging the kit for Compose.
+    if ((baseline < MIN_BASELINE_BYTES)); then
+        log "IMPLAUSIBLE: baseline APK is ${baseline} bytes, expected at least ${MIN_BASELINE_BYTES}."
+        log "  R8 has probably shrunk Compose out of the reference app -- check that"
+        log "  ReferenceAppActivity is still declared in the manifest and still renders."
         ok=false
     fi
     if ((kit - baseline < MIN_KIT_OVER_BASELINE_BYTES)); then

@@ -10,6 +10,8 @@ Options:
                              shows this stack's cost over stack BASE rather than over the
                              empty baseline. Repeatable; order is preserved.
   --marker TEXT              HTML comment used to find and replace the sticky PR comment.
+  --baseline-note TEXT       Sentence describing what the baseline app is. Per-workflow rather
+                             than fixed, because the fixtures do not share a baseline.
   --footnote TEXT            Trailing line naming what was measured, so a comment left behind
                              by a later push is visibly stale rather than passing as current.
 
@@ -105,13 +107,22 @@ def status(base, head, stacks):
 
 
 def parse_args(argv):
-    stacks, marker, paths, footnote = [], "<!-- sdk-size-report -->", [], ""
+    stacks, marker, paths, footnote, baseline_note = (
+        [],
+        "<!-- sdk-size-report -->",
+        [],
+        "",
+        "",
+    )
     index = 0
     while index < len(argv):
         arg = argv[index]
         if arg == "--footnote":
             index += 1
             footnote = argv[index]
+        elif arg == "--baseline-note":
+            index += 1
+            baseline_note = argv[index]
         elif arg == "--stack":
             index += 1
             parts = argv[index].split(":")
@@ -124,11 +135,11 @@ def parse_args(argv):
         else:
             paths.append(arg)
         index += 1
-    return stacks, marker, paths, footnote
+    return stacks, marker, paths, footnote, baseline_note
 
 
 def main(argv):
-    stacks, marker, paths, footnote = parse_args(argv)
+    stacks, marker, paths, footnote, baseline_note = parse_args(argv)
     if len(paths) != 2 or not stacks:
         print(__doc__, file=sys.stderr)
         return 2
@@ -138,8 +149,10 @@ def main(argv):
         marker,
         "## 📦 SDK Size Impact Report",
         "",
-        "APK size a minimal app pays for the SDK, on a minified release build.",
+        "What the SDK adds to a minified release APK.",
     ]
+    if baseline_note:
+        parts += ["", baseline_note]
     labels = {name: label for name, label, _ in stacks}
     for stack, label, marginal_base in stacks:
         marginal_label = labels.get(marginal_base, marginal_base)
