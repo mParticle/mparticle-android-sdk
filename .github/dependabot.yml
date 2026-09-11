@@ -1,11 +1,20 @@
 version: 2
 updates:
   - package-ecosystem: gradle
-    directory: "/"
+    # Root monorepo plus standalone kit Gradle projects. Kits live at kits/*/*
+    # (e.g. kits/rokt/rokt); deeper paths like example apps are excluded.
+    directories:
+      - "/"
+      - "/kits/*/*"
     schedule:
       interval: daily
     labels: ["dependabot"]
     open-pull-requests-limit: 10
+    groups:
+      shared-gradle-dependencies:
+        patterns:
+          - "*"
+        group-by: dependency-name
     ignore:
       - dependency-name: "com.mparticle:android-core"
       - dependency-name: "com.google.firebase:firebase-messaging"
