@@ -1,6 +1,10 @@
 plugins {
     id 'com.android.application' version '8.9.1'
     id 'org.jetbrains.kotlin.android' version '2.1.20'
+    // Module-level, not per-flavor: the Compose compiler cannot be scoped to a flavor, and it
+    // does not need to be -- it is compile-time only and contributes nothing to a flavor with
+    // no @Composable code. Version must track the Kotlin version above.
+    id 'org.jetbrains.kotlin.plugin.compose' version '2.1.20'
 }
 
 // Standalone build, modelled on kits/rokt/rokt/example/example-kotlin: the Rokt SDK requires a
@@ -10,7 +14,7 @@ plugins {
 // Three flavors of one throwaway app, all built by this one toolchain so the deltas are
 // comparable:
 //
-//   baseline -> nothing                          the floor
+//   baseline -> the reference app alone          the floor
 //   kit      -> com.mparticle:android-rokt-kit    Core + kit-base + Rokt kit + Rokt SDK
 //   sdkplus  -> com.rokt:rokt-sdk-plus            the above plus the payment extension, so
 //                                                 sdkplus - kit is the payment extension alone
@@ -81,10 +85,25 @@ android {
     }
 
     lint { checkReleaseBuilds false }
-    buildFeatures { buildConfig false }
+    buildFeatures {
+        buildConfig false
+        compose true
+    }
 }
 
 dependencies {
+    // The reference app, shared by every flavor. Anything here is paid for by the baseline too,
+    // so it drops out of the deltas -- which is the point: a partner already ships this. The Rokt
+    // kit is Compose-based, so an empty baseline charged it for Compose the host already has.
+    // This set is a convention, not a measured average: see README.md.
+    implementation platform('androidx.compose:compose-bom:2026.05.01')
+    implementation 'androidx.core:core-ktx:1.15.0'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'androidx.activity:activity-compose:1.10.1'
+    implementation 'androidx.lifecycle:lifecycle-runtime-compose:2.8.7'
+    implementation 'androidx.compose.ui:ui'
+    implementation 'androidx.compose.material3:material3'
+
     // Transitively provides android-core, android-kit-base and com.rokt:roktsdk.
     kitImplementation "com.mparticle:android-rokt-kit:${mparticleVersion}"
     // Transitively provides android-core, android-rokt-kit, com.rokt:roktsdk and
