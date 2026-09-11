@@ -48,7 +48,7 @@
 
 # InternalListenerManager identifies SDK frames by package and reads API names
 # from the live stack. Preserve those names/frames without retaining unused APIs.
--keeppackagenames com.mparticle.**
+-keeppackagenames com.mparticle,com.mparticle.**
 -keep,allowshrinking class com.mparticle.MParticle {
     public <methods>;
 }
