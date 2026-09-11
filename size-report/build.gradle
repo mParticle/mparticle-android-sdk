@@ -1,0 +1,58 @@
+apply plugin: 'com.android.application'
+
+// Size-report fixture. Two flavors of the same throwaway app, differing only in whether they
+// depend on the SDK, so one `assembleRelease` yields both APKs from one toolchain:
+//
+//   baseline -> nothing                the floor
+//   core     -> project(':android-core')   SDK impact = core - baseline
+//
+// Java, not Kotlin, on purpose: the Kotlin plugin would put kotlin-stdlib on the baseline too,
+// and android-core pulls kotlinx-coroutines (which drags stdlib), so a Kotlin fixture would
+// hide part of the SDK's real cost from the delta.
+android {
+    namespace 'com.mparticle.sizereport'   // required by the root build's namespace assertion
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.mparticle.sizereport'
+        minSdk 21          // native multidex, so androidx.multidex stays out of the baseline
+        targetSdk 34
+        versionCode 1
+        versionName '1.0'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.toVersion(JAVA_VERSION)
+        targetCompatibility JavaVersion.toVersion(JAVA_VERSION)
+    }
+
+    flavorDimensions += 'sizevariant'
+    productFlavors {
+        baseline { dimension 'sizevariant' }
+        core { dimension 'sizevariant' }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt')
+            // The root allprojects{} block only signs `debug`; without this the artifact is
+            // named *-release-unsigned.apk.
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    // lintVitalRelease hangs off assembleRelease for application modules, and android-core
+    // lintPublish-es error-severity rules into its consumers. Neither has anything useful to
+    // say about a fixture.
+    lint { checkReleaseBuilds false }
+    buildFeatures { buildConfig false }
+}
+
+// The root build applies sonarqube with androidVariant "release", which does not exist once
+// product flavors are declared.
+sonarqube { skipProject = true }
+
+dependencies {
+    coreImplementation project(':android-core')
+}

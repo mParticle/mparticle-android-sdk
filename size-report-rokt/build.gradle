@@ -1,0 +1,93 @@
+plugins {
+    id 'com.android.application' version '8.9.1'
+    id 'org.jetbrains.kotlin.android' version '2.1.20'
+}
+
+// Standalone build, modelled on kits/rokt/rokt/example/example-kotlin: the Rokt SDK requires a
+// newer AGP than the shared multi-kit build, so the umbrella can only be measured here, against
+// the *published* artifacts (mavenLocal first).
+//
+// Three flavors of one throwaway app, all built by this one toolchain so the deltas are
+// comparable:
+//
+//   baseline -> nothing                          the floor
+//   kit      -> com.mparticle:android-rokt-kit    Core + kit-base + Rokt kit + Rokt SDK
+//   sdkplus  -> com.rokt:rokt-sdk-plus            the above plus the payment extension, so
+//                                                 sdkplus - kit is the payment extension alone
+//
+// The Core SDK on its own is reported by the per-pull-request check in `size-report`, built by
+// the main build's toolchain. It is deliberately not repeated here: this build runs a different
+// AGP, compileSdk and R8, so the two numbers are not comparable and showing both invites a
+// subtraction that would be wrong.
+def mparticleVersion = providers.gradleProperty('mparticleVersion').getOrElse('0.0.0')
+
+configurations.all {
+    resolutionStrategy {
+        // android-rokt-kit floats android-kit-base with a dynamic '+' version, which would
+        // otherwise pull a higher published core/kit-base from Maven Central instead of the
+        // locally published build. Pin the mParticle chain to the umbrella's version.
+        force "com.mparticle:android-core:${mparticleVersion}"
+        force "com.mparticle:android-kit-base:${mparticleVersion}"
+    }
+}
+
+android {
+    namespace 'com.mparticle.sizereport'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId 'com.mparticle.sizereport'
+        minSdk 23
+        targetSdk 35
+        versionCode 1
+        versionName '1.0'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    // The flavor is `sdkplus`, not `plus`: a flavor named `plus` silently resolves to
+    // Groovy's Object.plus operator instead of creating a flavor, and the generated
+    // `plusImplementation` configuration never appears.
+    flavorDimensions += 'sizevariant'
+    productFlavors {
+        baseline { dimension 'sizevariant' }
+        kit { dimension 'sizevariant' }
+        sdkplus { dimension 'sizevariant' }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            // Unlike android-core, the Rokt kit ships Compose resources, so the resource
+            // shrinker measures something real here.
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    // `kit` and `sdkplus` share one fixture source: they must differ only in dependencies,
+    // or the delta between them would measure a source difference rather than the payment
+    // extension.
+    sourceSets {
+        kit.java.srcDirs += 'src/roktshared/java'
+        sdkplus.java.srcDirs += 'src/roktshared/java'
+    }
+
+    lint { checkReleaseBuilds false }
+    buildFeatures { buildConfig false }
+}
+
+dependencies {
+    // Transitively provides android-core, android-kit-base and com.rokt:roktsdk.
+    kitImplementation "com.mparticle:android-rokt-kit:${mparticleVersion}"
+    // Transitively provides android-core, android-rokt-kit, com.rokt:roktsdk and
+    // com.rokt:payment-extension.
+    sdkplusImplementation "com.rokt:rokt-sdk-plus:${mparticleVersion}"
+}

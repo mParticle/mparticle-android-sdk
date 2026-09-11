@@ -226,3 +226,112 @@ jobs:
     uses: ROKT/rokt-workflows/.github/workflows/oss_pr_opened_notification.yml@main
     secrets:
       gchat_webhook: ${{ secrets.GCHAT_PRS_WEBHOOK }}
+
+  size-report:
+    name: "SDK Size Impact"
+    # Advisory. Measures what the Core SDK adds to a minified release APK and compares the PR
+    # against its base. Reports via a sticky PR comment and the job summary; deliberately
+    # absent from every other job's `needs` so it can never block a merge.
+    if: github.event_name == 'pull_request'
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    permissions:
+      contents: read
+      # Replaces the workflow-level `pull-requests: read` for this job only.
+      pull-requests: write
+    env:
+      COMMENT_IDENTIFIER: "<!-- sdk-size-report -->"
+    steps:
+      - name: "Checkout PR head"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # The merge ref, not head.sha. `base.sha` is the base branch's current tip, so
+          # measuring a stale head against it attributes everything merged into the base since
+          # the branch diverged to this pull request -- an unrelated increase on the base branch
+          # would render as this pull request shrinking the SDK. Measuring the merge result
+          # against the base compares like with like.
+          # A pull request with conflicts has no merge ref, so this step fails and the job
+          # stops here. The job is advisory so nothing is blocked, but note that an existing
+          # comment is then left untouched rather than rewritten to "not measured" -- the
+          # footnote naming the measured commit is what marks it stale. A conflicted pull
+          # request cannot merge anyway, so resolving the conflict is the fix.
+          ref: refs/pull/${{ github.event.pull_request.number }}/merge
+          path: head
+      - name: "Checkout target branch"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+      - name: "Pin the head fixture into the target checkout"
+        # Both sides must be measured with the same fixture: the base may predate it entirely,
+        # and otherwise a change to the fixture would show up as an SDK size change.
+        run: |
+          set -euo pipefail
+          rm -rf base/size-report
+          cp -R head/size-report base/size-report
+          if ! grep -q 'size\.report' base/settings.gradle; then
+            printf "\n%s\n%s\n%s\n" \
+              "if (settings.startParameter.projectProperties['size.report'] == 'true') {" \
+              "    include ':size-report'" \
+              "}" >> base/settings.gradle
+          fi
+      - name: "Install JDK 17"
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6
+        with:
+          distribution: "zulu"
+          java-version: "17"
+      - name: "Setup Gradle"
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+      - name: "Measure target branch"
+        continue-on-error: true
+        run: head/scripts/sdk-size-report.sh base > "${RUNNER_TEMP}/base.json"
+      - name: "Measure PR head"
+        continue-on-error: true
+        run: head/scripts/sdk-size-report.sh head > "${RUNNER_TEMP}/head.json"
+      - name: "Render report"
+        env:
+          # Names what was measured. A comment left behind by a later push then reads as stale
+          # rather than passing as the current result.
+          FOOTNOTE: >-
+            Measured ${{ github.event_name == 'pull_request'
+            && format('{0} merged into {1}', github.event.pull_request.head.sha, github.event.pull_request.base.sha)
+            || github.sha }}
+        run: |
+          set -euo pipefail
+          touch "${RUNNER_TEMP}/base.json" "${RUNNER_TEMP}/head.json"
+          head/.github/scripts/render_size_report.py \
+            --marker "${COMMENT_IDENTIFIER}" \
+            --footnote "${FOOTNOTE}" \
+            --stack 'core:mParticle Core SDK' \
+            "${RUNNER_TEMP}/base.json" "${RUNNER_TEMP}/head.json" > "${RUNNER_TEMP}/size-report.md"
+          cat "${RUNNER_TEMP}/size-report.md" >> "${GITHUB_STEP_SUMMARY}"
+      - name: "Upload size report"
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sdk-size-report
+          path: |
+            ${{ runner.temp }}/size-report.md
+            ${{ runner.temp }}/base.json
+            ${{ runner.temp }}/head.json
+          retention-days: 14
+      # A pull_request from a fork gets a read-only token regardless of the permissions above,
+      # so commenting would 403. The job summary and the artifact still carry the result.
+      - name: "Find existing comment"
+        id: existing
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: "github-actions[bot]"
+          body-includes: ${{ env.COMMENT_IDENTIFIER }}
+      - name: "Create or update PR comment"
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5
+        with:
+          comment-id: ${{ steps.existing.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          edit-mode: replace
+          body-path: ${{ runner.temp }}/size-report.md
