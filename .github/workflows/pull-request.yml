@@ -252,8 +252,11 @@ jobs:
           # the branch diverged to this pull request -- an unrelated increase on the base branch
           # would render as this pull request shrinking the SDK. Measuring the merge result
           # against the base compares like with like.
-          # (A pull request with conflicts has no merge ref; the job is advisory and reports
-          # "not measured" rather than blocking.)
+          # A pull request with conflicts has no merge ref, so this step fails and the job
+          # stops here. The job is advisory so nothing is blocked, but note that an existing
+          # comment is then left untouched rather than rewritten to "not measured" -- the
+          # footnote naming the measured commit is what marks it stale. A conflicted pull
+          # request cannot merge anyway, so resolving the conflict is the fix.
           ref: refs/pull/${{ github.event.pull_request.number }}/merge
           path: head
       - name: "Checkout target branch"
