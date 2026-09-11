@@ -80,7 +80,7 @@ dependencies {
     def composeBom = platform('androidx.compose:compose-bom:2026.05.01')
     implementation composeBom
     implementation 'androidx.annotation:annotation:1.5.0'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0'
     implementation 'androidx.compose.runtime:runtime'
     api "com.rokt:roktsdk:${project.findProperty('roktSdkVersion') ?: '6.1.1'}"
     api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
@@ -93,7 +93,7 @@ dependencies {
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
     testImplementation 'org.powermock:powermock-core:2.0.9'
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
-    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0'
     compileOnly 'androidx.compose.ui:ui'
     compileOnly 'androidx.compose.material:material'
     compileOnly 'androidx.compose.ui:ui-tooling'
