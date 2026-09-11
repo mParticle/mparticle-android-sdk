@@ -10,6 +10,8 @@ Options:
                              shows this stack's cost over stack BASE rather than over the
                              empty baseline. Repeatable; order is preserved.
   --marker TEXT              HTML comment used to find and replace the sticky PR comment.
+  --footnote TEXT            Trailing line naming what was measured, so a comment left behind
+                             by a later push is visibly stale rather than passing as current.
 
 Either payload may be empty or unparseable -- that renders as "not measured" rather than as a
 zero, so a broken measurement can never be mistaken for a size-neutral change.
@@ -20,8 +22,11 @@ import sys
 
 # Deltas below this are indistinguishable from build noise, so they only pick an emoji.
 NEUTRAL_BYTES = 10 * 1024
+# The JSON keys are historical; the labels are what the report claims. "APK size" is the
+# archive's own byte length -- not the installed footprint, which includes ART-compiled
+# artifacts and is device-dependent.
 METRICS = (
-    ("install", "Install size"),
+    ("install", "APK size"),
     ("download", "Download size"),
     ("dex", "Dex bytes"),
 )
@@ -100,11 +105,14 @@ def status(base, head, stacks):
 
 
 def parse_args(argv):
-    stacks, marker, paths = [], "<!-- sdk-size-report -->", []
+    stacks, marker, paths, footnote = [], "<!-- sdk-size-report -->", [], ""
     index = 0
     while index < len(argv):
         arg = argv[index]
-        if arg == "--stack":
+        if arg == "--footnote":
+            index += 1
+            footnote = argv[index]
+        elif arg == "--stack":
             index += 1
             parts = argv[index].split(":")
             if len(parts) == 2:
@@ -116,11 +124,11 @@ def parse_args(argv):
         else:
             paths.append(arg)
         index += 1
-    return stacks, marker, paths
+    return stacks, marker, paths, footnote
 
 
 def main(argv):
-    stacks, marker, paths = parse_args(argv)
+    stacks, marker, paths, footnote = parse_args(argv)
     if len(paths) != 2 or not stacks:
         print(__doc__, file=sys.stderr)
         return 2
@@ -147,6 +155,8 @@ def main(argv):
         body = json.dumps(data, sort_keys=True) if data else "not measured"
         parts += [f"**{label}:**", "", "```json", body, "```", ""]
     parts += ["</details>"]
+    if footnote:
+        parts += ["", f"<sub>{footnote}</sub>"]
     print("\n".join(parts))
     return 0
 

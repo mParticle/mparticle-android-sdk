@@ -289,11 +289,19 @@ jobs:
         continue-on-error: true
         run: head/scripts/sdk-size-report.sh head > "${RUNNER_TEMP}/head.json"
       - name: "Render report"
+        env:
+          # Names what was measured. A comment left behind by a later push then reads as stale
+          # rather than passing as the current result.
+          FOOTNOTE: >-
+            Measured ${{ github.event_name == 'pull_request'
+            && format('{0} merged into {1}', github.event.pull_request.head.sha, github.event.pull_request.base.sha)
+            || github.sha }}
         run: |
           set -euo pipefail
           touch "${RUNNER_TEMP}/base.json" "${RUNNER_TEMP}/head.json"
           head/.github/scripts/render_size_report.py \
             --marker "${COMMENT_IDENTIFIER}" \
+            --footnote "${FOOTNOTE}" \
             --stack 'core:mParticle Core SDK' \
             "${RUNNER_TEMP}/base.json" "${RUNNER_TEMP}/head.json" > "${RUNNER_TEMP}/size-report.md"
           cat "${RUNNER_TEMP}/size-report.md" >> "${GITHUB_STEP_SUMMARY}"
