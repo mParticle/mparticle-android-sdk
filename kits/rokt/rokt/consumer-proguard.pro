@@ -1,4 +1,2 @@
-# These are the proguard rules specified by the Button SDK's documentation
-
--keep class com.google.android.gms.ads.identifier.** { *; }
--keep class  com.rokt.** { *; }
+# Rokt owns its runtime entry-point rules in its AAR. Core/kit-base preserve this
+# kit's discovery name/constructor and the advertising-ID reflection they perform.
