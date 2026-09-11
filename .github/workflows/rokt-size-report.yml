@@ -18,6 +18,14 @@ on:
       - "gradle.properties" # pins roktSdkVersion / roktPaymentExtensionVersion
       - ".github/workflows/rokt-size-report.yml"
       - "scripts/rokt-size-report.sh"
+      - ".github/scripts/render_size_report.py" # renders this report
+      # Published into the chain the umbrella resolves, so they can move the number.
+      - "android-kit-base/**"
+      - "kit-plugin/**"
+      - "build-logic/**"
+      # android-core is deliberately absent: it is in the chain, but it changes on most pull
+      # requests and its cost is already reported by the per-pull-request check. Running three
+      # publishes and a second build system on every core change is not worth the signal.
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -43,7 +51,14 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # The merge ref, not head.sha. `base.sha` is the base branch's current tip, so
+          # measuring a stale head against it attributes everything merged into the base since
+          # the branch diverged to this pull request -- an unrelated increase on the base branch
+          # would render as this pull request shrinking the SDK. Measuring the merge result
+          # against the base compares like with like.
+          # (A pull request with conflicts has no merge ref; the job is advisory and reports
+          # "not measured" rather than blocking.)
+          ref: ${{ github.event.pull_request.number && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.sha }}
           path: head
       # Only pull_request has a base SHA that is guaranteed fetched. On workflow_dispatch the
       # report shows the head numbers and "not measured" for the target branch.

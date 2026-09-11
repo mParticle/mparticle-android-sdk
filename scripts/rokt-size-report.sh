@@ -94,15 +94,50 @@ install_bytes() { wc -c <"$1" | tr -d ' '; }
 
 # unzip -v columns: Length Method Size Cmpr ... Name. $3 is the compressed size, the closest
 # portable proxy for what a user downloads.
-download_bytes() { unzip -v "$1" | awk '$1 ~ /^[0-9]+$/ { s += $3 } END { print s + 0 }'; }
+# The trailing totals line also starts with a number, but its $3 is the compression
+# percentage ("47%"), which awk would coerce to 47 and add to the sum.
+download_bytes() {
+    unzip -v "$1" | awk '$1 ~ /^[0-9]+$/ && $3 ~ /^[0-9]+$/ { s += $3 } END { print s + 0 }'
+}
 
 # unzip -l columns: Length Date Time Name. Uncompressed dex bytes = the code-only impact.
 dex_bytes() { unzip -l "$1" | awk '$4 ~ /\.dex$/ { s += $1 } END { print s + 0 }'; }
+
+# A fixture that silently stops linking the kit or the payment extension still produces a
+# perfectly valid APK, and the report would present that as a large size *saving*. Fail closed
+# instead: the workflow leaves the JSON empty and the comment reads "not measured".
+MAX_BASELINE_BYTES=$((128 * 1024))
+MIN_KIT_OVER_BASELINE_BYTES=$((1024 * 1024))
+MIN_SDKPLUS_OVER_KIT_BYTES=$((1024 * 1024))
+
+assert_plausible() {
+    local baseline="$1" kit="$2" sdkplus="$3"
+    local ok=true
+
+    if ((baseline > MAX_BASELINE_BYTES)); then
+        log "IMPLAUSIBLE: baseline APK is ${baseline} bytes, expected under ${MAX_BASELINE_BYTES}."
+        log "  The baseline flavor should depend on nothing -- check its dependencies."
+        ok=false
+    fi
+    if ((kit - baseline < MIN_KIT_OVER_BASELINE_BYTES)); then
+        log "IMPLAUSIBLE: Core + Rokt kit adds $((kit - baseline)) bytes, expected at least ${MIN_KIT_OVER_BASELINE_BYTES}."
+        log "  R8 has probably stripped it -- check that the fixture still calls MParticleRokt."
+        ok=false
+    fi
+    if ((sdkplus - kit < MIN_SDKPLUS_OVER_KIT_BYTES)); then
+        log "IMPLAUSIBLE: the payment extension adds $((sdkplus - kit)) bytes, expected at least ${MIN_SDKPLUS_OVER_KIT_BYTES}."
+        log "  Check the -keep rule for com.rokt.payment.extension.** in proguard-rules.pro."
+        ok=false
+    fi
+
+    [[ ${ok} == true ]]
+}
 
 main() {
     [[ ${SKIP_BUILD} == true ]] || build
 
     local json="{" first=true
+    local install_baseline=0 install_kit=0 install_sdkplus=0
     for flavor in "${FLAVORS[@]}"; do
         local apk install download dex
         apk="$(apk_path "${flavor}")"
@@ -114,8 +149,21 @@ main() {
         json+="\"${flavor}_install_bytes\":${install}"
         json+=",\"${flavor}_download_bytes\":${download}"
         json+=",\"${flavor}_dex_bytes\":${dex}"
+        case "${flavor}" in
+        baseline) install_baseline="${install}" ;;
+        kit) install_kit="${install}" ;;
+        sdkplus) install_sdkplus="${install}" ;;
+        *)
+            log "Unknown flavor: ${flavor}"
+            return 1
+            ;;
+        esac
         log "${flavor}: ${install} bytes installed"
     done
+    # Before emitting, not after: a failure here must leave stdout empty so the report
+    # reads "not measured" instead of showing a fabricated saving.
+    assert_plausible "${install_baseline}" "${install_kit}" "${install_sdkplus}"
+
     echo "${json}}"
 }
 

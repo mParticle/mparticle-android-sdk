@@ -90,10 +90,11 @@ def status(base, head, stacks):
             changes.append(now - was)
     if not changes:
         return "ℹ️ Size could not be measured on one or both branches."
-    worst = max(changes, key=abs)
-    if worst > NEUTRAL_BYTES:
+    # An increase in any stack wins over a decrease in another: taking the
+    # largest-magnitude delta would let a shrink in one hide a growth in the other.
+    if max(changes) > NEUTRAL_BYTES:
         return "⚠️ This change increases SDK size impact."
-    if worst < -NEUTRAL_BYTES:
+    if min(changes) < -NEUTRAL_BYTES:
         return "✅ This change decreases SDK size impact."
     return "➡️ SDK size impact change is minimal."
 

@@ -247,7 +247,14 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          ref: ${{ github.event.pull_request.head.sha }}
+          # The merge ref, not head.sha. `base.sha` is the base branch's current tip, so
+          # measuring a stale head against it attributes everything merged into the base since
+          # the branch diverged to this pull request -- an unrelated increase on the base branch
+          # would render as this pull request shrinking the SDK. Measuring the merge result
+          # against the base compares like with like.
+          # (A pull request with conflicts has no merge ref; the job is advisory and reports
+          # "not measured" rather than blocking.)
+          ref: refs/pull/${{ github.event.pull_request.number }}/merge
           path: head
       - name: "Checkout target branch"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
