@@ -14,7 +14,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
-FLAVORS=(baseline core sdkplus)
+FLAVORS=(baseline kit sdkplus)
 SKIP_BUILD=false
 REPO_ROOT_ARG=""
 

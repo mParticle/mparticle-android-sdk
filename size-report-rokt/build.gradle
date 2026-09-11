@@ -10,10 +10,15 @@ plugins {
 // Three flavors of one throwaway app, all built by this one toolchain so the deltas are
 // comparable:
 //
-//   baseline -> nothing                     the floor
-//   core     -> com.mparticle:android-core  Core SDK impact = core - baseline
-//   sdkplus  -> com.rokt:rokt-sdk-plus      full Rokt-on-mParticle impact, and its cost on top
-//                                           of Core = sdkplus - core
+//   baseline -> nothing                          the floor
+//   kit      -> com.mparticle:android-rokt-kit    Core + kit-base + Rokt kit + Rokt SDK
+//   sdkplus  -> com.rokt:rokt-sdk-plus            the above plus the payment extension, so
+//                                                 sdkplus - kit is the payment extension alone
+//
+// The Core SDK on its own is reported by the per-pull-request check in `size-report`, built by
+// the main build's toolchain. It is deliberately not repeated here: this build runs a different
+// AGP, compileSdk and R8, so the two numbers are not comparable and showing both invites a
+// subtraction that would be wrong.
 def mparticleVersion = providers.gradleProperty('mparticleVersion').getOrElse('0.0.0')
 
 configurations.all {
@@ -53,7 +58,7 @@ android {
     flavorDimensions += 'sizevariant'
     productFlavors {
         baseline { dimension 'sizevariant' }
-        core { dimension 'sizevariant' }
+        kit { dimension 'sizevariant' }
         sdkplus { dimension 'sizevariant' }
     }
 
@@ -67,12 +72,21 @@ android {
         }
     }
 
+    // `kit` and `sdkplus` share one fixture source: they must differ only in dependencies,
+    // or the delta between them would measure a source difference rather than the payment
+    // extension.
+    sourceSets {
+        kit.java.srcDirs += 'src/roktshared/java'
+        sdkplus.java.srcDirs += 'src/roktshared/java'
+    }
+
     lint { checkReleaseBuilds false }
     buildFeatures { buildConfig false }
 }
 
 dependencies {
-    coreImplementation "com.mparticle:android-core:${mparticleVersion}"
+    // Transitively provides android-core, android-kit-base and com.rokt:roktsdk.
+    kitImplementation "com.mparticle:android-rokt-kit:${mparticleVersion}"
     // Transitively provides android-core, android-rokt-kit, com.rokt:roktsdk and
     // com.rokt:payment-extension.
     sdkplusImplementation "com.rokt:rokt-sdk-plus:${mparticleVersion}"
