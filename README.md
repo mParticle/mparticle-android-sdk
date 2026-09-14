@@ -146,9 +146,11 @@ public class MyApplication extends Application {
 
 > **Warning:** It's generally not a good idea to log events in your `Application.onCreate()`. Android may instantiate your `Application` class for a lot of reasons, in the background, while the user isn't even using their device.
 
-### Proguard
+### R8 and ProGuard
 
-Proguard is a minification/optimization/obfuscation tool that's extremely useful, and it can also cause some sticky bugs. The mParticle SDK is already minified so there's no need to...double-minify it. If you're using Gradle there's nothing to do - we include a `consumer-proguard` rules file inside our `AAR` which Gradle will automatically include in your build. If you're not using Gradle, please add those same rules manually - [see here for the latest](https://github.com/mParticle/mparticle-android-sdk/blob/master/android-core/consumer-proguard.pro).
+The SDK supports shrinking and obfuscation in release apps. Gradle automatically imports the consumer rules packaged in the core and kit-base AARs. These preserve JavaScript methods, Parcelable creation, kit discovery, and the optional integrations loaded through reflection. The SDK's JSON payloads use explicit keys and do not require keeping entire model packages. Narrow name and stack-frame rules preserve the existing diagnostic callbacks while allowing unused APIs to shrink.
+
+The core AAR is also minified during publication. Its producer rules preserve public and cross-artifact APIs; they are separate from the consumer rules that let an integrating app remove unused code. Avoid adding a blanket keep for `com.mparticle.**` or `com.rokt.**` in your app, because it prevents that optimization. If your build does not import AAR consumer rules automatically, include [core's rules](android-core/consumer-proguard.pro) and [kit-base's rules](android-kit-base/consumer-proguard.pro) when using kits.
 
 ### Data Planning (beta)
 

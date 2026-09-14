@@ -18,6 +18,7 @@ android {
         minSdk 14
         targetSdk 33
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        consumerProguardFiles 'consumer-proguard.pro'
     }
 
     buildTypes {
@@ -27,7 +28,6 @@ android {
         }
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
     

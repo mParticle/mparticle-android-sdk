@@ -152,6 +152,10 @@
 -keep class com.mparticle.internal.RoktKitApi { *; }
 
 -keep class com.mparticle.identity.IdentityApi { *; }
+# Kit-base calls this method across the published AAR boundary.
+-keep class com.mparticle.identity.MParticleIdentityClientImpl {
+    public static java.lang.String getStringValue(com.mparticle.MParticle$IdentityType);
+}
 -keep class com.mparticle.identity.IdentityApiRequest { *; }
 -keep class com.mparticle.identity.IdentityApiRequest$* { *; }
 -keep class com.mparticle.identity.IdentityApiResult { *; }
