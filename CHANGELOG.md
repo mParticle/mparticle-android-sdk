@@ -2,6 +2,26 @@
 
 ## [Unreleased]
 
+## [6.0.5] - 2026-09-14
+
+### Core
+
+#### Changed
+
+- Trim AGENTS.md to the non-derivable core and add CLAUDE.md ([#769](https://github.com/mParticle/mparticle-android-sdk/pull/769))
+
+### Kits
+
+#### Rokt
+
+##### Added
+
+- Add Rokt session handoff APIs ([#760](https://github.com/mParticle/mparticle-android-sdk/pull/760))
+
+##### Changed
+
+- Allow apps to shrink unused SDK code ([#812](https://github.com/mParticle/mparticle-android-sdk/pull/812))
+
 ## [6.0.4] - 2026-09-02
 
 ### Kits
