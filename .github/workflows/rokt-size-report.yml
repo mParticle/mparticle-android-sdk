@@ -108,6 +108,7 @@ jobs:
           head/.github/scripts/render_size_report.py \
             --marker "${COMMENT_IDENTIFIER}" \
             --footnote "${FOOTNOTE}" \
+            --baseline-note "Measured against a Compose + Material3 reference app, so these are the costs on top of an app that already ships Compose. The reference app's dependencies are a documented convention, not a measured average: see \`size-report-rokt/README.md\`." \
             --stack 'kit:mParticle Core + Rokt kit' \
             --stack 'sdkplus:Rokt SDK+ umbrella (adds the payment extension):kit' \
             "${RUNNER_TEMP}/base.json" "${RUNNER_TEMP}/head.json" > "${RUNNER_TEMP}/size-report.md"
