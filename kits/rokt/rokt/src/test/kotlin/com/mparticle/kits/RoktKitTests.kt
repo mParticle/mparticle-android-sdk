@@ -1815,6 +1815,13 @@ class RoktKitTests {
         verify(exactly = 0) {
             Rokt.selectPlacements(any<String>(), any(), any(), any(), any(), any(), any())
         }
+
+        // The attempt still reaches mParticle, as it does on iOS, so abandoned calls stay
+        // countable rather than showing up only in a device log.
+        val loggedEvent = ArgumentCaptor.forClass(MPEvent::class.java)
+        Mockito.verify(MParticle.getInstance())?.logEvent(loggedEvent.capture())
+        assertEquals("selectPlacements", loggedEvent.value.eventName)
+
         unmockkObject(Rokt)
     }
 

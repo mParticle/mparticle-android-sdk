@@ -228,6 +228,11 @@ class RoktKit :
             entry.key to WeakReference(widget)
         }?.toMap()
 
+        // Attributes are prepared before the guard below because doing so logs the
+        // selectPlacements event. The iOS kit logs unconditionally too, so an abandoned call
+        // stays countable on both platforms.
+        val finalAttributes = prepareFinalAttributes(filterUser, attributes)
+
         if (!placeHolders.isNullOrEmpty() && placeholders.isNullOrEmpty()) {
             Logger.warning(
                 "RoktKit: every placeholder was released before placements were selected; " +
@@ -235,8 +240,6 @@ class RoktKit :
             )
             return
         }
-
-        val finalAttributes = prepareFinalAttributes(filterUser, attributes)
 
         Rokt.selectPlacements(
             identifier = viewName,
