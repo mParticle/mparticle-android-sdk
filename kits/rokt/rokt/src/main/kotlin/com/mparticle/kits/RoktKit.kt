@@ -208,10 +208,15 @@ class RoktKit :
         placementOptions: PlacementOptions?,
     ) {
         val placeholders: Map<String, WeakReference<Widget>>? = placeHolders?.mapNotNull { entry ->
-            val widget = Widget(entry.value.get()?.context as Context)
-            entry.value.get()?.removeAllViews()
-            entry.value.get()?.addView(widget)
-            entry.value.get()?.dimensionCallBack?.let {
+            val embeddedView = entry.value.get()
+            if (embeddedView == null) {
+                Logger.warning("RoktKit: placeholder \"${entry.key}\" was released before placements were selected")
+                return@mapNotNull null
+            }
+            val widget = Widget(embeddedView.context)
+            embeddedView.removeAllViews()
+            embeddedView.addView(widget)
+            embeddedView.dimensionCallBack?.let {
                 widget.registerDimensionListener(
                     object : RoktWidgetDimensionCallBack {
                         override fun onHeightChanged(height: Int) {
@@ -222,6 +227,14 @@ class RoktKit :
             }
             entry.key to WeakReference(widget)
         }?.toMap()
+
+        if (!placeHolders.isNullOrEmpty() && placeholders.isNullOrEmpty()) {
+            Logger.warning(
+                "RoktKit: every placeholder was released before placements were selected; " +
+                    "skipping selectPlacements for \"$viewName\"",
+            )
+            return
+        }
 
         val finalAttributes = prepareFinalAttributes(filterUser, attributes)
 
