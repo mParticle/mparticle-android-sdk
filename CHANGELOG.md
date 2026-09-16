@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [6.1.1] - 2026-09-16
+
+### Kits
+
+#### Rokt
+
+##### Fixed
+
+- Skip placements whose view was released before selection ([#815](https://github.com/mParticle/mparticle-android-sdk/pull/815))
+
 ## [6.1.0] - 2026-09-15
 
 ### Core
