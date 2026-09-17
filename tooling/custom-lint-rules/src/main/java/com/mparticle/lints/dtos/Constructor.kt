@@ -7,9 +7,12 @@ import org.jetbrains.uast.UCallExpression
 data class Constructor(override val parent: Expression, val methodName: String?, override val node: UCallExpression) : ParameterizedExpression {
     override var arguments: List<Value> = listOf()
 
-    override fun resolve(): Any? {
+    override fun resolve(): Any? = ResolutionGuard.guarded {
         val qualifiedClassName =
             node.receiverClassName()?.replace(".Builder", "\$Builder")
+        if (!AllowedTypes.isAllowed(qualifiedClassName)) {
+            return@guarded null
+        }
         val clazz = Class.forName(qualifiedClassName)
         val params: List<Any?> = arguments.resolve()
         val argumentClasses =
@@ -29,15 +32,15 @@ data class Constructor(override val parent: Expression, val methodName: String?,
         try {
             if (constructor != null) {
                 if (params.size > 0) {
-                    return constructor.newInstance(*params.toTypedArray())
+                    return@guarded constructor.newInstance(*params.toTypedArray())
                 } else {
-                    return constructor.newInstance()
+                    return@guarded constructor.newInstance()
                 }
             }
         } catch (ex: Exception) {
             "no new Instance for $clazz.name, tried constructor: ${constructor?.name}"
         }
-        return clazz
+        return@guarded clazz
     }
 
     override fun forEachExpression(predicate: (Expression) -> Unit) {

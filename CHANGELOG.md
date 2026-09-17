@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Core
+
+#### Security
+
+- Restrict the Data Plan lint detector to only ever construct or invoke mParticle event/commerce builder types when evaluating analyzed source, instead of reflecting on any class named in a local variable's initializer chain ([#TBD](https://github.com/mParticle/mparticle-android-sdk/pull/TBD))
+
 ## [6.1.0] - 2026-09-15
 
 ### Core

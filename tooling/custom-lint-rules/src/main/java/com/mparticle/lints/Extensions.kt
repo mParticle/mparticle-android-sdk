@@ -9,6 +9,7 @@ import com.intellij.psi.PsiVariable
 import com.intellij.psi.impl.compiled.ClsMethodImpl
 import com.intellij.psi.impl.source.PsiClassReferenceType
 import com.intellij.psi.impl.source.PsiImmediateClassType
+import com.mparticle.lints.dtos.AllowedTypes
 import com.mparticle.lints.dtos.Constructor
 import com.mparticle.lints.dtos.Expression
 import com.mparticle.lints.dtos.MethodCall
@@ -238,7 +239,7 @@ internal fun UExpression.resolveChainedCalls(returnValue: Boolean, instance: Exp
         }
 }
 
-internal fun Pair<*, *>.resolveToEnum(): Enum<*> {
+internal fun Pair<*, *>.resolveToEnum(): Enum<*>? {
     val className =
         when (first) {
             is ClassId -> "${(first as ClassId).packageFqName}.${
@@ -247,6 +248,9 @@ internal fun Pair<*, *>.resolveToEnum(): Enum<*> {
             is String -> first as String
             else -> null
         }
+    if (!AllowedTypes.isAllowed(className)) {
+        return null
+    }
     return className?.let { className ->
         val enumName = second.toString()
         val constructor =
@@ -255,7 +259,7 @@ internal fun Pair<*, *>.resolveToEnum(): Enum<*> {
                 .methods
                 .first { it.name == "valueOf" }
         constructor.invoke(null, enumName)
-    } as Enum<*>
+    } as? Enum<*>
 }
 
 internal fun List<Value>.resolve(): List<Any?> = map { it.resolve() }
