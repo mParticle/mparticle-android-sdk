@@ -305,6 +305,7 @@ jobs:
           head/.github/scripts/render_size_report.py \
             --marker "${COMMENT_IDENTIFIER}" \
             --footnote "${FOOTNOTE}" \
+            --baseline-note "Measured against an empty baseline app. Unlike the Rokt kit, android-core ships no Compose and no resources, so there is nothing here that a host app would already provide." \
             --stack 'core:mParticle Core SDK' \
             "${RUNNER_TEMP}/base.json" "${RUNNER_TEMP}/head.json" > "${RUNNER_TEMP}/size-report.md"
           cat "${RUNNER_TEMP}/size-report.md" >> "${GITHUB_STEP_SUMMARY}"

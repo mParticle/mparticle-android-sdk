@@ -45,6 +45,7 @@ android {
 
     defaultConfig {
         minSdk 14
+        consumerProguardFiles 'consumer-proguard.pro'
         targetSdk 33
         versionName (project.findProperty("VERSION") ?: "0.0.0").toString()
         versionCode Integer.parseInt(new Date().format('yyyyMMdd'))
@@ -74,7 +75,6 @@ android {
         release {
             minifyEnabled true
             proguardFiles 'proguard.pro'
-            consumerProguardFiles 'consumer-proguard.pro'
             //buildConfigField 'Boolean', 'MP_DEBUG', 'true'
         }
     }
