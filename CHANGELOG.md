@@ -2,12 +2,6 @@
 
 ## [Unreleased]
 
-### Core
-
-#### Security
-
-- Remove the unused Dependabot Branch Rebase workflow, which forwarded the full release secret set to an external reusable workflow ([#818](https://github.com/mParticle/mparticle-android-sdk/pull/818))
-
 ## [6.1.1] - 2026-09-16
 
 ### Kits
