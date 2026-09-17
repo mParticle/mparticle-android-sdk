@@ -6,7 +6,7 @@
 
 #### Security
 
-- Stop forwarding the full release secret set to the Dependabot Branch Rebase workflow; pass only the specific secrets it needs ([#TBD](https://github.com/mParticle/mparticle-android-sdk/pull/TBD))
+- Stop forwarding the full release secret set to the Dependabot Branch Rebase workflow; pass only the specific secrets it needs ([#818](https://github.com/mParticle/mparticle-android-sdk/pull/818))
 
 ## [6.1.0] - 2026-09-15
 
