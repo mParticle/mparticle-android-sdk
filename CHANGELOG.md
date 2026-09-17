@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Core
+
+#### Security
+
+- Stop forwarding the full release secret set to the Dependabot Branch Rebase workflow; pass only the specific secrets it needs ([#TBD](https://github.com/mParticle/mparticle-android-sdk/pull/TBD))
+
 ## [6.1.0] - 2026-09-15
 
 ### Core
