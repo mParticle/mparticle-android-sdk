@@ -1789,4 +1789,82 @@ class RoktKitTests {
         verify(exactly = 0) { Rokt.setCustomBaseURL(any()) }
         unmockkStatic(Rokt::class)
     }
+
+    @Test
+    fun selectPlacements_whenEveryPlaceholderWasReleased_doesNotThrowAndSkipsTheCall() {
+        mockkObject(Rokt)
+        every {
+            Rokt.selectPlacements(any<String>(), any(), any(), any(), any(), any(), any())
+        } just runs
+
+        // A reference whose view is already gone, as when the host screen is destroyed
+        // while the identity call made by RoktKitRequestHelper is still in flight.
+        val releasedPlaceholder: WeakReference<RoktEmbeddedView> = WeakReference(null)
+
+        roktKit.selectPlacements(
+            viewName = "test_view",
+            attributes = mapOf("initial_attr" to "initial_value"),
+            placeHolders = mutableMapOf("placeholder" to releasedPlaceholder),
+            fontTypefaces = null,
+            filterUser = selectPlacementsTestUser(),
+            roktConfig = null,
+            placementOptions = null,
+        )
+
+        // An embedded placement with no surviving view must not degrade into an overlay one.
+        verify(exactly = 0) {
+            Rokt.selectPlacements(any<String>(), any(), any(), any(), any(), any(), any())
+        }
+
+        // The attempt still reaches mParticle, as it does on iOS, so abandoned calls stay
+        // countable rather than showing up only in a device log.
+        val loggedEvent = ArgumentCaptor.forClass(MPEvent::class.java)
+        Mockito.verify(MParticle.getInstance())?.logEvent(loggedEvent.capture())
+        assertEquals("selectPlacements", loggedEvent.value.eventName)
+
+        unmockkObject(Rokt)
+    }
+
+    @Test
+    fun selectPlacements_whenNoPlaceholdersWereSupplied_stillCallsRokt() {
+        mockkObject(Rokt)
+        every {
+            Rokt.selectPlacements(any<String>(), any(), any(), any(), any(), any(), any())
+        } just runs
+
+        roktKit.selectPlacements(
+            viewName = "test_view",
+            attributes = mapOf("initial_attr" to "initial_value"),
+            placeHolders = null,
+            fontTypefaces = null,
+            filterUser = selectPlacementsTestUser(),
+            roktConfig = null,
+            placementOptions = null,
+        )
+
+        roktKit.selectPlacements(
+            viewName = "test_view",
+            attributes = mapOf("initial_attr" to "initial_value"),
+            placeHolders = mutableMapOf(),
+            fontTypefaces = null,
+            filterUser = selectPlacementsTestUser(),
+            roktConfig = null,
+            placementOptions = null,
+        )
+
+        verify(exactly = 2) {
+            Rokt.selectPlacements(any<String>(), any(), any(), any(), any(), any(), any())
+        }
+        unmockkObject(Rokt)
+    }
+
+    private fun selectPlacementsTestUser(): FilteredMParticleUser {
+        val filterUser = mock(FilteredMParticleUser::class.java)
+        Mockito.`when`(filterUser.userIdentities).thenReturn(HashMap())
+        Mockito.`when`(filterUser.userAttributes).thenReturn(HashMap<String, Any?>())
+        Mockito.`when`(filterUser.id).thenReturn(12345L)
+        roktKit.configuration =
+            MockKitConfiguration.createKitConfiguration(JSONObject().put("hs", JSONObject()))
+        return filterUser
+    }
 }
