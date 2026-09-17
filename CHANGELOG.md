@@ -2,11 +2,15 @@
 
 ## [Unreleased]
 
-### Core
+## [6.1.1] - 2026-09-16
 
-#### Security
+### Kits
 
-- Restrict the Data Plan lint detector's expression evaluation to an explicit allowlist of mParticle event/commerce builder types ([#817](https://github.com/mParticle/mparticle-android-sdk/pull/817))
+#### Rokt
+
+##### Fixed
+
+- Skip placements whose view was released before selection ([#815](https://github.com/mParticle/mparticle-android-sdk/pull/815))
 
 ## [6.1.0] - 2026-09-15
 
