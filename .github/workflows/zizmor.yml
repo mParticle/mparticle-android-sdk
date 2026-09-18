@@ -1,0 +1,48 @@
+name: Zizmor Security Scan
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+      - development
+    paths:
+      - .github/workflows/**
+      - .github/actions/**
+  push:
+    branches:
+      - main
+      - development
+    paths:
+      - .github/workflows/**
+      - .github/actions/**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions: {} # deny-by-default; job below grants only what it needs
+
+jobs:
+  zizmor:
+    name: Scan GitHub Actions workflows
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read # zizmor resolves reusable workflow/action metadata via GitHub API
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 1 # zizmor only needs the tree at HEAD
+      - name: Run zizmor
+        uses: zizmorcore/zizmor-action@70fb788f84895a7701f5643d103d587e460b5c99 # v0.6.3
+        # Permanent advisory mode — zizmor is rolled out across Rokt repos as a
+        # reporter, not a gate. Findings surface as PR annotations so owners
+        # can triage incrementally without blocking unrelated changes.
+        continue-on-error: true
+        with:
+          advanced-security: false
+          annotations: true
