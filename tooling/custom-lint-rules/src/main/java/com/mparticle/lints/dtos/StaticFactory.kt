@@ -9,8 +9,11 @@ class StaticFactory(val methodName: String?, override val node: UCallExpression)
     override val parent = RootParent(node)
     override var arguments: List<Value> = listOf()
 
-    override fun resolve(): Any? {
+    override fun resolve(): Any? = ResolutionGuard.guarded {
         val qualifiedClassName = (node.resolve()?.parent as? ClsClassImpl)?.stub?.qualifiedName
+        if (!AllowedTypes.isAllowedStaticFactory(qualifiedClassName, methodName)) {
+            return@guarded null
+        }
         val methods = HashSet<Method>()
         val clazz = Class.forName(qualifiedClassName)
         methods.addAll(clazz.declaredMethods)
@@ -31,9 +34,9 @@ class StaticFactory(val methodName: String?, override val node: UCallExpression)
                 }
             val arguments = arguments.resolve()
             method.isAccessible = true
-            return method.invoke(null, *arguments.toTypedArray())
+            return@guarded method.invoke(null, *arguments.toTypedArray())
         }
-        return null
+        return@guarded null
     }
 
     override fun forEachExpression(predicate: (Expression) -> Unit) {

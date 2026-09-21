@@ -10,11 +10,12 @@ data class MethodCall(override val parent: Expression, val methodName: String?, 
         arguments.forEach { it.parent = this }
     }
 
-    override fun resolve(): Any? {
-        val instance = parent.resolve()
-        if (instance == null) {
-            return null
+    override fun resolve(): Any? = ResolutionGuard.guarded {
+        val resolved = parent.resolve()
+        if (!AllowedTypes.isInstanceAllowed(resolved)) {
+            return@guarded null
         }
+        val instance = resolved!!
         var matchingMethods =
             instance::class.java.methods
                 .filter { it.name == methodName }
@@ -33,12 +34,12 @@ data class MethodCall(override val parent: Expression, val methodName: String?, 
             val arguments = arguments.resolve()
             val value = method.invoke(instance, *arguments.toTypedArray())
             if (returnValue) {
-                return value
+                return@guarded value
             } else {
-                return instance
+                return@guarded instance
             }
         }
-        return null
+        return@guarded null
     }
 
     override fun equals(other: Any?): Boolean = node.equals((other as? MethodCall)?.node)

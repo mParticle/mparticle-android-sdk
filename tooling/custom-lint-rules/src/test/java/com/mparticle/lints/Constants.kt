@@ -22,12 +22,23 @@ object Constants {
 
     @Language("JAVA")
     const val APPLICATION_STUB = """
-    package android.app; 
+    package android.app;
     public class Application {
        public void onCreate() {}
        public void onResume() {}
     }"""
 
+    @Language("JAVA")
+    const val MPEVENT_STUB = """package com.mparticle;
+    public class MPEvent {
+       public static class Builder {
+           public Builder(String eventName) {}
+           public Builder customAttributes(java.util.Map<String, ?> customAttributes) { return this; }
+           public MPEvent build() { return new MPEvent(); }
+       }
+    }"""
+
     val mParticleStubClass = java(MPARTICLE_STUB)
     val mApplicationStubClass = java(APPLICATION_STUB)
+    val mpEventStubClass = java(MPEVENT_STUB)
 }
