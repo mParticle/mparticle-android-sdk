@@ -11,7 +11,7 @@ class StaticFactory(val methodName: String?, override val node: UCallExpression)
 
     override fun resolve(): Any? = ResolutionGuard.guarded {
         val qualifiedClassName = (node.resolve()?.parent as? ClsClassImpl)?.stub?.qualifiedName
-        if (!AllowedTypes.isAllowed(qualifiedClassName)) {
+        if (!AllowedTypes.isAllowedStaticFactory(qualifiedClassName, methodName)) {
             return@guarded null
         }
         val methods = HashSet<Method>()

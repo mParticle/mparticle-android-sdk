@@ -38,9 +38,9 @@ data class Constructor(override val parent: Expression, val methodName: String?,
                 }
             }
         } catch (ex: Exception) {
-            "no new Instance for $clazz.name, tried constructor: ${constructor?.name}"
+            // fall through - no instance could be constructed
         }
-        return@guarded clazz
+        return@guarded null
     }
 
     override fun forEachExpression(predicate: (Expression) -> Unit) {

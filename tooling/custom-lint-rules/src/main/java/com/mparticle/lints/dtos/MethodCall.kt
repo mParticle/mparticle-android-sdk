@@ -11,10 +11,11 @@ data class MethodCall(override val parent: Expression, val methodName: String?, 
     }
 
     override fun resolve(): Any? = ResolutionGuard.guarded {
-        val instance = parent.resolve()
-        if (instance == null) {
+        val resolved = parent.resolve()
+        if (!AllowedTypes.isInstanceAllowed(resolved)) {
             return@guarded null
         }
+        val instance = resolved!!
         var matchingMethods =
             instance::class.java.methods
                 .filter { it.name == methodName }

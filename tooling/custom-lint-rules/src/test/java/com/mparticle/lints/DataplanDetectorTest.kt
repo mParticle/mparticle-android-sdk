@@ -88,6 +88,51 @@ class DataplanDetectorTest : LintDetectorTest() {
         }
     }
 
+    // Regression test: an allowlisted instance's own inherited Any.getClass() returns a
+    // java.lang.Class, which is not itself an allowlisted type. Chaining a further call onto that
+    // (Class.forName, reachable via ordinary instance-call syntax) must be rejected before it
+    // runs, not just before the *original* class is constructed.
+    @Test
+    fun testReflectionEscapeViaGetClassIsNeverExecuted() {
+        val sdkHome =
+            System.getenv("ANDROID_HOME")
+                ?: "${System.getProperty("user.home")}/Library/Android/sdk"
+
+        val marker = File.createTempFile("mparticle-lint-getclass-escape", ".txt")
+        marker.delete()
+        System.setProperty(SideEffectMarker.MARKER_PATH_PROPERTY, marker.absolutePath)
+
+        try {
+            withConfigFile(Config()) {
+                @Language("JAVA")
+                val source = """
+                    package com.mparticle.lints;
+                    import android.app.Application;
+                    import com.mparticle.MPEvent;
+                    public class HasClassEscapeCall extends Application {
+                        @Override
+                        public void onCreate() {
+                            super.onCreate();
+                            new MPEvent.Builder("test").getClass().forName("com.mparticle.lints.SideEffectMarker");
+                        }
+                    }
+                    """
+                lint()
+                    .sdkHome(File(sdkHome))
+                    .files(java(source), mParticleStubClass, mApplicationStubClass, mpEventStubClass)
+                    .skipTestModes(TestMode.PARENTHESIZED)
+                    .run()
+            }
+            assertTrue(
+                "Data plan lint must not load a class named by analyzed source via Class.forName",
+                !marker.exists(),
+            )
+        } finally {
+            System.clearProperty(SideEffectMarker.MARKER_PATH_PROPERTY)
+            marker.delete()
+        }
+    }
+
     // A legitimate builder chain (the only thing this detector needs to resolve) must keep
     // resolving successfully - the allowlist should reject non-DTO reflection, not the feature.
     @Test
