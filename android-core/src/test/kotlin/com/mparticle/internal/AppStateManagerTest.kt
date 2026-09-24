@@ -13,18 +13,15 @@ import com.mparticle.mock.MockSharedPreferences
 import com.mparticle.testutils.AndroidUtils
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
+import org.mockito.MockedStatic
 import org.mockito.Mockito
-import org.powermock.api.mockito.PowerMockito
-import org.powermock.core.classloader.annotations.PrepareForTest
-import org.powermock.modules.junit4.PowerMockRunner
 
-@RunWith(PowerMockRunner::class)
-@PrepareForTest(Looper::class)
 class AppStateManagerTest {
+    private lateinit var looperStatic: MockedStatic<Looper>
     lateinit var manager: AppStateManager
     private var mockContext: MockApplication? = null
     private val activity =
@@ -36,10 +33,9 @@ class AppStateManagerTest {
 
     @Before
     fun setup() {
+        looperStatic = Mockito.mockStatic(Looper::class.java)
         val context = MockContext()
         mockContext = context.applicationContext as MockApplication
-        // Prepare and mock the Looper class
-        PowerMockito.mockStatic(Looper::class.java)
         val looper: Looper = Mockito.mock(Looper::class.java)
         Mockito.`when`(Looper.getMainLooper()).thenReturn(looper)
         manager = AppStateManager(mockContext!!, true)
@@ -53,6 +49,11 @@ class AppStateManagerTest {
         MParticle.setInstance(mp)
         manager.delayedBackgroundCheckHandler = Mockito.mock(Handler::class.java)
         AppStateManager.mInitialized = false
+    }
+
+    @After
+    fun tearDown() {
+        looperStatic.close()
     }
 
     @Test
@@ -103,7 +104,7 @@ class AppStateManagerTest {
                 Mockito.anyString(),
                 Mockito.anyString(),
                 Mockito.eq("this is data string 1"),
-                Mockito.isNull(String::class.java),
+                Mockito.isNull(),
                 Mockito.eq("package name 1"),
                 Mockito.anyLong(),
                 Mockito.anyLong(),
@@ -124,7 +125,7 @@ class AppStateManagerTest {
                 Mockito.anyString(),
                 Mockito.anyString(),
                 Mockito.eq("this is data string 2"),
-                Mockito.isNull(String::class.java),
+                Mockito.isNull(),
                 Mockito.eq("package name 2"),
                 Mockito.anyLong(),
                 Mockito.anyLong(),
