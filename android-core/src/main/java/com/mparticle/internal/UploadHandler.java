@@ -8,6 +8,7 @@ import android.os.Looper;
 import android.os.Message;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
 import androidx.annotation.VisibleForTesting;
 
 import com.mparticle.MParticle;
@@ -81,10 +82,9 @@ public class UploadHandler extends BaseHandler {
     private final SharedPreferences mPreferences;
     private final SegmentDatabase audienceDB;
 
-    /**
-     * API client interface reference, useful for the unit test suite project.
-     */
-    MParticleApiClient mApiClient;
+    @VisibleForTesting
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    public MParticleApiClient mApiClient;
 
     /**
      * Boolean used to determine if we're currently connected to the network. If we're not connected to the network,
@@ -323,10 +323,9 @@ public class UploadHandler extends BaseHandler {
                 (statusCode >= 400 && statusCode < 500));
     }
 
-    /*
-     * Used by the test suite for mocking.
-     */
-    void setApiClient(MParticleApiClient apiClient) {
+    @VisibleForTesting
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    public void setApiClient(MParticleApiClient apiClient) {
         mApiClient = apiClient;
     }
 
