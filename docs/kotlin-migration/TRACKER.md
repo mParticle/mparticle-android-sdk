@@ -21,15 +21,16 @@ Java that converts: **16,550 LOC**. Java that stays by design (public facade, ki
 
 No product code. Risk class L throughout.
 
-| Done | PR  | Title                                                                               | Notes                                                                   |
-| ---- | --- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| [ ]  | 0.1 | `ci: report binary compatibility against the last published release`                | `scripts/api_compat_report.py`; job **Binary Compatibility**            |
-| [ ]  | 0.2 | `build: add public API dumps with binary-compatibility-validator`                   | `./gradlew apiCheck` in the Unit Tests job; `scripts/check_api_dump.py` |
-| [ ]  | 0.3 | `test: add Java and Kotlin consumer fixtures built against the published artifacts` | `settings-compat.gradle`, `compat/`                                     |
-| [ ]  | 0.4 | `test: replace PowerMock with Mockito 5 in core and kit-base unit tests`            | Prerequisite for converting classes the unit tests mock                 |
-| [ ]  | 0.5 | `test: expose explicit test seams for package-private core internals`               | Prerequisite for stacks C and D                                         |
-| [ ]  | 0.6 | `build(lint): build the custom lint jar from merged Java and Kotlin classes`        | Prerequisite for converting `Logger`                                    |
-| [ ]  | 0.7 | `docs: add the Kotlin migration playbook and tracker`                               | This document                                                           |
+| Done | PR  | Title                                                                               | Notes                                                                                               |
+| ---- | --- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| [ ]  | 0.1 | `ci: report binary compatibility against the last published release`                | `scripts/api_compat_report.py`; job **Binary Compatibility**                                        |
+| [ ]  | 0.2 | `build: add public API dumps with binary-compatibility-validator`                   | `./gradlew apiCheck` in the Unit Tests job; `scripts/check_api_dump.py`                             |
+| [ ]  | 0.3 | `test: add Java and Kotlin consumer fixtures built against the published artifacts` | `settings-compat.gradle`, `compat/`                                                                 |
+| [ ]  | 0.4 | `test: replace PowerMock with Mockito 5 in core and kit-base unit tests`            | Prerequisite for converting classes the unit tests mock                                             |
+| [ ]  | 0.5 | `test: expose explicit test seams for package-private core internals`               | Prerequisite for stacks C and D                                                                     |
+| [ ]  | 0.6 | `build(lint): build the custom lint jar from merged Java and Kotlin classes`        | Prerequisite for converting `Logger`                                                                |
+| [ ]  | 0.7 | `docs: add the Kotlin migration playbook and tracker`                               | This document                                                                                       |
+| [ ]  | 0.8 | `ci: report Java to Kotlin migration progress on pull requests`                     | `scripts/kotlin_migration_progress.py`; job **Kotlin Migration Progress**; `allow-new-java` ratchet |
 
 ## Phase 1 · Build hygiene
 
@@ -132,18 +133,30 @@ zero frozen-class diff in `apiCheck` and an empty Binary Compatibility report.
 | [ ]  | 3.2 | `kits/KitManagerImpl`           | 1,441 | H    | Keep the Java declaration; move the body |
 | [ ]  | 3.3 | `internal/MParticleJSInterface` |   840 | H    | Leave in Java                            |
 
-## Checkpoints
+## Checkpoints and expected numbers
 
-QA points, not releases. Record the result of each in this section when it is reached.
+QA points, not releases. The **Kotlin Migration Progress** job reports "Java left to convert" and
+"Kotlin share" on every pull request; the expected values below assume the stacks land in the
+recommended order and that converted Java shrinks to roughly 65–80% of its length as Kotlin.
+"Conversion progress" is exact: it is the share of the 16,550 baseline Java LOC that has been
+converted.
 
-| Point | After                               | Check                                                                                                 |
-| ----- | ----------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| M0    | Phase 0 and PR 1.1                  | A deliberate removal of a public method on a scratch branch fails `apiCheck` and Binary Compatibility |
-| M1    | Stacks A and D                      | Offline queue across process death, sessions, uploads                                                 |
-| M2    | Stacks B, C and G                   | Identity flows, remote config, certificate pinning against production, push registration              |
-| M3    | Stacks E, F and H; Phase 1 complete | Full checklist; one third-party kit and the Rokt kit end to end on a minified consumer build          |
-| Gate  | Before Phase 3                      | Per-file go/no-go with the consumer fixture results                                                   |
-| M4    | Phase 3                             | Full checklist; the migration's release                                                               |
+| Point | After                               | Java left (LOC) | Conversion progress | Kotlin share (est.) | Check                                                                                                 |
+| ----- | ----------------------------------- | --------------: | ------------------: | ------------------: | ----------------------------------------------------------------------------------------------------- |
+| M0    | Phase 0 and PR 1.1                  |          16,550 |                  0% |                 12% | A deliberate removal of a public method on a scratch branch fails `apiCheck` and Binary Compatibility |
+|       | Stack A                             |          14,062 |                 15% |              18–19% |                                                                                                       |
+| M1    | Stacks A and D                      |          11,336 |                 32% |              24–26% | Offline queue across process death, sessions, uploads                                                 |
+|       | Stack B                             |          10,066 |                 39% |              27–29% |                                                                                                       |
+|       | Stack C                             |           9,159 |                 45% |              30–32% |                                                                                                       |
+| M2    | Stacks B, C and G                   |           8,143 |                 51% |              32–35% | Identity flows, remote config, certificate pinning against production, push registration              |
+|       | Stack E                             |           7,141 |                 57% |              35–38% |                                                                                                       |
+|       | Stack F                             |           5,922 |                 64% |              38–41% |                                                                                                       |
+| M3    | Stacks E, F and H; Phase 1 complete |           3,350 |                 80% |              46–50% | Full checklist; one third-party kit and the Rokt kit end to end on a minified consumer build          |
+| Gate  | Before Phase 3                      |           3,350 |                 80% |              46–50% | Per-file go/no-go with the consumer fixture results                                                   |
+| M4    | Phase 3                             |               0 |                100% |              56–60% | Full checklist; the migration's release                                                               |
+
+The Kotlin share stops well short of 100% by design: 11,287 LOC of Java facade stay Java in 6.x.
+Facade thinning (an optional follow-up) would raise it further without changing the goal metric.
 
 ## Optional follow-ups
 
