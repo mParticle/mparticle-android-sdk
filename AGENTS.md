@@ -10,6 +10,14 @@ Environment setup, the Maven-local workflow and the isolated-kit builds are in
 [CONTRIBUTING.md](CONTRIBUTING.md). API reference lives in the
 [public docs](https://docs.mparticle.com/developers/sdk/android/).
 
+## Before you touch `android-core/src/main` or `android-kit-base/src/main`
+
+A Java to Kotlin migration of the SDK internals is in progress. Read
+[docs/kotlin-migration/PLAYBOOK.md](docs/kotlin-migration/PLAYBOOK.md) first: it defines what stays
+Java, the conversion rules that keep the compiled API identical, the per-PR checklist and the
+risk classes. [docs/kotlin-migration/TRACKER.md](docs/kotlin-migration/TRACKER.md) lists the pull
+requests and their status.
+
 ## What this repo is
 
 A public, multi-module Gradle library published to Maven Central, plus the integration kits that
