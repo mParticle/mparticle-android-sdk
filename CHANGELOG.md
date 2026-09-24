@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+## [6.1.3] - 2026-09-24
+
+### Core
+
+#### Fixed
+
+- Restrict data-plan detector to known event builder types ([#817](https://github.com/mParticle/mparticle-android-sdk/pull/817))
+
+### Kits
+
+#### Braze
+
+##### Fixed
+
+- Respect product attribute filters for identifier, name, price and quantity ([#853](https://github.com/mParticle/mparticle-android-sdk/pull/853))
+
 ## [6.1.1] - 2026-09-16
 
 ### Kits
