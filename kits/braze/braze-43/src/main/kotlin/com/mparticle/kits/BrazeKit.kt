@@ -287,11 +287,12 @@ open class BrazeKit :
                 logOrderLevelTransaction(event)
                 messages.add(ReportingMessage.fromEvent(this, event))
             } else {
-                val productList = event.products
-                productList?.let {
-                    for (product in productList) {
-                        logTransaction(event, product)
-                    }
+                val productList = event.products.orEmpty().filter { purchaseIdentifier(it) != null }
+                if (productList.isEmpty()) {
+                    return messages
+                }
+                for (product in productList) {
+                    logTransaction(event, product)
                 }
             }
             messages.add(ReportingMessage.fromEvent(this, event))
@@ -305,6 +306,7 @@ open class BrazeKit :
                     for (i in eventList.indices) {
                         try {
                             val e = eventList[i]
+                            removeFilteredProductFields(e)
                             val map = mutableMapOf<String, String>()
                             event.customAttributeStrings?.let { map.putAll(it) }
                             for (pair in map) {
@@ -726,10 +728,61 @@ open class BrazeKit :
 
     override fun logout(): List<ReportingMessage> = emptyList()
 
+    // The core SDK removes a filtered coupon code, brand, category, variant or position from a
+    // product but leaves its identifier, name, price and quantity in place, so every read of those
+    // four goes through these accessors, which report a field filtered for this kit as null.
+    private val Product.forwardedSku: String?
+        get() = sku.takeIf { isProductFieldForwarded(CommerceEventUtils.Constants.ATT_PRODUCT_ID) }
+
+    private val Product.forwardedName: String?
+        get() = name.takeIf { isProductFieldForwarded(CommerceEventUtils.Constants.ATT_PRODUCT_NAME) }
+
+    private val Product.forwardedUnitPrice: Double?
+        get() = unitPrice.takeIf { isProductFieldForwarded(CommerceEventUtils.Constants.ATT_PRODUCT_PRICE) }
+
+    private val Product.forwardedQuantity: Double?
+        get() = quantity.takeIf { isProductFieldForwarded(CommerceEventUtils.Constants.ATT_PRODUCT_QUANTITY) }
+
+    private fun isProductFieldForwarded(key: String): Boolean =
+        configuration
+            ?.commerceEntityAttributeFilters
+            ?.get(PRODUCT_ENTITY)
+            ?.get(KitUtils.hashForFiltering(key), true)
+            ?: true
+
+    // Braze identifies a purchase by this value, so a product whose identifier was filtered
+    // cannot be forwarded at all.
+    private fun purchaseIdentifier(product: Product): String? {
+        try {
+            if (settings[REPLACE_SKU_AS_PRODUCT_NAME] == "True") {
+                return product.forwardedName
+            }
+        } catch (e: Exception) {
+            Logger.error(e, "The Braze kit threw an exception while searching for forward sku as product name flag.")
+        }
+        return product.forwardedSku
+    }
+
+    // Matches by key, so a product custom attribute sharing a built-in field's name is removed too.
+    private fun removeFilteredProductFields(event: MPEvent) {
+        val attributes = event.customAttributes ?: return
+        val filteredKeys = PRODUCT_FILTERABLE_FIELDS.filterNot { isProductFieldForwarded(it) }
+        if (filteredKeys.isEmpty()) {
+            return
+        }
+        attributes.keys.removeAll(filteredKeys.toSet())
+        if (CommerceEventUtils.Constants.ATT_PRODUCT_PRICE in filteredKeys ||
+            CommerceEventUtils.Constants.ATT_PRODUCT_QUANTITY in filteredKeys
+        ) {
+            attributes.remove(CommerceEventUtils.Constants.ATT_PRODUCT_TOTAL_AMOUNT)
+        }
+    }
+
     fun logTransaction(
         event: CommerceEvent?,
         product: Product,
     ) {
+        val sanitizedProductName = purchaseIdentifier(product) ?: return
         val purchaseProperties = BrazeProperties()
         val currency = arrayOfNulls<String>(1)
         val commerceTypeParser: StringTypeParser =
@@ -809,7 +862,7 @@ open class BrazeKit :
         product.category?.let {
             purchaseProperties.addProperty(CommerceEventUtils.Constants.ATT_PRODUCT_CATEGORY, it)
         }
-        product.name.let {
+        product.forwardedName?.let {
             purchaseProperties.addProperty(CommerceEventUtils.Constants.ATT_PRODUCT_NAME, it)
         }
         product.variant?.let {
@@ -824,20 +877,12 @@ open class BrazeKit :
             }
         }
 
-        var sanitizedProductName: String = product.sku
-        try {
-            if (settings[REPLACE_SKU_AS_PRODUCT_NAME] == "True") {
-                sanitizedProductName = product.name
-            }
-        } catch (e: Exception) {
-            Logger.error(e, "The Braze kit threw an exception while searching for forward sku as product name flag.")
-        }
-
+        // Braze rejects a purchase with a quantity below one, so a filtered quantity is sent as one.
         Braze.Companion.getInstance(context).logPurchase(
             sanitizedProductName,
             currencyValue,
-            BigDecimal(product.unitPrice),
-            product.quantity.toInt(),
+            BigDecimal(product.forwardedUnitPrice ?: 0.0),
+            product.forwardedQuantity?.toInt() ?: 1,
             purchaseProperties,
         )
     }
@@ -978,6 +1023,14 @@ open class BrazeKit :
         if (KitUtils.isEmpty(action)) {
             return null
         }
+        // Braze requires a product identifier, so a product whose identifier was filtered is not
+        // forwarded. An event left with none is handled with nothing forwarded: returning null
+        // would send it down the legacy path instead.
+        val forwardableProducts = products.filter { it.forwardedSku != null }
+        if (forwardableProducts.isEmpty()) {
+            return if (RECOMMENDED_PRODUCT_ACTIONS.any { it.equals(action, true) }) emptyList() else null
+        }
+        val lineItems = recommendedLineItems(forwardableProducts)
         val currency =
             event.currency?.takeIf { it.isNotEmpty() }
                 ?: CommerceEventUtils.Constants.DEFAULT_CURRENCY_CODE
@@ -998,11 +1051,11 @@ open class BrazeKit :
                         cartId = recommendedCartId(event),
                         currency = currency,
                         source = source,
-                        totalValue = recommendedTotalValue(event),
+                        totalValue = recommendedTotalValue(event, lineItems),
                         subtotalValue = recommendedSubtotalValue(event),
                         tax = recommendedTax(event),
                         shipping = recommendedShipping(event),
-                        products = recommendedLineItems(products),
+                        products = lineItems,
                         metadata = eventMetadata,
                         action = cartAction,
                     ),
@@ -1014,8 +1067,8 @@ open class BrazeKit :
                         checkoutId = recommendedCheckoutId(event),
                         currency = currency,
                         source = source,
-                        totalValue = recommendedTotalValue(event),
-                        products = recommendedLineItems(products),
+                        totalValue = recommendedTotalValue(event, lineItems),
+                        products = lineItems,
                         cartId = recommendedCartId(event),
                         subtotalValue = recommendedSubtotalValue(event),
                         tax = recommendedTax(event),
@@ -1025,13 +1078,13 @@ open class BrazeKit :
                 )
             }
             action.equals(Product.DETAIL, true) -> {
-                for (product in products) {
+                for (product in forwardableProducts) {
                     braze.logEcommerceEvent(
                         ProductViewedEvent(
                             productId = product.sku,
-                            productName = product.name,
+                            productName = product.forwardedName.orEmpty(),
                             variantId = recommendedVariantId(product),
-                            price = product.unitPrice,
+                            price = product.forwardedUnitPrice ?: 0.0,
                             currency = currency,
                             source = source,
                             imageUrl = recommendedImageUrl(product),
@@ -1047,8 +1100,8 @@ open class BrazeKit :
                         orderId = recommendedOrderId(event),
                         currency = currency,
                         source = source,
-                        totalValue = recommendedTotalValue(event),
-                        products = recommendedLineItems(products),
+                        totalValue = recommendedTotalValue(event, lineItems),
+                        products = lineItems,
                         cartId = recommendedCartId(event),
                         totalDiscounts = recommendedTotalDiscounts(event),
                         subtotalValue = recommendedSubtotalValue(event),
@@ -1063,10 +1116,10 @@ open class BrazeKit :
                 // mirrors the recommended ecommerce.order_refunded schema.
                 val properties = BrazeProperties()
                 properties.addProperty(RECOMMENDED_ORDER_ID_KEY, recommendedOrderId(event))
-                properties.addProperty(RECOMMENDED_TOTAL_VALUE_KEY, recommendedTotalValue(event))
+                properties.addProperty(RECOMMENDED_TOTAL_VALUE_KEY, recommendedTotalValue(event, lineItems))
                 properties.addProperty(RECOMMENDED_CURRENCY_KEY, currency)
                 properties.addProperty(RECOMMENDED_SOURCE_KEY, source)
-                properties.addProperty(PRODUCT_KEY, recommendedProductsJson(products))
+                properties.addProperty(PRODUCT_KEY, recommendedProductsJson(forwardableProducts))
                 recommendedTotalDiscounts(event)?.let {
                     properties.addProperty(RECOMMENDED_TOTAL_DISCOUNTS_KEY, it)
                 }
@@ -1174,15 +1227,12 @@ open class BrazeKit :
         return value?.takeIf { it.isNotEmpty() }
     }
 
-    private fun recommendedTotalValue(event: CommerceEvent): Double {
-        event.transactionAttributes?.revenue?.let { return it }
-        var total = 0.0
-        event.products?.forEach { product ->
-            val quantity = product.quantity.toLong().coerceAtLeast(1L)
-            total += product.unitPrice * quantity
-        }
-        return total
-    }
+    // Summed over the line items rather than the event's products, so a product dropped for a
+    // filtered identifier does not count towards the total.
+    private fun recommendedTotalValue(
+        event: CommerceEvent,
+        lineItems: List<EcommerceProduct>,
+    ): Double = event.transactionAttributes?.revenue ?: lineItems.sumOf { it.price * it.quantity }
 
     private fun recommendedTotalDiscounts(event: CommerceEvent): Double? {
         val value = recommendedCustomAttribute(event, TOTAL_DISCOUNTS_ATTRIBUTE) ?: return null
@@ -1202,25 +1252,27 @@ open class BrazeKit :
         products.map { product ->
             EcommerceProduct(
                 productId = product.sku,
-                productName = product.name,
+                productName = product.forwardedName.orEmpty(),
                 variantId = recommendedVariantId(product),
-                price = product.unitPrice,
-                quantity = product.quantity.toLong().coerceAtLeast(1L),
+                price = product.forwardedUnitPrice ?: 0.0,
+                quantity = recommendedQuantity(product),
                 imageUrl = recommendedImageUrl(product),
                 productUrl = recommendedProductUrl(product),
                 metadata = mapToBrazeProperties(buildProductMetadataMap(product)),
             )
         }
 
+    private fun recommendedQuantity(product: Product): Long = (product.forwardedQuantity ?: 1.0).toLong().coerceAtLeast(1L)
+
     private fun recommendedProductsJson(products: List<Product>): JSONArray {
         val array = JSONArray()
         for (product in products) {
             val obj = JSONObject()
             obj.put(RECOMMENDED_PRODUCT_ID_KEY, product.sku)
-            obj.put(RECOMMENDED_PRODUCT_NAME_KEY, product.name)
+            obj.put(RECOMMENDED_PRODUCT_NAME_KEY, product.forwardedName.orEmpty())
             obj.put(RECOMMENDED_VARIANT_ID_KEY, recommendedVariantId(product))
-            obj.put(RECOMMENDED_QUANTITY_KEY, product.quantity.toLong().coerceAtLeast(1L))
-            obj.put(RECOMMENDED_PRICE_KEY, product.unitPrice)
+            obj.put(RECOMMENDED_QUANTITY_KEY, recommendedQuantity(product))
+            obj.put(RECOMMENDED_PRICE_KEY, product.forwardedUnitPrice ?: 0.0)
             recommendedImageUrl(product)?.let { obj.put(RECOMMENDED_IMAGE_URL_KEY, it) }
             recommendedProductUrl(product)?.let { obj.put(RECOMMENDED_PRODUCT_URL_KEY, it) }
             val productMetadata = buildProductMetadataMap(product)
@@ -1513,10 +1565,10 @@ open class BrazeKit :
             product.category?.let {
                 productProperties.put(CommerceEventUtils.Constants.ATT_PRODUCT_CATEGORY, it)
             }
-            product.name?.let {
+            product.forwardedName?.let {
                 productProperties.put(CommerceEventUtils.Constants.ATT_PRODUCT_NAME, it)
             }
-            product.sku?.let {
+            product.forwardedSku?.let {
                 productProperties.put(CommerceEventUtils.Constants.ATT_PRODUCT_ID, it)
             }
             product.variant?.let {
@@ -1525,18 +1577,20 @@ open class BrazeKit :
             product.position?.let {
                 productProperties.put(CommerceEventUtils.Constants.ATT_PRODUCT_POSITION, it)
             }
-            productProperties.put(
-                CommerceEventUtils.Constants.ATT_PRODUCT_PRICE,
-                product.unitPrice,
-            )
-            productProperties.put(
-                CommerceEventUtils.Constants.ATT_PRODUCT_QUANTITY,
-                product.quantity,
-            )
-            productProperties.put(
-                CommerceEventUtils.Constants.ATT_PRODUCT_TOTAL_AMOUNT,
-                product.totalAmount,
-            )
+            val unitPrice = product.forwardedUnitPrice
+            val quantity = product.forwardedQuantity
+            unitPrice?.let {
+                productProperties.put(CommerceEventUtils.Constants.ATT_PRODUCT_PRICE, it)
+            }
+            quantity?.let {
+                productProperties.put(CommerceEventUtils.Constants.ATT_PRODUCT_QUANTITY, it)
+            }
+            if (unitPrice != null && quantity != null) {
+                productProperties.put(
+                    CommerceEventUtils.Constants.ATT_PRODUCT_TOTAL_AMOUNT,
+                    product.totalAmount,
+                )
+            }
 
             productArray.put(productProperties)
         }
@@ -1774,6 +1828,23 @@ open class BrazeKit :
 
         // if this flag is true, kit will send Product name as sku
         const val REPLACE_SKU_AS_PRODUCT_NAME = "replaceSkuWithProductName"
+        private const val PRODUCT_ENTITY = 1
+        private val RECOMMENDED_PRODUCT_ACTIONS =
+            setOf(
+                Product.ADD_TO_CART,
+                Product.REMOVE_FROM_CART,
+                Product.CHECKOUT,
+                Product.DETAIL,
+                Product.PURCHASE,
+                Product.REFUND,
+            )
+        private val PRODUCT_FILTERABLE_FIELDS =
+            listOf(
+                CommerceEventUtils.Constants.ATT_PRODUCT_ID,
+                CommerceEventUtils.Constants.ATT_PRODUCT_NAME,
+                CommerceEventUtils.Constants.ATT_PRODUCT_PRICE,
+                CommerceEventUtils.Constants.ATT_PRODUCT_QUANTITY,
+            )
         private const val PREF_KEY_HAS_SYNCED_ATTRIBUTES = "appboy::has_synced_attributes"
         private const val PREF_KEY_CURRENT_EMAIL = "appboy::current_email"
         private const val FLUSH_DELAY = 5000
