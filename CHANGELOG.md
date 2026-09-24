@@ -18,6 +18,12 @@
 
 - Respect product attribute filters for identifier, name, price and quantity ([#853](https://github.com/mParticle/mparticle-android-sdk/pull/853))
 
+#### Rokt
+
+##### Changed
+
+- Bump Rokt SDK and payment extension to 6.1.4 ([#852](https://github.com/mParticle/mparticle-android-sdk/pull/852))
+
 ## [6.1.1] - 2026-09-16
 
 ### Kits
