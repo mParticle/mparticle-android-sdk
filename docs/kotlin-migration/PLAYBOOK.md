@@ -193,4 +193,6 @@ Whoever runs `Release – Draft` for unrelated work while migration pull request
 - Titles follow the house convention: `refactor(core): convert internal.database tables to Kotlin`,
   `build: …`, `ci: …`, `test: …`. A pure conversion has no `CHANGELOG.md` entry.
 - A pull request that adds Java to `android-core/src/main` or `android-kit-base/src/main` needs a
-  stated reason; the direction of travel is Kotlin.
+  stated reason; the direction of travel is Kotlin. The **Kotlin Migration Progress** job posts the
+  conversion numbers on every pull request and fails when Java is added without the `allow-new-java`
+  label.

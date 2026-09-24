@@ -59,6 +59,8 @@ JDK 17 — `gradle.properties` sets `JAVA_VERSION` and every CI job installs Zul
   intentional change and explain the diff in the PR. `scripts/check_api_dump.py --base origin/main`
   tells you whether a changed class is a frozen contract (see `scripts/api-frozen-internals.txt`).
 - Android lint — `./gradlew lint`; Kotlin lint — `./gradlew ktlintCheck`
+- Migration progress — `scripts/kotlin_migration_progress.py` prints Java left to convert and the
+  Kotlin share of `android-core` and `android-kit-base` (CI job _Kotlin Migration Progress_).
 - Binary compatibility with the last release — `scripts/api_compat_report.py` builds the release
   AARs and runs japicmp against the latest version on Maven Central (CI job _Binary Compatibility_).
   It compares what ships after R8, so it is the check that matters for consumers.
