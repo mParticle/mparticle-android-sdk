@@ -1,0 +1,30 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+    namespace 'com.mparticle.compat.kotlinconsumer'
+    compileSdk 33
+    defaultConfig {
+        minSdk 21
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+tasks.withType(KotlinCompile).configureEach {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_17
+        // A nullability or deprecation warning against the published API is a finding, not noise.
+        allWarningsAsErrors = true
+    }
+}
+
+dependencies {
+    implementation "com.mparticle:android-core:$mparticleSdkVersion"
+    implementation "com.mparticle:android-kit-base:$mparticleSdkVersion"
+}
