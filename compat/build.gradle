@@ -1,0 +1,18 @@
+// Shared by both fixture modules. They compile against the published com.mparticle artifacts, so
+// they must resolve like an integrating app does: from mavenLocal(), at the version under review.
+// CI exports VERSION as ORG_GRADLE_PROJECT_VERSION; locally the VERSION file is the source of truth.
+def sdkVersion = (findProperty('VERSION') ?: rootProject.file('VERSION').text.trim()).toString()
+
+subprojects {
+    ext.mparticleSdkVersion = sdkVersion
+
+    // The root allprojects{} block attaches an unfiltered mavenCentral(), where the previous release
+    // also exists. Rebuild the chain so com.mparticle can only come from mavenLocal(), exactly as
+    // KitPlugin.configureRepositories does for kits.
+    repositories.toList().each { repositories.remove(it) }
+    repositories {
+        mavenLocal { content { includeGroup 'com.mparticle' } }
+        google()
+        mavenCentral { content { excludeGroup 'com.mparticle' } }
+    }
+}
