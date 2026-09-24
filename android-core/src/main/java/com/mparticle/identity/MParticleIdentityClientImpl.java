@@ -2,6 +2,9 @@ package com.mparticle.identity;
 
 import android.content.Context;
 
+import androidx.annotation.RestrictTo;
+import androidx.annotation.VisibleForTesting;
+
 import com.mparticle.BuildConfig;
 import com.mparticle.MParticle;
 import com.mparticle.SdkListener;
@@ -31,10 +34,18 @@ public class MParticleIdentityClientImpl extends MParticleBaseClientImpl impleme
     private Context mContext;
     private ConfigManager mConfigManager;
 
-    static final String LOGIN_PATH = "login";
-    static final String LOGOUT_PATH = "logout";
-    static final String IDENTIFY_PATH = "identify";
-    static final String MODIFY_PATH = "modify";
+    @VisibleForTesting
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    public static final String LOGIN_PATH = "login";
+    @VisibleForTesting
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    public static final String LOGOUT_PATH = "logout";
+    @VisibleForTesting
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    public static final String IDENTIFY_PATH = "identify";
+    @VisibleForTesting
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    public static final String MODIFY_PATH = "modify";
 
     static final String PLATFORM = "platform";
     static final String SDK_VENDOR = "sdk_vendor";
@@ -286,7 +297,9 @@ public class MParticleIdentityClientImpl extends MParticleBaseClientImpl impleme
     }
 
 
-    MPUrl getUrl(long mpId, String endpoint) throws MalformedURLException {
+    @VisibleForTesting
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    public MPUrl getUrl(long mpId, String endpoint) throws MalformedURLException {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(mpId);
         if (endpoint.indexOf("/") != 0) {
@@ -296,7 +309,9 @@ public class MParticleIdentityClientImpl extends MParticleBaseClientImpl impleme
         return getUrl(stringBuilder.toString());
     }
 
-    MPUrl getUrl(String endpoint) throws MalformedURLException {
+    @VisibleForTesting
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    public MPUrl getUrl(String endpoint) throws MalformedURLException {
         return getUrl(Endpoint.IDENTITY, endpoint, null);
     }
 

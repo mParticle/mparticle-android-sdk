@@ -4,6 +4,8 @@ package com.mparticle.identity;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RestrictTo;
+import androidx.annotation.VisibleForTesting;
 
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListenerType;
@@ -74,7 +76,9 @@ public class MParticleUserImpl implements MParticleUser {
         return mUserDelegate.getUserIdentities(getId());
     }
 
-    void setUserIdentities(Map<MParticle.IdentityType, String> userIdentities) {
+    @VisibleForTesting
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    public void setUserIdentities(Map<MParticle.IdentityType, String> userIdentities) {
         if (userIdentities == null) {
             return;
         }

@@ -12,6 +12,8 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
+import androidx.annotation.VisibleForTesting;
 import androidx.annotation.WorkerThread;
 
 import com.mparticle.AttributionResult;
@@ -44,7 +46,9 @@ public class KitFrameworkWrapper implements KitManager {
     private final Context mContext;
     final CoreCallbacks mCoreCallbacks;
     private final ReportingManager mReportingManager;
-    KitManager mKitManager;
+    @VisibleForTesting
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    public KitManager mKitManager;
     private final MParticleOptions mOptions;
     private volatile boolean frameworkLoadAttempted = false;
     private static volatile boolean kitsLoaded = false;
@@ -98,7 +102,9 @@ public class KitFrameworkWrapper implements KitManager {
         }
     }
 
-    boolean getFrameworkLoadAttempted() {
+    @VisibleForTesting
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    public boolean getFrameworkLoadAttempted() {
         return frameworkLoadAttempted;
     }
 
@@ -110,7 +116,9 @@ public class KitFrameworkWrapper implements KitManager {
         return attributeQueue;
     }
 
-    void setKitManager(KitManager manager) {
+    @VisibleForTesting
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    public void setKitManager(KitManager manager) {
         mKitManager = manager;
     }
 
@@ -128,7 +136,9 @@ public class KitFrameworkWrapper implements KitManager {
         }
     }
 
-    void setKitsLoaded(boolean kitsLoaded) {
+    @VisibleForTesting
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    public void setKitsLoaded(boolean kitsLoaded) {
         this.kitsLoaded = kitsLoaded;
         if (kitsLoaded) {
             replayAndDisableQueue();

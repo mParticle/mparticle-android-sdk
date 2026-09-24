@@ -5,6 +5,9 @@ import android.graphics.Bitmap;
 import android.os.Looper;
 import android.os.Message;
 
+import androidx.annotation.RestrictTo;
+import androidx.annotation.VisibleForTesting;
+
 import com.mparticle.MParticle;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
@@ -25,7 +28,9 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 
-/* package-private */ class MessageHandler extends BaseHandler {
+@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+public class MessageHandler extends BaseHandler {
 
     private final Context mContext;
 
