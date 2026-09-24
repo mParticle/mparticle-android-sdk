@@ -1,0 +1,34 @@
+# Classes inside com.mparticle.internal that are contracts anyway.
+#
+# Everything outside com.mparticle.internal is frozen automatically: those
+# packages are the documented customer API and the kit-author API. The classes
+# below live in an internal package by name but are compiled against from
+# outside this repository (kits import them), are resolved by name at runtime,
+# or are named explicitly in android-core/proguard.pro, so
+# scripts/check_api_dump.py treats a change to them as a failure rather than a
+# reviewable internal diff.
+#
+# One fully qualified class name or glob per line; a nested class matches its
+# outer class entry. Adding an entry is always safe. Removing one requires an
+# audit of kits/, android-kit-base/, testutils/ and android-core/proguard.pro.
+
+# Imported by kits
+com.mparticle.internal.Logger
+com.mparticle.internal.MPUtility
+com.mparticle.internal.KitManager
+com.mparticle.internal.CoreCallbacks
+com.mparticle.internal.ReportingManager
+com.mparticle.internal.JsonReportingMessage
+com.mparticle.internal.KitsLoadedCallback
+com.mparticle.internal.SideloadedKit
+com.mparticle.internal.Constants
+
+# Resolved by name at runtime
+com.mparticle.internal.MParticleJSInterface
+
+# Named in android-core/proguard.pro
+com.mparticle.internal.ConfigManager
+com.mparticle.internal.InternalSession
+com.mparticle.internal.PushRegistrationHelper
+com.mparticle.internal.listeners.GraphListener
+com.mparticle.internal.listeners.InternalListenerManager
