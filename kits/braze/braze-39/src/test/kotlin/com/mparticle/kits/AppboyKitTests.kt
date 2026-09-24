@@ -1544,4 +1544,119 @@ class AppboyKitTests {
             purchase.purchaseProperties.properties[CommerceEventUtils.Constants.ATT_ACTION_CURRENCY_CODE],
         )
     }
+
+    private fun kitFilteringProductFields(
+        vararg fields: String,
+        settings: Map<String, String?> = emptyMap(),
+    ): MockAppboyKit {
+        val kitSettings = hashMapOf<String, String?>(AppboyKit.APPBOY_KEY to "key")
+        kitSettings.putAll(settings)
+        val kit = MockAppboyKit()
+        kit.configuration =
+            KitConfiguration.createKitConfiguration(JSONObject().put("as", JSONObject(kitSettings as Map<*, *>)))
+        val filteredHashes = fields.map { KitUtils.hashForFiltering(it) }.toSet()
+        kit.configuration.commerceEntityAttributeFilters[1] =
+            object : SparseBooleanArray() {
+                override fun get(
+                    key: Int,
+                    valueIfKeyNotFound: Boolean,
+                ): Boolean = key !in filteredHashes && valueIfKeyNotFound
+            }
+        kit.onKitCreate(kitSettings, MockContextApplication())
+        return kit
+    }
+
+    private fun purchaseOf(product: Product): CommerceEvent = CommerceEvent.Builder(Product.PURCHASE, product).build()
+
+    @Test
+    fun testPurchaseSendsFilteredPriceAsZero() {
+        val kit = kitFilteringProductFields(CommerceEventUtils.Constants.ATT_PRODUCT_PRICE)
+        val product = Product.Builder("product1", "1131331343", 13.0).quantity(2.0).build()
+
+        val messages = kit.logEvent(purchaseOf(product))
+
+        Assert.assertFalse(messages.isEmpty())
+        Assert.assertEquals(1, Braze.purchases.size)
+        val purchase = Braze.purchases[0]
+        Assert.assertEquals("1131331343", purchase.sku)
+        Assert.assertEquals(0, BigDecimal.ZERO.compareTo(purchase.unitPrice))
+        Assert.assertEquals(2, purchase.quantity)
+    }
+
+    @Test
+    fun testPurchaseSendsFilteredQuantityAsOne() {
+        val kit = kitFilteringProductFields(CommerceEventUtils.Constants.ATT_PRODUCT_QUANTITY)
+        val product = Product.Builder("product1", "1131331343", 13.0).quantity(5.0).build()
+
+        kit.logEvent(purchaseOf(product))
+
+        Assert.assertEquals(1, Braze.purchases[0].quantity)
+        Assert.assertEquals(0, BigDecimal(13.0).compareTo(Braze.purchases[0].unitPrice))
+    }
+
+    @Test
+    fun testPurchaseOmitsFilteredProductName() {
+        val kit = kitFilteringProductFields(CommerceEventUtils.Constants.ATT_PRODUCT_NAME)
+        val product = Product.Builder("product1", "1131331343", 13.0).build()
+
+        kit.logEvent(purchaseOf(product))
+
+        val purchase = Braze.purchases[0]
+        Assert.assertEquals("1131331343", purchase.sku)
+        Assert.assertFalse(
+            purchase.purchaseProperties.properties.containsKey(CommerceEventUtils.Constants.ATT_PRODUCT_NAME),
+        )
+    }
+
+    @Test
+    fun testPurchaseDropsProductWithFilteredIdentifier() {
+        val kit = kitFilteringProductFields(CommerceEventUtils.Constants.ATT_PRODUCT_ID)
+        val product = Product.Builder("product1", "1131331343", 13.0).build()
+
+        val messages = kit.logEvent(purchaseOf(product))
+
+        Assert.assertTrue(messages.isEmpty())
+        Assert.assertTrue(Braze.purchases.isEmpty())
+    }
+
+    @Test
+    fun testPurchaseDropsProductWithFilteredNameWhenNameIsTheIdentifier() {
+        val kit =
+            kitFilteringProductFields(
+                CommerceEventUtils.Constants.ATT_PRODUCT_NAME,
+                settings = mapOf(AppboyKit.REPLACE_SKU_AS_PRODUCT_NAME to "True"),
+            )
+        val product = Product.Builder("product1", "1131331343", 13.0).build()
+
+        val messages = kit.logEvent(purchaseOf(product))
+
+        Assert.assertTrue(messages.isEmpty())
+        Assert.assertTrue(Braze.purchases.isEmpty())
+    }
+
+    @Test
+    fun testProductListOmitsFilteredPrice() {
+        val kit = kitFilteringProductFields(CommerceEventUtils.Constants.ATT_PRODUCT_PRICE)
+        val product = Product.Builder("product1", "1131331343", 13.0).build()
+
+        val productJson = kit.getProductListParameters(listOf(product)).getJSONObject(0)
+
+        Assert.assertEquals("1131331343", productJson.get(CommerceEventUtils.Constants.ATT_PRODUCT_ID))
+        Assert.assertFalse(productJson.has(CommerceEventUtils.Constants.ATT_PRODUCT_PRICE))
+        Assert.assertFalse(productJson.has(CommerceEventUtils.Constants.ATT_PRODUCT_TOTAL_AMOUNT))
+        Assert.assertTrue(productJson.has(CommerceEventUtils.Constants.ATT_PRODUCT_QUANTITY))
+    }
+
+    @Test
+    fun testExpandedCommerceEventOmitsFilteredPrice() {
+        val kit = kitFilteringProductFields(CommerceEventUtils.Constants.ATT_PRODUCT_PRICE)
+        val product = Product.Builder("product1", "1131331343", 13.0).build()
+
+        kit.logEvent(CommerceEvent.Builder(Product.ADD_TO_CART, product).build())
+
+        val itemProperties = Braze.events.values.single().properties
+        Assert.assertEquals("1131331343", itemProperties[CommerceEventUtils.Constants.ATT_PRODUCT_ID])
+        Assert.assertFalse(itemProperties.containsKey(CommerceEventUtils.Constants.ATT_PRODUCT_PRICE))
+        Assert.assertFalse(itemProperties.containsKey(CommerceEventUtils.Constants.ATT_PRODUCT_TOTAL_AMOUNT))
+    }
 }

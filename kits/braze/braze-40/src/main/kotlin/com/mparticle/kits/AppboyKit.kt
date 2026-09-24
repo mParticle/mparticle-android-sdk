@@ -265,11 +265,12 @@ open class AppboyKit :
                 logOrderLevelTransaction(event)
                 messages.add(ReportingMessage.fromEvent(this, event))
             } else {
-                val productList = event.products
-                productList?.let {
-                    for (product in productList) {
-                        logTransaction(event, product)
-                    }
+                val productList = event.products.orEmpty().filter { purchaseIdentifier(it) != null }
+                if (productList.isEmpty()) {
+                    return messages
+                }
+                for (product in productList) {
+                    logTransaction(event, product)
                 }
             }
             messages.add(ReportingMessage.fromEvent(this, event))
@@ -283,6 +284,7 @@ open class AppboyKit :
                     for (i in eventList.indices) {
                         try {
                             val e = eventList[i]
+                            removeFilteredProductFields(e)
                             val map = mutableMapOf<String, String>()
                             event.customAttributeStrings?.let { map.putAll(it) }
                             for (pair in map) {
@@ -701,10 +703,61 @@ open class AppboyKit :
 
     override fun logout(): List<ReportingMessage> = emptyList()
 
+    // The core SDK removes a filtered coupon code, brand, category, variant or position from a
+    // product but leaves its identifier, name, price and quantity in place, so every read of those
+    // four goes through these accessors, which report a field filtered for this kit as null.
+    private val Product.forwardedSku: String?
+        get() = sku.takeIf { isProductFieldForwarded(CommerceEventUtils.Constants.ATT_PRODUCT_ID) }
+
+    private val Product.forwardedName: String?
+        get() = name.takeIf { isProductFieldForwarded(CommerceEventUtils.Constants.ATT_PRODUCT_NAME) }
+
+    private val Product.forwardedUnitPrice: Double?
+        get() = unitPrice.takeIf { isProductFieldForwarded(CommerceEventUtils.Constants.ATT_PRODUCT_PRICE) }
+
+    private val Product.forwardedQuantity: Double?
+        get() = quantity.takeIf { isProductFieldForwarded(CommerceEventUtils.Constants.ATT_PRODUCT_QUANTITY) }
+
+    private fun isProductFieldForwarded(key: String): Boolean =
+        configuration
+            ?.commerceEntityAttributeFilters
+            ?.get(PRODUCT_ENTITY)
+            ?.get(KitUtils.hashForFiltering(key), true)
+            ?: true
+
+    // Braze identifies a purchase by this value, so a product whose identifier was filtered
+    // cannot be forwarded at all.
+    private fun purchaseIdentifier(product: Product): String? {
+        try {
+            if (settings[REPLACE_SKU_AS_PRODUCT_NAME] == "True") {
+                return product.forwardedName
+            }
+        } catch (e: Exception) {
+            Logger.error(e, "The Braze kit threw an exception while searching for forward sku as product name flag.")
+        }
+        return product.forwardedSku
+    }
+
+    // Matches by key, so a product custom attribute sharing a built-in field's name is removed too.
+    private fun removeFilteredProductFields(event: MPEvent) {
+        val attributes = event.customAttributes ?: return
+        val filteredKeys = PRODUCT_FILTERABLE_FIELDS.filterNot { isProductFieldForwarded(it) }
+        if (filteredKeys.isEmpty()) {
+            return
+        }
+        attributes.keys.removeAll(filteredKeys.toSet())
+        if (CommerceEventUtils.Constants.ATT_PRODUCT_PRICE in filteredKeys ||
+            CommerceEventUtils.Constants.ATT_PRODUCT_QUANTITY in filteredKeys
+        ) {
+            attributes.remove(CommerceEventUtils.Constants.ATT_PRODUCT_TOTAL_AMOUNT)
+        }
+    }
+
     fun logTransaction(
         event: CommerceEvent?,
         product: Product,
     ) {
+        val sanitizedProductName = purchaseIdentifier(product) ?: return
         val purchaseProperties = BrazeProperties()
         val currency = arrayOfNulls<String>(1)
         val commerceTypeParser: StringTypeParser =
@@ -784,7 +837,7 @@ open class AppboyKit :
         product.category?.let {
             purchaseProperties.addProperty(CommerceEventUtils.Constants.ATT_PRODUCT_CATEGORY, it)
         }
-        product.name.let {
+        product.forwardedName?.let {
             purchaseProperties.addProperty(CommerceEventUtils.Constants.ATT_PRODUCT_NAME, it)
         }
         product.variant?.let {
@@ -799,20 +852,12 @@ open class AppboyKit :
             }
         }
 
-        var sanitizedProductName: String = product.sku
-        try {
-            if (settings[REPLACE_SKU_AS_PRODUCT_NAME] == "True") {
-                sanitizedProductName = product.name
-            }
-        } catch (e: Exception) {
-            Logger.error(e, "The Braze kit threw an exception while searching for forward sku as product name flag.")
-        }
-
+        // Braze rejects a purchase with a quantity below one, so a filtered quantity is sent as one.
         Braze.Companion.getInstance(context).logPurchase(
             sanitizedProductName,
             currencyValue,
-            BigDecimal(product.unitPrice),
-            product.quantity.toInt(),
+            BigDecimal(product.forwardedUnitPrice ?: 0.0),
+            product.forwardedQuantity?.toInt() ?: 1,
             purchaseProperties,
         )
     }
@@ -1145,10 +1190,10 @@ open class AppboyKit :
             product.category?.let {
                 productProperties.put(CommerceEventUtils.Constants.ATT_PRODUCT_CATEGORY, it)
             }
-            product.name?.let {
+            product.forwardedName?.let {
                 productProperties.put(CommerceEventUtils.Constants.ATT_PRODUCT_NAME, it)
             }
-            product.sku?.let {
+            product.forwardedSku?.let {
                 productProperties.put(CommerceEventUtils.Constants.ATT_PRODUCT_ID, it)
             }
             product.variant?.let {
@@ -1157,18 +1202,20 @@ open class AppboyKit :
             product.position?.let {
                 productProperties.put(CommerceEventUtils.Constants.ATT_PRODUCT_POSITION, it)
             }
-            productProperties.put(
-                CommerceEventUtils.Constants.ATT_PRODUCT_PRICE,
-                product.unitPrice,
-            )
-            productProperties.put(
-                CommerceEventUtils.Constants.ATT_PRODUCT_QUANTITY,
-                product.quantity,
-            )
-            productProperties.put(
-                CommerceEventUtils.Constants.ATT_PRODUCT_TOTAL_AMOUNT,
-                product.totalAmount,
-            )
+            val unitPrice = product.forwardedUnitPrice
+            val quantity = product.forwardedQuantity
+            unitPrice?.let {
+                productProperties.put(CommerceEventUtils.Constants.ATT_PRODUCT_PRICE, it)
+            }
+            quantity?.let {
+                productProperties.put(CommerceEventUtils.Constants.ATT_PRODUCT_QUANTITY, it)
+            }
+            if (unitPrice != null && quantity != null) {
+                productProperties.put(
+                    CommerceEventUtils.Constants.ATT_PRODUCT_TOTAL_AMOUNT,
+                    product.totalAmount,
+                )
+            }
 
             productArray.put(productProperties)
         }
@@ -1405,6 +1452,14 @@ open class AppboyKit :
 
         // if this flag is true, kit will send Product name as sku
         const val REPLACE_SKU_AS_PRODUCT_NAME = "replaceSkuWithProductName"
+        private const val PRODUCT_ENTITY = 1
+        private val PRODUCT_FILTERABLE_FIELDS =
+            listOf(
+                CommerceEventUtils.Constants.ATT_PRODUCT_ID,
+                CommerceEventUtils.Constants.ATT_PRODUCT_NAME,
+                CommerceEventUtils.Constants.ATT_PRODUCT_PRICE,
+                CommerceEventUtils.Constants.ATT_PRODUCT_QUANTITY,
+            )
         private const val PREF_KEY_HAS_SYNCED_ATTRIBUTES = "appboy::has_synced_attributes"
         private const val PREF_KEY_CURRENT_EMAIL = "appboy::current_email"
         private const val FLUSH_DELAY = 5000

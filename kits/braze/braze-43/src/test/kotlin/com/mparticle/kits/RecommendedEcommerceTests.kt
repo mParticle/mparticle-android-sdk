@@ -1,5 +1,6 @@
 package com.mparticle.kits
 
+import android.util.SparseBooleanArray
 import com.braze.Braze
 import com.braze.models.recommended.ecommerce.CartUpdatedAction
 import com.braze.models.recommended.ecommerce.CartUpdatedEvent
@@ -415,5 +416,57 @@ class RecommendedEcommerceTests {
         )
         // Promotion events carry no products, so the recommended path must defer to legacy forwarding.
         Assert.assertTrue(Braze.ecommerceEvents.isEmpty())
+    }
+
+    private fun kitFilteringProductFields(vararg fields: String): MockBrazeKit {
+        val filteredHashes = fields.map { KitUtils.hashForFiltering(it) }.toSet()
+        return kit.apply {
+            configuration.commerceEntityAttributeFilters[1] =
+                object : SparseBooleanArray() {
+                    override fun get(
+                        key: Int,
+                        valueIfKeyNotFound: Boolean,
+                    ): Boolean = key !in filteredHashes && valueIfKeyNotFound
+                }
+        }
+    }
+
+    @Test
+    fun testOrderPlacedSendsFilteredPriceAsZero() {
+        val kit = kitFilteringProductFields(CommerceEventUtils.Constants.ATT_PRODUCT_PRICE)
+
+        kit.logEvent(CommerceEvent.Builder(Product.PURCHASE, productWithUrls()).build())
+
+        val event = Braze.ecommerceEvents.single() as OrderPlacedEvent
+        Assert.assertEquals("sku1", event.products[0].productId)
+        Assert.assertEquals("product name", event.products[0].productName)
+        Assert.assertEquals(0.0, event.products[0].price, 0.001)
+    }
+
+    @Test
+    fun testOrderPlacedSendsFilteredNameAsEmptyAndQuantityAsOne() {
+        val kit =
+            kitFilteringProductFields(
+                CommerceEventUtils.Constants.ATT_PRODUCT_NAME,
+                CommerceEventUtils.Constants.ATT_PRODUCT_QUANTITY,
+            )
+
+        kit.logEvent(CommerceEvent.Builder(Product.PURCHASE, productWithUrls()).build())
+
+        val event = Braze.ecommerceEvents.single() as OrderPlacedEvent
+        Assert.assertEquals("", event.products[0].productName)
+        Assert.assertEquals(1L, event.products[0].quantity)
+    }
+
+    @Test
+    fun testEventWithOnlyFilteredIdentifiersIsNotSentDownTheLegacyPath() {
+        val kit = kitFilteringProductFields(CommerceEventUtils.Constants.ATT_PRODUCT_ID)
+
+        val messages = kit.logEvent(CommerceEvent.Builder(Product.PURCHASE, productWithUrls()).build())
+
+        Assert.assertTrue(messages.isEmpty())
+        Assert.assertTrue(Braze.ecommerceEvents.isEmpty())
+        Assert.assertTrue(Braze.purchases.isEmpty())
+        Assert.assertTrue(Braze.events.isEmpty())
     }
 }
