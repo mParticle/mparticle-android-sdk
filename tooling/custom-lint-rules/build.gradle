@@ -25,9 +25,6 @@ buildscript {
 
 repositories {
     google()
-    maven {
-        url "https://mvnrepository.com/artifact/com.android.tools.lint/lint-tests"
-    }
 }
 
 configurations {
@@ -72,11 +69,16 @@ rootProject.project('android-core').android.buildTypes.all {
     }
 }
 
+// AGP-internal task that produces android-core's merged Java and Kotlin classes jar. If an AGP
+// upgrade renames it, this build fails loudly instead of silently shipping a lint jar without
+// the Kotlin classes.
+def coreClassesJar = rootProject.project('android-core')
+    .tasks.named("bundleLibCompileToJar${targetBuildType.capitalize()}")
+
 task zipSources(type: Jar) {
-    from {
-        def compileTask = rootProject.project('android-core')
-            .tasks.named("compile${targetBuildType.capitalize()}JavaWithJavac").get()
-        fileTree(dir: compileTask.destinationDirectory.get().asFile)
+    dependsOn coreClassesJar
+    from(zipTree(coreClassesJar.map { it.outputs.files.singleFile })) {
+        exclude 'META-INF/**'
     }
     destinationDirectory.set(new File("$project.projectDir/libs"))
     archiveFileName.set("mparticle.jar")
@@ -92,7 +94,6 @@ task proguardCore(type: ProGuardTask) {
 afterEvaluate {
     compileKotlin.dependsOn proguardCore
     proguardCore.dependsOn zipSources
-    zipSources.dependsOn ":android-core:compile${targetBuildType.capitalize()}JavaWithJavac"
 }
 
 task cleanTempLibraries {
