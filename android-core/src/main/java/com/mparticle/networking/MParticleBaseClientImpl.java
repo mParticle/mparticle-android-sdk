@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
+import androidx.annotation.VisibleForTesting;
 
 import com.mparticle.BuildConfig;
 import com.mparticle.internal.ConfigManager;
@@ -29,7 +31,9 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
     private final ConfigManager mConfigManager;
     private BaseNetworkConnection mRequestHandler;
     private final SharedPreferences mPreferences;
-    String mApiKey;
+    @VisibleForTesting
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    public String mApiKey;
 
     private static final String SERVICE_VERSION_1 = "/v1";
     private static final String SERVICE_VERSION_2 = "/v2";
