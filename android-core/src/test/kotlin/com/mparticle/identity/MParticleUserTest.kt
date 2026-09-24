@@ -222,7 +222,7 @@ class MParticleUserTest {
                 mp?.Identity()?.mMessageManager,
                 Mockito.times(1),
             )?.logUserIdentityChangeMessage(
-                Mockito.isNull(JSONObject::class.java),
+                Mockito.isNull(),
                 argument2.capture(),
                 argument3.capture(),
                 argument4.capture(),
@@ -271,7 +271,7 @@ class MParticleUserTest {
                 Mockito.times(1),
             )?.logUserIdentityChangeMessage(
                 argument2.capture(),
-                Mockito.isNull(JSONObject::class.java),
+                Mockito.isNull(),
                 argument3.capture(),
                 argument4.capture(),
             )

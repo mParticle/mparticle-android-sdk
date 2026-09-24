@@ -17,21 +17,16 @@ import com.mparticle.testutils.RandomUtils
 import org.json.JSONArray
 import org.junit.Assert
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
-import org.powermock.api.mockito.PowerMockito
-import org.powermock.core.classloader.annotations.PrepareForTest
-import org.powermock.modules.junit4.PowerMockRunner
 import java.lang.ref.WeakReference
 import java.util.Random
 import kotlin.test.assertEquals
 
-@RunWith(PowerMockRunner::class)
 class KitFrameworkWrapperTest {
     private fun newWrapper(): KitFrameworkWrapper = KitFrameworkWrapper(
         Mockito.mock(Context::class.java),
@@ -124,7 +119,6 @@ class KitFrameworkWrapperTest {
     }
 
     @Test
-    @PrepareForTest(CommerceEvent::class)
     @Throws(Exception::class)
     fun testReplayEvents() {
         val wrapper =
@@ -169,7 +163,7 @@ class KitFrameworkWrapperTest {
         wrapper.kitsLoaded = false
         val event = MPEvent.Builder("example").build()
         val screenEvent = Mockito.mock(MPEvent::class.java)
-        val commerceEvent = PowerMockito.mock(CommerceEvent::class.java)
+        val commerceEvent = Mockito.mock(CommerceEvent::class.java)
         Mockito.`when`(screenEvent.isScreenEvent).thenReturn(true)
         wrapper.logEvent(event)
         wrapper.logEvent(screenEvent)
@@ -478,7 +472,6 @@ class KitFrameworkWrapperTest {
     }
 
     @Test
-    @PrepareForTest(CommerceEvent::class)
     @Throws(Exception::class)
     fun testLogCommerceEvent() {
         val wrapper =
@@ -519,7 +512,6 @@ class KitFrameworkWrapperTest {
     }
 
     @Test
-    @PrepareForTest(CommerceEvent::class)
     fun testLogBaseEvent() {
         val wrapper =
             KitFrameworkWrapper(

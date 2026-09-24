@@ -24,37 +24,40 @@ import com.mparticle.messaging.MPMessagingAPI
 import com.mparticle.mock.MockContext
 import com.mparticle.testutils.AndroidUtils
 import com.mparticle.testutils.RandomUtils
+import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
+import org.mockito.MockedStatic
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
-import org.powermock.api.mockito.PowerMockito
-import org.powermock.core.classloader.annotations.PrepareForTest
-import org.powermock.modules.junit4.PowerMockRunner
 import java.util.LinkedList
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-@RunWith(PowerMockRunner::class)
-@PrepareForTest(Looper::class, SystemClock::class)
 class MParticleTest {
+    private lateinit var looperStatic: MockedStatic<Looper>
+    private lateinit var systemClockStatic: MockedStatic<SystemClock>
     private lateinit var executor: ExecutorService
 
     @Before
     fun setup() {
-        PowerMockito.mockStatic(Looper::class.java)
+        looperStatic = Mockito.mockStatic(Looper::class.java)
+        systemClockStatic = Mockito.mockStatic(SystemClock::class.java)
         val looper: Looper = Mockito.mock(Looper::class.java)
         Mockito.`when`(Looper.getMainLooper()).thenReturn(looper)
 
-        // Mock SystemClock's static method
-        PowerMockito.mockStatic(SystemClock::class.java)
         Mockito.`when`(SystemClock.elapsedRealtime()).thenReturn(123456789L)
         executor = Executors.newSingleThreadExecutor()
+    }
+
+    @After
+    fun tearDown() {
+        systemClockStatic.close()
+        looperStatic.close()
     }
 
     @Test
@@ -77,9 +80,9 @@ class MParticleTest {
         Assert.assertFalse(
             mp.Identity().currentUser!!.setUserAttribute(String(CharArray(257)), ""),
         )
-        val listCaptor =
+        val valueCaptor =
             ArgumentCaptor.forClass(
-                MutableList::class.java,
+                Any::class.java,
             )
         val stringCaptor =
             ArgumentCaptor.forClass(
@@ -103,12 +106,12 @@ class MParticleTest {
         )
         Mockito.verify(mp.mMessageManager, Mockito.times(2)).setUserAttribute(
             stringCaptor.capture(),
-            listCaptor.capture(),
+            valueCaptor.capture(),
             longCaptor.capture(),
             ArgumentMatchers.eq(false),
         )
         Assert.assertTrue(stringCaptor.value == "test2")
-        var capturedStringList = listCaptor.value
+        var capturedStringList = valueCaptor.value as List<*>
         Assert.assertTrue(capturedStringList.size == 1)
         Assert.assertTrue(capturedStringList[0] == "203948")
         Assert.assertTrue(longCaptor.value == 1L)
@@ -121,13 +124,13 @@ class MParticleTest {
         )
         Mockito.verify(mp.mMessageManager, Mockito.times(3)).setUserAttribute(
             stringCaptor.capture(),
-            listCaptor.capture(),
+            valueCaptor.capture(),
             longCaptor.capture(),
             ArgumentMatchers.eq(false),
         )
         Assert.assertTrue(stringCaptor.value == "test3")
         Assert.assertTrue(longCaptor.value == 1L)
-        capturedStringList = listCaptor.value
+        capturedStringList = valueCaptor.value as List<*>
         Assert.assertTrue(capturedStringList == longStringList)
         longStringList.add("too much!")
         Assert.assertFalse(

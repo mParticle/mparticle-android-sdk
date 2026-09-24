@@ -18,11 +18,8 @@ import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.mockito.Mockito
-import org.powermock.modules.junit4.PowerMockRunner
 
-@RunWith(PowerMockRunner::class)
 class MessageHandlerTest {
     private lateinit var mConfigManager: ConfigManager
     private lateinit var handler: MessageHandler
