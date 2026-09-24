@@ -1,0 +1,11 @@
+// The root build.gradle declares `id "mparticle.android.library.publish"`, so the included build
+// that provides it must be visible even though nothing here publishes.
+pluginManagement {
+    includeBuild('build-logic')
+}
+
+// Consumer compatibility fixtures: unpublished modules that compile against the published
+// com.mparticle artifacts in mavenLocal(), from Java and from Kotlin. Kept out of settings.gradle
+// for the same reason the kits are: they must never see the modules in this build. See compat/README.md.
+include ':compat:java-consumer',
+        ':compat:kotlin-consumer'
