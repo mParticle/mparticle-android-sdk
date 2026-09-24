@@ -82,6 +82,20 @@ jobs:
         uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
       - name: "Run Unit Tests"
         run: ./gradlew test
+      - name: "Check the public API dumps"
+        run: ./gradlew apiCheck
+      - name: "Fetch the base branch"
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: git fetch --no-tags --depth=1 origin "$BASE_REF"
+      - name: "Classify public API changes"
+        if: >
+          github.event_name == 'pull_request' &&
+          !contains(github.event.pull_request.labels.*.name, 'api-change-approved')
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: python3 scripts/check_api_dump.py --base "origin/$BASE_REF"
       - name: "Print Android Unit Tests Report"
         uses: asadmansr/android-test-report-action@384cd31388782f4106dc4a1b37eea2ff02e0aad7 #v1.2.0
         if: always()

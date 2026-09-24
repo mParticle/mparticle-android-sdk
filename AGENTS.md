@@ -46,6 +46,10 @@ JDK 17 — `gradle.properties` sets `JAVA_VERSION` and every CI job installs Zul
 `JAVA_HOME` section still tells you to install Java 11; ignore that part of it.
 
 - Core + tooling unit tests — `./gradlew test`
+- Public API dumps — `./gradlew apiCheck` fails when the compiled surface of `android-core` or
+  `android-kit-base` differs from `*/api/*.api`; regenerate with `./gradlew apiDump` after an
+  intentional change and explain the diff in the PR. `scripts/check_api_dump.py --base origin/main`
+  tells you whether a changed class is a frozen contract (see `scripts/api-frozen-internals.txt`).
 - Android lint — `./gradlew lint`; Kotlin lint — `./gradlew ktlintCheck`
 - Instrumented tests — `./gradlew :android-core:cAT :android-kit-base:cAT --stacktrace`, needs an
   API 28 emulator
