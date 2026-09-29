@@ -37,13 +37,6 @@ android {
 
 }
 
-repositories {
-    // REQUIRED:
-    maven {
-        url "https://repo.leanplum.com/"
-    }
-}
-
 dependencies {
 
     // REQUIRED:
