@@ -5,6 +5,12 @@ import com.appsflyer.share.AppsFlyerConsent
 
 class AppsFlyerLib {
     private var consentData: AppsFlyerConsent? = null
+    var startCallCount: Int = 0
+        private set
+
+    fun start() {
+        startCallCount++
+    }
 
     fun setConsentData(consent: AppsFlyerConsent) {
         consentData = consent

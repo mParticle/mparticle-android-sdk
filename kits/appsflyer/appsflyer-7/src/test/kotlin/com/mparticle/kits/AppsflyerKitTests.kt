@@ -3,6 +3,7 @@ package com.mparticle.kits
 import android.app.Activity
 import android.content.Context
 import android.net.Uri
+import android.os.Bundle
 import com.appsflyer.AppsFlyerLib
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
@@ -140,6 +141,61 @@ class AppsflyerKitTests {
             e = ex
         }
         Assert.assertNotNull(e)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testIsManualStart_returnsTrue_whenSettingIsTrue() {
+        val map = HashMap<String?, String?>()
+        map["manualStart"] = "true"
+        kit.configuration =
+            KitConfiguration.createKitConfiguration(JSONObject().put("as", JSONObject(map as Map<*, *>)))
+
+        val method = AppsFlyerKit::class.java.getDeclaredMethod("isManualStart")
+        method.isAccessible = true
+        Assert.assertEquals(true, method.invoke(kit))
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testIsManualStart_returnsFalse_whenSettingIsFalse() {
+        val map = HashMap<String?, String?>()
+        map["manualStart"] = "false"
+        kit.configuration =
+            KitConfiguration.createKitConfiguration(JSONObject().put("as", JSONObject(map as Map<*, *>)))
+
+        val method = AppsFlyerKit::class.java.getDeclaredMethod("isManualStart")
+        method.isAccessible = true
+        Assert.assertEquals(false, method.invoke(kit))
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testIsManualStart_returnsFalse_whenSettingIsAbsent() {
+        val method = AppsFlyerKit::class.java.getDeclaredMethod("isManualStart")
+        method.isAccessible = true
+        Assert.assertEquals(false, method.invoke(kit))
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testOnActivityCreated_manualStartEnabled_doesNotCallAppsFlyerStart() {
+        val map = HashMap<String?, String?>()
+        map["manualStart"] = "true"
+        kit.configuration =
+            KitConfiguration.createKitConfiguration(JSONObject().put("as", JSONObject(map as Map<*, *>)))
+
+        kit.onActivityCreated(mock(Activity::class.java), mock(Bundle::class.java))
+
+        Assert.assertEquals(0, appsflyer.startCallCount)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testOnActivityCreated_manualStartDisabled_callsAppsFlyerStart() {
+        kit.onActivityCreated(mock(Activity::class.java), mock(Bundle::class.java))
+
+        Assert.assertEquals(1, appsflyer.startCallCount)
     }
 
     @Test

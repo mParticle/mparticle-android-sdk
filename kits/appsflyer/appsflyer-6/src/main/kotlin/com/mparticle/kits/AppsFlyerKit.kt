@@ -70,7 +70,9 @@ class AppsFlyerKit :
         }
         val userConsentState = currentUser?.consentState
         setConsent(userConsentState)
-        AppsFlyerLib.getInstance().start(context.applicationContext)
+        if (!isManualStart()) {
+            AppsFlyerLib.getInstance().start(context.applicationContext)
+        }
         AppsFlyerLib.getInstance().setCollectAndroidID(MParticle.isAndroidIdEnabled())
         val integrationAttributes = HashMap<String, String?>(1)
         integrationAttributes[APPSFLYERID_INTEGRATION_KEY] =
@@ -541,7 +543,9 @@ class AppsFlyerKit :
         activity: Activity,
         bundle: Bundle?,
     ): List<ReportingMessage> {
-        instance.start(activity)
+        if (!isManualStart()) {
+            instance.start(activity)
+        }
         return emptyList()
     }
 
@@ -570,6 +574,13 @@ class AppsFlyerKit :
             instance.setSharingFilterForPartners(*partners.toTypedArray())
         }
     }
+
+    /**
+     * Only gates the calls to [AppsFlyerLib.start]. [logEvent] calls are intentionally left
+     * unconditional: AppsFlyer's own SDK caches in-app events locally until `start` is invoked,
+     * then flushes them, so withholding `start` here is sufficient to honor "Require Manual Start".
+     */
+    private fun isManualStart(): Boolean = settings[MANUAL_START].toBoolean()
 
     private fun parseSharingFilterForPartners(json: String?): List<String>? {
         if (json.isNullOrEmpty()) return null
@@ -614,6 +625,7 @@ class AppsFlyerKit :
 
         private const val SHARING_FILTER_FOR_PARTNERS = "sharingFilterForPartners"
         private const val CONSENT_MAPPING = "consentMapping"
+        private const val MANUAL_START = "manualStart"
 
         @Suppress("ktlint:standard:property-naming")
         enum class AppsFlyerConsentValues(

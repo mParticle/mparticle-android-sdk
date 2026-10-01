@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Kits
+
+#### Appsflyer
+
+##### Fixed
+
+- Honor the "Require Manual Start" connection setting on Android: the kit no longer calls AppsFlyer's `start` automatically when manual start is enabled, in both the `appsflyer-6` and `appsflyer-7` kits ([#869](https://github.com/mParticle/mparticle-android-sdk/pull/869))
+
 ## [6.1.3] - 2026-09-24
 
 ### Core

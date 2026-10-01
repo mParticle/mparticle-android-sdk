@@ -1,9 +1,20 @@
 package com.appsflyer
 
+import android.app.Activity
 import android.content.Context
 
 class AppsFlyerLib {
     private var consentData: AppsFlyerConsent? = null
+    var startCallCount: Int = 0
+        private set
+
+    fun start(context: Context?) {
+        startCallCount++
+    }
+
+    fun start(activity: Activity?) {
+        startCallCount++
+    }
 
     fun setConsentData(consent: AppsFlyerConsent) {
         consentData = consent
