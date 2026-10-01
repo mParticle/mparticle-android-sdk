@@ -1,8 +1,8 @@
 # Rokt SDK+ size report fixture
 
 Measures what the Rokt kit, and the `com.rokt:rokt-sdk-plus` umbrella (which adds the payment
-extension), add to a minified release APK. Results are posted to pull requests by
-`.github/workflows/rokt-size-report.yml`.
+extension), add to a minified release APK. Results are posted to pull requests, alongside the
+Core SDK on its own, by the `size-report` job in `.github/workflows/pull-request.yml`.
 
 This is a standalone Gradle build with its own wrapper and AGP, modelled on
 `kits/rokt/rokt/example/example-kotlin`. It has to be: the kit plugin wires kits to module
