@@ -12,16 +12,10 @@ import com.mparticle.networking.MParticleBaseClientImpl
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito
-import org.powermock.api.mockito.PowerMockito
-import org.powermock.core.classloader.annotations.PrepareForTest
-import org.powermock.modules.junit4.PowerMockRunner
 import java.math.BigInteger
-import java.net.URL
 
-@RunWith(PowerMockRunner::class)
 class MParticleApiClientImplTest {
     lateinit var client: MParticleApiClientImpl
     private lateinit var mockConnection: MPConnection
@@ -41,8 +35,8 @@ class MParticleApiClientImplTest {
                 MockContext(),
             )
         client.mDeviceRampNumber = 50
-        val mockUrl = PowerMockito.mock(MPUrl::class.java)
-        mockConnection = PowerMockito.mock(MPConnection::class.java)
+        val mockUrl = Mockito.mock(MPUrl::class.java)
+        mockConnection = Mockito.mock(MPConnection::class.java)
         Mockito.`when`(mockUrl.openConnection()).thenReturn(mockConnection)
         Mockito.`when`(mockConnection.url).thenReturn(mockUrl)
         Mockito.`when`(mockUrl.defaultUrl).thenReturn(mockUrl)
@@ -51,40 +45,40 @@ class MParticleApiClientImplTest {
     }
 
     @Test
-    @PrepareForTest(URL::class, MParticleApiClientImpl::class, MPUtility::class)
     @Throws(
         Exception::class,
     )
     fun testAddMessageSignature() {
         setup()
-        PowerMockito.mockStatic(MPUtility::class.java)
-        Mockito
-            .`when`(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString()))
-            .thenReturn("encoded")
-        val headerCapture =
-            ArgumentCaptor.forClass(
-                String::class.java,
-            )
-        val headerValueCapture =
-            ArgumentCaptor.forClass(
-                String::class.java,
-            )
-        client.addMessageSignature(mockConnection, "this is a sample batch")
-        Mockito
-            .verify(mockConnection, Mockito.times(2))
-            .setRequestProperty(headerCapture.capture(), headerValueCapture.capture())
-        val headerKeys = headerCapture.allValues
-        val headerValues = headerValueCapture.allValues
-        val dateIndex = headerKeys.indexOf("Date")
-        Assert.assertTrue(headerKeys.toString(), dateIndex >= 0)
-        val dateValue = headerValues[dateIndex]
-        Assert.assertNotNull(dateValue)
-        Assert.assertTrue(dateValue.isNotEmpty())
-        val signatureIndex = headerKeys.indexOf("x-mp-signature")
-        Assert.assertTrue(headerValues.toString(), signatureIndex >= 0)
-        val signatureValue = headerValues[signatureIndex]
-        Assert.assertNotNull(signatureValue)
-        Assert.assertTrue(signatureValue.isNotEmpty())
+        Mockito.mockStatic(MPUtility::class.java).use {
+            Mockito
+                .`when`(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn("encoded")
+            val headerCapture =
+                ArgumentCaptor.forClass(
+                    String::class.java,
+                )
+            val headerValueCapture =
+                ArgumentCaptor.forClass(
+                    String::class.java,
+                )
+            client.addMessageSignature(mockConnection, "this is a sample batch")
+            Mockito
+                .verify(mockConnection, Mockito.times(2))
+                .setRequestProperty(headerCapture.capture(), headerValueCapture.capture())
+            val headerKeys = headerCapture.allValues
+            val headerValues = headerValueCapture.allValues
+            val dateIndex = headerKeys.indexOf("Date")
+            Assert.assertTrue(headerKeys.toString(), dateIndex >= 0)
+            val dateValue = headerValues[dateIndex]
+            Assert.assertNotNull(dateValue)
+            Assert.assertTrue(dateValue.isNotEmpty())
+            val signatureIndex = headerKeys.indexOf("x-mp-signature")
+            Assert.assertTrue(headerValues.toString(), signatureIndex >= 0)
+            val signatureValue = headerValues[signatureIndex]
+            Assert.assertNotNull(signatureValue)
+            Assert.assertTrue(signatureValue.isNotEmpty())
+        }
     }
 
     @Test
@@ -108,93 +102,92 @@ class MParticleApiClientImplTest {
     }
 
     @Test
-    @PrepareForTest(URL::class, MParticleApiClientImpl::class, MPUtility::class)
     @Throws(
         Exception::class,
     )
     fun testFetchConfigSuccess() {
         setup()
-        PowerMockito.mockStatic(MPUtility::class.java)
-        Mockito
-            .`when`(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString()))
-            .thenReturn("encoded")
-        Mockito.`when`(mockConnection.responseCode).thenReturn(200)
-        val response = JSONObject()
-        response.put("test", "value")
-        Mockito.`when`(MPUtility.getJsonResponse(mockConnection)).thenReturn(response)
-        val captor =
-            ArgumentCaptor.forClass(
-                JSONObject::class.java,
+        Mockito.mockStatic(MPUtility::class.java).use {
+            Mockito
+                .`when`(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn("encoded")
+            Mockito.`when`(mockConnection.responseCode).thenReturn(200)
+            val response = JSONObject()
+            response.put("test", "value")
+            Mockito.`when`(MPUtility.getJsonResponse(mockConnection)).thenReturn(response)
+            val captor =
+                ArgumentCaptor.forClass(
+                    JSONObject::class.java,
+                )
+            client.fetchConfig()
+            Mockito.verify(configManager)?.updateConfig(
+                captor.capture(),
+                Mockito.nullable(
+                    String::class.java,
+                ),
+                Mockito.nullable(String::class.java),
             )
-        client.fetchConfig()
-        Mockito.verify(configManager)?.updateConfig(
-            captor.capture(),
-            Mockito.nullable(
-                String::class.java,
-            ),
-            Mockito.nullable(String::class.java),
-        )
-        Assert.assertEquals(response, captor.value)
+            Assert.assertEquals(response, captor.value)
+        }
     }
 
     @Test
-    @PrepareForTest(URL::class, MParticleApiClientImpl::class, MPUtility::class)
     @Throws(
         Exception::class,
     )
     fun testFetchConfigFailure() {
         setup()
-        PowerMockito.mockStatic(MPUtility::class.java)
-        Mockito
-            .`when`(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString()))
-            .thenReturn("encoded")
-        Mockito.`when`(mockConnection.responseCode).thenReturn(400)
-        var e: Exception? = null
-        try {
-            client.fetchConfig()
-        } catch (cfe: MPConfigException) {
-            e = cfe
+        Mockito.mockStatic(MPUtility::class.java).use {
+            Mockito
+                .`when`(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn("encoded")
+            Mockito.`when`(mockConnection.responseCode).thenReturn(400)
+            var e: Exception? = null
+            try {
+                client.fetchConfig()
+            } catch (cfe: MPConfigException) {
+                e = cfe
+            }
+            Assert.assertNotNull(e)
         }
-        Assert.assertNotNull(e)
     }
 
     @Test
-    @PrepareForTest(URL::class, MParticleApiClientImpl::class, MPUtility::class)
     @Throws(
         Exception::class,
     )
     fun testConfigDelay() {
         setup()
-        PowerMockito.mockStatic(MPUtility::class.java)
-        Mockito
-            .`when`(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString()))
-            .thenReturn("encoded")
-        Mockito.`when`(mockConnection.responseCode).thenReturn(400)
-        var e: Exception? = null
-        try {
-            client.fetchConfig()
-        } catch (cfe: MPConfigException) {
-            e = cfe
+        Mockito.mockStatic(MPUtility::class.java).use {
+            Mockito
+                .`when`(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn("encoded")
+            Mockito.`when`(mockConnection.responseCode).thenReturn(400)
+            var e: Exception? = null
+            try {
+                client.fetchConfig()
+            } catch (cfe: MPConfigException) {
+                e = cfe
+            }
+            Assert.assertNotNull(e)
+            e = null
+            try {
+                client.fetchConfig()
+            } catch (cfe: MPConfigException) {
+                e = cfe
+            }
+            Assert.assertNull(e)
+            e = null
+            try {
+                client.fetchConfig(true)
+            } catch (cfe: MPConfigException) {
+                e = cfe
+            }
+            Assert.assertNotNull(e)
         }
-        Assert.assertNotNull(e)
-        e = null
-        try {
-            client.fetchConfig()
-        } catch (cfe: MPConfigException) {
-            e = cfe
-        }
-        Assert.assertNull(e)
-        e = null
-        try {
-            client.fetchConfig(true)
-        } catch (cfe: MPConfigException) {
-            e = cfe
-        }
-        Assert.assertNotNull(e)
     }
 
     @Test
-    @PrepareForTest(URL::class, MParticleApiClientImpl::class, MPUtility::class)
     @Throws(
         Exception::class,
     )
@@ -214,96 +207,96 @@ class MParticleApiClientImplTest {
     }
 
     @Test
-    @PrepareForTest(URL::class, MParticleApiClientImpl::class, MPUtility::class)
     @Throws(
         Exception::class,
     )
     fun testMessageBatchWhileThrottled() {
         setup()
-        PowerMockito.mockStatic(MPUtility::class.java)
-        Mockito
-            .`when`(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString()))
-            .thenReturn("encoded")
-        try {
-            client.sendMessageBatch("", configManager.uploadSettings)
-        } catch (e: Exception) {
-            if (e is MPThrottleException) {
-                throw e
+        Mockito.mockStatic(MPUtility::class.java).use {
+            Mockito
+                .`when`(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn("encoded")
+            try {
+                client.sendMessageBatch("", configManager.uploadSettings)
+            } catch (e: Exception) {
+                if (e is MPThrottleException) {
+                    throw e
+                }
             }
+            client.requestHandler.setNextRequestTime(
+                MParticleBaseClientImpl.Endpoint.EVENTS,
+                System.currentTimeMillis() + 1000,
+            )
+            var e: Exception? = null
+            try {
+                client.sendMessageBatch("", configManager.uploadSettings)
+            } catch (cfe: MPThrottleException) {
+                e = cfe
+            }
+            Assert.assertNotNull(e)
         }
-        client.requestHandler.setNextRequestTime(
-            MParticleBaseClientImpl.Endpoint.EVENTS,
-            System.currentTimeMillis() + 1000,
-        )
-        var e: Exception? = null
-        try {
-            client.sendMessageBatch("", configManager.uploadSettings)
-        } catch (cfe: MPThrottleException) {
-            e = cfe
-        }
-        Assert.assertNotNull(e)
     }
 
     @Test
-    @PrepareForTest(URL::class, MParticleApiClientImpl::class, MPUtility::class)
     @Throws(
         Exception::class,
     )
     fun testConfigRequestWhileThrottled() {
         setup()
-        PowerMockito.mockStatic(MPUtility::class.java)
-        // set all endpoints throttled, Config should not be listening to any throttle
-        for (endpoint in MParticleBaseClientImpl.Endpoint.values()) {
-            client.requestHandler.setNextRequestTime(endpoint, System.currentTimeMillis() + 1000)
-        }
-        Mockito.`when`(mockConnection.responseCode).thenReturn(200)
-        val response = JSONObject()
-        response.put("test", "value")
-        Mockito.`when`(MPUtility.getJsonResponse(mockConnection)).thenReturn(response)
-        val captor =
-            ArgumentCaptor.forClass(
-                JSONObject::class.java,
+        Mockito.mockStatic(MPUtility::class.java).use {
+            // set all endpoints throttled, Config should not be listening to any throttle
+            for (endpoint in MParticleBaseClientImpl.Endpoint.values()) {
+                client.requestHandler.setNextRequestTime(endpoint, System.currentTimeMillis() + 1000)
+            }
+            Mockito.`when`(mockConnection.responseCode).thenReturn(200)
+            val response = JSONObject()
+            response.put("test", "value")
+            Mockito.`when`(MPUtility.getJsonResponse(mockConnection)).thenReturn(response)
+            val captor =
+                ArgumentCaptor.forClass(
+                    JSONObject::class.java,
+                )
+            client.fetchConfig()
+            Mockito.verify(configManager)?.updateConfig(
+                captor.capture(),
+                Mockito.nullable(
+                    String::class.java,
+                ),
+                Mockito.nullable(String::class.java),
             )
-        client.fetchConfig()
-        Mockito.verify(configManager)?.updateConfig(
-            captor.capture(),
-            Mockito.nullable(
-                String::class.java,
-            ),
-            Mockito.nullable(String::class.java),
-        )
-        Assert.assertEquals(response, captor.value)
+            Assert.assertEquals(response, captor.value)
+        }
     }
 
     @Test
-    @PrepareForTest(URL::class, MParticleApiClientImpl::class, MPUtility::class)
     @Throws(
         Exception::class,
     )
     fun testAliasRequestWhileThrottled() {
         setup()
-        PowerMockito.mockStatic(MPUtility::class.java)
-        Mockito
-            .`when`(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString()))
-            .thenReturn("encoded")
-        try {
-            client.sendAliasRequest("", configManager.uploadSettings)
-        } catch (e: Exception) {
-            if (e is MPThrottleException) {
-                throw e
+        Mockito.mockStatic(MPUtility::class.java).use {
+            Mockito
+                .`when`(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn("encoded")
+            try {
+                client.sendAliasRequest("", configManager.uploadSettings)
+            } catch (e: Exception) {
+                if (e is MPThrottleException) {
+                    throw e
+                }
             }
+            client.requestHandler.setNextRequestTime(
+                MParticleBaseClientImpl.Endpoint.ALIAS,
+                System.currentTimeMillis() + 1000,
+            )
+            var e: Exception? = null
+            try {
+                client.sendAliasRequest("", configManager.uploadSettings)
+            } catch (cfe: MPThrottleException) {
+                e = cfe
+            }
+            Assert.assertNotNull(e)
         }
-        client.requestHandler.setNextRequestTime(
-            MParticleBaseClientImpl.Endpoint.ALIAS,
-            System.currentTimeMillis() + 1000,
-        )
-        var e: Exception? = null
-        try {
-            client.sendAliasRequest("", configManager.uploadSettings)
-        } catch (cfe: MPThrottleException) {
-            e = cfe
-        }
-        Assert.assertNotNull(e)
     }
 
     /**
@@ -312,76 +305,75 @@ class MParticleApiClientImplTest {
      * @throws Exception
      */
     @Test
-    @PrepareForTest(URL::class, MParticleApiClientImpl::class, MPUtility::class)
     @Throws(
         Exception::class,
     )
     fun testAliasEventsOnSeparateThrottles() {
         setup()
-        PowerMockito.mockStatic(MPUtility::class.java)
-        Mockito
-            .`when`(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString()))
-            .thenReturn("encoded")
-        try {
-            client.sendMessageBatch("", configManager.uploadSettings)
-            client.sendAliasRequest("", configManager.uploadSettings)
-        } catch (e: Exception) {
-            if (e is MPThrottleException) {
-                throw e
+        Mockito.mockStatic(MPUtility::class.java).use {
+            Mockito
+                .`when`(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn("encoded")
+            try {
+                client.sendMessageBatch("", configManager.uploadSettings)
+                client.sendAliasRequest("", configManager.uploadSettings)
+            } catch (e: Exception) {
+                if (e is MPThrottleException) {
+                    throw e
+                }
             }
-        }
 
-        // make sure Events still works when Alias is throttled
-        client.requestHandler.setNextRequestTime(
-            MParticleBaseClientImpl.Endpoint.ALIAS,
-            System.currentTimeMillis() + 1000,
-        )
-        client.requestHandler.setNextRequestTime(
-            MParticleBaseClientImpl.Endpoint.EVENTS,
-            System.currentTimeMillis() - 1000,
-        )
-        var ex: MPThrottleException? = null
-        try {
-            client.sendMessageBatch("", configManager.uploadSettings)
-        } catch (e: Exception) {
-            if (e is MPThrottleException) {
-                throw e
+            // make sure Events still works when Alias is throttled
+            client.requestHandler.setNextRequestTime(
+                MParticleBaseClientImpl.Endpoint.ALIAS,
+                System.currentTimeMillis() + 1000,
+            )
+            client.requestHandler.setNextRequestTime(
+                MParticleBaseClientImpl.Endpoint.EVENTS,
+                System.currentTimeMillis() - 1000,
+            )
+            var ex: MPThrottleException? = null
+            try {
+                client.sendMessageBatch("", configManager.uploadSettings)
+            } catch (e: Exception) {
+                if (e is MPThrottleException) {
+                    throw e
+                }
             }
-        }
-        try {
-            client.sendAliasRequest("", configManager.uploadSettings)
-        } catch (e: MPThrottleException) {
-            ex = e
-        }
-        Assert.assertNotNull(ex)
+            try {
+                client.sendAliasRequest("", configManager.uploadSettings)
+            } catch (e: MPThrottleException) {
+                ex = e
+            }
+            Assert.assertNotNull(ex)
 
-        // make sure Alias still works when Events is throttled
-        client.requestHandler.setNextRequestTime(
-            MParticleBaseClientImpl.Endpoint.ALIAS,
-            System.currentTimeMillis() - 1000,
-        )
-        client.requestHandler.setNextRequestTime(
-            MParticleBaseClientImpl.Endpoint.EVENTS,
-            System.currentTimeMillis() + 1000,
-        )
-        ex = null
-        try {
-            client.sendAliasRequest("", configManager.uploadSettings)
-        } catch (e: Exception) {
-            if (e is MPThrottleException) {
-                throw e
+            // make sure Alias still works when Events is throttled
+            client.requestHandler.setNextRequestTime(
+                MParticleBaseClientImpl.Endpoint.ALIAS,
+                System.currentTimeMillis() - 1000,
+            )
+            client.requestHandler.setNextRequestTime(
+                MParticleBaseClientImpl.Endpoint.EVENTS,
+                System.currentTimeMillis() + 1000,
+            )
+            ex = null
+            try {
+                client.sendAliasRequest("", configManager.uploadSettings)
+            } catch (e: Exception) {
+                if (e is MPThrottleException) {
+                    throw e
+                }
             }
+            try {
+                client.sendMessageBatch("", configManager.uploadSettings)
+            } catch (e: MPThrottleException) {
+                ex = e
+            }
+            Assert.assertNotNull(ex)
         }
-        try {
-            client.sendMessageBatch("", configManager.uploadSettings)
-        } catch (e: MPThrottleException) {
-            ex = e
-        }
-        Assert.assertNotNull(ex)
     }
 
     @LargeTest
-    @PrepareForTest(URL::class, MParticleApiClientImpl::class)
     @Throws(
         Exception::class,
     )

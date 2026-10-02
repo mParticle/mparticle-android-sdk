@@ -15,7 +15,6 @@ import com.mparticle.consent.GDPRConsent
 import com.mparticle.identity.IdentityApi
 import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.CoreCallbacks
-import com.mparticle.internal.MPUtility
 import com.mparticle.internal.SideloadedKit
 import com.mparticle.kits.KitIntegration.ModifyIdentityListener
 import com.mparticle.kits.KitIntegration.UserAttributeListener
@@ -29,41 +28,45 @@ import junit.framework.TestCase.assertEquals
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import org.junit.After
 import org.junit.Assert
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq
+import org.mockito.MockedStatic
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.withSettings
-import org.powermock.api.mockito.PowerMockito
-import org.powermock.core.classloader.annotations.PrepareForTest
-import org.powermock.modules.junit4.PowerMockRunner
 import java.util.Arrays
 import java.util.LinkedList
 import java.util.concurrent.ConcurrentHashMap
 
-@RunWith(PowerMockRunner::class)
-@PrepareForTest(Looper::class, SystemClock::class, MPUtility::class)
 class KitManagerImplTest {
+    private lateinit var looperStatic: MockedStatic<Looper>
+    private lateinit var systemClockStatic: MockedStatic<SystemClock>
     var mparticle: MParticle? = null
     var mockIdentity: IdentityApi? = null
 
     @Before
     fun before() {
-        PowerMockito.mockStatic(Looper::class.java)
-        PowerMockito.mockStatic(SystemClock::class.java)
+        looperStatic = Mockito.mockStatic(Looper::class.java)
+        systemClockStatic = Mockito.mockStatic(SystemClock::class.java)
         mockIdentity = mock(IdentityApi::class.java)
         val instance = MockMParticle()
         instance.setIdentityApi(mockIdentity)
         MParticle.setInstance(instance)
+    }
+
+    @After
+    fun tearDown() {
+        systemClockStatic.close()
+        looperStatic.close()
     }
 
     @Test
