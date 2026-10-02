@@ -1,5 +1,6 @@
 package com.mparticle.kits
 
+import android.graphics.Typeface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -8,6 +9,7 @@ import androidx.compose.ui.Modifier
 import com.rokt.roktsdk.PlacementOptions
 import com.rokt.roktsdk.RoktConfig
 import com.rokt.roktsdk.RoktEvent
+import java.lang.ref.WeakReference
 
 /**
  * Rokt Jetpack Compose placement wrapper with mParticle attribute enrichment.
@@ -18,6 +20,10 @@ import com.rokt.roktsdk.RoktEvent
  * @param location The Rokt placement location.
  * @param modifier Optional Compose modifier for the placement.
  * @param config Optional Rokt SDK configuration.
+ * @param fontTypefaces Optional map of font PostScript names to Typefaces the app already bundles. A Typeface is
+ * used only when its PostScript name is also in `RoktOptions.fontPostScriptNames` passed to `MParticle.start`.
+ * Typefaces are shared with other placements and overlays. Keep the Typefaces reachable for as long as placements
+ * can render; only weak references are held.
  * @param onEvent Callback for native Rokt SDK placement events.
  */
 @Composable
@@ -29,6 +35,7 @@ fun RoktLayout(
     location: String,
     modifier: Modifier = Modifier,
     config: RoktConfig? = null,
+    fontTypefaces: Map<String, WeakReference<Typeface>>? = null,
     onEvent: (RoktEvent) -> Unit = {},
 ) {
     var placementOptions: PlacementOptions? = null
@@ -56,7 +63,30 @@ fun RoktLayout(
             location = location,
             config = config,
             placementOptions = placementOptions,
+            fontTypefaces = fontTypefaces,
             onEvent = onEvent,
         )
     }
 }
+
+@Deprecated("Maintained for binary compatibility.", level = DeprecationLevel.HIDDEN)
+@Composable
+@Suppress("FunctionName")
+fun RoktLayout(
+    sdkTriggered: Boolean,
+    identifier: String,
+    attributes: Map<String, String>,
+    location: String,
+    modifier: Modifier = Modifier,
+    config: RoktConfig? = null,
+    onEvent: (RoktEvent) -> Unit = {},
+) = RoktLayout(
+    sdkTriggered = sdkTriggered,
+    identifier = identifier,
+    attributes = attributes,
+    location = location,
+    modifier = modifier,
+    config = config,
+    fontTypefaces = null,
+    onEvent = onEvent,
+)

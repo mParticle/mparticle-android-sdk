@@ -107,6 +107,18 @@ RoktLayout(
 )
 ```
 
+To render fonts your app already bundles, pass their PostScript names in `RoktOptions(fontPostScriptNames = ...)` to `MParticle.start`, then pass the `Typeface`s to `RoktLayout`. Keep the `Typeface`s reachable while placements can render; only weak references are held.
+
+```kotlin
+RoktLayout(
+    sdkTriggered = true,
+    identifier = "RoktExperience",
+    attributes = attributes,
+    location = "RoktEmbedded1",
+    fontTypefaces = mapOf("BrandSans-Bold" to WeakReference(brandSansBold)),
+)
+```
+
 ## Documentation
 
 [Rokt integration](https://docs.rokt.com/developers/integration-guides/android/overview)
