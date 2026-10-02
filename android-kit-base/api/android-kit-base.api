@@ -1,0 +1,492 @@
+public final class com/mparticle/kits/CommerceEventUtils {
+	public static fun expand (Lcom/mparticle/commerce/CommerceEvent;)Ljava/util/List;
+	public static fun expandProductAction (Lcom/mparticle/commerce/CommerceEvent;)Ljava/util/List;
+	public static fun expandProductImpression (Lcom/mparticle/commerce/CommerceEvent;)Ljava/util/List;
+	public static fun expandPromotionAction (Lcom/mparticle/commerce/CommerceEvent;)Ljava/util/List;
+	public static fun extractActionAttributes (Lcom/mparticle/commerce/CommerceEvent;Lcom/mparticle/kits/CommerceEventUtils$OnAttributeExtracted;)V
+	public static fun extractActionAttributes (Lcom/mparticle/commerce/CommerceEvent;Ljava/util/Map;)V
+	public static fun extractProductAttributes (Lcom/mparticle/commerce/Product;Lcom/mparticle/kits/CommerceEventUtils$OnAttributeExtracted;)V
+	public static fun extractProductAttributes (Lcom/mparticle/commerce/Product;Ljava/util/Map;)V
+	public static fun extractProductFields (Lcom/mparticle/commerce/Product;Lcom/mparticle/kits/CommerceEventUtils$OnAttributeExtracted;)V
+	public static fun extractProductFields (Lcom/mparticle/commerce/Product;Ljava/util/Map;)V
+	public static fun extractPromotionAttributes (Lcom/mparticle/commerce/Promotion;Lcom/mparticle/kits/CommerceEventUtils$OnAttributeExtracted;)V
+	public static fun extractPromotionAttributes (Lcom/mparticle/commerce/Promotion;Ljava/util/Map;)V
+	public static fun extractTransactionAttributes (Lcom/mparticle/commerce/CommerceEvent;Lcom/mparticle/kits/CommerceEventUtils$OnAttributeExtracted;)V
+	public static fun extractTransactionAttributes (Lcom/mparticle/commerce/CommerceEvent;Ljava/util/Map;)Ljava/util/Map;
+	public static fun getEventType (Lcom/mparticle/commerce/CommerceEvent;)I
+	public static fun getEventTypeString (Lcom/mparticle/commerce/CommerceEvent;)Ljava/lang/String;
+}
+
+public abstract interface class com/mparticle/kits/CommerceEventUtils$Constants {
+	public static final field ATT_ACTION_CHECKOUT_OPTIONS Ljava/lang/String;
+	public static final field ATT_ACTION_CHECKOUT_STEP Ljava/lang/String;
+	public static final field ATT_ACTION_CURRENCY_CODE Ljava/lang/String;
+	public static final field ATT_ACTION_PRODUCT_ACTION_LIST Ljava/lang/String;
+	public static final field ATT_ACTION_PRODUCT_LIST_SOURCE Ljava/lang/String;
+	public static final field ATT_AFFILIATION Ljava/lang/String;
+	public static final field ATT_PRODUCT_BRAND Ljava/lang/String;
+	public static final field ATT_PRODUCT_CATEGORY Ljava/lang/String;
+	public static final field ATT_PRODUCT_COUPON_CODE Ljava/lang/String;
+	public static final field ATT_PRODUCT_ID Ljava/lang/String;
+	public static final field ATT_PRODUCT_NAME Ljava/lang/String;
+	public static final field ATT_PRODUCT_POSITION Ljava/lang/String;
+	public static final field ATT_PRODUCT_PRICE Ljava/lang/String;
+	public static final field ATT_PRODUCT_QUANTITY Ljava/lang/String;
+	public static final field ATT_PRODUCT_TOTAL_AMOUNT Ljava/lang/String;
+	public static final field ATT_PRODUCT_VARIANT Ljava/lang/String;
+	public static final field ATT_PROMOTION_CREATIVE Ljava/lang/String;
+	public static final field ATT_PROMOTION_ID Ljava/lang/String;
+	public static final field ATT_PROMOTION_NAME Ljava/lang/String;
+	public static final field ATT_PROMOTION_POSITION Ljava/lang/String;
+	public static final field ATT_SCREEN_NAME Ljava/lang/String;
+	public static final field ATT_SHIPPING Ljava/lang/String;
+	public static final field ATT_TAX Ljava/lang/String;
+	public static final field ATT_TOTAL Ljava/lang/String;
+	public static final field ATT_TRANSACTION_COUPON_CODE Ljava/lang/String;
+	public static final field ATT_TRANSACTION_ID Ljava/lang/String;
+	public static final field DEFAULT_CURRENCY_CODE Ljava/lang/String;
+	public static final field EVENT_TYPE_ADD_TO_CART I
+	public static final field EVENT_TYPE_ADD_TO_WISHLIST I
+	public static final field EVENT_TYPE_CHECKOUT I
+	public static final field EVENT_TYPE_CHECKOUT_OPTION I
+	public static final field EVENT_TYPE_CLICK I
+	public static final field EVENT_TYPE_IMPRESSION I
+	public static final field EVENT_TYPE_PROMOTION_CLICK I
+	public static final field EVENT_TYPE_PROMOTION_VIEW I
+	public static final field EVENT_TYPE_PURCHASE I
+	public static final field EVENT_TYPE_REFUND I
+	public static final field EVENT_TYPE_REMOVE_FROM_CART I
+	public static final field EVENT_TYPE_REMOVE_FROM_WISHLIST I
+	public static final field EVENT_TYPE_STRING_ADD_TO_CART Ljava/lang/String;
+	public static final field EVENT_TYPE_STRING_ADD_TO_WISHLIST Ljava/lang/String;
+	public static final field EVENT_TYPE_STRING_CHECKOUT Ljava/lang/String;
+	public static final field EVENT_TYPE_STRING_CHECKOUT_OPTION Ljava/lang/String;
+	public static final field EVENT_TYPE_STRING_CLICK Ljava/lang/String;
+	public static final field EVENT_TYPE_STRING_IMPRESSION Ljava/lang/String;
+	public static final field EVENT_TYPE_STRING_PROMOTION_CLICK Ljava/lang/String;
+	public static final field EVENT_TYPE_STRING_PROMOTION_VIEW Ljava/lang/String;
+	public static final field EVENT_TYPE_STRING_PURCHASE Ljava/lang/String;
+	public static final field EVENT_TYPE_STRING_REFUND Ljava/lang/String;
+	public static final field EVENT_TYPE_STRING_REMOVE_FROM_CART Ljava/lang/String;
+	public static final field EVENT_TYPE_STRING_REMOVE_FROM_WISHLIST Ljava/lang/String;
+	public static final field EVENT_TYPE_STRING_UNKNOWN Ljava/lang/String;
+	public static final field EVENT_TYPE_STRING_VIEW_DETAIL Ljava/lang/String;
+	public static final field EVENT_TYPE_VIEW_DETAIL I
+	public static final field RESERVED_KEY_LTV Ljava/lang/String;
+}
+
+public abstract interface class com/mparticle/kits/CommerceEventUtils$OnAttributeExtracted {
+	public abstract fun onAttributeExtracted (Ljava/lang/String;D)V
+	public abstract fun onAttributeExtracted (Ljava/lang/String;I)V
+	public abstract fun onAttributeExtracted (Ljava/lang/String;Ljava/lang/String;)V
+	public abstract fun onAttributeExtracted (Ljava/util/Map;)V
+}
+
+public class com/mparticle/kits/FilteredIdentityApiRequest {
+	public fun getNewIdentities ()Ljava/util/Map;
+	public fun getUserIdentities ()Ljava/util/Map;
+}
+
+public class com/mparticle/kits/FilteredMParticleUser : com/mparticle/identity/MParticleUser {
+	public fun getConsentState ()Lcom/mparticle/consent/ConsentState;
+	public fun getFirstSeenTime ()J
+	public fun getId ()J
+	public fun getLastSeenTime ()J
+	public fun getUserAttributes ()Ljava/util/Map;
+	public fun getUserAttributes (Lcom/mparticle/UserAttributeListenerType;)Ljava/util/Map;
+	public fun getUserAudiences ()Lcom/mparticle/audience/AudienceTask;
+	public fun getUserIdentities ()Ljava/util/Map;
+	public fun incrementUserAttribute (Ljava/lang/String;Ljava/lang/Number;)Z
+	public fun isLoggedIn ()Z
+	public fun removeUserAttribute (Ljava/lang/String;)Z
+	public fun setConsentState (Lcom/mparticle/consent/ConsentState;)V
+	public fun setUserAttribute (Ljava/lang/String;Ljava/lang/Object;)Z
+	public fun setUserAttributeList (Ljava/lang/String;Ljava/lang/Object;)Z
+	public fun setUserAttributes (Ljava/util/Map;)Z
+	public fun setUserTag (Ljava/lang/String;)Z
+}
+
+public class com/mparticle/kits/KitConfiguration {
+	protected field consentForwardingIncludeMatches Z
+	protected field mAttributeAddToUser Ljava/util/Map;
+	protected field mAttributeFilters Landroid/util/SparseBooleanArray;
+	protected field mAttributeRemoveFromUser Ljava/util/Map;
+	protected field mAttributeSingleItemUser Ljava/util/Map;
+	protected field mCommerceAttributeFilters Landroid/util/SparseBooleanArray;
+	protected field mCommerceEntityFilters Landroid/util/SparseBooleanArray;
+	protected field mConsentForwardingRules Ljava/util/Map;
+	protected field mExcludeAnonymousUsers Z
+	protected field mNameFilters Landroid/util/SparseBooleanArray;
+	protected field mScreenAttributeFilters Landroid/util/SparseBooleanArray;
+	protected field mScreenNameFilters Landroid/util/SparseBooleanArray;
+	protected field mTypeFilters Landroid/util/SparseBooleanArray;
+	protected field mUserAttributeFilters Landroid/util/SparseBooleanArray;
+	protected field mUserIdentityFilters Landroid/util/SparseBooleanArray;
+	public fun <init> ()V
+	public fun applySideloadedKits (Lcom/mparticle/kits/MPSideloadedFilters;)Lcom/mparticle/kits/KitConfiguration;
+	public static fun convertSparseArrayToJsonObject (Landroid/util/SparseBooleanArray;)Lorg/json/JSONObject;
+	public fun convertToJsonObject ()Lorg/json/JSONObject;
+	protected fun convertToSparseArray (Lorg/json/JSONObject;)Landroid/util/SparseBooleanArray;
+	protected fun convertToSparseMap (Lorg/json/JSONObject;)Ljava/util/Map;
+	public static fun createKitConfiguration (Lorg/json/JSONObject;)Lcom/mparticle/kits/KitConfiguration;
+	public static final fun filterAttributes (Landroid/util/SparseBooleanArray;Ljava/util/Map;)Ljava/util/Map;
+	protected fun filterCommerceEvent (Lcom/mparticle/commerce/CommerceEvent;)Lcom/mparticle/commerce/CommerceEvent;
+	public final fun filterEventAttributes (Lcom/mparticle/MPEvent;)Ljava/util/Map;
+	public static final fun filterEventAttributes (Lcom/mparticle/MParticle$EventType;Ljava/lang/String;Landroid/util/SparseBooleanArray;Ljava/util/Map;)Ljava/util/Map;
+	public final fun filterScreenAttributes (Lcom/mparticle/MParticle$EventType;Ljava/lang/String;Ljava/util/Map;)Ljava/util/Map;
+	public fun getAvfHashedAttribute ()I
+	public fun getAvfHashedValue ()I
+	public fun getCommerceAttributeFilters ()Landroid/util/SparseBooleanArray;
+	public fun getCommerceEntityAttributeFilters ()Ljava/util/Map;
+	public fun getCommerceEntityFilters ()Landroid/util/SparseBooleanArray;
+	public final fun getCustomMappingList ()Ljava/util/List;
+	public final fun getDefaultCommerceCustomMapping ()Lcom/mparticle/kits/mappings/CustomMapping;
+	public final fun getDefaultEventProjection ()Lcom/mparticle/kits/mappings/CustomMapping;
+	public final fun getDefaultScreenCustomMapping ()Lcom/mparticle/kits/mappings/CustomMapping;
+	public fun getEventAttributeFilters ()Landroid/util/SparseBooleanArray;
+	public fun getEventAttributesAddToUser ()Ljava/util/Map;
+	public fun getEventAttributesRemoveFromUser ()Ljava/util/Map;
+	public fun getEventAttributesSingleItemUser ()Ljava/util/Map;
+	public fun getEventNameFilters ()Landroid/util/SparseBooleanArray;
+	public fun getEventTypeFilters ()Landroid/util/SparseBooleanArray;
+	public fun getHashedEmailUserIdentityType ()Ljava/lang/String;
+	public fun getHighBracket ()I
+	public fun getKitId ()I
+	public fun getLowBracket ()I
+	public fun getPlacementAttributesMapping ()Lorg/json/JSONArray;
+	public fun getScreenAttributeFilters ()Landroid/util/SparseBooleanArray;
+	public fun getScreenNameFilters ()Landroid/util/SparseBooleanArray;
+	public fun getSettings ()Ljava/util/Map;
+	public fun getUserAttributeFilters ()Landroid/util/SparseBooleanArray;
+	public fun getUserIdentityFilters ()Landroid/util/SparseBooleanArray;
+	public fun getValueFromSideloadedFilterToMap (Ljava/util/Map;Ljava/lang/String;)Ljava/util/Map;
+	public fun getValueFromSideloadedFilterToSparseArray (Ljava/util/Map;Ljava/lang/String;)Landroid/util/SparseBooleanArray;
+	public fun isAttributeValueFilteringActive ()Z
+	public fun isAvfShouldIncludeMatches ()Z
+	public fun isConsentStateFilterMatch (Lcom/mparticle/consent/ConsentState;)Z
+	public fun parseConfiguration (Lorg/json/JSONObject;)Lcom/mparticle/kits/KitConfiguration;
+	public fun passesBracketing (I)Z
+	public fun shouldExcludeUser (Lcom/mparticle/identity/MParticleUser;)Z
+	public static final fun shouldForwardAttribute (Landroid/util/SparseBooleanArray;Ljava/lang/String;)Z
+	public fun shouldHonorOptOut ()Z
+	protected fun shouldLogEvent (Lcom/mparticle/MPEvent;)Z
+	public fun shouldLogScreen (Ljava/lang/String;)Z
+}
+
+public abstract class com/mparticle/kits/KitIntegration {
+	public fun <init> ()V
+	protected final fun clearIntegrationAttributes ()V
+	public fun executeNetworkRequest (Ljava/lang/Runnable;)V
+	public fun getConfiguration ()Lcom/mparticle/kits/KitConfiguration;
+	public final fun getContext ()Landroid/content/Context;
+	public final fun getCurrentActivity ()Ljava/lang/ref/WeakReference;
+	public final fun getCurrentUser ()Lcom/mparticle/identity/MParticleUser;
+	public fun getInstance ()Ljava/lang/Object;
+	protected final fun getIntegrationAttributes ()Ljava/util/Map;
+	public fun getJsonConfig ()Lorg/json/JSONObject;
+	protected final fun getKitManager ()Lcom/mparticle/kits/KitManagerImpl;
+	protected final fun getKitPreferences ()Landroid/content/SharedPreferences;
+	public abstract fun getName ()Ljava/lang/String;
+	public final fun getSettings ()Ljava/util/Map;
+	public fun getSurveyUrl (Ljava/util/Map;Ljava/util/Map;)Landroid/net/Uri;
+	public final fun getUser (Ljava/lang/Long;)Lcom/mparticle/identity/MParticleUser;
+	protected final fun isBackgrounded ()Z
+	public fun isDisabled ()Z
+	public fun isDisabled (Z)Z
+	public fun logBaseEvent (Lcom/mparticle/BaseEvent;)Ljava/util/List;
+	public fun logEvent (Lcom/mparticle/MPEvent;)Ljava/util/List;
+	protected abstract fun onKitCreate (Ljava/util/Map;Landroid/content/Context;)Ljava/util/List;
+	protected fun onKitDestroy ()V
+	public fun onSettingsUpdated (Ljava/util/Map;)V
+	protected fun reset ()V
+	public final fun setConfiguration (Lcom/mparticle/kits/KitConfiguration;)Lcom/mparticle/kits/KitIntegration;
+	public fun setInstallReferrer (Landroid/content/Intent;)V
+	protected final fun setIntegrationAttributes (Ljava/util/Map;)V
+	public final fun setKitManager (Lcom/mparticle/kits/KitManagerImpl;)Lcom/mparticle/kits/KitIntegration;
+	public fun setLocation (Landroid/location/Location;)V
+	public abstract fun setOptOut (Z)Ljava/util/List;
+}
+
+public abstract interface class com/mparticle/kits/KitIntegration$ActivityListener {
+	public abstract fun onActivityCreated (Landroid/app/Activity;Landroid/os/Bundle;)Ljava/util/List;
+	public abstract fun onActivityDestroyed (Landroid/app/Activity;)Ljava/util/List;
+	public abstract fun onActivityPaused (Landroid/app/Activity;)Ljava/util/List;
+	public abstract fun onActivityResumed (Landroid/app/Activity;)Ljava/util/List;
+	public abstract fun onActivitySaveInstanceState (Landroid/app/Activity;Landroid/os/Bundle;)Ljava/util/List;
+	public abstract fun onActivityStarted (Landroid/app/Activity;)Ljava/util/List;
+	public abstract fun onActivityStopped (Landroid/app/Activity;)Ljava/util/List;
+}
+
+public abstract interface class com/mparticle/kits/KitIntegration$ApplicationStateListener {
+	public abstract fun onApplicationBackground ()V
+	public abstract fun onApplicationForeground ()V
+}
+
+public abstract interface class com/mparticle/kits/KitIntegration$BatchListener {
+	public abstract fun logBatch (Lorg/json/JSONObject;)Ljava/util/List;
+}
+
+public abstract interface class com/mparticle/kits/KitIntegration$CommerceListener {
+	public abstract fun logEvent (Lcom/mparticle/commerce/CommerceEvent;)Ljava/util/List;
+	public abstract fun logLtvIncrease (Ljava/math/BigDecimal;Ljava/math/BigDecimal;Ljava/lang/String;Ljava/util/Map;)Ljava/util/List;
+}
+
+public abstract interface class com/mparticle/kits/KitIntegration$EventListener {
+	public abstract fun leaveBreadcrumb (Ljava/lang/String;)Ljava/util/List;
+	public abstract fun logError (Ljava/lang/String;Ljava/util/Map;)Ljava/util/List;
+	public abstract fun logEvent (Lcom/mparticle/MPEvent;)Ljava/util/List;
+	public abstract fun logException (Ljava/lang/Exception;Ljava/util/Map;Ljava/lang/String;)Ljava/util/List;
+	public abstract fun logScreen (Ljava/lang/String;Ljava/util/Map;)Ljava/util/List;
+}
+
+public abstract interface class com/mparticle/kits/KitIntegration$IdentityListener {
+	public abstract fun onIdentifyCompleted (Lcom/mparticle/identity/MParticleUser;Lcom/mparticle/kits/FilteredIdentityApiRequest;)V
+	public abstract fun onLoginCompleted (Lcom/mparticle/identity/MParticleUser;Lcom/mparticle/kits/FilteredIdentityApiRequest;)V
+	public abstract fun onLogoutCompleted (Lcom/mparticle/identity/MParticleUser;Lcom/mparticle/kits/FilteredIdentityApiRequest;)V
+	public abstract fun onModifyCompleted (Lcom/mparticle/identity/MParticleUser;Lcom/mparticle/kits/FilteredIdentityApiRequest;)V
+	public abstract fun onUserIdentified (Lcom/mparticle/identity/MParticleUser;)V
+}
+
+public abstract interface class com/mparticle/kits/KitIntegration$LogoutListener {
+	public abstract fun logout ()Ljava/util/List;
+}
+
+public abstract interface class com/mparticle/kits/KitIntegration$ModifyIdentityListener {
+	public abstract fun removeUserIdentity (Lcom/mparticle/MParticle$IdentityType;)V
+	public abstract fun setUserIdentity (Lcom/mparticle/MParticle$IdentityType;Ljava/lang/String;)V
+}
+
+public abstract interface class com/mparticle/kits/KitIntegration$PushListener {
+	public abstract fun onPushMessageReceived (Landroid/content/Context;Landroid/content/Intent;)V
+	public abstract fun onPushRegistration (Ljava/lang/String;Ljava/lang/String;)Z
+	public abstract fun willHandlePushMessage (Landroid/content/Intent;)Z
+}
+
+public abstract interface class com/mparticle/kits/KitIntegration$RoktListener {
+	public abstract fun setWrapperSdkVersion (Lcom/mparticle/WrapperSdkVersion;)V
+}
+
+public abstract interface class com/mparticle/kits/KitIntegration$SessionListener {
+	public abstract fun onSessionEnd ()Ljava/util/List;
+	public abstract fun onSessionStart ()Ljava/util/List;
+}
+
+public abstract interface class com/mparticle/kits/KitIntegration$UserAttributeListener {
+	public abstract fun getConfiguration ()Lcom/mparticle/kits/KitConfiguration;
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun onConsentStateUpdated (Lcom/mparticle/consent/ConsentState;Lcom/mparticle/consent/ConsentState;)V
+	public abstract fun onIncrementUserAttribute (Ljava/lang/String;Ljava/lang/Number;Ljava/lang/String;)V
+	public abstract fun onRemoveUserAttribute (Ljava/lang/String;)V
+	public abstract fun onSetAllUserAttributes (Ljava/util/Map;Ljava/util/Map;)V
+	public abstract fun onSetUserAttribute (Ljava/lang/String;Ljava/lang/Object;)V
+	public abstract fun onSetUserAttributeList (Ljava/lang/String;Ljava/util/List;)V
+	public abstract fun onSetUserTag (Ljava/lang/String;)V
+	public abstract fun supportsAttributeLists ()Z
+}
+
+public class com/mparticle/kits/KitIntegrationFactory {
+	public fun <init> (Lcom/mparticle/MParticleOptions;)V
+	public fun addSupportedKit (ILjava/lang/Class;)V
+	public fun createInstance (Lcom/mparticle/kits/KitManagerImpl;I)Lcom/mparticle/kits/KitIntegration;
+	public fun createInstance (Lcom/mparticle/kits/KitManagerImpl;Lcom/mparticle/kits/KitConfiguration;)Lcom/mparticle/kits/KitIntegration;
+	public fun getSupportedKits ()Ljava/util/Set;
+	public fun isSupported (I)Z
+}
+
+public class com/mparticle/kits/KitManagerImpl : com/mparticle/AttributionListener, com/mparticle/identity/IdentityStateListener, com/mparticle/internal/KitManager {
+	protected final field mCoreCallbacks Lcom/mparticle/internal/CoreCallbacks;
+	public fun <init> (Landroid/content/Context;Lcom/mparticle/internal/ReportingManager;Lcom/mparticle/internal/CoreCallbacks;Lcom/mparticle/MParticleOptions;)V
+	public fun addKitsLoadedListener (Lcom/mparticle/kits/KitManagerImpl$KitsLoadedListener;)V
+	protected fun configureKits (Ljava/util/List;)V
+	protected fun createKitConfiguration (Lorg/json/JSONObject;)Lcom/mparticle/kits/KitConfiguration;
+	public fun getAttributionResults ()Ljava/util/Map;
+	public fun getContext ()Landroid/content/Context;
+	public fun getCurrentActivity ()Ljava/lang/ref/WeakReference;
+	public fun getKitInstance (I)Ljava/lang/Object;
+	public fun getKitStatus ()Ljava/util/Map;
+	public fun getLaunchAction ()Ljava/lang/String;
+	public fun getLaunchUri ()Landroid/net/Uri;
+	public fun getPushInstanceId ()Ljava/lang/String;
+	public fun getPushSenderId ()Ljava/lang/String;
+	public fun getRoktOptions ()Lcom/mparticle/rokt/RoktOptions;
+	public fun getSupportedKits ()Ljava/util/Set;
+	public fun getSurveyUrl (ILjava/util/Map;Ljava/util/Map;)Landroid/net/Uri;
+	public fun getUserBucket ()I
+	public fun incrementUserAttribute (Ljava/lang/String;Ljava/lang/Number;Ljava/lang/String;J)V
+	public fun installReferrerUpdated ()V
+	public fun isBackgrounded ()Z
+	public fun isEnabled ()Z
+	public fun isKitActive (I)Z
+	public fun isOptedOut ()Z
+	public fun isPushEnabled ()Z
+	public fun leaveBreadcrumb (Ljava/lang/String;)V
+	public fun logBatch (Ljava/lang/String;)V
+	protected fun logCommerceEvent (Lcom/mparticle/commerce/CommerceEvent;)V
+	public fun logError (Ljava/lang/String;Ljava/util/Map;)V
+	public fun logEvent (Lcom/mparticle/BaseEvent;)V
+	public fun logException (Ljava/lang/Exception;Ljava/util/Map;Ljava/lang/String;)V
+	protected fun logMPEvent (Lcom/mparticle/MPEvent;)V
+	public fun logNetworkPerformance (Ljava/lang/String;JLjava/lang/String;JJJLjava/lang/String;I)V
+	public fun logScreen (Lcom/mparticle/MPEvent;)V
+	public fun logout ()V
+	public fun onActivityCreated (Landroid/app/Activity;Landroid/os/Bundle;)V
+	public fun onActivityDestroyed (Landroid/app/Activity;)V
+	public fun onActivityPaused (Landroid/app/Activity;)V
+	public fun onActivityResumed (Landroid/app/Activity;)V
+	public fun onActivitySaveInstanceState (Landroid/app/Activity;Landroid/os/Bundle;)V
+	public fun onActivityStarted (Landroid/app/Activity;)V
+	public fun onActivityStopped (Landroid/app/Activity;)V
+	public fun onApplicationBackground ()V
+	public fun onApplicationForeground ()V
+	public fun onConsentStateUpdated (Lcom/mparticle/consent/ConsentState;Lcom/mparticle/consent/ConsentState;J)V
+	public fun onError (Lcom/mparticle/AttributionError;)V
+	public fun onIdentifyCompleted (Lcom/mparticle/identity/MParticleUser;Lcom/mparticle/identity/IdentityApiRequest;)V
+	public fun onLoginCompleted (Lcom/mparticle/identity/MParticleUser;Lcom/mparticle/identity/IdentityApiRequest;)V
+	public fun onLogoutCompleted (Lcom/mparticle/identity/MParticleUser;Lcom/mparticle/identity/IdentityApiRequest;)V
+	public fun onMessageReceived (Landroid/content/Context;Landroid/content/Intent;)Z
+	public fun onModifyCompleted (Lcom/mparticle/identity/MParticleUser;Lcom/mparticle/identity/IdentityApiRequest;)V
+	public fun onPushRegistration (Ljava/lang/String;Ljava/lang/String;)Z
+	public fun onResult (Lcom/mparticle/AttributionResult;)V
+	public fun onSessionEnd ()V
+	public fun onSessionStart ()V
+	public fun onUserAttributesReceived (Ljava/util/Map;Ljava/util/Map;Ljava/lang/Long;)V
+	public fun onUserIdentified (Lcom/mparticle/identity/MParticleUser;Lcom/mparticle/identity/MParticleUser;)V
+	public fun reloadKits ()V
+	public fun removeUserAttribute (Ljava/lang/String;J)V
+	public fun removeUserIdentity (Lcom/mparticle/MParticle$IdentityType;)V
+	public fun reset ()V
+	public fun runOnKitThread (Ljava/lang/Runnable;)V
+	public fun runOnMainThread (Ljava/lang/Runnable;)V
+	public fun setKitFactory (Lcom/mparticle/kits/KitIntegrationFactory;)V
+	public fun setKitOptions (Lcom/mparticle/kits/KitOptions;)V
+	public fun setLocation (Landroid/location/Location;)V
+	public fun setOptOut (Z)V
+	public fun setUserAttribute (Ljava/lang/String;Ljava/lang/String;J)V
+	public fun setUserAttributeList (Ljava/lang/String;Ljava/util/List;J)V
+	public fun setUserIdentity (Ljava/lang/String;Lcom/mparticle/MParticle$IdentityType;)V
+	public fun setUserTag (Ljava/lang/String;J)V
+	public fun setWrapperSdkVersion (Lcom/mparticle/WrapperSdkVersion;)V
+	public fun updateDataplan (Lcom/mparticle/MParticleOptions$DataplanOptions;)V
+	public fun updateKits (Lorg/json/JSONArray;)Lcom/mparticle/internal/KitsLoadedCallback;
+}
+
+public class com/mparticle/kits/KitOptions : com/mparticle/Configuration {
+	public fun <init> ()V
+	public fun <init> (Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun addKit (ILjava/lang/Class;)Lcom/mparticle/kits/KitOptions;
+	public fun apply (Lcom/mparticle/kits/KitManagerImpl;)V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun configures ()Ljava/lang/Class;
+	public final fun getKits ()Ljava/util/Map;
+}
+
+public final class com/mparticle/kits/KitUtils {
+	public fun <init> ()V
+	public static fun getAndroidID (Landroid/content/Context;)Ljava/lang/String;
+	public static fun hashFnv1a ([B)Ljava/math/BigInteger;
+	public static fun hashForFiltering (Ljava/lang/String;)I
+	public static fun isEmpty (Ljava/lang/CharSequence;)Z
+	public static fun isServiceAvailable (Landroid/content/Context;Ljava/lang/Class;)Z
+	public static fun join (Ljava/util/List;)Ljava/lang/String;
+	public static fun join (Ljava/util/List;Ljava/lang/String;)Ljava/lang/String;
+	public static fun parseBooleanSetting (Ljava/util/Map;Ljava/lang/String;)Z
+	public static fun parseBooleanSetting (Ljava/util/Map;Ljava/lang/String;Z)Z
+	public static fun sanitizeAttributeKey (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class com/mparticle/kits/MPSideloadedFilters {
+	public fun <init> ()V
+	public final fun getFilters ()Ljava/util/Map;
+}
+
+public abstract class com/mparticle/kits/MPSideloadedKit : com/mparticle/kits/KitIntegration, com/mparticle/internal/SideloadedKit {
+	public static final field Companion Lcom/mparticle/kits/MPSideloadedKit$Companion;
+	public static final field MIN_SIDELOADED_KIT I
+	public fun <init> (I)V
+	public final fun addFilters (Lcom/mparticle/kits/MPSideloadedFilters;)Lcom/mparticle/kits/MPSideloadedKit;
+	public fun getJsonConfig ()Lorg/json/JSONObject;
+	public final fun getKitId ()I
+	public fun getName ()Ljava/lang/String;
+	public fun kitId ()I
+	protected fun onKitCreate (Ljava/util/Map;Landroid/content/Context;)Ljava/util/List;
+	public fun setOptOut (Z)Ljava/util/List;
+}
+
+public final class com/mparticle/kits/MPSideloadedKit$Companion {
+}
+
+public class com/mparticle/kits/ReportingMessage : com/mparticle/internal/JsonReportingMessage {
+	public fun <init> (Lcom/mparticle/kits/KitIntegration;Ljava/lang/String;JLjava/util/Map;)V
+	public fun addProjectionReport (Lcom/mparticle/kits/ReportingMessage$ProjectionReport;)V
+	public static fun fromEvent (Lcom/mparticle/kits/KitIntegration;Lcom/mparticle/BaseEvent;)Lcom/mparticle/kits/ReportingMessage;
+	public static fun fromPushMessage (Lcom/mparticle/kits/KitIntegration;Landroid/content/Intent;)Lcom/mparticle/kits/ReportingMessage;
+	public static fun fromPushRegistrationMessage (Lcom/mparticle/kits/KitIntegration;)Lcom/mparticle/kits/ReportingMessage;
+	public fun getEventName ()Ljava/lang/String;
+	public fun getEventTypeString ()Ljava/lang/String;
+	public fun getModuleId ()I
+	public fun getSessionId ()Ljava/lang/String;
+	public fun getTimestamp ()J
+	public static fun logoutMessage (Lcom/mparticle/kits/KitIntegration;)Lcom/mparticle/kits/ReportingMessage;
+	public fun setAttributes (Ljava/util/Map;)Lcom/mparticle/kits/ReportingMessage;
+	public fun setDevMode (Z)V
+	public fun setEventName (Ljava/lang/String;)Lcom/mparticle/kits/ReportingMessage;
+	public fun setExceptionClassName (Ljava/lang/String;)V
+	public fun setMessageType (Ljava/lang/String;)V
+	public fun setOptOut (Z)Lcom/mparticle/kits/ReportingMessage;
+	public fun setScreenName (Ljava/lang/String;)Lcom/mparticle/kits/ReportingMessage;
+	public fun setSessionId (Ljava/lang/String;)V
+	public fun toJson ()Lorg/json/JSONObject;
+}
+
+public abstract interface class com/mparticle/kits/ReportingMessage$MessageType {
+	public static final field APP_STATE_TRANSITION Ljava/lang/String;
+	public static final field BREADCRUMB Ljava/lang/String;
+	public static final field COMMERCE_EVENT Ljava/lang/String;
+	public static final field ERROR Ljava/lang/String;
+	public static final field EVENT Ljava/lang/String;
+	public static final field FIRST_RUN Ljava/lang/String;
+	public static final field NETWORK_PERFORMNACE Ljava/lang/String;
+	public static final field OPT_OUT Ljava/lang/String;
+	public static final field PROFILE Ljava/lang/String;
+	public static final field PUSH_RECEIVED Ljava/lang/String;
+	public static final field PUSH_REGISTRATION Ljava/lang/String;
+	public static final field REQUEST_HEADER Ljava/lang/String;
+	public static final field SCREEN_VIEW Ljava/lang/String;
+	public static final field SESSION_END Ljava/lang/String;
+	public static final field SESSION_START Ljava/lang/String;
+}
+
+public class com/mparticle/kits/ReportingMessage$ProjectionReport {
+	public fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public static fun fromEvent (ILcom/mparticle/MPEvent;)Lcom/mparticle/kits/ReportingMessage$ProjectionReport;
+	public static fun fromEvent (ILcom/mparticle/commerce/CommerceEvent;)Lcom/mparticle/kits/ReportingMessage$ProjectionReport;
+	public static fun fromProjectionResult (Lcom/mparticle/kits/mappings/CustomMapping$ProjectionResult;)Lcom/mparticle/kits/ReportingMessage$ProjectionReport;
+}
+
+public class com/mparticle/kits/mappings/CustomMapping {
+	public static final field PROPERTY_LOCATION_EVENT_ATTRIBUTE Ljava/lang/String;
+	public static final field PROPERTY_LOCATION_EVENT_FIELD Ljava/lang/String;
+	public static final field PROPERTY_LOCATION_PRODUCT_ATTRIBUTE Ljava/lang/String;
+	public static final field PROPERTY_LOCATION_PRODUCT_FIELD Ljava/lang/String;
+	public static final field PROPERTY_LOCATION_PROMOTION_FIELD Ljava/lang/String;
+	public field rawJsonProjection Lorg/json/JSONObject;
+	public fun <init> (Lorg/json/JSONObject;)V
+	public fun getMatchList ()Ljava/util/List;
+	public fun getMessageType ()I
+	public fun isDefault ()Z
+	public fun project (Lcom/mparticle/kits/mappings/EventWrapper$CommerceEventWrapper;)Ljava/util/List;
+	public fun project (Lcom/mparticle/kits/mappings/EventWrapper$MPEventWrapper;)Ljava/util/List;
+	public static fun projectEvents (Lcom/mparticle/MPEvent;Ljava/util/List;Lcom/mparticle/kits/mappings/CustomMapping;)Ljava/util/List;
+	public static fun projectEvents (Lcom/mparticle/MPEvent;ZLjava/util/List;Lcom/mparticle/kits/mappings/CustomMapping;Lcom/mparticle/kits/mappings/CustomMapping;)Ljava/util/List;
+	public static fun projectEvents (Lcom/mparticle/commerce/CommerceEvent;Ljava/util/List;Lcom/mparticle/kits/mappings/CustomMapping;)Ljava/util/List;
+}
+
+public class com/mparticle/kits/mappings/CustomMapping$ProjectionResult {
+	public fun <init> (Lcom/mparticle/MPEvent;I)V
+	public fun <init> (Lcom/mparticle/commerce/CommerceEvent;I)V
+	public fun getCommerceEvent ()Lcom/mparticle/commerce/CommerceEvent;
+	public fun getMPEvent ()Lcom/mparticle/MPEvent;
+	public fun getProjectionId ()I
+}
+
