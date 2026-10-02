@@ -196,6 +196,8 @@ jobs:
         run: ./gradlew :android-kit-base:testRelease
       - name: "Run Kit Release Tests and Build"
         run: ./gradlew -p kits testRelease -c ../settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true
+      - name: "Build consumer compatibility fixtures"
+        run: ./gradlew -c settings-compat.gradle assembleDebug
       - name: "Run Isolated Kit Compatibility Tests (urbanairship)"
         run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 -PisRelease=true testRelease
       - name: "Run Isolated Kit Compatibility Tests (braze-43)"
