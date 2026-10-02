@@ -44,6 +44,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      - name: Extract release notes
+        id: release-notes
+        uses: ffurrer2/extract-release-notes@273da39a24fb7db106a35526c8162815faffd31d # v3.1.0
+        with:
+          changelog_file: CHANGELOG.md
+
       - name: Install JDK 17
         uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6
         with:
@@ -117,5 +123,4 @@ jobs:
           makeLatest: ${{ needs.setup-and-version.outputs.is_prerelease != 'true' }}
           prerelease: ${{ needs.setup-and-version.outputs.is_prerelease == 'true' }}
           tag: ${{ needs.setup-and-version.outputs.final_version }}
-          body: |
-            Release ${{ needs.setup-and-version.outputs.final_version }}
+          body: ${{ steps.release-notes.outputs.release_notes }}
