@@ -5,6 +5,9 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 
+import androidx.annotation.RestrictTo;
+import androidx.annotation.VisibleForTesting;
+
 import com.mparticle.internal.listeners.InternalListenerManager;
 
 import java.util.Set;
@@ -53,7 +56,9 @@ public class BaseHandler extends Handler {
         return disabled;
     }
 
-    void await(CountDownLatch latch) {
+    @VisibleForTesting
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    public void await(CountDownLatch latch) {
         this.sendMessage(obtainMessage(-1, latch));
     }
 

@@ -9,6 +9,8 @@ import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
+import androidx.annotation.VisibleForTesting;
 import androidx.annotation.WorkerThread;
 
 import com.mparticle.Configuration;
@@ -251,7 +253,9 @@ public class ConfigManager {
         deleteUserStorage(mContext, mpId);
     }
 
-    static void deleteConfigManager(Context context) {
+    @VisibleForTesting
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    public static void deleteConfigManager(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             context.deleteSharedPreferences(PREFERENCES_FILE);
             sPreferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
@@ -909,8 +913,9 @@ public class ConfigManager {
         }
     }
 
-    //for testing
-    static void clearMpid(Context context) {
+    @VisibleForTesting
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    public static void clearMpid(Context context) {
         if (sPreferences == null) {
             sPreferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
         }
