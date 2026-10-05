@@ -1,0 +1,4 @@
+{
+  "request": { "method": "POST", "urlPathPattern": "/v1/identity/[^/]+/alias" },
+  "response": { "status": 202 }
+}

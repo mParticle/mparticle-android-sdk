@@ -1,0 +1,11 @@
+{
+  "request": { "method": "GET", "urlPathPattern": "/v4/[^/]+/config" },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json",
+      "ETag": "\"integration-tests\""
+    },
+    "jsonBody": { "id": "integration-tests", "ct": 1700000000000 }
+  }
+}

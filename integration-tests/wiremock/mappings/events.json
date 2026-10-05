@@ -1,0 +1,8 @@
+{
+  "request": { "method": "POST", "urlPathPattern": "/v2/[^/]+/events" },
+  "response": {
+    "status": 202,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {}
+  }
+}

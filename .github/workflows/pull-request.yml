@@ -66,6 +66,18 @@ jobs:
       gradle_command: "-Porchestrator=true :android-core:cAT -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=none --stacktrace"
       artifact_name: instrumented-orchestrator-results
       artifact_path: android-core/build/orchestrator/**
+
+  # End-to-end payload baselines against a local WireMock; see integration-tests/README.md.
+  instrumented-integration:
+    uses: ./.github/workflows/instrumented-tests.yml
+    with:
+      display_name: Integration
+      gradle_command: "-Pintegration.tests=true :integration-tests:testDebugUnitTest :integration-tests:connectedDebugAndroidTest --stacktrace"
+      artifact_name: instrumented-integration-results
+      artifact_path: |
+        integration-tests/build/reports/androidTests/connected/**
+        integration-tests/build/wiremock/wiremock.log
+      timeout_minutes: 30
   unit-tests:
     name: "Unit Tests"
     timeout-minutes: 15
@@ -200,6 +212,7 @@ jobs:
         instrumented-kit-base,
         instrumented-testutils,
         instrumented-orchestrator,
+        instrumented-integration,
         unit-tests,
         lint-checks,
         kotlin-lint-checks,
@@ -218,6 +231,7 @@ jobs:
       - instrumented-kit-base
       - instrumented-testutils
       - instrumented-orchestrator
+      - instrumented-integration
       - unit-tests
       - lint-checks
       - kotlin-lint-checks
