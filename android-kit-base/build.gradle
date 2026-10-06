@@ -1,6 +1,12 @@
 apply plugin: 'com.android.library'
 apply plugin: 'mparticle.android.library.publish'
 apply plugin: 'kotlin-android'
+apply plugin: 'org.jetbrains.kotlinx.binary-compatibility-validator'
+
+apiValidation {
+    ignoredClasses.add('com.mparticle.kits.BuildConfig')
+    nonPublicMarkers.add('androidx.annotation.RestrictTo')
+}
 
 mparticleMavenPublish {
     artifactId.set('android-kit-base')
