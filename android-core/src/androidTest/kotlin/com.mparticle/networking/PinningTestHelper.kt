@@ -69,7 +69,7 @@ class PinningTestHelper internal constructor(
                     var connection = connection
                     connection =
                         try {
-                            requestHandler.makeUrlRequest(endpoint, connection, null, identity)
+                            requestHandler.makeUrlRequest(endpoint, connection, payload, identity)
                         } finally {
                             if (connection.url.toString().contains(path)) {
                                 val finalConnection = connection
