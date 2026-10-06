@@ -1,0 +1,14 @@
+{
+  "request": { "method": "POST", "urlPath": "/v1/identify" },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "context": null,
+      "mpid": "1000000000000000001",
+      "is_logged_in": false,
+      "is_ephemeral": false,
+      "matched_identities": {}
+    }
+  }
+}

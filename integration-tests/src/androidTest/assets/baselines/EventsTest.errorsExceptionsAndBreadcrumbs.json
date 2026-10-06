@@ -1,0 +1,533 @@
+[
+  {
+    "method": "GET",
+    "url": "\/v4\/integration-tests-api-key\/config?av=1.0&sv=<ignored>",
+    "headers": {
+      "accept-encoding": "gzip",
+      "connection": "keep-alive",
+      "date": "<ignored>",
+      "user-agent": "<ignored>",
+      "x-mp-env": "2",
+      "x-mp-signature": "<ignored>"
+    }
+  },
+  {
+    "method": "GET",
+    "url": "\/v4\/integration-tests-api-key\/config?av=1.0&sv=<ignored>",
+    "headers": {
+      "accept-encoding": "gzip",
+      "connection": "keep-alive",
+      "date": "<ignored>",
+      "if-none-match": "\"integration-tests\"",
+      "user-agent": "<ignored>",
+      "x-mp-env": "2",
+      "x-mp-signature": "<ignored>"
+    }
+  },
+  {
+    "method": "POST",
+    "url": "\/v1\/identify",
+    "headers": {
+      "accept-encoding": "gzip",
+      "connection": "keep-alive",
+      "content-encoding": "gzip",
+      "content-type": "application\/json",
+      "date": "<ignored>",
+      "user-agent": "<ignored>",
+      "x-mp-key": "integration-tests-api-key",
+      "x-mp-signature": "<ignored>"
+    },
+    "body": {
+      "client_sdk": {
+        "platform": "android",
+        "sdk_vendor": "mparticle",
+        "sdk_version": "<ignored>"
+      },
+      "environment": "production",
+      "known_identities": {
+        "customerid": "integration-customer",
+        "device_application_stamp": "<id:1>",
+        "email": "integration@example.com"
+      },
+      "request_id": "<id:2>",
+      "request_timestamp_ms": "<ignored>"
+    }
+  },
+  {
+    "method": "POST",
+    "url": "\/v2\/integration-tests-api-key\/events",
+    "headers": {
+      "accept-encoding": "gzip",
+      "connection": "keep-alive",
+      "content-encoding": "gzip",
+      "content-type": "application\/json",
+      "date": "<ignored>",
+      "user-agent": "<ignored>",
+      "x-mp-signature": "<ignored>"
+    },
+    "body": {
+      "ai": {
+        "abn": "1",
+        "an": "mParticle Integration Tests",
+        "apn": "com.mparticle.integrationtests",
+        "av": "1.0",
+        "bid": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+        "dbg": true,
+        "env": 2,
+        "fi": true,
+        "ict": "<ignored>",
+        "lc": 1,
+        "lcu": 1,
+        "lud": 0,
+        "pir": false,
+        "sideloaded_kits_count": 0,
+        "ud": "<ignored>"
+      },
+      "ck": {},
+      "con": {
+        "gdpr": {}
+      },
+      "ct": "<ignored>",
+      "das": "<id:1>",
+      "dbg": false,
+      "di": {
+        "b": "<ignored>",
+        "bid": "<ignored>",
+        "dma": "<ignored>",
+        "dmdl": "<ignored>",
+        "dn": "<ignored>",
+        "dosv": "<ignored>",
+        "dosvi": "<ignored>",
+        "dp": "<ignored>",
+        "p": "<ignored>",
+        "vr": "<ignored>"
+      },
+      "dt": "h",
+      "echo": true,
+      "id": "<id:3>",
+      "mpcv": "\"integration-tests--gzip\"",
+      "mpid": "1000000000000000001",
+      "msgs": [
+        {
+          "cs": {
+            "ama": "<ignored>",
+            "amm": "<ignored>",
+            "amt": "<ignored>",
+            "bl": "<ignored>",
+            "dct": "<ignored>",
+            "efds": "<ignored>",
+            "fds": "<ignored>",
+            "sbo": "<ignored>",
+            "sma": "<ignored>",
+            "sml": "<ignored>",
+            "smt": "<ignored>",
+            "so": "<ignored>",
+            "tsm": "<ignored>",
+            "tss": "<ignored>"
+          },
+          "ct": "<ignored>",
+          "dct": "<ignored>",
+          "dt": "fr",
+          "id": "<id:4>",
+          "sct": "<ignored>",
+          "sid": "<id:5>"
+        },
+        {
+          "cs": {
+            "ama": "<ignored>",
+            "amm": "<ignored>",
+            "amt": "<ignored>",
+            "bl": "<ignored>",
+            "dct": "<ignored>",
+            "efds": "<ignored>",
+            "fds": "<ignored>",
+            "sbo": "<ignored>",
+            "sma": "<ignored>",
+            "sml": "<ignored>",
+            "smt": "<ignored>",
+            "so": "<ignored>",
+            "tsm": "<ignored>",
+            "tss": "<ignored>"
+          },
+          "ct": "<ignored>",
+          "dt": "ss",
+          "id": "<id:5>"
+        },
+        {
+          "cs": {
+            "ama": "<ignored>",
+            "amm": "<ignored>",
+            "amt": "<ignored>",
+            "bl": "<ignored>",
+            "dct": "<ignored>",
+            "efds": "<ignored>",
+            "fds": "<ignored>",
+            "sbo": "<ignored>",
+            "sma": "<ignored>",
+            "sml": "<ignored>",
+            "smt": "<ignored>",
+            "so": "<ignored>",
+            "tsm": "<ignored>",
+            "tss": "<ignored>"
+          },
+          "ct": "<ignored>",
+          "dt": "ast",
+          "id": "<id:6>",
+          "ifr": true,
+          "iu": false,
+          "nsi": 0,
+          "sct": "<ignored>",
+          "sid": "<id:5>",
+          "t": "app_init"
+        },
+        {
+          "cs": {
+            "ama": "<ignored>",
+            "amm": "<ignored>",
+            "amt": "<ignored>",
+            "bl": "<ignored>",
+            "dct": "<ignored>",
+            "efds": "<ignored>",
+            "fds": "<ignored>",
+            "sbo": "<ignored>",
+            "sma": "<ignored>",
+            "sml": "<ignored>",
+            "smt": "<ignored>",
+            "so": "<ignored>",
+            "tsm": "<ignored>",
+            "tss": "<ignored>"
+          },
+          "ct": "<ignored>",
+          "dt": "bc",
+          "est": "<ignored>",
+          "id": "<id:7>",
+          "l": "before error",
+          "sct": "<ignored>",
+          "sid": "<id:5>",
+          "sn": 1
+        },
+        {
+          "bc": [
+            {
+              "cs": {
+                "ama": "<ignored>",
+                "amm": "<ignored>",
+                "amt": "<ignored>",
+                "bl": "<ignored>",
+                "dct": "<ignored>",
+                "efds": "<ignored>",
+                "fds": "<ignored>",
+                "sbo": "<ignored>",
+                "sma": "<ignored>",
+                "sml": "<ignored>",
+                "smt": "<ignored>",
+                "so": "<ignored>",
+                "tsm": "<ignored>",
+                "tss": "<ignored>"
+              },
+              "ct": "<ignored>",
+              "dt": "bc",
+              "est": "<ignored>",
+              "id": "<id:8>",
+              "l": "before error",
+              "sct": "<ignored>",
+              "sid": "<id:5>",
+              "sn": 1
+            }
+          ],
+          "cs": {
+            "ama": "<ignored>",
+            "amm": "<ignored>",
+            "amt": "<ignored>",
+            "bl": "<ignored>",
+            "dct": "<ignored>",
+            "efds": "<ignored>",
+            "fds": "<ignored>",
+            "sbo": "<ignored>",
+            "sma": "<ignored>",
+            "sml": "<ignored>",
+            "smt": "<ignored>",
+            "so": "<ignored>",
+            "tsm": "<ignored>",
+            "tss": "<ignored>"
+          },
+          "ct": "<ignored>",
+          "dt": "x",
+          "id": "<id:9>",
+          "m": "Plain Error",
+          "s": "error",
+          "sct": "<ignored>",
+          "sid": "<id:5>"
+        },
+        {
+          "attrs": {
+            "code": "E42"
+          },
+          "bc": [
+            {
+              "cs": {
+                "ama": "<ignored>",
+                "amm": "<ignored>",
+                "amt": "<ignored>",
+                "bl": "<ignored>",
+                "dct": "<ignored>",
+                "efds": "<ignored>",
+                "fds": "<ignored>",
+                "sbo": "<ignored>",
+                "sma": "<ignored>",
+                "sml": "<ignored>",
+                "smt": "<ignored>",
+                "so": "<ignored>",
+                "tsm": "<ignored>",
+                "tss": "<ignored>"
+              },
+              "ct": "<ignored>",
+              "dt": "bc",
+              "est": "<ignored>",
+              "id": "<id:8>",
+              "l": "before error",
+              "sct": "<ignored>",
+              "sid": "<id:5>",
+              "sn": 1
+            }
+          ],
+          "cs": {
+            "ama": "<ignored>",
+            "amm": "<ignored>",
+            "amt": "<ignored>",
+            "bl": "<ignored>",
+            "dct": "<ignored>",
+            "efds": "<ignored>",
+            "fds": "<ignored>",
+            "sbo": "<ignored>",
+            "sma": "<ignored>",
+            "sml": "<ignored>",
+            "smt": "<ignored>",
+            "so": "<ignored>",
+            "tsm": "<ignored>",
+            "tss": "<ignored>"
+          },
+          "ct": "<ignored>",
+          "dt": "x",
+          "id": "<id:10>",
+          "m": "Attributed Error",
+          "s": "error",
+          "sct": "<ignored>",
+          "sid": "<id:5>"
+        },
+        {
+          "attrs": {
+            "code": "E42"
+          },
+          "bc": [
+            {
+              "cs": {
+                "ama": "<ignored>",
+                "amm": "<ignored>",
+                "amt": "<ignored>",
+                "bl": "<ignored>",
+                "dct": "<ignored>",
+                "efds": "<ignored>",
+                "fds": "<ignored>",
+                "sbo": "<ignored>",
+                "sma": "<ignored>",
+                "sml": "<ignored>",
+                "smt": "<ignored>",
+                "so": "<ignored>",
+                "tsm": "<ignored>",
+                "tss": "<ignored>"
+              },
+              "ct": "<ignored>",
+              "dt": "bc",
+              "est": "<ignored>",
+              "id": "<id:8>",
+              "l": "before error",
+              "sct": "<ignored>",
+              "sid": "<id:5>",
+              "sn": 1
+            }
+          ],
+          "c": "java.lang.IllegalStateException",
+          "cs": {
+            "ama": "<ignored>",
+            "amm": "<ignored>",
+            "amt": "<ignored>",
+            "bl": "<ignored>",
+            "dct": "<ignored>",
+            "efds": "<ignored>",
+            "fds": "<ignored>",
+            "sbo": "<ignored>",
+            "sma": "<ignored>",
+            "sml": "<ignored>",
+            "smt": "<ignored>",
+            "so": "<ignored>",
+            "tsm": "<ignored>",
+            "tss": "<ignored>"
+          },
+          "ct": "<ignored>",
+          "dt": "x",
+          "eh": "true",
+          "id": "<id:11>",
+          "m": "Handled Exception",
+          "s": "error",
+          "sct": "<ignored>",
+          "sid": "<id:5>",
+          "sn": 1,
+          "st": "java.lang.IllegalStateException: Handled Exception\n<ignored>"
+        }
+      ],
+      "oo": false,
+      "sdk": "<ignored>",
+      "stl": 60,
+      "ua": {},
+      "ui": [
+        {
+          "dfs": "<ignored>",
+          "f": true,
+          "i": "integration-customer",
+          "n": 1
+        },
+        {
+          "dfs": "<ignored>",
+          "f": true,
+          "i": "integration@example.com",
+          "n": 7
+        }
+      ],
+      "uitl": 600
+    }
+  },
+  {
+    "method": "POST",
+    "url": "\/v2\/integration-tests-api-key\/events",
+    "headers": {
+      "accept-encoding": "gzip",
+      "connection": "keep-alive",
+      "content-encoding": "gzip",
+      "content-type": "application\/json",
+      "date": "<ignored>",
+      "user-agent": "<ignored>",
+      "x-mp-signature": "<ignored>"
+    },
+    "body": {
+      "ai": {
+        "abn": "1",
+        "an": "mParticle Integration Tests",
+        "apn": "com.mparticle.integrationtests",
+        "av": "1.0",
+        "bid": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+        "dbg": true,
+        "env": 2,
+        "fi": true,
+        "ict": "<ignored>",
+        "lc": 1,
+        "lcu": 1,
+        "lud": 0,
+        "pir": false,
+        "sideloaded_kits_count": 0,
+        "ud": "<ignored>"
+      },
+      "ck": {},
+      "con": {
+        "gdpr": {}
+      },
+      "ct": "<ignored>",
+      "das": "<id:1>",
+      "dbg": false,
+      "di": {
+        "b": "<ignored>",
+        "bid": "<ignored>",
+        "dma": "<ignored>",
+        "dmdl": "<ignored>",
+        "dn": "<ignored>",
+        "dosv": "<ignored>",
+        "dosvi": "<ignored>",
+        "dp": "<ignored>",
+        "p": "<ignored>",
+        "vr": "<ignored>"
+      },
+      "dt": "h",
+      "echo": true,
+      "id": "<id:12>",
+      "mpcv": "\"integration-tests--gzip\"",
+      "mpid": "1000000000000000001",
+      "msgs": [
+        {
+          "cs": {
+            "ama": "<ignored>",
+            "amm": "<ignored>",
+            "amt": "<ignored>",
+            "bl": "<ignored>",
+            "dct": "<ignored>",
+            "efds": "<ignored>",
+            "fds": "<ignored>",
+            "sbo": "<ignored>",
+            "sma": "<ignored>",
+            "sml": "<ignored>",
+            "smt": "<ignored>",
+            "so": "<ignored>",
+            "tsm": "<ignored>",
+            "tss": "<ignored>"
+          },
+          "ct": "<ignored>",
+          "dt": "uic",
+          "id": "<id:13>",
+          "ni": {
+            "dfs": "<ignored>",
+            "f": true,
+            "i": "integration-customer",
+            "n": 1
+          },
+          "oi": null
+        },
+        {
+          "cs": {
+            "ama": "<ignored>",
+            "amm": "<ignored>",
+            "amt": "<ignored>",
+            "bl": "<ignored>",
+            "dct": "<ignored>",
+            "efds": "<ignored>",
+            "fds": "<ignored>",
+            "sbo": "<ignored>",
+            "sma": "<ignored>",
+            "sml": "<ignored>",
+            "smt": "<ignored>",
+            "so": "<ignored>",
+            "tsm": "<ignored>",
+            "tss": "<ignored>"
+          },
+          "ct": "<ignored>",
+          "dt": "uic",
+          "id": "<id:14>",
+          "ni": {
+            "dfs": "<ignored>",
+            "f": true,
+            "i": "integration@example.com",
+            "n": 7
+          },
+          "oi": null
+        }
+      ],
+      "oo": false,
+      "sdk": "<ignored>",
+      "stl": 60,
+      "ua": {},
+      "ui": [
+        {
+          "dfs": "<ignored>",
+          "f": true,
+          "i": "integration-customer",
+          "n": 1
+        },
+        {
+          "dfs": "<ignored>",
+          "f": true,
+          "i": "integration@example.com",
+          "n": 7
+        }
+      ],
+      "uitl": 600
+    }
+  }
+]

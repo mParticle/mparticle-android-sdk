@@ -1,0 +1,8 @@
+{
+  "request": { "method": "GET", "urlPathPattern": "/v1/[^/]+/audience" },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": { "currentAudienceMemberships": [] }
+  }
+}

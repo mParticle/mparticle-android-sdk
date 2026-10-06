@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.mparticle.MParticle;
 import com.mparticle.SdkListener;
@@ -177,7 +178,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
                 Logger.verbose("Config result: \n " +
                         connection.getResponseCode() + ": " +
                         connection.getResponseMessage() + "\n" +
-                        "response:\n" + response.toString());
+                        "response:\n" + response);
 
                 String newEtag = connection.getHeaderField("ETag");
                 String newModified = connection.getHeaderField("Last-Modified");
@@ -276,7 +277,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
             Logger.verbose("Upload result response: \n" +
                     connection.getResponseCode() + ": " +
                     connection.getResponseMessage() + "\n" +
-                    "response:\n" + response.toString());
+                    "response:\n" + response);
             parseCookies(response);
         } else {
             Logger.error("Upload request failed- " + responseCode + ": " + connection.getResponseMessage());
@@ -360,7 +361,11 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         }
     }
 
-    private void parseCookies(JSONObject jsonResponse) {
+    private void parseCookies(@Nullable JSONObject jsonResponse) {
+        // A success response may have no JSON body; throwing here would abort the upload after the send.
+        if (jsonResponse == null) {
+            return;
+        }
         try {
             if (jsonResponse.has(CONSUMER_INFO)) {
                 JSONObject consumerInfo = jsonResponse.getJSONObject(CONSUMER_INFO);

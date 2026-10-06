@@ -1,0 +1,196 @@
+apply plugin: 'com.android.application'
+
+// End-to-end payload tests. Each androidTest drives the public API, then compares every request
+// the SDK sent to a local WireMock against a committed baseline. See README.md.
+//
+// Java, not Kotlin, on purpose: when android-core moves to Kotlin these tests also prove the API
+// is still callable from Java unchanged.
+
+def wireMockHttpPort = 18080
+def wireMockHttpsPort = 18443
+def certDir = layout.buildDirectory.dir('wiremock-certs')
+def generatedRes = layout.buildDirectory.dir('generated/wiremock-ca/res')
+def recordMode = project.findProperty('integration.tests.record') == 'true'
+
+android {
+    namespace 'com.mparticle.integrationtests'   // required by the root build's namespace assertion
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.mparticle.integrationtests'
+        minSdk 26          // java.util.Base64, shared with the JVM unit tests
+        targetSdk 34
+        versionCode 1
+        versionName '1.0'
+
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        // Every scenario starts from a fresh install, so no SDK state leaks between baselines.
+        testInstrumentationRunnerArguments clearPackageData: 'true',
+                useTestStorageService: 'true',
+                wireMockHttpsPort: "$wireMockHttpsPort",
+                record: "$recordMode"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.toVersion(JAVA_VERSION)
+        targetCompatibility JavaVersion.toVersion(JAVA_VERSION)
+    }
+
+    sourceSets {
+        main.res.srcDirs += generatedRes
+        // The baseline comparator runs on the device and is unit-tested on the JVM.
+        test.java.srcDirs += 'src/sharedTest/java'
+        androidTest.java.srcDirs += 'src/sharedTest/java'
+    }
+
+    testOptions {
+        execution 'ANDROIDX_TEST_ORCHESTRATOR'
+        unitTests.returnDefaultValues = false
+    }
+
+    lint {
+        checkReleaseBuilds false
+        // Each test starts the SDK itself, and the fixture never posts the notifications
+        // android-core's push code is flagged for.
+        disable 'MParticleInitialization', 'NotificationPermission'
+    }
+}
+
+// The root build applies sonarqube with androidVariant "release"; a test fixture has nothing for it.
+sonarqube { skipProject = true }
+
+configurations {
+    wiremock { transitive = false }
+}
+
+dependencies {
+    implementation project(':android-core')
+
+    androidTestImplementation 'androidx.test:runner:1.7.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.3.0'
+    androidTestImplementation 'androidx.test.services:storage:1.6.0'
+    androidTestUtil 'androidx.test:orchestrator:1.6.1'
+    androidTestUtil 'androidx.test.services:test-services:1.6.0'
+
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.json:json:20250517'
+
+    wiremock 'org.wiremock:wiremock-standalone:3.13.1'
+}
+
+// A throwaway CA plus a leaf for the emulator's host alias, generated per checkout so no private
+// key is ever committed. The app trusts the CA only for 10.0.2.2 (res/xml/network_security_config).
+tasks.register('generateWireMockCerts') {
+    def outDir = certDir
+    def resDir = generatedRes
+    outputs.dir(outDir)
+    outputs.dir(resDir)
+    doLast {
+        def dir = outDir.get().asFile
+        project.delete(dir)
+        dir.mkdirs()
+        def keytool = "${System.getProperty('java.home')}/bin/keytool"
+        def pass = 'integration-tests'
+        def run = { List<String> args ->
+            project.exec { commandLine([keytool] + args + ['-storepass', pass]); workingDir dir }
+        }
+        def ec = ['-keyalg', 'EC', '-groupname', 'secp256r1', '-storetype', 'PKCS12']
+        run(['-genkeypair', '-alias', 'ca', '-dname', 'CN=mParticle Integration Tests CA',
+             '-ext', 'bc:c', '-validity', '3650', '-keystore', 'ca.p12'] + ec)
+        run(['-exportcert', '-rfc', '-alias', 'ca', '-keystore', 'ca.p12', '-file', 'ca.pem'])
+        run(['-genkeypair', '-alias', 'server', '-dname', 'CN=10.0.2.2', '-validity', '825',
+             '-keystore', 'server.p12'] + ec)
+        run(['-certreq', '-alias', 'server', '-keystore', 'server.p12', '-file', 'server.csr'])
+        run(['-gencert', '-rfc', '-alias', 'ca', '-keystore', 'ca.p12', '-infile', 'server.csr',
+             '-outfile', 'server.pem', '-validity', '825',
+             '-ext', 'SAN=IP:10.0.2.2,IP:127.0.0.1,DNS:localhost', '-ext', 'EKU=serverAuth'])
+        run(['-importcert', '-noprompt', '-alias', 'ca', '-file', 'ca.pem', '-keystore', 'server.p12'])
+        run(['-importcert', '-alias', 'server', '-file', 'server.pem', '-keystore', 'server.p12'])
+
+        def raw = new File(resDir.get().asFile, 'raw')
+        project.delete(resDir.get().asFile)
+        raw.mkdirs()
+        new File(raw, 'wiremock_ca.pem').bytes = new File(dir, 'ca.pem').bytes
+    }
+}
+preBuild.dependsOn 'generateWireMockCerts'
+
+def wireMockPidFile = layout.buildDirectory.file('wiremock/wiremock.pid')
+def wireMockLog = layout.buildDirectory.file('wiremock/wiremock.log')
+
+// Only stops the PID if it is still a WireMock: after a reboot a stale PID can belong to anything.
+def stopWireMockProcess = { File pidFile ->
+    if (!pidFile.exists()) return
+    ProcessHandle.of(pidFile.text.trim() as long)
+            .filter { it.info().commandLine().map { it.contains('wiremock-standalone') }.orElse(false) }
+            .ifPresent { it.destroy(); it.onExit().get(10, java.util.concurrent.TimeUnit.SECONDS) }
+    pidFile.delete()
+}
+
+def wireMockResponds = { int port ->
+    try {
+        ((HttpURLConnection) new URL("http://127.0.0.1:$port/__admin/health").openConnection()).responseCode == 200
+    } catch (IOException ignored) {
+        false
+    }
+}
+
+tasks.register('startWireMock') {
+    dependsOn 'generateWireMockCerts'
+    def jar = configurations.wiremock
+    def pidFile = wireMockPidFile
+    def logFile = wireMockLog
+    def root = file('wiremock')
+    def keystore = certDir.map { it.file('server.p12') }
+    doLast {
+        stopWireMockProcess(pidFile.get().asFile)
+        if (wireMockResponds(wireMockHttpPort)) {
+            throw new GradleException("Port $wireMockHttpPort is already serving WireMock, probably another " +
+                    "checkout's run. Stop it first; sharing it would mix both runs' requests.")
+        }
+        logFile.get().asFile.parentFile.mkdirs()
+        // Loopback only: the emulator reaches the host's 127.0.0.1 as 10.0.2.2.
+        def process = new ProcessBuilder(
+                "${System.getProperty('java.home')}/bin/java", '-jar', jar.singleFile.absolutePath,
+                '--bind-address', '127.0.0.1',
+                '--port', "$wireMockHttpPort",
+                '--https-port', "$wireMockHttpsPort",
+                '--https-keystore', keystore.get().asFile.absolutePath,
+                '--keystore-type', 'PKCS12',
+                '--keystore-password', 'integration-tests',
+                '--key-manager-password', 'integration-tests',
+                '--root-dir', root.absolutePath,
+                '--disable-banner')
+                .redirectErrorStream(true)
+                .redirectOutput(logFile.get().asFile)
+                .start()
+        pidFile.get().asFile.text = "${process.pid()}"
+        for (int i = 0; i < 60 && process.alive; i++) {
+            if (wireMockResponds(wireMockHttpPort) && process.alive) return
+            Thread.sleep(500)
+        }
+        process.destroy()
+        throw new GradleException("WireMock did not start; see ${logFile.get().asFile}")
+    }
+}
+
+tasks.register('stopWireMock') {
+    def pidFile = wireMockPidFile
+    doLast { stopWireMockProcess(pidFile.get().asFile) }
+}
+
+// Record mode: the device writes baselines through TestStorage; copy them back into the source tree.
+tasks.register('copyRecordedBaselines', Copy) {
+    from(layout.buildDirectory.dir('outputs/connected_android_test_additional_output')) {
+        include '**/baselines/*.json'
+        eachFile { path = name }
+    }
+    into 'src/androidTest/assets/baselines'
+    includeEmptyDirs = false
+}
+
+tasks.matching { it.name == 'connectedDebugAndroidTest' }.configureEach {
+    dependsOn 'startWireMock'
+    finalizedBy 'stopWireMock'
+    if (recordMode) finalizedBy 'copyRecordedBaselines'
+}

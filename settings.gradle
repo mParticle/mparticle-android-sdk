@@ -32,3 +32,9 @@ project(':tooling:android-plugin').name = 'android-plugin'
 if (settings.startParameter.projectProperties['size.report'] == 'true') {
     include ':size-report'
 }
+
+// End-to-end payload tests against a local WireMock. Opt in with -Pintegration.tests=true, for
+// the same reason as :size-report above. See integration-tests/README.md.
+if (settings.startParameter.projectProperties['integration.tests'] == 'true') {
+    include ':integration-tests'
+}

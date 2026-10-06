@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- The emulator's alias for the host, where WireMock runs. The CA is generated per build by
+         :integration-tests:generateWireMockCerts and is trusted for this host only. -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="false">10.0.2.2</domain>
+        <trust-anchors>
+            <certificates src="@raw/wiremock_ca" />
+        </trust-anchors>
+    </domain-config>
+</network-security-config>

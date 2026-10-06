@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Core
+
+#### Fixed
+
+- Stop re-sending accepted event batches and skipping uploads when a success response has an empty or non-JSON body
+
 ### Kits
 
 #### Appsflyer

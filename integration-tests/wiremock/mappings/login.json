@@ -1,0 +1,14 @@
+{
+  "request": { "method": "POST", "urlPath": "/v1/login" },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "context": null,
+      "mpid": "1000000000000000002",
+      "is_logged_in": true,
+      "is_ephemeral": false,
+      "matched_identities": {}
+    }
+  }
+}

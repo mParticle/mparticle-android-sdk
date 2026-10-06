@@ -142,6 +142,27 @@ class MParticleApiClientImplTest {
     @Throws(
         Exception::class,
     )
+    fun testFetchConfigSuccessWithEmptyBody() {
+        setup()
+        PowerMockito.mockStatic(MPUtility::class.java)
+        Mockito
+            .`when`(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString()))
+            .thenReturn("encoded")
+        Mockito.`when`(mockConnection.responseCode).thenReturn(200)
+        Mockito.`when`(MPUtility.getJsonResponse(mockConnection)).thenReturn(null)
+        client.fetchConfig()
+        Mockito.verify(configManager)?.updateConfig(
+            Mockito.isNull(),
+            Mockito.nullable(String::class.java),
+            Mockito.nullable(String::class.java),
+        )
+    }
+
+    @Test
+    @PrepareForTest(URL::class, MParticleApiClientImpl::class, MPUtility::class)
+    @Throws(
+        Exception::class,
+    )
     fun testFetchConfigFailure() {
         setup()
         PowerMockito.mockStatic(MPUtility::class.java)

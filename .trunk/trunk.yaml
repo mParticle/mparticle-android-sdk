@@ -72,6 +72,11 @@ lint:
         - "**/gradlew"
         - scripts/install-start-emulator.sh
         - kits/urbanairship/urbanairship-20/**
+    # Recorded by the integration tests and rewritten on every re-record. trufflehog and
+    # mparticle-api-key-check still scan them.
+    - linters: [prettier, checkov]
+      paths:
+        - integration-tests/src/androidTest/assets/baselines/**
 actions:
   enabled:
     - trunk-announce
