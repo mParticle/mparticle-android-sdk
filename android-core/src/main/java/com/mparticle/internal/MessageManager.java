@@ -19,6 +19,8 @@ import android.os.Process;
 import android.telephony.TelephonyManager;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
+import androidx.annotation.VisibleForTesting;
 
 import com.mparticle.InstallReferrerHelper;
 import com.mparticle.MPEvent;
@@ -77,7 +79,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     /**
      * These are the handlers which manage the queues and threads mentioned above.
      */
-    MessageHandler mMessageHandler;
+    @VisibleForTesting
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    public MessageHandler mMessageHandler;
     public UploadHandler mUploadHandler;
 
     /**
@@ -125,7 +129,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     /**
      * Every state-transition message needs to know if this was an upgrade or an install.
      */
-    MParticle.InstallType mInstallType = MParticle.InstallType.AutoDetect;
+    @VisibleForTesting
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    public MParticle.InstallType mInstallType = MParticle.InstallType.AutoDetect;
     /**
      * Batches/messages need to communicate the current telephony status when available.
      */
