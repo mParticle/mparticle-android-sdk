@@ -124,6 +124,16 @@ public class RequestNormalizerTest {
     }
 
     @Test
+    public void stackTracesCompareOnlyTheExceptionLine() throws Exception {
+        String api28 = "{\"msgs\":[{\"st\":\"java.lang.IllegalStateException: boom\\n\\tat android.app.Instrumentation.run(Instrumentation.java:2597)\"}]}";
+        String api36 = "{\"msgs\":[{\"st\":\"java.lang.IllegalStateException: boom\\n\\tat android.app.Instrumentation.run(Instrumentation.java:2453)\"}]}";
+        JSONObject a = normalizeOne(request("/v2/k/events", api28));
+        assertTrue(BaselineDiff.diff(a, normalizeOne(request("/v2/k/events", api36))).isEmpty());
+        assertEquals("java.lang.IllegalStateException: boom\n" + RequestNormalizer.IGNORED,
+                a.getJSONObject("body").getJSONArray("msgs").getJSONObject(0).get("st"));
+    }
+
+    @Test
     public void unorderedArraysCompareByMembership() throws Exception {
         String one = "{\"identity_changes\":[{\"identity_type\":\"email\"},{\"identity_type\":\"other\"}]}";
         String two = "{\"identity_changes\":[{\"identity_type\":\"other\"},{\"identity_type\":\"email\"}]}";

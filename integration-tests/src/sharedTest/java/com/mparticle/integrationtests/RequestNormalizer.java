@@ -80,6 +80,12 @@ public final class RequestNormalizer {
     }
 
     /**
+     * Stack traces: only the first line (exception class and message) is compared. The frames
+     * below it run through the test runner and the OS, whose line numbers differ by API level.
+     */
+    static final List<String[]> STACK_TRACE_PATHS = paths("msgs.*.st");
+
+    /**
      * Arrays the SDK builds from unordered collections. Their elements are sorted, so only
      * membership is compared.
      */
@@ -202,6 +208,11 @@ public final class RequestNormalizer {
     private static Object normalizeValue(Object value, List<String> path, Map<String, String> ids)
             throws JSONException {
         if (matches(IGNORED_PATHS, path)) return IGNORED;
+        if (matches(STACK_TRACE_PATHS, path) && value instanceof String) {
+            String trace = (String) value;
+            int newline = trace.indexOf('\n');
+            return newline < 0 ? trace : trace.substring(0, newline) + "\n" + IGNORED;
+        }
         if (matches(ID_PATHS, path) && value instanceof String) {
             if (ids == null) return MASKED_ID;
             String token = ids.get(value);
