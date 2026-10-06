@@ -18,23 +18,19 @@ import com.mparticle.testutils.TestingUtils
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Answers
+import org.mockito.MockedStatic
 import org.mockito.Mockito
-import org.powermock.api.mockito.PowerMockito
-import org.powermock.core.classloader.annotations.PrepareForTest
-import org.powermock.modules.junit4.PowerMockRunner
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.util.Random
 import java.util.concurrent.atomic.AtomicLong
 
-@RunWith(PowerMockRunner::class)
-@PrepareForTest(Looper::class)
 class MessageManagerTest {
+    private lateinit var looperStatic: MockedStatic<Looper>
     private lateinit var context: MockContext
     private lateinit var configManager: ConfigManager
     private lateinit var appStateManager: AppStateManager
@@ -45,6 +41,7 @@ class MessageManagerTest {
 
     @Before
     fun setup() {
+        looperStatic = Mockito.mockStatic(Looper::class.java)
         MParticle.setInstance(MockMParticle())
         context = MockContext()
         configManager = Mockito.mock(ConfigManager::class.java)
@@ -61,8 +58,6 @@ class MessageManagerTest {
                     ?.mpid,
             ).thenReturn(defaultId)
         Mockito.`when`(configManager.mpid).thenReturn(defaultId)
-        // Prepare and mock the Looper class
-        PowerMockito.mockStatic(Looper::class.java)
         val looper: Looper = Mockito.mock(Looper::class.java)
         Mockito.`when`(Looper.getMainLooper()).thenReturn(looper)
         appStateManager = AppStateManager(context, true)
@@ -84,57 +79,62 @@ class MessageManagerTest {
         Mockito.`when`(messageHandler.obtainMessage(Mockito.anyInt())).thenReturn(Message())
     }
 
+    @After
+    fun tearDown() {
+        looperStatic.close()
+    }
+
     @Test
-    @PrepareForTest(MessageManager::class, MPUtility::class, Looper::class)
     @Throws(Exception::class)
     fun testGetStateInfo() {
-        PowerMockito.mockStatic(MPUtility::class.java, Answers.RETURNS_MOCKS.get())
-        val stateInfo = MessageManager.getStateInfo()
-        Assert.assertNotNull(stateInfo.getLong(MessageKey.STATE_INFO_AVAILABLE_MEMORY))
-        Assert.assertNotNull(stateInfo.getLong(MessageKey.STATE_INFO_TOTAL_MEMORY))
-        Assert.assertNotNull(stateInfo.getDouble(MessageKey.STATE_INFO_BATTERY_LVL))
-        Assert.assertNotNull(stateInfo.getDouble(MessageKey.STATE_INFO_TIME_SINCE_START))
-        Assert.assertNotNull(stateInfo.getLong(MessageKey.STATE_INFO_AVAILABLE_DISK))
-        Assert.assertNotNull(stateInfo.getLong(MessageKey.STATE_INFO_AVAILABLE_EXT_DISK))
-        Assert.assertNotNull(stateInfo.getLong(MessageKey.STATE_INFO_APP_MEMORY_USAGE))
-        Assert.assertNotNull(stateInfo.getLong(MessageKey.STATE_INFO_APP_MEMORY_AVAIL))
-        Assert.assertNotNull(stateInfo.getLong(MessageKey.STATE_INFO_APP_MEMORY_MAX))
-        Assert.assertNotNull(stateInfo.getString(MessageKey.STATE_INFO_DATA_CONNECTION))
-        Assert.assertNotNull(stateInfo.getInt(MessageKey.STATE_INFO_ORIENTATION))
-        Assert.assertNotNull(stateInfo.getInt(MessageKey.STATE_INFO_BAR_ORIENTATION))
-        Assert.assertNotNull(stateInfo.getBoolean(MessageKey.STATE_INFO_MEMORY_LOW))
-        Assert.assertNotNull(stateInfo.getBoolean(MessageKey.STATE_INFO_GPS))
-        Assert.assertNotNull(stateInfo.getLong(MessageKey.STATE_INFO_MEMORY_THRESHOLD))
-        Assert.assertNotNull(stateInfo.getInt(MessageKey.STATE_INFO_NETWORK_TYPE))
+        Mockito.mockStatic(MPUtility::class.java, Mockito.RETURNS_MOCKS).use {
+            val stateInfo = MessageManager.getStateInfo()
+            Assert.assertNotNull(stateInfo.getLong(MessageKey.STATE_INFO_AVAILABLE_MEMORY))
+            Assert.assertNotNull(stateInfo.getLong(MessageKey.STATE_INFO_TOTAL_MEMORY))
+            Assert.assertNotNull(stateInfo.getDouble(MessageKey.STATE_INFO_BATTERY_LVL))
+            Assert.assertNotNull(stateInfo.getDouble(MessageKey.STATE_INFO_TIME_SINCE_START))
+            Assert.assertNotNull(stateInfo.getLong(MessageKey.STATE_INFO_AVAILABLE_DISK))
+            Assert.assertNotNull(stateInfo.getLong(MessageKey.STATE_INFO_AVAILABLE_EXT_DISK))
+            Assert.assertNotNull(stateInfo.getLong(MessageKey.STATE_INFO_APP_MEMORY_USAGE))
+            Assert.assertNotNull(stateInfo.getLong(MessageKey.STATE_INFO_APP_MEMORY_AVAIL))
+            Assert.assertNotNull(stateInfo.getLong(MessageKey.STATE_INFO_APP_MEMORY_MAX))
+            Assert.assertNotNull(stateInfo.getString(MessageKey.STATE_INFO_DATA_CONNECTION))
+            Assert.assertNotNull(stateInfo.getInt(MessageKey.STATE_INFO_ORIENTATION))
+            Assert.assertNotNull(stateInfo.getInt(MessageKey.STATE_INFO_BAR_ORIENTATION))
+            Assert.assertNotNull(stateInfo.getBoolean(MessageKey.STATE_INFO_MEMORY_LOW))
+            Assert.assertNotNull(stateInfo.getBoolean(MessageKey.STATE_INFO_GPS))
+            Assert.assertNotNull(stateInfo.getLong(MessageKey.STATE_INFO_MEMORY_THRESHOLD))
+            Assert.assertNotNull(stateInfo.getInt(MessageKey.STATE_INFO_NETWORK_TYPE))
+        }
     }
 
     @Test
-    @PrepareForTest(MessageManager::class, MPUtility::class, Looper::class)
     @Throws(Exception::class)
     fun testGetTotalMemory() {
-        PowerMockito.mockStatic(MPUtility::class.java, Answers.RETURNS_MOCKS.get())
-        val prefs = context.getSharedPreferences(null, 0)
-        val memory = MPUtility.getTotalMemory(context)
-        Assert.assertEquals(-1, prefs.getLong(Constants.MiscStorageKeys.TOTAL_MEMORY, -1))
-        val newMemory = MessageManager.getTotalMemory()
-        Assert.assertEquals(memory, newMemory)
-        Assert.assertEquals(memory, prefs.getLong(Constants.MiscStorageKeys.TOTAL_MEMORY, -1234))
+        Mockito.mockStatic(MPUtility::class.java, Mockito.RETURNS_MOCKS).use {
+            val prefs = context.getSharedPreferences(null, 0)
+            val memory = MPUtility.getTotalMemory(context)
+            Assert.assertEquals(-1, prefs.getLong(Constants.MiscStorageKeys.TOTAL_MEMORY, -1))
+            val newMemory = MessageManager.getTotalMemory()
+            Assert.assertEquals(memory, newMemory)
+            Assert.assertEquals(memory, prefs.getLong(Constants.MiscStorageKeys.TOTAL_MEMORY, -1234))
+        }
     }
 
     @Test
-    @PrepareForTest(MessageManager::class, MPUtility::class, Looper::class)
     @Throws(Exception::class)
     fun testGetSystemMemoryThreshold() {
-        PowerMockito.mockStatic(MPUtility::class.java, Answers.RETURNS_MOCKS.get())
-        val prefs = context.getSharedPreferences(null, 0)
-        val memory = MPUtility.getSystemMemoryThreshold(context)
-        Assert.assertEquals(-1, prefs.getLong(Constants.MiscStorageKeys.MEMORY_THRESHOLD, -1))
-        val newMemory = MessageManager.getSystemMemoryThreshold()
-        Assert.assertEquals(memory, newMemory)
-        Assert.assertEquals(
-            memory,
-            prefs.getLong(Constants.MiscStorageKeys.MEMORY_THRESHOLD, -1234),
-        )
+        Mockito.mockStatic(MPUtility::class.java, Mockito.RETURNS_MOCKS).use {
+            val prefs = context.getSharedPreferences(null, 0)
+            val memory = MPUtility.getSystemMemoryThreshold(context)
+            Assert.assertEquals(-1, prefs.getLong(Constants.MiscStorageKeys.MEMORY_THRESHOLD, -1))
+            val newMemory = MessageManager.getSystemMemoryThreshold()
+            Assert.assertEquals(memory, newMemory)
+            Assert.assertEquals(
+                memory,
+                prefs.getLong(Constants.MiscStorageKeys.MEMORY_THRESHOLD, -1234),
+            )
+        }
     }
 
     @Test

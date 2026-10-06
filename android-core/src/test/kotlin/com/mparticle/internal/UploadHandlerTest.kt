@@ -24,16 +24,11 @@ import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.mockito.Mockito
-import org.powermock.api.mockito.PowerMockito
-import org.powermock.core.classloader.annotations.PrepareForTest
-import org.powermock.modules.junit4.PowerMockRunner
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-@RunWith(PowerMockRunner::class)
 class UploadHandlerTest {
     private lateinit var handler: UploadHandler
     private lateinit var mConfigManager: ConfigManager
@@ -364,7 +359,6 @@ class UploadHandlerTest {
         Assert.assertNotNull(deletedUpload.value)
     }
 
-    @PrepareForTest(MPUtility::class)
     @Throws(
         MPRampException::class,
         MPThrottleException::class,
@@ -373,99 +367,100 @@ class UploadHandlerTest {
     )
     fun testAliasCallback() {
         val ran = RandomUtils()
-        PowerMockito.mockStatic(MPUtility::class.java)
-        Mockito
-            .`when`(
-                MPUtility.isAppDebuggable(
-                    Mockito.any(
-                        Context::class.java,
+        Mockito.mockStatic(MPUtility::class.java).use {
+            Mockito
+                .`when`(
+                    MPUtility.isAppDebuggable(
+                        Mockito.any(
+                            Context::class.java,
+                        ),
                     ),
-                ),
-            ).thenReturn(true)
-        val capturedResponse = AndroidUtils.Mutable<AliasResponse?>(null)
-        val sdkListener: SdkListener =
-            object : SdkListener() {
-                override fun onAliasRequestFinished(aliasResponse: AliasResponse) {
-                    capturedResponse.value = aliasResponse
+                ).thenReturn(true)
+            val capturedResponse = AndroidUtils.Mutable<AliasResponse?>(null)
+            val sdkListener: SdkListener =
+                object : SdkListener() {
+                    override fun onAliasRequestFinished(aliasResponse: AliasResponse) {
+                        capturedResponse.value = aliasResponse
+                    }
                 }
-            }
-        MParticle.addListener(MockContext(), sdkListener)
-        val mockApiClient =
-            Mockito.mock(
-                MParticleApiClient::class.java,
-            )
-        handler.setApiClient(mockApiClient)
+            MParticle.addListener(MockContext(), sdkListener)
+            val mockApiClient =
+                Mockito.mock(
+                    MParticleApiClient::class.java,
+                )
+            handler.setApiClient(mockApiClient)
 
-        // test successful request
-        Mockito
-            .`when`(
-                mockApiClient.sendAliasRequest(
-                    Mockito.any(
-                        String::class.java,
+            // test successful request
+            Mockito
+                .`when`(
+                    mockApiClient.sendAliasRequest(
+                        Mockito.any(
+                            String::class.java,
+                        ),
+                        Mockito.any(
+                            UploadSettings::class.java,
+                        ),
                     ),
-                    Mockito.any(
-                        UploadSettings::class.java,
-                    ),
-                ),
-            ).thenReturn(AliasNetworkResponse(202))
-        TestCase.assertNull(capturedResponse.value)
-        var aliasRequest = TestingUtils.getInstance().randomAliasRequest
-        var aliasRequestMessage = MPAliasMessage(aliasRequest, "das", "apiKey")
-        handler.uploadAliasRequest(1, aliasRequestMessage.toString(), mConfigManager.uploadSettings)
-        capturedResponse.value?.isSuccessful?.let { Assert.assertTrue(it) }
-        TestCase.assertNull(capturedResponse.value?.errorResponse)
-        capturedResponse.value?.willRetry()?.let { Assert.assertFalse(it) }
-        Assert.assertEquals(aliasRequest, capturedResponse.value?.request)
-        Assert.assertEquals(202, capturedResponse.value?.responseCode)
-        Assert.assertEquals(aliasRequestMessage.requestId, capturedResponse.value?.requestId)
-        capturedResponse.value = null
+                ).thenReturn(AliasNetworkResponse(202))
+            TestCase.assertNull(capturedResponse.value)
+            var aliasRequest = TestingUtils.getInstance().randomAliasRequest
+            var aliasRequestMessage = MPAliasMessage(aliasRequest, "das", "apiKey")
+            handler.uploadAliasRequest(1, aliasRequestMessage.toString(), mConfigManager.uploadSettings)
+            capturedResponse.value?.isSuccessful?.let { Assert.assertTrue(it) }
+            TestCase.assertNull(capturedResponse.value?.errorResponse)
+            capturedResponse.value?.willRetry()?.let { Assert.assertFalse(it) }
+            Assert.assertEquals(aliasRequest, capturedResponse.value?.request)
+            Assert.assertEquals(202, capturedResponse.value?.responseCode)
+            Assert.assertEquals(aliasRequestMessage.requestId, capturedResponse.value?.requestId)
+            capturedResponse.value = null
 
-        // test retry request
-        Mockito
-            .`when`(
-                mockApiClient.sendAliasRequest(
-                    Mockito.any(
-                        String::class.java,
+            // test retry request
+            Mockito
+                .`when`(
+                    mockApiClient.sendAliasRequest(
+                        Mockito.any(
+                            String::class.java,
+                        ),
+                        Mockito.any(
+                            UploadSettings::class.java,
+                        ),
                     ),
-                    Mockito.any(
-                        UploadSettings::class.java,
-                    ),
-                ),
-            ).thenReturn(AliasNetworkResponse(429))
-        TestCase.assertNull(capturedResponse.value)
-        aliasRequest = TestingUtils.getInstance().randomAliasRequest
-        aliasRequestMessage = MPAliasMessage(aliasRequest, "das", "apiKey")
-        handler.uploadAliasRequest(2, aliasRequestMessage.toString(), mConfigManager.uploadSettings)
-        capturedResponse.value?.isSuccessful?.let { Assert.assertFalse(it) }
-        TestCase.assertNull(capturedResponse.value?.errorResponse)
-        capturedResponse.value?.willRetry()?.let { Assert.assertTrue(it) }
-        Assert.assertEquals(aliasRequest, capturedResponse.value?.request)
-        Assert.assertEquals(429, capturedResponse.value?.responseCode)
-        Assert.assertEquals(aliasRequestMessage.requestId, capturedResponse.value?.requestId)
-        capturedResponse.value = null
+                ).thenReturn(AliasNetworkResponse(429))
+            TestCase.assertNull(capturedResponse.value)
+            aliasRequest = TestingUtils.getInstance().randomAliasRequest
+            aliasRequestMessage = MPAliasMessage(aliasRequest, "das", "apiKey")
+            handler.uploadAliasRequest(2, aliasRequestMessage.toString(), mConfigManager.uploadSettings)
+            capturedResponse.value?.isSuccessful?.let { Assert.assertFalse(it) }
+            TestCase.assertNull(capturedResponse.value?.errorResponse)
+            capturedResponse.value?.willRetry()?.let { Assert.assertTrue(it) }
+            Assert.assertEquals(aliasRequest, capturedResponse.value?.request)
+            Assert.assertEquals(429, capturedResponse.value?.responseCode)
+            Assert.assertEquals(aliasRequestMessage.requestId, capturedResponse.value?.requestId)
+            capturedResponse.value = null
 
-        // test error message present
-        val error = ran.getAlphaNumericString(20)
-        Mockito
-            .`when`(
-                mockApiClient.sendAliasRequest(
-                    Mockito.any(
-                        String::class.java,
+            // test error message present
+            val error = ran.getAlphaNumericString(20)
+            Mockito
+                .`when`(
+                    mockApiClient.sendAliasRequest(
+                        Mockito.any(
+                            String::class.java,
+                        ),
+                        Mockito.any(
+                            UploadSettings::class.java,
+                        ),
                     ),
-                    Mockito.any(
-                        UploadSettings::class.java,
-                    ),
-                ),
-            ).thenReturn(AliasNetworkResponse(400, error))
-        TestCase.assertNull(capturedResponse.value)
-        aliasRequest = TestingUtils.getInstance().randomAliasRequest
-        aliasRequestMessage = MPAliasMessage(aliasRequest, "das", "apiKey")
-        handler.uploadAliasRequest(3, aliasRequestMessage.toString(), mConfigManager.uploadSettings)
-        capturedResponse.value?.isSuccessful?.let { Assert.assertFalse(it) }
-        Assert.assertEquals(capturedResponse.value?.errorResponse, error)
-        capturedResponse.value?.willRetry()?.let { Assert.assertFalse(it) }
-        Assert.assertEquals(aliasRequest, capturedResponse.value?.request)
-        Assert.assertEquals(aliasRequestMessage.requestId, capturedResponse.value?.requestId)
+                ).thenReturn(AliasNetworkResponse(400, error))
+            TestCase.assertNull(capturedResponse.value)
+            aliasRequest = TestingUtils.getInstance().randomAliasRequest
+            aliasRequestMessage = MPAliasMessage(aliasRequest, "das", "apiKey")
+            handler.uploadAliasRequest(3, aliasRequestMessage.toString(), mConfigManager.uploadSettings)
+            capturedResponse.value?.isSuccessful?.let { Assert.assertFalse(it) }
+            Assert.assertEquals(capturedResponse.value?.errorResponse, error)
+            capturedResponse.value?.willRetry()?.let { Assert.assertFalse(it) }
+            Assert.assertEquals(aliasRequest, capturedResponse.value?.request)
+            Assert.assertEquals(aliasRequestMessage.requestId, capturedResponse.value?.requestId)
+        }
     }
 
     // we are uploading 100 messages at a time. Make sure when we have > 100 messages ready for upload, we perform
