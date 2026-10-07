@@ -5,6 +5,10 @@ apply plugin: 'mparticle.android.library.publish'
 sourceCompatibility = JavaVersion.toVersion(JAVA_VERSION)
 targetCompatibility = JavaVersion.toVersion(JAVA_VERSION)
 
+kotlin {
+    jvmToolchain(Integer.parseInt(JAVA_VERSION))
+}
+
 mparticleMavenPublish {
     artifactId.set('android-plugin')
     description.set('mParticle Gradle Plugin for managing Dataplanning functionality')
