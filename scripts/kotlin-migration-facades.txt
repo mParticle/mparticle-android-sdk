@@ -1,0 +1,74 @@
+# Java files that stay Java by design for the duration of the migration.
+#
+# These declare the public API that customers and kit authors compile against
+# (see docs/kotlin-migration/PLAYBOOK.md, "Scope"), plus package-info.java,
+# which has no Kotlin equivalent. scripts/kotlin_migration_progress.py counts
+# them separately so that "Java left to convert" can honestly reach zero.
+#
+# Adding a file here is an API-surface decision that needs a maintainer's
+# review, not just the author's. One repository-relative path per line.
+android-core/src/main/java/com/mparticle/AttributionError.java
+android-core/src/main/java/com/mparticle/AttributionListener.java
+android-core/src/main/java/com/mparticle/AttributionResult.java
+android-core/src/main/java/com/mparticle/BaseEvent.java
+android-core/src/main/java/com/mparticle/Configuration.java
+android-core/src/main/java/com/mparticle/MPEvent.java
+android-core/src/main/java/com/mparticle/MPReceiver.java
+android-core/src/main/java/com/mparticle/MPService.java
+android-core/src/main/java/com/mparticle/MParticle.java
+android-core/src/main/java/com/mparticle/MParticleOptions.java
+android-core/src/main/java/com/mparticle/MParticleTask.java
+android-core/src/main/java/com/mparticle/SdkListener.java
+android-core/src/main/java/com/mparticle/Session.java
+android-core/src/main/java/com/mparticle/commerce/CommerceEvent.java
+android-core/src/main/java/com/mparticle/commerce/Impression.java
+android-core/src/main/java/com/mparticle/commerce/Product.java
+android-core/src/main/java/com/mparticle/commerce/Promotion.java
+android-core/src/main/java/com/mparticle/commerce/TransactionAttributes.java
+android-core/src/main/java/com/mparticle/commerce/package-info.java
+android-core/src/main/java/com/mparticle/consent/CCPAConsent.java
+android-core/src/main/java/com/mparticle/consent/ConsentInstance.java
+android-core/src/main/java/com/mparticle/consent/ConsentState.java
+android-core/src/main/java/com/mparticle/consent/GDPRConsent.java
+android-core/src/main/java/com/mparticle/consent/package-info.java
+android-core/src/main/java/com/mparticle/identity/AliasRequest.java
+android-core/src/main/java/com/mparticle/identity/AliasResponse.java
+android-core/src/main/java/com/mparticle/identity/BaseIdentityTask.java
+android-core/src/main/java/com/mparticle/identity/IdentityApi.java
+android-core/src/main/java/com/mparticle/identity/IdentityApiRequest.java
+android-core/src/main/java/com/mparticle/identity/IdentityApiResult.java
+android-core/src/main/java/com/mparticle/identity/IdentityHttpResponse.java
+android-core/src/main/java/com/mparticle/identity/IdentityStateListener.java
+android-core/src/main/java/com/mparticle/identity/MParticleUser.java
+android-core/src/main/java/com/mparticle/identity/TaskFailureListener.java
+android-core/src/main/java/com/mparticle/identity/TaskSuccessListener.java
+android-core/src/main/java/com/mparticle/identity/package-info.java
+android-core/src/main/java/com/mparticle/internal/package-info.java
+android-core/src/main/java/com/mparticle/media/MPMediaAPI.java
+android-core/src/main/java/com/mparticle/media/MediaCallbacks.java
+android-core/src/main/java/com/mparticle/media/package-info.java
+android-core/src/main/java/com/mparticle/messaging/InstanceIdService.java
+android-core/src/main/java/com/mparticle/messaging/MPMessagingAPI.java
+android-core/src/main/java/com/mparticle/messaging/MPMessagingRouter.java
+android-core/src/main/java/com/mparticle/messaging/MessagingConfigCallbacks.java
+android-core/src/main/java/com/mparticle/messaging/ProviderCloudMessage.java
+android-core/src/main/java/com/mparticle/messaging/PushAnalyticsReceiver.java
+android-core/src/main/java/com/mparticle/messaging/PushAnalyticsReceiverCallback.java
+android-core/src/main/java/com/mparticle/messaging/package-info.java
+android-core/src/main/java/com/mparticle/networking/BaseNetworkConnection.java
+android-core/src/main/java/com/mparticle/networking/Certificate.java
+android-core/src/main/java/com/mparticle/networking/DomainMapping.java
+android-core/src/main/java/com/mparticle/networking/MPConnection.java
+android-core/src/main/java/com/mparticle/networking/MPUrl.java
+android-core/src/main/java/com/mparticle/networking/NetworkOptions.java
+android-core/src/main/java/com/mparticle/package-info.java
+android-core/src/main/java/com/mparticle/segmentation/Segment.java
+android-core/src/main/java/com/mparticle/segmentation/SegmentListener.java
+android-core/src/main/java/com/mparticle/segmentation/SegmentMembership.java
+android-core/src/main/java/com/mparticle/segmentation/package-info.java
+android-kit-base/src/main/java/com/mparticle/kits/CommerceEventUtils.java
+android-kit-base/src/main/java/com/mparticle/kits/FilteredIdentityApiRequest.java
+android-kit-base/src/main/java/com/mparticle/kits/FilteredMParticleUser.java
+android-kit-base/src/main/java/com/mparticle/kits/KitIntegration.java
+android-kit-base/src/main/java/com/mparticle/kits/KitUtils.java
+android-kit-base/src/main/java/com/mparticle/kits/ReportingMessage.java
