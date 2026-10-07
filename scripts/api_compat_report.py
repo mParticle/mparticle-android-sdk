@@ -35,6 +35,14 @@ Usage::
 
     scripts/api_compat_report.py [--module android-core] [--previous 6.1.2]
                                  [--skip-build] [--output-dir build/api-compat]
+                                 [--comment-file PATH]
+
+``--comment-file`` writes a short markdown summary (one line per module, with
+the findings collapsed behind a disclosure when a module is incompatible) to
+``PATH``. The workflow posts that file as a pull request comment, the same
+way the SDK Size Impact Report does, so an incompatibility is visible in the
+PR conversation without opening the job logs. The same text is also appended
+to ``GITHUB_STEP_SUMMARY`` when it is set, regardless of ``--comment-file``.
 
 Exit codes: 0 compatible, 2 incompatible change found, 1 tooling error.
 """
@@ -239,6 +247,19 @@ class Finding:
         return f"{where}: {', '.join(self.changes)}"
 
 
+@dataclass
+class ModuleResult:
+    module: str
+    previous: str
+    compared: int
+    findings: list[Finding]
+    additions: int
+
+    @property
+    def compatible(self) -> bool:
+        return not self.findings
+
+
 def _incompatible(element: ET.Element) -> bool:
     return element.get("binaryCompatible") == "false" or element.get("sourceCompatible") == "false"
 
@@ -297,8 +318,8 @@ def evaluate_report(xml_path: Path, renamed_members: dict[str, set[str]] | None 
     return findings, additions
 
 
-def compare(module: str, previous: str, japicmp: Path, work: Path, output_dir: Path) -> bool:
-    """Run japicmp for one module. Returns True when compatible."""
+def compare(module: str, previous: str, japicmp: Path, work: Path, output_dir: Path) -> ModuleResult:
+    """Run japicmp for one module."""
     module_dir = work / module
     module_dir.mkdir(parents=True, exist_ok=True)
 
@@ -343,7 +364,54 @@ def compare(module: str, previous: str, japicmp: Path, work: Path, output_dir: P
     else:
         print(f"{module}: compatible with {previous} ({additions} classes with additions only)")
     log(f"{module}: report at {html}")
-    return not findings
+    return ModuleResult(module=module, previous=previous, compared=new_kept, findings=findings, additions=additions)
+
+
+def render_report(results: list[ModuleResult]) -> str:
+    """Render the per-module results as the short markdown both the job summary and the
+    pull request comment use. Quick to read by default: one line per module, with the
+    findings behind a disclosure only when a module is incompatible."""
+    lines = ["<!-- binary-compatibility-report -->", "### Binary compatibility", ""]
+    for result in results:
+        compared_word = "class" if result.compared == 1 else "classes"
+        if result.compatible:
+            lines.append(
+                f"- ✅ `{result.module}` is compatible with {result.previous} "
+                f"({result.compared} {compared_word} compared, {result.additions} with additions only)."
+            )
+        else:
+            affected_classes = len({finding.class_name for finding in result.findings})
+            findings_word = "finding" if len(result.findings) == 1 else "findings"
+            lines.append(
+                f"- ❌ `{result.module}` is **incompatible** with {result.previous}: "
+                f"{len(result.findings)} {findings_word} across {affected_classes} of {result.compared} "
+                f"compared {compared_word}."
+            )
+            lines.append("")
+            lines.append("  <details><summary>Findings</summary>")
+            lines.append("")
+            for finding in result.findings:
+                lines.append(f"  - `{finding}`")
+            lines.append("")
+            lines.append("  </details>")
+    lines.append("")
+    lines.append(
+        "Compares the release AAR against the same artifact at the last version published to Maven "
+        "Central; R8-renamed classes and members are excluded (see the script docstring). Full "
+        "japicmp HTML/XML reports are attached as the `api-compat-reports` workflow artifact. This "
+        "check is not in the required-check set yet, so a red result here does not block merging."
+    )
+    return "\n".join(lines) + "\n"
+
+
+def write_report(report: str, comment_file: str | None) -> None:
+    """Write ``report`` to ``GITHUB_STEP_SUMMARY`` (if set) and to ``comment_file`` (if given)."""
+    summary = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary:
+        with open(summary, "a", encoding="utf-8") as out:
+            out.write(report)
+    if comment_file:
+        Path(comment_file).write_text(report, encoding="utf-8")
 
 
 def main(argv: list[str]) -> int:
@@ -352,6 +420,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--previous", help="published version to compare against (default: latest on Maven Central)")
     parser.add_argument("--skip-build", action="store_true", help="reuse existing release AARs")
     parser.add_argument("--output-dir", default="build/api-compat", help="where to write the japicmp reports")
+    parser.add_argument("--comment-file", help="write the markdown summary here as well, for posting as a pull request comment")
     args = parser.parse_args(argv)
 
     modules = tuple(args.module) if args.module else MODULES
@@ -359,24 +428,29 @@ def main(argv: list[str]) -> int:
     cache_dir = Path(os.environ.get("API_COMPAT_CACHE", tempfile.gettempdir())) / "mparticle-api-compat"
     cache_dir.mkdir(parents=True, exist_ok=True)
 
-    if not args.skip_build:
-        build_release_aars(modules)
+    try:
+        if not args.skip_build:
+            build_release_aars(modules)
+        japicmp = japicmp_jar(cache_dir)
+        results: list[ModuleResult] = []
+        with tempfile.TemporaryDirectory(prefix="api-compat-") as tmp:
+            work = Path(tmp)
+            for module in modules:
+                previous = args.previous or latest_published_version(module)
+                results.append(compare(module, previous, japicmp, work, output_dir))
+    except (subprocess.CalledProcessError, RuntimeError, OSError, zipfile.BadZipFile, KeyError, ET.ParseError) as error:
+        # Write the comment and summary even on a tooling failure, not just an incompatible
+        # result, so the workflow's "post a comment" steps can run unconditionally afterwards
+        # without needing to check whether this step produced a file.
+        log(f"error: {error}")
+        write_report(f"<!-- binary-compatibility-report -->\n### Binary compatibility\n\n"
+                      f"⚠️ Could not complete the comparison: `{error}`. See the job log for details.\n",
+                      args.comment_file)
+        return 1
 
-    japicmp = japicmp_jar(cache_dir)
-    all_compatible = True
-    with tempfile.TemporaryDirectory(prefix="api-compat-") as tmp:
-        work = Path(tmp)
-        for module in modules:
-            previous = args.previous or latest_published_version(module)
-            if not compare(module, previous, japicmp, work, output_dir):
-                all_compatible = False
-
-    summary = os.environ.get("GITHUB_STEP_SUMMARY")
-    if summary:
-        with open(summary, "a", encoding="utf-8") as out:
-            status = "compatible" if all_compatible else "**incompatible change detected**"
-            out.write(f"### Binary compatibility\n\n{', '.join(modules)}: {status} with the last published release. "
-                      f"Reports are attached as a workflow artifact.\n")
+    report = render_report(results)
+    write_report(report, args.comment_file)
+    all_compatible = all(result.compatible for result in results)
     return 0 if all_compatible else 2
 
 

@@ -10,6 +10,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 _SPEC = importlib.util.spec_from_file_location(
     "api_compat_report", Path(__file__).resolve().parent / "api_compat_report.py"
@@ -156,6 +157,51 @@ class EvaluateReportTest(unittest.TestCase):
         self.assertFalse(any(f.startswith("com.mparticle.identity.a") for f in rendered))
         self.assertFalse(any(f.startswith("com.mparticle.MParticle") for f in rendered))
         self.assertEqual(additions, 1)
+
+
+class RenderReportTest(unittest.TestCase):
+    def test_compatible_module_is_one_line_with_no_disclosure(self) -> None:
+        result = report.ModuleResult(module="android-kit-base", previous="6.1.2", compared=44, findings=[], additions=2)
+        text = report.render_report([result])
+        self.assertIn("<!-- binary-compatibility-report -->", text)
+        self.assertIn("✅ `android-kit-base` is compatible with 6.1.2 (44 classes compared, 2 with additions only).", text)
+        self.assertNotIn("<details>", text)
+
+    def test_incompatible_module_lists_findings_behind_a_disclosure(self) -> None:
+        finding = report.Finding("com.mparticle.AttributionError", "getMessage", ["METHOD_REMOVED"])
+        result = report.ModuleResult(module="android-core", previous="6.1.2", compared=115, findings=[finding], additions=0)
+        text = report.render_report([result])
+        self.assertIn("❌ `android-core` is **incompatible** with 6.1.2: 1 finding across 1 of 115 compared classes.", text)
+        self.assertIn("<details><summary>Findings</summary>", text)
+        self.assertIn("com.mparticle.AttributionError#getMessage: METHOD_REMOVED", text)
+
+    def test_compatible_module_with_one_compared_class_is_singular(self) -> None:
+        result = report.ModuleResult(module="android-kit-base", previous="6.1.2", compared=1, findings=[], additions=0)
+        text = report.render_report([result])
+        self.assertIn("compatible with 6.1.2 (1 class compared, 0 with additions only).", text)
+
+    def test_renders_one_line_per_module(self) -> None:
+        results = [
+            report.ModuleResult(module="android-core", previous="6.1.2", compared=115, findings=[], additions=0),
+            report.ModuleResult(module="android-kit-base", previous="6.1.2", compared=44, findings=[], additions=0),
+        ]
+        text = report.render_report(results)
+        self.assertIn("`android-core`", text)
+        self.assertIn("`android-kit-base`", text)
+
+
+class MainErrorHandlingTest(unittest.TestCase):
+    def test_tooling_error_still_writes_the_comment_file_and_returns_1(self) -> None:
+        # japicmp_jar runs even with --skip-build, so patching it exercises the error path
+        # without touching the network or Gradle.
+        with tempfile.TemporaryDirectory() as tmp:
+            comment_file = Path(tmp) / "comment.md"
+            with mock.patch.object(report, "japicmp_jar", side_effect=RuntimeError("boom")):
+                exit_code = report.main(["--skip-build", "--comment-file", str(comment_file)])
+            self.assertEqual(exit_code, 1)
+            text = comment_file.read_text(encoding="utf-8")
+            self.assertIn("<!-- binary-compatibility-report -->", text)
+            self.assertIn("boom", text)
 
 
 if __name__ == "__main__":
