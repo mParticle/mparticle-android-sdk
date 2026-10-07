@@ -5,7 +5,9 @@ Run with ``python3 -m unittest scripts/test_kotlin_migration_progress.py``.
 
 from __future__ import annotations
 
+import contextlib
 import importlib.util
+import io
 import sys
 import tempfile
 import unittest
@@ -97,6 +99,51 @@ class MeasureTest(unittest.TestCase):
             with self.assertRaises(FileNotFoundError):
                 progress.measure(Path(empty), [])
             self.assertEqual(progress.main(["--root", empty, "--format", "env"]), 1)
+
+
+class RenderHeadlineTest(unittest.TestCase):
+    def test_pure_progress_is_reported_plainly(self) -> None:
+        self.assertEqual(
+            progress.render_headline(delta_left=-12, delta_java=0),
+            "This pull request converts **12 lines** of Java to Kotlin.",
+        )
+
+    def test_no_change(self) -> None:
+        self.assertEqual(progress.render_headline(delta_left=0, delta_java=0), "No change to the Java left to convert.")
+
+    def test_java_growth_always_warns_even_when_left_also_drops(self) -> None:
+        # The ratchet fails the job on delta_java alone, so a drop in delta_left must not hide
+        # that: a headline reading "converts N lines" while the ratchet below still goes red
+        # would contradict the job's own result.
+        headline = progress.render_headline(delta_left=-5, delta_java=20)
+        self.assertIn(":warning:", headline)
+        self.assertIn("adds 20 lines", headline)
+        self.assertIn("still drops by 5 lines", headline)
+
+    def test_java_growth_without_left_drop_has_no_dangling_clause(self) -> None:
+        headline = progress.render_headline(delta_left=3, delta_java=20)
+        self.assertIn("adds 20 lines", headline)
+        self.assertNotIn("still drops", headline)
+
+    def test_left_increase_without_java_growth_is_flagged_not_silent(self) -> None:
+        # Java left to convert went up (e.g. code moved out of a facade into a convertible file)
+        # even though total Java did not grow; the ratchet only checks delta_java, so the
+        # headline is the only place this regression can surface.
+        headline = progress.render_headline(delta_left=7, delta_java=0)
+        self.assertIn(":warning:", headline)
+        self.assertIn("increased by 7 lines", headline)
+        self.assertNotIn("No change", headline)
+
+    def test_left_increase_with_java_shrinking_is_still_flagged(self) -> None:
+        headline = progress.render_headline(delta_left=4, delta_java=-10)
+        self.assertIn("increased by 4 lines", headline)
+
+    def test_headline_cli_mode_does_not_require_a_tree(self) -> None:
+        buffer = io.StringIO()
+        with contextlib.redirect_stdout(buffer):
+            exit_code = progress.main(["--headline", "-5", "0"])
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(buffer.getvalue().strip(), "This pull request converts **5 lines** of Java to Kotlin.")
 
 
 if __name__ == "__main__":

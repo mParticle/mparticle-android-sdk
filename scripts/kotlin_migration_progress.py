@@ -21,8 +21,11 @@ Usage::
 
     scripts/kotlin_migration_progress.py [--root DIR] [--format markdown|env]
                                          [--facades FILE]
+    scripts/kotlin_migration_progress.py --headline DELTA_LEFT DELTA_JAVA
 
-The ``env`` format prints ``KEY=value`` lines for CI.
+The ``env`` format prints ``KEY=value`` lines for CI. ``--headline`` renders the sticky-comment
+headline for a pair of already-computed deltas (head minus base) instead of measuring a tree; see
+``render_headline`` for why it checks ``delta_java`` before ``delta_left``.
 """
 
 from __future__ import annotations
@@ -145,6 +148,33 @@ def render_markdown(results: list[ModuleStats]) -> str:
     return "\n".join(lines)
 
 
+def render_headline(delta_left: int, delta_java: int) -> str:
+    """Render the sticky-comment headline for a before/after measurement.
+
+    ``delta_java`` is checked first because that is what the ratchet step fails the job on; a
+    drop in ``delta_left`` is reported alongside it rather than instead of it, so the headline
+    never looks green while the job is about to go red. A rise in ``delta_left`` is called out
+    even when ``delta_java`` does not grow (code moved out of a facade into a convertible file),
+    since the ratchet itself would otherwise stay silent on that regression.
+    """
+    if delta_java > 0:
+        headline = f":warning: This pull request **adds {delta_java} lines** of Java to the published modules."
+        if delta_left < 0:
+            headline += (
+                f" Java left to convert still drops by {-delta_left} lines, but the ratchet below "
+                "checks total Java, not just what is left to convert."
+            )
+        return headline
+    if delta_left < 0:
+        return f"This pull request converts **{-delta_left} lines** of Java to Kotlin."
+    if delta_left > 0:
+        return (
+            f":warning: The Java left to convert increased by {delta_left} lines, even though total "
+            "Java did not grow -- check whether code moved out of a facade file into a convertible one."
+        )
+    return "No change to the Java left to convert."
+
+
 def render_env(results: list[ModuleStats]) -> str:
     total = totals(results)
     return "\n".join(
@@ -166,7 +196,18 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--root", default=".", help="repository root to measure (default: current directory)")
     parser.add_argument("--format", choices=("markdown", "env"), default="markdown")
     parser.add_argument("--facades", help="facade list to apply (default: scripts/kotlin-migration-facades.txt under --root)")
+    parser.add_argument(
+        "--headline",
+        nargs=2,
+        type=int,
+        metavar=("DELTA_LEFT", "DELTA_JAVA"),
+        help="print the sticky-comment headline for these deltas and exit; does not measure a tree",
+    )
     args = parser.parse_args(argv)
+
+    if args.headline is not None:
+        print(render_headline(*args.headline))
+        return 0
 
     root = Path(args.root).resolve()
     facade_path = Path(args.facades).resolve() if args.facades else root / FACADE_LIST

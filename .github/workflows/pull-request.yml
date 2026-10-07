@@ -325,13 +325,7 @@ jobs:
           base_java=$(read_metric "${RUNNER_TEMP}/base.env" JAVA_LOC)
           delta_left=$((head_left - base_left))
           delta_java=$((head_java - base_java))
-          if [ "${delta_left}" -lt 0 ]; then
-            headline="This pull request converts **$((-delta_left)) lines** of Java to Kotlin."
-          elif [ "${delta_java}" -gt 0 ]; then
-            headline=":warning: This pull request **adds ${delta_java} lines** of Java to the published modules."
-          else
-            headline="No change to the Java left to convert."
-          fi
+          headline=$(python3 scripts/kotlin_migration_progress.py --headline "${delta_left}" "${delta_java}")
           {
             echo "${COMMENT_IDENTIFIER}"
             echo "### Kotlin migration progress"
