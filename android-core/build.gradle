@@ -113,6 +113,10 @@ android {
     }
 }
 
+kotlin {
+    jvmToolchain(Integer.parseInt(JAVA_VERSION))
+}
+
 dependencies {
     //noinspection GradleCompatible
     compileOnly 'com.google.firebase:firebase-messaging:[10.2.1, )'

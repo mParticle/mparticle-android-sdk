@@ -10,9 +10,6 @@ android {
         targetCompatibility = JavaVersion.toVersion(JAVA_VERSION)
     }
 
-    kotlinOptions {
-        jvmTarget = JAVA_VERSION
-    }
     defaultConfig {
         //This is set to 21 to avoid slow multidex.
         minSdk 21
@@ -61,6 +58,10 @@ android {
     lint {
         disable 'OutdatedLibrary'
     }
+}
+
+kotlin {
+    jvmToolchain(Integer.parseInt(JAVA_VERSION))
 }
 
 dependencies {
