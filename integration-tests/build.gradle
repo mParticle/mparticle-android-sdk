@@ -75,7 +75,7 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.json:json:20250517'
 
-    wiremock 'org.wiremock:wiremock-standalone:3.13.1'
+    wiremock 'org.wiremock:wiremock-standalone:3.13.2'
 }
 
 // A throwaway CA plus a leaf for the emulator's host alias, generated per checkout so no private
