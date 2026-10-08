@@ -10,12 +10,6 @@
 
 ### Kits
 
-#### Rokt
-
-##### Changed
-
-- Update the Rokt SDK and payment extension to 6.2.1
-
 #### Appsflyer
 
 ##### Fixed
