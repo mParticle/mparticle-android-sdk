@@ -1057,6 +1057,7 @@ public class com/mparticle/internal/AppStateManager {
 	public final fun setMessageManager (Lcom/mparticle/internal/MessageManager;)V
 	public fun setSession (Lcom/mparticle/internal/InternalSession;)V
 	public final fun shouldEndSession ()Z
+	public final fun shutdown ()V
 	public final fun startSession ()V
 }
 

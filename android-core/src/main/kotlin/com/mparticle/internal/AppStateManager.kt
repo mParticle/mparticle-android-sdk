@@ -49,6 +49,8 @@ constructor(context: Context, unitTesting: Boolean = false) {
     @JvmField
     var delayedBackgroundCheckHandler: Handler = Handler(Looper.getMainLooper())
 
+    private var lifecycleCallbacks: Application.ActivityLifecycleCallbacks? = null
+
     /**
      * Some providers need to know for the given session, how many 'interruptions' there were - how many
      * times did the user leave and return prior to the session timing out.
@@ -357,11 +359,20 @@ constructor(context: Context, unitTesting: Boolean = false) {
 
     @TargetApi(14)
     private fun setupLifecycleCallbacks() {
-        (mContext as Application).registerActivityLifecycleCallbacks(
-            MPLifecycleCallbackDelegate(
-                this,
-            ),
-        )
+        lifecycleCallbacks =
+            MPLifecycleCallbackDelegate(this).also {
+                (mContext as Application).registerActivityLifecycleCallbacks(it)
+            }
+    }
+
+    /**
+     * Detaches this instance from the process, so that the next start of the SDK behaves like a new app launch.
+     */
+    fun shutdown() {
+        lifecycleCallbacks?.let { (mContext as Application).unregisterActivityLifecycleCallbacks(it) }
+        lifecycleCallbacks = null
+        delayedBackgroundCheckHandler.removeCallbacksAndMessages(null)
+        mInitialized = false
     }
 
     open fun isBackgrounded(): Boolean = !mInitialized || (currentActivity == null && (time - mLastStoppedTime.get() >= ACTIVITY_DELAY))
