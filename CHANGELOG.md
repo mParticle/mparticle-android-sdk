@@ -16,12 +16,6 @@
 
 - Honor the "Require Manual Start" connection setting on Android: the kit no longer calls AppsFlyer's `start` automatically when manual start is enabled, in both the `appsflyer-6` and `appsflyer-7` kits ([#869](https://github.com/mParticle/mparticle-android-sdk/pull/869))
 
-#### Comscore
-
-##### Fixed
-
-- Pin Comscore Android Analytics to 6.15.0 to keep the kit compatible with Android API 35 ([#860](https://github.com/mParticle/mparticle-android-sdk/pull/860))
-
 ## [6.1.5] - 2026-10-02
 
 ### Kits
