@@ -122,6 +122,17 @@ class RoktKit :
         super.reset()
     }
 
+    public override fun onKitDestroy() {
+        kitManager?.runOnMainThread {
+            try {
+                Rokt.close()
+            } catch (e: Exception) {
+                logError("Error closing Rokt", e)
+            }
+        }
+        unregister(this)
+    }
+
     /*
      * Overrides for CommerceListener
      */
@@ -525,6 +536,12 @@ class RoktKit :
 
         fun register(kit: RoktKit) {
             instance = kit
+        }
+
+        internal fun unregister(kit: RoktKit) {
+            if (instance === kit) {
+                instance = null
+            }
         }
 
         const val NAME = "Rokt"
