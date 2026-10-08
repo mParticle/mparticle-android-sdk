@@ -1,21 +1,26 @@
 #!/usr/bin/env python3
-"""Render an SDK Size Impact Report comment from two measure_size.sh JSON payloads.
+"""Render an SDK Size Impact Report comment from base/head JSON payloads of one or more fixtures.
 
 Usage:
-  render_size_report.py [options] <base-json> <head-json>
+  render_size_report.py [--marker TEXT] [--footnote TEXT]
+      --fixture NAME BASE_JSON HEAD_JSON [--baseline-note TEXT] --stack NAME:LABEL[:BASE] ...
+      [--fixture ...]
 
 Options:
-  --stack NAME:LABEL[:BASE]  A column group to report. NAME matches the `<name>_*_bytes` keys
-                             in the payload; LABEL is the heading. With BASE, an extra column
+  --fixture NAME BASE HEAD   Starts a fixture: one reference app measured on the target branch
+                             (BASE) and the pull request (HEAD). The --baseline-note and --stack
+                             options that follow belong to it. Repeatable; order is preserved.
+  --baseline-note TEXT       Sentence describing what this fixture's baseline app is. Per
+                             fixture, because the fixtures do not share a baseline.
+  --stack NAME:LABEL[:BASE]  A table to report. NAME matches the `<name>_*_bytes` keys in the
+                             fixture's payload; LABEL is the heading. With BASE, an extra column
                              shows this stack's cost over stack BASE rather than over the
-                             empty baseline. Repeatable; order is preserved.
+                             fixture's baseline. Repeatable; order is preserved.
   --marker TEXT              HTML comment used to find and replace the sticky PR comment.
-  --baseline-note TEXT       Sentence describing what the baseline app is. Per-workflow rather
-                             than fixed, because the fixtures do not share a baseline.
   --footnote TEXT            Trailing line naming what was measured, so a comment left behind
                              by a later push is visibly stale rather than passing as current.
 
-Either payload may be empty or unparseable -- that renders as "not measured" rather than as a
+Any payload may be empty or unparseable -- that renders as "not measured" rather than as a
 zero, so a broken measurement can never be mistaken for a size-neutral change.
 """
 
@@ -88,62 +93,75 @@ def table(base, head, stack, marginal_base, marginal_label):
     return "\n".join(rows)
 
 
-def status(base, head, stacks):
-    changes = []
-    for stack, _, _ in stacks:
-        was = cost(base, stack, "install")
-        now = cost(head, stack, "install")
-        if was is not None and now is not None:
-            changes.append(now - was)
+def status(fixtures):
+    changes, unmeasured = [], 0
+    for fixture in fixtures:
+        for stack, _, _ in fixture["stacks"]:
+            was = cost(fixture["base"], stack, "install")
+            now = cost(fixture["head"], stack, "install")
+            if was is not None and now is not None:
+                changes.append(now - was)
+            else:
+                unmeasured += 1
     if not changes:
         return "ℹ️ Size could not be measured on one or both branches."
     # An increase in any stack wins over a decrease in another: taking the
     # largest-magnitude delta would let a shrink in one hide a growth in the other.
     if max(changes) > NEUTRAL_BYTES:
-        return "⚠️ This change increases SDK size impact."
-    if min(changes) < -NEUTRAL_BYTES:
-        return "✅ This change decreases SDK size impact."
-    return "➡️ SDK size impact change is minimal."
+        verdict = "⚠️ This change increases SDK size impact."
+    elif min(changes) < -NEUTRAL_BYTES:
+        verdict = "✅ This change decreases SDK size impact."
+    else:
+        verdict = "➡️ SDK size impact change is minimal."
+    # Otherwise a fixture that failed to build would pass as size-neutral.
+    if unmeasured:
+        verdict += " Some stacks could not be measured, so this covers only the rest."
+    return verdict
 
 
 def parse_args(argv):
-    stacks, marker, paths, footnote, baseline_note = (
-        [],
-        "<!-- sdk-size-report -->",
-        [],
-        "",
-        "",
-    )
+    fixtures, marker, footnote = [], "<!-- sdk-size-report -->", ""
     index = 0
     while index < len(argv):
         arg = argv[index]
-        if arg == "--footnote":
-            index += 1
-            footnote = argv[index]
+        if arg == "--fixture":
+            name, base, head = argv[index + 1 : index + 4]
+            index += 3
+            fixtures.append(
+                {"name": name, "base": load(base), "head": load(head), "note": "", "stacks": []}
+            )
+        elif arg in ("--baseline-note", "--stack") and not fixtures:
+            raise ValueError(f"{arg} must follow a --fixture")
         elif arg == "--baseline-note":
             index += 1
-            baseline_note = argv[index]
+            fixtures[-1]["note"] = argv[index]
         elif arg == "--stack":
             index += 1
             parts = argv[index].split(":")
             if len(parts) == 2:
                 parts.append("")
-            stacks.append((parts[0], parts[1], parts[2]))
+            fixtures[-1]["stacks"].append((parts[0], parts[1], parts[2]))
         elif arg == "--marker":
             index += 1
             marker = argv[index]
+        elif arg == "--footnote":
+            index += 1
+            footnote = argv[index]
         else:
-            paths.append(arg)
+            raise ValueError(f"unexpected argument: {arg}")
         index += 1
-    return stacks, marker, paths, footnote, baseline_note
+    return fixtures, marker, footnote
 
 
 def main(argv):
-    stacks, marker, paths, footnote, baseline_note = parse_args(argv)
-    if len(paths) != 2 or not stacks:
+    try:
+        fixtures, marker, footnote = parse_args(argv)
+    except ValueError as error:
+        print(f"{error}\n{__doc__}", file=sys.stderr)
+        return 2
+    if not fixtures or not all(fixture["stacks"] for fixture in fixtures):
         print(__doc__, file=sys.stderr)
         return 2
-    base, head = load(paths[0]), load(paths[1])
 
     parts = [
         marker,
@@ -151,22 +169,29 @@ def main(argv):
         "",
         "What the SDK adds to a minified release APK.",
     ]
-    if baseline_note:
-        parts += ["", baseline_note]
-    labels = {name: label for name, label, _ in stacks}
-    for stack, label, marginal_base in stacks:
-        marginal_label = labels.get(marginal_base, marginal_base)
-        parts += [
-            "",
-            f"### {label}",
-            "",
-            table(base, head, stack, marginal_base, marginal_label),
-        ]
-    parts += ["", status(base, head, stacks), ""]
+    for fixture in fixtures:
+        labels = {name: label for name, label, _ in fixture["stacks"]}
+        for position, (stack, label, marginal_base) in enumerate(fixture["stacks"]):
+            parts += ["", f"### {label}", ""]
+            # Once per fixture: later stacks share the baseline, and their "On top of" column
+            # already names what they are measured against.
+            if position == 0 and fixture["note"]:
+                parts += [fixture["note"], ""]
+            parts.append(
+                table(
+                    fixture["base"],
+                    fixture["head"],
+                    stack,
+                    marginal_base,
+                    labels.get(marginal_base, marginal_base),
+                )
+            )
+    parts += ["", status(fixtures), ""]
     parts += ["<details><summary>Raw measurements</summary>", ""]
-    for label, data in (("Target branch", base), ("This PR", head)):
-        body = json.dumps(data, sort_keys=True) if data else "not measured"
-        parts += [f"**{label}:**", "", "```json", body, "```", ""]
+    for fixture in fixtures:
+        for label, data in (("Target branch", fixture["base"]), ("This PR", fixture["head"])):
+            body = json.dumps(data, sort_keys=True) if data else "not measured"
+            parts += [f"**{fixture['name']}, {label}:**", "", "```json", body, "```", ""]
     parts += ["</details>"]
     if footnote:
         parts += ["", f"<sub>{footnote}</sub>"]

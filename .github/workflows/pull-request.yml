@@ -405,11 +405,12 @@ jobs:
 
   size-report:
     name: "SDK Size Impact"
-    # Advisory. Measures what the Core SDK adds to a minified release APK and compares the PR
-    # against its base. Reports via a sticky PR comment and the job summary; deliberately
-    # absent from every other job's `needs` so it can never block a merge.
+    # Advisory. Measures what the Core SDK, and the Core SDK with the Rokt kit, add to a minified
+    # release APK and compares the PR against its base. Reports via a sticky PR comment and the
+    # job summary; deliberately absent from every other job's `needs` so it can never block a
+    # merge.
     if: github.event_name == 'pull_request'
-    timeout-minutes: 30
+    timeout-minutes: 60
     runs-on: ubuntu-latest
     continue-on-error: true
     permissions:
@@ -441,13 +442,14 @@ jobs:
           persist-credentials: false
           ref: ${{ github.event.pull_request.base.sha }}
           path: base
-      - name: "Pin the head fixture into the target checkout"
-        # Both sides must be measured with the same fixture: the base may predate it entirely,
-        # and otherwise a change to the fixture would show up as an SDK size change.
+      - name: "Pin the head fixtures into the target checkout"
+        # Both sides must be measured with the same fixtures: the base may predate them entirely,
+        # and otherwise a change to a fixture would show up as an SDK size change.
         run: |
           set -euo pipefail
-          rm -rf base/size-report
+          rm -rf base/size-report base/size-report-rokt
           cp -R head/size-report base/size-report
+          cp -R head/size-report-rokt base/size-report-rokt
           if ! grep -q 'size\.report' base/settings.gradle; then
             printf "\n%s\n%s\n%s\n" \
               "if (settings.startParameter.projectProperties['size.report'] == 'true') {" \
@@ -461,12 +463,20 @@ jobs:
           java-version: "17"
       - name: "Setup Gradle"
         uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
-      - name: "Measure target branch"
+      - name: "Measure target branch: Core SDK"
         continue-on-error: true
-        run: head/scripts/sdk-size-report.sh base > "${RUNNER_TEMP}/base.json"
-      - name: "Measure PR head"
+        run: head/scripts/sdk-size-report.sh base > "${RUNNER_TEMP}/core-base.json"
+      - name: "Measure PR head: Core SDK"
         continue-on-error: true
-        run: head/scripts/sdk-size-report.sh head > "${RUNNER_TEMP}/head.json"
+        run: head/scripts/sdk-size-report.sh head > "${RUNNER_TEMP}/core-head.json"
+      # The Core SDK fixture alone understates a core change: R8 strips the core code only the
+      # Rokt kit calls, so that code's cost shows up only when the kit is linked in.
+      - name: "Measure target branch: Rokt kit"
+        continue-on-error: true
+        run: head/scripts/rokt-size-report.sh base > "${RUNNER_TEMP}/rokt-base.json"
+      - name: "Measure PR head: Rokt kit"
+        continue-on-error: true
+        run: head/scripts/rokt-size-report.sh head > "${RUNNER_TEMP}/rokt-head.json"
       - name: "Render report"
         env:
           # Names what was measured. A comment left behind by a later push then reads as stale
@@ -477,22 +487,30 @@ jobs:
             || github.sha }}
         run: |
           set -euo pipefail
-          touch "${RUNNER_TEMP}/base.json" "${RUNNER_TEMP}/head.json"
-          head/.github/scripts/render_size_report.py \
+          cd "${RUNNER_TEMP}"
+          touch core-base.json core-head.json rokt-base.json rokt-head.json
+          "${GITHUB_WORKSPACE}/head/.github/scripts/render_size_report.py" \
             --marker "${COMMENT_IDENTIFIER}" \
             --footnote "${FOOTNOTE}" \
+            --fixture core core-base.json core-head.json \
             --baseline-note "Measured against an empty baseline app. Unlike the Rokt kit, android-core ships no Compose and no resources, so there is nothing here that a host app would already provide." \
             --stack 'core:mParticle Core SDK' \
-            "${RUNNER_TEMP}/base.json" "${RUNNER_TEMP}/head.json" > "${RUNNER_TEMP}/size-report.md"
-          cat "${RUNNER_TEMP}/size-report.md" >> "${GITHUB_STEP_SUMMARY}"
+            --fixture rokt rokt-base.json rokt-head.json \
+            --baseline-note "Measured against a Compose + Material3 reference app, so these are the costs on top of an app that already ships Compose. The reference app's dependencies are a documented convention, not a measured average: see \`size-report-rokt/README.md\`." \
+            --stack 'kit:mParticle Core + Rokt kit' \
+            --stack 'sdkplus:Rokt SDK+ umbrella (adds the payment extension):kit' \
+            > size-report.md
+          cat size-report.md >> "${GITHUB_STEP_SUMMARY}"
       - name: "Upload size report"
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: sdk-size-report
           path: |
             ${{ runner.temp }}/size-report.md
-            ${{ runner.temp }}/base.json
-            ${{ runner.temp }}/head.json
+            ${{ runner.temp }}/core-base.json
+            ${{ runner.temp }}/core-head.json
+            ${{ runner.temp }}/rokt-base.json
+            ${{ runner.temp }}/rokt-head.json
           retention-days: 14
       # A pull_request from a fork gets a read-only token regardless of the permissions above,
       # so commenting would 403. The job summary and the artifact still carry the result.
