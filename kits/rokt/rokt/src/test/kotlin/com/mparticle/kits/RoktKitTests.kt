@@ -694,11 +694,58 @@ class RoktKitTests {
 
     @Test
     fun test_addIdentityAttributes_When_userIdentities_Other_map_To_Identity() {
+        val result = addIdentityAttributesWithHashedEmailSetting(
+            "Other",
+            mapOf(IdentityType.Email to "TestEmail@gamil.com", IdentityType.Other to "hashedEmail@123.com"),
+        )
+        assertEquals(5, result.size)
+
+        assertTrue(result.containsKey("key1"))
+        assertTrue(result.containsKey("key2"))
+        assertTrue(result.containsKey("key3"))
+        assertTrue(result.containsKey("email"))
+        assertEquals("hashedEmail@123.com", result["emailsha256"])
+        assertFalse(result.containsKey("other"))
+    }
+
+    @Test
+    fun test_addIdentityAttributes_When_hashedEmailSetting_isLowercase_map_To_emailsha256() {
+        val result = addIdentityAttributesWithHashedEmailSetting(
+            "other",
+            mapOf(IdentityType.Other to "hashedEmail@123.com"),
+        )
+
+        assertEquals("hashedEmail@123.com", result["emailsha256"])
+        assertFalse(result.containsKey("other"))
+    }
+
+    @Test
+    fun test_addIdentityAttributes_When_hashedEmailSetting_isOther2_map_only_Other2_To_emailsha256() {
+        val result = addIdentityAttributesWithHashedEmailSetting(
+            "Other2",
+            mapOf(IdentityType.Other to "otherValue", IdentityType.Other2 to "hashedEmail@123.com"),
+        )
+
+        assertEquals("hashedEmail@123.com", result["emailsha256"])
+        assertEquals("otherValue", result["other"])
+        assertFalse(result.containsKey("other2"))
+    }
+
+    @Test
+    fun test_parseIdentityType_isCaseInsensitive_and_rejectsUnknown() {
+        assertEquals(IdentityType.Other, RoktKitRequestHelper.parseIdentityType("Other"))
+        assertEquals(IdentityType.Other, RoktKitRequestHelper.parseIdentityType("other"))
+        assertEquals(IdentityType.Other10, RoktKitRequestHelper.parseIdentityType("OTHER10"))
+        assertNull(RoktKitRequestHelper.parseIdentityType("Unknown"))
+        assertNull(RoktKitRequestHelper.parseIdentityType(null))
+    }
+
+    private fun addIdentityAttributesWithHashedEmailSetting(
+        setting: String,
+        identities: Map<IdentityType, String>,
+    ): Map<String, String> {
         val mockFilterUser = mock(FilteredMParticleUser::class.java)
-        val userIdentities = HashMap<IdentityType, String>()
-        userIdentities.put(IdentityType.Email, "TestEmail@gamil.com")
-        userIdentities.put(IdentityType.Other, "hashedEmail@123.com")
-        Mockito.`when`(mockFilterUser.userIdentities).thenReturn(userIdentities)
+        Mockito.`when`(mockFilterUser.userIdentities).thenReturn(HashMap(identities))
         val attributes: Map<String, String> = mapOf(
             "key1" to "value1",
             "key2" to "value2",
@@ -706,21 +753,15 @@ class RoktKitTests {
         )
         val hashedField = RoktKit::class.java.getDeclaredField("hashedEmailUserIdentityType")
         hashedField.isAccessible = true
-        hashedField.set(roktKit, "Other")
+        hashedField.set(roktKit, setting)
         val method: Method = RoktKit::class.java.getDeclaredMethod(
             "addIdentityAttributes",
             Map::class.java,
             FilteredMParticleUser::class.java,
         )
         method.isAccessible = true
-        val result = method.invoke(roktKit, attributes, mockFilterUser) as Map<String, String>
-        assertEquals(5, result.size)
-
-        assertTrue(result.containsKey("key1"))
-        assertTrue(result.containsKey("key2"))
-        assertTrue(result.containsKey("key3"))
-        assertTrue(result.containsKey("email"))
-        assertTrue(result.containsKey("other"))
+        @Suppress("UNCHECKED_CAST")
+        return method.invoke(roktKit, attributes, mockFilterUser) as Map<String, String>
     }
 
     @Test

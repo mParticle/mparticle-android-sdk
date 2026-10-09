@@ -105,6 +105,10 @@ internal object RoktKitRequestHelper {
         }
     }
 
+    // Case-insensitive to match the iOS and web kits; unrecognised values such as "Unknown" disable the mapping.
+    fun parseIdentityType(value: String?): MParticle.IdentityType? =
+        MParticle.IdentityType.values().firstOrNull { it.name.equals(value, ignoreCase = true) }
+
     private fun getValueIgnoreCase(map: Map<String, String>, searchKey: String): String? {
         for ((key, value) in map) {
             if (key.equals(searchKey, ignoreCase = true)) {
@@ -165,15 +169,7 @@ internal object RoktKitRequestHelper {
         val hasHashedEmail = !hashedEmail.isNullOrEmpty()
 
         if ((hasEmail || hasHashedEmail) && user != null) {
-            var selectedIdentityType: MParticle.IdentityType? = null
-            try {
-                val identityTypeStr = kitConfiguration?.hashedEmailUserIdentityType
-                if (identityTypeStr != null) {
-                    selectedIdentityType = MParticle.IdentityType.valueOf(identityTypeStr)
-                }
-            } catch (e: IllegalArgumentException) {
-                Logger.error("Invalid identity type ${e.message}")
-            }
+            val selectedIdentityType = parseIdentityType(kitConfiguration?.hashedEmailUserIdentityType)
 
             val existingEmail = user.userIdentities[MParticle.IdentityType.Email]
             val existingHashedEmail = selectedIdentityType?.let { user.userIdentities[it] }
