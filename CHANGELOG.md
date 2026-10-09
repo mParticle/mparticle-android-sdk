@@ -16,6 +16,34 @@
 
 - Honor the "Require Manual Start" connection setting on Android: the kit no longer calls AppsFlyer's `start` automatically when manual start is enabled, in both the `appsflyer-6` and `appsflyer-7` kits ([#869](https://github.com/mParticle/mparticle-android-sdk/pull/869))
 
+## [6.1.6] - 2026-10-09
+
+### Core
+
+#### Fixed
+
+- Handle empty success responses and add end-to-end payload tests ([#880](https://github.com/mParticle/mparticle-android-sdk/pull/880))
+- Include changelog notes in GitHub releases ([#874](https://github.com/mParticle/mparticle-android-sdk/pull/874))
+
+#### Changed
+
+- Add public repository confidentiality rules for agents ([#884](https://github.com/mParticle/mparticle-android-sdk/pull/884))
+- Add the Kotlin migration playbook and tracker ([#846](https://github.com/mParticle/mparticle-android-sdk/pull/846))
+
+### Kits
+
+#### Comscore
+
+##### Fixed
+
+- Keep Comscore kit compatible with Android API 35 and update Mockito ([#860](https://github.com/mParticle/mparticle-android-sdk/pull/860))
+
+#### Rokt
+
+##### Fixed
+
+- Update Rokt SDK and payment extension to 6.2.1 ([#886](https://github.com/mParticle/mparticle-android-sdk/pull/886))
+
 ## [6.1.5] - 2026-10-02
 
 ### Kits
