@@ -2,20 +2,6 @@
 
 ## [Unreleased]
 
-### Core
-
-#### Fixed
-
-- Stop re-sending accepted event batches and skipping uploads when a success response has an empty or non-JSON body
-
-### Kits
-
-#### Appsflyer
-
-##### Fixed
-
-- Honor the "Require Manual Start" connection setting on Android: the kit no longer calls AppsFlyer's `start` automatically when manual start is enabled, in both the `appsflyer-6` and `appsflyer-7` kits ([#869](https://github.com/mParticle/mparticle-android-sdk/pull/869))
-
 ## [6.1.7] - 2026-10-09
 
 ### Kits
