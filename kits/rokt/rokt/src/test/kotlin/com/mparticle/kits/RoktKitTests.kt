@@ -693,6 +693,32 @@ class RoktKitTests {
     }
 
     @Test
+    fun test_addIdentityAttributes_When_userIdentities_Contain_phone_numbers_use_snake_case_keys() {
+        val mockFilterUser = mock(FilteredMParticleUser::class.java)
+        val userIdentities = HashMap<IdentityType, String>()
+        userIdentities.put(IdentityType.MobileNumber, "+13125551515")
+        userIdentities.put(IdentityType.PhoneNumber2, "+13125551516")
+        userIdentities.put(IdentityType.PhoneNumber3, "+13125551517")
+        Mockito.`when`(mockFilterUser.userIdentities).thenReturn(userIdentities)
+        val method: Method = RoktKit::class.java.getDeclaredMethod(
+            "addIdentityAttributes",
+            Map::class.java,
+            FilteredMParticleUser::class.java,
+        )
+        method.isAccessible = true
+        val result = method.invoke(roktKit, mutableMapOf<String, String>(), mockFilterUser) as Map<String, String>
+
+        assertEquals(
+            mapOf(
+                "mobile_number" to "+13125551515",
+                "phone_number_2" to "+13125551516",
+                "phone_number_3" to "+13125551517",
+            ),
+            result,
+        )
+    }
+
+    @Test
     fun test_addIdentityAttributes_When_userIdentities_Other_map_To_Identity() {
         val mockFilterUser = mock(FilteredMParticleUser::class.java)
         val userIdentities = HashMap<IdentityType, String>()

@@ -437,7 +437,7 @@ class RoktKit :
         val identityAttributes = mutableMapOf<String, String>()
         if (filterUser != null) {
             for ((identityNumberKey, identityValue) in filterUser.userIdentities) {
-                val identityType = getStringForIdentity(identityNumberKey)
+                val identityType = getStringForIdentity(identityNumberKey) ?: continue
                 if (identityType.equals(hashedEmailUserIdentityType)) {
                     identityAttributes["emailsha256"] = identityValue
                 } else {
@@ -486,7 +486,7 @@ class RoktKit :
         }
     }
 
-    private fun getStringForIdentity(identityType: IdentityType): String = when (identityType) {
+    private fun getStringForIdentity(identityType: IdentityType): String? = when (identityType) {
         IdentityType.Other -> "other"
         IdentityType.CustomerId -> "customerid"
         IdentityType.Facebook -> "facebook"
@@ -506,10 +506,10 @@ class RoktKit :
         IdentityType.Other8 -> "other8"
         IdentityType.Other9 -> "other9"
         IdentityType.Other10 -> "other10"
-        IdentityType.MobileNumber -> "mobilenumber"
-        IdentityType.PhoneNumber2 -> "phonenumber2"
-        IdentityType.PhoneNumber3 -> "phonenumber3"
-        else -> ""
+        IdentityType.MobileNumber -> "mobile_number"
+        IdentityType.PhoneNumber2 -> "phone_number_2"
+        IdentityType.PhoneNumber3 -> "phone_number_3"
+        else -> null
     }
 
     companion object {
