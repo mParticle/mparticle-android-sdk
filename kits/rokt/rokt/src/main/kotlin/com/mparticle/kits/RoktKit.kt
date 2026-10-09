@@ -436,12 +436,12 @@ class RoktKit :
     ): MutableMap<String, String> {
         val identityAttributes = mutableMapOf<String, String>()
         if (filterUser != null) {
+            val hashedEmailIdentity = RoktKitRequestHelper.parseIdentityType(hashedEmailUserIdentityType)
             for ((identityNumberKey, identityValue) in filterUser.userIdentities) {
-                val identityType = getStringForIdentity(identityNumberKey)
-                if (identityType.equals(hashedEmailUserIdentityType)) {
+                if (identityNumberKey == hashedEmailIdentity) {
                     identityAttributes["emailsha256"] = identityValue
                 } else {
-                    identityAttributes[identityType] = identityValue
+                    identityAttributes[getStringForIdentity(identityNumberKey)] = identityValue
                 }
             }
         }
