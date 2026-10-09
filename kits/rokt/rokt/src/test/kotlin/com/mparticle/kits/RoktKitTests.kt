@@ -97,6 +97,32 @@ class RoktKitTests {
     }
 
     @Test
+    fun onKitDestroy_closes_Rokt_and_unregisters_the_kit_even_if_close_fails() {
+        mockkObject(Rokt)
+        every { Rokt.close() } throws IllegalStateException("Rokt not initialized")
+        RoktKit.register(roktKit)
+
+        roktKit.onKitDestroy()
+
+        verify { Rokt.close() }
+        assertNull(RoktKit.instance)
+        unmockkObject(Rokt)
+    }
+
+    @Test
+    fun onKitDestroy_keeps_a_newer_registered_kit() {
+        mockkObject(Rokt)
+        every { Rokt.close() } just runs
+        val newerKit = RoktKit()
+        RoktKit.register(newerKit)
+
+        roktKit.onKitDestroy()
+
+        assertTrue(RoktKit.instance === newerKit)
+        unmockkObject(Rokt)
+    }
+
+    @Test
     fun test_prepareFinalAttributes_filters_out_null_user_attributes() {
         val mockFilterUser = mock(FilteredMParticleUser::class.java)
         Mockito.`when`(mockFilterUser.userIdentities).thenReturn(HashMap())
