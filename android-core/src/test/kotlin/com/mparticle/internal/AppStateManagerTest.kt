@@ -66,6 +66,18 @@ class AppStateManagerTest {
     }
 
     @Test
+    fun testShutdownDetachesFromProcess() {
+        manager.init(14)
+        AppStateManager.mInitialized = true
+
+        manager.shutdown()
+
+        Assert.assertNull(mockContext?.mCallbacks)
+        Assert.assertFalse(AppStateManager.mInitialized)
+        Mockito.verify(manager.delayedBackgroundCheckHandler).removeCallbacksAndMessages(null)
+    }
+
+    @Test
     @Throws(Exception::class)
     fun testOnActivityStarted() {
         Assert.assertEquals(true, manager.isBackgrounded())

@@ -1302,15 +1302,20 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
         }
     }
 
+    /**
+     * Shuts down every kit when the SDK is reset or switches workspace. Uses onKitDestroy rather than
+     * KitIntegration.reset, which some kits implement as a persistent opt-out.
+     */
     @Override
     public void reset() {
         for (KitIntegration provider : providers.values()) {
             try {
-                provider.reset();
+                provider.onKitDestroy();
             } catch (Exception e) {
-                Logger.warning("Failed to call reset for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call onKitDestroy for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
+        providers.clear();
     }
 
     @Override

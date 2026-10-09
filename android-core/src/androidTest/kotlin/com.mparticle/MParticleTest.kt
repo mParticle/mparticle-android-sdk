@@ -8,11 +8,14 @@ import android.os.Looper
 import android.webkit.WebView
 import com.mparticle.identity.IdentityApiRequest
 import com.mparticle.identity.IdentityStateListener
+import com.mparticle.internal.AppStateManager
 import com.mparticle.internal.ConfigManager
+import com.mparticle.internal.Constants
 import com.mparticle.internal.KitFrameworkWrapper
 import com.mparticle.internal.MParticleJSInterface
 import com.mparticle.internal.MessageManager
 import com.mparticle.internal.PushRegistrationHelper.PushRegistration
+import com.mparticle.internal.database.services.MParticleDBManager
 import com.mparticle.internal.database.services.UploadService
 import com.mparticle.networking.Matcher
 import com.mparticle.networking.MockServer.JSONMatch
@@ -28,6 +31,7 @@ import java.io.File
 import java.util.Arrays
 import java.util.concurrent.CountDownLatch
 import kotlin.test.assertTrue
+import com.mparticle.internal.database.services.AccessUtils as DbAccessUtils
 
 class MParticleTest : BaseCleanStartedEachTest() {
     private val configResponse = """
@@ -476,6 +480,43 @@ class MParticleTest : BaseCleanStartedEachTest() {
         instance2!!.logEvent(event2)
 
         // TODO: Improvements to mock server to add more comprehensive testing on this - https://go.mparticle.com/work/SQDSDKS-6840
+    }
+
+    @Test
+    fun testSwitchWorkspaceStartsLikeAnAppLaunch() {
+        goToForeground()
+        val instance1 = MParticle.getInstance()!!
+        val activity = instance1.mAppStateManager.currentActivity!!.get()
+        val latch: CountDownLatch = MPLatch(2)
+        var appInitFirstRun = false
+        DbAccessUtils.setMessageStoredListener(
+            MParticleDBManager.MessageListener { message ->
+                if (MParticle.getInstance() === instance1) {
+                    return@MessageListener
+                }
+                when (message.messageType) {
+                    Constants.MessageType.APP_STATE_TRANSITION ->
+                        if (message.optString(Constants.MessageKey.STATE_TRANSITION_TYPE) == Constants.StateTransitionType.STATE_TRANS_INIT) {
+                            appInitFirstRun = message.optBoolean(Constants.MessageKey.APP_INIT_FIRST_RUN)
+                            latch.countDown()
+                        }
+                    Constants.MessageType.FIRST_RUN -> latch.countDown()
+                }
+            },
+        )
+
+        val switchOptionsBuilder = MParticleOptions.builder(mContext)
+        switchOptionsBuilder.apiKey = "apiKey2"
+        switchOptionsBuilder.apiSecret = "apiSecret2"
+        MParticle.switchWorkspace(switchOptionsBuilder.build())
+        latch.await()
+        DbAccessUtils.setMessageStoredListener(null)
+
+        val instance2 = MParticle.getInstance()!!
+        Assert.assertTrue(appInitFirstRun)
+        Assert.assertSame(activity, instance2.mAppStateManager.currentActivity?.get())
+        Thread.sleep(AppStateManager.ACTIVITY_DELAY + 100)
+        Assert.assertFalse(instance2.mAppStateManager.isBackgrounded())
     }
 
     @Throws(JSONException::class, InterruptedException::class)
