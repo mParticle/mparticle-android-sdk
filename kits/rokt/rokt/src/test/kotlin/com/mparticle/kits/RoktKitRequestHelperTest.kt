@@ -9,7 +9,6 @@ import com.mparticle.identity.IdentityApiResult
 import com.mparticle.identity.IdentityHttpResponse
 import com.mparticle.identity.MParticleUser
 import com.mparticle.identity.TaskFailureListener
-import com.mparticle.identity.TaskSuccessListener
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -29,12 +28,10 @@ class RoktKitRequestHelperTest {
     private lateinit var roktListener: RoktKitBridge
     private val userIdentities = HashMap<IdentityType, String>()
     private val identifyRequests = mutableListOf<IdentityApiRequest>()
-    private val successListeners = mutableListOf<TaskSuccessListener>()
     private val failureListeners = mutableListOf<TaskFailureListener>()
 
     @Before
     fun setUp() {
-        RoktKitRequestHelper.resetInFlightIdentifyForTesting()
         val mParticle = mockk<MParticle>(relaxed = true)
         identityApi = mockk(relaxed = true)
         user = mockk(relaxed = true)
@@ -60,18 +57,12 @@ class RoktKitRequestHelperTest {
     @After
     fun tearDown() {
         MParticle.setInstance(null)
-        RoktKitRequestHelper.resetInFlightIdentifyForTesting()
     }
 
-    // A task whose listeners are captured but never invoked, i.e. identify still in flight.
+    // A task that never completes on its own, i.e. identify still in flight.
     private fun pendingTask(): MParticleTask<IdentityApiResult> {
         val task = mockk<MParticleTask<IdentityApiResult>>(relaxed = true)
-        val success = slot<TaskSuccessListener>()
         val failure = slot<TaskFailureListener>()
-        every { task.addSuccessListener(capture(success)) } answers {
-            successListeners.add(success.captured)
-            task
-        }
         every { task.addFailureListener(capture(failure)) } answers {
             failureListeners.add(failure.captured)
             task
@@ -142,7 +133,7 @@ class RoktKitRequestHelperTest {
     }
 
     @Test
-    fun selectPlacements_whenIdentifyFails_placementIsUnaffected_andIdentifyCanRetry() {
+    fun selectPlacements_whenIdentifyFails_placementIsUnaffected() {
         selectPlacements(mapOf("email" to "new@example.com"))
         failureListeners.single().onFailure(mockk<IdentityHttpResponse>(relaxed = true))
         selectPlacements(mapOf("email" to "new@example.com"))
@@ -152,7 +143,7 @@ class RoktKitRequestHelperTest {
     }
 
     @Test
-    fun selectPlacements_whenIdentifyThrows_stillRequestsPlacement_andIdentifyCanRetry() {
+    fun selectPlacements_whenIdentifyThrows_stillRequestsPlacement() {
         every { identityApi.identify(any()) } answers {
             identifyRequests.add(firstArg())
             throw IllegalStateException("identify unavailable")
@@ -163,35 +154,6 @@ class RoktKitRequestHelperTest {
 
         assertEquals(2, identifyRequests.size)
         verifyPlacementRequested(times = 2)
-    }
-
-    @Test
-    fun selectPlacements_whenIdentifyCompletesBeforeListenersAreAdded_identifyCanRetry() {
-        every { identityApi.identify(any()) } answers {
-            identifyRequests.add(firstArg())
-            pendingTask().also { every { it.isComplete } returns true }
-        }
-
-        selectPlacements(mapOf("email" to "new@example.com"))
-        selectPlacements(mapOf("email" to "new@example.com"))
-
-        assertEquals(2, identifyRequests.size)
-    }
-
-    @Test
-    fun selectPlacements_whenIdentifyNeverCompletes_identifiesAgainAfterTimeout() {
-        var now = 1_000L
-        RoktKitRequestHelper.clock = { now }
-
-        selectPlacements(mapOf("email" to "new@example.com"))
-        now += 29_000L
-        selectPlacements(mapOf("email" to "new@example.com"))
-        assertEquals(1, identifyRequests.size)
-
-        now += 2_000L
-        selectPlacements(mapOf("email" to "new@example.com"))
-        assertEquals(2, identifyRequests.size)
-        verifyPlacementRequested(times = 3)
     }
 
     @Test
@@ -208,29 +170,5 @@ class RoktKitRequestHelperTest {
 
         assertEquals(1, identifyRequests.size)
         verify(exactly = 1) { roktListener.selectShoppableAds(any(), any(), any(), any()) }
-    }
-
-    @Test
-    fun selectPlacements_whileSameIdentifyInFlight_doesNotIdentifyAgainUntilItCompletes() {
-        selectPlacements(mapOf("email" to "new@example.com"))
-        selectPlacements(mapOf("email" to "new@example.com"))
-
-        assertEquals(1, identifyRequests.size)
-        verifyPlacementRequested(times = 2)
-
-        successListeners.single().onSuccess(IdentityApiResult(user, null))
-        selectPlacements(mapOf("email" to "new@example.com"))
-
-        assertEquals(2, identifyRequests.size)
-        verifyPlacementRequested(times = 3)
-    }
-
-    @Test
-    fun selectPlacements_whileDifferentIdentifyInFlight_identifiesAgain() {
-        selectPlacements(mapOf("email" to "first@example.com"))
-        selectPlacements(mapOf("email" to "second@example.com"))
-
-        assertEquals(2, identifyRequests.size)
-        verifyPlacementRequested(times = 2)
     }
 }

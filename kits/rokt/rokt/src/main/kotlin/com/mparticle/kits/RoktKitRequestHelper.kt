@@ -213,51 +213,13 @@ internal object RoktKitRequestHelper {
                 if (hashedEmailMismatch && selectedIdentityType != null) {
                     identityBuilder.userIdentity(selectedIdentityType, hashedEmail)
                 }
-                val identifyKey = listOf(
-                    user.id,
-                    email.takeIf { emailMismatch },
-                    selectedIdentityType.takeIf { hashedEmailMismatch },
-                    hashedEmail.takeIf { hashedEmailMismatch },
-                ).joinToString("|")
-                identifyInBackground(identityApi, identityBuilder.build(), identifyKey)
+                identifyInBackground(identityApi, identityBuilder.build())
             }
         }
         runnable.run()
     }
 
-    // Identities of the identify currently in flight, so repeated placements don't stack duplicates.
-    // Expires so a task that never completes cannot block that identity for the rest of the session.
-    private const val IN_FLIGHT_IDENTIFY_TIMEOUT_MS = 30_000L
-    private val inFlightIdentifyLock = Any()
-    private var inFlightIdentifyKey: String? = null
-    private var inFlightIdentifyStartedAt = 0L
-    internal var clock: () -> Long = System::currentTimeMillis
-
-    private fun startIdentify(identifyKey: String): Boolean = synchronized(inFlightIdentifyLock) {
-        val now = clock()
-        if (inFlightIdentifyKey == identifyKey && now - inFlightIdentifyStartedAt < IN_FLIGHT_IDENTIFY_TIMEOUT_MS) {
-            false
-        } else {
-            inFlightIdentifyKey = identifyKey
-            inFlightIdentifyStartedAt = now
-            true
-        }
-    }
-
-    private fun finishIdentify(identifyKey: String) = synchronized(inFlightIdentifyLock) {
-        if (inFlightIdentifyKey == identifyKey) {
-            inFlightIdentifyKey = null
-        }
-    }
-
-    private fun identifyInBackground(
-        identityApi: IdentityApi,
-        identityRequest: IdentityApiRequest,
-        identifyKey: String,
-    ) {
-        if (!startIdentify(identifyKey)) {
-            return
-        }
+    private fun identifyInBackground(identityApi: IdentityApi, identityRequest: IdentityApiRequest) {
         val task: MParticleTask<IdentityApiResult>?
         try {
             // Kit-internal identity sync (email carried on selectPlacement) — suppress so it
@@ -266,33 +228,17 @@ internal object RoktKitRequestHelper {
             MParticle.withoutRoktApiUsage { identifyTask = identityApi.identify(identityRequest) }
             task = identifyTask
         } catch (e: Exception) {
-            finishIdentify(identifyKey)
             Logger.error("Failed to sync email from selectPlacement to user in the background: ${e.message}")
             return
         }
-        if (task == null) {
-            finishIdentify(identifyKey)
-            return
-        }
-        task.addFailureListener { result ->
-            finishIdentify(identifyKey)
+        task?.addFailureListener { result ->
             Logger.error("Failed to sync email from selectPlacement to user in the background: ${result?.errors}")
         }
-        task.addSuccessListener { result ->
-            finishIdentify(identifyKey)
+        task?.addSuccessListener { result ->
             Logger.debug(
                 "Updated email identity in the background based on selectPlacement's attributes: " +
                     result.user.userIdentities[MParticle.IdentityType.Email],
             )
         }
-        // Listeners are not replayed, so a task that completed before they were added never calls them.
-        if (task.isComplete) {
-            finishIdentify(identifyKey)
-        }
-    }
-
-    internal fun resetInFlightIdentifyForTesting() {
-        synchronized(inFlightIdentifyLock) { inFlightIdentifyKey = null }
-        clock = System::currentTimeMillis
     }
 }
