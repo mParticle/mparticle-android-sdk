@@ -436,16 +436,22 @@ class RoktKit :
     ): MutableMap<String, String> {
         val identityAttributes = mutableMapOf<String, String>()
         if (filterUser != null) {
+            val hashedEmailIdentity = RoktKitRequestHelper.parseIdentityType(hashedEmailUserIdentityType)
             for ((identityNumberKey, identityValue) in filterUser.userIdentities) {
-                val identityType = getStringForIdentity(identityNumberKey) ?: continue
-                if (identityType.equals(hashedEmailUserIdentityType)) {
+                if (identityNumberKey == hashedEmailIdentity) {
                     identityAttributes["emailsha256"] = identityValue
                 } else {
-                    identityAttributes[identityType] = identityValue
+                    getStringForIdentity(identityNumberKey)?.let { identityAttributes[it] = identityValue }
                 }
             }
         }
         if (attributes != null) {
+            // Caller values are fresher than the user's identities while a background identify is in flight.
+            for (key in listOf(MParticle.IdentityType.Email.name.lowercase(), "emailsha256")) {
+                if (attributes.any { it.key.equals(key, ignoreCase = true) && it.value.isNotEmpty() }) {
+                    identityAttributes.remove(key)
+                }
+            }
             attributes.putAll(identityAttributes)
             return attributes
         } else {

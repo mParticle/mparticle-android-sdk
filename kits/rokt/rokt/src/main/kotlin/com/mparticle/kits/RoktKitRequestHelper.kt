@@ -105,6 +105,10 @@ internal object RoktKitRequestHelper {
         }
     }
 
+    // Case-insensitive to match the iOS and web kits; unrecognised values such as "Unknown" disable the mapping.
+    fun parseIdentityType(value: String?): MParticle.IdentityType? =
+        MParticle.IdentityType.values().firstOrNull { it.name.equals(value, ignoreCase = true) }
+
     private fun getValueIgnoreCase(map: Map<String, String>, searchKey: String): String? {
         for ((key, value) in map) {
             if (key.equals(searchKey, ignoreCase = true)) {
@@ -165,15 +169,7 @@ internal object RoktKitRequestHelper {
         val hasHashedEmail = !hashedEmail.isNullOrEmpty()
 
         if ((hasEmail || hasHashedEmail) && user != null) {
-            var selectedIdentityType: MParticle.IdentityType? = null
-            try {
-                val identityTypeStr = kitConfiguration?.hashedEmailUserIdentityType
-                if (identityTypeStr != null) {
-                    selectedIdentityType = MParticle.IdentityType.valueOf(identityTypeStr)
-                }
-            } catch (e: IllegalArgumentException) {
-                Logger.error("Invalid identity type ${e.message}")
-            }
+            val selectedIdentityType = parseIdentityType(kitConfiguration?.hashedEmailUserIdentityType)
 
             val existingEmail = user.userIdentities[MParticle.IdentityType.Email]
             val existingHashedEmail = selectedIdentityType?.let { user.userIdentities[it] }
@@ -188,8 +184,8 @@ internal object RoktKitRequestHelper {
                             "the email passed to selectPlacements ($email). " +
                             "Please make sure to sync the email identity to mParticle " +
                             "as soon as it's available. " +
-                            "Identifying user with the provided email before continuing " +
-                            "to selectPlacements."
+                            "Identifying user with the provided email in the background; " +
+                            "selectPlacements continues without waiting."
                     Logger.warning(
                         emailMismatchMessage,
                     )
@@ -199,8 +195,8 @@ internal object RoktKitRequestHelper {
                             "the hashed email passed to selectPlacements ($hashedEmail). " +
                             "Please make sure to sync the hashed email identity to mParticle " +
                             "as soon as it's available. " +
-                            "Identifying user with the provided hashed email before continuing " +
-                            "to selectPlacements."
+                            "Identifying user with the provided hashed email in the background; " +
+                            "selectPlacements continues without waiting."
                     Logger.warning(
                         hashedEmailMismatchMessage,
                     )
@@ -213,34 +209,32 @@ internal object RoktKitRequestHelper {
                 if (hashedEmailMismatch && selectedIdentityType != null) {
                     identityBuilder.userIdentity(selectedIdentityType, hashedEmail)
                 }
-
-                val identityRequest = identityBuilder.build()
-                // Kit-internal identity sync (email carried on selectPlacement) — suppress so it
-                // isn't reported as a partner IDENTIFY call.
-                var identifyTask: MParticleTask<IdentityApiResult>? = null
-                MParticle.withoutRoktApiUsage { identifyTask = identityApi.identify(identityRequest) }
-                val task = identifyTask
-                if (task == null) {
-                    runnable.run()
-                } else {
-                    task.addFailureListener { result ->
-                        Logger.error("Failed to sync email from selectPlacement to user: ${result?.errors}")
-                        runnable.run()
-                    }
-
-                    task.addSuccessListener { result ->
-                        Logger.debug(
-                            "Updated email identity based on selectPlacement's attributes: " +
-                                result.user.userIdentities[MParticle.IdentityType.Email],
-                        )
-                        runnable.run()
-                    }
-                }
-            } else {
-                runnable.run()
+                identifyInBackground(identityApi, identityBuilder.build())
             }
-        } else {
-            runnable.run()
+        }
+        runnable.run()
+    }
+
+    private fun identifyInBackground(identityApi: IdentityApi, identityRequest: IdentityApiRequest) {
+        val task: MParticleTask<IdentityApiResult>?
+        try {
+            // Kit-internal identity sync (email carried on selectPlacement) — suppress so it
+            // isn't reported as a partner IDENTIFY call.
+            var identifyTask: MParticleTask<IdentityApiResult>? = null
+            MParticle.withoutRoktApiUsage { identifyTask = identityApi.identify(identityRequest) }
+            task = identifyTask
+        } catch (e: Exception) {
+            Logger.error("Failed to sync email from selectPlacement to user in the background: ${e.message}")
+            return
+        }
+        task?.addFailureListener { result ->
+            Logger.error("Failed to sync email from selectPlacement to user in the background: ${result?.errors}")
+        }
+        task?.addSuccessListener { result ->
+            Logger.debug(
+                "Updated email identity in the background based on selectPlacement's attributes: " +
+                    result.user.userIdentities[MParticle.IdentityType.Email],
+            )
         }
     }
 }
