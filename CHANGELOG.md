@@ -2,19 +2,17 @@
 
 ## [Unreleased]
 
-### Core
-
-#### Fixed
-
-- Stop re-sending accepted event batches and skipping uploads when a success response has an empty or non-JSON body
+## [6.1.7] - 2026-10-09
 
 ### Kits
 
-#### Appsflyer
+#### Rokt
 
 ##### Fixed
 
-- Honor the "Require Manual Start" connection setting on Android: the kit no longer calls AppsFlyer's `start` automatically when manual start is enabled, in both the `appsflyer-6` and `appsflyer-7` kits ([#869](https://github.com/mParticle/mparticle-android-sdk/pull/869))
+- Send phone number identities under the shared key names ([#899](https://github.com/mParticle/mparticle-android-sdk/pull/899))
+- Identify in the background instead of delaying placements ([#900](https://github.com/mParticle/mparticle-android-sdk/pull/900))
+- Map hashed email identity case-insensitively ([#898](https://github.com/mParticle/mparticle-android-sdk/pull/898))
 
 ## [6.1.6] - 2026-10-09
 
