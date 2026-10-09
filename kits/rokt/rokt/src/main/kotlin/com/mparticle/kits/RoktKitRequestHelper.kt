@@ -188,8 +188,8 @@ internal object RoktKitRequestHelper {
                             "the email passed to selectPlacements ($email). " +
                             "Please make sure to sync the email identity to mParticle " +
                             "as soon as it's available. " +
-                            "Identifying user with the provided email before continuing " +
-                            "to selectPlacements."
+                            "Identifying user with the provided email in the background; " +
+                            "selectPlacements continues without waiting."
                     Logger.warning(
                         emailMismatchMessage,
                     )
@@ -199,8 +199,8 @@ internal object RoktKitRequestHelper {
                             "the hashed email passed to selectPlacements ($hashedEmail). " +
                             "Please make sure to sync the hashed email identity to mParticle " +
                             "as soon as it's available. " +
-                            "Identifying user with the provided hashed email before continuing " +
-                            "to selectPlacements."
+                            "Identifying user with the provided hashed email in the background; " +
+                            "selectPlacements continues without waiting."
                     Logger.warning(
                         hashedEmailMismatchMessage,
                     )
@@ -213,34 +213,86 @@ internal object RoktKitRequestHelper {
                 if (hashedEmailMismatch && selectedIdentityType != null) {
                     identityBuilder.userIdentity(selectedIdentityType, hashedEmail)
                 }
-
-                val identityRequest = identityBuilder.build()
-                // Kit-internal identity sync (email carried on selectPlacement) — suppress so it
-                // isn't reported as a partner IDENTIFY call.
-                var identifyTask: MParticleTask<IdentityApiResult>? = null
-                MParticle.withoutRoktApiUsage { identifyTask = identityApi.identify(identityRequest) }
-                val task = identifyTask
-                if (task == null) {
-                    runnable.run()
-                } else {
-                    task.addFailureListener { result ->
-                        Logger.error("Failed to sync email from selectPlacement to user: ${result?.errors}")
-                        runnable.run()
-                    }
-
-                    task.addSuccessListener { result ->
-                        Logger.debug(
-                            "Updated email identity based on selectPlacement's attributes: " +
-                                result.user.userIdentities[MParticle.IdentityType.Email],
-                        )
-                        runnable.run()
-                    }
-                }
-            } else {
-                runnable.run()
+                val identifyKey = listOf(
+                    user.id,
+                    email.takeIf { emailMismatch },
+                    selectedIdentityType.takeIf { hashedEmailMismatch },
+                    hashedEmail.takeIf { hashedEmailMismatch },
+                ).joinToString("|")
+                identifyInBackground(identityApi, identityBuilder.build(), identifyKey)
             }
-        } else {
-            runnable.run()
         }
+        runnable.run()
+    }
+
+    // Identities of the identify currently in flight, so repeated placements don't stack duplicates.
+    // Expires so a task that never completes cannot block that identity for the rest of the session.
+    private const val IN_FLIGHT_IDENTIFY_TIMEOUT_MS = 30_000L
+    private val inFlightIdentifyLock = Any()
+    private var inFlightIdentifyKey: String? = null
+    private var inFlightIdentifyStartedAt = 0L
+    internal var clock: () -> Long = System::currentTimeMillis
+
+    private fun startIdentify(identifyKey: String): Boolean = synchronized(inFlightIdentifyLock) {
+        val now = clock()
+        if (inFlightIdentifyKey == identifyKey && now - inFlightIdentifyStartedAt < IN_FLIGHT_IDENTIFY_TIMEOUT_MS) {
+            false
+        } else {
+            inFlightIdentifyKey = identifyKey
+            inFlightIdentifyStartedAt = now
+            true
+        }
+    }
+
+    private fun finishIdentify(identifyKey: String) = synchronized(inFlightIdentifyLock) {
+        if (inFlightIdentifyKey == identifyKey) {
+            inFlightIdentifyKey = null
+        }
+    }
+
+    private fun identifyInBackground(
+        identityApi: IdentityApi,
+        identityRequest: IdentityApiRequest,
+        identifyKey: String,
+    ) {
+        if (!startIdentify(identifyKey)) {
+            return
+        }
+        val task: MParticleTask<IdentityApiResult>?
+        try {
+            // Kit-internal identity sync (email carried on selectPlacement) — suppress so it
+            // isn't reported as a partner IDENTIFY call.
+            var identifyTask: MParticleTask<IdentityApiResult>? = null
+            MParticle.withoutRoktApiUsage { identifyTask = identityApi.identify(identityRequest) }
+            task = identifyTask
+        } catch (e: Exception) {
+            finishIdentify(identifyKey)
+            Logger.error("Failed to sync email from selectPlacement to user in the background: ${e.message}")
+            return
+        }
+        if (task == null) {
+            finishIdentify(identifyKey)
+            return
+        }
+        task.addFailureListener { result ->
+            finishIdentify(identifyKey)
+            Logger.error("Failed to sync email from selectPlacement to user in the background: ${result?.errors}")
+        }
+        task.addSuccessListener { result ->
+            finishIdentify(identifyKey)
+            Logger.debug(
+                "Updated email identity in the background based on selectPlacement's attributes: " +
+                    result.user.userIdentities[MParticle.IdentityType.Email],
+            )
+        }
+        // Listeners are not replayed, so a task that completed before they were added never calls them.
+        if (task.isComplete) {
+            finishIdentify(identifyKey)
+        }
+    }
+
+    internal fun resetInFlightIdentifyForTesting() {
+        synchronized(inFlightIdentifyLock) { inFlightIdentifyKey = null }
+        clock = System::currentTimeMillis
     }
 }

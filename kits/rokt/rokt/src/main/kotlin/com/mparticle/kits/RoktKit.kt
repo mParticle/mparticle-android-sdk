@@ -446,6 +446,12 @@ class RoktKit :
             }
         }
         if (attributes != null) {
+            // Caller values are fresher than the user's identities while a background identify is in flight.
+            for (key in listOf(MParticle.IdentityType.Email.name.lowercase(), "emailsha256")) {
+                if (attributes.any { it.key.equals(key, ignoreCase = true) && it.value.isNotEmpty() }) {
+                    identityAttributes.remove(key)
+                }
+            }
             attributes.putAll(identityAttributes)
             return attributes
         } else {

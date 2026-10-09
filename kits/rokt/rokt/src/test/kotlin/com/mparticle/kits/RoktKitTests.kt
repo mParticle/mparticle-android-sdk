@@ -609,7 +609,7 @@ class RoktKitTests {
                 "key1" to "value1",
                 "key2" to "value2",
                 "key3" to "value3",
-                "email" to "TestEmail@gamil.com",
+                "email" to "abc@gmail.com",
             ),
             result,
         )
@@ -690,6 +690,28 @@ class RoktKitTests {
         assertTrue(result.containsKey("key3"))
         assertTrue(result.containsKey("email"))
         assertTrue(result.containsKey("other"))
+    }
+
+    @Test
+    fun test_addIdentityAttributes_When_caller_passes_email_and_emailsha256_caller_values_win() {
+        val mockFilterUser = mock(FilteredMParticleUser::class.java)
+        val userIdentities = HashMap<IdentityType, String>()
+        userIdentities.put(IdentityType.Email, "stale@example.com")
+        userIdentities.put(IdentityType.CustomerId, "customer-1")
+        Mockito.`when`(mockFilterUser.userIdentities).thenReturn(userIdentities)
+        val attributes = mutableMapOf("Email" to "fresh@example.com", "emailsha256" to "freshhash")
+        val method: Method = RoktKit::class.java.getDeclaredMethod(
+            "addIdentityAttributes",
+            Map::class.java,
+            FilteredMParticleUser::class.java,
+        )
+        method.isAccessible = true
+        val result = method.invoke(roktKit, attributes, mockFilterUser) as Map<String, String>
+
+        assertEquals("fresh@example.com", result["Email"])
+        assertFalse(result.containsKey("email"))
+        assertEquals("freshhash", result["emailsha256"])
+        assertEquals("customer-1", result["customerid"])
     }
 
     @Test
