@@ -194,5 +194,5 @@ Whoever runs `Release – Draft` for unrelated work while migration pull request
   `build: …`, `ci: …`, `test: …`. A pure conversion has no `CHANGELOG.md` entry.
 - A pull request that adds Java to `android-core/src/main` or `android-kit-base/src/main` needs a
   stated reason; the direction of travel is Kotlin. The **Kotlin Migration Progress** job posts the
-  conversion numbers on every pull request and warns when Java is added without the `allow-new-java`
-  label. The warning does not fail the job.
+  conversion numbers on every pull request. Its last step fails when Java is added without the
+  `allow-new-java` label, but it is `continue-on-error`, so the job stays green.
