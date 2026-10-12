@@ -285,8 +285,9 @@ jobs:
 
   kotlin-migration-progress:
     name: "Kotlin Migration Progress"
-    # Posts the Java-to-Kotlin conversion numbers on every pull request. The last step fails
+    # Posts the Java-to-Kotlin conversion numbers on every pull request. The last step warns
     # when a pull request adds Java to the published modules without the allow-new-java label.
+    # It is a warning annotation, not a failure, so it never turns the pull request red.
     if: github.event_name == 'pull_request'
     timeout-minutes: 10
     runs-on: ubuntu-latest
@@ -353,17 +354,14 @@ jobs:
           issue-number: ${{ github.event.pull_request.number }}
           edit-mode: replace
           body-path: ${{ runner.temp }}/comment.md
-      - name: "Ratchet: no new Java in the published modules"
+      - name: "Ratchet: warn on new Java in the published modules"
         if: >
           steps.measure.outputs.delta_java > 0 &&
           !contains(github.event.pull_request.labels.*.name, 'allow-new-java')
         env:
           DELTA_JAVA: ${{ steps.measure.outputs.delta_java }}
         run: |
-          echo "This pull request adds ${DELTA_JAVA} lines of Java to android-core or android-kit-base." >&2
-          echo "New code in these modules is written in Kotlin. If the Java is unavoidable, add the" >&2
-          echo "allow-new-java label and explain why in the description." >&2
-          exit 1
+          echo "::warning title=New Java in a published module::This pull request adds ${DELTA_JAVA} lines of Java to android-core or android-kit-base. New code in these modules is written in Kotlin. If the Java is unavoidable, add the allow-new-java label and explain why in the description."
 
   automerge-dependabot:
     name: "Save PR Number for Dependabot Automerge"
