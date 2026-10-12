@@ -27,6 +27,13 @@ public class MockApplication extends Application {
     }
 
     @Override
+    public void unregisterActivityLifecycleCallbacks(ActivityLifecycleCallbacks callback) {
+        if (mCallbacks == callback) {
+            mCallbacks = null;
+        }
+    }
+
+    @Override
     public Context getApplicationContext() {
         return this;
     }

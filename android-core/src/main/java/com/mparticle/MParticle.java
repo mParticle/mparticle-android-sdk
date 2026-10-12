@@ -60,6 +60,7 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -368,12 +369,23 @@ public class MParticle {
         final HandlerThread handlerThread = new HandlerThread("mParticleSwitchWorkspaceHandler");
         handlerThread.start();
         new Handler(handlerThread.getLooper()).post(() -> {
+            MParticle previous = instance;
+            WeakReference<Activity> resumed = previous != null ? previous.mAppStateManager.getCurrentActivity() : null;
+            Activity activity = resumed != null ? resumed.get() : null;
+
             // Reset everything except for uploads table
             resetForSwitchingWorkspaces(options.getContext());
 
             // Restart the SDK using new options
             instance = null;
             start(options);
+
+            // Replay the resume of the visible Activity, so the new workspace logs app_init and starts in the
+            // foreground, as on an app launch. Lifecycle callbacks that arrive during the switch (a few ms) are not tracked.
+            MParticle current = instance;
+            if (activity != null && current != null) {
+                current.mAppStateManager.onActivityResumed(activity);
+            }
 
             handlerThread.quit();
         });
@@ -1385,6 +1397,8 @@ public class MParticle {
                 if (instance.isLocationTrackingEnabled()) {
                     instance.disableLocationTracking();
                 }
+                instance.mKitManager.reset();
+                instance.mAppStateManager.shutdown();
                 instance.mMessageManager.disable();
                 instance.mIdentityApi.Internal().reset();
                 MParticle.setInstance(null);

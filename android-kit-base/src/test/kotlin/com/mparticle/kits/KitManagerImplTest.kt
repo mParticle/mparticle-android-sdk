@@ -100,6 +100,24 @@ class KitManagerImplTest {
         Assert.assertFalse(active.contains(disabled))
     }
 
+    @Test
+    fun testResetDestroysKitsWithoutCallingKitReset() {
+        val manager: KitManagerImpl = MockKitManagerImpl()
+        val kit1 = mock(KitIntegration::class.java)
+        val kit2 = mock(KitIntegration::class.java)
+        Mockito.doThrow(RuntimeException("kit failure")).`when`(kit1).onKitDestroy()
+        manager.providers[1] = kit1
+        manager.providers[2] = kit2
+
+        manager.reset()
+
+        verify(kit1).onKitDestroy()
+        verify(kit2).onKitDestroy()
+        verify(kit1, never()).reset()
+        verify(kit2, never()).reset()
+        assertTrue(manager.providers.isEmpty())
+    }
+
     private fun createKitsMap(
         ids: List<Int>,
         type: Class<*> = KitIntegration::class.java,
