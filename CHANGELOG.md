@@ -2,6 +2,27 @@
 
 ## [Unreleased]
 
+## [6.1.8] - 2026-10-12
+
+### Core
+
+#### Fixed
+
+- Treat a workspace switch as a fresh app launch ([#887](https://github.com/mParticle/mparticle-android-sdk/pull/887))
+
+### Kits
+
+#### Rokt
+
+##### Added
+
+- Clear the Rokt session when the kit stops and add clearSession ([#906](https://github.com/mParticle/mparticle-android-sdk/pull/906))
+
+##### Fixed
+
+- Update Rokt SDK and payment extension to 6.3.0 ([#905](https://github.com/mParticle/mparticle-android-sdk/pull/905))
+- Close Rokt and release the Rokt kit when it is shut down ([#888](https://github.com/mParticle/mparticle-android-sdk/pull/888))
+
 ## [6.1.7] - 2026-10-09
 
 ### Kits
