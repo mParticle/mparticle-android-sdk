@@ -73,7 +73,7 @@ dependencies {
     androidTestUtil 'androidx.test.services:test-services:1.6.0'
 
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.json:json:20250517'
+    testImplementation 'org.json:json:20260814'
 
     wiremock 'org.wiremock:wiremock-standalone:3.13.1'
 }
