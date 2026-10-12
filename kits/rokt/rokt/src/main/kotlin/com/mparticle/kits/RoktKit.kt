@@ -126,6 +126,7 @@ class RoktKit :
         kitManager?.runOnMainThread {
             try {
                 Rokt.close()
+                Rokt.clearSession()
             } catch (e: Exception) {
                 logError("Error closing Rokt", e)
             }
@@ -364,6 +365,10 @@ class RoktKit :
 
     override fun close() {
         Rokt.close()
+    }
+
+    override fun clearSession() {
+        Rokt.clearSession()
     }
 
     /**

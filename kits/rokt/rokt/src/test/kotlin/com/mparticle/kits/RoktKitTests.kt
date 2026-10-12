@@ -110,9 +110,36 @@ class RoktKitTests {
     }
 
     @Test
+    fun onKitDestroy_closes_Rokt_and_clears_its_session() {
+        mockkObject(Rokt)
+        every { Rokt.close() } just runs
+        every { Rokt.clearSession() } just runs
+
+        roktKit.onKitDestroy()
+
+        verifyOrder {
+            Rokt.close()
+            Rokt.clearSession()
+        }
+        unmockkObject(Rokt)
+    }
+
+    @Test
+    fun clearSession_forwards_to_Rokt_clearSession() {
+        mockkObject(Rokt)
+        every { Rokt.clearSession() } just runs
+
+        roktKit.clearSession()
+
+        verify { Rokt.clearSession() }
+        unmockkObject(Rokt)
+    }
+
+    @Test
     fun onKitDestroy_keeps_a_newer_registered_kit() {
         mockkObject(Rokt)
         every { Rokt.close() } just runs
+        every { Rokt.clearSession() } just runs
         val newerKit = RoktKit()
         RoktKit.register(newerKit)
 
