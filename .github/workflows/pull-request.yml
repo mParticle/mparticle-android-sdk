@@ -287,6 +287,7 @@ jobs:
     name: "Kotlin Migration Progress"
     # Posts the Java-to-Kotlin conversion numbers on every pull request. The last step fails
     # when a pull request adds Java to the published modules without the allow-new-java label.
+    # It is continue-on-error, so the step is marked failed but the job and the pull request stay green.
     if: github.event_name == 'pull_request'
     timeout-minutes: 10
     runs-on: ubuntu-latest
@@ -357,6 +358,7 @@ jobs:
         if: >
           steps.measure.outputs.delta_java > 0 &&
           !contains(github.event.pull_request.labels.*.name, 'allow-new-java')
+        continue-on-error: true
         env:
           DELTA_JAVA: ${{ steps.measure.outputs.delta_java }}
         run: |
