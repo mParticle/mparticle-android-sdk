@@ -297,6 +297,20 @@ class RoktTest {
     }
 
     @Test
+    fun testClearSession_whenEnabled_delegatesToKitManager() {
+        configManager.enabled = true
+        rokt.clearSession()
+        verify(roktListener).clearSession()
+    }
+
+    @Test
+    fun testClearSession_whenDisabled_doesNotCallKitManager() {
+        configManager.enabled = false
+        rokt.clearSession()
+        verify(roktListener, never()).clearSession()
+    }
+
+    @Test
     fun testSetSession_whenEnabled_delegatesToKitManager() {
         configManager.enabled = true
         val session = com.mparticle.rokt.RoktSession("sid", "jwt", 123L)

@@ -37,6 +37,8 @@ internal interface RoktKitBridge {
 
     fun close()
 
+    fun clearSession()
+
     fun setSession(session: RoktSession)
 
     fun getSession(): RoktSession?

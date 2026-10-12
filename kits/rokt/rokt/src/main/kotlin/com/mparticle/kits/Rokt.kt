@@ -149,6 +149,27 @@ class Rokt internal constructor(private val mKitManager: KitManager) {
     }
 
     /**
+     * End the current Rokt session so the next selectPlacements call starts a new one.
+     *
+     * Intended for self-service terminals, such as kiosks, counter tablets and shared point-of-sale
+     * hardware, where a queue of unrelated customers uses a single device. Without this the Rokt SDK
+     * reuses its stored session, so successive customers are recorded as one person.
+     *
+     * Call this at a transaction boundary, not between screens within one customer's journey: two
+     * placements shown to the same customer are meant to share a session.
+     *
+     * Events already buffered are still sent in the background under the ended session. Calling this
+     * with no active session is a no-op. This also clears the session returned by [getSession], so a
+     * WebView session hand-off must be re-established afterwards.
+     */
+    fun clearSession() {
+        MParticle.logRoktApiUsage("ROKT_CLEAR_SESSION")
+        if (isEnabled()) {
+            resolveRoktKit()?.second?.clearSession()
+        }
+    }
+
+    /**
      * Set the session to use for the next execute call.
      *
      * Use this when you have a session from a non-native integration (e.g. WebView)
