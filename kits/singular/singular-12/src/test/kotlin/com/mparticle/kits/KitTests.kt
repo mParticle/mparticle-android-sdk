@@ -4,6 +4,8 @@ import com.mparticle.MPEvent
 import com.mparticle.MParticleOptions
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.commerce.Product
+import com.mparticle.consent.CCPAConsent
+import com.mparticle.consent.ConsentState
 import com.singular.sdk.Singular
 import com.singular.sdk.SingularConfig
 import org.json.JSONObject
@@ -180,6 +182,30 @@ class KitTests {
         } finally {
             Assert.assertTrue(!result.isNullOrEmpty())
         }
+    }
+
+    //endregion
+    //region Consent Tests
+    @Test
+    fun onConsentStateUpdatedForwardsNewCcpaState() {
+        val oldState =
+            ConsentState
+                .builder()
+                .setCCPAConsentState(CCPAConsent.builder(true).build())
+                .build()
+        val newState =
+            ConsentState
+                .builder()
+                .setCCPAConsentState(CCPAConsent.builder(false).build())
+                .build()
+        val initialized = SingularKit::class.java.getDeclaredField("isInitialized")
+        initialized.isAccessible = true
+        initialized.set(kit, true)
+        Singular.limitDataSharingValue = null
+
+        kit?.onConsentStateUpdated(oldState, newState)
+
+        Assert.assertEquals(false, Singular.limitDataSharingValue)
     }
 
     //endregion
