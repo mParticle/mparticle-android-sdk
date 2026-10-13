@@ -953,6 +953,65 @@ class KitManagerImplTest {
             .setWrapperSdkVersion(wrapperSdkVersion)
     }
 
+    @Test
+    @Throws(Exception::class)
+    fun testKitInitializationIdentitySyncHonorsDataplanIdentityBlocking() {
+        val mockUser = mock(MParticleUser::class.java)
+        `when`(mockUser.consentState).thenReturn(ConsentState.builder().build())
+        `when`(mockUser.userIdentities).thenReturn(
+            mapOf(
+                MParticle.IdentityType.Email to "planned@example.com",
+                MParticle.IdentityType.CustomerId to "unplanned-customer-id",
+            ),
+        )
+        `when`(mockIdentity!!.currentUser).thenReturn(mockUser)
+        val manager: KitManagerImpl = MockKitManagerImpl()
+        // a data plan that lists only the email identity, with user identity blocking switched on
+        val dataplan =
+            JSONObject(
+                "{\"version_document\":{\"data_points\":[{\"match\":{\"type\":\"user_identities\",\"criteria\":{}}," +
+                    "\"validator\":{\"type\":\"json_schema\",\"definition\":{\"additionalProperties\":false," +
+                    "\"properties\":{\"email\":{\"type\":\"string\"}}}}}]}}",
+            )
+        val dataplanOptions =
+            MParticleOptions.DataplanOptions
+                .builder()
+                .dataplanVersion(dataplan)
+                .blockUserIdentities(true)
+                .build()
+        `when`(manager.mCoreCallbacks.getDataplanOptions()).thenReturn(dataplanOptions)
+        val factory =
+            mock(
+                KitIntegrationFactory::class.java,
+            )
+        manager.setKitFactory(factory)
+        `when`(factory.getSupportedKits()).thenReturn(createKitsMap(listOf(1)).keys)
+        `when`(factory.isSupported(Mockito.anyInt())).thenReturn(true)
+        val mockKit =
+            mock(
+                KitIntegration::class.java,
+                withSettings().extraInterfaces(ModifyIdentityListener::class.java),
+            )
+        val configuration = mock(KitConfiguration::class.java)
+        `when`(configuration.shouldSetIdentity(any())).thenReturn(true)
+        `when`(mockKit.configuration).thenReturn(configuration)
+        `when`(
+            factory.createInstance(
+                any(
+                    KitManagerImpl::class.java,
+                ),
+                any(KitConfiguration::class.java),
+            ),
+        ).thenReturn(mockKit)
+        val kitConfiguration = JSONArray()
+        kitConfiguration.put(JSONObject("{\"id\":1}"))
+        manager.updateKits(kitConfiguration)
+        assertEquals(1, manager.providers.size)
+        val listener = mockKit as ModifyIdentityListener
+        verify(listener).setUserIdentity(MParticle.IdentityType.Email, "planned@example.com")
+        verify(listener, never()).setUserIdentity(eq(MParticle.IdentityType.CustomerId), any())
+    }
+
     internal inner class KitManagerEventCounter : MockKitManagerImpl() {
         var logBaseEventCalled = 0
         var logCommerceEventCalled = 0

@@ -650,6 +650,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
         Map<MParticle.IdentityType, String> identities = user.getUserIdentities();
 
         for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()) {
+            if (mDataplanFilter.isUserIdentityBlocked(entry.getKey())) {
+                continue;
+            }
             if (configuration.shouldSetIdentity(entry.getKey())) {
                 listener.setUserIdentity(entry.getKey(), entry.getValue());
             }
