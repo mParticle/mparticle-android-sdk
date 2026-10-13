@@ -702,44 +702,22 @@ public class KitConfiguration {
                     if (filteredEvent.getProducts() != null && filteredEvent.getProducts().size() > 0) {
                         List<Product> filteredProducts = new LinkedList<Product>();
                         for (Product product : filteredEvent.getProducts()) {
-                            Product.Builder productBuilder = new Product.Builder(product);
-                            if (product.getCustomAttributes() != null && product.getCustomAttributes().size() > 0) {
-                                HashMap<String, String> filteredCustomAttributes = new HashMap<String, String>(product.getCustomAttributes().size());
-                                for (Map.Entry<String, String> customAttribute : product.getCustomAttributes().entrySet()) {
-                                    if (filters.get(KitUtils.hashForFiltering(customAttribute.getKey()), true)) {
-                                        filteredCustomAttributes.put(customAttribute.getKey(), customAttribute.getValue());
-                                    }
-                                }
-                                productBuilder.customAttributes(filteredCustomAttributes);
-                            }
-                            if (!MPUtility.isEmpty(product.getCouponCode()) && filters.get(KitUtils.hashForFiltering(CommerceEventUtils.Constants.ATT_PRODUCT_COUPON_CODE), true)) {
-                                productBuilder.couponCode(product.getCouponCode());
-                            } else {
-                                productBuilder.couponCode(null);
-                            }
-                            if (product.getPosition() != null && filters.get(KitUtils.hashForFiltering(CommerceEventUtils.Constants.ATT_PRODUCT_POSITION), true)) {
-                                productBuilder.position(product.getPosition());
-                            } else {
-                                productBuilder.position(null);
-                            }
-                            if (!MPUtility.isEmpty(product.getVariant()) && filters.get(KitUtils.hashForFiltering(CommerceEventUtils.Constants.ATT_PRODUCT_VARIANT), true)) {
-                                productBuilder.variant(product.getVariant());
-                            } else {
-                                productBuilder.variant(null);
-                            }
-                            if (!MPUtility.isEmpty(product.getCategory()) && filters.get(KitUtils.hashForFiltering(CommerceEventUtils.Constants.ATT_PRODUCT_CATEGORY), true)) {
-                                productBuilder.category(product.getCategory());
-                            } else {
-                                productBuilder.category(null);
-                            }
-                            if (!MPUtility.isEmpty(product.getBrand()) && filters.get(KitUtils.hashForFiltering(CommerceEventUtils.Constants.ATT_PRODUCT_BRAND), true)) {
-                                productBuilder.brand(product.getBrand());
-                            } else {
-                                productBuilder.brand(null);
-                            }
-                            filteredProducts.add(productBuilder.build());
+                            filteredProducts.add(filterProductAttributes(product, filters));
                         }
                         builder.products(filteredProducts);
+                    }
+                    if (filteredEvent.getImpressions() != null && filteredEvent.getImpressions().size() > 0) {
+                        List<Impression> filteredImpressions = new LinkedList<Impression>();
+                        for (Impression impression : filteredEvent.getImpressions()) {
+                            Impression filteredImpression = new Impression(impression.getListName(), null);
+                            if (impression.getProducts() != null) {
+                                for (Product product : impression.getProducts()) {
+                                    filteredImpression.addProduct(filterProductAttributes(product, filters));
+                                }
+                            }
+                            filteredImpressions.add(filteredImpression);
+                        }
+                        builder.impressions(filteredImpressions);
                     }
                     break;
                 case ENTITY_PROMOTION:
@@ -768,6 +746,45 @@ public class KitConfiguration {
             }
         }
         return builder.build();
+    }
+
+    private Product filterProductAttributes(Product product, SparseBooleanArray filters) {
+        Product.Builder productBuilder = new Product.Builder(product);
+        if (product.getCustomAttributes() != null && product.getCustomAttributes().size() > 0) {
+            HashMap<String, String> filteredCustomAttributes = new HashMap<String, String>(product.getCustomAttributes().size());
+            for (Map.Entry<String, String> customAttribute : product.getCustomAttributes().entrySet()) {
+                if (filters.get(KitUtils.hashForFiltering(customAttribute.getKey()), true)) {
+                    filteredCustomAttributes.put(customAttribute.getKey(), customAttribute.getValue());
+                }
+            }
+            productBuilder.customAttributes(filteredCustomAttributes);
+        }
+        if (!MPUtility.isEmpty(product.getCouponCode()) && filters.get(KitUtils.hashForFiltering(CommerceEventUtils.Constants.ATT_PRODUCT_COUPON_CODE), true)) {
+            productBuilder.couponCode(product.getCouponCode());
+        } else {
+            productBuilder.couponCode(null);
+        }
+        if (product.getPosition() != null && filters.get(KitUtils.hashForFiltering(CommerceEventUtils.Constants.ATT_PRODUCT_POSITION), true)) {
+            productBuilder.position(product.getPosition());
+        } else {
+            productBuilder.position(null);
+        }
+        if (!MPUtility.isEmpty(product.getVariant()) && filters.get(KitUtils.hashForFiltering(CommerceEventUtils.Constants.ATT_PRODUCT_VARIANT), true)) {
+            productBuilder.variant(product.getVariant());
+        } else {
+            productBuilder.variant(null);
+        }
+        if (!MPUtility.isEmpty(product.getCategory()) && filters.get(KitUtils.hashForFiltering(CommerceEventUtils.Constants.ATT_PRODUCT_CATEGORY), true)) {
+            productBuilder.category(product.getCategory());
+        } else {
+            productBuilder.category(null);
+        }
+        if (!MPUtility.isEmpty(product.getBrand()) && filters.get(KitUtils.hashForFiltering(CommerceEventUtils.Constants.ATT_PRODUCT_BRAND), true)) {
+            productBuilder.brand(product.getBrand());
+        } else {
+            productBuilder.brand(null);
+        }
+        return productBuilder.build();
     }
 
     public final Map<String, Object> filterEventAttributes(MPEvent event) {

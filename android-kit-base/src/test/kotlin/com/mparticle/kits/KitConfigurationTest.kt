@@ -365,6 +365,40 @@ class KitConfigurationTest {
 
     @Test
     @Throws(Exception::class)
+    fun testFilterCommerceEntityAttributeInImpressions() {
+        val attributes: MutableMap<String, String> = HashMap()
+        attributes["my custom product attribute"] = "whatever"
+        val product =
+            Product
+                .Builder("name", "sku", 5.0)
+                .customAttributes(attributes)
+                .brand("cool brand")
+                .build()
+        val event =
+            CommerceEvent
+                .Builder(Impression("Cool list name", product))
+                .build()
+        Assert.assertEquals(
+            "whatever",
+            event.impressions
+                ?.get(0)
+                ?.products
+                ?.get(0)
+                ?.customAttributes
+                ?.get("my custom product attribute"),
+        )
+        Assert.assertEquals("cool brand", event.impressions?.get(0)?.products?.get(0)?.brand)
+        val configuration = MockKitConfiguration.createKitConfiguration(JSONObject(commerceFilters2))
+        val filteredEvent = configuration.filterCommerceEvent(event)
+        val filteredProduct = filteredEvent.impressions?.get(0)?.products?.get(0)
+        Assert.assertNotNull(filteredProduct)
+        Assert.assertEquals("name", filteredProduct?.name)
+        Assert.assertNull(filteredProduct?.customAttributes?.get("my custom product attribute"))
+        Assert.assertNull(filteredProduct?.brand)
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun testFilterCommerceEventType() {
         // CUSTOM ATTRIBUTES
         val configuration =
