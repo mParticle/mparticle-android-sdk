@@ -2,16 +2,23 @@ package com.mparticle.internal.database.services
 
 import android.os.Handler
 import android.os.Looper
+import com.mparticle.MParticle
 import com.mparticle.TypedUserAttributeListener
 import com.mparticle.identity.UserAttributeListenerWrapper
+import com.mparticle.internal.Constants
+import com.mparticle.internal.InternalSession
+import com.mparticle.internal.database.UploadSettings
 import com.mparticle.internal.database.services.MParticleDBManager.UserAttributeRemoval
 import com.mparticle.internal.database.services.MParticleDBManager.UserAttributeResponse
+import com.mparticle.internal.messages.BaseMPMessage
+import com.mparticle.networking.NetworkOptions
 import com.mparticle.testutils.AndroidUtils
 import com.mparticle.testutils.BaseCleanInstallEachTest
 import com.mparticle.testutils.MPLatch
 import org.junit.Assert
 import org.junit.Test
 import java.util.TreeMap
+import java.util.UUID
 
 class MParticleDBManagerTest : BaseCleanInstallEachTest() {
     @Test
@@ -155,5 +162,55 @@ class MParticleDBManagerTest : BaseCleanInstallEachTest() {
         // this was being run on an AsyncTask, but it may have been leading to db locks, "messages"
         // thread is know to not be an issue w/db access
         Assert.assertEquals("mParticleMessageHandler", dbAccessThread.value?.name)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testUploadBatchSizeLimitCountsTheBatchHeader() {
+        startMParticle()
+        val instance = MParticle.getInstance()!!
+        val manager = MParticleDBManager(mContext)
+
+        // User attributes large enough that the batch header alone takes most of the upload size limit.
+        val attributes = UserAttributeResponse()
+        attributes.mpId = mStartingMpid
+        attributes.attributeSingles = HashMap()
+        for (i in 0 until 40) {
+            attributes.attributeSingles["attribute-$i"] = "a".repeat(4000)
+        }
+        manager.setUserAttribute(attributes)
+
+        // Three messages whose bodies alone fit in one batch, but not beside that header.
+        val sessionId = UUID.randomUUID().toString()
+        val session = InternalSession()
+        session.mSessionID = sessionId
+        for (i in 0 until 3) {
+            val message =
+                BaseMPMessage
+                    .Builder("event-$i-" + "b".repeat(30000))
+                    .timestamp(System.currentTimeMillis() - 1000L)
+                    .build(session, null, mStartingMpid)
+            manager.insertMessage("apiKey", message, null, null)
+        }
+
+        manager.createMessagesForUploadMessage(
+            instance.Internal().configManager,
+            instance.Internal().messageManager.deviceAttributes,
+            UUID.randomUUID().toString(),
+            UploadSettings("apiKey", "secret", NetworkOptions.builder().build(), "", ""),
+        )
+
+        // Every stored upload fits the limit, so the cleanup that runs before an upload removes none of them.
+        val uploads = manager.readyUploads
+        Assert.assertTrue(uploads.isNotEmpty())
+        for (upload in uploads) {
+            Assert.assertTrue(upload.message.length <= Constants.LIMIT_MAX_UPLOAD_SIZE)
+        }
+        manager.cleanupUploadMessages()
+        Assert.assertEquals(uploads.size, manager.readyUploads.size)
+
+        // The messages that did not fit beside the header stay queued for the next round instead of being lost.
+        val remaining = MessageService.getMessagesForUpload(manager.database).filter { it.sessionId == sessionId }
+        Assert.assertEquals(2, remaining.size)
     }
 }

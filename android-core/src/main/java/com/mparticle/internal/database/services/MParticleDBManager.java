@@ -152,7 +152,7 @@ public class MParticleDBManager {
                 db.setTransactionSuccessful();
                 return;
             }
-            HashMap<BatchId, MessageBatch> uploadMessagesByBatchId = getUploadMessageByBatchIdMap(readyMessages, db, configManager, false);
+            HashMap<BatchId, MessageBatch> uploadMessagesByBatchId = getUploadMessageByBatchIdMap(readyMessages, db, configManager, deviceAttributes, false);
 
             List<ReportingService.ReportingMessage> reportingMessages = ReportingService.getReportingMessagesForUpload(db);
             for (ReportingService.ReportingMessage reportingMessage : reportingMessages) {
@@ -238,11 +238,11 @@ public class MParticleDBManager {
         }
     }
 
-    private HashMap<BatchId, MessageBatch> getUploadMessageByBatchIdMap(List<MessageService.ReadyMessage> readyMessages, MPDatabase db, ConfigManager configManager) throws JSONException {
-        return getUploadMessageByBatchIdMap(readyMessages, db, configManager, false);
+    private HashMap<BatchId, MessageBatch> getUploadMessageByBatchIdMap(List<MessageService.ReadyMessage> readyMessages, MPDatabase db, ConfigManager configManager, DeviceAttributes deviceAttributes) throws JSONException {
+        return getUploadMessageByBatchIdMap(readyMessages, db, configManager, deviceAttributes, false);
     }
 
-    private HashMap<BatchId, MessageBatch> getUploadMessageByBatchIdMap(List<MessageService.ReadyMessage> readyMessages, MPDatabase db, ConfigManager configManager, boolean markAsUpload) throws JSONException {
+    private HashMap<BatchId, MessageBatch> getUploadMessageByBatchIdMap(List<MessageService.ReadyMessage> readyMessages, MPDatabase db, ConfigManager configManager, DeviceAttributes deviceAttributes, boolean markAsUpload) throws JSONException {
         HashMap<BatchId, MessageBatch> uploadMessagesByBatchId = new HashMap<BatchId, MessageBatch>();
         int highestUploadedMessageId = -1;
         for (MessageService.ReadyMessage readyMessage : readyMessages) {
@@ -250,16 +250,30 @@ public class MParticleDBManager {
             MessageBatch uploadMessage = uploadMessagesByBatchId.get(batchId);
             if (uploadMessage == null) {
                 uploadMessage = createUploadMessage(configManager, true, batchId);
+                //Count the batch header toward LIMIT_MAX_UPLOAD_SIZE, not only the messages.
+                uploadMessage.setAppInfo(deviceAttributes.getAppInfo(mContext));
+                uploadMessage.setDeviceInfo(deviceAttributes.getDeviceInfo(mContext));
+                uploadMessage.setIdentities(configManager.getUserIdentityJson(batchId.getMpid()));
+                uploadMessage.setUserAttributes(getAllUserAttributesJson(batchId.getMpid()));
+                uploadMessage.put(Constants.MessageKey.MESSAGES, new JSONArray());
+                String batchHeader = uploadMessage.toString();
+                if (batchHeader != null) {
+                    uploadMessage.incrementMessageLengthBytes(batchHeader.length());
+                }
                 uploadMessagesByBatchId.put(batchId, uploadMessage);
             }
             int messageLength = readyMessage.getMessage().length();
             JSONObject msgObject = new JSONObject(readyMessage.getMessage());
-            if (messageLength + uploadMessage.getMessageLengthBytes() > Constants.LIMIT_MAX_UPLOAD_SIZE) {
+            //Always take a batch's first message, so an oversized header cannot stall the queue.
+            JSONArray batchMessages = uploadMessage.getMessages();
+            boolean batchHasMessages = batchMessages != null && batchMessages.length() > 0;
+            if (batchHasMessages && messageLength + uploadMessage.getMessageLengthBytes() > Constants.LIMIT_MAX_UPLOAD_SIZE) {
                 break;
             }
             uploadMessage.addMessage(msgObject);
             InternalListenerManager.getListener().onCompositeObjects(readyMessage, uploadMessage);
-            uploadMessage.incrementMessageLengthBytes(messageLength);
+            //+1 for the separator between messages.
+            uploadMessage.incrementMessageLengthBytes(messageLength + 1);
             highestUploadedMessageId = readyMessage.getMessageId();
         }
         if (markAsUpload) {
@@ -307,6 +321,13 @@ public class MParticleDBManager {
                     }
                 }
 
+                //The messages are already consumed, so log an oversized batch instead of storing it for
+                //cleanupUploadMessages to delete silently.
+                String batchString = batch.toString();
+                if (batchString != null && batchString.length() > Constants.LIMIT_MAX_UPLOAD_SIZE) {
+                    Logger.error("Not uploading batch of size " + batchString.length() + " that exceeds maximum safe size of " + Constants.LIMIT_MAX_UPLOAD_SIZE + " bytes.");
+                    continue;
+                }
                 UploadService.insertUpload(db, batch, uploadSettings);
                 cleanSessions(currentSessionId);
             }
