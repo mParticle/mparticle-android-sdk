@@ -1,5 +1,6 @@
 package com.mparticle.kits
 
+import android.content.Context
 import android.util.SparseBooleanArray
 import com.braze.Braze
 import com.braze.models.outgoing.BrazeProperties
@@ -16,9 +17,12 @@ import com.mparticle.consent.ConsentState
 import com.mparticle.consent.GDPRConsent
 import com.mparticle.identity.IdentityApi
 import com.mparticle.identity.MParticleUser
+import com.mparticle.internal.ReportingManager
 import com.mparticle.kits.mocks.MockBrazeKit
 import com.mparticle.kits.mocks.MockContextApplication
+import com.mparticle.kits.mocks.MockCoreCallbacks
 import com.mparticle.kits.mocks.MockKitConfiguration
+import com.mparticle.kits.mocks.MockKitManagerImpl
 import com.mparticle.kits.mocks.MockUser
 import junit.framework.TestCase
 import org.json.JSONArray
@@ -210,6 +214,56 @@ class BrazeKitTests {
             Assert.assertEquals(mockCustomerId, values[0])
             Assert.assertEquals(mockEmail, values[1])
         }
+    }
+
+    @Test
+    fun testOnKitCreateForwardsOnlyFilteredIdentities() {
+        val rawUser = Mockito.mock(MParticleUser::class.java)
+        val identities = HashMap<IdentityType, String>()
+        identities[IdentityType.CustomerId] = "12345"
+        identities[IdentityType.Email] = "mockEmail"
+        Mockito.`when`(rawUser.userIdentities).thenReturn(identities)
+        Mockito.`when`(MParticle.getInstance()!!.Identity().currentUser).thenReturn(rawUser)
+        val values = arrayOfNulls<String>(2)
+        val kit: BrazeKit =
+            object : BrazeKit() {
+                override fun setId(customerId: String) {
+                    values[0] = customerId
+                }
+
+                override fun setEmail(email: String) {
+                    values[1] = email
+                }
+
+                override fun queueDataFlush() {}
+            }
+        kit.kitManager =
+            MockKitManagerImpl(
+                Mockito.mock(Context::class.java),
+                Mockito.mock(ReportingManager::class.java),
+                MockCoreCallbacks(),
+            )
+        // a kit configuration whose identity filter excludes Email
+        kit.configuration =
+            object : KitConfiguration() {
+                override fun getUserIdentityFilters(): SparseBooleanArray =
+                    object : SparseBooleanArray() {
+                        override fun size(): Int = 1
+
+                        override fun get(
+                            key: Int,
+                            valueIfKeyNotFound: Boolean,
+                        ): Boolean = key != IdentityType.Email.value
+                    }
+            }
+        val settings = HashMap<String, String?>()
+        settings[BrazeKit.APPBOY_KEY] = "key"
+        settings[BrazeKit.USER_IDENTIFICATION_TYPE] = "CustomerId"
+
+        kit.onKitCreate(settings, MockContextApplication())
+
+        Assert.assertEquals("12345", values[0])
+        Assert.assertNull("a filtered identity must not reach Braze", values[1])
     }
 
     @Test

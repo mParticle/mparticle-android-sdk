@@ -131,7 +131,7 @@ open class AppboyKit :
         }
         setIdentityType(settings)
 
-        val user = MParticle.getInstance()?.Identity()?.currentUser
+        val user = currentUser
         if (user != null) {
             updateUser(user)
         }
