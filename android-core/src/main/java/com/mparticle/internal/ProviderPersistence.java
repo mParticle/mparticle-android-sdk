@@ -50,7 +50,12 @@ class ProviderPersistence extends JSONObject {
 
                 for (int fileIndex = 0; fileIndex < files.length(); fileIndex++) {
                     JSONObject fileObject = files.getJSONObject(fileIndex);
-                    SharedPreferences preferences = context.getSharedPreferences(fileObject.getString(KEY_PERSISTENCE_FILE), fileObject.getInt(KEY_PERSISTENCE_MODE));
+                    String fileName = fileObject.getString(KEY_PERSISTENCE_FILE);
+                    if (isMParticlePreferencesFile(fileName)) {
+                        Logger.warning("Ignoring provider persistence config for the SDK's own preferences file: " + fileName);
+                        continue;
+                    }
+                    SharedPreferences preferences = context.getSharedPreferences(fileName, fileObject.getInt(KEY_PERSISTENCE_MODE));
                     JSONArray fileObjects = fileObject.getJSONArray(KEY_PERSISTENCE_KEY_LIST);
                     SharedPreferences.Editor editor = preferences.edit();
                     for (int keyIndex = 0; keyIndex < fileObjects.length(); keyIndex++) {
@@ -97,6 +102,14 @@ class ProviderPersistence extends JSONObject {
 
         }
 
+    }
+
+    private static boolean isMParticlePreferencesFile(String fileName) {
+        return fileName.equals(Constants.PREFS_FILE)
+                || fileName.equals(ConfigManager.PREFERENCES_FILE)
+                || fileName.startsWith(ConfigManager.PREFERENCES_FILE + ":")
+                || fileName.equals(ConfigManager.KIT_CONFIG_PREFERENCES)
+                || fileName.startsWith(MPPREFIX);
     }
 
     private static final String MACRO_GUID_NO_DASHES = "%gn%";
