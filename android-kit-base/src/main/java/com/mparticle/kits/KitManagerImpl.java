@@ -1423,7 +1423,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, Identity
             if (kitConfig != null) {
                 try {
                     configurations.add(createKitConfiguration(kitConfig));
-                } catch (JSONException e) {
+                } catch (JSONException | NumberFormatException e) {
                     int kitId = kitConfig.optInt("id", -1);
                     mCoreCallbacks.getKitListener().kitExcluded(kitId, "exception while starting. Exception: " + e.getMessage());
                     Logger.error("Exception while starting kit: " + kitId + ": " + e.getMessage());
