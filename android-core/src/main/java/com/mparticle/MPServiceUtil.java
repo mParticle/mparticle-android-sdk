@@ -77,8 +77,12 @@ public class MPServiceUtil {
 
     public void onHandleIntent(Intent intent) {
         try {
-            String action = intent.getAction();
+            String action = intent == null ? null : intent.getAction();
             Logger.info("MPService", "Handling action: " + action);
+            if (action == null) {
+                Logger.warning("MPService", "Ignoring intent with no action.");
+                return;
+            }
             if (action.equals("com.google.android.c2dm.intent.REGISTRATION")) {
                 //Android will an Intent with this action, but we don't care - we capture the ID synchronously.
             } else if (action.equals("com.google.android.c2dm.intent.RECEIVE")) {
@@ -88,8 +92,10 @@ public class MPServiceUtil {
             } else if (action.equals(MPMessagingAPI.BROADCAST_NOTIFICATION_TAPPED)) {
                 handleNotificationTap(intent);
             } else if (action.equals(MPMessagingAPI.BROADCAST_NOTIFICATION_RECEIVED)) {
-                final ProviderCloudMessage message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
-                showNotification(message);
+                final ProviderCloudMessage message = getCloudMessage(intent);
+                if (message != null) {
+                    showNotification(message);
+                }
             }
         } finally {
             synchronized (LOCK) {
@@ -130,8 +136,24 @@ public class MPServiceUtil {
         }
     }
 
+    private static ProviderCloudMessage getCloudMessage(Intent intent) {
+        ProviderCloudMessage message = null;
+        try {
+            message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
+        } catch (Exception e) {
+            Logger.warning("MPService", "Unable to read the cloud message extra: " + e);
+        }
+        if (message == null) {
+            Logger.warning("MPService", "Ignoring action " + intent.getAction() + " with no cloud message extra.");
+        }
+        return message;
+    }
+
     private void handleNotificationTap(Intent intent) {
-        ProviderCloudMessage message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
+        ProviderCloudMessage message = getCloudMessage(intent);
+        if (message == null) {
+            return;
+        }
         Intent pe = message.getDefaultOpenIntent(mContext, message);
         pe.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         pe.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -190,7 +212,10 @@ public class MPServiceUtil {
     }
 
     private void handleNotificationTapInternal(Intent intent) {
-        ProviderCloudMessage message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
+        ProviderCloudMessage message = getCloudMessage(intent);
+        if (message == null) {
+            return;
+        }
 
         NotificationManager manager =
                 (NotificationManager) mContext.getSystemService(NOTIFICATION_SERVICE);
