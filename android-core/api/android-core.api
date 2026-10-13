@@ -2741,7 +2741,7 @@ public class com/mparticle/internal/UploadHandler : com/mparticle/internal/BaseH
 	public fun fetchUserAudiences (J)Lcom/mparticle/audience/AudienceTask;
 	protected fun forwardBatchToKits (Ljava/lang/String;)V
 	public fun handleMessageImpl (Landroid/os/Message;)V
-	public fun prepareMessageUploads (Lcom/mparticle/internal/database/UploadSettings;)V
+	public fun prepareMessageUploads (Lcom/mparticle/internal/database/UploadSettings;)Z
 	protected fun sendEmpty (I)V
 	protected fun sendEmptyDelayed (IJ)V
 	public fun setConnected (Z)V
