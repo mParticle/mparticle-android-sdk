@@ -6,6 +6,8 @@ The Android SDK and kits are released together from this monorepo using GitHub A
 
 ## Release workflows
 
+Both workflows run in the `release` environment, which only runs on `main` and `workstation/*`. A run from any other branch stops before its first step.
+
 ### Release - Draft
 
 Use `Release - Draft` to prepare a release PR. The workflow:
