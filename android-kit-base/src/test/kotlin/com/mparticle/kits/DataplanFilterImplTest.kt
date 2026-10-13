@@ -26,6 +26,7 @@ import org.junit.Before
 import org.junit.Test
 import java.io.File
 import java.lang.reflect.Modifier
+import java.util.Collections
 import kotlin.random.Random
 
 class DataplanFilterImplTest {
@@ -333,6 +334,48 @@ class DataplanFilterImplTest {
             assertNull(dataplanFilter.transformEventForEvent(event))
             diversity.remove(datapoint.type)
         }
+    }
+
+    @Test
+    fun `test blockEventAttribute is blocking product attributes`() {
+        val allowedAttributes = randomAttributes()
+        // a key longer than randomAttributes() produces, so it can never collide with an allowed key
+        val blockedAttributes = mapOf("unplanned_${randomString(4)}" to randomString(8))
+        // a product's attribute map may be immutable, so blocking must work without changing it in place
+        val productAttributes = Collections.unmodifiableMap(allowedAttributes + blockedAttributes)
+
+        val productAction = randomProductAction()
+        val productActionEvent =
+            CommerceEvent
+                .Builder(
+                    productAction,
+                    Product.Builder("a", "b", 1.0).customAttributes(productAttributes).build(),
+                ).build()
+        dataplanPoints = getRandomDataplanPoints()
+        dataplanPoints["$PRODUCT_ACTION_KEY.$productAction"] = null
+        dataplanPoints["$PRODUCT_ACTION_KEY.$productAction.$PRODUCT_ACTION_PRODUCTS"] = allowedAttributes.keys.toHashSet()
+        var dataplanFilter = DataplanFilterImpl(dataplanPoints, Random.Default.nextBoolean(), true, false, false)
+        assertEquals(
+            allowedAttributes,
+            dataplanFilter.transformEventForEvent(productActionEvent)?.products?.single()?.customAttributes,
+        )
+
+        val impressionEvent =
+            CommerceEvent
+                .Builder(
+                    Impression(
+                        "impressionname",
+                        Product.Builder("a", "b", 1.0).customAttributes(productAttributes).build(),
+                    ),
+                ).build()
+        dataplanPoints = getRandomDataplanPoints()
+        dataplanPoints[PRODUCT_IMPRESSION_KEY] = null
+        dataplanPoints["$PRODUCT_IMPRESSION_KEY.$PRODUCT_IMPRESSION_PRODUCTS"] = allowedAttributes.keys.toHashSet()
+        dataplanFilter = DataplanFilterImpl(dataplanPoints, Random.Default.nextBoolean(), true, false, false)
+        assertEquals(
+            allowedAttributes,
+            dataplanFilter.transformEventForEvent(impressionEvent)?.impressions?.single()?.products?.single()?.customAttributes,
+        )
     }
 
     private val types =
