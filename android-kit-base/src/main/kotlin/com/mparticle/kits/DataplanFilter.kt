@@ -5,6 +5,8 @@ import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.commerce.CommerceEvent
+import com.mparticle.commerce.Impression
+import com.mparticle.commerce.Product
 import com.mparticle.identity.MParticleIdentityClientImpl
 import com.mparticle.internal.Logger
 import org.json.JSONArray
@@ -61,7 +63,8 @@ Data Plan parsed for Kit Filtering:
      * 1) they are not defined within the dataplan
      * 2) the corresponding flag for the filtering area is true
      *
-     * note: this will NOT return a copy of the event, it will return either the original event filtered or null
+     * note: this returns the original event filtered, a rebuilt CommerceEvent when product attributes were blocked,
+     * or null
      */
     override fun <T : BaseEvent> transformEventForEvent(event: T?): T? {
         if (event == null) {
@@ -119,37 +122,78 @@ Data Plan parsed for Kit Filtering:
                 if (event is CommerceEvent) {
                     val productActionDatapoint =
                         dataPoints["$dataPointKey.$PRODUCT_ACTION_PRODUCTS"]
-                    event.products?.iterator()?.forEach { product ->
-                        product?.customAttributes?.toMutableMap()?.apply {
-                            val filteredAttributes =
-                                filterKeys {
-                                    productActionDatapoint?.contains(it) ?: true
-                                }
-                            clear()
-                            putAll(filteredAttributes)
-                        }
-                    }
                     val productImpressionDatapoint =
                         dataPoints["$dataPointKey.$PRODUCT_IMPRESSION_PRODUCTS"]
-                    if ((event.impressions?.size ?: 0) > 0) {
-                        event.impressions?.iterator()?.forEach {
-                            it.products.forEach { product ->
-                                product?.customAttributes?.toMutableMap()?.apply {
-                                    val filteredAttributes =
-                                        filterKeys {
-                                            productImpressionDatapoint?.contains(it) ?: true
-                                        }
-                                    clear()
-                                    putAll(filteredAttributes)
+                    var productsChanged = false
+                    val products =
+                        event.products?.map { product ->
+                            product.filterCustomAttributes(productActionDatapoint).also {
+                                if (it !== product) {
+                                    productsChanged = true
                                 }
                             }
                         }
+                    val impressions =
+                        event.impressions?.map { impression ->
+                            impression.filterProductAttributes(productImpressionDatapoint).also {
+                                if (it !== impression) {
+                                    productsChanged = true
+                                }
+                            }
+                        }
+                    if (productsChanged) {
+                        // products may hold immutable attribute maps, so rebuild rather than edit in place
+                        val builder = CommerceEvent.Builder(event)
+                        products?.let { builder.products(it) }
+                        impressions?.let { builder.impressions(it) }
+                        @Suppress("UNCHECKED_CAST")
+                        val filteredEvent = builder.build() as T
+                        return filteredEvent
                     }
                 }
             }
             return event
         }
         return event
+    }
+
+    // null allowedKeys means there are no constraints for product attributes
+    private fun Product.filterCustomAttributes(allowedKeys: HashSet<String>?): Product {
+        val attributes = customAttributes
+        if (allowedKeys == null || attributes == null) {
+            return this
+        }
+        val filteredAttributes =
+            attributes.filterKeys {
+                if (allowedKeys.contains(it)) {
+                    true
+                } else {
+                    Logger.verbose("Blocking unplanned product attribute: $it")
+                    false
+                }
+            }
+        if (filteredAttributes.size == attributes.size) {
+            return this
+        }
+        return Product.Builder(this).customAttributes(filteredAttributes).build()
+    }
+
+    private fun Impression.filterProductAttributes(allowedKeys: HashSet<String>?): Impression {
+        var productsChanged = false
+        val filteredProducts =
+            products.map { product ->
+                product.filterCustomAttributes(allowedKeys).also {
+                    if (it !== product) {
+                        productsChanged = true
+                    }
+                }
+            }
+        if (!productsChanged) {
+            return this
+        }
+        val filteredImpression = Impression(listName, filteredProducts.first())
+        filteredProducts.drop(1).forEach { filteredImpression.addProduct(it) }
+        return filteredImpression
     }
 
     override fun transformIdentities(identities: Map<MParticle.IdentityType, String?>?): Map<MParticle.IdentityType, String?>? {
