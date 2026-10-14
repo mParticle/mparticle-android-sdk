@@ -11,6 +11,7 @@ import org.gradle.api.Task
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.File
+import java.io.IOException
 
 class MParticlePlugin : Plugin<Project> {
     companion object {
@@ -31,7 +32,11 @@ class MParticlePlugin : Plugin<Project> {
         }
 
         target.afterEvaluate {
-            updateConfig(it)
+            try {
+                updateConfig(it)
+            } catch (e: IOException) {
+                Logger.warning("Unable to update the mParticle config, so data plan lint may not run: ${e.message}")
+            }
         }
         target.tasks.register(mpInstallTaskName, installTask)
         target.tasks.register(mpUninstallTaskName, uninstallTask)

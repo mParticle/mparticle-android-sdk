@@ -5,6 +5,8 @@ import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
+import java.nio.file.Files
+import java.nio.file.attribute.PosixFilePermissions
 
 object Utils {
     fun getCurrentFileLocation(fileName: String): String = javaClass
@@ -72,7 +74,7 @@ object Utils {
     }
 
     fun setConfigFile(config: Config) {
-        File(getFileLocation(CONFIG_FILE_NAME))
+        stateFile(CONFIG_FILE_NAME)
             .writeText(config.toJson().toString())
     }
 
@@ -100,18 +102,28 @@ object Utils {
     }
 
     fun setLocalDataplan(dataplan: String) {
-        File(getFileLocation(DATAPLAN_FILE_NAME))
+        stateFile(DATAPLAN_FILE_NAME)
             .writeText(dataplan)
     }
 
-    fun getFileLocation(fileName: String): String {
-        val env = System.getenv()
-        var tempDirectory = env["TMPDIR"]
-        if (tempDirectory?.endsWith("/") == false) {
-            tempDirectory += "/"
+    fun getFileLocation(fileName: String): String = File(stateDirectory(), fileName).path
+
+    private fun stateDirectory(): File = File(System.getProperty("user.home"), STATE_DIRECTORY_NAME)
+
+    // Creates the state directory, private to the current user, on first write.
+    private fun stateFile(fileName: String): File {
+        val directory = stateDirectory().toPath()
+        if (!Files.isDirectory(directory)) {
+            if (directory.fileSystem.supportedFileAttributeViews().contains("posix")) {
+                Files.createDirectories(directory, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwx------")))
+            } else {
+                Files.createDirectories(directory)
+            }
         }
-        return tempDirectory + fileName
+        return directory.resolve(fileName).toFile()
     }
+
+    private const val STATE_DIRECTORY_NAME = ".mparticle"
 }
 
 const val CONFIG_FILE_NAME = "mparticle-config"
