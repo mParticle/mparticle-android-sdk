@@ -528,10 +528,60 @@ class UploadHandlerTest {
         Assert.assertEquals(100L, uploadHandler.messageDelay)
     }
 
+    // when preparing a batch makes no progress (the database step failed, or the SDK instance is gone) the pending
+    // messages stay pending. Make sure the upload loop stops instead of reading them again forever, and still uploads
+    // what was already prepared and schedules the next "upload loop"
+    @Test
+    @Throws(
+        IOException::class,
+        MPThrottleException::class,
+        JSONException::class,
+        MPRampException::class,
+    )
+    fun testUploadLoopStopsWhenPrepareMessageUploadsMakesNoProgress() {
+        val database = MockMParticleDBManager()
+        database.hasMessagesForever = true
+        val mockConfigManager =
+            Mockito.mock(
+                ConfigManager::class.java,
+            )
+        Mockito.`when`(mockConfigManager.uploadInterval).thenReturn(100)
+        Mockito
+            .`when`(
+                mockConfigManager.uploadSettings,
+            ).thenReturn(UploadSettings("apiKey", "secret", NetworkOptions.builder().build(), "", ""))
+        val mockAppStateManager =
+            Mockito.mock(
+                AppStateManager::class.java,
+            )
+        val session: InternalSession =
+            object : InternalSession() {
+                override fun isActive(): Boolean = true
+            }
+        Mockito.`when`(mockAppStateManager.session).thenReturn(session)
+        val uploadHandler = MockUploadHandler(database, mockConfigManager, mockAppStateManager)
+        uploadHandler.prepareMessageUploadsResult = false
+        uploadHandler.setApiClient(Mockito.mock(MParticleApiClient::class.java))
+
+        // send a regular "upload loop" message
+        val message = Mockito.mock(Message::class.java)
+        message.what = UploadHandler.UPLOAD_MESSAGES
+        message.arg1 = 0
+        uploadHandler.handleMessageImpl(message)
+
+        // the loop gives up after the one attempt that made no progress, even though messages are still pending
+        Assert.assertEquals(1, uploadHandler.prepareMessageUploadsCalledCount)
+        // the batches prepared earlier are still uploaded
+        Assert.assertEquals(1, uploadHandler.uploadCalledCount)
+        // and the next "upload loop" is still scheduled, so the failed batch is retried later
+        Assert.assertEquals(100L, uploadHandler.messageDelay)
+    }
+
     internal inner class MockMParticleDBManager : MParticleDBManager(MockContext()) {
         var hasMessagesTrueCount = 0
+        var hasMessagesForever = false
 
-        override fun hasMessagesForUpload(): Boolean = hasMessagesTrueCount-- > 0
+        override fun hasMessagesForUpload(): Boolean = hasMessagesForever || hasMessagesTrueCount-- > 0
 
         override fun getDatabase(): MPDatabase? = null
     }
@@ -552,14 +602,16 @@ class UploadHandlerTest {
         var messageDelay: Long? = null
         var uploadCalledCount = 0
         var prepareMessageUploadsCalledCount = 0
+        var prepareMessageUploadsResult = true
 
         override fun upload() {
             uploadCalledCount++
         }
 
         @Throws(Exception::class)
-        override fun prepareMessageUploads(uploadSettings: UploadSettings) {
+        override fun prepareMessageUploads(uploadSettings: UploadSettings): Boolean {
             prepareMessageUploadsCalledCount++
+            return prepareMessageUploadsResult
         }
 
         override fun sendEmpty(what: Int) {

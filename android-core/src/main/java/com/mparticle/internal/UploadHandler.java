@@ -155,7 +155,9 @@ public class UploadHandler extends BaseHandler {
                     if (isNetworkConnected) {
                         if (uploadInterval > 0 || msg.arg1 == 1) {
                             while (mParticleDBManager.hasMessagesForUpload()) {
-                                prepareMessageUploads(mConfigManager.getUploadSettings());
+                                if (!prepareMessageUploads(mConfigManager.getUploadSettings())) {
+                                    break;
+                                }
                             }
                             upload();
                         }
@@ -182,8 +184,10 @@ public class UploadHandler extends BaseHandler {
      * - query app and device customAttributes, and add them to their respective batches
      * - persist all of the resulting upload batch objects
      * - mark the messages as having been uploaded.
+     *
+     * @return false when nothing was packaged, so the pending messages are still there
      */
-    public void prepareMessageUploads(UploadSettings uploadSettings) throws Exception {
+    public boolean prepareMessageUploads(UploadSettings uploadSettings) throws Exception {
         String currentSessionId = mAppStateManager.getSession().mSessionID;
         long remainingHeap = MPUtility.getRemainingHeapInBytes();
         if (remainingHeap < Constants.LIMIT_MAX_UPLOAD_SIZE) {
@@ -192,13 +196,15 @@ public class UploadHandler extends BaseHandler {
         MParticle instance = MParticle.getInstance();
         //abort if MParticle singleton has been dereferenced, there is no way to evaluate session history
         if (instance == null) {
-            return;
+            return false;
         }
         try {
             mParticleDBManager.cleanupMessages();
             mParticleDBManager.createMessagesForUploadMessage(mConfigManager, mMessageManager.getDeviceAttributes(), currentSessionId, uploadSettings);
+            return true;
         } catch (Exception e) {
             Logger.verbose("Error preparing batch upload in mParticle DB: " + e.getMessage());
+            return false;
         }
     }
 
