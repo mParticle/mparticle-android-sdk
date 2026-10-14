@@ -8,6 +8,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,7 +28,6 @@ class ProviderPersistence extends JSONObject {
     private static final String KEY_PERSISTENCE_ID = "id";
     private static final String KEY_PERSISTENCE_ANDROID = "pr";
     private static final String KEY_PERSISTENCE_FILE = "f";
-    private static final String KEY_PERSISTENCE_MODE = "m";
     private static final String KEY_PERSISTENCE_KEY_LIST = "ps";
     private static final String KEY_PERSISTENCE_KEY = "k";
     private static final String KEY_PERSISTENCE_TYPE = "t";
@@ -38,8 +41,20 @@ class ProviderPersistence extends JSONObject {
     private static final int PERSISTENCE_TYPE_FLOAT = 4;
     private static final int PERSISTENCE_TYPE_LONG = 5;
 
+    /**
+     * The Adobe Mobile Services identifiers custom modules were built to carry. The config names the
+     * keys to read, so without this bound it could name any preference the host app keeps. The host
+     * app widens it with {@link com.mparticle.MParticleOptions.Builder#customModulePreferenceKeys}.
+     */
+    private static final Set<String> DEFAULT_ALLOWED_KEYS = new HashSet<>(Arrays.asList(
+            "ADB_LIFETIME_VALUE",
+            "ADOBEMOBILE_STOREDDEFAULTS_AID",
+            "APP_MEASUREMENT_VISITOR_ID",
+            "OMCK1",
+            "OMCK5",
+            "OMCK6"));
 
-    ProviderPersistence(JSONObject config, Context context) throws JSONException {
+    ProviderPersistence(JSONObject config, Context context, Collection<String> allowedKeys) throws JSONException {
         super();
         JSONArray configPersistence = config.getJSONArray(KEY_PERSISTENCE);
         for (int i = 0; i < configPersistence.length(); i++) {
@@ -55,12 +70,17 @@ class ProviderPersistence extends JSONObject {
                         Logger.warning("Ignoring provider persistence config for the SDK's own preferences file: " + fileName);
                         continue;
                     }
-                    SharedPreferences preferences = context.getSharedPreferences(fileName, fileObject.getInt(KEY_PERSISTENCE_MODE));
+                    SharedPreferences preferences = context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
                     JSONArray fileObjects = fileObject.getJSONArray(KEY_PERSISTENCE_KEY_LIST);
                     SharedPreferences.Editor editor = preferences.edit();
                     for (int keyIndex = 0; keyIndex < fileObjects.length(); keyIndex++) {
                         final int type = fileObjects.getJSONObject(keyIndex).getInt(KEY_PERSISTENCE_TYPE);
                         final String key = fileObjects.getJSONObject(keyIndex).getString(KEY_PERSISTENCE_KEY);
+                        if (!DEFAULT_ALLOWED_KEYS.contains(key) && !allowedKeys.contains(key)) {
+                            Logger.warning("Ignoring a custom module preference for '" + key + "': not a key this SDK reads. "
+                                    + "Add it to MParticleOptions.Builder.customModulePreferenceKeys() to share it deliberately.");
+                            continue;
+                        }
                         final String mpKey = fileObjects.getJSONObject(keyIndex).getString(KEY_PERSISTENCE_MPVAR);
                         final String mpPersistenceKey = MPPREFIX + mpKey;
                         if (preferences.contains(mpPersistenceKey)) {

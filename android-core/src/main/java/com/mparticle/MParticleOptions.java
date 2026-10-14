@@ -60,6 +60,8 @@ public class MParticleOptions {
     private Map<Class, List<Configuration>> mConfigurations = new HashMap();
     private List<SideloadedKit> sideloadedKits = new ArrayList<>();
     private List<Integer> disabledKits = new ArrayList<>();
+    private boolean collectCustomModulePreferences = true;
+    private List<String> customModulePreferenceKeys = new ArrayList<>();
 
     private MParticleOptions() {
     }
@@ -164,6 +166,8 @@ public class MParticleOptions {
         this.mConfigurations = builder.configurations;
         this.sideloadedKits = builder.sideloadedKits;
         this.disabledKits = builder.disabledKits;
+        this.collectCustomModulePreferences = builder.collectCustomModulePreferences;
+        this.customModulePreferenceKeys = builder.customModulePreferenceKeys;
     }
 
     /**
@@ -216,6 +220,25 @@ public class MParticleOptions {
     @NonNull
     public List<Integer> getDisabledKits() {
         return disabledKits;
+    }
+
+    /**
+     * Whether the SDK may read custom module preferences out of the host app's SharedPreferences.
+     *
+     * @see Builder#collectCustomModulePreferences(boolean)
+     */
+    public boolean getCollectCustomModulePreferences() {
+        return collectCustomModulePreferences;
+    }
+
+    /**
+     * The SharedPreferences keys the SDK may read for custom modules in addition to its default set.
+     *
+     * @see Builder#customModulePreferenceKeys(List)
+     */
+    @NonNull
+    public List<String> getCustomModulePreferenceKeys() {
+        return customModulePreferenceKeys;
     }
 
     /**
@@ -453,6 +476,8 @@ public class MParticleOptions {
         private boolean isAppDebuggable;
         private List<SideloadedKit> sideloadedKits = new ArrayList<>();
         private List<Integer> disabledKits = new ArrayList<>();
+        private boolean collectCustomModulePreferences = true;
+        private List<String> customModulePreferenceKeys = new ArrayList<>();
 
         private Builder(Context context) {
             this.context = context;
@@ -529,6 +554,45 @@ public class MParticleOptions {
         @NonNull
         public Builder disabledKits(@NonNull List<Integer> kits) {
             disabledKits.addAll(kits);
+            return this;
+        }
+
+        /**
+         * Whether the SDK may read custom module preferences out of the host app's SharedPreferences.
+         *
+         * Custom modules let the configuration forward a small, fixed set of Adobe Mobile Services
+         * identifiers the Adobe SDK stores in SharedPreferences. Set this to false to stop the SDK
+         * reading SharedPreferences for custom modules entirely, whatever the configuration asks for.
+         *
+         * Defaults to true.
+         *
+         * @param collect whether custom module preferences may be read
+         * @return the instance of the builder, for chaining calls
+         * @see #customModulePreferenceKeys(List)
+         */
+        @NonNull
+        public Builder collectCustomModulePreferences(boolean collect) {
+            this.collectCustomModulePreferences = collect;
+            return this;
+        }
+
+        /**
+         * Additional SharedPreferences keys the SDK may read for custom modules.
+         *
+         * The SDK reads only the Adobe Mobile Services identifiers custom modules were built to carry,
+         * and ignores any other key the configuration names. List a key here to allow it as well; keys
+         * outside the default set and this list are never read, and each one ignored is logged. The
+         * configuration still chooses which SharedPreferences file a listed key is read from.
+         *
+         * Has no effect when {@link #collectCustomModulePreferences(boolean)} is false.
+         *
+         * @param keys the additional keys the SDK may read
+         * @return the instance of the builder, for chaining calls
+         * @see #collectCustomModulePreferences(boolean)
+         */
+        @NonNull
+        public Builder customModulePreferenceKeys(@NonNull List<String> keys) {
+            this.customModulePreferenceKeys = new ArrayList<>(keys);
             return this;
         }
 
@@ -873,6 +937,8 @@ public class MParticleOptions {
         }
 
         MParticleOptions buildForInternalRestart() {
+            // The host's own options are unknown here, so fail closed rather than read its preferences.
+            collectCustomModulePreferences = false;
             return new MParticleOptions(this);
         }
     }
