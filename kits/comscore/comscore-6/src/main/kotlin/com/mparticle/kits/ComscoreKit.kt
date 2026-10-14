@@ -240,7 +240,7 @@ class ComscoreKit :
     override fun onActivityStopped(activity: Activity): List<ReportingMessage> = emptyList()
 
     override fun setOptOut(optOutStatus: Boolean): List<ReportingMessage> {
-        if (!optOutStatus) {
+        if (optOutStatus) {
             Analytics.getConfiguration().disable()
         }
         val messageList = LinkedList<ReportingMessage>()
