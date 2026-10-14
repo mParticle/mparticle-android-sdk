@@ -291,6 +291,30 @@ class KitConfigurationTest {
 
     @Test
     @Throws(Exception::class)
+    fun testSideloadedCommerceEntityFilterRemovesProducts() {
+        // commerceFilters2 carries no "ent" filter, so the sideloaded one is the only entity filter
+        val configuration = MockKitConfiguration.createKitConfiguration(JSONObject(commerceFilters2))
+        val sideloadedFilters = MPSideloadedFilters()
+        sideloadedFilters.filters["ent"] = JSONObject().put("1", 0)
+        configuration.applySideloadedKits(sideloadedFilters)
+        val attributes: MutableMap<String, String> = HashMap()
+        attributes["my custom attribute"] = "whatever"
+        val event =
+            CommerceEvent
+                .Builder(Product.ADD_TO_CART, Product.Builder("name", "sku", 2.0).build())
+                .customAttributes(attributes)
+                .build()
+        Assert.assertEquals(1, event.products?.size)
+        Assert.assertEquals("whatever", event.customAttributeStrings?.get("my custom attribute"))
+        val filteredEvent = configuration.filterCommerceEvent(event)
+        // the sideloaded entity filter removes the products
+        Assert.assertNull(filteredEvent.products)
+        // the configuration's commerce attribute filter still applies
+        Assert.assertNull(filteredEvent.customAttributeStrings?.get("my custom attribute"))
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun testFilterCommerceEntityAttribute() {
         var event =
             CommerceEvent

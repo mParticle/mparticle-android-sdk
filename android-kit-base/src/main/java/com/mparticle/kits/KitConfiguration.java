@@ -218,7 +218,7 @@ public class KitConfiguration {
             try {
                 JSONObject commerceEntityFilterSparseArray = sideloadedFiltersMap.get(KEY_COMMERCE_ENTITY_FILTERS);
                 if (commerceEntityFilterSparseArray != null && commerceEntityFilterSparseArray.length() > 0) {
-                    this.mCommerceAttributeFilters = convertToSparseArray(commerceEntityFilterSparseArray);
+                    this.mCommerceEntityFilters = convertToSparseArray(commerceEntityFilterSparseArray);
                 }
             } catch (Exception e) {
             }
