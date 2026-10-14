@@ -72,7 +72,7 @@ class LeanplumKit :
     }
 
     private fun generateLeanplumId(): String? =
-        MParticle.getInstance()?.Identity()?.currentUser?.let {
+        currentUser?.let {
             generateLeanplumUserId(
                 it,
                 settings,
