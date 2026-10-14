@@ -1012,6 +1012,39 @@ class KitManagerImplTest {
         verify(listener, never()).setUserIdentity(eq(MParticle.IdentityType.CustomerId), any())
     }
 
+    @Test
+    fun testKitWithUnparseableConfigurationIsExcluded() {
+        val manager: KitManagerImpl = MockKitManagerImpl()
+        val factory =
+            mock(
+                KitIntegrationFactory::class.java,
+            )
+        manager.setKitFactory(factory)
+        `when`(factory.getSupportedKits()).thenReturn(createKitsMap(listOf(1, 2, 3)).keys)
+        `when`(factory.isSupported(Mockito.anyInt())).thenReturn(true)
+        val mockKit = mock(KitIntegration::class.java)
+        `when`(mockKit.configuration).thenReturn(mock(KitConfiguration::class.java))
+        `when`(
+            factory.createInstance(
+                any(
+                    KitManagerImpl::class.java,
+                ),
+                any(KitConfiguration::class.java),
+            ),
+        ).thenReturn(mockKit)
+        val kitConfiguration = JSONArray()
+        kitConfiguration.put(JSONObject("{\"id\":1,\"hs\":{\"afa\":{\"not a number\":{}}}}"))
+        kitConfiguration.put(JSONObject("{\"id\":2}"))
+        kitConfiguration.put(
+            JSONObject(
+                "{\"id\":3,\"pr\":[{\"id\":89,\"matches\":[{\"message_type\":4,\"event_match_type\":\"Hash\"," +
+                    "\"event\":\"not a number\"}],\"behavior\":{},\"action\":{\"projected_event_name\":\"\",\"attribute_maps\":[]}}]}",
+            ),
+        )
+        manager.updateKits(kitConfiguration)
+        assertEquals(setOf(2), manager.providers.keys)
+    }
+
     internal inner class KitManagerEventCounter : MockKitManagerImpl() {
         var logBaseEventCalled = 0
         var logCommerceEventCalled = 0
