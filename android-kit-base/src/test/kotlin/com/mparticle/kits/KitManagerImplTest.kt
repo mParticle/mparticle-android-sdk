@@ -1020,7 +1020,7 @@ class KitManagerImplTest {
                 KitIntegrationFactory::class.java,
             )
         manager.setKitFactory(factory)
-        `when`(factory.getSupportedKits()).thenReturn(createKitsMap(listOf(1, 2, 3)).keys)
+        `when`(factory.getSupportedKits()).thenReturn(createKitsMap(listOf(1, 2, 3, 4)).keys)
         `when`(factory.isSupported(Mockito.anyInt())).thenReturn(true)
         val mockKit = mock(KitIntegration::class.java)
         `when`(mockKit.configuration).thenReturn(mock(KitConfiguration::class.java))
@@ -1039,6 +1039,12 @@ class KitManagerImplTest {
             JSONObject(
                 "{\"id\":3,\"pr\":[{\"id\":89,\"matches\":[{\"message_type\":4,\"event_match_type\":\"Hash\"," +
                     "\"event\":\"not a number\"}],\"behavior\":{},\"action\":{\"projected_event_name\":\"\",\"attribute_maps\":[]}}]}",
+            ),
+        )
+        kitConfiguration.put(
+            JSONObject(
+                "{\"id\":4,\"pr\":[{\"id\":90,\"matches\":[],\"behavior\":{\"is_default\":true}," +
+                    "\"action\":{\"projected_event_name\":\"\",\"attribute_maps\":[]}}]}",
             ),
         )
         manager.updateKits(kitConfiguration)
