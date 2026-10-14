@@ -561,7 +561,7 @@ public class MParticleOptions {
          * Whether the SDK may read custom module preferences out of the host app's SharedPreferences.
          *
          * Custom modules let the configuration forward a small, fixed set of Adobe Mobile Services
-         * identifiers the Adobe SDK stores in SharedPreferences. Set this to false to stop the SDK
+         * values the Adobe SDK stores in SharedPreferences. Set this to false to stop the SDK
          * reading SharedPreferences for custom modules entirely, whatever the configuration asks for.
          *
          * Defaults to true.
@@ -579,7 +579,7 @@ public class MParticleOptions {
         /**
          * Additional SharedPreferences keys the SDK may read for custom modules.
          *
-         * The SDK reads only the Adobe Mobile Services identifiers custom modules were built to carry,
+         * The SDK reads only the Adobe Mobile Services values custom modules were built to carry,
          * and ignores any other key the configuration names. List a key here to allow it as well; keys
          * outside the default set and this list are never read, and each one ignored is logged. The
          * configuration still chooses which SharedPreferences file a listed key is read from.

@@ -818,6 +818,18 @@ class ConfigManagerTest {
 
     @Test
     @Throws(Exception::class)
+    fun testProviderPersistenceReadsAdobeLifecycleKeys() {
+        val prefs = context.getSharedPreferences(null, 0)
+        for (key in listOf("ADMS_InstallDate", "ADMS_LastDateUsed", "ADMS_Launches", "OMCK1", "OMCK5", "OMCK6")) {
+            prefs.edit().putString(key, "value of $key").apply()
+            manager.updateConfig(JSONObject(providerPersistenceConfig("APP_MEASUREMENT_CACHE", key, "out")))
+            Assert.assertEquals("value of $key", manager.providerPersistence?.getJSONObject("1")?.getString("out"))
+            prefs.edit().remove("mp::out").apply()
+        }
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun testProviderPersistenceIgnoredWhenCollectionDisabled() {
         val prefs = context.getSharedPreferences(null, 0)
         prefs.edit().putString(ADOBE_AID_KEY, "stored aid").apply()

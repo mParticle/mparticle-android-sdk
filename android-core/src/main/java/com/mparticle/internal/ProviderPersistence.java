@@ -42,14 +42,20 @@ class ProviderPersistence extends JSONObject {
     private static final int PERSISTENCE_TYPE_LONG = 5;
 
     /**
-     * The Adobe Mobile Services identifiers custom modules were built to carry. The config names the
-     * keys to read, so without this bound it could name any preference the host app keeps. The host
-     * app widens it with {@link com.mparticle.MParticleOptions.Builder#customModulePreferenceKeys}.
+     * The Adobe Mobile Services values custom modules were built to carry. The config names the keys
+     * to read, so without this bound it could name any preference the host app keeps. The host app
+     * widens it with {@link com.mparticle.MParticleOptions.Builder#customModulePreferenceKeys}.
+     * The Adobe Mobile Services (v4) SDK stores install date, last-used date and launches as ADMS_*
+     * keys on Android and as OMCK* keys on iOS; both are listed so a configuration shared with iOS
+     * keeps working.
      */
     private static final Set<String> DEFAULT_ALLOWED_KEYS = new HashSet<>(Arrays.asList(
             "ADB_LIFETIME_VALUE",
             "ADOBEMOBILE_STOREDDEFAULTS_AID",
             "APP_MEASUREMENT_VISITOR_ID",
+            "ADMS_InstallDate",
+            "ADMS_LastDateUsed",
+            "ADMS_Launches",
             "OMCK1",
             "OMCK5",
             "OMCK6"));
