@@ -14,4 +14,4 @@ permissions:
 jobs:
   automerge-dependabot:
     name: "Automerge Dependabot PR"
-    uses: mParticle/mparticle-workflows/.github/workflows/dependabot-automerge.yml@main
+    uses: mParticle/mparticle-workflows/.github/workflows/dependabot-automerge.yml@a78c8b34f5811be7c046a27cae900a844094f1cf # main

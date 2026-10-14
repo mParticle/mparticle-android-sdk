@@ -179,7 +179,7 @@ jobs:
   security-checks:
     name: "Security Lint Checks"
     if: github.event_name == 'pull_request'
-    uses: mparticle/mparticle-workflows/.github/workflows/security-checks.yml@main
+    uses: mparticle/mparticle-workflows/.github/workflows/security-checks.yml@a78c8b34f5811be7c046a27cae900a844094f1cf # main
     with:
       base_branch: main
 
@@ -383,7 +383,7 @@ jobs:
         kit-compatibility-test,
         build-kits,
       ]
-    uses: mParticle/mparticle-workflows/.github/workflows/dependabot-save-pr-number.yml@main
+    uses: mParticle/mparticle-workflows/.github/workflows/dependabot-save-pr-number.yml@a78c8b34f5811be7c046a27cae900a844094f1cf # main
 
   pr-notify:
     if: >
@@ -401,7 +401,7 @@ jobs:
       - kotlin-lint-checks
       - security-checks
     name: Notify GChat
-    uses: ROKT/rokt-workflows/.github/workflows/oss_pr_opened_notification.yml@main
+    uses: ROKT/rokt-workflows/.github/workflows/oss_pr_opened_notification.yml@da0c5fd5d38e9cf113a24ec9aaea079cc7d0bc40 # main
     secrets:
       gchat_webhook: ${{ secrets.GCHAT_PRS_WEBHOOK }}
 
