@@ -206,6 +206,13 @@ class RadarKit :
         return messageList
     }
 
+    override fun onKitDestroy() {
+        super.onKitDestroy()
+        if (mRunAutomatically) {
+            stopTracking()
+        }
+    }
+
     companion object {
         private const val KEY_PUBLISHABLE_KEY = "publishableKey"
         private const val KEY_RUN_AUTOMATICALLY = "runAutomatically"
