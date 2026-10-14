@@ -765,6 +765,36 @@ class ConfigManagerTest {
         Assert.assertTrue(reloadedManager.isDeviceBasedConsentEnabled())
     }
 
+    @Test
+    @Throws(Exception::class)
+    fun testProviderPersistenceIgnoresSdkPreferencesFiles() {
+        val prefs = context.getSharedPreferences(null, 0)
+        prefs.edit().putString(Constants.PrefKeys.API_KEY, "stored api key").remove(Constants.PrefKeys.OPTOUT).apply()
+        val sdkFiles =
+            listOf(
+                Constants.PREFS_FILE,
+                ConfigManager.PREFERENCES_FILE,
+                ConfigManager.PREFERENCES_FILE + ":12345",
+                ConfigManager.KIT_CONFIG_PREFERENCES,
+                "mp::kit::80",
+            )
+        for (fileName in sdkFiles) {
+            manager.updateConfig(JSONObject(providerPersistenceConfig(fileName, Constants.PrefKeys.API_KEY, "optout::")))
+            val persistence = manager.providerPersistence
+            Assert.assertNotNull(persistence)
+            Assert.assertEquals(0, persistence?.getJSONObject("1")?.length())
+            Assert.assertFalse(prefs.contains(Constants.PrefKeys.OPTOUT))
+        }
+
+        // a preferences file that belongs to another SDK is still migrated
+        prefs.edit().putString("other_sdk_key", "other sdk value").apply()
+        manager.updateConfig(JSONObject(providerPersistenceConfig("other_sdk_prefs", "other_sdk_key", "migrated")))
+        Assert.assertEquals("other sdk value", manager.providerPersistence?.getJSONObject("1")?.getString("migrated"))
+        Assert.assertEquals("other sdk value", prefs.getString("mp::migrated", null))
+    }
+
+    private fun providerPersistenceConfig(fileName: String, key: String, mpVar: String): String = """{ "cms":[ { "id":1, "pr":[ { "f":"$fileName", "m":0, "ps":[ { "k":"$key", "t":1, "n":"$mpVar", "d":"default" } ] } ] } ] }"""
+
     companion object {
         private const val SAMPLE_CONFIG =
             "{ \"dt\":\"ac\", \"id\":\"5b7b8073-852b-47c2-9b89-c4bc66e3bd55\", \"ct\":1428030730685, \"dbg\":false, \"cue\":\"appdefined\", \"pmk\":[ \"mp_message\", \"com.urbanairship.push.ALERT\", \"alert\", \"a\", \"message\" ], \"cnp\":\"appdefined\", \"soc\":0, \"oo\":false, \"tri\" : { \"mm\" : [{ \"dt\" : \"x\", \"eh\" : true } ], \"evts\" : [1217787541, 2, 3] }, \"eks\":[ { \"id\":64, \"as\":{ \"clientId\":\"8FMBElARYl9ZtgwYIN5sZA==\", \"surveyId\":\"android_app\", \"sendAppVersion\":\"True\", \"rootUrl\":\"http://survey.foreseeresults.com/survey/display\" }, \"hs\":{ \"et\":{ \"57\":0, \"49\":0, \"55\":0, \"52\":0, \"53\":0, \"50\":0, \"56\":0, \"51\":0, \"54\":0, \"48\":0 }, \"ec\":{ \"609391310\":0, \"-1282670145\":0, \"2138942058\":0, \"-1262630649\":0, \"-877324321\":0, \"1700497048\":0, \"1611158813\":0, \"1900204162\":0, \"-998867355\":0, \"-1758179958\":0, \"-994832826\":0, \"1598473606\":0, \"-2106320589\":0 }, \"ea\":{ \"343635109\":0, \"1162787110\":0, \"-427055400\":0, \"-1285822129\":0, \"1699530232\":0 }, \"svec\":{ \"-725356351\":0, \"-1992427723\":0, \"751512662\":0, \"-118381281\":0, \"-171137512\":0, \"-2036479142\":0, \"-1338304551\":0, \"1003167705\":0, \"1046650497\":0, \"1919407518\":0, \"-1326325184\":0, \"480870493\":0, \"-1087232483\":0, \"-725540438\":0, \"-461793000\":0, \"1935019626\":0, \"76381608\":0, \"273797382\":0, \"-948909976\":0, \"-348193740\":0, \"-685370074\":0, \"-849874419\":0, \"2074021738\":0, \"-767572488\":0, \"-1091433459\":0, \"1671688881\":0, \"1304651793\":0, \"1299738196\":0, \"326063875\":0, \"296835202\":0, \"268236000\":0, \"1708308839\":0, \"101093345\":0, \"-652558691\":0, \"-1613021771\":0, \"1106318256\":0, \"-473874363\":0, \"-1267780435\":0, \"486732621\":0, \"1855792002\":0, \"-881258627\":0, \"698731249\":0, \"1510155838\":0, \"1119638805\":0, \"479337352\":0, \"1312099430\":0, \"1712783405\":0, \"-459721027\":0, \"-214402990\":0, \"617910950\":0, \"428901717\":0, \"-201124647\":0, \"940674176\":0, \"1632668193\":0, \"338835860\":0, \"879890181\":0, \"1667730064\":0 } } } ], \"lsv\":\"2.1.4\", \"pio\":30 }"
