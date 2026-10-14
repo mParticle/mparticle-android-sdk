@@ -397,11 +397,11 @@ open class SingularKit :
     override fun supportsAttributeLists(): Boolean = false
 
     override fun onConsentStateUpdated(
-        consentState: ConsentState,
-        consentState1: ConsentState,
+        oldState: ConsentState,
+        newState: ConsentState,
     ) {
         executeIfSingularInitialized({
-            consentState.ccpaConsentState?.let { Singular.limitDataSharing(it.isConsented) }
+            newState.ccpaConsentState?.let { Singular.limitDataSharing(it.isConsented) }
         }, forceInitSingular = false, "onConsentStateUpdated")
     }
 
