@@ -2,6 +2,73 @@
 
 ## [Unreleased]
 
+## [6.1.9] - 2026-10-15
+
+### Core
+
+#### Fixed
+
+- Bound the preferences custom modules may read from the host app ([#939](https://github.com/mParticle/mparticle-android-sdk/pull/939))
+- Exclude a kit whose configuration throws while parsing ([#937](https://github.com/mParticle/mparticle-android-sdk/pull/937))
+- Keep plugin state files in a per-user directory ([#929](https://github.com/mParticle/mparticle-android-sdk/pull/929))
+- Apply kit product attribute filters to products in impressions ([#927](https://github.com/mParticle/mparticle-android-sdk/pull/927))
+- Stop the upload loop when no batch can be prepared ([#925](https://github.com/mParticle/mparticle-android-sdk/pull/925))
+- Ignore provider persistence entries that name the SDK's own preference files ([#922](https://github.com/mParticle/mparticle-android-sdk/pull/922))
+- Block unplanned product attributes in the data plan filter ([#921](https://github.com/mParticle/mparticle-android-sdk/pull/921))
+- Count the batch header toward the upload size limit ([#919](https://github.com/mParticle/mparticle-android-sdk/pull/919))
+- Exclude a kit whose configuration fails to parse instead of crashing ([#928](https://github.com/mParticle/mparticle-android-sdk/pull/928))
+- Apply data plan identity blocking when a kit is created ([#916](https://github.com/mParticle/mparticle-android-sdk/pull/916))
+- Ignore push service intents without an action or cloud message ([#914](https://github.com/mParticle/mparticle-android-sdk/pull/914))
+- Apply sideloaded commerce entity filters ([#913](https://github.com/mParticle/mparticle-android-sdk/pull/913))
+
+#### Changed
+
+- Note who can create workstation release branches ([#938](https://github.com/mParticle/mparticle-android-sdk/pull/938))
+
+### Kits
+
+#### Braze
+
+##### Fixed
+
+- Use the kit's filtered user when the kit starts ([#915](https://github.com/mParticle/mparticle-android-sdk/pull/915))
+
+#### Comscore
+
+##### Fixed
+
+- Disable comScore when the user opts out ([#924](https://github.com/mParticle/mparticle-android-sdk/pull/924))
+
+#### Ga
+
+##### Fixed
+
+- Read Google consent from the typed consent state ([#926](https://github.com/mParticle/mparticle-android-sdk/pull/926))
+
+#### Leanplum
+
+##### Fixed
+
+- Derive the start-up user id from the kit's filtered user ([#918](https://github.com/mParticle/mparticle-android-sdk/pull/918))
+
+#### Radar
+
+##### Fixed
+
+- Stop location tracking when the kit is destroyed ([#917](https://github.com/mParticle/mparticle-android-sdk/pull/917))
+
+#### Rokt
+
+##### Fixed
+
+- Update Rokt SDK and payment extension to 6.3.1 ([#950](https://github.com/mParticle/mparticle-android-sdk/pull/950))
+
+#### Singular
+
+##### Fixed
+
+- Forward the new CCPA consent state ([#920](https://github.com/mParticle/mparticle-android-sdk/pull/920))
+
 ## [6.1.8] - 2026-10-12
 
 ### Core
