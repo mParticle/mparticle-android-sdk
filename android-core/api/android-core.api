@@ -384,12 +384,14 @@ public class com/mparticle/MParticleOptions {
 	public fun getApiSecret ()Ljava/lang/String;
 	public fun getAttributionListener ()Lcom/mparticle/AttributionListener;
 	public fun getBatchCreationListener ()Lcom/mparticle/MParticleOptions$BatchCreationListener;
+	public fun getCollectCustomModulePreferences ()Z
 	public fun getConfigMaxAge ()Ljava/lang/Integer;
 	public fun getConfiguration (Ljava/lang/Class;)Lcom/mparticle/Configuration;
 	public fun getConfigurations ()Ljava/util/List;
 	public fun getConfigurationsForTarget (Ljava/lang/Class;)Ljava/util/List;
 	public fun getConnectionTimeout ()I
 	public fun getContext ()Landroid/content/Context;
+	public fun getCustomModulePreferenceKeys ()Ljava/util/List;
 	public fun getDataplanId ()Ljava/lang/String;
 	public fun getDataplanOptions ()Lcom/mparticle/MParticleOptions$DataplanOptions;
 	public fun getDataplanVersion ()Ljava/lang/Integer;
@@ -424,9 +426,11 @@ public class com/mparticle/MParticleOptions$Builder {
 	public fun attributionListener (Lcom/mparticle/AttributionListener;)Lcom/mparticle/MParticleOptions$Builder;
 	public fun batchCreationListener (Lcom/mparticle/MParticleOptions$BatchCreationListener;)Lcom/mparticle/MParticleOptions$Builder;
 	public fun build ()Lcom/mparticle/MParticleOptions;
+	public fun collectCustomModulePreferences (Z)Lcom/mparticle/MParticleOptions$Builder;
 	public fun configMaxAgeSeconds (I)Lcom/mparticle/MParticleOptions$Builder;
 	public fun configuration (Lcom/mparticle/Configuration;)Lcom/mparticle/MParticleOptions$Builder;
 	public fun credentials (Ljava/lang/String;Ljava/lang/String;)Lcom/mparticle/MParticleOptions$Builder;
+	public fun customModulePreferenceKeys (Ljava/util/List;)Lcom/mparticle/MParticleOptions$Builder;
 	public fun dataplan (Ljava/lang/String;Ljava/lang/Integer;)Lcom/mparticle/MParticleOptions$Builder;
 	public fun dataplanOptions (Lcom/mparticle/MParticleOptions$DataplanOptions;)Lcom/mparticle/MParticleOptions$Builder;
 	public fun deviceBasedConsentEnabled (Z)Lcom/mparticle/MParticleOptions$Builder;

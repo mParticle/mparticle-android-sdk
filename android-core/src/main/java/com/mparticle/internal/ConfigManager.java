@@ -117,6 +117,8 @@ public class ConfigManager {
     public static final int DEFAULT_UPLOAD_INTERVAL = 600;
     private List<ConfigLoadedListener> configUpdatedListeners = new ArrayList<>();
     private List<SideloadedKit> sideloadedKits = new ArrayList<>();
+    private boolean mCollectCustomModulePreferences = true;
+    private List<String> mCustomModulePreferenceKeys = new ArrayList<>();
 
     private ConfigManager() {
         super();
@@ -144,6 +146,8 @@ public class ConfigManager {
         this(options.getContext(), options.getEnvironment(), options.getApiKey(), options.getApiSecret(), options.getDataplanOptions(), options.getDataplanId(), options.getDataplanVersion(), options.getConfigMaxAge(), options.getConfigurationsForTarget(ConfigManager.class), options.getSideloadedKits());
         mPersistenceMaxAgeSeconds = options.getPersistenceMaxAgeSeconds();
         setDeviceBasedConsentEnabled(options.isDeviceBasedConsentEnabled());
+        mCollectCustomModulePreferences = options.getCollectCustomModulePreferences();
+        mCustomModulePreferenceKeys = new ArrayList<>(options.getCustomModulePreferenceKeys());
     }
 
     /**
@@ -452,8 +456,8 @@ public class ConfigManager {
             mSendOoEvents = false;
         }
 
-        if (responseJSON.has(ProviderPersistence.KEY_PERSISTENCE)) {
-            setProviderPersistence(new ProviderPersistence(responseJSON, mContext));
+        if (mCollectCustomModulePreferences && responseJSON.has(ProviderPersistence.KEY_PERSISTENCE)) {
+            setProviderPersistence(new ProviderPersistence(responseJSON, mContext, mCustomModulePreferenceKeys));
         } else {
             setProviderPersistence(null);
         }
