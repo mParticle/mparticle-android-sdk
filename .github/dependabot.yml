@@ -19,15 +19,19 @@ updates:
       - dependency-name: "com.mparticle:android-core"
       - dependency-name: "com.google.firebase:firebase-messaging"
       - dependency-name: "org.jetbrains.kotlin:*"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+        update-types:
+          ["version-update:semver-major", "version-update:semver-minor"]
       - dependency-name: "org.jetbrains.kotlin.*"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+        update-types:
+          ["version-update:semver-major", "version-update:semver-minor"]
       - dependency-name: "jvm"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+        update-types:
+          ["version-update:semver-major", "version-update:semver-minor"]
       - dependency-name: "gradle-wrapper"
         update-types: ["version-update:semver-major"]
       - dependency-name: "com.mparticle:android-media"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+        update-types:
+          ["version-update:semver-major", "version-update:semver-minor"]
     commit-message:
       prefix: "chore"
   - package-ecosystem: github-actions
