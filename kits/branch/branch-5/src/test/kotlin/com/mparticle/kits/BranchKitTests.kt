@@ -60,40 +60,40 @@ class BranchKitTests {
         MParticle.setInstance(null)
     }
 
-    private fun mockCurrentSession(sessionUuid: String?) {
+    private fun mockCurrentSession(sessionId: Long) {
         val session = Mockito.mock(Session::class.java)
-        Mockito.`when`(session.sessionUUID).thenReturn(sessionUuid)
+        Mockito.`when`(session.sessionID).thenReturn(sessionId)
         val mParticle = Mockito.mock(MParticle::class.java)
         Mockito.`when`(mParticle.currentSession).thenReturn(session)
         MParticle.setInstance(mParticle)
     }
 
     /**
-     * Verifies the current session UUID is added to the Branch event's custom data.
+     * Verifies the current session ID is added to the Branch event's custom data.
      */
     @Test
-    fun testAddSessionUuidAddsCurrentSession() {
-        mockCurrentSession("11111111-2222-3333-4444-555555555555")
+    fun testAddSessionIdAddsCurrentSession() {
+        mockCurrentSession(-7046029254386353131L)
         val branchEvent = Mockito.mock(BranchEvent::class.java)
 
-        BranchMetricsKit().addSessionUuid(branchEvent, mapOf("color" to "blue"))
+        BranchMetricsKit().addSessionId(branchEvent, mapOf("color" to "blue"))
 
         Mockito
             .verify(branchEvent)
-            .addCustomDataProperty(BranchMetricsKit.SESSION_UUID_KEY, "11111111-2222-3333-4444-555555555555")
+            .addCustomDataProperty(BranchMetricsKit.SESSION_ID_KEY, "-7046029254386353131")
     }
 
     /**
-     * Verifies a customer attribute with the session UUID key is not overwritten.
+     * Verifies a customer attribute with the session ID key is not overwritten.
      */
     @Test
-    fun testAddSessionUuidKeepsCustomerValue() {
-        mockCurrentSession("11111111-2222-3333-4444-555555555555")
+    fun testAddSessionIdKeepsCustomerValue() {
+        mockCurrentSession(-7046029254386353131L)
         val branchEvent = Mockito.mock(BranchEvent::class.java)
 
-        BranchMetricsKit().addSessionUuid(
+        BranchMetricsKit().addSessionId(
             branchEvent,
-            mapOf(BranchMetricsKit.SESSION_UUID_KEY to "customer-value"),
+            mapOf(BranchMetricsKit.SESSION_ID_KEY to "customer-value"),
         )
 
         Mockito.verifyZeroInteractions(branchEvent)
@@ -103,13 +103,26 @@ class BranchKitTests {
      * Verifies nothing is added when there is no current session.
      */
     @Test
-    fun testAddSessionUuidSkipsWithoutSession() {
+    fun testAddSessionIdSkipsWithoutSession() {
         val mParticle = Mockito.mock(MParticle::class.java)
         Mockito.`when`(mParticle.currentSession).thenReturn(null)
         MParticle.setInstance(mParticle)
         val branchEvent = Mockito.mock(BranchEvent::class.java)
 
-        BranchMetricsKit().addSessionUuid(branchEvent, null)
+        BranchMetricsKit().addSessionId(branchEvent, null)
+
+        Mockito.verifyZeroInteractions(branchEvent)
+    }
+
+    /**
+     * Verifies nothing is added when the session has no UUID, which the SDK reports as an ID of 0.
+     */
+    @Test
+    fun testAddSessionIdSkipsZeroId() {
+        mockCurrentSession(0L)
+        val branchEvent = Mockito.mock(BranchEvent::class.java)
+
+        BranchMetricsKit().addSessionId(branchEvent, null)
 
         Mockito.verifyZeroInteractions(branchEvent)
     }

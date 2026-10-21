@@ -122,7 +122,7 @@ class BranchMetricsKit :
     override fun logEvent(event: MPEvent): List<ReportingMessage> {
         branchUtil
             ?.createBranchEventFromMPEvent(event)
-            ?.let { addSessionUuid(it, event.customAttributeStrings) }
+            ?.let { addSessionId(it, event.customAttributeStrings) }
             ?.logEvent(context)
         val messages = LinkedList<ReportingMessage>()
         messages.add(ReportingMessage.fromEvent(this, event))
@@ -139,7 +139,7 @@ class BranchMetricsKit :
     override fun logEvent(commerceEvent: CommerceEvent): List<ReportingMessage> {
         branchUtil
             ?.createBranchEventFromMPCommerceEvent(commerceEvent)
-            ?.let { addSessionUuid(it, commerceEvent.customAttributeStrings) }
+            ?.let { addSessionId(it, commerceEvent.customAttributeStrings) }
             ?.logEvent(context)
         val messages: MutableList<ReportingMessage> = LinkedList()
         messages.add(ReportingMessage.fromEvent(this, commerceEvent))
@@ -157,7 +157,7 @@ class BranchMetricsKit :
                 eventAttributes = HashMap()
             }
             branchUtil?.updateBranchEventWithCustomData(logScreenEvent, eventAttributes)
-            addSessionUuid(logScreenEvent, eventAttributes)
+            addSessionId(logScreenEvent, eventAttributes)
             logScreenEvent.logEvent(context)
             val messages =
                 LinkedList<ReportingMessage>()
@@ -176,16 +176,16 @@ class BranchMetricsKit :
     }
 
     /**
-     * Adds the current mParticle session UUID to the event's custom data. A customer attribute with
+     * Adds the current mParticle session ID to the event's custom data. A customer attribute with
      * the same key wins, and nothing is added when there is no current session.
      */
-    internal fun addSessionUuid(
+    internal fun addSessionId(
         branchEvent: BranchEvent,
         eventAttributes: Map<String, String>?,
     ): BranchEvent {
-        val sessionUuid = MParticle.getInstance()?.currentSession?.sessionUUID
-        if (!sessionUuid.isNullOrEmpty() && eventAttributes?.containsKey(SESSION_UUID_KEY) != true) {
-            branchEvent.addCustomDataProperty(SESSION_UUID_KEY, sessionUuid)
+        val sessionId = MParticle.getInstance()?.currentSession?.sessionID
+        if (sessionId != null && sessionId != 0L && eventAttributes?.containsKey(SESSION_ID_KEY) != true) {
+            branchEvent.addCustomDataProperty(SESSION_ID_KEY, sessionId.toString())
         }
         return branchEvent
     }
@@ -340,7 +340,7 @@ class BranchMetricsKit :
     companion object {
         private const val FORWARD_SCREEN_VIEWS = "forwardScreenViews"
         private const val USER_IDENTIFICATION_TYPE = "userIdentificationType"
-        internal const val SESSION_UUID_KEY = "mp_session_uuid"
+        internal const val SESSION_ID_KEY = "mp_session_id"
         const val NAME = "Branch Metrics"
     }
 }
