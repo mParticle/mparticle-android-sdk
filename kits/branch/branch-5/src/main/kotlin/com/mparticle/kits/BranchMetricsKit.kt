@@ -49,6 +49,7 @@ class BranchMetricsKit :
     private var isMpidIdentityType = false
     var identityType: IdentityType? = IdentityType.CustomerId
     private var mSendScreenEvents = false
+    private var sendSessionId = false
     private var branchUtil: BranchUtil? = null
 
     override fun getInstance(): Branch? = branch
@@ -74,6 +75,7 @@ class BranchMetricsKit :
         mSendScreenEvents =
             sendScreenEvents != null &&
             sendScreenEvents.equals("true", ignoreCase = true)
+        sendSessionId = settings[SEND_SESSION_ID].equals("true", ignoreCase = true)
         setIdentityType(settings)
         return emptyList()
     }
@@ -120,7 +122,10 @@ class BranchMetricsKit :
     ): List<ReportingMessage> = emptyList()
 
     override fun logEvent(event: MPEvent): List<ReportingMessage> {
-        branchUtil?.createBranchEventFromMPEvent(event)?.logEvent(context)
+        branchUtil
+            ?.createBranchEventFromMPEvent(event)
+            ?.withSessionId(currentSessionId, event.customAttributeStrings)
+            ?.logEvent(context)
         val messages = LinkedList<ReportingMessage>()
         messages.add(ReportingMessage.fromEvent(this, event))
         return messages
@@ -134,7 +139,10 @@ class BranchMetricsKit :
     ): List<ReportingMessage> = emptyList()
 
     override fun logEvent(commerceEvent: CommerceEvent): List<ReportingMessage> {
-        branchUtil?.createBranchEventFromMPCommerceEvent(commerceEvent)?.logEvent(context)
+        branchUtil
+            ?.createBranchEventFromMPCommerceEvent(commerceEvent)
+            ?.withSessionId(currentSessionId, commerceEvent.customAttributeStrings)
+            ?.logEvent(context)
         val messages: MutableList<ReportingMessage> = LinkedList()
         messages.add(ReportingMessage.fromEvent(this, commerceEvent))
         return messages
@@ -151,7 +159,7 @@ class BranchMetricsKit :
                 eventAttributes = HashMap()
             }
             branchUtil?.updateBranchEventWithCustomData(logScreenEvent, eventAttributes)
-            logScreenEvent.logEvent(context)
+            logScreenEvent.withSessionId(currentSessionId, eventAttributes).logEvent(context)
             val messages =
                 LinkedList<ReportingMessage>()
             messages.add(
@@ -167,6 +175,9 @@ class BranchMetricsKit :
             emptyList()
         }
     }
+
+    private val currentSessionId: Long?
+        get() = if (sendSessionId) MParticle.getInstance()?.currentSession?.sessionID else null
 
     private val branch: Branch?
         get() = settings[branchAppKey]?.let { Branch.getInstance() }
@@ -315,9 +326,25 @@ class BranchMetricsKit :
 
     override fun onApplicationBackground() {}
 
+    /**
+     * Adds the mParticle session ID to the event's custom data. A customer attribute with the same
+     * key wins, and nothing is added without a session ID.
+     */
+    internal fun BranchEvent.withSessionId(
+        sessionId: Long?,
+        attributes: Map<String, String>?,
+    ): BranchEvent =
+        apply {
+            if (sessionId != null && sessionId != 0L && attributes?.containsKey(SESSION_ID_KEY) != true) {
+                addCustomDataProperty(SESSION_ID_KEY, sessionId.toString())
+            }
+        }
+
     companion object {
         private const val FORWARD_SCREEN_VIEWS = "forwardScreenViews"
         private const val USER_IDENTIFICATION_TYPE = "userIdentificationType"
+        private const val SEND_SESSION_ID = "sendSessionId"
+        internal const val SESSION_ID_KEY = "mp_session_id"
         const val NAME = "Branch Metrics"
     }
 }
