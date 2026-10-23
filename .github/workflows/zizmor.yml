@@ -38,7 +38,7 @@ jobs:
           persist-credentials: false
           fetch-depth: 1 # zizmor only needs the tree at HEAD
       - name: Run zizmor
-        uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 # v0.6.4
+        uses: zizmorcore/zizmor-action@85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e # v0.7.1
         # Permanent advisory mode — zizmor is rolled out across Rokt repos as a
         # reporter, not a gate. Findings surface as PR annotations so owners
         # can triage incrementally without blocking unrelated changes.
