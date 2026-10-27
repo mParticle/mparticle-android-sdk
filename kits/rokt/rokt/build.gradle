@@ -87,7 +87,7 @@ dependencies {
 
     testImplementation  files('libs/java-json.jar')
     testImplementation 'com.squareup.assertj:assertj-android:1.2.0'
-    testImplementation ("io.mockk:mockk:1.13.4")
+    testImplementation ("io.mockk:mockk:1.14.11")
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
