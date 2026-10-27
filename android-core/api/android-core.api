@@ -3013,18 +3013,12 @@ public class com/mparticle/internal/database/services/UserAttributesService : co
 }
 
 public class com/mparticle/internal/database/tables/BreadcrumbTable : com/mparticle/internal/database/tables/MpIdDependentTable {
+	public static final field Companion Lcom/mparticle/internal/database/tables/BreadcrumbTable$Companion;
 	public fun <init> ()V
 	public fun getTableName ()Ljava/lang/String;
 }
 
-protected abstract interface class com/mparticle/internal/database/tables/BreadcrumbTable$BreadcrumbTableColumns {
-	public static final field API_KEY Ljava/lang/String;
-	public static final field CF_UUID Ljava/lang/String;
-	public static final field CREATED_AT Ljava/lang/String;
-	public static final field MESSAGE Ljava/lang/String;
-	public static final field MP_ID Ljava/lang/String;
-	public static final field SESSION_ID Ljava/lang/String;
-	public static final field TABLE_NAME Ljava/lang/String;
+public final class com/mparticle/internal/database/tables/BreadcrumbTable$Companion {
 }
 
 public class com/mparticle/internal/database/tables/MParticleDatabaseHelper : com/mparticle/internal/database/services/SQLiteOpenHelperWrapper {
@@ -3040,11 +3034,30 @@ public class com/mparticle/internal/database/tables/MParticleDatabaseHelper : co
 public class com/mparticle/internal/database/tables/MessageTable : com/mparticle/internal/database/tables/MpIdDependentTable {
 	public static final field ADD_DATAPLAN_ID_COLUMN Ljava/lang/String;
 	public static final field ADD_DATAPLAN_VERSION_COLUMN Ljava/lang/String;
+	public static final field Companion Lcom/mparticle/internal/database/tables/MessageTable$Companion;
 	public fun <init> ()V
 	public fun getTableName ()Ljava/lang/String;
 }
 
+public final class com/mparticle/internal/database/tables/MessageTable$Companion {
+}
+
 public abstract interface class com/mparticle/internal/database/tables/MessageTable$MessageTableColumns : android/provider/BaseColumns {
+	public static final field API_KEY Ljava/lang/String;
+	public static final field CF_UUID Ljava/lang/String;
+	public static final field CREATED_AT Ljava/lang/String;
+	public static final field Companion Lcom/mparticle/internal/database/tables/MessageTable$MessageTableColumns$Companion;
+	public static final field DATAPLAN_ID Ljava/lang/String;
+	public static final field DATAPLAN_VERSION Ljava/lang/String;
+	public static final field MESSAGE Ljava/lang/String;
+	public static final field MESSAGE_TYPE Ljava/lang/String;
+	public static final field MP_ID Ljava/lang/String;
+	public static final field SESSION_ID Ljava/lang/String;
+	public static final field STATUS Ljava/lang/String;
+	public static final field TABLE_NAME Ljava/lang/String;
+}
+
+public final class com/mparticle/internal/database/tables/MessageTable$MessageTableColumns$Companion {
 	public static final field API_KEY Ljava/lang/String;
 	public static final field CF_UUID Ljava/lang/String;
 	public static final field CREATED_AT Ljava/lang/String;
@@ -3059,36 +3072,59 @@ public abstract interface class com/mparticle/internal/database/tables/MessageTa
 }
 
 public abstract class com/mparticle/internal/database/tables/MpIdDependentTable {
+	public static final field Companion Lcom/mparticle/internal/database/tables/MpIdDependentTable$Companion;
 	public static final field MP_ID Ljava/lang/String;
 	public fun <init> ()V
 	public abstract fun getTableName ()Ljava/lang/String;
 	public fun updateMpId (Lcom/mparticle/internal/database/MPDatabase;JJ)V
 }
 
+public final class com/mparticle/internal/database/tables/MpIdDependentTable$Companion {
+}
+
 public class com/mparticle/internal/database/tables/ReportingTable : com/mparticle/internal/database/tables/MpIdDependentTable {
+	public static final field Companion Lcom/mparticle/internal/database/tables/ReportingTable$Companion;
 	public fun <init> ()V
 	public fun getTableName ()Ljava/lang/String;
 }
 
-protected abstract interface class com/mparticle/internal/database/tables/ReportingTable$ReportingTableColumns : android/provider/BaseColumns {
-	public static final field CREATED_AT Ljava/lang/String;
-	public static final field MESSAGE Ljava/lang/String;
-	public static final field MODULE_ID Ljava/lang/String;
-	public static final field MP_ID Ljava/lang/String;
-	public static final field SESSION_ID Ljava/lang/String;
-	public static final field TABLE_NAME Ljava/lang/String;
+public final class com/mparticle/internal/database/tables/ReportingTable$Companion {
 }
 
 public class com/mparticle/internal/database/tables/SessionTable : com/mparticle/internal/database/tables/MpIdDependentTable {
+	public static final field Companion Lcom/mparticle/internal/database/tables/SessionTable$Companion;
 	public fun <init> ()V
 	public fun getTableName ()Ljava/lang/String;
+}
+
+public final class com/mparticle/internal/database/tables/SessionTable$Companion {
 }
 
 public abstract interface class com/mparticle/internal/database/tables/SessionTable$SessionStatus {
 	public static final field CLOSED Ljava/lang/String;
+	public static final field Companion Lcom/mparticle/internal/database/tables/SessionTable$SessionStatus$Companion;
+}
+
+public final class com/mparticle/internal/database/tables/SessionTable$SessionStatus$Companion {
+	public static final field CLOSED Ljava/lang/String;
 }
 
 public abstract interface class com/mparticle/internal/database/tables/SessionTable$SessionTableColumns {
+	public static final field API_KEY Ljava/lang/String;
+	public static final field APP_INFO Ljava/lang/String;
+	public static final field ATTRIBUTES Ljava/lang/String;
+	public static final field Companion Lcom/mparticle/internal/database/tables/SessionTable$SessionTableColumns$Companion;
+	public static final field DEVICE_INFO Ljava/lang/String;
+	public static final field END_TIME Ljava/lang/String;
+	public static final field MP_ID Ljava/lang/String;
+	public static final field SESSION_FOREGROUND_LENGTH Ljava/lang/String;
+	public static final field SESSION_ID Ljava/lang/String;
+	public static final field START_TIME Ljava/lang/String;
+	public static final field STATUS Ljava/lang/String;
+	public static final field TABLE_NAME Ljava/lang/String;
+}
+
+public final class com/mparticle/internal/database/tables/SessionTable$SessionTableColumns$Companion {
 	public static final field API_KEY Ljava/lang/String;
 	public static final field APP_INFO Ljava/lang/String;
 	public static final field ATTRIBUTES Ljava/lang/String;
@@ -3104,32 +3140,21 @@ public abstract interface class com/mparticle/internal/database/tables/SessionTa
 
 public class com/mparticle/internal/database/tables/UploadTable {
 	public static final field ALIAS_REQUEST Ljava/lang/String;
+	public static final field Companion Lcom/mparticle/internal/database/tables/UploadTable$Companion;
 	public static final field UPLOAD_REQUEST Ljava/lang/String;
 	public fun <init> ()V
 }
 
-protected abstract interface class com/mparticle/internal/database/tables/UploadTable$UploadTableColumns : android/provider/BaseColumns {
-	public static final field API_KEY Ljava/lang/String;
-	public static final field CREATED_AT Ljava/lang/String;
-	public static final field MESSAGE Ljava/lang/String;
-	public static final field REQUEST_TYPE Ljava/lang/String;
-	public static final field SESSION_ID Ljava/lang/String;
-	public static final field TABLE_NAME Ljava/lang/String;
-	public static final field UPLOAD_SETTINGS Ljava/lang/String;
+public final class com/mparticle/internal/database/tables/UploadTable$Companion {
 }
 
 public class com/mparticle/internal/database/tables/UserAttributesTable : com/mparticle/internal/database/tables/MpIdDependentTable {
+	public static final field Companion Lcom/mparticle/internal/database/tables/UserAttributesTable$Companion;
 	public fun <init> ()V
 	public fun getTableName ()Ljava/lang/String;
 }
 
-protected abstract interface class com/mparticle/internal/database/tables/UserAttributesTable$UserAttributesTableColumns {
-	public static final field ATTRIBUTE_KEY Ljava/lang/String;
-	public static final field ATTRIBUTE_VALUE Ljava/lang/String;
-	public static final field CREATED_AT Ljava/lang/String;
-	public static final field IS_LIST Ljava/lang/String;
-	public static final field MP_ID Ljava/lang/String;
-	public static final field TABLE_NAME Ljava/lang/String;
+public final class com/mparticle/internal/database/tables/UserAttributesTable$Companion {
 }
 
 public abstract interface annotation class com/mparticle/internal/listeners/ApiClass : java/lang/annotation/Annotation {
