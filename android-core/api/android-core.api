@@ -2840,6 +2840,7 @@ public class com/mparticle/internal/database/MPDatabaseImpl : com/mparticle/inte
 }
 
 public class com/mparticle/internal/database/UploadSettings {
+	public static final field Companion Lcom/mparticle/internal/database/UploadSettings$Companion;
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lcom/mparticle/networking/NetworkOptions;Ljava/lang/String;Ljava/lang/String;)V
 	public fun getActiveKits ()Ljava/lang/String;
 	public fun getApiKey ()Ljava/lang/String;
@@ -2847,7 +2848,11 @@ public class com/mparticle/internal/database/UploadSettings {
 	public fun getSecret ()Ljava/lang/String;
 	public fun getSupportedKits ()Ljava/lang/String;
 	public fun toJson ()Ljava/lang/String;
-	public static fun withJson (Ljava/lang/String;)Lcom/mparticle/internal/database/UploadSettings;
+	public static final fun withJson (Ljava/lang/String;)Lcom/mparticle/internal/database/UploadSettings;
+}
+
+public final class com/mparticle/internal/database/UploadSettings$Companion {
+	public final fun withJson (Ljava/lang/String;)Lcom/mparticle/internal/database/UploadSettings;
 }
 
 public class com/mparticle/internal/database/services/BreadcrumbService : com/mparticle/internal/database/tables/BreadcrumbTable {
