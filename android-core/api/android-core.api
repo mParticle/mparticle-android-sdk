@@ -3027,13 +3027,19 @@ public final class com/mparticle/internal/database/tables/BreadcrumbTable$Compan
 }
 
 public class com/mparticle/internal/database/tables/MParticleDatabaseHelper : com/mparticle/internal/database/services/SQLiteOpenHelperWrapper {
+	public static final field Companion Lcom/mparticle/internal/database/tables/MParticleDatabaseHelper$Companion;
 	public static final field DB_VERSION I
 	public fun <init> (Landroid/content/Context;)V
-	public static fun getDbName ()Ljava/lang/String;
+	public static final fun getDbName ()Ljava/lang/String;
 	public fun onCreate (Landroid/database/sqlite/SQLiteDatabase;)V
 	public fun onDowngrade (Landroid/database/sqlite/SQLiteDatabase;II)V
 	public fun onUpgrade (Landroid/database/sqlite/SQLiteDatabase;II)V
-	public static fun setDbName (Ljava/lang/String;)V
+	public static final fun setDbName (Ljava/lang/String;)V
+}
+
+public final class com/mparticle/internal/database/tables/MParticleDatabaseHelper$Companion {
+	public final fun getDbName ()Ljava/lang/String;
+	public final fun setDbName (Ljava/lang/String;)V
 }
 
 public class com/mparticle/internal/database/tables/MessageTable : com/mparticle/internal/database/tables/MpIdDependentTable {

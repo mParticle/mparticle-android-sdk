@@ -87,9 +87,11 @@ JDK 17 — `gradle.properties` sets `JAVA_VERSION` and every CI job installs Zul
 - Android lint — `./gradlew lint`; Kotlin lint — `./gradlew ktlintCheck`
 - Migration progress — `scripts/kotlin_migration_progress.py` prints Java left to convert and the
   Kotlin share of `android-core` and `android-kit-base` (CI job _Kotlin Migration Progress_).
-- Binary compatibility with the last release — `scripts/api_compat_report.py` builds the release
-  AARs and runs japicmp against the latest version on Maven Central (CI job _Binary Compatibility_).
-  It compares what ships after R8, so it is the check that matters for consumers.
+- Binary compatibility with the last release — `scripts/api_compat_report.py` builds this branch
+  and the latest version on Maven Central (from its tag) without R8 and runs japicmp over the two,
+  limited to the classes and members that release keeps by name after R8. It also checks that the
+  release AAR still keeps them (CI job _Binary Compatibility_). It is the check that matters for
+  consumers.
 - Instrumented tests — `./gradlew :android-core:cAT :android-kit-base:cAT --stacktrace`, needs an
   API 28 emulator
 - Kit unit tests — `./gradlew -p kits testRelease -c ../settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true`
