@@ -2856,10 +2856,17 @@ public final class com/mparticle/internal/database/UploadSettings$Companion {
 }
 
 public class com/mparticle/internal/database/services/BreadcrumbService : com/mparticle/internal/database/tables/BreadcrumbTable {
+	public static final field Companion Lcom/mparticle/internal/database/services/BreadcrumbService$Companion;
 	public fun <init> ()V
-	public static fun deleteAll (Lcom/mparticle/internal/database/MPDatabase;)V
-	public static fun getBreadcrumbs (Lcom/mparticle/internal/database/MPDatabase;Landroid/content/Context;Ljava/lang/Long;)Lorg/json/JSONArray;
-	public static fun insertBreadcrumb (Lcom/mparticle/internal/database/MPDatabase;Landroid/content/Context;Lcom/mparticle/internal/messages/BaseMPMessage;Ljava/lang/String;Ljava/lang/Long;)I
+	public static final fun deleteAll (Lcom/mparticle/internal/database/MPDatabase;)V
+	public static final fun getBreadcrumbs (Lcom/mparticle/internal/database/MPDatabase;Landroid/content/Context;Ljava/lang/Long;)Lorg/json/JSONArray;
+	public static final fun insertBreadcrumb (Lcom/mparticle/internal/database/MPDatabase;Landroid/content/Context;Lcom/mparticle/internal/messages/BaseMPMessage;Ljava/lang/String;Ljava/lang/Long;)I
+}
+
+public final class com/mparticle/internal/database/services/BreadcrumbService$Companion {
+	public final fun deleteAll (Lcom/mparticle/internal/database/MPDatabase;)V
+	public final fun getBreadcrumbs (Lcom/mparticle/internal/database/MPDatabase;Landroid/content/Context;Ljava/lang/Long;)Lorg/json/JSONArray;
+	public final fun insertBreadcrumb (Lcom/mparticle/internal/database/MPDatabase;Landroid/content/Context;Lcom/mparticle/internal/messages/BaseMPMessage;Ljava/lang/String;Ljava/lang/Long;)I
 }
 
 public class com/mparticle/internal/database/services/MParticleDBManager {
@@ -2960,11 +2967,19 @@ public class com/mparticle/internal/database/services/MessageService$ReadyMessag
 }
 
 public class com/mparticle/internal/database/services/ReportingService : com/mparticle/internal/database/tables/ReportingTable {
+	public static final field Companion Lcom/mparticle/internal/database/services/ReportingService$Companion;
 	public fun <init> ()V
-	public static fun deleteAll (Lcom/mparticle/internal/database/MPDatabase;)V
-	public static fun deleteReportingMessage (Lcom/mparticle/internal/database/MPDatabase;I)V
-	public static fun getReportingMessagesForUpload (Lcom/mparticle/internal/database/MPDatabase;)Ljava/util/List;
-	public static fun insertReportingMessage (Lcom/mparticle/internal/database/MPDatabase;Lcom/mparticle/internal/JsonReportingMessage;J)V
+	public static final fun deleteAll (Lcom/mparticle/internal/database/MPDatabase;)V
+	public static final fun deleteReportingMessage (Lcom/mparticle/internal/database/MPDatabase;I)V
+	public static final fun getReportingMessagesForUpload (Lcom/mparticle/internal/database/MPDatabase;)Ljava/util/List;
+	public static final fun insertReportingMessage (Lcom/mparticle/internal/database/MPDatabase;Lcom/mparticle/internal/JsonReportingMessage;J)V
+}
+
+public final class com/mparticle/internal/database/services/ReportingService$Companion {
+	public final fun deleteAll (Lcom/mparticle/internal/database/MPDatabase;)V
+	public final fun deleteReportingMessage (Lcom/mparticle/internal/database/MPDatabase;I)V
+	public final fun getReportingMessagesForUpload (Lcom/mparticle/internal/database/MPDatabase;)Ljava/util/List;
+	public final fun insertReportingMessage (Lcom/mparticle/internal/database/MPDatabase;Lcom/mparticle/internal/JsonReportingMessage;J)V
 }
 
 public class com/mparticle/internal/database/services/ReportingService$ReportingMessage {
@@ -2999,22 +3014,41 @@ public class com/mparticle/internal/database/services/SessionService : com/mpart
 }
 
 public class com/mparticle/internal/database/services/UploadService : com/mparticle/internal/database/tables/UploadTable {
+	public static final field Companion Lcom/mparticle/internal/database/services/UploadService$Companion;
 	public fun <init> ()V
-	public static fun cleanupUploadMessages (Lcom/mparticle/internal/database/MPDatabase;)I
-	public static fun deleteUpload (Lcom/mparticle/internal/database/MPDatabase;I)I
-	public static fun deleteUploadsOlderThan (Lcom/mparticle/internal/database/MPDatabase;J)I
-	public static fun getReadyUploads (Lcom/mparticle/internal/database/MPDatabase;)Ljava/util/List;
-	public static fun insertAliasRequest (Lcom/mparticle/internal/database/MPDatabase;Lorg/json/JSONObject;Lcom/mparticle/internal/database/UploadSettings;)J
-	public static fun insertUpload (Lcom/mparticle/internal/database/MPDatabase;Lorg/json/JSONObject;Lcom/mparticle/internal/database/UploadSettings;)V
+	public static final fun cleanupUploadMessages (Lcom/mparticle/internal/database/MPDatabase;)I
+	public static final fun deleteUpload (Lcom/mparticle/internal/database/MPDatabase;I)I
+	public static final fun deleteUploadsOlderThan (Lcom/mparticle/internal/database/MPDatabase;J)I
+	public static final fun getReadyUploads (Lcom/mparticle/internal/database/MPDatabase;)Ljava/util/List;
+	public static final fun insertAliasRequest (Lcom/mparticle/internal/database/MPDatabase;Lorg/json/JSONObject;Lcom/mparticle/internal/database/UploadSettings;)J
+	public static final fun insertUpload (Lcom/mparticle/internal/database/MPDatabase;Lorg/json/JSONObject;Lcom/mparticle/internal/database/UploadSettings;)V
+}
+
+public final class com/mparticle/internal/database/services/UploadService$Companion {
+	public final fun cleanupUploadMessages (Lcom/mparticle/internal/database/MPDatabase;)I
+	public final fun deleteUpload (Lcom/mparticle/internal/database/MPDatabase;I)I
+	public final fun deleteUploadsOlderThan (Lcom/mparticle/internal/database/MPDatabase;J)I
+	public final fun getReadyUploads (Lcom/mparticle/internal/database/MPDatabase;)Ljava/util/List;
+	public final fun insertAliasRequest (Lcom/mparticle/internal/database/MPDatabase;Lorg/json/JSONObject;Lcom/mparticle/internal/database/UploadSettings;)J
+	public final fun insertUpload (Lcom/mparticle/internal/database/MPDatabase;Lorg/json/JSONObject;Lcom/mparticle/internal/database/UploadSettings;)V
 }
 
 public class com/mparticle/internal/database/services/UserAttributesService : com/mparticle/internal/database/tables/UserAttributesTable {
+	public static final field Companion Lcom/mparticle/internal/database/services/UserAttributesService$Companion;
 	public fun <init> ()V
-	public static fun deleteAll (Lcom/mparticle/internal/database/MPDatabase;)V
-	public static fun deleteAttributes (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;J)I
-	public static fun getUserAttributesLists (Lcom/mparticle/internal/database/MPDatabase;J)Ljava/util/TreeMap;
-	public static fun getUserAttributesSingles (Lcom/mparticle/internal/database/MPDatabase;J)Ljava/util/TreeMap;
-	public static fun insertAttribute (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;Ljava/lang/String;JZJ)V
+	public static final fun deleteAll (Lcom/mparticle/internal/database/MPDatabase;)V
+	public static final fun deleteAttributes (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;J)I
+	public static final fun getUserAttributesLists (Lcom/mparticle/internal/database/MPDatabase;J)Ljava/util/TreeMap;
+	public static final fun getUserAttributesSingles (Lcom/mparticle/internal/database/MPDatabase;J)Ljava/util/TreeMap;
+	public static final fun insertAttribute (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;Ljava/lang/String;JZJ)V
+}
+
+public final class com/mparticle/internal/database/services/UserAttributesService$Companion {
+	public final fun deleteAll (Lcom/mparticle/internal/database/MPDatabase;)V
+	public final fun deleteAttributes (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;J)I
+	public final fun getUserAttributesLists (Lcom/mparticle/internal/database/MPDatabase;J)Ljava/util/TreeMap;
+	public final fun getUserAttributesSingles (Lcom/mparticle/internal/database/MPDatabase;J)Ljava/util/TreeMap;
+	public final fun insertAttribute (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;Ljava/lang/String;JZJ)V
 }
 
 public class com/mparticle/internal/database/tables/BreadcrumbTable : com/mparticle/internal/database/tables/MpIdDependentTable {
