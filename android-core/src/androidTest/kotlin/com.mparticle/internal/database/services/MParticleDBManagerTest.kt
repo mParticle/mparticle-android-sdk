@@ -37,7 +37,7 @@ class MParticleDBManagerTest : BaseCleanInstallEachTest() {
         val attributeList = ArrayList<String>()
         attributeList.add("bar")
         attributeList.add("baz")
-        newAttributes.attributeLists["foo"] = attributeList
+        newAttributes.attributeLists!!["foo"] = attributeList
         manager.setUserAttribute(newAttributes)
         attributes = manager.getUserAttributes(10)
         Assert.assertNotNull(attributes["foo"])
@@ -62,7 +62,7 @@ class MParticleDBManagerTest : BaseCleanInstallEachTest() {
         var attributeList = ArrayList<String>()
         attributeList.add("bar")
         attributeList.add("baz")
-        newAttributes.attributeLists["foo"] = attributeList
+        newAttributes.attributeLists!!["foo"] = attributeList
         manager.setUserAttribute(newAttributes)
         attributes = manager.getUserAttributes(10)
         Assert.assertNotNull(attributes["foo"])
@@ -71,8 +71,8 @@ class MParticleDBManagerTest : BaseCleanInstallEachTest() {
         attributeList.add("bar")
         attributeList.add("baz")
         attributeList.add("bar-2")
-        newAttributes.attributeLists.clear()
-        newAttributes.attributeLists["foo"] = attributeList
+        newAttributes.attributeLists!!.clear()
+        newAttributes.attributeLists!!["foo"] = attributeList
         manager.setUserAttribute(newAttributes)
         attributes = manager.getUserAttributes(10)
         Assert.assertNotNull(attributes["foo"])
@@ -81,16 +81,16 @@ class MParticleDBManagerTest : BaseCleanInstallEachTest() {
         attributeList.add("bar-2")
         attributeList.add("bar")
         attributeList.add("baz")
-        newAttributes.attributeLists.clear()
-        newAttributes.attributeLists["foo"] = attributeList
+        newAttributes.attributeLists!!.clear()
+        newAttributes.attributeLists!!["foo"] = attributeList
         manager.setUserAttribute(newAttributes)
         attributes = manager.getUserAttributes(10)
         Assert.assertNotNull(attributes["foo"])
         Assert.assertEquals(attributeList, attributes["foo"])
         attributeList = ArrayList()
         attributeList.add("bar")
-        newAttributes.attributeLists.clear()
-        newAttributes.attributeLists["foo"] = attributeList
+        newAttributes.attributeLists!!.clear()
+        newAttributes.attributeLists!!["foo"] = attributeList
         manager.setUserAttribute(newAttributes)
         attributes = manager.getUserAttributes(10)
         Assert.assertNotNull(attributes["foo"])
@@ -176,7 +176,7 @@ class MParticleDBManagerTest : BaseCleanInstallEachTest() {
         attributes.mpId = mStartingMpid
         attributes.attributeSingles = HashMap()
         for (i in 0 until 40) {
-            attributes.attributeSingles["attribute-$i"] = "a".repeat(4000)
+            attributes.attributeSingles!!["attribute-$i"] = "a".repeat(4000)
         }
         manager.setUserAttribute(attributes)
 
@@ -201,16 +201,16 @@ class MParticleDBManagerTest : BaseCleanInstallEachTest() {
         )
 
         // Every stored upload fits the limit, so the cleanup that runs before an upload removes none of them.
-        val uploads = manager.readyUploads
+        val uploads = manager.getReadyUploads()
         Assert.assertTrue(uploads.isNotEmpty())
         for (upload in uploads) {
-            Assert.assertTrue(upload.message.length <= Constants.LIMIT_MAX_UPLOAD_SIZE)
+            Assert.assertTrue(upload.message!!.length <= Constants.LIMIT_MAX_UPLOAD_SIZE)
         }
         manager.cleanupUploadMessages()
-        Assert.assertEquals(uploads.size, manager.readyUploads.size)
+        Assert.assertEquals(uploads.size, manager.getReadyUploads().size)
 
         // The messages that did not fit beside the header stay queued for the next round instead of being lost.
-        val remaining = MessageService.getMessagesForUpload(manager.database).filter { it.sessionId == sessionId }
+        val remaining = MessageService.getMessagesForUpload(manager.getDatabase()).filter { it.sessionId == sessionId }
         Assert.assertEquals(2, remaining.size)
     }
 }
