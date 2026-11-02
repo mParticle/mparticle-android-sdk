@@ -1,28 +1,39 @@
 #!/usr/bin/env python3
-"""Compare the release artifacts against the last published release with japicmp.
+"""Compare the SDK's public surface with the last published release, using japicmp.
 
 ``./gradlew apiCheck`` guards the *compiled* surface of ``android-core`` and
-``android-kit-base`` before R8 runs. What consumers actually link against is the
-release AAR: for ``android-core`` that is an R8-processed jar in which only the
-classes ``android-core/proguard.pro`` keeps survive under their own names. This
-script builds both release AARs, extracts ``classes.jar`` from each, downloads
-the same artifact at the most recent version published to Maven Central, and
-runs japicmp over the two.
+``android-kit-base`` before R8 runs. This script guards what consumers link
+against: the classes and members the last published release keeps under their
+own names after R8.
 
-R8 renames whatever no keep rule names, and the names it picks are not stable
-between builds, so those symbols are excluded before the verdict is computed:
+R8 renames every class no keep rule names, and it can pick a different short
+name in each build. Two minified jars therefore disagree on the signature of a
+kept method that names such a class, and japicmp reads that method as removed
+although nothing changed. So the comparison runs on jars built without R8:
 
-* a class whose simple name, or any nested-class segment of it, is one or two
-  lowercase letters optionally followed by a digit (``a``, ``b1``,
-  ``MParticle$a``, ``CoreCallbacks$KitListener$b``), or an anonymous class
-  (``Outer$1``), is dropped from both jars before the comparison;
-* inside a surviving class that the release build's R8 mapping file shows
-  to have renamed members (a keep rule names the class only partially), a
-  method or field with such a name is ignored when the report is evaluated;
-  members of fully kept classes are always compared, whatever their name;
-* an interface or superclass change that only involves such a class is
-  ignored as well;
-* ``BuildConfig`` is dropped from both jars; its fields carry per-build values.
+1. This branch is built twice per module: ``assembleRelease`` for the release
+   AAR, and ``bundleLibCompileToJarRelease`` for the same classes before R8
+   (the un-minified jar).
+2. The previous release's source is downloaded from its GitHub tag and its
+   un-minified jar is built the same way.
+3. japicmp compares the two un-minified jars. Every class has its real name on
+   both sides, so a class R8 renamed cannot make a kept member read as removed.
+4. Only findings on the previous release's public surface count. That surface
+   is read from the release AAR published on Maven Central: a public class it
+   keeps under its own name, and in that class a public or protected member it
+   keeps under its own name. A class or member counts as kept when it appears,
+   by name and parameter count, both in the published jar and in the
+   un-minified build of the same tag. An incompatible member that is new on
+   this branch counts in any class of the surface, so an abstract method added
+   to a kept class is still reported.
+5. This branch's release AAR must still keep every class and member of that
+   surface under its own name. A keep rule that stops matching breaks
+   consumers even when the source is unchanged, so it is reported as
+   ``CLASS_NO_LONGER_KEPT`` or ``MEMBER_NO_LONGER_KEPT``.
+
+An interface or superclass change counts unless every class it names is a class
+of the build that the previous release does not keep by name. ``BuildConfig``
+is dropped from both jars; its fields carry per-build values.
 
 Any remaining binary- or source-incompatible change fails the run. Additions
 are reported but do not fail it.
@@ -34,8 +45,15 @@ supertypes are not analysed. The compile-time dump covers those.
 Usage::
 
     scripts/api_compat_report.py [--module android-core] [--previous 6.1.2]
-                                 [--skip-build] [--output-dir build/api-compat]
+                                 [--previous-source DIR] [--skip-build]
+                                 [--output-dir build/api-compat]
                                  [--comment-file PATH]
+
+``--previous-source`` builds the previous release from a local checkout of its
+tag instead of downloading the tag's source archive. ``--skip-build`` reuses
+this branch's existing build outputs. The previous release's un-minified jars
+are cached by version in ``API_COMPAT_CACHE`` (the temporary directory by
+default), so a second run does not build them again.
 
 ``--comment-file`` writes a short markdown summary (one line per module, with
 the findings collapsed behind a disclosure when a module is incompatible) to
@@ -52,22 +70,27 @@ from __future__ import annotations
 import argparse
 import hashlib
 import os
-import re
 import shutil
+import struct
 import subprocess
 import sys
+import tarfile
 import tempfile
 import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
 import zipfile
 from dataclasses import dataclass, field
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 GROUP_PATH = "com/mparticle"
 MAVEN_CENTRAL = "https://repo1.maven.org/maven2"
 MODULES = ("android-core", "android-kit-base")
+SOURCE_ARCHIVE = "https://github.com/mParticle/mparticle-android-sdk/archive/refs/tags/{tag}.tar.gz"
+# The AGP task that jars a library's compiled Java and Kotlin classes before R8.
+# tooling/custom-lint-rules/build.gradle depends on the same task.
+UNMINIFIED_TASK = "bundleLibCompileToJarRelease"
 
 JAPICMP_VERSION = "0.26.2"
 JAPICMP_URL = (
@@ -76,31 +99,22 @@ JAPICMP_URL = (
 )
 JAPICMP_SHA256 = "d1eb211b7132eae1f9ee834270a8d19a9652d1983d3fe75ec564666ebef5c18d"
 
-_OBFUSCATED_SEGMENT = re.compile(r"^(?:[a-z]{1,2}\d?|\d+)$")
-_OBFUSCATED_MEMBER = re.compile(r"^[a-z]{1,2}\d?$")
+ACC_PUBLIC = 0x0001
+ACC_PROTECTED = 0x0004
+ACC_SYNTHETIC = 0x1000
+
+# A member is keyed by its name and parameter count; a field's count is None and a
+# constructor's name is "<init>".
+MemberKey = tuple
 
 
 def log(message: str) -> None:
     print(message, file=sys.stderr)
 
 
-def run(cmd: list[str], cwd: Path) -> None:
+def run(cmd: list[str], cwd: Path, env: dict[str, str] | None = None) -> None:
     log("$ " + " ".join(cmd))
-    subprocess.run(cmd, cwd=cwd, check=True)
-
-
-# --- naming -----------------------------------------------------------------
-
-
-def is_obfuscated_class(binary_name: str) -> bool:
-    """``binary_name`` is a class name with ``/`` or ``.`` separators, with or without ``.class``."""
-    name = binary_name[: -len(".class")] if binary_name.endswith(".class") else binary_name
-    simple = name.replace("/", ".").rsplit(".", 1)[-1]
-    return any(_OBFUSCATED_SEGMENT.match(segment) for segment in simple.split("$"))
-
-
-def is_obfuscated_member(name: str | None) -> bool:
-    return bool(name) and _OBFUSCATED_MEMBER.match(name) is not None
+    subprocess.run(cmd, cwd=cwd, check=True, env=env)
 
 
 # --- artifacts --------------------------------------------------------------
@@ -158,27 +172,24 @@ def extract_classes_jar(aar: Path, dest: Path) -> Path:
     return dest
 
 
-def filter_jar(source: Path, dest: Path) -> tuple[int, int]:
-    """Copy ``source`` to ``dest`` without R8-renamed classes and BuildConfig.
-
-    Returns ``(kept, dropped)`` class counts.
-    """
-    kept = dropped = 0
+def filter_jar(source: Path, dest: Path) -> int:
+    """Copy ``source`` to ``dest`` without BuildConfig. Returns the number of classes kept."""
+    kept = 0
     with zipfile.ZipFile(source) as src, zipfile.ZipFile(dest, "w", zipfile.ZIP_DEFLATED) as out:
         for info in src.infolist():
             name = info.filename
             if name.endswith(".class"):
-                if is_obfuscated_class(name) or name.rsplit("/", 1)[-1] == "BuildConfig.class":
-                    dropped += 1
+                if name.rsplit("/", 1)[-1] == "BuildConfig.class":
                     continue
                 kept += 1
             out.writestr(info, src.read(name))
-    return kept, dropped
+    return kept
 
 
-def build_release_aars(modules: tuple[str, ...]) -> None:
+def build_branch(modules: tuple[str, ...]) -> None:
+    """Build this branch's release AARs and its un-minified jars."""
     version = (REPO_ROOT / "VERSION").read_text(encoding="utf-8").strip()
-    tasks = [f":{module}:assembleRelease" for module in modules]
+    tasks = [task for module in modules for task in (f":{module}:assembleRelease", f":{module}:{UNMINIFIED_TASK}")]
     run(["./gradlew", *tasks, f"-PVERSION={version}", "--console=plain", "-q"], cwd=REPO_ROOT)
 
 
@@ -189,51 +200,200 @@ def local_release_aar(module: str) -> Path:
     return aar
 
 
+def unminified_jar(root: Path, module: str) -> Path:
+    """The jar :data:`UNMINIFIED_TASK` wrote for ``module`` under the project ``root``: AGP 8
+    writes it to ``compile_library_classes_jar/release/<task>/classes.jar``, AGP 7 to
+    ``compile_library_classes_jar/release/classes.jar``."""
+    intermediates = root / module / "build" / "intermediates"
+    jars = sorted(
+        path
+        for path in (intermediates.rglob("classes.jar") if intermediates.is_dir() else ())
+        if UNMINIFIED_TASK in path.parts or path.parts[-3:-1] == ("compile_library_classes_jar", "release")
+    )
+    if len(jars) != 1:
+        raise RuntimeError(
+            f"expected one un-minified classes jar under {intermediates}, found {len(jars)}; "
+            f"run :{module}:{UNMINIFIED_TASK} (or this script without --skip-build)"
+        )
+    return jars[0]
+
+
+def extract_source(archive: Path, dest: Path) -> tuple[Path, str | None]:
+    """Extract a GitHub source archive into ``dest``.
+
+    Returns the project root (the archive's one top-level directory) and the commit
+    the archive was cut from (GitHub writes it in the archive's global header), if any.
+    Refuses an archive with an absolute path, a ``..`` segment, a link or a device.
+    """
+    with tarfile.open(archive) as tar:
+        members = tar.getmembers()
+        roots = set()
+        for member in members:
+            path = PurePosixPath(member.name)
+            if path.is_absolute() or ".." in path.parts or not (member.isfile() or member.isdir()):
+                raise RuntimeError(f"refusing archive entry {member.name!r} in {archive.name}")
+            roots.add(path.parts[0])
+        if len(roots) != 1:
+            raise RuntimeError(f"expected one top-level directory in {archive.name}, found {sorted(roots)}")
+        if hasattr(tarfile, "data_filter"):
+            tar.extractall(dest, filter="data")
+        else:
+            tar.extractall(dest)
+        commit = tar.pax_headers.get("comment")
+    return dest / roots.pop(), commit
+
+
+def download_release_source(version: str, work: Path) -> tuple[Path, str | None]:
+    """Download and extract the source of the release ``version`` from its GitHub tag."""
+    for tag in (version, f"v{version}"):
+        url = SOURCE_ARCHIVE.format(tag=tag)
+        archive = work / f"source-{tag}.tar.gz"
+        log(f"downloading {url}")
+        try:
+            with urllib.request.urlopen(url, timeout=300) as response, archive.open("wb") as out:
+                shutil.copyfileobj(response, out)
+        except urllib.error.HTTPError as error:
+            if error.code == 404:
+                continue
+            raise
+        root, commit = extract_source(archive, work / f"source-{tag}")
+        found = (root / "VERSION").read_text(encoding="utf-8").strip()
+        if found != version:
+            raise RuntimeError(f"{url} has VERSION {found}, not {version}")
+        log(f"previous release {version}: tag {tag}, commit {commit or 'unknown'}")
+        return root, commit
+    raise RuntimeError(f"no source archive for tag {version} or v{version} at {SOURCE_ARCHIVE.format(tag=version)}")
+
+
+def previous_unminified_jars(
+    version: str, modules: tuple[str, ...], source: Path | None, work: Path, cache_dir: Path
+) -> dict[str, Path]:
+    """Build the un-minified jars of the release ``version`` and cache them by version."""
+    cached = {module: cache_dir / f"{module}-{version}-unminified.jar" for module in modules}
+    if all(path.exists() for path in cached.values()):
+        return cached
+    commit = None
+    if source is None:
+        source, commit = download_release_source(version, work)
+        gradlew = source / "gradlew"
+        gradlew.chmod(gradlew.stat().st_mode | 0o100)
+    env = dict(os.environ)
+    # android-core/build.gradle reads the commit from git, else from MP_GIT_SHA; a source
+    # archive is no git checkout.
+    env["MP_GIT_SHA"] = commit if commit and len(commit) >= 7 else "0000000"
+    tasks = [f":{module}:{UNMINIFIED_TASK}" for module in modules]
+    run(["./gradlew", *tasks, f"-PVERSION={version}", "--console=plain", "-q"], cwd=source, env=env)
+    for module, path in cached.items():
+        shutil.copyfile(unminified_jar(source, module), path)
+    return cached
+
+
 def japicmp_jar(cache_dir: Path) -> Path:
     return download_verified(JAPICMP_URL, cache_dir / f"japicmp-{JAPICMP_VERSION}.jar", JAPICMP_SHA256)
 
 
-def release_mapping(module: str) -> Path | None:
-    mapping = REPO_ROOT / module / "build" / "outputs" / "mapping" / "release" / "mapping.txt"
-    return mapping if mapping.exists() else None
+# --- class files ------------------------------------------------------------
+
+# Bytes after the tag of each constant pool entry other than Utf8 (JVMS 4.4).
+_CONSTANT_SIZES = {3: 4, 4: 4, 5: 8, 6: 8, 7: 2, 8: 2, 9: 4, 10: 4, 11: 4, 12: 4, 15: 3, 16: 2, 17: 4, 18: 4, 19: 2, 20: 2}
 
 
-_MAPPING_CLASS = re.compile(r"^(\S+) -> (\S+):$")
-_MAPPING_MEMBER = re.compile(r"^\s+(?:\d+:\d+:)?\S+ (?P<name>[^\s(]+)(?:\([^)]*\))?(?::\d+:\d+)? -> (?P<renamed>\S+)$")
+@dataclass(frozen=True)
+class ClassInfo:
+    """What a class file says about a class's surface: whether the class is public, and
+    the key of each of its public or protected members that is not synthetic."""
+
+    public: bool
+    members: frozenset
 
 
-def load_renamed_members(mapping: Path | None) -> dict[str, set[str]]:
-    """Read an R8 mapping file into ``{class name in the jar: {renamed member names}}``.
-
-    Classes are keyed by the name they carry in the shipped jar (for a kept
-    class, its original name), which is also how japicmp reports them. Only
-    classes with at least one member renamed to a different name are listed;
-    a class that a keep rule names in full never appears, so its members are
-    always compared by their real names. Inlined frames, which R8 records as
-    qualified method names mapped onto the caller, are skipped.
-    """
-    renamed: dict[str, set[str]] = {}
-    if mapping is None:
-        return renamed
-    current: str | None = None
-    for line in mapping.read_text(encoding="utf-8").splitlines():
-        if not line or line.lstrip().startswith("#"):
-            continue
-        class_match = _MAPPING_CLASS.match(line)
-        if class_match:
-            current = class_match.group(2)
-            continue
-        member_match = _MAPPING_MEMBER.match(line)
-        if current is None or not member_match:
-            continue
-        name, new_name = member_match.group("name"), member_match.group("renamed")
-        if "." in name or name.startswith("<") or new_name.startswith("<") or name == new_name:
-            continue
-        renamed.setdefault(current, set()).add(new_name)
-    return renamed
+def parameter_count(descriptor: str) -> int:
+    """The number of parameters in a method descriptor such as ``(I[JLjava/lang/String;)V``."""
+    params = descriptor[1 : descriptor.index(")")]
+    count = index = 0
+    while index < len(params):
+        while params[index] == "[":
+            index += 1
+        index = params.index(";", index) + 1 if params[index] == "L" else index + 1
+        count += 1
+    return count
 
 
-# --- report evaluation ------------------------------------------------------
+def read_class(data: bytes) -> tuple[str, ClassInfo]:
+    """The binary name (``com.mparticle.MParticle$Builder``) and :class:`ClassInfo` of a
+    class file. Raises ``ValueError`` for bytes that are not a class file."""
+    try:
+        if data[:4] != b"\xca\xfe\xba\xbe":
+            raise ValueError("not a class file")
+        (count,) = struct.unpack_from(">H", data, 8)
+        utf8: dict[int, str] = {}
+        classes: dict[int, int] = {}
+        offset, index = 10, 1
+        while index < count:
+            tag = data[offset]
+            if tag == 1:
+                (length,) = struct.unpack_from(">H", data, offset + 1)
+                utf8[index] = data[offset + 3 : offset + 3 + length].decode("utf-8", "replace")
+                offset += 3 + length
+            else:
+                if tag == 7:
+                    (classes[index],) = struct.unpack_from(">H", data, offset + 1)
+                offset += 1 + _CONSTANT_SIZES[tag]
+            index += 2 if tag in (5, 6) else 1
+
+        access, this_entry, _super_entry, interface_count = struct.unpack_from(">HHHH", data, offset)
+        offset += 8 + 2 * interface_count
+
+        def members(is_method: bool) -> set[MemberKey]:
+            nonlocal offset
+            (member_count,) = struct.unpack_from(">H", data, offset)
+            offset += 2
+            found = set()
+            for _ in range(member_count):
+                flags, name, descriptor, attribute_count = struct.unpack_from(">HHHH", data, offset)
+                offset += 8
+                for _ in range(attribute_count):
+                    (length,) = struct.unpack_from(">I", data, offset + 2)
+                    offset += 6 + length
+                if flags & ACC_SYNTHETIC or not flags & (ACC_PUBLIC | ACC_PROTECTED) or utf8[name] == "<clinit>":
+                    continue
+                found.add((utf8[name], parameter_count(utf8[descriptor]) if is_method else None))
+            return found
+
+        keys = members(False) | members(True)
+        name = utf8[classes[this_entry]].replace("/", ".")
+    except (KeyError, IndexError, struct.error, UnicodeError) as error:
+        raise ValueError(f"not a readable class file: {type(error).__name__}") from error
+    return name, ClassInfo(public=bool(access & ACC_PUBLIC), members=frozenset(keys))
+
+
+def read_jar(jar: Path) -> dict[str, ClassInfo]:
+    """Every readable class in ``jar`` but BuildConfig, by binary name."""
+    found: dict[str, ClassInfo] = {}
+    with zipfile.ZipFile(jar) as archive:
+        for entry in archive.namelist():
+            if not entry.endswith(".class") or entry.rsplit("/", 1)[-1] == "BuildConfig.class":
+                continue
+            try:
+                name, info = read_class(archive.read(entry))
+            except ValueError:
+                continue
+            found[name] = info
+    return found
+
+
+def kept_surface(published: dict[str, ClassInfo], unminified: dict[str, ClassInfo]) -> dict[str, frozenset]:
+    """The public surface a published release keeps under its own names after R8:
+    ``{public class: member keys}`` for each class and member found by name both in the
+    published jar and in the un-minified build of the same release."""
+    return {
+        name: published[name].members & unminified[name].members
+        for name in published.keys() & unminified.keys()
+        if unminified[name].public
+    }
+
+
+# --- findings ---------------------------------------------------------------
 
 
 @dataclass
@@ -271,71 +431,111 @@ def _change_types(element: ET.Element) -> list[str]:
     return [c.get("type") or "?" for c in changes if _incompatible(c)]
 
 
-def evaluate_report(xml_path: Path, renamed_members: dict[str, set[str]] | None = None) -> tuple[list[Finding], int]:
-    """Return ``(incompatible findings, number of classes with additions only)``.
+def _member_key(member: ET.Element, member_tag: str) -> MemberKey:
+    if member_tag == "field":
+        return (member.get("name") or "", None)
+    count = len(member.findall("./parameters/parameter"))
+    return ("<init>" if member_tag == "constructor" else member.get("name") or "", count)
 
-    ``renamed_members`` comes from :func:`load_renamed_members`. Inside a class
-    listed there, members whose name is R8-shaped are ignored: on the new side
-    because the mapping proves the name is synthetic, on the old side because
-    the class is only partially kept and R8 renamed its members there too.
+
+def evaluate_report(
+    xml_path: Path,
+    surface: dict[str, frozenset],
+    internal: set[str] | frozenset = frozenset(),
+    new_kept: set[str] | frozenset = frozenset(),
+) -> tuple[list[Finding], int]:
+    """Return ``(incompatible findings, number of classes with additions only)`` for a
+    japicmp report over two un-minified jars.
+
+    ``surface`` is :func:`kept_surface` for the previous release: a class outside it is
+    skipped, and in a class inside it a member counts when its key is in the surface or
+    when it is new. ``internal`` is the build's classes the previous release does not
+    keep by name; an interface or superclass change that names only such classes is
+    skipped. ``new_kept`` is the classes this branch's release jar keeps by name; a new
+    one counts towards the additions.
     """
-    renamed_members = renamed_members or {}
     root = ET.parse(xml_path).getroot()
     findings: list[Finding] = []
     additions = 0
     for clazz in root.iter("class"):
         class_name = clazz.get("fullyQualifiedName") or "?"
-        if is_obfuscated_class(class_name):
+        if class_name not in surface:
+            if class_name in new_kept and clazz.get("changeStatus") == "NEW" and not _incompatible(clazz):
+                additions += 1
             continue
 
         class_changes = [
             t for t in _change_types(clazz) if not t.startswith(("INTERFACE_", "SUPERCLASS_"))
         ]
         for interface in clazz.iterfind("./interfaces/interface"):
-            if _incompatible(interface) and not is_obfuscated_class(interface.get("fullyQualifiedName") or ""):
+            if _incompatible(interface) and (interface.get("fullyQualifiedName") or "") not in internal:
                 class_changes.extend(_change_types(interface) or [f"INTERFACE_{interface.get('changeStatus')}"])
         superclass = clazz.find("superclass")
         if superclass is not None and _incompatible(superclass):
-            names = (superclass.get("superclassOld") or "", superclass.get("superclassNew") or "")
-            if not all(is_obfuscated_class(n) for n in names if n):
+            names = [n for n in (superclass.get("superclassOld"), superclass.get("superclassNew")) if n]
+            if not names or not all(n in internal for n in names):
                 class_changes.extend(_change_types(superclass) or ["SUPERCLASS_MODIFIED"])
         if class_changes:
             findings.append(Finding(class_name, "", sorted(set(class_changes))))
 
-        partially_kept = class_name in renamed_members
+        kept_members = surface[class_name]
         for section, member_tag in (("methods", "method"), ("constructors", "constructor"), ("fields", "field")):
             for member in clazz.iterfind(f"./{section}/{member_tag}"):
-                name = member.get("name") or ""
-                if section != "constructors" and partially_kept and (
-                    name in renamed_members[class_name] or is_obfuscated_member(name)
-                ):
+                if not _incompatible(member):
                     continue
-                if _incompatible(member):
-                    findings.append(Finding(class_name, name, sorted(set(_change_types(member))) or ["INCOMPATIBLE"]))
+                key = _member_key(member, member_tag)
+                if key not in kept_members and member.get("changeStatus") != "NEW":
+                    continue
+                findings.append(Finding(class_name, key[0], sorted(set(_change_types(member))) or ["INCOMPATIBLE"]))
 
         if not class_changes and clazz.get("changeStatus") in ("NEW", "MODIFIED") and not _incompatible(clazz):
             additions += 1
     return findings, additions
 
 
-def compare(module: str, previous: str, japicmp: Path, work: Path, output_dir: Path) -> ModuleResult:
-    """Run japicmp for one module."""
+def keep_findings(
+    surface: dict[str, frozenset], new_unminified: dict[str, ClassInfo], new_release: dict[str, ClassInfo]
+) -> list[Finding]:
+    """Each class and member of ``surface`` that this branch still declares but its
+    release jar no longer keeps under its own name. One this branch no longer declares
+    is japicmp's removal, so it is not repeated here."""
+    findings: list[Finding] = []
+    for class_name in sorted(surface):
+        if class_name not in new_unminified:
+            continue
+        if class_name not in new_release:
+            findings.append(Finding(class_name, "", ["CLASS_NO_LONGER_KEPT"]))
+            continue
+        lost = (surface[class_name] & new_unminified[class_name].members) - new_release[class_name].members
+        for name, count in sorted(lost, key=lambda key: (key[0], -1 if key[1] is None else key[1])):
+            findings.append(Finding(class_name, name, ["MEMBER_NO_LONGER_KEPT"]))
+    return findings
+
+
+def compare(
+    module: str, previous: str, previous_jar: Path, japicmp: Path, work: Path, output_dir: Path
+) -> ModuleResult:
+    """Run japicmp for one module over the previous release's un-minified jar and this branch's."""
     module_dir = work / module
     module_dir.mkdir(parents=True, exist_ok=True)
 
-    old_aar = download_verified(
+    published_aar = download_verified(
         f"{MAVEN_CENTRAL}/{GROUP_PATH}/{module}/{previous}/{module}-{previous}.aar",
         module_dir / f"{module}-{previous}.aar",
     )
-    old_raw = extract_classes_jar(old_aar, module_dir / "old-raw.jar")
-    new_raw = extract_classes_jar(local_release_aar(module), module_dir / "new-raw.jar")
-    old_jar = module_dir / "old.jar"
-    new_jar = module_dir / "new.jar"
-    old_kept, old_dropped = filter_jar(old_raw, old_jar)
-    new_kept, new_dropped = filter_jar(new_raw, new_jar)
-    log(f"{module}: previous {previous} -> {old_kept} classes compared ({old_dropped} R8-renamed dropped); "
-        f"local -> {new_kept} compared ({new_dropped} dropped)")
+    published = read_jar(extract_classes_jar(published_aar, module_dir / "published.jar"))
+    new_release = read_jar(extract_classes_jar(local_release_aar(module), module_dir / "release.jar"))
+    new_raw = unminified_jar(REPO_ROOT, module)
+    old_full, new_full = read_jar(previous_jar), read_jar(new_raw)
 
+    surface = kept_surface(published, old_full)
+    internal = (old_full.keys() | new_full.keys()) - surface.keys()
+    new_kept = new_release.keys() & new_full.keys()
+    log(f"{module}: {previous} keeps {len(surface)} public classes by name, of {len(old_full)} built without R8")
+
+    old_jar, new_jar = module_dir / "old.jar", module_dir / "new.jar"
+    filter_jar(previous_jar, old_jar)
+    filter_jar(new_raw, new_jar)
     output_dir.mkdir(parents=True, exist_ok=True)
     html = output_dir / f"{module}.html"
     xml = output_dir / f"{module}.xml"
@@ -353,10 +553,8 @@ def compare(module: str, previous: str, japicmp: Path, work: Path, output_dir: P
     if result.returncode != 0:
         raise RuntimeError(f"japicmp exited {result.returncode} for {module}:\n{result.stdout}\n{result.stderr}")
 
-    mapping = release_mapping(module)
-    renamed = load_renamed_members(mapping)
-    log(f"{module}: {'no R8 mapping file; every member compared by name' if mapping is None else f'{len(renamed)} partially kept classes from {mapping.relative_to(REPO_ROOT)}'}")
-    findings, additions = evaluate_report(xml, renamed)
+    findings, additions = evaluate_report(xml, surface, internal, new_kept)
+    findings.extend(keep_findings(surface, new_full, new_release))
     if findings:
         print(f"{module}: INCOMPATIBLE with {previous}")
         for finding in findings:
@@ -364,7 +562,7 @@ def compare(module: str, previous: str, japicmp: Path, work: Path, output_dir: P
     else:
         print(f"{module}: compatible with {previous} ({additions} classes with additions only)")
     log(f"{module}: report at {html}")
-    return ModuleResult(module=module, previous=previous, compared=new_kept, findings=findings, additions=additions)
+    return ModuleResult(module=module, previous=previous, compared=len(surface), findings=findings, additions=additions)
 
 
 def render_report(results: list[ModuleResult]) -> str:
@@ -396,10 +594,12 @@ def render_report(results: list[ModuleResult]) -> str:
             lines.append("  </details>")
     lines.append("")
     lines.append(
-        "Compares the release AAR against the same artifact at the last version published to Maven "
-        "Central; R8-renamed classes and members are excluded (see the script docstring). Full "
-        "japicmp HTML/XML reports are attached as the `api-compat-reports` workflow artifact. This "
-        "check is not in the required-check set yet, so a red result here does not block merging."
+        "Compares this branch with the last version published to Maven Central, both built "
+        "without R8, over the public classes and members that release keeps under their own "
+        "names. It also checks that this branch's release AAR still keeps them (see the script "
+        "docstring). Full japicmp HTML/XML reports are attached as the `api-compat-reports` "
+        "workflow artifact. This check is not in the required-check set yet, so a red result "
+        "here does not block merging."
     )
     return "\n".join(lines) + "\n"
 
@@ -418,7 +618,12 @@ def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--module", action="append", choices=MODULES, help="module to compare (default: both)")
     parser.add_argument("--previous", help="published version to compare against (default: latest on Maven Central)")
-    parser.add_argument("--skip-build", action="store_true", help="reuse existing release AARs")
+    parser.add_argument(
+        "--previous-source",
+        type=Path,
+        help="a checkout of the previous release's tag, used for every module (default: download its source)",
+    )
+    parser.add_argument("--skip-build", action="store_true", help="reuse this branch's existing build outputs")
     parser.add_argument("--output-dir", default="build/api-compat", help="where to write the japicmp reports")
     parser.add_argument("--comment-file", help="write the markdown summary here as well, for posting as a pull request comment")
     args = parser.parse_args(argv)
@@ -430,15 +635,22 @@ def main(argv: list[str]) -> int:
 
     try:
         if not args.skip_build:
-            build_release_aars(modules)
+            build_branch(modules)
         japicmp = japicmp_jar(cache_dir)
         results: list[ModuleResult] = []
         with tempfile.TemporaryDirectory(prefix="api-compat-") as tmp:
             work = Path(tmp)
+            previous = {module: args.previous or latest_published_version(module) for module in modules}
+            previous_jars: dict[str, Path] = {}
+            for version in sorted(set(previous.values())):
+                built = tuple(module for module in modules if previous[module] == version)
+                previous_jars.update(previous_unminified_jars(version, built, args.previous_source, work, cache_dir))
             for module in modules:
-                previous = args.previous or latest_published_version(module)
-                results.append(compare(module, previous, japicmp, work, output_dir))
-    except (subprocess.CalledProcessError, RuntimeError, OSError, zipfile.BadZipFile, KeyError, ET.ParseError) as error:
+                results.append(compare(module, previous[module], previous_jars[module], japicmp, work, output_dir))
+    except (
+        subprocess.CalledProcessError, RuntimeError, OSError, zipfile.BadZipFile, tarfile.TarError, KeyError,
+        ET.ParseError,
+    ) as error:
         # Write the comment and summary even on a tooling failure, not just an incompatible
         # result, so the workflow's "post a comment" steps can run unconditionally afterwards
         # without needing to check whether this step produced a file.
@@ -458,6 +670,7 @@ if __name__ == "__main__":
     os.chdir(REPO_ROOT)
     try:
         sys.exit(main(sys.argv[1:]))
-    except (subprocess.CalledProcessError, RuntimeError, OSError, zipfile.BadZipFile, KeyError, ET.ParseError) as error:
+    except (subprocess.CalledProcessError, RuntimeError, OSError, zipfile.BadZipFile, tarfile.TarError, KeyError,
+            ET.ParseError) as error:
         log(f"error: {error}")
         sys.exit(1)
