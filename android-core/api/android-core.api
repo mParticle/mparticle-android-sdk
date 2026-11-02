@@ -2943,18 +2943,33 @@ public class com/mparticle/internal/database/services/MParticleDBManager$UserAtt
 }
 
 public class com/mparticle/internal/database/services/MessageService : com/mparticle/internal/database/tables/MessageTable {
+	public static final field Companion Lcom/mparticle/internal/database/services/MessageService$Companion;
 	public fun <init> ()V
-	public static fun cleanupMessages (Lcom/mparticle/internal/database/MPDatabase;)I
-	public static fun deleteAll (Lcom/mparticle/internal/database/MPDatabase;)V
-	public static fun deleteMessages (Lcom/mparticle/internal/database/MPDatabase;I)I
-	public static fun deleteMessagesOlderThan (Lcom/mparticle/internal/database/MPDatabase;J)I
-	public static fun deleteOldMessages (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;)I
-	public static fun getMessagesForUpload (Lcom/mparticle/internal/database/MPDatabase;)Ljava/util/List;
-	public static fun getSessionHistory (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;)Ljava/util/List;
-	public static fun getSessionIds (Lcom/mparticle/internal/database/MPDatabase;)Ljava/util/Set;
-	public static fun hasMessagesForUpload (Lcom/mparticle/internal/database/MPDatabase;)Z
-	public static fun insertMessage (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;Lcom/mparticle/internal/messages/BaseMPMessage;JLjava/lang/String;Ljava/lang/Integer;)V
-	public static fun markMessagesAsUploaded (Lcom/mparticle/internal/database/MPDatabase;I)I
+	public static final fun cleanupMessages (Lcom/mparticle/internal/database/MPDatabase;)I
+	public static final fun deleteAll (Lcom/mparticle/internal/database/MPDatabase;)V
+	public static final fun deleteMessages (Lcom/mparticle/internal/database/MPDatabase;I)I
+	public static final fun deleteMessagesOlderThan (Lcom/mparticle/internal/database/MPDatabase;J)I
+	public static final fun deleteOldMessages (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;)I
+	public static final fun getMessagesForUpload (Lcom/mparticle/internal/database/MPDatabase;)Ljava/util/List;
+	public static final fun getSessionHistory (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;)Ljava/util/List;
+	public static final fun getSessionIds (Lcom/mparticle/internal/database/MPDatabase;)Ljava/util/Set;
+	public static final fun hasMessagesForUpload (Lcom/mparticle/internal/database/MPDatabase;)Z
+	public static final fun insertMessage (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;Lcom/mparticle/internal/messages/BaseMPMessage;JLjava/lang/String;Ljava/lang/Integer;)V
+	public static final fun markMessagesAsUploaded (Lcom/mparticle/internal/database/MPDatabase;I)I
+}
+
+public final class com/mparticle/internal/database/services/MessageService$Companion {
+	public final fun cleanupMessages (Lcom/mparticle/internal/database/MPDatabase;)I
+	public final fun deleteAll (Lcom/mparticle/internal/database/MPDatabase;)V
+	public final fun deleteMessages (Lcom/mparticle/internal/database/MPDatabase;I)I
+	public final fun deleteMessagesOlderThan (Lcom/mparticle/internal/database/MPDatabase;J)I
+	public final fun deleteOldMessages (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;)I
+	public final fun getMessagesForUpload (Lcom/mparticle/internal/database/MPDatabase;)Ljava/util/List;
+	public final fun getSessionHistory (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;)Ljava/util/List;
+	public final fun getSessionIds (Lcom/mparticle/internal/database/MPDatabase;)Ljava/util/Set;
+	public final fun hasMessagesForUpload (Lcom/mparticle/internal/database/MPDatabase;)Z
+	public final fun insertMessage (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;Lcom/mparticle/internal/messages/BaseMPMessage;JLjava/lang/String;Ljava/lang/Integer;)V
+	public final fun markMessagesAsUploaded (Lcom/mparticle/internal/database/MPDatabase;I)I
 }
 
 public class com/mparticle/internal/database/services/MessageService$ReadyMessage {
@@ -2996,21 +3011,38 @@ public abstract interface class com/mparticle/internal/database/services/SQLiteO
 }
 
 public class com/mparticle/internal/database/services/SessionService : com/mparticle/internal/database/tables/SessionTable {
+	public static final field Companion Lcom/mparticle/internal/database/services/SessionService$Companion;
 	public static field readyMessages [Ljava/lang/String;
 	public fun <init> ()V
-	public static fun deleteAll (Lcom/mparticle/internal/database/MPDatabase;)V
-	public static fun deleteSessions (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;)I
-	public static fun deleteSessions (Lcom/mparticle/internal/database/MPDatabase;Ljava/util/Set;)I
-	public static fun deleteSessionsOlderThan (Lcom/mparticle/internal/database/MPDatabase;J)I
-	public static fun getOrphanSessionIds (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;)Ljava/util/List;
-	public static fun getSessionForSessionEndMessage (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;)Landroid/database/Cursor;
-	public static fun getSessions (Lcom/mparticle/internal/database/MPDatabase;)Landroid/database/Cursor;
-	public static fun insertSession (Lcom/mparticle/internal/database/MPDatabase;Lcom/mparticle/internal/messages/BaseMPMessage;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)V
-	public static fun processSessions (Lcom/mparticle/internal/database/MPDatabase;Ljava/util/HashMap;)Ljava/util/List;
-	public static fun updateSessionAttributes (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;Ljava/lang/String;)V
-	public static fun updateSessionEndTime (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;JJ)V
-	public static fun updateSessionInstallReferrer (Lcom/mparticle/internal/database/MPDatabase;Lorg/json/JSONObject;Ljava/lang/String;)V
-	public static fun updateSessionStatus (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;Ljava/lang/String;)V
+	public static final fun deleteAll (Lcom/mparticle/internal/database/MPDatabase;)V
+	public static final fun deleteSessions (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;)I
+	public static final fun deleteSessions (Lcom/mparticle/internal/database/MPDatabase;Ljava/util/Set;)I
+	public static final fun deleteSessionsOlderThan (Lcom/mparticle/internal/database/MPDatabase;J)I
+	public static final fun getOrphanSessionIds (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;)Ljava/util/List;
+	public static final fun getSessionForSessionEndMessage (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;)Landroid/database/Cursor;
+	public static final fun getSessions (Lcom/mparticle/internal/database/MPDatabase;)Landroid/database/Cursor;
+	public static final fun insertSession (Lcom/mparticle/internal/database/MPDatabase;Lcom/mparticle/internal/messages/BaseMPMessage;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)V
+	public static final fun processSessions (Lcom/mparticle/internal/database/MPDatabase;Ljava/util/HashMap;)Ljava/util/List;
+	public static final fun updateSessionAttributes (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;Ljava/lang/String;)V
+	public static final fun updateSessionEndTime (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;JJ)V
+	public static final fun updateSessionInstallReferrer (Lcom/mparticle/internal/database/MPDatabase;Lorg/json/JSONObject;Ljava/lang/String;)V
+	public static final fun updateSessionStatus (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;Ljava/lang/String;)V
+}
+
+public final class com/mparticle/internal/database/services/SessionService$Companion {
+	public final fun deleteAll (Lcom/mparticle/internal/database/MPDatabase;)V
+	public final fun deleteSessions (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;)I
+	public final fun deleteSessions (Lcom/mparticle/internal/database/MPDatabase;Ljava/util/Set;)I
+	public final fun deleteSessionsOlderThan (Lcom/mparticle/internal/database/MPDatabase;J)I
+	public final fun getOrphanSessionIds (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;)Ljava/util/List;
+	public final fun getSessionForSessionEndMessage (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;)Landroid/database/Cursor;
+	public final fun getSessions (Lcom/mparticle/internal/database/MPDatabase;)Landroid/database/Cursor;
+	public final fun insertSession (Lcom/mparticle/internal/database/MPDatabase;Lcom/mparticle/internal/messages/BaseMPMessage;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)V
+	public final fun processSessions (Lcom/mparticle/internal/database/MPDatabase;Ljava/util/HashMap;)Ljava/util/List;
+	public final fun updateSessionAttributes (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun updateSessionEndTime (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;JJ)V
+	public final fun updateSessionInstallReferrer (Lcom/mparticle/internal/database/MPDatabase;Lorg/json/JSONObject;Ljava/lang/String;)V
+	public final fun updateSessionStatus (Lcom/mparticle/internal/database/MPDatabase;Ljava/lang/String;Ljava/lang/String;)V
 }
 
 public class com/mparticle/internal/database/services/UploadService : com/mparticle/internal/database/tables/UploadTable {
