@@ -63,7 +63,7 @@ class UploadServiceTest : BaseMPServiceTest() {
         val readyUploads = UploadService.getReadyUploads(database)
 
         assertEquals(1, readyUploads.size)
-        assertEquals("rkt.example.com:8443", readyUploads[0].uploadSettings.networkOptions.customBaseURL)
+        assertEquals("rkt.example.com:8443", readyUploads[0].uploadSettings!!.networkOptions.customBaseURL)
     }
 
     @Throws(JSONException::class)

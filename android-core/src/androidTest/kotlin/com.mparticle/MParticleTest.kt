@@ -459,7 +459,7 @@ class MParticleTest : BaseCleanStartedEachTest() {
         val event1 = MPEvent.Builder("event 1").build()
         instance1.logEvent(event1)
 
-        val readyUploads1 = UploadService.getReadyUploads(instance1.mDatabaseManager.database)
+        val readyUploads1 = UploadService.getReadyUploads(instance1.mDatabaseManager.getDatabase())
         Assert.assertEquals(0, readyUploads1.count())
 
         val switchOptionsBuilder = MParticleOptions.builder(mContext)
