@@ -91,7 +91,7 @@ jobs:
           distribution: "zulu"
           java-version: "17"
       - name: "Setup Gradle"
-        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
       - name: "Run Unit Tests"
         run: ./gradlew test
       - name: "Check the public API dumps"
@@ -133,7 +133,7 @@ jobs:
           distribution: "zulu"
           java-version: "17"
       - name: "Setup Gradle"
-        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
       - name: "Run Android Core SDK Lint"
         run: ./gradlew lint
       - name: "Setup Android Kit Lint"
@@ -162,7 +162,7 @@ jobs:
           distribution: "zulu"
           java-version: "17"
       - name: "Setup Gradle"
-        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
       - name: "Run Android Core SDK Kotlin Lint"
         run: ./gradlew ktlintCheck
       - name: "Setup Android Kit Kotlin Lint"
@@ -201,7 +201,7 @@ jobs:
           distribution: "zulu"
           java-version: "17"
       - name: "Setup Gradle"
-        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
       - name: "Generate Core Release Build"
         run: ./gradlew publishMavenPublicationToMavenLocal
       - name: "Run Kit-Base Release Tests and Build"
@@ -243,7 +243,7 @@ jobs:
           distribution: "zulu"
           java-version: "17"
       - name: "Setup Gradle"
-        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
       - name: "Test the comparison script"
         run: python3 -m unittest scripts/test_api_compat_report.py
       - name: "Compare release artifacts with the last published release"
@@ -464,7 +464,7 @@ jobs:
           distribution: "zulu"
           java-version: "17"
       - name: "Setup Gradle"
-        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
       - name: "Measure target branch: Core SDK"
         continue-on-error: true
         run: head/scripts/sdk-size-report.sh base > "${RUNNER_TEMP}/core-base.json"
