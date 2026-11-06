@@ -171,8 +171,8 @@ To verify all kits (main + isolated):
 ```
 
 **Adding a new isolated kit:** If a kit upgrades to a Kotlin version
-incompatible with the root KGP (2.1.20), remove it from
-`settings-kits.gradle` with a comment, and add standalone build steps
+incompatible with the root KGP (`kotlin_version` in the root `build.gradle`),
+remove it from `settings-kits.gradle` with a comment, and add standalone build steps
 to the CI workflows following the urbanairship pattern. Also add a
 matching isolated publish step in `.github/workflows/release-publish.yml`
 (the aggregate `settings-kits.gradle` publish will not include it).
