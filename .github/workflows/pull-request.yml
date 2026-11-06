@@ -218,6 +218,16 @@ jobs:
         run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga/ga-23 -PisRelease=true testRelease
       - name: "Run Isolated Kit Compatibility Tests (ga4)"
         run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga4/ga4-23 -PisRelease=true testRelease
+      # A Kotlin or dependency bump moves these kits' published POMs, so build each publication
+      # here, as release-draft.yml's smoke test does, before a release workflow first meets it.
+      - name: "Publish Isolated Kit to Maven Local (urbanairship-20)"
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 publishMavenPublicationToMavenLocal
+      - name: "Publish Isolated Kit to Maven Local (braze-43)"
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/braze/braze-43 publishMavenPublicationToMavenLocal
+      - name: "Publish Isolated Kit to Maven Local (ga-23)"
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga/ga-23 publishMavenPublicationToMavenLocal
+      - name: "Publish Isolated Kit to Maven Local (ga4-23)"
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga4/ga4-23 publishMavenPublicationToMavenLocal
 
   binary-compatibility:
     name: "Binary Compatibility"
