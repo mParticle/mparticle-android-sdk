@@ -2,6 +2,34 @@
 
 ## [Unreleased]
 
+## [6.1.10] - 2026-11-06
+
+### Core
+
+#### Changed
+
+- Convert four B1 networking classes to Kotlin ([#985](https://github.com/mParticle/mparticle-android-sdk/pull/985))
+- Convert MParticleDBManager to Kotlin ([#984](https://github.com/mParticle/mparticle-android-sdk/pull/984))
+- Convert SessionService and MessageService to Kotlin ([#983](https://github.com/mParticle/mparticle-android-sdk/pull/983))
+- Convert the four A3 services to Kotlin ([#981](https://github.com/mParticle/mparticle-android-sdk/pull/981))
+- Convert the three A2 persistence classes to Kotlin ([#979](https://github.com/mParticle/mparticle-android-sdk/pull/979))
+- Convert internal.database tables to Kotlin ([#971](https://github.com/mParticle/mparticle-android-sdk/pull/971))
+- Convert the four A1 part 2 classes to Kotlin ([#970](https://github.com/mParticle/mparticle-android-sdk/pull/970))
+
+### Kits
+
+#### Branch
+
+##### Added
+
+- Send the mParticle session ID to Branch ([#959](https://github.com/mParticle/mparticle-android-sdk/pull/959))
+
+#### Rokt
+
+##### Fixed
+
+- Update Rokt SDK and payment extension to 6.3.2 ([#990](https://github.com/mParticle/mparticle-android-sdk/pull/990))
+
 ## [6.1.9] - 2026-10-15
 
 ### Core
