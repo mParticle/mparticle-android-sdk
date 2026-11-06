@@ -77,7 +77,7 @@ repositories {
 }
 
 dependencies {
-    def composeBom = platform('androidx.compose:compose-bom:2026.05.01')
+    def composeBom = platform('androidx.compose:compose-bom:2026.09.00')
     implementation composeBom
     implementation 'androidx.annotation:annotation:1.11.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0'
