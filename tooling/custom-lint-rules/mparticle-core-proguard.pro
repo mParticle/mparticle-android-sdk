@@ -1,5 +1,11 @@
 -dontwarn
 -dontusemixedcaseclassnames
+# Keep each local variable in the slot the compiler gave it. This config names no
+# library jars, so java.lang.Object is unknown to ProGuard. When the variable
+# optimization reuses one slot for two unrelated classes (Impression and Product in
+# MPCommerceMessage's Kotlin loops), the preverifier cannot merge their types and
+# stops with IncompleteClassHierarchyException.
+-optimizations !code/allocation/variable
 -keepattributes InnerClasses
 
 -keep class com.mparticle.MPEvent { *; }

@@ -3299,7 +3299,6 @@ public final class com/mparticle/internal/listeners/InternalListenerManager$Comp
 
 public class com/mparticle/internal/messages/BaseMPMessage : org/json/JSONObject {
 	protected fun <init> ()V
-	protected fun <init> (Lcom/mparticle/internal/messages/BaseMPMessageBuilder;Lcom/mparticle/internal/InternalSession;Landroid/location/Location;J)V
 	public fun getAttributes ()Lorg/json/JSONObject;
 	public fun getMessageType ()Ljava/lang/String;
 	public fun getMpId ()J

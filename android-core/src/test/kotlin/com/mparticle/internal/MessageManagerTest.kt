@@ -661,7 +661,7 @@ class MessageManagerTest {
                 false,
                 0,
                 1,
-            )
+            )!!
         Assert.assertEquals("this is a key", message.getString("n"))
         Assert.assertEquals("this is the new value", message.getString("nv"))
         Assert.assertEquals("this is the old value", message.getString("ov"))
@@ -682,7 +682,7 @@ class MessageManagerTest {
                 true,
                 0,
                 1,
-            )
+            )!!
         Assert.assertEquals("this is a key", message.getString("n"))
         Assert.assertEquals(2, message.getJSONArray("nv").length().toLong())
         Assert.assertEquals(2, message.getJSONArray("ov").length().toLong())
@@ -704,7 +704,7 @@ class MessageManagerTest {
                 false,
                 0,
                 1,
-            )
+            )!!
         Assert.assertEquals("this is a key", message.getString("n"))
         Assert.assertEquals("this is the new value", message.getString("nv"))
         Assert.assertEquals(JSONObject.NULL, message["ov"])
@@ -715,7 +715,7 @@ class MessageManagerTest {
     @Throws(Exception::class)
     fun testLogUserAttributeChangeNewTag() {
         val message =
-            manager.logUserAttributeChangeMessage("this is a key", null, null, false, false, 0, 1)
+            manager.logUserAttributeChangeMessage("this is a key", null, null, false, false, 0, 1)!!
         Assert.assertEquals("this is a key", message.getString("n"))
         Assert.assertEquals(JSONObject.NULL, message["ov"])
         Assert.assertEquals(JSONObject.NULL, message["nv"])
@@ -734,7 +734,7 @@ class MessageManagerTest {
                 false,
                 0,
                 1,
-            )
+            )!!
         Assert.assertEquals("this is a key", message.getString("n"))
         Assert.assertEquals(JSONObject.NULL, message["ov"])
         Assert.assertEquals("this is the new value", message["nv"])
@@ -756,7 +756,7 @@ class MessageManagerTest {
                 false,
                 0,
                 1,
-            )
+            )!!
         Assert.assertEquals("this is a key", message.getString("n"))
         Assert.assertEquals(2, message.getJSONArray("nv").length().toLong())
         Assert.assertEquals("this is a new value", message.getJSONArray("nv")[0])
@@ -768,7 +768,7 @@ class MessageManagerTest {
     @Throws(Exception::class)
     fun testLogUserAttributeChangeRemoveTag() {
         val message =
-            manager.logUserAttributeChangeMessage("this is a key", null, null, true, false, 0, 1)
+            manager.logUserAttributeChangeMessage("this is a key", null, null, true, false, 0, 1)!!
         Assert.assertEquals("this is a key", message.getString("n"))
         Assert.assertEquals(JSONObject.NULL, message["ov"])
         Assert.assertEquals(JSONObject.NULL, message["nv"])
@@ -787,7 +787,7 @@ class MessageManagerTest {
                 false,
                 0,
                 1,
-            )
+            )!!
         Assert.assertEquals("this is a key", message.getString("n"))
         Assert.assertEquals("this is the old value", message["ov"])
         Assert.assertEquals(JSONObject.NULL, message["nv"])
