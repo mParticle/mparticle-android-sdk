@@ -23,7 +23,6 @@ on:
 permissions:
   contents: read
   pull-requests: read
-  checks: write
 
 jobs:
   instrumented:
@@ -33,6 +32,8 @@ jobs:
     steps:
       - name: "Checkout Branch"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: "Install JDK 17"
         uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
         with:
@@ -64,7 +65,7 @@ jobs:
             for pkg in com.mparticle.kittests com.mparticle.kits.test com.mparticle.legacyTest com.mparticle.test; do if adb shell pm list packages | grep -q "$pkg"; then adb uninstall "$pkg"; fi; done
             ./gradlew ${{ inputs.gradle_command }}
       - name: "Archive ${{ inputs.display_name }} Results"
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: ${{ inputs.artifact_name }}

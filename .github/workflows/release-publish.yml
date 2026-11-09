@@ -8,18 +8,21 @@ on:
     paths:
       - VERSION
 
-permissions:
-  contents: write
+permissions: {}
 
 jobs:
   setup-and-version:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       final_version: ${{ steps.version-file.outputs.release-version }}
       is_prerelease: ${{ steps.version-file.outputs.is-prerelease }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Get current version
         id: version-file
@@ -38,7 +41,10 @@ jobs:
     # The release environment holds the signing and Sonatype secrets and admits only the release
     # branches. One key signs both the com.mparticle and the com.rokt artifacts.
     environment: release
+    permissions:
+      contents: write
     env:
+      FINAL_VERSION: ${{ needs.setup-and-version.outputs.final_version }}
       ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.ROKT_MAVEN_CENTRAL_SIGNING_KEY }}
       ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.ROKT_MAVEN_CENTRAL_SIGNING_KEY_PASSWORD }}
       ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
@@ -46,6 +52,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Extract release notes
         id: release-notes
@@ -63,42 +71,42 @@ jobs:
         uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
 
       - name: Publish core to Maven local (required before kits can compile)
-        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=${{ needs.setup-and-version.outputs.final_version }} --no-build-cache
+        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION="$FINAL_VERSION" --no-build-cache
 
       - name: Validate aggregate kit publications in Maven local
-        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=${{ needs.setup-and-version.outputs.final_version }} -c settings-kits.gradle --no-build-cache
+        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION="$FINAL_VERSION" -c settings-kits.gradle --no-build-cache
 
       - name: Validate isolated kit publication (urbanairship-20)
-        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 -PVERSION=${{ needs.setup-and-version.outputs.final_version }} publishMavenPublicationToMavenLocal --no-build-cache
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 -PVERSION="$FINAL_VERSION" publishMavenPublicationToMavenLocal --no-build-cache
 
       - name: Validate isolated kit publication (braze-43)
-        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/braze/braze-43 -PVERSION=${{ needs.setup-and-version.outputs.final_version }} publishMavenPublicationToMavenLocal --no-build-cache
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/braze/braze-43 -PVERSION="$FINAL_VERSION" publishMavenPublicationToMavenLocal --no-build-cache
 
       - name: Validate isolated kit publication (ga-23)
-        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga/ga-23 -PVERSION=${{ needs.setup-and-version.outputs.final_version }} publishMavenPublicationToMavenLocal --no-build-cache
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga/ga-23 -PVERSION="$FINAL_VERSION" publishMavenPublicationToMavenLocal --no-build-cache
 
       - name: Validate isolated kit publication (ga4-23)
-        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga4/ga4-23 -PVERSION=${{ needs.setup-and-version.outputs.final_version }} publishMavenPublicationToMavenLocal --no-build-cache
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga4/ga4-23 -PVERSION="$FINAL_VERSION" publishMavenPublicationToMavenLocal --no-build-cache
 
       - name: Publish core to Maven Central
-        run: ./gradlew publishMavenPublicationToMavenCentralRepository -PVERSION=${{ needs.setup-and-version.outputs.final_version }} --no-build-cache
+        run: ./gradlew publishMavenPublicationToMavenCentralRepository -PVERSION="$FINAL_VERSION" --no-build-cache
 
       - name: Publish kits to Maven Central
-        run: ./gradlew publishMavenPublicationToMavenCentralRepository -PVERSION=${{ needs.setup-and-version.outputs.final_version }} -c settings-kits.gradle --no-build-cache
+        run: ./gradlew publishMavenPublicationToMavenCentralRepository -PVERSION="$FINAL_VERSION" -c settings-kits.gradle --no-build-cache
 
       # Isolated Kotlin 2.2.x kits are excluded from settings-kits.gradle and must be
       # published from their own project roots (same pattern as CI test/lint steps).
       - name: Publish Isolated Kits (urbanairship-20)
-        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 -PVERSION=${{ needs.setup-and-version.outputs.final_version }} publishMavenPublicationToMavenCentralRepository --no-build-cache
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 -PVERSION="$FINAL_VERSION" publishMavenPublicationToMavenCentralRepository --no-build-cache
 
       - name: Publish Isolated Kits (braze-43)
-        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/braze/braze-43 -PVERSION=${{ needs.setup-and-version.outputs.final_version }} publishMavenPublicationToMavenCentralRepository --no-build-cache
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/braze/braze-43 -PVERSION="$FINAL_VERSION" publishMavenPublicationToMavenCentralRepository --no-build-cache
 
       - name: Publish Isolated Kits (ga-23)
-        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga/ga-23 -PVERSION=${{ needs.setup-and-version.outputs.final_version }} publishMavenPublicationToMavenCentralRepository --no-build-cache
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga/ga-23 -PVERSION="$FINAL_VERSION" publishMavenPublicationToMavenCentralRepository --no-build-cache
 
       - name: Publish Isolated Kits (ga4-23)
-        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga4/ga4-23 -PVERSION=${{ needs.setup-and-version.outputs.final_version }} publishMavenPublicationToMavenCentralRepository --no-build-cache
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga4/ga4-23 -PVERSION="$FINAL_VERSION" publishMavenPublicationToMavenCentralRepository --no-build-cache
 
       # rokt-sdk-plus (com.rokt:rokt-sdk-plus) is an umbrella over the mParticle Rokt kit + the
       # Rokt Payment Extension. The "Publish core to Maven local" step above already placed
@@ -107,15 +115,29 @@ jobs:
       # Maven Central propagation. com.rokt:payment-extension (+ roktsdk) come from Central,
       # released independently from the ROKT sdk-android-source repo.
       - name: Publish Rokt kit to Maven local (so rokt-sdk-plus resolves it locally)
-        run: ./gradlew :kits:android-rokt:rokt:publishMavenPublicationToMavenLocal -PVERSION=${{ needs.setup-and-version.outputs.final_version }} -c settings-kits.gradle --no-build-cache
+        run: ./gradlew :kits:android-rokt:rokt:publishMavenPublicationToMavenLocal -PVERSION="$FINAL_VERSION" -c settings-kits.gradle --no-build-cache
 
       - name: Publish rokt-sdk-plus to Maven Central
-        run: ./gradlew publishMavenPublicationToMavenCentralRepository -PVERSION=${{ needs.setup-and-version.outputs.final_version }} -c settings-rokt-sdk-plus.gradle --no-build-cache
+        run: ./gradlew publishMavenPublicationToMavenCentralRepository -PVERSION="$FINAL_VERSION" -c settings-rokt-sdk-plus.gradle --no-build-cache
 
       - name: Create GitHub release
-        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
-        with:
-          makeLatest: ${{ needs.setup-and-version.outputs.is_prerelease != 'true' }}
-          prerelease: ${{ needs.setup-and-version.outputs.is_prerelease == 'true' }}
-          tag: ${{ needs.setup-and-version.outputs.final_version }}
-          body: ${{ steps.release-notes.outputs.release_notes }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IS_PRERELEASE: ${{ needs.setup-and-version.outputs.is_prerelease }}
+          RELEASE_NOTES: ${{ steps.release-notes.outputs.release_notes }}
+        run: |
+          printf '%s\n' "$RELEASE_NOTES" > "$RUNNER_TEMP/release-notes.md"
+          if [ "$IS_PRERELEASE" = "true" ]; then
+            gh release create "$FINAL_VERSION" \
+              --target "$GITHUB_SHA" \
+              --title "$FINAL_VERSION" \
+              --notes-file "$RUNNER_TEMP/release-notes.md" \
+              --prerelease \
+              --latest=false
+          else
+            gh release create "$FINAL_VERSION" \
+              --target "$GITHUB_SHA" \
+              --title "$FINAL_VERSION" \
+              --notes-file "$RUNNER_TEMP/release-notes.md" \
+              --latest
+          fi
