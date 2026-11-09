@@ -336,7 +336,7 @@ ConsentState.builder().removeCCPAConsentState()
 
 ### Rokt API moved from `android-core` to `rokt-kit`
 
-Rokt APIs are now owned by the Rokt kit module. Usage remains the same (`MParticle.getInstance().Rokt()`); update imports to use the kit package types.
+Rokt APIs are now owned by the Rokt kit module, and `android-core` no longer has `MParticle.Rokt()`. From Kotlin, use the kit's `rokt` extension property. From Java, use `MParticleRokt.Rokt()`.
 
 Kotlin:
 
@@ -347,9 +347,9 @@ import com.mparticle.Rokt
 val rokt = MParticle.getInstance()?.Rokt()
 
 // After
-import com.mparticle.kits.Rokt
+import com.mparticle.kits.rokt
 
-val rokt = MParticle.getInstance()?.Rokt()
+val rokt = MParticle.getInstance()?.rokt
 ```
 
 Java:
@@ -359,7 +359,7 @@ Java:
 com.mparticle.Rokt rokt = MParticle.getInstance().Rokt();
 
 // After
-com.mparticle.kits.Rokt rokt = MParticle.getInstance().Rokt();
+com.mparticle.kits.Rokt rokt = com.mparticle.kits.MParticleRokt.Rokt();
 ```
 
 ---
@@ -370,30 +370,105 @@ The following mParticle wrapper types were removed:
 
 - `com.mparticle.RoktEvent`
 - `com.mparticle.MpRoktEventCallback`
+- `com.mparticle.UnloadReasons`
 - `com.mparticle.rokt.RoktConfig`
 - `com.mparticle.rokt.PlacementOptions`
 
 Use native Rokt SDK types instead:
 
 - `com.rokt.roktsdk.RoktEvent`
-- `com.rokt.roktsdk.Rokt.RoktCallback`
 - `com.rokt.roktsdk.RoktConfig`
 - `com.rokt.roktsdk.PlacementOptions`
+
+`MpRoktEventCallback` and `UnloadReasons` have no replacement type. Placement events now arrive as `com.rokt.roktsdk.RoktEvent` values. See [Placement callbacks replaced with `RoktEvent`](#placement-callbacks-replaced-with-roktevent).
 
 Kotlin:
 
 ```kotlin
 // Before
-val callback = object : MpRoktEventCallback { /* ... */ }
 val config = com.mparticle.rokt.RoktConfig.Builder().build()
 
 // After
-val callback = object : com.rokt.roktsdk.Rokt.RoktCallback { /* ... */ }
 val config = com.rokt.roktsdk.RoktConfig.Builder().build()
 ```
 
 ---
 
-### `Rokt.prepareAttributesAsync(...)` is no longer public API
+### Placement callbacks replaced with `RoktEvent`
 
-`prepareAttributesAsync` is now internal to the kit implementation and should not be called directly from app code.
+`selectPlacements` no longer takes a `callbacks` argument, and `RoktLayout` no longer takes `mpRoktEventCallback`. Each callback is now a `RoktEvent`:
+
+| Removed callback                 | `RoktEvent`                                                                                                       |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `onLoad()`                       | `PlacementReady`, then `PlacementInteractive` once the placement has rendered                                     |
+| `onUnload(reason)`               | `PlacementClosed`, `PlacementCompleted` or `PlacementFailure`. The event type takes the place of `UnloadReasons`. |
+| `onShouldShowLoadingIndicator()` | `ShowLoadingIndicator`                                                                                            |
+| `onShouldHideLoadingIndicator()` | `HideLoadingIndicator`                                                                                            |
+
+With `selectPlacements`, collect `events(identifier)` for the placement's identifier. Start collecting before you call `selectPlacements`, so you receive the first events.
+
+Kotlin:
+
+```kotlin
+// Before
+val callbacks = object : MpRoktEventCallback {
+    override fun onLoad() { /* ... */ }
+    override fun onUnload(reason: UnloadReasons) { /* ... */ }
+    override fun onShouldShowLoadingIndicator() { /* ... */ }
+    override fun onShouldHideLoadingIndicator() { /* ... */ }
+}
+MParticle.getInstance()?.Rokt()?.selectPlacements(
+    identifier = "RoktExperience",
+    attributes = attributes,
+    callbacks = callbacks,
+)
+
+// After
+import com.mparticle.kits.rokt
+import com.rokt.roktsdk.RoktEvent
+
+lifecycleScope.launch {
+    MParticle.getInstance()?.rokt?.events("RoktExperience")?.collect { event ->
+        when (event) {
+            is RoktEvent.PlacementReady -> { /* was onLoad */ }
+            is RoktEvent.PlacementClosed,
+            is RoktEvent.PlacementCompleted,
+            is RoktEvent.PlacementFailure -> { /* was onUnload */ }
+            is RoktEvent.ShowLoadingIndicator -> { /* was onShouldShowLoadingIndicator */ }
+            is RoktEvent.HideLoadingIndicator -> { /* was onShouldHideLoadingIndicator */ }
+            else -> Unit
+        }
+    }
+}
+MParticle.getInstance()?.rokt?.selectPlacements(
+    identifier = "RoktExperience",
+    attributes = attributes,
+)
+```
+
+With Jetpack Compose, pass `onEvent` to `RoktLayout`:
+
+```kotlin
+// Before
+RoktLayout(
+    sdkTriggered = true,
+    identifier = "RoktExperience",
+    attributes = attributes,
+    location = "RoktEmbedded1",
+    mpRoktEventCallback = callbacks,
+)
+
+// After
+import com.mparticle.kits.RoktLayout
+import com.rokt.roktsdk.RoktEvent
+
+RoktLayout(
+    sdkTriggered = true,
+    identifier = "RoktExperience",
+    attributes = attributes,
+    location = "RoktEmbedded1",
+    onEvent = { event: RoktEvent ->
+        // Handle the event, as in the selectPlacements example above
+    },
+)
+```
