@@ -34,6 +34,8 @@ updates:
           ["version-update:semver-major", "version-update:semver-minor"]
     commit-message:
       prefix: "chore"
+    cooldown:
+      default-days: 7
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -43,3 +45,5 @@ updates:
       - dependabot
     commit-message:
       prefix: "chore"
+    cooldown:
+      default-days: 7

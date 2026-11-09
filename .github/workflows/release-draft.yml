@@ -41,6 +41,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           ref: ${{ github.ref_name }}
           fetch-depth: 0
 
@@ -105,28 +106,29 @@ jobs:
           fi
 
           echo "new-version=$new_version" >> $GITHUB_OUTPUT
+          echo "NEW_VERSION=$new_version" >> "$GITHUB_ENV"
 
       - name: Save bumped version to file
         run: |
-          echo "${{ steps.compose-version.outputs.new-version }}" > VERSION
+          echo "$NEW_VERSION" > VERSION
 
       - name: Publish core to Maven local (smoke test)
-        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=${{ steps.compose-version.outputs.new-version }} --no-build-cache
+        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION="$NEW_VERSION" --no-build-cache
 
       - name: Publish aggregate kits to Maven local (smoke test)
-        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION=${{ steps.compose-version.outputs.new-version }} -c settings-kits.gradle --no-build-cache
+        run: ./gradlew publishMavenPublicationToMavenLocal -PVERSION="$NEW_VERSION" -c settings-kits.gradle --no-build-cache
 
       - name: Publish isolated kit to Maven local (urbanairship-20 smoke test)
-        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 -PVERSION=${{ steps.compose-version.outputs.new-version }} publishMavenPublicationToMavenLocal --no-build-cache
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/urbanairship/urbanairship-20 -PVERSION="$NEW_VERSION" publishMavenPublicationToMavenLocal --no-build-cache
 
       - name: Publish isolated kit to Maven local (braze-43 smoke test)
-        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/braze/braze-43 -PVERSION=${{ steps.compose-version.outputs.new-version }} publishMavenPublicationToMavenLocal --no-build-cache
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/braze/braze-43 -PVERSION="$NEW_VERSION" publishMavenPublicationToMavenLocal --no-build-cache
 
       - name: Publish isolated kit to Maven local (ga-23 smoke test)
-        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga/ga-23 -PVERSION=${{ steps.compose-version.outputs.new-version }} publishMavenPublicationToMavenLocal --no-build-cache
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga/ga-23 -PVERSION="$NEW_VERSION" publishMavenPublicationToMavenLocal --no-build-cache
 
       - name: Publish isolated kit to Maven local (ga4-23 smoke test)
-        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga4/ga4-23 -PVERSION=${{ steps.compose-version.outputs.new-version }} publishMavenPublicationToMavenLocal --no-build-cache
+        run: ./gradlew -Pmparticle.kit.mparticleFromMavenLocalOnly=true -p kits/ga4/ga4-23 -PVERSION="$NEW_VERSION" publishMavenPublicationToMavenLocal --no-build-cache
 
       - name: Generate changelog entry
         id: changelog
