@@ -2742,6 +2742,7 @@ public final class com/mparticle/internal/SideloadedKitsUtils {
 }
 
 public class com/mparticle/internal/UploadHandler : com/mparticle/internal/BaseHandler {
+	public static final field Companion Lcom/mparticle/internal/UploadHandler$Companion;
 	public static final field INIT_CONFIG I
 	public static final field UPDATE_CONFIG I
 	public static final field UPLOAD_MESSAGES I
@@ -2756,6 +2757,9 @@ public class com/mparticle/internal/UploadHandler : com/mparticle/internal/BaseH
 	public fun setConnected (Z)V
 	public fun shouldDelete (I)Z
 	protected fun upload ()V
+}
+
+public final class com/mparticle/internal/UploadHandler$Companion {
 }
 
 public final class com/mparticle/internal/UserStorage {

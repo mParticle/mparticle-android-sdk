@@ -120,7 +120,7 @@ class UploadHandlerTest {
             )
         val rampException = MPRampException()
         Mockito.`when`(apiClient.sendMessageBatch(Mockito.anyString(), Mockito.any())).thenThrow(rampException)
-        Mockito.`when`(handler.mParticleDBManager.deleteUpload(Mockito.anyInt())).thenReturn(1)
+        Mockito.`when`(handler.mParticleDBManager!!.deleteUpload(Mockito.anyInt())).thenReturn(1)
         handler.setApiClient(apiClient)
         handler.uploadMessage(522, "", mConfigManager.uploadSettings)
     }
@@ -188,7 +188,7 @@ class UploadHandlerTest {
 
     @Test
     fun testMaybePrunePersistedRecordsHonorsTwentyFourHourThrottle() {
-        val db = handler.mParticleDBManager
+        val db = handler.mParticleDBManager!!
         // The sweep must succeed so the throttle arms; otherwise every call retries.
         Mockito.`when`(db.deleteRecordsOlderThan(Mockito.anyLong())).thenReturn(true)
         val t0 = 1_000_000_000_000L
@@ -208,7 +208,7 @@ class UploadHandlerTest {
 
     @Test
     fun testMaybePrunePersistedRecordsRetriesAfterFailure() {
-        val db = handler.mParticleDBManager
+        val db = handler.mParticleDBManager!!
 
         // Phase 1 - deleteRecordsOlderThan reports failure (false); throttle must NOT be armed.
         // This models the real contract: MParticleDBManager.deleteRecordsOlderThan catches
@@ -609,7 +609,7 @@ class UploadHandlerTest {
         }
 
         @Throws(Exception::class)
-        override fun prepareMessageUploads(uploadSettings: UploadSettings): Boolean {
+        override fun prepareMessageUploads(uploadSettings: UploadSettings?): Boolean {
             prepareMessageUploadsCalledCount++
             return prepareMessageUploadsResult
         }

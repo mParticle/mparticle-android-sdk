@@ -27,7 +27,7 @@ class ConfigRequestTests : BaseCleanInstallEachTest() {
         }
 
         // make sure it works on subsiquent requests
-        AccessUtils.getUploadHandler().mApiClient.fetchConfig(true)
+        AccessUtils.getUploadHandler().mApiClient!!.fetchConfig(true)
         (0..2).forEach {
             mServer.waitForVerify(Matcher(mServer.Endpoints().configUrl)) {
                 assertTrue { it.url.contains("plan_id=dpId") }
@@ -52,7 +52,7 @@ class ConfigRequestTests : BaseCleanInstallEachTest() {
 
         // make sure it works on subsiquent requests
         (0..2).forEach {
-            AccessUtils.getUploadHandler().mApiClient.fetchConfig(true)
+            AccessUtils.getUploadHandler().mApiClient!!.fetchConfig(true)
             mServer.waitForVerify(Matcher(mServer.Endpoints().configUrl)) {
                 assertTrue { it.url.contains("plan_id") }
                 assertFalse { it.url.contains("plan_version") }
@@ -76,7 +76,7 @@ class ConfigRequestTests : BaseCleanInstallEachTest() {
 
         // make sure it works on subsiquent requests
         (0..2).forEach {
-            AccessUtils.getUploadHandler().mApiClient.fetchConfig(true)
+            AccessUtils.getUploadHandler().mApiClient!!.fetchConfig(true)
             mServer.waitForVerify(Matcher(mServer.Endpoints().configUrl)) {
                 assertFalse { it.url.contains("plan_id") }
                 assertFalse { it.url.contains("plan_version") }
