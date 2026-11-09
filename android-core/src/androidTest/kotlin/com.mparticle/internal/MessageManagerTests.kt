@@ -72,18 +72,18 @@ class MessageManagerTests : BaseCleanInstallEachTest() {
         messageManager.startSession(session)
         AccessUtils.awaitMessageHandler()
         var message =
-            messageManager.mParticleDBManager.getSessionForSessionEndMessage(
+            messageManager.mParticleDBManager!!.getSessionForSessionEndMessage(
                 session.mSessionID,
                 null,
                 session.mpids,
             )
         junit.framework.Assert.assertNotNull(message)
-        messageManager.mParticleDBManager.updateSessionStatus(
+        messageManager.mParticleDBManager!!.updateSessionStatus(
             session.mSessionID,
             SessionTable.SessionTableColumns.STATUS,
         )
         message =
-            messageManager.mParticleDBManager.getSessionForSessionEndMessage(
+            messageManager.mParticleDBManager!!.getSessionForSessionEndMessage(
                 session.mSessionID,
                 null,
                 session.mpids,

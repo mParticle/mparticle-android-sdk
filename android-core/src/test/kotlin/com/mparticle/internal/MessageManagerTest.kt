@@ -151,7 +151,7 @@ class MessageManagerTest {
     @Throws(Exception::class)
     fun testStartSession() {
         val prefs = context.getSharedPreferences(null, 0) as MockSharedPreferences
-        var sessionStart = manager.startSession(appStateManager.session)
+        var sessionStart = manager.startSession(appStateManager.session)!!
         Mockito.verify(messageHandler, Mockito.times(2)).sendMessage(
             Mockito.any(
                 Message::class.java,
@@ -175,7 +175,7 @@ class MessageManagerTest {
         configManager.userStorage.setPreviousSessionForeground(42000)
         configManager.userStorage.setPreviousSessionStart(24000)
         prefs.commit()
-        sessionStart = manager.startSession(appStateManager.session)
+        sessionStart = manager.startSession(appStateManager.session)!!
         Assert.assertNotNull(sessionStart)
         Assert.assertEquals(Constants.MessageType.SESSION_START, sessionStart.messageType)
         Assert.assertEquals(42, sessionStart.getLong(MessageKey.PREVIOUS_SESSION_LENGTH))
@@ -241,7 +241,7 @@ class MessageManagerTest {
                 .addCustomFlag("flag 2", "value 3")
                 .customAttributes(info)
                 .build()
-        val message = manager.logEvent(event, "test screen name")
+        val message = manager.logEvent(event, "test screen name")!!
         Assert.assertNotNull(message)
         Assert.assertEquals(Constants.MessageType.EVENT, message.messageType)
         Assert.assertEquals(appStateManager.session.mSessionID, message.sessionId)
@@ -301,7 +301,7 @@ class MessageManagerTest {
             CommerceEvent
                 .Builder(Product.ADD_TO_CART, Product.Builder("foo", "bar", 10.0).build())
                 .build()
-        val message = manager.logEvent(event)
+        val message = manager.logEvent(event)!!
         Assert.assertNotNull(message)
 
         // Mockito defaults to an Answer of 1
@@ -326,7 +326,7 @@ class MessageManagerTest {
                     .customAttributes(info)
                     .build(),
                 true,
-            )
+            )!!
         Assert.assertNotNull(message)
         Assert.assertEquals(Constants.MessageType.SCREEN_VIEW, message.messageType)
         Assert.assertEquals(appStateManager.session.mSessionID, message.sessionId)
@@ -352,7 +352,7 @@ class MessageManagerTest {
             manager.logScreen(
                 MPEvent.Builder("screen name 2").customAttributes(info).build(),
                 false,
-            )
+            )!!
         Assert.assertEquals(message.getString(MessageKey.SCREEN_STARTED), "activity_stopped")
         Mockito.verify(messageHandler, Mockito.times(3)).sendMessage(
             Mockito.any(
@@ -366,7 +366,7 @@ class MessageManagerTest {
     fun testLogBreadcrumb() {
         appStateManager.session.start(context)
         manager.logBreadcrumb(null)
-        val message = manager.logBreadcrumb("test crumb")
+        val message = manager.logBreadcrumb("test crumb")!!
         Assert.assertNotNull(message)
         Assert.assertEquals(Constants.MessageType.BREADCRUMB, message.messageType)
         Assert.assertEquals(appStateManager.session.mLastEventTime, message.timestamp)
@@ -392,7 +392,7 @@ class MessageManagerTest {
     fun testOptOut() {
         appStateManager.session.start(context)
         val optOutTime = System.currentTimeMillis()
-        val message = manager.optOut(optOutTime, true)
+        val message = manager.optOut(optOutTime, true)!!
         Assert.assertNotNull(message)
         Assert.assertEquals(Constants.MessageType.OPT_OUT, message.messageType)
         Assert.assertTrue(message.getBoolean(MessageKey.OPT_OUT_STATUS))
@@ -402,7 +402,7 @@ class MessageManagerTest {
                 Message::class.java,
             ),
         )
-        val message2 = manager.optOut(optOutTime, false)
+        val message2 = manager.optOut(optOutTime, false)!!
         Assert.assertFalse(message2.getBoolean(MessageKey.OPT_OUT_STATUS))
     }
 
@@ -419,7 +419,7 @@ class MessageManagerTest {
         manager.logErrorEvent(null, null, null, true)
         manager.logErrorEvent(errorMessage, null, null, true)
         manager.logErrorEvent(null, t, null, true)
-        var message = manager.logErrorEvent(errorMessage, t, attrs, true)
+        var message = manager.logErrorEvent(errorMessage, t, attrs, true)!!
         Assert.assertNotNull(message)
         Assert.assertEquals(Constants.MessageType.ERROR, message.messageType)
         Assert.assertEquals(appStateManager.session.mLastEventTime, message.timestamp)
@@ -441,7 +441,7 @@ class MessageManagerTest {
                 Message::class.java,
             ),
         )
-        message = manager.logErrorEvent(errorMessage, t, attrs, false)
+        message = manager.logErrorEvent(errorMessage, t, attrs, false)!!
         Assert.assertNotNull(message)
         Assert.assertEquals(Constants.MessageType.ERROR, message.messageType)
         Assert.assertEquals(appStateManager.session.mLastEventTime, message.timestamp)
@@ -463,7 +463,7 @@ class MessageManagerTest {
                 Message::class.java,
             ),
         )
-        message = manager.logErrorEvent(errorMessage, t, attrs)
+        message = manager.logErrorEvent(errorMessage, t, attrs)!!
         Assert.assertNotNull(message)
         Assert.assertEquals(Constants.MessageType.ERROR, message.messageType)
         Assert.assertEquals(appStateManager.session.mLastEventTime, message.timestamp)
@@ -502,7 +502,7 @@ class MessageManagerTest {
                 123,
                 1234,
                 "request string",
-            )
+            )!!
         Assert.assertNotNull(message)
         Assert.assertEquals(Constants.MessageType.NETWORK_PERFORMNACE, message.messageType)
         Assert.assertEquals(message.getString(MessageKey.NPE_METHOD), "GET")
@@ -527,13 +527,13 @@ class MessageManagerTest {
         Assert.assertNull(message)
         message = manager.setPushRegistrationId("", true)
         Assert.assertNull(message)
-        message = manager.setPushRegistrationId("coolgcmregid", true)
+        message = manager.setPushRegistrationId("coolgcmregid", true)!!
         Assert.assertNotNull(message)
         Assert.assertEquals(Constants.MessageType.PUSH_REGISTRATION, message.messageType)
         Assert.assertEquals(message.getString(MessageKey.PUSH_TOKEN), "coolgcmregid")
         Assert.assertEquals(message.getString(MessageKey.PUSH_TOKEN_TYPE), "google")
         Assert.assertEquals(message.getBoolean(MessageKey.PUSH_REGISTER_FLAG), true)
-        message = manager.setPushRegistrationId("coolgcmregid", false)
+        message = manager.setPushRegistrationId("coolgcmregid", false)!!
         Assert.assertEquals(message.getBoolean(MessageKey.PUSH_REGISTER_FLAG), false)
         Mockito.verify(messageHandler, Mockito.times(2)).sendMessage(
             Mockito.any(
@@ -622,7 +622,7 @@ class MessageManagerTest {
                 42,
                 24,
                 123,
-            )
+            )!!
         Assert.assertNotNull(message)
         Assert.assertEquals(Constants.MessageType.APP_STATE_TRANSITION, message.messageType)
         Assert.assertEquals(
@@ -801,7 +801,7 @@ class MessageManagerTest {
         val newIdentity = JSONObject()
         val identities = JSONArray()
         val message =
-            manager.logUserIdentityChangeMessage(newIdentity, oldIdentity, identities, defaultId)
+            manager.logUserIdentityChangeMessage(newIdentity, oldIdentity, identities, defaultId)!!
         Assert.assertEquals(message["oi"], oldIdentity)
         Assert.assertEquals(message["ni"], newIdentity)
         Assert.assertEquals(message["ui"], identities)
@@ -813,7 +813,7 @@ class MessageManagerTest {
         val newIdentity = JSONObject()
         val identities = JSONArray()
         val message =
-            manager.logUserIdentityChangeMessage(newIdentity, null, identities, defaultId)
+            manager.logUserIdentityChangeMessage(newIdentity, null, identities, defaultId)!!
         Assert.assertEquals(message["oi"], JSONObject.NULL)
         Assert.assertEquals(message["ni"], newIdentity)
         Assert.assertEquals(message["ui"], identities)
@@ -825,7 +825,7 @@ class MessageManagerTest {
         val oldIdentity = JSONObject()
         val identities = JSONArray()
         val message =
-            manager.logUserIdentityChangeMessage(null, oldIdentity, identities, defaultId)
+            manager.logUserIdentityChangeMessage(null, oldIdentity, identities, defaultId)!!
         Assert.assertEquals(message["ni"], JSONObject.NULL)
         Assert.assertEquals(message["oi"], oldIdentity)
         Assert.assertEquals(message["ui"], identities)
@@ -834,7 +834,7 @@ class MessageManagerTest {
     @Test
     fun testToListMan() {
         val map = RandomUtils.getInstance().getRandomAttributes(10)
-        val listMap = MessageManager().toStringListMap(map)
+        val listMap = MessageManager().toStringListMap(map)!!
         Assert.assertEquals(map.size.toLong(), listMap.size.toLong())
         for ((key, value) in map) {
             Assert.assertEquals(1, listMap[key]?.size)

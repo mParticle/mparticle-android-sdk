@@ -2628,6 +2628,7 @@ public final class com/mparticle/internal/MessageBatch$Companion {
 }
 
 public class com/mparticle/internal/MessageManager : com/mparticle/internal/MessageManagerCallbacks, com/mparticle/internal/ReportingManager {
+	public static final field Companion Lcom/mparticle/internal/MessageManager$Companion;
 	public field mUploadHandler Lcom/mparticle/internal/UploadHandler;
 	public fun <init> ()V
 	public fun <init> (Landroid/content/Context;Lcom/mparticle/internal/ConfigManager;Lcom/mparticle/MParticle$InstallType;Lcom/mparticle/internal/AppStateManager;Lcom/mparticle/internal/database/services/MParticleDBManager;Lcom/mparticle/internal/MessageHandler;Lcom/mparticle/internal/UploadHandler;)V
@@ -2636,7 +2637,7 @@ public class com/mparticle/internal/MessageManager : com/mparticle/internal/Mess
 	public fun checkForTrigger (Lcom/mparticle/internal/messages/BaseMPMessage;)V
 	public fun createFirstRunMessage ()Lcom/mparticle/internal/messages/BaseMPMessage;
 	public fun delayedStart ()V
-	public static fun destroy ()V
+	public static final fun destroy ()V
 	public fun disable ()V
 	public fun doUpload ()V
 	public fun endSession (Lcom/mparticle/internal/InternalSession;)V
@@ -2646,9 +2647,9 @@ public class com/mparticle/internal/MessageManager : com/mparticle/internal/Mess
 	public fun getLocation ()Landroid/location/Location;
 	public fun getMParticleDBManager ()Lcom/mparticle/internal/database/services/MParticleDBManager;
 	public fun getMessageHandler ()Landroid/os/Handler;
-	public static fun getStateInfo ()Lorg/json/JSONObject;
-	public static fun getSystemMemoryThreshold ()J
-	public static fun getTotalMemory ()J
+	public static final fun getStateInfo ()Lorg/json/JSONObject;
+	public static final fun getSystemMemoryThreshold ()J
+	public static final fun getTotalMemory ()J
 	public fun getUploadSettings ()Lcom/mparticle/internal/database/UploadSettings;
 	public fun getUserAttributes (Lcom/mparticle/identity/UserAttributeListenerWrapper;J)Ljava/util/Map;
 	public fun getUserIdentities (J)Ljava/util/Map;
@@ -2687,6 +2688,13 @@ public class com/mparticle/internal/MessageManager : com/mparticle/internal/Mess
 	public fun startSession (Lcom/mparticle/internal/InternalSession;)Lcom/mparticle/internal/messages/BaseMPMessage;
 	public fun startUploadLoop ()V
 	public fun updateSessionEnd (Lcom/mparticle/internal/InternalSession;)V
+}
+
+public final class com/mparticle/internal/MessageManager$Companion {
+	public final fun destroy ()V
+	public final fun getStateInfo ()Lorg/json/JSONObject;
+	public final fun getSystemMemoryThreshold ()J
+	public final fun getTotalMemory ()J
 }
 
 public class com/mparticle/internal/MessageManager$ReportingMpidMessage {
