@@ -17,9 +17,9 @@ import com.mparticle.internal.DatabaseHelper
 import com.mparticle.internal.DeviceAttributes
 import com.mparticle.internal.JsonReportingMessage
 import com.mparticle.internal.Logger
-import com.mparticle.internal.MessageBatch
 import com.mparticle.internal.MessageManager
 import com.mparticle.internal.MessageManagerCallbacks
+import com.mparticle.internal.UserStorage
 import com.mparticle.internal.database.MPDatabase
 import com.mparticle.internal.database.UploadSettings
 import com.mparticle.internal.messages.BaseMPMessage
@@ -892,25 +892,22 @@ class MParticleDBManagerTest {
         val deviceAttributes = Mockito.mock(DeviceAttributes::class.java)
         Mockito.`when`(deviceAttributes.getAppInfo(context)).thenReturn(JSONObject("{\"app\":1}"))
         Mockito.`when`(deviceAttributes.getDeviceInfo(context)).thenReturn(JSONObject("{\"device\":1}"))
+        // MessageBatch.create runs for real: Kotlin calls it through its companion object, which a static mock does not reach.
+        Mockito.`when`(configManager.getUserStorage(Mockito.anyLong())).thenReturn(Mockito.mock(UserStorage::class.java))
         val storedMessages = ArrayList<String>()
-        Mockito.mockStatic(MessageBatch::class.java).use { batches ->
-            batches
-                .`when`<MessageBatch> { MessageBatch.create(Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.any()) }
-                .thenAnswer { TestBatch() }
-            Mockito.mockStatic(TextUtils::class.java).use { textUtils ->
-                textUtils
-                    .`when`<String> { TextUtils.join(Mockito.any(), Mockito.any<Array<Any>>()) }
-                    .thenAnswer { invocation -> (invocation.arguments[1] as Array<*>).joinToString(invocation.arguments[0] as CharSequence) }
-                val contentValues =
-                    Mockito.mockConstruction(ContentValues::class.java) { values, _ ->
-                        Mockito
-                            .doAnswer { invocation -> storedMessages.add(invocation.arguments[1] as String) }
-                            .`when`(values)
-                            .put(Mockito.eq("message"), Mockito.anyString())
-                    }
-                contentValues.use {
-                    target.createMessagesForUploadMessage(configManager, deviceAttributes, "session-current", uploadSettings())
+        Mockito.mockStatic(TextUtils::class.java).use { textUtils ->
+            textUtils
+                .`when`<String> { TextUtils.join(Mockito.any(), Mockito.any<Array<Any>>()) }
+                .thenAnswer { invocation -> (invocation.arguments[1] as Array<*>).joinToString(invocation.arguments[0] as CharSequence) }
+            val contentValues =
+                Mockito.mockConstruction(ContentValues::class.java) { values, _ ->
+                    Mockito
+                        .doAnswer { invocation -> storedMessages.add(invocation.arguments[1] as String) }
+                        .`when`(values)
+                        .put(Mockito.eq("message"), Mockito.anyString())
                 }
+            contentValues.use {
+                target.createMessagesForUploadMessage(configManager, deviceAttributes, "session-current", uploadSettings())
             }
         }
         return storedMessages.singleOrNull()?.let { JSONObject(it) }
@@ -974,6 +971,4 @@ class MParticleDBManagerTest {
         Assert.assertEquals(50L, change.time)
         Assert.assertEquals(7L, change.mpId)
     }
-
-    private class TestBatch : MessageBatch()
 }

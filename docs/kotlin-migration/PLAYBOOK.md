@@ -39,6 +39,8 @@ the 6.x line, even where their bodies are later moved into Kotlin helpers:
   `MPConnection`, `BaseNetworkConnection`
 - `com.mparticle.kits`: `KitIntegration`, `KitUtils`, `ReportingMessage`, `CommerceEventUtils`,
   `FilteredMParticleUser`, `FilteredIdentityApiRequest`
+- `com.mparticle.internal`: `InternalSession` (passed to `SdkListener.onSessionUpdated` and kept whole
+  by `android-core/proguard.pro`)
 - every `package-info.java`
 
 The reason is a property of the Kotlin language, not caution. A Kotlin caller that wrote
