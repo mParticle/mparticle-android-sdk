@@ -60,6 +60,15 @@ class MessageBatchTest {
         }
         batch = MessageBatch.create(sessionHistory, manager, JSONObject(), batchId)
         Assert.assertFalse(batch.has("pb"))
+        Assert.assertNull(batch.optJSONObject(Constants.MessageKey.DATA_PLAN_CONTEXT))
+        val dataplanBatchId = BatchId(manager.mpid, null, "test-plan", 2)
+        val dataplanBatch = MessageBatch.create(sessionHistory, manager, JSONObject(), dataplanBatchId)
+        val dataplan =
+            dataplanBatch
+                .getJSONObject(Constants.MessageKey.DATA_PLAN_CONTEXT)
+                .getJSONObject(Constants.MessageKey.DATA_PLAN_KEY)
+        Assert.assertEquals("test-plan", dataplan.getString(Constants.MessageKey.DATA_PLAN_ID))
+        Assert.assertEquals(2, dataplan.getInt(Constants.MessageKey.DATA_PLAN_VERSION))
     }
 
     @Test

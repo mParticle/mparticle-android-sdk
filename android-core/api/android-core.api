@@ -2605,12 +2605,13 @@ public class com/mparticle/internal/MParticleJSInterface {
 }
 
 public class com/mparticle/internal/MessageBatch : org/json/JSONObject {
+	public static final field Companion Lcom/mparticle/internal/MessageBatch$Companion;
 	protected fun <init> ()V
 	public fun addConsentState (Lcom/mparticle/consent/ConsentState;)V
 	public fun addDataplanContext (Ljava/lang/String;Ljava/lang/Integer;)V
 	public fun addMessage (Lorg/json/JSONObject;)V
 	public fun addReportingMessage (Lorg/json/JSONObject;)V
-	public static fun create (ZLcom/mparticle/internal/ConfigManager;Lorg/json/JSONObject;Lcom/mparticle/internal/BatchId;)Lcom/mparticle/internal/MessageBatch;
+	public static final fun create (ZLcom/mparticle/internal/ConfigManager;Lorg/json/JSONObject;Lcom/mparticle/internal/BatchId;)Lcom/mparticle/internal/MessageBatch;
 	public fun getAppInfo ()Lorg/json/JSONObject;
 	public fun getDeviceInfo ()Lorg/json/JSONObject;
 	public fun getMessageLengthBytes ()J
@@ -2620,6 +2621,10 @@ public class com/mparticle/internal/MessageBatch : org/json/JSONObject {
 	public fun setDeviceInfo (Lorg/json/JSONObject;)V
 	public fun setIdentities (Lorg/json/JSONArray;)V
 	public fun setUserAttributes (Lorg/json/JSONObject;)V
+}
+
+public final class com/mparticle/internal/MessageBatch$Companion {
+	public final fun create (ZLcom/mparticle/internal/ConfigManager;Lorg/json/JSONObject;Lcom/mparticle/internal/BatchId;)Lcom/mparticle/internal/MessageBatch;
 }
 
 public class com/mparticle/internal/MessageManager : com/mparticle/internal/MessageManagerCallbacks, com/mparticle/internal/ReportingManager {

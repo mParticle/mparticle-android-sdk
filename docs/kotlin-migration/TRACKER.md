@@ -71,7 +71,7 @@ zero frozen-class diff in `apiCheck` and an empty Binary Compatibility report.
 | Done | PR  | Files                                                                                                                                           |   LOC | Tests | Risk |
 | ---- | --- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ----: | ----- | ---- |
 | [ ]  | D1  | `internal/MessageManagerCallbacks`; `internal/messages/` MPEventMessage, MPAliasMessage, BaseMPMessage, BaseMPMessageBuilder, MPCommerceMessage |   551 | 1     | L    |
-| [ ]  | D2  | `internal/InternalSession` (named in `proguard.pro`; frozen), `internal/BaseHandler`, `internal/MessageBatch`                                   |   392 | 3     | M    |
+| [ ]  | D2  | `internal/BaseHandler`, `internal/MessageBatch` (`InternalSession` stays in Java: `SdkListener.onSessionUpdated` is kept by `proguard.pro`)     |   392 | 3     | M    |
 | [ ]  | D3  | `internal/MessageHandler`                                                                                                                       |   319 | 1     | L    |
 | [ ]  | D4  | `internal/UploadHandler`                                                                                                                        |   375 | 1     | M    |
 | [ ]  | D5  | `internal/MessageManager`                                                                                                                       | 1,089 | 1     | M    |

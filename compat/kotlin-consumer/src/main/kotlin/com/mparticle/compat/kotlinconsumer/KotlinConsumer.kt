@@ -25,6 +25,7 @@ import com.mparticle.consent.ConsentState
 import com.mparticle.consent.GDPRConsent
 import com.mparticle.identity.IdentityApiRequest
 import com.mparticle.identity.IdentityApiResult
+import com.mparticle.internal.InternalSession
 import com.mparticle.internal.Logger
 import com.mparticle.internal.MPUtility
 import com.mparticle.rokt.RoktSession
@@ -132,6 +133,17 @@ class KotlinConsumer(private val context: Context) {
 
         override fun onKitStarted(kitId: Int) {
             Logger.debug("kit $kitId started")
+        }
+
+        override fun onSessionUpdated(session: InternalSession?) {
+            if (session != null && session.isActive()) {
+                val sessionId: String = session.mSessionID.uppercase()
+                val attrCount: Int = session.mSessionAttributes.length()
+                val mpids: Set<Long> = session.getMpids()
+                val duration: Long =
+                    session.getLength() + session.getBackgroundTime() + session.getForegroundTime()
+                Logger.debug("session $sessionId ($attrCount attrs, ${mpids.size} mpids) lasted $duration")
+            }
         }
     }
 }
