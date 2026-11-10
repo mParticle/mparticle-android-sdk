@@ -31,7 +31,7 @@ class IdentityApiTest {
         val identityApi = IdentityApi()
         identityApi.mMessageManager =
             object : MessageManager() {
-                override fun logAliasRequest(aliasRequest: AliasRequest) {
+                override fun logAliasRequest(aliasRequest: AliasRequest?) {
                     Assert.fail("should not logged Alias Request:\n$aliasRequest")
                 }
             }
@@ -110,7 +110,7 @@ class IdentityApiTest {
         val requestMade = AndroidUtils.Mutable(false)
         identityApi.mMessageManager =
             object : MessageManager() {
-                override fun logAliasRequest(aliasRequest: AliasRequest) {
+                override fun logAliasRequest(aliasRequest: AliasRequest?) {
                     requestMade.value = true
                 }
             }

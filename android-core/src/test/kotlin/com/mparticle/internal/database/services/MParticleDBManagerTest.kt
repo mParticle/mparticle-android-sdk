@@ -17,6 +17,7 @@ import com.mparticle.internal.DatabaseHelper
 import com.mparticle.internal.DeviceAttributes
 import com.mparticle.internal.JsonReportingMessage
 import com.mparticle.internal.Logger
+import com.mparticle.internal.MPUtility
 import com.mparticle.internal.MessageManager
 import com.mparticle.internal.MessageManagerCallbacks
 import com.mparticle.internal.UserStorage
@@ -254,10 +255,11 @@ class MParticleDBManagerTest {
         Mockito.`when`(cursor.getLong(2)).thenReturn(3000L)
         Mockito.`when`(cursor.getString(3)).thenReturn("{\"color\":\"blue\"}")
         stubQuery("sessions", cursor)
-        val stateInfo = JSONObject().put("state", 1)
-        Mockito.mockStatic(MessageManager::class.java).use { messageManager ->
-            messageManager.`when`<JSONObject> { MessageManager.getStateInfo() }.thenReturn(stateInfo)
-
+        // MessageManager.getStateInfo() is a companion function, which Mockito.mockStatic does not reach from Kotlin.
+        // The real one runs on a mocked MPUtility, with the context and preferences the constructor stores.
+        MessageManager(context, null, null, null, null, null, null)
+        Mockito.mockStatic(MPUtility::class.java, Mockito.RETURNS_MOCKS).use {
+            Mockito.`when`(MPUtility.getTotalMemory(Mockito.any())).thenReturn(424242L)
             val message = manager.getSessionForSessionEndMessage("session-1", null, linkedSetOf(0L, 5L, 9L))!!
 
             Assert.assertEquals("se", message.getString("dt"))
@@ -267,7 +269,7 @@ class MParticleDBManagerTest {
             Assert.assertEquals(4, message.getInt("en"))
             Assert.assertEquals(3000L, message.getLong("sl"))
             Assert.assertEquals(4000L, message.getLong("slx"))
-            Assert.assertSame(stateInfo, message.get("cs"))
+            Assert.assertEquals(424242L, message.getJSONObject("cs").getLong(Constants.MessageKey.STATE_INFO_TOTAL_MEMORY))
             Assert.assertEquals("[5,9]", message.getJSONArray("smpids").toString())
             Assert.assertEquals("blue", message.getJSONObject("attrs").getString("color"))
             Assert.assertEquals(36, message.getString("id").length)

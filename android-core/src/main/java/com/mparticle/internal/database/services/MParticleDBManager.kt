@@ -598,7 +598,7 @@ open class MParticleDBManager {
                 instance
                     .Internal()
                     .messageManager
-                    .messageHandler
+                    .messageHandler!!
                     .post(
                         object : Runnable {
                             override fun run() {
