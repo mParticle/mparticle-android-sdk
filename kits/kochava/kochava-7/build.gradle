@@ -24,7 +24,7 @@ plugins {
 
 sonarqube {
     properties {
-        property "sonar.projectKey", "mparticle-android-integration-kochava"
+        property "sonar.projectKey", "mparticle-android-integration-kochava-7"
         property "sonar.organization", "mparticle"
         property "sonar.host.url", "https://sonarcloud.io"
     }
@@ -40,7 +40,7 @@ android {
         buildConfig = true
     }
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 21
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -56,11 +56,20 @@ android {
     }
 }
 
+repositories {
+    exclusiveContent {
+        forRepository {
+            maven { url 'https://maven.sdk.kochava.com' }
+        }
+        filter {
+            includeGroup 'com.kochava.measurement'
+        }
+    }
+}
+
 dependencies {
-    def kochava_tracker_version = "[5.4.0,6.0.0)"
-    implementation("com.kochava.tracker:tracker:$kochava_tracker_version") // Required
-    implementation("com.kochava.tracker:events:$kochava_tracker_version") // Optional
-    implementation("com.kochava.tracker:engagement:$kochava_tracker_version") // Optional
-    implementation("com.kochava.tracker:datapointnetwork:$kochava_tracker_version") // Optional
-    implementation("com.kochava.tracker:legacyreferrer:$kochava_tracker_version") // Optional
+    def kochava_measurement_version = "[7.0.0,8.0.0)"
+    implementation("com.kochava.measurement:base:$kochava_measurement_version")
+    implementation("com.kochava.measurement:google:$kochava_measurement_version")
+    implementation("com.kochava.measurement:googletracking:$kochava_measurement_version")
 }

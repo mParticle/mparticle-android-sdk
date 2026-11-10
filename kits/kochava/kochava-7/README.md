@@ -1,40 +1,44 @@
 # Kochava Kit Integration
 
-This directory contains the [Kochava](https://www.kochava.com) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
+This directory contains the [Kochava](https://www.kochava.com) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk), built against Kochava SDK 7.x. It requires Android API level 21 or later.
 
 ## Adding the integration
 
-1. Add the kit dependency to your app's build.gradle:
+1. Add the Kochava Maven repository and the kit dependency to your app's build.gradle. Kochava SDK 7 is published to Kochava's repository, not Maven Central:
 
     ```groovy
+    repositories {
+        exclusiveContent {
+            forRepository {
+                maven { url 'https://maven.sdk.kochava.com' }
+            }
+            filter {
+                includeGroup 'com.kochava.measurement'
+            }
+        }
+    }
+
     dependencies {
-        implementation 'com.mparticle:kochava-5:6.0.0'
+        implementation 'com.mparticle:kochava-7:6.0.0'
     }
     ```
 
-2. Add the following dependencies to enable various Kochava capabilites.
-
-    > NOTE: Starting with Play Services 15 the dependency requirements have changed. The Android Advertising ID (adid) collection has moved out of play-services “base” and into “ads-identifier”. Use the appropriate option for the version of Play Services you are using as indicated below.
+2. Add the following dependencies to enable various Kochava capabilities.
 
     ```groovy
     dependencies {
         //Required: Google Play Services Ads Identifier (If publishing to the Google Play Store)
         implementation 'com.google.android.gms:play-services-ads-identifier:15.0.1'
-        //Required: If using Play Services prior to version 15.
-        //implementation 'com.google.android.gms:play-services-base:12.0.1'
 
-        //Required: Install Referrer (If publishing to the Google Play Store)
-        implementation 'com.android.installreferrer:installreferrer:1+'
+        //Required: Install Referrer 2.2 or later (If publishing to the Google Play Store)
+        implementation 'com.android.installreferrer:installreferrer:2.2'
 
         //Optional: Location Collection. Note: This feature must also be enabled server side before collection will occur.
         implementation 'com.google.android.gms:play-services-location:15.0.1'
-
-        //Optional: Instant App Status Collection
-        implementation 'com.google.android.instantapps:instantapps:1.1.0'
     }
     ```
 
-    > [Kochava SDK documentation](https://support.kochava.com/sdk-integration/sdk-kochavatracker-android/_)
+    > [Kochava SDK documentation](https://support.kochava.com/sdk-integration/android-sdk-integration/)
 
 3. Follow the mParticle Android SDK [quick-start](https://github.com/mParticle/mparticle-android-sdk), then rebuild and launch your app, and verify that you see `"Kochava detected"` in the output of `adb logcat`.
 4. Reference mParticle's integration docs below to enable the integration.

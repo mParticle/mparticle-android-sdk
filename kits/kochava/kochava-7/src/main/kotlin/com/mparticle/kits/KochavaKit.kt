@@ -3,8 +3,8 @@ package com.mparticle.kits
 import android.content.Context
 import android.content.Intent
 import android.location.Location
-import com.kochava.tracker.Tracker
-import com.kochava.tracker.log.LogLevel
+import com.kochava.measurement.base.Measurement
+import com.kochava.measurement.base.log.LogLevel
 import com.mparticle.AttributionError
 import com.mparticle.AttributionResult
 import com.mparticle.MParticle.IdentityType
@@ -33,41 +33,38 @@ class KochavaKit :
         if (java.lang.Boolean.parseBoolean(getSettings()[ENABLE_LOGGING])) {
             logLevel = LogLevel.DEBUG
         }
-        Tracker.getInstance().setLogLevel(logLevel)
+        Measurement.getInstance().setLogLevel(logLevel)
 
-        Tracker
+        Measurement
             .getInstance()
             .setAppLimitAdTracking(java.lang.Boolean.parseBoolean(getSettings()[LIMIT_ADD_TRACKING]))
         val configuration = getSettings()[APP_ID]
         if (configuration != null) {
-            Tracker.getInstance().startWithAppGuid(context.applicationContext, configuration)
+            Measurement.getInstance().startWithAppGuid(context.applicationContext, configuration)
 
             identityLink?.let {
                 for (link in it) {
-                    Tracker.getInstance().registerIdentityLink(link.key, link.value)
+                    Measurement.getInstance().registerIdentityLink(link.key, link.value)
                 }
             }
             try {
                 if (attributionEnabled) {
-                    val currentInstallAttribution = Tracker.getInstance().installAttribution
-                    if (!currentInstallAttribution.isRetrieved) {
-                        Tracker.getInstance().retrieveInstallAttribution { installAttribution ->
-                            try {
-                                setAttributionResultParameter(
-                                    ATTRIBUTION_PARAMETERS,
-                                    installAttribution.toJson(),
-                                )
-                            } catch (e: JSONException) {
-                                val error =
-                                    AttributionError()
-                                        .setMessage("unable to parse attribution JSON:\n $installAttribution")
-                                kitManager.onError(error)
-                            }
+                    Measurement.getInstance().retrieveInstallAttribution { installAttribution ->
+                        try {
+                            setAttributionResultParameter(
+                                ATTRIBUTION_PARAMETERS,
+                                installAttribution.toJson(),
+                            )
+                        } catch (e: JSONException) {
+                            val error =
+                                AttributionError()
+                                    .setMessage("unable to parse attribution JSON:\n $installAttribution")
+                            kitManager.onError(error)
                         }
                     }
-                    Tracker
+                    Measurement
                         .getInstance()
-                        .processDeeplink(kitManager.launchUri.toString()) { deeplink ->
+                        .processDeeplink(kitManager.launchUri.toString(), true) { deeplink ->
                             setAttributionResultParameter(
                                 ENHANCED_DEEPLINK_PARAMETERS,
                                 deeplink.toJson(),
@@ -140,7 +137,7 @@ class KochavaKit :
         val possibleIdentities = listOf(USER_IDENTIFICATION_TYPE, EMAIL_IDENTIFICATION_TYPE)
         possibleIdentities.forEach {
             if (it == identityType.name) {
-                Tracker.getInstance().registerIdentityLink(it, id)
+                Measurement.getInstance().registerIdentityLink(it, id)
             }
         }
     }
@@ -150,7 +147,7 @@ class KochavaKit :
     override fun logout(): List<ReportingMessage> = emptyList()
 
     override fun setOptOut(optOutStatus: Boolean): List<ReportingMessage> {
-        Tracker.getInstance().setAppLimitAdTracking(optOutStatus)
+        Measurement.getInstance().setAppLimitAdTracking(optOutStatus)
 
         return listOf(
             ReportingMessage(
