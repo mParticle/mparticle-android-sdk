@@ -42,7 +42,7 @@ class BaseMPMessageTest {
                 .length(event2.length)
                 .attributes(MPUtility.enforceAttributeConstraints(event2.customAttributeStrings))
                 .build(session, null, 1)
-        Assert.assertEquals(message2.attributes.getString("EventLength"), "321")
+        Assert.assertEquals(message2.attributes!!.getString("EventLength"), "321")
         val event3 =
             MPEvent.Builder("test name", MParticle.EventType.Navigation).duration(123.0).build()
         val message3 =
@@ -53,7 +53,7 @@ class BaseMPMessageTest {
                 .length(event3.length)
                 .attributes(MPUtility.enforceAttributeConstraints(event.customAttributeStrings))
                 .build(session, null, 1)
-        Assert.assertEquals(message3.attributes.getString("EventLength"), "123")
+        Assert.assertEquals(message3.attributes!!.getString("EventLength"), "123")
     }
 
     @Test
