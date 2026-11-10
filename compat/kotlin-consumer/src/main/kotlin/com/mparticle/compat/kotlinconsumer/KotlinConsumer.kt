@@ -28,6 +28,7 @@ import com.mparticle.identity.IdentityApiResult
 import com.mparticle.internal.InternalSession
 import com.mparticle.internal.Logger
 import com.mparticle.internal.MPUtility
+import com.mparticle.internal.PushRegistrationHelper
 import com.mparticle.rokt.RoktSession
 
 class KotlinConsumer(private val context: Context) {
@@ -112,6 +113,12 @@ class KotlinConsumer(private val context: Context) {
         if (!MPUtility.isEmpty(session.sessionToken)) {
             Logger.debug("rokt session ${session.sessionId} expires at ${session.expiresAt}")
         }
+    }
+
+    fun pushRegistration() {
+        val registration: PushRegistrationHelper.PushRegistration? =
+            PushRegistrationHelper.getLatestPushRegistration(context)
+        Logger.debug("push registration ${registration?.instanceId} for ${registration?.senderId}")
     }
 
     // Companion references on kept Kotlin classes are exercised separately.
