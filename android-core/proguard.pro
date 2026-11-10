@@ -144,6 +144,7 @@
 -keep class com.mparticle.UserAttributeListener { *; }
 -keep class com.mparticle.internal.PushRegistrationHelper { *; }
 -keep class com.mparticle.internal.PushRegistrationHelper$PushRegistration { *; }
+-keep class com.mparticle.internal.PushRegistrationHelper$Companion { *; }
 -keep class com.mparticle.internal.MParticleJSInterface { *; }
 -keep class com.mparticle.internal.Logger { *; }
 -keep class com.mparticle.internal.Logger$* { *; }
