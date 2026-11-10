@@ -70,7 +70,9 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
     private static boolean sdkFetchedSuccessfully = false;
     private static String bridgeToken = new RandomUtils().getAlphaString(5);
     private static String bridgeVersion = "2";
-    private static final int WEBVIEW_TIMEOUT_SECONDS = 30;
+    // Extra cover after the explicit WebView/JS SDK readiness wait in runJavascriptTest.
+    private static final int WEBVIEW_TIMEOUT_SECONDS = 60;
+    private static final String READINESS_BRIDGE_SUFFIX = "_ready";
 
     private static final String jsStartupMParticle = "window.mParticle = {\n" +
             "            config: {\n" +
@@ -97,7 +99,11 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                     " console.log(\"testing started\")\n " +
                     "       window.mParticle.ready(function () {\n" +
                     "       console.log(\"mparticle started in JS land\");\n" +
-                    "%s\n" +
+                    "       if (!window.%1$s || typeof window.%1$s.onReady !== 'function') {\n" +
+                    "           throw new Error('Missing WebView readiness bridge: %1$s.onReady');\n" +
+                    "       }\n" +
+                    "       window.%1$s.onReady();\n" +
+                    "%2$s\n" +
                     "      })\n";
 
     private static final String jsSetMpidFunction = "function getCookieDomain() {\n" +
@@ -581,7 +587,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
         assertTrue(called.value);
     }
 
-    private String getJavascriptWrappedinHtml(String testJavascript) {
+    private String getJavascriptWrappedinHtml(String readinessBridgeName, String testJavascript) {
         StringBuilder javascriptBuilder = new StringBuilder()
                 .append(jsSetMpidFunction)
                 .append("\n")
@@ -591,11 +597,19 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                 .append("\n")
                 .append(jsSdk)
                 .append("\n")
-                .append(String.format(jsTestWrapper, testJavascript));
+                .append(String.format(
+                        jsTestWrapper,
+                        readinessBridgeName,
+                        testJavascript
+                ));
         return String.format(htmlWrapper, javascriptBuilder.toString());
     }
 
-    private void runJavascriptTest(final String testJavascript, final MParticleJSInterface jsInterface) {
+    private void runJavascriptTest(final String testJavascript, final MParticleJSInterface jsInterface) throws InterruptedException {
+        final MutableBoolean sdkReady = new MutableBoolean(false);
+        final CountDownLatch sdkReadyLatch = new MPLatch(1);
+        final String bridgeName = MParticleJSInterface.getBridgeName(bridgeToken);
+        final String readinessBridgeName = bridgeName + READINESS_BRIDGE_SUFFIX;
         new Handler(Looper.getMainLooper()).post(
                 () -> {
                     CookieManager cookieManager = CookieManager.getInstance();
@@ -619,9 +633,16 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                                 cookieManager.setAcceptThirdPartyCookies(wv, true);
                                 wv.getSettings().setDomStorageEnabled(true);
                                 wv.getSettings().setJavaScriptEnabled(true);
-                                String bridgeName = MParticleJSInterface.getBridgeName(bridgeToken);
                                 wv.removeJavascriptInterface(bridgeName);
                                 wv.addJavascriptInterface(jsInterface, bridgeName);
+                                wv.removeJavascriptInterface(readinessBridgeName);
+                                wv.addJavascriptInterface(new Object() {
+                                    @JavascriptInterface
+                                    public void onReady() {
+                                        sdkReady.value = true;
+                                        sdkReadyLatch.countDown();
+                                    }
+                                }, readinessBridgeName);
                                 wv.setWebChromeClient(new WebChromeClient() {
                                     public void onConsoleMessage(String message, int lineNumber, String sourceID) {
                                         Logger.warning("MParticle JS sdk", message + " -- From line "
@@ -629,7 +650,7 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                                     }
                                 });
 
-                                String jsString = getJavascriptWrappedinHtml(testJavascript);
+                                String jsString = getJavascriptWrappedinHtml(readinessBridgeName, testJavascript);
                                 Logger.error(jsString);
                                 wv.loadDataWithBaseURL("http://localhost/",
                                         jsString,
@@ -638,6 +659,8 @@ public class MParticleJSInterfaceITest extends BaseCleanStartedEachTest {
                             }
                     );
                 });
+        sdkReadyLatch.await(WEBVIEW_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        assertTrue("Timed out waiting for WebView and mParticle JS SDK readiness", sdkReady.value);
     }
 
     private String setMpidJavascript(long mpid) {
