@@ -316,13 +316,13 @@ class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
             ) {
                 @Throws(IOException::class)
                 override fun makeUrlRequest(
-                    endpoint: Endpoint,
-                    connection: MPConnection,
-                    payload: String,
+                    endpoint: Endpoint?,
+                    connection: MPConnection?,
+                    payload: String?,
                     identity: Boolean,
-                ): MPConnection {
+                ): MPConnection? {
                     try {
-                        identityClient?.makeUrlRequest(connection, payload, identity)
+                        identityClient?.makeUrlRequest(connection!!, payload, identity)
                     } catch (e: JSONException) {
                         Logger.error(e)
                         Assert.fail(e.message)
