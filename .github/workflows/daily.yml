@@ -204,9 +204,6 @@ jobs:
           cache: "gradle"
       - name: "Run Unit Tests"
         run: ./gradlew test
-      - name: "Print Android Unit Tests Report"
-        uses: asadmansr/android-test-report-action@384cd31388782f4106dc4a1b37eea2ff02e0aad7 #v1.2.0
-        if: always()
       - name: "Archive Unit Test Results"
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
