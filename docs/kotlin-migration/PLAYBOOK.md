@@ -78,34 +78,59 @@ it, so a companion object on a kept class needs its own keep rule or Kotlin cons
 Use the IDE's Java-to-Kotlin conversion, then apply this table before anything else. Convert; do not
 refactor. Renames, coroutine adoption and null-safety improvements are separate follow-ups.
 
-| Java construct                                                      | Kotlin form                                                                                                       | Why                                                                                              |
-| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Non-final class or public/protected method                          | `open class`, `open fun`, always, for anything in the binary surface or kit ABI                                   | Kotlin is final by default; consumers and their tests depend on non-finality                     |
-| `public static` method                                              | `@JvmStatic` in a `companion object` or on an `object`                                                            | Otherwise Java sees `X.Companion.foo()`                                                          |
-| `public static final` primitive or `String`                         | `const val`                                                                                                       | Stays a field                                                                                    |
-| Other `static final` fields; public instance fields                 | `@JvmField`                                                                                                       | Otherwise the field becomes accessors and disappears from the surface                            |
-| Companion object on a class `proguard.pro` keeps                    | A rules-only pull request adding `-keep class com.mparticle.X$Companion` lands first                              | R8 renames `X$Companion` and does not rewrite the metadata in the shipped AAR                    |
-| Top-level functions or properties                                   | Not allowed in `src/main`                                                                                         | R8 strips `META-INF/*.kotlin_module`; Java sees an unexpected `FooKt` class                      |
-| Getter/setter pairs on kit-visible types                            | Match the syntax existing Kotlin callers in this repository use; state the choice in the pull request             | Property versus function is source-breaking for the other style                                  |
-| Unannotated parameter                                               | `T?`, always                                                                                                      | A non-null parameter emits `checkNotNullParameter`; Java callers and `Mockito.any()` pass `null` |
-| Unannotated return type                                             | `T?` unless the body provably never returns `null`; for kit-visible types, audit callers in this repository first | `T?` is honest but breaks Kotlin callers that dereference a former platform type; record it      |
-| `@NonNull` / `@Nullable`                                            | Mirror exactly                                                                                                    | These annotations are the contract                                                               |
-| `throws`                                                            | `@Throws(X::class)`                                                                                               | Removing a checked exception breaks Java callers that catch it                                   |
-| `synchronized` / `volatile`                                         | `@Synchronized` / `@Volatile`                                                                                     | Silently dropped otherwise                                                                       |
-| `protected` member used from the same package                       | `internal`, or public with `@RestrictTo`                                                                          | Kotlin `protected` is not package-visible                                                        |
-| Package-private class                                               | `internal class`                                                                                                  | JVM-public but excluded from the API dump; R8 renames it in core                                 |
-| Static nested class                                                 | Nested class (not `inner`)                                                                                        | Same JVM name                                                                                    |
-| Anonymous class                                                     | `object : Type { }`                                                                                               | Synthetic names change; nothing references them by name                                          |
-| Overloads                                                           | Keep every overload explicitly; no default arguments on anything in the binary surface or kit ABI                 | Defaults add `DefaultConstructorMarker` overloads                                                |
-| Generic signatures                                                  | `@JvmSuppressWildcards` / `@JvmWildcard` until the dump matches                                                   | Kotlin inserts `? extends` where Java had none                                                   |
-| Value or model classes                                              | Plain `class`, never `data class`                                                                                 | `data class` changes `toString()` and adds `componentN`/`copy`                                   |
-| Interfaces                                                          | No default bodies                                                                                                 | The Java interfaces have none; bodies create `DefaultImpls` under the current compiler settings  |
-| Reflection strings, constructor arity, `@JavascriptInterface` names | Copy verbatim                                                                                                     | No compiler checks them                                                                          |
-| Enum                                                                | `enum class` with the same constants                                                                              | Kotlin adds `getEntries()`, a harmless addition                                                  |
+| Java construct                                                      | Kotlin form                                                                                                       | Why                                                                                                                 |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Non-final class or public/protected method                          | `open class`, `open fun`, always, for anything in the binary surface or kit ABI                                   | Kotlin is final by default; consumers and their tests depend on non-finality                                        |
+| `public static` method                                              | `@JvmStatic` in a `companion object` or on an `object`                                                            | Otherwise Java sees `X.Companion.foo()`                                                                             |
+| `public static final` primitive or `String`                         | `const val`                                                                                                       | Stays a field                                                                                                       |
+| Other `static final` fields; public instance fields                 | `@JvmField`                                                                                                       | Otherwise the field becomes accessors and disappears from the surface                                               |
+| Companion object on a class `proguard.pro` keeps                    | A rules-only pull request adding `-keep class com.mparticle.X$Companion` lands first (classes not kept need none) | R8 renames `X$Companion` and does not rewrite the metadata in the shipped AAR                                       |
+| Top-level functions or properties                                   | Not allowed in `src/main`                                                                                         | R8 strips `META-INF/*.kotlin_module`; Java sees an unexpected `FooKt` class                                         |
+| Getter/setter pairs on kit-visible types                            | Match the syntax existing Kotlin callers in this repository use; state the choice in the pull request             | Property versus function is source-breaking for the other style                                                     |
+| Unannotated parameter                                               | `T?`, always                                                                                                      | A non-null parameter emits `checkNotNullParameter`; Java callers and `Mockito.any()` pass `null`                    |
+| Unannotated return type                                             | `T?` unless the body provably never returns `null`; for kit-visible types, audit callers in this repository first | `T?` is honest but breaks Kotlin callers that dereference a former platform type; record it                         |
+| `@NonNull` / `@Nullable`                                            | Mirror exactly                                                                                                    | These annotations are the contract                                                                                  |
+| `throws`                                                            | `@Throws(X::class)`                                                                                               | Removing a checked exception breaks Java callers that catch it                                                      |
+| `synchronized` / `volatile`                                         | `@Synchronized` / `@Volatile`                                                                                     | Silently dropped otherwise                                                                                          |
+| `protected` member used from the same package                       | Keep `protected open`; same-package tests call it through a Java helper (see API-dump traps)                      | Kotlin `protected` is not package-visible, but the JVM keeps it; `internal` or `@RestrictTo` drops it from the dump |
+| Package-private class                                               | `internal class`                                                                                                  | JVM-public but excluded from the API dump; R8 renames it in core                                                    |
+| Static nested class                                                 | Nested class (not `inner`)                                                                                        | Same JVM name                                                                                                       |
+| Anonymous class                                                     | `object : Type { }`                                                                                               | Synthetic names change; nothing references them by name                                                             |
+| Overloads                                                           | Keep every overload explicitly; no default arguments on anything in the binary surface or kit ABI                 | Defaults add `DefaultConstructorMarker` overloads                                                                   |
+| Generic signatures                                                  | `@JvmSuppressWildcards` / `@JvmWildcard` until the dump matches                                                   | Kotlin inserts `? extends` where Java had none                                                                      |
+| Value or model classes                                              | Plain `class`, never `data class`                                                                                 | `data class` changes `toString()` and adds `componentN`/`copy`                                                      |
+| Interfaces                                                          | No default bodies                                                                                                 | The Java interfaces have none; bodies create `DefaultImpls` under the current compiler settings                     |
+| Reflection strings, constructor arity, `@JavascriptInterface` names | Copy verbatim                                                                                                     | No compiler checks them                                                                                             |
+| Enum                                                                | `enum class` with the same constants                                                                              | Kotlin adds `getEntries()`, a harmless addition                                                                     |
 
 Convert in place: `Foo.java` becomes `Foo.kt` in the same directory. Both `src/main/java` and
 `src/main/kotlin` already compile Kotlin in every module, and a directory move on top of a conversion
 hides signature changes in review.
+
+### API-dump traps
+
+Three mistakes recur in conversions of classes in frozen packages such as `com.mparticle.networking`.
+`scripts/check_api_dump.py` fails on any change there, so know which kind you are looking at.
+
+1. **Visibility must match the Java original.** A Java `protected` or `public` member stays
+   `protected open` or `public` in Kotlin. `@RestrictTo` and `internal` remove it from the dump and
+   break every subclass that overrides it, which is a partner-breaking change. Use `@RestrictTo`
+   only on a member that was package-private in Java and had to be widened for a Java test or
+   subclass in the same package (for example `NetworkConnection.isPostGingerBread`).
+2. **Same-package Kotlin tests cannot see `protected` members.** Do not widen the production member.
+   Add a small Java helper in the same package under `src/androidTest/java` or `src/test/java`
+   (Java treats `protected` as package-visible), plus Kotlin extension functions that delegate to
+   it. `BaseClientAccess` and `BaseClientAccessExt.kt` in `android-core` are the example.
+3. **Some dump additions are expected, and a removal never is.** Each `companion object` adds a
+   `Companion` field and a `$Companion` class, and each `enum` adds `getEntries()`. These fail the
+   frozen-API check even though nothing a consumer uses has changed. List them in the description and
+   ask for the `api-change-approved` label after API review. Any removed line or narrowed
+   visibility in `git diff origin/main -- android-core/api/android-core.api` is a defect: fix it,
+   do not ask for the label.
+
+A new `$Companion` needs a keep rule only when `proguard.pro` keeps the outer class. Search both
+`proguard.pro` and `consumer-proguard.pro` for it; a class that is not kept is renamed together with
+its companion, so there is nothing to keep.
 
 ## Pull request checklist
 
@@ -113,6 +138,9 @@ Run locally before requesting review. CI runs the same set.
 
 - [ ] `./gradlew apiCheck` passes. If the dump changed, `scripts/check_api_dump.py --base origin/main`
       reports no frozen class, and the reviewable diff is pasted into the description with the reason.
+- [ ] `git diff origin/main -- android-core/api/android-core.api` has no removed line and no narrowed
+      visibility. Added lines are limited to `Companion` and `getEntries`, and are listed in the
+      description (see API-dump traps).
 - [ ] The **Binary Compatibility** job (`scripts/api_compat_report.py`) reports no incompatible change
       against the last published release.
 - [ ] `./gradlew test ktlintCheck lint` pass, and the unit-test report shows the same test count as

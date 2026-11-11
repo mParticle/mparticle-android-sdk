@@ -39,7 +39,7 @@ public class MParticleBaseClientImplTest {
             }
 
             @Override
-            boolean isPostGingerBread() {
+            protected boolean isPostGingerBread() {
                 return true;
             }
 

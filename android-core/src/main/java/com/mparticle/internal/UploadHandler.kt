@@ -15,7 +15,7 @@ import com.mparticle.internal.database.UploadSettings
 import com.mparticle.internal.database.services.MParticleDBManager
 import com.mparticle.internal.listeners.InternalListenerManager
 import com.mparticle.internal.messages.MPAliasMessage
-import com.mparticle.networking.NetworkConnection.HTTP_TOO_MANY_REQUESTS
+import com.mparticle.networking.NetworkConnection.Companion.HTTP_TOO_MANY_REQUESTS
 import org.json.JSONException
 import java.io.IOException
 import java.net.MalformedURLException

@@ -3529,6 +3529,7 @@ public abstract interface class com/mparticle/networking/MParticleBaseClient {
 }
 
 public class com/mparticle/networking/MParticleBaseClientImpl : com/mparticle/networking/MParticleBaseClient {
+	public static final field Companion Lcom/mparticle/networking/MParticleBaseClientImpl$Companion;
 	protected static final field REQUEST_ID Ljava/lang/String;
 	public fun <init> (Landroid/content/Context;Lcom/mparticle/internal/ConfigManager;)V
 	protected fun generateDefaultURL (ZLandroid/net/Uri;Ljava/lang/String;Ljava/lang/String;)Lcom/mparticle/networking/MPUrl;
@@ -3548,22 +3549,34 @@ public class com/mparticle/networking/MParticleBaseClientImpl : com/mparticle/ne
 	public fun setRequestHandler (Lcom/mparticle/networking/BaseNetworkConnection;)V
 }
 
+public final class com/mparticle/networking/MParticleBaseClientImpl$Companion {
+}
+
 public final class com/mparticle/networking/MParticleBaseClientImpl$Endpoint : java/lang/Enum {
 	public static final field ALIAS Lcom/mparticle/networking/MParticleBaseClientImpl$Endpoint;
 	public static final field AUDIENCE Lcom/mparticle/networking/MParticleBaseClientImpl$Endpoint;
 	public static final field CONFIG Lcom/mparticle/networking/MParticleBaseClientImpl$Endpoint;
+	public static final field Companion Lcom/mparticle/networking/MParticleBaseClientImpl$Endpoint$Companion;
 	public static final field EVENTS Lcom/mparticle/networking/MParticleBaseClientImpl$Endpoint;
 	public static final field IDENTITY Lcom/mparticle/networking/MParticleBaseClientImpl$Endpoint;
 	public field value I
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/mparticle/networking/MParticleBaseClientImpl$Endpoint;
 	public static fun values ()[Lcom/mparticle/networking/MParticleBaseClientImpl$Endpoint;
 }
 
+public final class com/mparticle/networking/MParticleBaseClientImpl$Endpoint$Companion {
+}
+
 public class com/mparticle/networking/NetworkConnection : com/mparticle/networking/BaseNetworkConnection {
+	public static final field Companion Lcom/mparticle/networking/NetworkConnection$Companion;
 	public static final field HTTP_TOO_MANY_REQUESTS I
 	protected fun getOutputStream (Lcom/mparticle/networking/MPConnection;)Ljava/io/OutputStream;
 	protected fun getSocketFactory ()Ljavax/net/ssl/SSLSocketFactory;
 	public fun makeUrlRequest (Lcom/mparticle/networking/MParticleBaseClientImpl$Endpoint;Lcom/mparticle/networking/MPConnection;Ljava/lang/String;Z)Lcom/mparticle/networking/MPConnection;
+}
+
+public final class com/mparticle/networking/NetworkConnection$Companion {
 }
 
 public class com/mparticle/networking/NetworkOptions {
