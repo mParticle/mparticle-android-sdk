@@ -144,7 +144,7 @@ internal object RoktKitRequestHelper {
 
         val objectAttributes = mutableMapOf<String, Any>()
         for ((key, value) in finalAttributes) {
-            if (key != ROKT_ATTRIBUTE_SANDBOX_MODE) {
+            if (key != ROKT_ATTRIBUTE_SANDBOX_MODE && !isRoktOnlyAttribute(key)) {
                 objectAttributes[key] = value
             }
         }
