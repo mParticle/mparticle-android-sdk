@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Kits
+
+#### Rokt
+
+##### Fixed
+
+- Keep `paypalpayerid` off the user profile and the logged `selectPlacements` and `selectShoppableAds` events; supply `paypalpayerid` on each placement call where Rokt needs it
+
 ## [6.1.10] - 2026-11-06
 
 ### Core

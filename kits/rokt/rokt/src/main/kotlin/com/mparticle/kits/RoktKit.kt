@@ -44,6 +44,13 @@ import com.rokt.roktsdk.RoktSession as NativeRoktSession
 
 const val ROKT_ATTRIBUTE_SANDBOX_MODE: String = "sandbox"
 
+// Sent to Rokt, but skipped in new user-profile writes and in the kit's logged selectPlacements
+// and selectShoppableAds events (does not remove values stored by earlier versions or renamed by
+// placement attribute mappings).
+internal const val ROKT_ATTRIBUTE_PAYPAL_PAYER_ID: String = "paypalpayerid"
+
+internal fun isRoktOnlyAttribute(key: String): Boolean = key.equals(ROKT_ATTRIBUTE_PAYPAL_PAYER_ID, ignoreCase = true)
+
 /**
  * MParticle embedded implementation of the Rokt Library.
  *
@@ -499,7 +506,7 @@ class RoktKit :
 
     private fun logRoktEvent(eventName: String, attributes: Map<String, String>) {
         val event = MPEvent.Builder(eventName, MParticle.EventType.Other)
-            .customAttributes(attributes)
+            .customAttributes(attributes.filterKeys { !isRoktOnlyAttribute(it) })
             .build()
         // Kit-internal telemetry (forwarding a Rokt engagement as an mParticle event) — not a
         // partner LOG_EVENT call, so suppress the usage diagnostic.

@@ -90,6 +90,28 @@ class RoktKitRequestHelperTest {
     }
 
     @Test
+    fun selectPlacements_keepsPaypalPayerIdOffTheUserAndSendsItToTheKit() {
+        val saved = slot<Map<String, Any>>()
+        every { user.setUserAttributes(capture(saved)) } returns true
+        val sent = slot<Map<String, String>>()
+        every {
+            roktListener.selectPlacements(any(), capture(sent), any(), any(), any(), any(), any())
+        } returns Unit
+
+        selectPlacements(
+            mapOf(
+                "firstname" to "Jane",
+                "paypalpayerid" to "PAYERID123",
+                "PayPalPayerID" to "PAYERID456",
+            ),
+        )
+
+        assertEquals(mapOf<String, Any>("firstname" to "Jane"), saved.captured)
+        assertEquals("PAYERID123", sent.captured["paypalpayerid"])
+        assertEquals("PAYERID456", sent.captured["PayPalPayerID"])
+    }
+
+    @Test
     fun selectPlacements_whenEmailDiffers_requestsPlacementWithoutWaitingForIdentify() {
         userIdentities[IdentityType.Email] = "old@example.com"
 

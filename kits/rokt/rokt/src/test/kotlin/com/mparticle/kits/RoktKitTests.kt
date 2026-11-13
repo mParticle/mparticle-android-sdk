@@ -1487,6 +1487,45 @@ class RoktKitTests {
     }
 
     @Test
+    fun test_prepareFinalAttributes_sends_paypalpayerid_and_leaves_it_out_of_the_logged_event() {
+        val mParticleMock = MParticle.getInstance()!!
+        val method: Method = RoktKit::class.java.getDeclaredMethod(
+            "prepareFinalAttributes",
+            FilteredMParticleUser::class.java,
+            Map::class.java,
+        )
+        method.isAccessible = true
+
+        val mockFilterUser = mock(FilteredMParticleUser::class.java)
+        Mockito.`when`(mockFilterUser.userIdentities).thenReturn(HashMap())
+        Mockito.`when`(mockFilterUser.id).thenReturn(9876L)
+        Mockito.`when`(mockFilterUser.userAttributes).thenReturn(HashMap<String, Any?>())
+
+        roktKit.configuration = MockKitConfiguration.createKitConfiguration(JSONObject().put("hs", JSONObject()))
+        val attributes: Map<String, String> = mapOf(
+            "attr1" to "val1",
+            "paypalpayerid" to "PAYERID123",
+            "PayPalPayerID" to "PAYERID456",
+        )
+
+        @Suppress("UNCHECKED_CAST")
+        val finalAttributes = method.invoke(roktKit, mockFilterUser, attributes) as Map<String, String>
+
+        assertEquals("PAYERID123", finalAttributes["paypalpayerid"])
+        assertEquals("PAYERID456", finalAttributes["PayPalPayerID"])
+
+        val eventCaptor = ArgumentCaptor.forClass(MPEvent::class.java)
+        Mockito.verify(mParticleMock).logEvent(eventCaptor.capture())
+        assertEquals(
+            mapOf(
+                "attr1" to "val1",
+                "mpid" to "9876",
+            ),
+            eventCaptor.value.customAttributes,
+        )
+    }
+
+    @Test
     fun testRegisterPaymentExtensionPassesStripeKeyFromKitConfiguration() {
         val paymentExtension = mock(PaymentExtension::class.java)
         var registrationConfig: Map<*, *>? = null
