@@ -96,6 +96,12 @@
     "example_kotlin_project": ":kits:android-kochava:kochava-5:example-kotlin"
   },
   {
+    "name": "kochava-7",
+    "local_path": "kits/kochava/kochava-7",
+    "kit_project": ":kits:android-kochava:kochava-7",
+    "example_kotlin_project": ":kits:android-kochava:kochava-7:example-kotlin"
+  },
+  {
     "name": "localytics-6",
     "local_path": "kits/localytics/localytics-6",
     "kit_project": ":kits:android-localytics:localytics-6",

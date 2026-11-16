@@ -25,6 +25,7 @@ include (
         //  ':kits:ga4:ga4-23',  // Kotlin 2.2.x -- built standalone (see ONBOARDING.md)
         ':kits:iterable:iterable-3',
         ':kits:kochava:kochava-5',
+        ':kits:kochava:kochava-7',
         ':kits:localytics:localytics-6',
         ':kits:leanplum:leanplum-7',
         //Neura hosts kit

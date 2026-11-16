@@ -17,6 +17,7 @@ include ':kits:adjust:adjust-5:example-kotlin',
         ':kits:comscore:comscore-6:example-kotlin',
         ':kits:iterable:iterable-3:example-kotlin',
         ':kits:kochava:kochava-5:example-kotlin',
+        ':kits:kochava:kochava-7:example-kotlin',
         ':kits:localytics:localytics-6:example-kotlin',
         ':kits:leanplum:leanplum-7:example-kotlin',
         ':kits:onetrust:onetrust:example-kotlin',
@@ -41,6 +42,7 @@ project(':kits:clevertap:clevertap-7:example-kotlin').projectDir = file('kits/cl
 project(':kits:comscore:comscore-6:example-kotlin').projectDir = file('kits/comscore/comscore-6/example/example-kotlin')
 project(':kits:iterable:iterable-3:example-kotlin').projectDir = file('kits/iterable/iterable-3/example/example-kotlin')
 project(':kits:kochava:kochava-5:example-kotlin').projectDir = file('kits/kochava/kochava-5/example/example-kotlin')
+project(':kits:kochava:kochava-7:example-kotlin').projectDir = file('kits/kochava/kochava-7/example/example-kotlin')
 project(':kits:localytics:localytics-6:example-kotlin').projectDir = file('kits/localytics/localytics-6/example/example-kotlin')
 project(':kits:leanplum:leanplum-7:example-kotlin').projectDir = file('kits/leanplum/leanplum-7/example/example-kotlin')
 project(':kits:onetrust:onetrust:example-kotlin').projectDir = file('kits/onetrust/onetrust/example/example-kotlin')
