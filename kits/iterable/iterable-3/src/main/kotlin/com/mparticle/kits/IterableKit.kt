@@ -3,6 +3,7 @@ package com.mparticle.kits
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import com.google.firebase.messaging.RemoteMessage
@@ -32,6 +33,11 @@ class IterableKit :
     private val previousLinks: MutableSet<String> = HashSet()
     private var mpidEnabled = false
 
+    @Volatile
+    private var optOutApplied = false
+
+    internal var iterableSession: IterableSession = IterableApiSession
+
     override fun onKitCreate(
         settings: Map<String, String>,
         context: Context,
@@ -48,12 +54,47 @@ class IterableKit :
             IterableApi.initialize(context, it, configBuilder.build())
         }
         initIntegrationAttributes()
+        if (takeOptOutMark(context)) {
+            currentUser?.let { updateIdentity(it) }
+        }
         return emptyList()
     }
 
     override fun getName(): String = NAME
 
-    override fun setOptOut(optedOut: Boolean): List<ReportingMessage> = emptyList()
+    override fun setOptOut(optedOut: Boolean): List<ReportingMessage> {
+        if (!optedOut || configuration?.shouldHonorOptOut() == false) {
+            return emptyList()
+        }
+        optOutApplied = true
+        iterableSession.disablePush()
+        if (prefersUserId) {
+            iterableSession.setUserId(null)
+        } else {
+            iterableSession.setEmail(null)
+        }
+        optOutPreferences(context)?.edit()?.putBoolean(LOGGED_OUT_BY_KIT, true)?.apply()
+        return listOf(
+            ReportingMessage(
+                this,
+                ReportingMessage.MessageType.OPT_OUT,
+                System.currentTimeMillis(),
+                null,
+            ).setOptOut(true),
+        )
+    }
+
+    internal fun takeOptOutMark(context: Context?): Boolean {
+        val preferences = optOutPreferences(context) ?: return false
+        if (!preferences.getBoolean(LOGGED_OUT_BY_KIT, false)) {
+            return false
+        }
+        preferences.edit().remove(LOGGED_OUT_BY_KIT).apply()
+        return true
+    }
+
+    private fun optOutPreferences(context: Context?): SharedPreferences? =
+        context?.getSharedPreferences(OPT_OUT_PREFERENCES, Context.MODE_PRIVATE)
 
     private fun initIntegrationAttributes() {
         val integrationAttributes = HashMap<String, String>()
@@ -168,12 +209,15 @@ class IterableKit :
 
     private fun String?.getPlaceholderEmail(): String? = this?.let { "$it@placeholder.email" }
 
-    private fun handleOnSuccess(
+    internal fun handleOnSuccess(
         userId: String?,
         mParticleUser: MParticleUser,
     ) {
+        if (optOutApplied) {
+            return
+        }
         if (prefersUserId) {
-            IterableApi.getInstance().setUserId(userId)
+            iterableSession.setUserId(userId)
         } else {
             val userIdentities = mParticleUser.userIdentities
             val mpEmail = userIdentities[IdentityType.Email]
@@ -188,7 +232,7 @@ class IterableKit :
                     null
                 }
 
-            IterableApi.getInstance().setEmail(email)
+            iterableSession.setEmail(email)
         }
     }
 
@@ -248,6 +292,8 @@ class IterableKit :
         private const val NAME = "Iterable"
         private const val ITERABLE_KIT_ERROR_TAG = "IterableKit"
         private const val ITERABLE_KIT_ERROR_MESSAGE = "Error while getting the placeholder email"
+        internal const val OPT_OUT_PREFERENCES = "mp::kit::iterable::optout"
+        internal const val LOGGED_OUT_BY_KIT = "loggedOutByKit"
 
         /**
          * Set a custom config to be used when initializing Iterable SDK
@@ -256,5 +302,27 @@ class IterableKit :
         fun setCustomConfig(config: IterableConfig?) {
             customConfig = config
         }
+    }
+}
+
+internal interface IterableSession {
+    fun disablePush()
+
+    fun setEmail(email: String?)
+
+    fun setUserId(userId: String?)
+}
+
+private object IterableApiSession : IterableSession {
+    override fun disablePush() {
+        IterableApi.getInstance().disablePush()
+    }
+
+    override fun setEmail(email: String?) {
+        IterableApi.getInstance().setEmail(email)
+    }
+
+    override fun setUserId(userId: String?) {
+        IterableApi.getInstance().setUserId(userId)
     }
 }

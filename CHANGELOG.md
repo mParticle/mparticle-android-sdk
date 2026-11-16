@@ -4,6 +4,12 @@
 
 ### Kits
 
+#### Iterable
+
+##### Fixed
+
+- Disable Iterable push and log the user out of the Iterable SDK when the user opts out; identify the user again when the kit restarts after that opt-out
+
 #### Rokt
 
 ##### Fixed
