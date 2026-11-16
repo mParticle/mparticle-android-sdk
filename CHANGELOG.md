@@ -10,6 +10,35 @@
 
 - Keep `paypalpayerid` off the user profile and the logged `selectPlacements` and `selectShoppableAds` events; supply `paypalpayerid` on each placement call where Rokt needs it
 
+## [6.1.11] - 2026-11-16
+
+### Core
+
+#### Changed
+
+- Convert MParticleApiClientImpl to Kotlin ([#1006](https://github.com/mParticle/mparticle-android-sdk/pull/1006))
+- Convert NetworkConnection and MParticleBaseClientImpl to Kotlin ([#1005](https://github.com/mParticle/mparticle-android-sdk/pull/1005))
+- Convert MessageManager to Kotlin ([#1002](https://github.com/mParticle/mparticle-android-sdk/pull/1002))
+- Convert UploadHandler to Kotlin ([#1001](https://github.com/mParticle/mparticle-android-sdk/pull/1001))
+- Convert MessageHandler to Kotlin ([#1000](https://github.com/mParticle/mparticle-android-sdk/pull/1000))
+- Convert BaseHandler and MessageBatch to Kotlin ([#996](https://github.com/mParticle/mparticle-android-sdk/pull/996))
+- Convert the D1 event message classes to Kotlin ([#995](https://github.com/mParticle/mparticle-android-sdk/pull/995))
+- Correct the Rokt callback migration in MIGRATING.md ([#994](https://github.com/mParticle/mparticle-android-sdk/pull/994))
+
+### Kits
+
+#### Kochava
+
+##### Added
+
+- Add Kochava Android SDK 7 kit (kochava-7) ([#1014](https://github.com/mParticle/mparticle-android-sdk/pull/1014))
+
+#### Rokt
+
+##### Fixed
+
+- Keep paypalpayerid off the user profile and the selectPlacements event ([#1013](https://github.com/mParticle/mparticle-android-sdk/pull/1013))
+
 ## [6.1.10] - 2026-11-06
 
 ### Core
