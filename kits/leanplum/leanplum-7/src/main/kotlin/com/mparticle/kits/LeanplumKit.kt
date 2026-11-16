@@ -38,6 +38,7 @@ class LeanplumKit :
         settings: Map<String, String>,
         context: Context,
     ): List<ReportingMessage> {
+        restoreLeanplumAfterOptIn()
         val deviceIdType = settings[DEVICE_ID_TYPE]
 
         val userId = generateLeanplumId()
@@ -54,6 +55,9 @@ class LeanplumKit :
 
         // Starting Leanplum with empty map to avoid db query, setting it after calling async fun
         Leanplum.start(context, userId)
+        if (userId == null && currentUser != null) {
+            switchToDeviceUser()
+        }
         LeanplumActivityHelper.enableLifecycleCallbacks(context.applicationContext as Application)
         MParticle
             .getInstance()
@@ -114,6 +118,8 @@ class LeanplumKit :
         // first set userId to effectively switch users
         if (!KitUtils.isEmpty(userId)) {
             Leanplum.setUserId(userId)
+        } else {
+            switchToDeviceUser()
         }
         // then set the attributes of the new user
         try {
@@ -207,10 +213,56 @@ class LeanplumKit :
         return userId
     }
 
+    private fun usesIdentityBoundUserId(): Boolean {
+        val userIdField = settings[USER_ID_FIELD_KEY]
+        return USER_ID_CUSTOMER_ID_VALUE.equals(userIdField, ignoreCase = true) ||
+            USER_ID_EMAIL_VALUE.equals(userIdField, ignoreCase = true)
+    }
+
+    // A user with no customer ID or email must not keep writing to the previous user's
+    // Leanplum profile, so fall back to Leanplum's own anonymous, device-level user ID.
+    private fun switchToDeviceUser() {
+        if (!usesIdentityBoundUserId()) {
+            return
+        }
+        val deviceId = Leanplum.getDeviceId()
+        if (deviceId.isNullOrEmpty() || deviceId == Leanplum.getUserId()) {
+            return
+        }
+        Leanplum.setUserId(deviceId)
+    }
+
     override fun getName(): String = NAME
 
-    // Leanplum doesn't have the notion of opt-out.
-    override fun setOptOut(optedOut: Boolean): List<ReportingMessage> = emptyList()
+    // Leanplum has no opt-out API. Test mode is its public switch that stops every request
+    // to Leanplum's servers, so the kit turns it on at opt-out and off again at opt-in,
+    // but only when the kit itself turned it on.
+    override fun setOptOut(optedOut: Boolean): List<ReportingMessage> {
+        if (!optedOut) {
+            restoreLeanplumAfterOptIn()
+            return emptyList()
+        }
+        if (configuration?.shouldHonorOptOut() == false || Leanplum.isTestModeEnabled()) {
+            return emptyList()
+        }
+        Leanplum.setIsTestModeEnabled(true)
+        leanplumSilencedByKit = true
+        return listOf(
+            ReportingMessage(
+                this,
+                ReportingMessage.MessageType.OPT_OUT,
+                System.currentTimeMillis(),
+                null,
+            ).setOptOut(true),
+        )
+    }
+
+    private fun restoreLeanplumAfterOptIn() {
+        if (leanplumSilencedByKit) {
+            Leanplum.setIsTestModeEnabled(false)
+            leanplumSilencedByKit = false
+        }
+    }
 
     override fun onSetUserAttribute(
         key: String?,
@@ -414,5 +466,8 @@ class LeanplumKit :
         const val DEVICE_ID_TYPE_ANDROID_ID = "androidId"
         const val DEVICE_ID_TYPE_DAS = "das"
         const val NAME = "Leanplum"
+
+        @Volatile
+        private var leanplumSilencedByKit = false
     }
 }

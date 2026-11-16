@@ -10,6 +10,13 @@
 
 ### Kits
 
+#### Leanplum
+
+##### Fixed
+
+- Stop the Leanplum SDK from sending requests when the user opts out, where the kit honours opt-out, and resume it at opt-in
+- Switch Leanplum to its anonymous device user when the current user has no customer ID or email in those user ID modes, so a logged-out user's Leanplum profile stops receiving the next user's data
+
 #### Rokt
 
 ##### Fixed
