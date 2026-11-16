@@ -28,6 +28,8 @@ class ApptentiveKit :
     private var enableTypeDetection = true
     private var lastKnownFirstName: String? = null
     private var lastKnownLastName: String? = null
+    private var boundMpid: Long? = null
+    private val addedPersonDataKeys = mutableSetOf<String>()
 
     //region KitIntegration
     override fun getName(): String = NAME
@@ -65,7 +67,7 @@ class ApptentiveKit :
                 configuration,
             ) { registerResult ->
                 if (registerResult is RegisterResult.Success) {
-                    Apptentive.setMParticleId(currentUser?.id.toString())
+                    currentUser?.id?.let { Apptentive.setMParticleId(it.toString()) }
                 }
             }
         }
@@ -97,8 +99,10 @@ class ApptentiveKit :
     override fun onRemoveUserAttribute(
         key: String?,
     ) {
+        bindUser(currentUser?.id)
         key?.let {
             Apptentive.removeCustomPersonData(it)
+            untrackPersonDataKey(it)
         }
     }
 
@@ -106,6 +110,7 @@ class ApptentiveKit :
         key: String?,
         value: Any?,
     ) {
+        bindUser(currentUser?.id)
         if (key != null && value != null) {
             when (key.lowercase()) {
                 MParticle.UserAttributes.FIRSTNAME.lowercase() -> {
@@ -147,6 +152,7 @@ class ApptentiveKit :
         userAttributes: MutableMap<String, String>?,
         userAttributeLists: MutableMap<String, MutableList<String>>?,
     ) {
+        bindUser(currentUser?.id)
         userAttributes?.let { userAttribute ->
             val firstName = userAttribute[MParticle.UserAttributes.FIRSTNAME] ?: ""
             val lastName = userAttribute[MParticle.UserAttributes.LASTNAME] ?: ""
@@ -237,7 +243,7 @@ class ApptentiveKit :
     }
 
     override fun onUserIdentified(mParticleUser: MParticleUser?) {
-        // Ignored
+        bindUser(mParticleUser?.id)
     }
 
     //endregion
@@ -255,6 +261,7 @@ class ApptentiveKit :
         }
 
     private fun setUserIdentity(user: MParticleUser?) {
+        bindUser(user?.id)
         user?.userIdentities?.entries?.let {
             for (i in it.indices) {
                 val entry = it.elementAt(i)
@@ -276,6 +283,39 @@ class ApptentiveKit :
         }
     }
 
+    /**
+     * Ties the Apptentive person to the current mParticle user. When the user changes, for
+     * example on logout, the custom person data this kit added for the previous user is removed
+     * and the remembered name parts are reset, so they do not carry over to the next user.
+     * Apptentive keeps the person's name and email until new values are set, because its API
+     * cannot clear them.
+     */
+    @Synchronized
+    private fun bindUser(mpid: Long?) {
+        if (mpid == null || mpid == 0L || mpid == boundMpid) {
+            return
+        }
+        val previousMpid = boundMpid
+        boundMpid = mpid
+        if (previousMpid != null) {
+            addedPersonDataKeys.forEach { Apptentive.removeCustomPersonData(it) }
+            addedPersonDataKeys.clear()
+            lastKnownFirstName = null
+            lastKnownLastName = null
+        }
+        Apptentive.setMParticleId(mpid.toString())
+    }
+
+    @Synchronized
+    private fun trackPersonDataKey(key: String) {
+        addedPersonDataKeys.add(key)
+    }
+
+    @Synchronized
+    private fun untrackPersonDataKey(key: String) {
+        addedPersonDataKeys.remove(key)
+    }
+
     private fun engage(
         event: String,
         customData: Map<String, String>?,
@@ -291,6 +331,7 @@ class ApptentiveKit :
         // original key
         Logger.debug("Adding custom person data $key to $value")
         Apptentive.addCustomPersonData(key, value)
+        trackPersonDataKey(key)
 
         // typed key
         if (enableTypeDetection) {
@@ -300,9 +341,11 @@ class ApptentiveKit :
                 }
                 is Boolean -> {
                     Apptentive.addCustomPersonData(key + SUFFIX_KEY_FLAG, typedValue)
+                    trackPersonDataKey(key + SUFFIX_KEY_FLAG)
                 }
                 is Number -> {
                     Apptentive.addCustomPersonData(key + SUFFIX_KEY_NUMBER, typedValue)
+                    trackPersonDataKey(key + SUFFIX_KEY_NUMBER)
                 }
                 else -> {
                     Logger.error(
