@@ -4,6 +4,12 @@
 
 ### Kits
 
+#### Apptentive
+
+##### Fixed
+
+- Update the Apptentive person's mParticle ID and remove the previous user's custom person data when the mParticle user changes
+
 #### Rokt
 
 ##### Fixed
