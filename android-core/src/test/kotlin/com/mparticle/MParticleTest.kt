@@ -22,6 +22,7 @@ import com.mparticle.internal.MessageManager
 import com.mparticle.media.MPMediaAPI
 import com.mparticle.messaging.MPMessagingAPI
 import com.mparticle.mock.MockContext
+import com.mparticle.mock.MockSharedPreferences
 import com.mparticle.testutils.AndroidUtils
 import com.mparticle.testutils.RandomUtils
 import org.junit.After
@@ -610,6 +611,53 @@ class MParticleTest {
 
         verify(instance.mKitManager).logRoktApiDiagnostic("UPLOAD")
         verify(instance.mMessageManager, Mockito.times(2)).doUpload()
+    }
+
+    @Test
+    fun disableLocationTracking_clearsSavedRequest_whenTrackingWasNotStartedInThisProcess() {
+        val instance: MParticle = InnerMockMParticle()
+        val preferences = MockSharedPreferences()
+        preferences
+            .edit()
+            .putString(Constants.PrefKeys.LOCATION_PROVIDER, "network")
+            .putLong(Constants.PrefKeys.LOCATION_MINTIME, 30_000L)
+            .putLong(Constants.PrefKeys.LOCATION_MINDISTANCE, 1_000L)
+            .apply()
+        instance.mPreferences = preferences
+
+        // A fresh launch that turns tracking off: no listener was ever registered in this process.
+        instance.disableLocationTracking()
+
+        Assert.assertFalse(preferences.contains(Constants.PrefKeys.LOCATION_PROVIDER))
+        Assert.assertFalse(preferences.contains(Constants.PrefKeys.LOCATION_MINTIME))
+        Assert.assertFalse(preferences.contains(Constants.PrefKeys.LOCATION_MINDISTANCE))
+        Assert.assertFalse(instance.isLocationTrackingEnabled)
+    }
+
+    @Test
+    fun disableLocationTracking_keepsOtherPreferences() {
+        val instance: MParticle = InnerMockMParticle()
+        val preferences = MockSharedPreferences()
+        preferences
+            .edit()
+            .putString(Constants.PrefKeys.LOCATION_PROVIDER, "gps")
+            .putString("unrelated-key", "kept")
+            .apply()
+        instance.mPreferences = preferences
+
+        instance.disableLocationTracking()
+
+        Assert.assertFalse(preferences.contains(Constants.PrefKeys.LOCATION_PROVIDER))
+        Assert.assertEquals("kept", preferences.getString("unrelated-key", null))
+    }
+
+    @Test
+    fun disableLocationTracking_withoutPreferences_doesNotThrow() {
+        val instance: MParticle = InnerMockMParticle()
+
+        instance.disableLocationTracking()
+
+        Assert.assertFalse(instance.isLocationTrackingEnabled)
     }
 
     inner class InnerMockMParticle : MParticle() {
