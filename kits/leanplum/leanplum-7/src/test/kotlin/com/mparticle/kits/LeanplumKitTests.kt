@@ -7,6 +7,7 @@ import com.mparticle.MParticle.IdentityType
 import com.mparticle.MParticleOptions
 import com.mparticle.MockMParticle
 import com.mparticle.identity.MParticleUser
+import org.junit.After
 import org.junit.Assert
 import org.junit.Test
 import org.mockito.ArgumentMatchers
@@ -18,6 +19,12 @@ class LeanplumKitTests {
     private val settings = HashMap<String, String>()
     private val userIdentities = HashMap<IdentityType, String>()
     private val mockConfiguration = Mockito.mock(KitConfiguration::class.java)
+
+    @After
+    fun tearDown() {
+        LeanplumKit().setOptOut(false)
+        Leanplum.clear()
+    }
 
     @Test
     @Throws(Exception::class)
@@ -146,5 +153,117 @@ class LeanplumKitTests {
         kit.setDeviceIdType(LeanplumKit.DEVICE_ID_TYPE_ANDROID_ID)
         Assert.assertNull(Leanplum.mMode)
         Assert.assertNull(Leanplum.deviceId)
+    }
+
+    @Test
+    fun testOptOutStopsLeanplumWhenKitHonoursOptOut() {
+        Mockito.`when`(mockConfiguration.shouldHonorOptOut()).thenReturn(true)
+        kit.configuration = mockConfiguration
+
+        val messages = kit.setOptOut(true)
+
+        Assert.assertTrue(Leanplum.isTestModeEnabled())
+        Assert.assertEquals(1, messages.size)
+    }
+
+    @Test
+    fun testOptInRestartsLeanplumStoppedByTheKit() {
+        Mockito.`when`(mockConfiguration.shouldHonorOptOut()).thenReturn(true)
+        kit.configuration = mockConfiguration
+        kit.setOptOut(true)
+
+        // The core drops the opted-out kit and creates a new instance at opt-in.
+        LeanplumKit().setOptOut(false)
+
+        Assert.assertFalse(Leanplum.isTestModeEnabled())
+    }
+
+    @Test
+    fun testOptOutLeavesLeanplumRunningWhenKitIgnoresOptOut() {
+        Mockito.`when`(mockConfiguration.shouldHonorOptOut()).thenReturn(false)
+        kit.configuration = mockConfiguration
+
+        val messages = kit.setOptOut(true)
+
+        Assert.assertFalse(Leanplum.isTestModeEnabled())
+        Assert.assertTrue(messages.isEmpty())
+    }
+
+    @Test
+    fun testOptInKeepsTestModeTheAppTurnedOn() {
+        Leanplum.setIsTestModeEnabled(true)
+        Mockito.`when`(mockConfiguration.shouldHonorOptOut()).thenReturn(true)
+        kit.configuration = mockConfiguration
+
+        kit.setOptOut(true)
+        kit.setOptOut(false)
+
+        Assert.assertTrue(Leanplum.isTestModeEnabled())
+    }
+
+    @Test
+    fun testLogoutSwitchesLeanplumToTheDeviceUser() {
+        givenUserIdField(LeanplumKit.USER_ID_CUSTOMER_ID_VALUE)
+        Leanplum.deviceId = "fake-device-id"
+        Leanplum.setUserId("fake-customer-id")
+        Mockito.`when`(user.userIdentities).thenReturn(emptyMap())
+
+        kit.onUserIdentified(user)
+
+        Assert.assertEquals("fake-device-id", Leanplum.getUserId())
+    }
+
+    @Test
+    fun testLogoutSwitchesLeanplumToTheDeviceUserInEmailMode() {
+        givenUserIdField(LeanplumKit.USER_ID_EMAIL_VALUE)
+        Leanplum.deviceId = "fake-device-id"
+        Leanplum.setUserId("fake-user@example.com")
+        Mockito.`when`(user.userIdentities).thenReturn(emptyMap())
+
+        kit.onUserIdentified(user)
+
+        Assert.assertEquals("fake-device-id", Leanplum.getUserId())
+    }
+
+    @Test
+    fun testLoginSetsTheCustomerIdAsLeanplumUser() {
+        givenUserIdField(LeanplumKit.USER_ID_CUSTOMER_ID_VALUE)
+        Leanplum.deviceId = "fake-device-id"
+        Leanplum.setUserId("fake-device-id")
+        Mockito
+            .`when`(user.userIdentities)
+            .thenReturn(mapOf(IdentityType.CustomerId to "fake-customer-id"))
+
+        kit.onUserIdentified(user)
+
+        Assert.assertEquals("fake-customer-id", Leanplum.getUserId())
+    }
+
+    @Test
+    fun testUserWithoutIdentityKeepsLeanplumUserWhenNoUserIdFieldIsSet() {
+        givenUserIdField(null)
+        Leanplum.deviceId = "fake-device-id"
+        Leanplum.setUserId("fake-app-user-id")
+        Mockito.`when`(user.userIdentities).thenReturn(emptyMap())
+
+        kit.onUserIdentified(user)
+
+        Assert.assertEquals("fake-app-user-id", Leanplum.getUserId())
+    }
+
+    private fun givenUserIdField(userIdField: String?) {
+        if (userIdField != null) {
+            settings[LeanplumKit.USER_ID_FIELD_KEY] = userIdField
+        }
+        Mockito.`when`(mockConfiguration.settings).thenReturn(settings)
+        Mockito
+            .`when`(
+                mockConfiguration.shouldSetIdentity(
+                    ArgumentMatchers.any(
+                        IdentityType::class.java,
+                    ),
+                ),
+            ).thenReturn(true)
+        kit.configuration = mockConfiguration
     }
 }
