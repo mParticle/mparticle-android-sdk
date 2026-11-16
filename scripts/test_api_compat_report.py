@@ -5,8 +5,11 @@ Run with ``python3 -m unittest scripts/test_api_compat_report.py``.
 
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import io
+import os
+import stat
 import struct
 import sys
 import tarfile
@@ -512,12 +515,78 @@ class MainErrorHandlingTest(unittest.TestCase):
         # without touching the network or Gradle.
         with tempfile.TemporaryDirectory() as tmp:
             comment_file = Path(tmp) / "comment.md"
-            with mock.patch.object(report, "japicmp_jar", side_effect=RuntimeError("boom")):
+            with mock.patch.dict(os.environ, {"API_COMPAT_CACHE": tmp}), mock.patch.object(
+                report, "japicmp_jar", side_effect=RuntimeError("boom")
+            ):
                 exit_code = report.main(["--skip-build", "--comment-file", str(comment_file)])
             self.assertEqual(exit_code, 1)
             text = comment_file.read_text(encoding="utf-8")
             self.assertIn("<!-- binary-compatibility-report -->", text)
             self.assertIn("boom", text)
+
+
+class CacheAndVerificationTest(unittest.TestCase):
+    def test_default_cache_uses_user_cache_dir_and_restricts_permissions(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            env = {"HOME": tmp, "XDG_CACHE_HOME": "", "API_COMPAT_CACHE": ""}
+            with mock.patch.dict(os.environ, env, clear=False), mock.patch.object(
+                Path, "home", return_value=Path(tmp)
+            ):
+                os.environ.pop("API_COMPAT_CACHE", None)
+                os.environ.pop("XDG_CACHE_HOME", None)
+                cache_dir = report.prepare_cache_dir()
+            self.assertEqual(cache_dir, Path(tmp) / ".cache" / "mparticle-api-compat")
+            self.assertNotEqual(cache_dir.parent, Path(tempfile.gettempdir()))
+            if hasattr(os, "geteuid"):
+                mode = stat.S_IMODE(cache_dir.lstat().st_mode)
+                self.assertEqual(mode, 0o700)
+
+    def test_prepare_cache_dir_rejects_symlinks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            target = root / "real"
+            target.mkdir()
+            symlink_cache = root / "mparticle-api-compat"
+            symlink_cache.symlink_to(target)
+            with self.assertRaises(RuntimeError):
+                report.prepare_cache_dir(root)
+
+    def test_download_verified_validates_before_atomic_replace_and_rejects_symlinks(self) -> None:
+        payload = b"verified-jar-bytes"
+        digest = hashlib.sha256(payload).hexdigest()
+        with tempfile.TemporaryDirectory() as tmp:
+            dest = Path(tmp) / "artifact.jar"
+            with mock.patch("urllib.request.urlopen", return_value=io.BytesIO(payload)):
+                result = report.download_verified("https://example.invalid/artifact.jar", dest, digest)
+            self.assertEqual(result, dest)
+            self.assertEqual(dest.read_bytes(), payload)
+
+            bad_dest = Path(tmp) / "bad.jar"
+            with mock.patch("urllib.request.urlopen", return_value=io.BytesIO(b"tampered")):
+                with self.assertRaises(RuntimeError):
+                    report.download_verified("https://example.invalid/bad.jar", bad_dest, digest)
+            self.assertFalse(bad_dest.exists())
+
+            symlink_dest = Path(tmp) / "link.jar"
+            symlink_dest.symlink_to(dest)
+            with self.assertRaises(RuntimeError):
+                report.download_verified("https://example.invalid/link.jar", symlink_dest, digest)
+
+    def test_japicmp_jar_stages_verified_copy_into_private_work_dir(self) -> None:
+        payload = b"japicmp-jar-content"
+        digest = hashlib.sha256(payload).hexdigest()
+        with tempfile.TemporaryDirectory() as cache_tmp, tempfile.TemporaryDirectory() as work_tmp:
+            cache_dir = Path(cache_tmp)
+            work_dir = Path(work_tmp)
+            cached_jar = cache_dir / f"japicmp-{report.JAPICMP_VERSION}.jar"
+            cached_jar.write_bytes(payload)
+            with mock.patch.object(report, "JAPICMP_SHA256", digest):
+                staged = report.japicmp_jar(cache_dir, work_dir)
+            self.assertEqual(staged.parent, work_dir)
+            self.assertNotEqual(staged.parent, cache_dir)
+            self.assertEqual(staged.read_bytes(), payload)
+            if hasattr(os, "geteuid"):
+                self.assertEqual(stat.S_IMODE(staged.lstat().st_mode), 0o600)
 
 
 if __name__ == "__main__":
