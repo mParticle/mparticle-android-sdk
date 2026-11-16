@@ -435,6 +435,7 @@ open class MParticleDBManager {
                 // Create a session-end message.
                 endMessage = createMessageSessionEnd(sessionId, start, end, foregroundLength, sessionAttributes, location, mpIds)
                 endMessage.put(Constants.MessageKey.ID, UUID.randomUUID().toString())
+                dropSessionAttributesIfOversized(endMessage, sessionId)
             }
             return endMessage
         } finally {
@@ -480,6 +481,22 @@ open class MParticleDBManager {
         message.put(Constants.MessageKey.STATE_INFO_KEY, MessageManager.getStateInfo())
         message.put(Constants.MessageKey.SESSION_SPANNING_MPIDS, spanningMpids)
         return message
+    }
+
+    // A session-end message over the message size limit is never stored, so the whole session end would be lost.
+    // Session attributes are the only unbounded part of it; drop them and keep the session end.
+    private fun dropSessionAttributesIfOversized(endMessage: BaseMPMessage, sessionId: String?) {
+        if (!endMessage.has(Constants.MessageKey.ATTRIBUTES)) {
+            return
+        }
+        val size = endMessage.toString().length
+        if (size > Constants.LIMIT_MAX_MESSAGE_SIZE) {
+            endMessage.remove(Constants.MessageKey.ATTRIBUTES)
+            Logger.warning(
+                "Session end message for session ID: $sessionId is $size characters, over the limit of " +
+                    "${Constants.LIMIT_MAX_MESSAGE_SIZE}; its session attributes are dropped so the session end is kept.",
+            )
+        }
     }
 
     private fun resetEventCounter() {
