@@ -71,6 +71,7 @@ import argparse
 import hashlib
 import os
 import shutil
+import stat
 import struct
 import subprocess
 import sys
@@ -140,29 +141,50 @@ def fetch_text(url: str) -> str | None:
         raise
 
 
+def _verify_checksum(path: Path, url: str, algorithm: str, expected: str) -> bytes:
+    if path.is_symlink():
+        raise RuntimeError(f"refusing symlinked artifact at {path}")
+    data = path.read_bytes()
+    actual = hashlib.new(algorithm, data).hexdigest()
+    if actual != expected:
+        path.unlink(missing_ok=True)
+        raise RuntimeError(f"{algorithm} mismatch for {url}: expected {expected}, got {actual}")
+    return data
+
+
 def download_verified(url: str, dest: Path, expected_sha256: str | None = None) -> Path:
     """Download ``url`` to ``dest`` and verify it against a pinned or published checksum."""
+    if dest.is_symlink() or dest.parent.is_symlink():
+        raise RuntimeError(f"refusing symlink path for {dest}")
+    algorithm = "sha256" if expected_sha256 else ""
+    expected = expected_sha256.lower() if expected_sha256 else ""
+    if not expected:
+        for suffix, candidate_alg in ((".sha256", "sha256"), (".sha1", "sha1")):
+            published = fetch_text(url + suffix)
+            if published is not None:
+                algorithm = candidate_alg
+                expected = published.split()[0].lower()
+                break
+        if not expected:
+            raise RuntimeError(f"no published checksum found for {url}")
+
     if not dest.exists():
         log(f"downloading {url}")
-        with urllib.request.urlopen(url, timeout=120) as response, dest.open("wb") as out:
-            shutil.copyfileobj(response, out)
-    if expected_sha256:
-        actual = hashlib.sha256(dest.read_bytes()).hexdigest()
-        if actual != expected_sha256:
-            dest.unlink(missing_ok=True)
-            raise RuntimeError(f"sha256 mismatch for {url}: expected {expected_sha256}, got {actual}")
-        return dest
-    for suffix, algorithm in ((".sha256", "sha256"), (".sha1", "sha1")):
-        published = fetch_text(url + suffix)
-        if published is None:
-            continue
-        expected = published.split()[0].lower()
-        actual = hashlib.new(algorithm, dest.read_bytes()).hexdigest()
-        if actual != expected:
-            dest.unlink(missing_ok=True)
-            raise RuntimeError(f"{algorithm} mismatch for {url}: expected {expected}, got {actual}")
-        return dest
-    raise RuntimeError(f"no published checksum found for {url}")
+        fd, tmp_name = tempfile.mkstemp(dir=dest.parent, prefix=f".{dest.name}.", suffix=".tmp")
+        tmp_path = Path(tmp_name)
+        try:
+            with urllib.request.urlopen(url, timeout=120) as response, os.fdopen(fd, "wb") as out:
+                shutil.copyfileobj(response, out)
+            _verify_checksum(tmp_path, url, algorithm, expected)
+            if dest.is_symlink():
+                raise RuntimeError(f"refusing symlink destination {dest}")
+            os.replace(tmp_path, dest)
+        except BaseException:
+            tmp_path.unlink(missing_ok=True)
+            raise
+    else:
+        _verify_checksum(dest, url, algorithm, expected)
+    return dest
 
 
 def extract_classes_jar(aar: Path, dest: Path) -> Path:
@@ -288,8 +310,48 @@ def previous_unminified_jars(
     return cached
 
 
-def japicmp_jar(cache_dir: Path) -> Path:
-    return download_verified(JAPICMP_URL, cache_dir / f"japicmp-{JAPICMP_VERSION}.jar", JAPICMP_SHA256)
+def default_cache_root() -> Path:
+    configured = os.environ.get("API_COMPAT_CACHE")
+    if configured:
+        return Path(configured).expanduser()
+    xdg_cache = os.environ.get("XDG_CACHE_HOME")
+    if xdg_cache:
+        return Path(xdg_cache).expanduser()
+    return Path.home() / ".cache"
+
+
+def prepare_cache_dir(cache_root: Path | None = None) -> Path:
+    root = cache_root if cache_root is not None else default_cache_root()
+    if root.is_symlink():
+        raise RuntimeError(f"refusing symlinked cache root: {root}")
+    cache_dir = root / "mparticle-api-compat"
+    if cache_dir.is_symlink():
+        raise RuntimeError(f"refusing symlinked cache directory: {cache_dir}")
+    cache_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
+    st = cache_dir.lstat()
+    if not stat.S_ISDIR(st.st_mode):
+        raise RuntimeError(f"cache path is not a directory: {cache_dir}")
+    if hasattr(os, "geteuid"):
+        if st.st_uid != os.geteuid():
+            raise RuntimeError(f"cache directory {cache_dir} is not owned by the current user")
+        if (st.st_mode & 0o077) != 0:
+            os.chmod(cache_dir, 0o700)
+    return cache_dir
+
+
+def japicmp_jar(cache_dir: Path, work_dir: Path | None = None) -> Path:
+    cached = download_verified(JAPICMP_URL, cache_dir / f"japicmp-{JAPICMP_VERSION}.jar", JAPICMP_SHA256)
+    if work_dir is None:
+        return cached
+    if work_dir.is_symlink():
+        raise RuntimeError(f"refusing symlinked work directory: {work_dir}")
+    staged = work_dir / f"japicmp-{JAPICMP_VERSION}.jar"
+    if staged.is_symlink():
+        raise RuntimeError(f"refusing symlinked staged jar: {staged}")
+    shutil.copyfile(cached, staged)
+    os.chmod(staged, 0o600)
+    _verify_checksum(staged, JAPICMP_URL, "sha256", JAPICMP_SHA256)
+    return staged
 
 
 # --- class files ------------------------------------------------------------
@@ -630,16 +692,15 @@ def main(argv: list[str]) -> int:
 
     modules = tuple(args.module) if args.module else MODULES
     output_dir = (REPO_ROOT / args.output_dir).resolve()
-    cache_dir = Path(os.environ.get("API_COMPAT_CACHE", tempfile.gettempdir())) / "mparticle-api-compat"
-    cache_dir.mkdir(parents=True, exist_ok=True)
 
     try:
+        cache_dir = prepare_cache_dir()
         if not args.skip_build:
             build_branch(modules)
-        japicmp = japicmp_jar(cache_dir)
         results: list[ModuleResult] = []
         with tempfile.TemporaryDirectory(prefix="api-compat-") as tmp:
             work = Path(tmp)
+            japicmp = japicmp_jar(cache_dir, work)
             previous = {module: args.previous or latest_published_version(module) for module in modules}
             previous_jars: dict[str, Path] = {}
             for version in sorted(set(previous.values())):
