@@ -296,6 +296,28 @@ class MParticleDBManagerTest {
     }
 
     @Test
+    fun testGetSessionForSessionEndMessageDropsSessionAttributesThatPushItOverTheSizeLimit() {
+        val message = sessionEndMessageWithAttributes(30)
+
+        Assert.assertFalse(message.has("attrs"))
+        Assert.assertTrue(message.toString().length <= Constants.LIMIT_MAX_MESSAGE_SIZE)
+        Assert.assertEquals("se", message.getString("dt"))
+        Assert.assertEquals("session-1", message.getString("sid"))
+        Assert.assertEquals(4000L, message.getLong("slx"))
+        Assert.assertEquals(36, message.getString("id").length)
+        logger.verify { Logger.warning(Mockito.startsWith("Session end message for session ID: session-1 is ")) }
+    }
+
+    @Test
+    fun testGetSessionForSessionEndMessageKeepsSessionAttributesUnderTheSizeLimit() {
+        val message = sessionEndMessageWithAttributes(20)
+
+        Assert.assertEquals(20, message.getJSONObject("attrs").length())
+        Assert.assertTrue(message.toString().length <= Constants.LIMIT_MAX_MESSAGE_SIZE)
+        logger.verify({ Logger.warning(Mockito.startsWith("Session end message")) }, Mockito.never())
+    }
+
+    @Test
     fun testGetOrphanSessionIdsReadsTheOpenSessionsOfTheApiKey() {
         val cursor = Mockito.mock(Cursor::class.java)
         Mockito.`when`(cursor.moveToNext()).thenReturn(true, true, false)
@@ -821,6 +843,24 @@ class MParticleDBManagerTest {
 
     private fun managerOn(db: MPDatabase?, options: MParticleOptions? = null): MParticleDBManager = object : MParticleDBManager(context, options) {
         override fun getDatabase(): MPDatabase? = db
+    }
+
+    private fun sessionEndMessageWithAttributes(count: Int): BaseMPMessage {
+        val attributes = JSONObject()
+        for (i in 0 until count) {
+            attributes.put("attribute-$i", "x".repeat(Constants.LIMIT_ATTR_VALUE))
+        }
+        val cursor = Mockito.mock(Cursor::class.java)
+        Mockito.`when`(cursor.moveToFirst()).thenReturn(true)
+        Mockito.`when`(cursor.getLong(0)).thenReturn(1000L)
+        Mockito.`when`(cursor.getLong(1)).thenReturn(5000L)
+        Mockito.`when`(cursor.getLong(2)).thenReturn(3000L)
+        Mockito.`when`(cursor.getString(3)).thenReturn(attributes.toString())
+        stubQuery("sessions", cursor)
+        MessageManager(context, null, null, null, null, null, null)
+        Mockito.mockStatic(MPUtility::class.java, Mockito.RETURNS_MOCKS).use {
+            return manager.getSessionForSessionEndMessage("session-1", null, setOf(5L))!!
+        }
     }
 
     private fun stubQuery(table: String?, cursor: Cursor) {
