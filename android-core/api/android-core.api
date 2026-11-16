@@ -2726,10 +2726,17 @@ public abstract interface class com/mparticle/internal/OnKitManagerLoaded {
 }
 
 public class com/mparticle/internal/PushRegistrationHelper {
+	public static final field Companion Lcom/mparticle/internal/PushRegistrationHelper$Companion;
 	public fun <init> ()V
-	public static fun getLatestPushRegistration (Landroid/content/Context;)Lcom/mparticle/internal/PushRegistrationHelper$PushRegistration;
-	public static fun requestInstanceId (Landroid/content/Context;)V
-	public static fun requestInstanceId (Landroid/content/Context;Ljava/lang/String;)V
+	public static final fun getLatestPushRegistration (Landroid/content/Context;)Lcom/mparticle/internal/PushRegistrationHelper$PushRegistration;
+	public static final fun requestInstanceId (Landroid/content/Context;)V
+	public static final fun requestInstanceId (Landroid/content/Context;Ljava/lang/String;)V
+}
+
+public final class com/mparticle/internal/PushRegistrationHelper$Companion {
+	public final fun getLatestPushRegistration (Landroid/content/Context;)Lcom/mparticle/internal/PushRegistrationHelper$PushRegistration;
+	public final fun requestInstanceId (Landroid/content/Context;)V
+	public final fun requestInstanceId (Landroid/content/Context;Ljava/lang/String;)V
 }
 
 public class com/mparticle/internal/PushRegistrationHelper$PushRegistration {
