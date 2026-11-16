@@ -156,6 +156,61 @@ class MParticleApiClientImplTest {
     @Throws(
         Exception::class,
     )
+    fun testFetchConfigSanitizesOutgoingAndIncomingCacheHeaders() {
+        val invalidValues = listOf("bad\r\netag", "bad\u0000value", "bad\u007fvalue", "bad\u0080value", "   ", "a".repeat(257))
+        for (invalid in invalidValues) {
+            setup()
+            Mockito.mockStatic(MPUtility::class.java).use {
+                Mockito.`when`(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString())).thenReturn("encoded")
+                Mockito.`when`(configManager.etag).thenReturn(invalid)
+                Mockito.`when`(configManager.ifModified).thenReturn(invalid)
+                Mockito.`when`(mockConnection.responseCode).thenReturn(200)
+                val response = JSONObject().put("test", "value")
+                Mockito.`when`(MPUtility.getJsonResponse(mockConnection)).thenReturn(response)
+                Mockito.`when`(mockConnection.getHeaderField("ETag")).thenReturn(invalid)
+                Mockito.`when`(mockConnection.getHeaderField("Last-Modified")).thenReturn(invalid)
+
+                client.fetchConfig(true)
+
+                Mockito.verify(mockConnection, Mockito.never()).setRequestProperty(Mockito.eq("If-None-Match"), Mockito.anyString())
+                Mockito.verify(mockConnection, Mockito.never()).setRequestProperty(Mockito.eq("If-Modified-Since"), Mockito.anyString())
+                Mockito.verify(configManager).updateConfig(Mockito.eq(response), Mockito.isNull(), Mockito.isNull())
+            }
+        }
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testFetchConfigPreservesValidCacheHeadersAndNotModified() {
+        setup()
+        Mockito.mockStatic(MPUtility::class.java).use {
+            Mockito.`when`(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString())).thenReturn("encoded")
+            val etag = "W/\"v1-config\""
+            val modified = "Wed, 21 Oct 2015 07:28:00 GMT"
+            Mockito.`when`(configManager.etag).thenReturn(etag)
+            Mockito.`when`(configManager.ifModified).thenReturn(modified)
+            Mockito.`when`(mockConnection.responseCode).thenReturn(200)
+            val response = JSONObject()
+            Mockito.`when`(MPUtility.getJsonResponse(mockConnection)).thenReturn(response)
+            Mockito.`when`(mockConnection.getHeaderField("ETag")).thenReturn(etag)
+            Mockito.`when`(mockConnection.getHeaderField("Last-Modified")).thenReturn(modified)
+
+            client.fetchConfig(true)
+
+            Mockito.verify(mockConnection).setRequestProperty("If-None-Match", etag)
+            Mockito.verify(mockConnection).setRequestProperty("If-Modified-Since", modified)
+            Mockito.verify(configManager).updateConfig(response, etag, modified)
+
+            Mockito.clearInvocations(configManager)
+            Mockito.`when`(mockConnection.responseCode).thenReturn(304)
+            client.fetchConfig(true)
+            Mockito.verify(configManager).configUpToDate()
+            Mockito.verify(configManager, Mockito.never()).updateConfig(Mockito.any(), Mockito.any(), Mockito.any())
+        }
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun testFetchConfigFailure() {
         setup()
         Mockito.mockStatic(MPUtility::class.java).use {

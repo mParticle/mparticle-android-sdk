@@ -914,7 +914,8 @@ public class MParticle {
     }
 
     /**
-     * Disables any mParticle location tracking that had been started.
+     * Disables any mParticle location tracking that had been started, and clears any saved tracking
+     * request so that a later session start does not resume it.
      */
     @SuppressLint("MissingPermission")
     public void disableLocationTracking() {
@@ -934,14 +935,27 @@ public class MParticle {
                 }
                 mLocationListener = null;
                 setLocation(null);
-                SharedPreferences.Editor editor = mPreferences.edit();
-                editor.remove(PrefKeys.LOCATION_PROVIDER)
-                        .remove(PrefKeys.LOCATION_MINTIME)
-                        .remove(PrefKeys.LOCATION_MINDISTANCE)
-                        .apply();
             } catch (Exception e) {
 
             }
+        }
+        // Clear the saved request even when this process never started tracking (for example a
+        // fresh launch that turns tracking off), so the next session start does not re-apply it.
+        clearLocationTrackingPreferences();
+    }
+
+    private void clearLocationTrackingPreferences() {
+        if (mPreferences == null) {
+            return;
+        }
+        try {
+            mPreferences.edit()
+                    .remove(PrefKeys.LOCATION_PROVIDER)
+                    .remove(PrefKeys.LOCATION_MINTIME)
+                    .remove(PrefKeys.LOCATION_MINDISTANCE)
+                    .apply();
+        } catch (Exception e) {
+
         }
     }
 

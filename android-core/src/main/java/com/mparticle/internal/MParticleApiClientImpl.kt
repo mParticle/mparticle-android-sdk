@@ -105,11 +105,11 @@ open class MParticleApiClientImpl :
             }
 
             connection.setRequestProperty("User-Agent", mUserAgent)
-            val etag = mConfigManager.etag
+            val etag = ConfigManager.sanitizeHeaderValue(mConfigManager.etag)
             if (etag != null) {
                 connection.setRequestProperty("If-None-Match", etag)
             }
-            val modified = mConfigManager.ifModified
+            val modified = ConfigManager.sanitizeHeaderValue(mConfigManager.ifModified)
             if (modified != null) {
                 connection.setRequestProperty("If-Modified-Since", modified)
             }
@@ -153,8 +153,8 @@ open class MParticleApiClientImpl :
                         "response:\n" + response,
                 )
 
-                val newEtag = connection.getHeaderField("ETag")
-                val newModified = connection.getHeaderField("Last-Modified")
+                val newEtag = ConfigManager.sanitizeHeaderValue(connection.getHeaderField("ETag"))
+                val newModified = ConfigManager.sanitizeHeaderValue(connection.getHeaderField("Last-Modified"))
 
                 mConfigManager.updateConfig(response, newEtag, newModified)
             } else if (connection.responseCode == 400) {

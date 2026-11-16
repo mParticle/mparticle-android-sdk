@@ -347,13 +347,15 @@ public class ConfigManager {
     void saveConfigJson(JSONObject coreConfig, JSONArray kitConfig, String etag, String lastModified, Long timestamp) throws JSONException {
         if (coreConfig != null) {
             String kitConfigString = kitConfig != null ? kitConfig.toString() : null;
+            String sanitizedEtag = sanitizeHeaderValue(etag);
+            String sanitizedLastModified = sanitizeHeaderValue(lastModified);
             Logger.debug("Updating core config to:\n" + coreConfig);
             Logger.debug("Updating kit config to:\n" + kitConfigString);
             sPreferences.edit()
                     .putString(CONFIG_JSON, coreConfig.toString())
                     .putLong(CONFIG_JSON_TIMESTAMP, timestamp != null ? timestamp : System.currentTimeMillis())
-                    .putString(Constants.PrefKeys.ETAG, etag)
-                    .putString(Constants.PrefKeys.IF_MODIFIED, lastModified)
+                    .putString(Constants.PrefKeys.ETAG, sanitizedEtag)
+                    .putString(Constants.PrefKeys.IF_MODIFIED, sanitizedLastModified)
                     .apply();
             getKitConfigPreferences()
                     .edit()
@@ -1457,12 +1459,35 @@ public class ConfigManager {
         return sPreferences.getInt(ALIAS_MAX_WINDOW, DEFAULT_MAX_ALIAS_WINDOW_DAYS);
     }
 
+    static final int MAX_HEADER_VALUE_LENGTH = 256;
+
+    @Nullable
+    static String sanitizeHeaderValue(@Nullable String value) {
+        if (value == null) {
+            return null;
+        }
+        if (value.isEmpty() || value.length() > MAX_HEADER_VALUE_LENGTH) {
+            return null;
+        }
+        boolean hasNonWhitespace = false;
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if (c < 0x20 || c >= 0x7f) {
+                return null;
+            }
+            if (c != ' ') {
+                hasNonWhitespace = true;
+            }
+        }
+        return hasNonWhitespace ? value : null;
+    }
+
     public String getEtag() {
-        return sPreferences.getString(Constants.PrefKeys.ETAG, null);
+        return sanitizeHeaderValue(sPreferences.getString(Constants.PrefKeys.ETAG, null));
     }
 
     public String getIfModified() {
-        return sPreferences.getString(Constants.PrefKeys.IF_MODIFIED, null);
+        return sanitizeHeaderValue(sPreferences.getString(Constants.PrefKeys.IF_MODIFIED, null));
     }
 
     public void addConfigUpdatedListener(ConfigLoadedListener listener) {

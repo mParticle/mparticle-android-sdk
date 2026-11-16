@@ -2,20 +2,6 @@
 
 ## [Unreleased]
 
-### Core
-
-#### Security
-
-- Document `MPService` as `android:exported="false"` and log a warning at `enablePushNotifications` when the app exports it with no permission, so other apps cannot send it push intents
-
-### Kits
-
-#### Rokt
-
-##### Fixed
-
-- Keep `paypalpayerid` off the user profile and the logged `selectPlacements` and `selectShoppableAds` events; supply `paypalpayerid` on each placement call where Rokt needs it
-
 ## [6.1.11] - 2026-11-16
 
 ### Core

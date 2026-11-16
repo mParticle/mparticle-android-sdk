@@ -146,9 +146,13 @@ JDK 17 — `gradle.properties` sets `JAVA_VERSION` and every CI job installs Zul
   every `Instrumented Tests (…)` job, `Security Lint Checks`, `Kit Compatibility Test` and
   `build-kits` all run and are reported but are **not** required, so a PR can merge with them red.
   Re-read the ruleset rather than trusting this list, and never say "CI is green" — name the job.
-- Add a `CHANGELOG.md` entry for anything user-visible, under one of `Added`, `Changed`,
-  `Deprecated`, `Fixed`, `Removed`, `Security`, in imperative mood. Never invent or auto-generate
-  one; if the right wording is unclear, leave it for a human.
+- Do not hand-write `CHANGELOG.md` entries. `Release – Draft` generates the version section from
+  the squash-merged PR titles since the last tag (`exclude-types: chore,ci,test,build`) and inserts
+  it beneath `## [Unreleased]`, so a hand-written entry there is duplicated by the generated one
+  and then stranded under `Unreleased`. Delete any such leftovers when reviewing the release PR.
+- **Your PR title is the changelog line.** Write it in imperative mood, in the user's terms. Its
+  type picks the section (`feat` → `Added`, `fix` → `Fixed`, most others → `Changed`), and the
+  files the PR changes place it under Core or a kit.
 
 ## Conventions no config enforces
 

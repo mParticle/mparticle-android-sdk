@@ -733,6 +733,55 @@ class ConfigManagerTest {
     }
 
     @Test
+    @Throws(JSONException::class)
+    fun testSanitizeEtagAndIfModifiedRejectsInvalidHeaderValues() {
+        ConfigManager.clear()
+        val configJson = JSONObject()
+        val prefs = context.getSharedPreferences(null, 0)
+        val invalidValues =
+            listOf(
+                "",
+                "   ",
+                "etag\r\nInjected: true",
+                "etag\nInjected",
+                "etag\u0000null",
+                "etag\ttab",
+                "etag\u001fcontrol",
+                "etag\u007fdel",
+                "etag-\u0080-non-ascii",
+                "a".repeat(ConfigManager.MAX_HEADER_VALUE_LENGTH + 1),
+            )
+        for (invalid in invalidValues) {
+            manager.updateConfig(configJson, invalid, invalid)
+            Assert.assertNull(manager.etag)
+            Assert.assertNull(manager.ifModified)
+            Assert.assertNull(prefs.getString(Constants.PrefKeys.ETAG, null))
+            Assert.assertNull(prefs.getString(Constants.PrefKeys.IF_MODIFIED, null))
+
+            // Previously persisted values must be safe even before the next successful response.
+            prefs.edit()
+                .putString(Constants.PrefKeys.ETAG, invalid)
+                .putString(Constants.PrefKeys.IF_MODIFIED, invalid)
+                .apply()
+            Assert.assertNull(manager.etag)
+            Assert.assertNull(manager.ifModified)
+        }
+
+        manager.updateConfig(configJson, "W/\"v1-config\"", "Wed, 21 Oct 2015 07:28:00 GMT")
+        Assert.assertEquals("W/\"v1-config\"", manager.etag)
+        Assert.assertEquals("Wed, 21 Oct 2015 07:28:00 GMT", manager.ifModified)
+        Assert.assertEquals("W/\"v1-config\"", prefs.getString(Constants.PrefKeys.ETAG, null))
+
+        val boundaryValue = " " + "a".repeat(ConfigManager.MAX_HEADER_VALUE_LENGTH - 2) + "~"
+        manager.updateConfig(configJson, boundaryValue, boundaryValue)
+        Assert.assertEquals(boundaryValue, manager.etag)
+        Assert.assertEquals(boundaryValue, manager.ifModified)
+        manager.updateConfig(configJson, null, null)
+        Assert.assertNull(manager.etag)
+        Assert.assertNull(manager.ifModified)
+    }
+
+    @Test
     fun testDeviceConsentOverridesMpidConsent() {
         val mpid = ran.nextLong()
         val mpidConsent = ConsentState.builder()

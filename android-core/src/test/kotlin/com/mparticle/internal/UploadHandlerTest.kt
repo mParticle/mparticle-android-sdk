@@ -577,6 +577,59 @@ class UploadHandlerTest {
         Assert.assertEquals(100L, uploadHandler.messageDelay)
     }
 
+    @Test
+    @Throws(Exception::class)
+    fun testUploadProceedsWhenPassiveConfigRefreshFails() {
+        val failures =
+            listOf(
+                IllegalArgumentException("Unexpected char in header value"),
+                IOException("Config unavailable"),
+                Mockito.mock(MParticleApiClientImpl::class.java).MPConfigException(),
+            )
+        for (failure in failures) {
+            for (uploadResponse in listOf(202, 503)) {
+                val apiClient = Mockito.mock(MParticleApiClient::class.java)
+                Mockito.doThrow(failure).`when`(apiClient).fetchConfig()
+                val database = Mockito.mock(MParticleDBManager::class.java)
+                val uploadSettings = UploadSettings("apiKey", "secret", NetworkOptions.builder().build(), "", "")
+                val message = "{\"dt\":\"h\"}"
+                Mockito.`when`(database.getReadyUploads()).thenReturn(
+                    listOf(
+                        MParticleDBManager.ReadyUpload(42, false, message, uploadSettings),
+                        MParticleDBManager.ReadyUpload(43, false, message, uploadSettings),
+                    ),
+                )
+                Mockito.`when`(apiClient.sendMessageBatch(Mockito.anyString(), Mockito.any())).thenReturn(uploadResponse)
+                val uploadHandler =
+                    object : UploadHandler(
+                        MockContext(),
+                        mConfigManager,
+                        Mockito.mock(AppStateManager::class.java),
+                        Mockito.mock(MessageManager::class.java),
+                        database,
+                        Mockito.mock(KitFrameworkWrapper::class.java),
+                    ) {
+                        fun runUpload() {
+                            super.upload()
+                        }
+                    }
+                uploadHandler.setApiClient(apiClient)
+
+                uploadHandler.runUpload()
+
+                Mockito.verify(apiClient).fetchConfig()
+                Mockito.verify(apiClient, Mockito.times(2)).sendMessageBatch(message, uploadSettings)
+                for (id in listOf(42, 43)) {
+                    if (uploadResponse == 202) {
+                        Mockito.verify(database).deleteUpload(id)
+                    } else {
+                        Mockito.verify(database, Mockito.never()).deleteUpload(id)
+                    }
+                }
+            }
+        }
+    }
+
     internal inner class MockMParticleDBManager : MParticleDBManager(MockContext()) {
         var hasMessagesTrueCount = 0
         var hasMessagesForever = false
