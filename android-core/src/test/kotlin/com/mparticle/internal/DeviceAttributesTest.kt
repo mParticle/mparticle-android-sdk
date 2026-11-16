@@ -3,11 +3,13 @@ package com.mparticle.internal
 import android.content.Context
 import com.mparticle.MParticle
 import com.mparticle.MockMParticle
+import com.mparticle.internal.PushRegistrationHelper.PushRegistration
 import com.mparticle.mock.MockContext
 import com.mparticle.mock.MockSharedPreferences
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Test
+import org.mockito.Mockito
 
 class DeviceAttributesTest {
     @Test
@@ -90,6 +92,33 @@ class DeviceAttributesTest {
             val osString = DeviceAttributes(operatingSystem).operatingSystemString
             Assert.assertFalse(osStringValues.contains(osString))
             osStringValues.add(osString)
+        }
+    }
+
+    @Test
+    fun testUpdateDeviceInfoAndStaticHelpers() {
+        val mockMp = MockMParticle()
+        Mockito
+            .`when`(mockMp.Internal().configManager.pushRegistration)
+            .thenReturn(PushRegistration("push-token-123", "sender-456"))
+        MParticle.setInstance(mockMp)
+        try {
+            DeviceAttributes.deviceImei = "351756051523999"
+            Assert.assertEquals("351756051523999", DeviceAttributes.deviceImei)
+
+            val context = MockContext()
+            val deviceInfo = JSONObject()
+            deviceInfo.put(Constants.MessageKey.LIMIT_AD_TRACKING, true)
+            deviceInfo.put(Constants.MessageKey.GOOGLE_ADV_ID, "stale-gaid")
+
+            val attributes = DeviceAttributes(MParticle.OperatingSystem.ANDROID)
+            attributes.updateDeviceInfo(context, deviceInfo)
+            Assert.assertFalse(deviceInfo.has(Constants.MessageKey.GOOGLE_ADV_ID))
+            Assert.assertEquals("push-token-123", deviceInfo.getString(Constants.MessageKey.PUSH_TOKEN))
+            Assert.assertEquals(Constants.GOOGLE_GCM, deviceInfo.getString(Constants.MessageKey.PUSH_TOKEN_TYPE))
+        } finally {
+            DeviceAttributes.deviceImei = null
+            MParticle.setInstance(null)
         }
     }
 }
