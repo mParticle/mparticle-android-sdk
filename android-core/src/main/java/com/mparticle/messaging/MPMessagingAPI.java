@@ -1,10 +1,13 @@
 package com.mparticle.messaging;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.content.pm.ServiceInfo;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.mparticle.MPService;
@@ -65,11 +68,24 @@ public class MPMessagingAPI {
         if (!MPUtility.isFirebaseAvailable()) {
             Logger.error("Push is enabled but Firebase Cloud Messaging library not found - you must add com.google.firebase:firebase-messaging:10.2.1 or later to your application.");
         } else if (!MPUtility.isServiceAvailable(mContext, MPService.class)) {
-            Logger.error("Push is enabled but you have not added <service android:name=\"com.mparticle.MPService\" /> to the <application> section of your AndroidManifest.xml.");
+            Logger.error("Push is enabled but you have not added <service android:exported=\"false\" android:name=\"com.mparticle.MPService\" /> to the <application> section of your AndroidManifest.xml.");
         } else if (!MPUtility.checkPermission(mContext, "com.google.android.c2dm.permission.RECEIVE")) {
             Logger.error("Attempted to enable push notifications without required permission: ", "\"com.google.android.c2dm.permission.RECEIVE\".");
         } else {
+            if (isExportedWithoutPermission(mContext, MPService.class)) {
+                Logger.warning("com.mparticle.MPService is exported with no permission in your AndroidManifest.xml, so any app on the device can send it push intents. The SDK starts it only from your own app: set android:exported=\"false\" on it.");
+            }
             PushRegistrationHelper.requestInstanceId(mContext, senderId);
+        }
+    }
+
+    @VisibleForTesting
+    static boolean isExportedWithoutPermission(@NonNull Context context, @NonNull Class<?> service) {
+        try {
+            ServiceInfo info = context.getPackageManager().getServiceInfo(new ComponentName(context, service), 0);
+            return info != null && info.exported && info.permission == null;
+        } catch (Exception e) {
+            return false;
         }
     }
 

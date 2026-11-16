@@ -13,8 +13,11 @@ import androidx.annotation.NonNull;
  * <p></p>
  * <pre>
  * {@code
- * <service android:exported="true" android:name="com.mparticle.MPService" />}
+ * <service android:exported="false" android:name="com.mparticle.MPService" />}
  * </pre>
+ * <p></p>
+ * The SDK starts this service only with explicit intents from your own application, so do not export it.
+ * An exported service with no permission lets any other app on the device send it push intents.
  */
 @SuppressLint("Registered")
 public class MPService extends IntentService {

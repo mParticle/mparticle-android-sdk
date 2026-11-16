@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Core
+
+#### Security
+
+- Document `MPService` as `android:exported="false"` and log a warning at `enablePushNotifications` when the app exports it with no permission, so other apps cannot send it push intents
+
 ### Kits
 
 #### Rokt
