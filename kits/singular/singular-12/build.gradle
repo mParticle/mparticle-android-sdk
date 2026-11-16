@@ -74,4 +74,13 @@ dependencies {
     testImplementation 'org.powermock:powermock-classloading-xstream:2.0.9'
     testImplementation "org.robolectric:robolectric:4.3.1"
     testImplementation 'org.json:json:20260814'
+
+    constraints {
+        testImplementation('com.thoughtworks.xstream:xstream:1.4.21') {
+            because 'powermock-classloading-xstream 2.0.9 pulls in 1.4.10, which has critical CVEs'
+        }
+        testImplementation('org.codehaus.plexus:plexus-utils:3.6.1') {
+            because 'robolectric 4.3.1 pulls in 1.5.15, which has critical CVEs'
+        }
+    }
 }
