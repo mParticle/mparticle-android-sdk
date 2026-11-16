@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Core
+
+#### Fixed
+
+- Keep the session-end message when its session attributes would push it over the 100 KiB message limit; drop the session attributes and log a warning instead of losing the whole session end
+
 ### Kits
 
 #### Rokt
