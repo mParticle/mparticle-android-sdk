@@ -77,10 +77,17 @@ public class com/mparticle/ExceptionHandler : java/lang/Thread$UncaughtException
 }
 
 public class com/mparticle/InstallReferrerHelper {
+	public static final field Companion Lcom/mparticle/InstallReferrerHelper$Companion;
 	public fun <init> ()V
-	public static fun fetchInstallReferrer (Landroid/content/Context;Lcom/mparticle/InstallReferrerHelper$InstallReferrerCallback;)V
-	public static fun getInstallReferrer (Landroid/content/Context;)Ljava/lang/String;
-	public static fun setInstallReferrer (Landroid/content/Context;Ljava/lang/String;)V
+	public static final fun fetchInstallReferrer (Landroid/content/Context;Lcom/mparticle/InstallReferrerHelper$InstallReferrerCallback;)V
+	public static final fun getInstallReferrer (Landroid/content/Context;)Ljava/lang/String;
+	public static final fun setInstallReferrer (Landroid/content/Context;Ljava/lang/String;)V
+}
+
+public final class com/mparticle/InstallReferrerHelper$Companion {
+	public final fun fetchInstallReferrer (Landroid/content/Context;Lcom/mparticle/InstallReferrerHelper$InstallReferrerCallback;)V
+	public final fun getInstallReferrer (Landroid/content/Context;)Ljava/lang/String;
+	public final fun setInstallReferrer (Landroid/content/Context;Ljava/lang/String;)V
 }
 
 public abstract interface class com/mparticle/InstallReferrerHelper$InstallReferrerCallback {
