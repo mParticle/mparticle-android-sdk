@@ -144,11 +144,16 @@ public class com/mparticle/MPService : android/app/IntentService {
 }
 
 public class com/mparticle/MPServiceUtil {
+	public static final field Companion Lcom/mparticle/MPServiceUtil$Companion;
 	public static final field INTERNAL_NOTIFICATION_TAP Ljava/lang/String;
 	public static final field NOTIFICATION_CHANNEL Ljava/lang/String;
 	public fun <init> (Landroid/content/Context;)V
 	public fun onHandleIntent (Landroid/content/Intent;)V
-	public static fun runIntentInService (Landroid/content/Context;Landroid/content/Intent;)V
+	public static final fun runIntentInService (Landroid/content/Context;Landroid/content/Intent;)V
+}
+
+public final class com/mparticle/MPServiceUtil$Companion {
+	public final fun runIntentInService (Landroid/content/Context;Landroid/content/Intent;)V
 }
 
 public class com/mparticle/MParticle {
