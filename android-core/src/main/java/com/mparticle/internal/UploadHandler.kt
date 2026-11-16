@@ -195,7 +195,13 @@ open class UploadHandler : BaseHandler {
         try {
             val readyUploads = mParticleDBManager!!.getReadyUploads()
             if (readyUploads.size > 0) {
-                mApiClient!!.fetchConfig()
+                try {
+                    mApiClient!!.fetchConfig()
+                } catch (e: MParticleApiClientImpl.MPConfigException) {
+                    Logger.error("Bad API request - is the correct API key and secret configured?")
+                } catch (e: Exception) {
+                    Logger.warning(e, "Config refresh before upload failed, proceeding with batch uploads.")
+                }
             }
             for (readyUpload in readyUploads) {
                 val message = readyUpload.message
