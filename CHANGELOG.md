@@ -23,6 +23,12 @@
 - Stop the Leanplum SDK from sending requests when the user opts out, where the kit honours opt-out, and resume it at opt-in
 - Switch Leanplum to its anonymous device user when the current user has no customer ID or email in those user ID modes, so a logged-out user's Leanplum profile stops receiving the next user's data
 
+#### Iterable
+
+##### Fixed
+
+- Disable Iterable push and log the user out of the Iterable SDK when the user opts out; identify the user again when the kit restarts after that opt-out
+
 #### Rokt
 
 ##### Fixed
