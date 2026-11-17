@@ -2229,4 +2229,239 @@ class RoktKitTests {
             unmockkObject(Rokt)
         }
     }
+
+    private fun stubAppStateManagerScreenViewId(screenViewId: String?): com.mparticle.internal.AppStateManager {
+        val mockInternal = mock(MParticle.Internal::class.java)
+        val mockAppStateManager = mock(com.mparticle.internal.AppStateManager::class.java)
+        Mockito.`when`(MParticle.getInstance()?.Internal()).thenReturn(mockInternal)
+        Mockito.`when`(mockInternal.appStateManager).thenReturn(mockAppStateManager)
+        Mockito.`when`(mockAppStateManager.getOrCreateScreenViewIdForPlacement()).thenReturn(screenViewId)
+        return mockAppStateManager
+    }
+
+    @Test
+    fun selectPlacements_attachesScreenViewIdFromAppStateManager() {
+        val capturedAttributes = slot<Map<String, String>>()
+        mockkObject(Rokt)
+        every {
+            Rokt.selectPlacements(
+                any<String>(),
+                capture(capturedAttributes),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } just runs
+
+        stubAppStateManagerScreenViewId("sv-core-uuid-123")
+
+        roktKit.selectPlacements(
+            viewName = "checkout_view",
+            attributes = mapOf("cart_value" to "42.00"),
+            placeHolders = null,
+            fontTypefaces = null,
+            filterUser = selectPlacementsTestUser(),
+            roktConfig = null,
+            placementOptions = null,
+        )
+
+        assertEquals("sv-core-uuid-123", capturedAttributes.captured["screen_view_id"])
+        assertEquals("42.00", capturedAttributes.captured["cart_value"])
+        unmockkObject(Rokt)
+    }
+
+    @Test
+    fun selectPlacements_preservesCallerProvidedScreenViewId() {
+        val capturedAttributes = slot<Map<String, String>>()
+        mockkObject(Rokt)
+        every {
+            Rokt.selectPlacements(
+                any<String>(),
+                capture(capturedAttributes),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } just runs
+
+        stubAppStateManagerScreenViewId("sv-core-uuid-123")
+
+        roktKit.selectPlacements(
+            viewName = "checkout_view",
+            attributes = mapOf("screen_view_id" to "caller-sv-999"),
+            placeHolders = null,
+            fontTypefaces = null,
+            filterUser = selectPlacementsTestUser(),
+            roktConfig = null,
+            placementOptions = null,
+        )
+
+        assertEquals("caller-sv-999", capturedAttributes.captured["screen_view_id"])
+        unmockkObject(Rokt)
+    }
+
+    @Test
+    fun selectPlacements_whenScreenViewIdIsFilteredOut_suppressesBothCallerAndCoreScreenViewId() {
+        val capturedAttributes = mutableListOf<Map<String, String>>()
+        mockkObject(Rokt)
+        every {
+            Rokt.selectPlacements(
+                any<String>(),
+                capture(capturedAttributes),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } just runs
+
+        stubAppStateManagerScreenViewId("sv-core-uuid-123")
+
+        val filterUser = selectPlacementsTestUser()
+        Mockito.`when`(filterUser.userAttributes).thenReturn(hashMapOf<String, Any?>("screen_view_id" to "user-sv-1"))
+        val uaFilters = JSONObject().put(KitUtils.hashForFiltering(RoktKit.SCREEN_VIEW_ID).toString(), 0)
+        roktKit.configuration =
+            MockKitConfiguration.createKitConfiguration(
+                JSONObject().put("hs", JSONObject().put("ua", uaFilters)),
+            )
+
+        roktKit.selectPlacements(
+            viewName = "checkout_view",
+            attributes = mapOf("screen_view_id" to "caller-sv-999", "cart_value" to "42.00"),
+            placeHolders = null,
+            fontTypefaces = null,
+            filterUser = filterUser,
+            roktConfig = null,
+            placementOptions = null,
+        )
+
+        roktKit.selectPlacements(
+            viewName = "checkout_view",
+            attributes = mapOf("cart_value" to "42.00"),
+            placeHolders = null,
+            fontTypefaces = null,
+            filterUser = filterUser,
+            roktConfig = null,
+            placementOptions = null,
+        )
+
+        assertEquals(2, capturedAttributes.size)
+        assertFalse(capturedAttributes[0].containsKey("screen_view_id"))
+        assertEquals("42.00", capturedAttributes[0]["cart_value"])
+        assertFalse(capturedAttributes[1].containsKey("screen_view_id"))
+        assertEquals("42.00", capturedAttributes[1]["cart_value"])
+        unmockkObject(Rokt)
+    }
+
+    @Test
+    fun selectPlacements_whenCallerOmitsScreenViewId_ignoresUserAttributeAndResolvesCoreId() {
+        val capturedAttributes = mutableListOf<Map<String, String>>()
+        mockkObject(Rokt)
+        every {
+            Rokt.selectPlacements(
+                any<String>(),
+                capture(capturedAttributes),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } just runs
+
+        val mockAppStateManager = stubAppStateManagerScreenViewId("sv-core-screen-1")
+        val filterUser = selectPlacementsTestUser()
+        Mockito
+            .`when`(filterUser.userAttributes)
+            .thenReturn(hashMapOf<String, Any?>("screen_view_id" to "caller-sv-first-screen"))
+
+        roktKit.selectPlacements(
+            viewName = "screen_one",
+            attributes = mapOf("screen_view_id" to "caller-sv-first-screen"),
+            placeHolders = null,
+            fontTypefaces = null,
+            filterUser = filterUser,
+            roktConfig = null,
+            placementOptions = null,
+        )
+
+        Mockito.`when`(mockAppStateManager.getOrCreateScreenViewIdForPlacement()).thenReturn("sv-core-screen-2")
+
+        roktKit.selectPlacements(
+            viewName = "screen_two",
+            attributes = mapOf("cart_value" to "19.99"),
+            placeHolders = null,
+            fontTypefaces = null,
+            filterUser = filterUser,
+            roktConfig = null,
+            placementOptions = null,
+        )
+
+        assertEquals(2, capturedAttributes.size)
+        assertEquals("caller-sv-first-screen", capturedAttributes[0]["screen_view_id"])
+        assertEquals("sv-core-screen-2", capturedAttributes[1]["screen_view_id"])
+        unmockkObject(Rokt)
+    }
+
+    @Test
+    fun selectPlacements_whenCallerSuppliesBlankScreenViewId_fallsBackToCoreScreenViewId() {
+        val capturedAttributes = mutableListOf<Map<String, String>>()
+        mockkObject(Rokt)
+        every {
+            Rokt.selectPlacements(
+                any<String>(),
+                capture(capturedAttributes),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } just runs
+
+        val mockAppStateManager = stubAppStateManagerScreenViewId("sv-core-uuid-123")
+
+        roktKit.selectPlacements(
+            viewName = "checkout_view",
+            attributes = mapOf("screen_view_id" to ""),
+            placeHolders = null,
+            fontTypefaces = null,
+            filterUser = selectPlacementsTestUser(),
+            roktConfig = null,
+            placementOptions = null,
+        )
+
+        roktKit.selectPlacements(
+            viewName = "checkout_view",
+            attributes = mapOf("screen_view_id" to "   "),
+            placeHolders = null,
+            fontTypefaces = null,
+            filterUser = selectPlacementsTestUser(),
+            roktConfig = null,
+            placementOptions = null,
+        )
+
+        Mockito.`when`(mockAppStateManager.getOrCreateScreenViewIdForPlacement()).thenReturn(null)
+
+        roktKit.selectPlacements(
+            viewName = "checkout_view",
+            attributes = mapOf("screen_view_id" to "   "),
+            placeHolders = null,
+            fontTypefaces = null,
+            filterUser = selectPlacementsTestUser(),
+            roktConfig = null,
+            placementOptions = null,
+        )
+
+        assertEquals(3, capturedAttributes.size)
+        assertEquals("sv-core-uuid-123", capturedAttributes[0]["screen_view_id"])
+        assertEquals("sv-core-uuid-123", capturedAttributes[1]["screen_view_id"])
+        assertFalse(capturedAttributes[2].containsKey("screen_view_id"))
+        unmockkObject(Rokt)
+    }
 }

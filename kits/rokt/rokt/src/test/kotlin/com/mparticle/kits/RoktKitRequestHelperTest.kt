@@ -553,4 +553,28 @@ class RoktKitRequestHelperTest {
         assertEquals(true, stored["\$NoTargeting"])
         assertEquals("false", stored["noFunctional"])
     }
+
+    @Test
+    fun selectPlacements_doesNotPersistScreenViewIdInUserAttributes() {
+        val persistedAttributes = slot<Map<String, Any>>()
+        val forwardedAttributes = slot<Map<String, String>>()
+        every { user.setUserAttributes(capture(persistedAttributes)) } returns true
+        every {
+            roktListener.selectPlacements(
+                any(),
+                capture(forwardedAttributes),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns Unit
+
+        selectPlacements(mapOf("screen_view_id" to "caller-sv-123", "cart_value" to "42.00"))
+
+        assertFalse(persistedAttributes.captured.containsKey("screen_view_id"))
+        assertEquals("42.00", persistedAttributes.captured["cart_value"])
+        assertEquals("caller-sv-123", forwardedAttributes.captured["screen_view_id"])
+    }
 }
