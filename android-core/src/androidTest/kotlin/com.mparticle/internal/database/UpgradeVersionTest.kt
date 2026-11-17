@@ -2,6 +2,7 @@ package com.mparticle.internal.database
 
 import android.database.sqlite.SQLiteDatabase
 import android.location.Location
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.internal.InternalSession
 import com.mparticle.internal.database.services.BreadcrumbService
 import com.mparticle.internal.database.services.MessageService
@@ -25,7 +26,9 @@ import org.json.JSONException
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 class UpgradeVersionTest : BaseTableTest() {
     private val helper = MParticleDatabaseHelper(mContext)
 

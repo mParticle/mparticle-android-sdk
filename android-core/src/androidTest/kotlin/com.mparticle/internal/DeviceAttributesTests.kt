@@ -1,5 +1,6 @@
 package com.mparticle.internal
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
@@ -7,7 +8,9 @@ import com.mparticle.testutils.BaseCleanInstallEachTest
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 class DeviceAttributesTests : BaseCleanInstallEachTest() {
     @Test
     @Throws(Exception::class)

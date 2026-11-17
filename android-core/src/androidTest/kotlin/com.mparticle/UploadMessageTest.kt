@@ -2,6 +2,7 @@ package com.mparticle
 
 import android.os.Handler
 import android.os.Looper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.internal.AccessUtils
 import com.mparticle.internal.AccessUtils.EmptyMParticleApiClient
 import com.mparticle.internal.Constants
@@ -18,9 +19,11 @@ import org.json.JSONException
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
 
+@RunWith(AndroidJUnit4::class)
 class UploadMessageTest : BaseCleanStartedEachTest() {
     /**
      * set MPID, log between 0 and 20 random MPEvents, and check to make sure each one is properly

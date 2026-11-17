@@ -1,5 +1,6 @@
 package com.mparticle.identity
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.MParticle
 import com.mparticle.MParticle.IdentityType
 import com.mparticle.MParticleOptions
@@ -17,8 +18,10 @@ import junit.framework.TestCase
 import org.json.JSONException
 import org.junit.Assert
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 
+@RunWith(AndroidJUnit4::class)
 class IdentityApiStartTest : BaseCleanInstallEachTest() {
     @Test
     @Throws(Exception::class)

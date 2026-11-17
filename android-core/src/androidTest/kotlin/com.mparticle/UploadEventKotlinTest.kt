@@ -1,12 +1,15 @@
 package com.mparticle
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.commerce.Product
 import com.mparticle.networking.Matcher
 import com.mparticle.testutils.BaseCleanStartedEachTest
 import org.junit.Test
+import org.junit.runner.RunWith
 import kotlin.test.assertNotEquals
 
+@RunWith(AndroidJUnit4::class)
 class UploadEventKotlinTest : BaseCleanStartedEachTest() {
     @Test
     fun testMPEventUploadBypass() {

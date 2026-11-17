@@ -1,10 +1,13 @@
 package com.mparticle.networking
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.internal.Constants
 import com.mparticle.internal.Logger
 import org.junit.Assert
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 class NetworkOptionsManagerTest {
     @Test
     fun testEmptyNetworkOptions() {

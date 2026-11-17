@@ -3,6 +3,7 @@ package com.mparticle.identity
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.MParticle
 import com.mparticle.MParticle.IdentityType
 import com.mparticle.TypedUserAttributeListener
@@ -16,9 +17,11 @@ import com.mparticle.testutils.MPLatch
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.util.Locale
 import java.util.concurrent.CountDownLatch
 
+@RunWith(AndroidJUnit4::class)
 class MParticleUserDelegateITest : BaseCleanStartedEachTest() {
     private lateinit var mUserDelegate: MParticleUserDelegate
 

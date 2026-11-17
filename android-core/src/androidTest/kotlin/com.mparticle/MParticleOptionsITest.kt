@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Looper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import com.mparticle.MParticleOptions.BatchCreationListener
@@ -21,10 +22,12 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
 
-class MParticleOptionsTest : BaseAbstractTest() {
+@RunWith(AndroidJUnit4::class)
+class MParticleOptionsITest : BaseAbstractTest() {
     lateinit var mContext: Context
     private lateinit var mProductionContext: Context
 

@@ -1,5 +1,6 @@
 package com.mparticle.kits
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.internal.AccessUtils
@@ -12,7 +13,9 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 class UpdateConfigTest : BaseKitOptionsTest() {
     @Test
     fun testKitsLoadFromRemoteConfig() {

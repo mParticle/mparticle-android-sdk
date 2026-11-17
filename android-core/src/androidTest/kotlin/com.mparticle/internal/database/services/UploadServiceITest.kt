@@ -1,5 +1,6 @@
 package com.mparticle.internal.database.services
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.internal.Constants
 import com.mparticle.internal.database.UploadSettings
 import com.mparticle.networking.NetworkOptions
@@ -7,8 +8,10 @@ import org.json.JSONException
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.junit.runner.RunWith
 
-class UploadServiceTest : BaseMPServiceTest() {
+@RunWith(AndroidJUnit4::class)
+class UploadServiceITest : BaseMPServiceTest() {
 
     @Test
     @Throws(JSONException::class)

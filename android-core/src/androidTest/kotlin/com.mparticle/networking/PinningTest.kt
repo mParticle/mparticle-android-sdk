@@ -1,5 +1,6 @@
 package com.mparticle.networking
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mparticle.MParticle
 import com.mparticle.identity.IdentityApiRequest
@@ -14,8 +15,10 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 
+@RunWith(AndroidJUnit4::class)
 open class PinningTest : BaseCleanStartedEachTest() {
     var called: AndroidUtils.Mutable<Boolean> = AndroidUtils.Mutable(false)
     var latch: CountDownLatch = MPLatch(1)

@@ -1,9 +1,12 @@
 package com.mparticle.internal.database.tables
 
 import android.database.sqlite.SQLiteDatabase
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.internal.database.services.SQLiteOpenHelperWrapper
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 class UploadTableTest : BaseTableTest() {
     @Test
     @Throws(InterruptedException::class)

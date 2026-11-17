@@ -2,12 +2,15 @@ package com.mparticle.internal.database
 
 import android.database.sqlite.SQLiteDatabase
 import android.provider.BaseColumns
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.internal.database.services.SQLiteOpenHelperWrapper
 import com.mparticle.internal.database.tables.BaseTableTest
 import com.mparticle.internal.database.tables.MParticleDatabaseHelper
 import com.mparticle.internal.database.tables.MessageTable
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 class UpgradeMessageTableTest : BaseTableTest() {
     private val helper = MParticleDatabaseHelper(mContext)
 

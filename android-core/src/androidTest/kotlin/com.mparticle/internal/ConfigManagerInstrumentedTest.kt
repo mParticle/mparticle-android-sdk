@@ -1,5 +1,6 @@
 package com.mparticle.internal
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.Configuration
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
@@ -14,7 +15,9 @@ import org.json.JSONException
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 class ConfigManagerInstrumentedTest : BaseAbstractTest() {
     @Test
     @Throws(InterruptedException::class)

@@ -2,6 +2,7 @@ package com.mparticle.identity
 
 import android.os.Handler
 import android.util.MutableBoolean
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.MParticle
 import com.mparticle.internal.ConfigManager
 import com.mparticle.internal.Logger
@@ -16,10 +17,12 @@ import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
 
-class MParticleIdentityClientImplTest : BaseCleanStartedEachTest() {
+@RunWith(AndroidJUnit4::class)
+class MParticleIdentityClientImplITest : BaseCleanStartedEachTest() {
     private var mConfigManager: ConfigManager? = null
     private var mApiClient: MParticleIdentityClientImpl? = null
 

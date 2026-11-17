@@ -2,6 +2,7 @@ package com.mparticle.internal
 
 import android.os.HandlerThread
 import android.os.Message
+import android.os.SystemClock
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -81,10 +82,18 @@ class BaseHandlerDisableTest {
                 isDaemon = true
             }.start()
 
+            // disable() bounds its wait by SystemClock, which Robolectric moves only on SystemClock.sleep, and that
+            // sleep returns immediately. Give the caller real time before each step, or the clock can pass 30s before
+            // it reads its deadline.
+            var waitedMs = 0L
+            while (!disableReturned.await(100, TimeUnit.MILLISECONDS) && waitedMs < disableMustReturnWithinMs) {
+                SystemClock.sleep(1000)
+                waitedMs += 1000
+            }
             assertTrue(
                 "disable() did not return within ${disableMustReturnWithinMs}ms with a message in " +
                     "flight; it is spinning instead of giving up waiting",
-                disableReturned.await(disableMustReturnWithinMs, TimeUnit.MILLISECONDS),
+                disableReturned.count == 0L,
             )
         } finally {
             releaseHandlerThread.countDown()

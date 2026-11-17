@@ -1,6 +1,7 @@
 package com.mparticle.internal.database.services
 
 import android.database.Cursor
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.internal.BatchId
 import com.mparticle.internal.MessageBatch
 import com.mparticle.internal.database.tables.SessionTable
@@ -9,9 +10,11 @@ import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.util.UUID
 
-class SessionServiceTest : BaseMPServiceTest() {
+@RunWith(AndroidJUnit4::class)
+class SessionServiceITest : BaseMPServiceTest() {
     @Test
     @Throws(Exception::class)
     fun testUpdateSessionInstallReferrer() {

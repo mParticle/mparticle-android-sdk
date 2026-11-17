@@ -1,6 +1,7 @@
 package com.mparticle.internal.database.services
 
 import android.location.Location
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.internal.ConfigManager
 import com.mparticle.internal.InternalSession
 import com.mparticle.internal.messages.BaseMPMessage
@@ -8,8 +9,10 @@ import org.json.JSONException
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
-class BreadcrumbServiceTest : BaseMPServiceTest() {
+@RunWith(AndroidJUnit4::class)
+class BreadcrumbServiceITest : BaseMPServiceTest() {
     @Before
     @Throws(Exception::class)
     fun before() {

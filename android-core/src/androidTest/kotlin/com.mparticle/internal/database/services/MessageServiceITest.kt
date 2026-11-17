@@ -1,6 +1,7 @@
 package com.mparticle.internal.database.services
 
 import android.location.Location
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.internal.Constants
 import com.mparticle.internal.InternalSession
 import com.mparticle.internal.database.services.MessageService.ReadyMessage
@@ -9,10 +10,12 @@ import org.json.JSONException
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.util.UUID
 import kotlin.properties.Delegates
 
-class MessageServiceTest : BaseMPServiceTest() {
+@RunWith(AndroidJUnit4::class)
+class MessageServiceITest : BaseMPServiceTest() {
     var mpid1 by Delegates.notNull<Long>()
     var mpid2 by Delegates.notNull<Long>()
     var mpid3 by Delegates.notNull<Long>()

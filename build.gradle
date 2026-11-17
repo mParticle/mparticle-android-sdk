@@ -99,3 +99,5 @@ allprojects {
         }
     }
 }
+
+apply from: "gradle/robolectric/robolectric.gradle"

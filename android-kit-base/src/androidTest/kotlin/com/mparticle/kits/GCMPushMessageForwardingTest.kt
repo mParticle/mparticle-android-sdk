@@ -3,6 +3,7 @@ package com.mparticle.kits
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.MPServiceUtil
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
@@ -10,7 +11,9 @@ import com.mparticle.kits.testkits.PushListenerTestKit
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 class GCMPushMessageForwardingTest : BaseKitOptionsTest() {
     @Test
     fun testPushForwardedAfterSDKStarted() {

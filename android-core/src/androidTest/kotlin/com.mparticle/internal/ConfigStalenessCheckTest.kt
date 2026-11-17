@@ -1,16 +1,19 @@
 package com.mparticle.internal
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.testutils.BaseCleanInstallEachTest
 import com.mparticle.testutils.MPLatch
 import org.json.JSONObject
 import org.junit.Test
+import org.junit.runner.RunWith
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+@RunWith(AndroidJUnit4::class)
 class ConfigStalenessCheckTest : BaseCleanInstallEachTest() {
     val configManager: ConfigManager
         get() =

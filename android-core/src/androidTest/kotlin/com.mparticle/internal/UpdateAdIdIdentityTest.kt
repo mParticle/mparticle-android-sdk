@@ -1,5 +1,6 @@
 package com.mparticle.internal
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.identity.BaseIdentityTask
@@ -7,9 +8,11 @@ import com.mparticle.identity.IdentityApiRequest
 import com.mparticle.testutils.BaseCleanInstallEachTest
 import com.mparticle.testutils.MPLatch
 import org.junit.Test
+import org.junit.runner.RunWith
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
+@RunWith(AndroidJUnit4::class)
 class UpdateAdIdIdentityTest : BaseCleanInstallEachTest() {
     @Test
     fun testAdIdModifyNoUser() {

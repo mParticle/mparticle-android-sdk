@@ -2,6 +2,7 @@ package com.mparticle.internal
 
 import android.content.Context
 import android.util.MutableBoolean
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.AccessUtils
 import com.mparticle.MParticle
 import com.mparticle.identity.IdentityApiRequest
@@ -10,9 +11,11 @@ import com.mparticle.testutils.BaseCleanStartedEachTest
 import com.mparticle.testutils.MPLatch
 import org.junit.Assert
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 
-class KitFrameworkWrapperTest : BaseCleanStartedEachTest() {
+@RunWith(AndroidJUnit4::class)
+class KitFrameworkWrapperITest : BaseCleanStartedEachTest() {
     private fun setKitManager(kitManager: KitFrameworkWrapper) {
         AccessUtils.setKitManager(kitManager)
         com.mparticle.identity.AccessUtils

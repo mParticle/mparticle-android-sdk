@@ -1,11 +1,14 @@
 package com.mparticle.internal
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.MParticle
 import com.mparticle.testutils.BaseCleanStartedEachTest
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 class UserStorageTest : BaseCleanStartedEachTest() {
     @Before
     fun before() {

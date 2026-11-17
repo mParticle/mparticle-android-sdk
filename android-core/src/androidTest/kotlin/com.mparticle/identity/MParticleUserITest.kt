@@ -1,12 +1,15 @@
 package com.mparticle.identity
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.MParticle
 import com.mparticle.testutils.BaseCleanStartedEachTest
 import com.mparticle.testutils.MPLatch
 import org.junit.Assert
 import org.junit.Test
+import org.junit.runner.RunWith
 
-class MParticleUserTest : BaseCleanStartedEachTest() {
+@RunWith(AndroidJUnit4::class)
+class MParticleUserITest : BaseCleanStartedEachTest() {
     @Test
     @Throws(InterruptedException::class)
     fun testFirstLastSeenTime() {

@@ -1,5 +1,6 @@
 package com.mparticle.networking
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.internal.AccessUtils
@@ -9,9 +10,11 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.net.MalformedURLException
 
-class NetworkOptionsTest : BaseCleanInstallEachTest() {
+@RunWith(AndroidJUnit4::class)
+class NetworkOptionsITest : BaseCleanInstallEachTest() {
     private lateinit var mpClient: MParticleBaseClientImpl
     private lateinit var identityClient: MParticleBaseClientImpl
     private val defaultUrls = HashMap<MParticleBaseClientImpl.Endpoint, MPUrl>()

@@ -1,5 +1,6 @@
 package com.mparticle.kits
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
@@ -14,7 +15,9 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 class KitBatchingTest : BaseKitOptionsTest() {
     @Before
     fun before() {
