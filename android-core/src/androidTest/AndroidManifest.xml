@@ -23,7 +23,7 @@
             </intent-filter>
         </activity>
         <service
-            android:exported="true"
+            android:exported="false"
             android:name="com.mparticle.MPService" />
     </application>
 
