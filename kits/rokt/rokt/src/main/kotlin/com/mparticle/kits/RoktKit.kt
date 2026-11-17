@@ -43,6 +43,22 @@ import java.net.URL
 import com.rokt.roktsdk.RoktSession as NativeRoktSession
 
 const val ROKT_ATTRIBUTE_SANDBOX_MODE: String = "sandbox"
+internal const val ROKT_ATTRIBUTE_NO_FUNCTIONAL: String = "noFunctional"
+internal const val ROKT_ATTRIBUTE_NO_TARGETING: String = "noTargeting"
+internal const val ROKT_ATTRIBUTE_DO_NOT_SHARE_OR_SELL: String = "doNotShareOrSell"
+internal const val ROKT_ATTRIBUTE_GPC_ENABLED: String = "gpcEnabled"
+internal const val NO_TARGETING_USER_ATTRIBUTE: String = "\$NoTargeting"
+
+internal fun canonicalPrivacyKey(key: String): String? = when (key.lowercase()) {
+    "nofunctional" -> ROKT_ATTRIBUTE_NO_FUNCTIONAL
+    "notargeting" -> ROKT_ATTRIBUTE_NO_TARGETING
+    "donotshareorsell" -> ROKT_ATTRIBUTE_DO_NOT_SHARE_OR_SELL
+    "gpcenabled" -> ROKT_ATTRIBUTE_GPC_ENABLED
+    else -> null
+}
+
+internal fun isReservedAttributeKey(key: String): Boolean =
+    key.equals(ROKT_ATTRIBUTE_SANDBOX_MODE, ignoreCase = true) || canonicalPrivacyKey(key) != null
 
 // Sent to Rokt, but skipped in new user-profile writes and in the kit's logged selectPlacements
 // and selectShoppableAds events (does not remove values stored by earlier versions or renamed by
@@ -50,6 +66,67 @@ const val ROKT_ATTRIBUTE_SANDBOX_MODE: String = "sandbox"
 internal const val ROKT_ATTRIBUTE_PAYPAL_PAYER_ID: String = "paypalpayerid"
 
 internal fun isRoktOnlyAttribute(key: String): Boolean = key.equals(ROKT_ATTRIBUTE_PAYPAL_PAYER_ID, ignoreCase = true)
+
+internal fun normalizePrivacyValue(rawValue: String): String = when {
+    rawValue.equals("true", ignoreCase = true) -> "true"
+    rawValue.equals("false", ignoreCase = true) -> "false"
+    else -> rawValue
+}
+
+internal fun extractPrivacyAttributesFromStrings(attributes: Map<String, String>): Map<String, String> {
+    val result = mutableMapOf<String, String>()
+    for (key in attributes.keys.sorted()) {
+        val canonicalKey = canonicalPrivacyKey(key) ?: continue
+        val rawValue = attributes[key] ?: continue
+        if (rawValue.isEmpty()) continue
+        val normalized = normalizePrivacyValue(rawValue)
+        val existing = result[canonicalKey]
+        if (existing == "true") continue
+        if (normalized == "true" || existing == null || key == canonicalKey) {
+            result[canonicalKey] = normalized
+        }
+    }
+    return result
+}
+
+internal fun extractPrivacyAttributesFromObjects(attributes: Map<String, Any?>?): Map<String, String> {
+    if (attributes == null) return emptyMap()
+    val stringMap = mutableMapOf<String, String>()
+    for ((key, value) in attributes) {
+        if (value != null && canonicalPrivacyKey(key) != null) {
+            val str = value.toString()
+            if (str.isNotEmpty()) {
+                stringMap[key] = str
+            }
+        }
+    }
+    return extractPrivacyAttributesFromStrings(stringMap)
+}
+
+internal fun mergePrivacyMapsWithOptOutPrecedence(
+    base: Map<String, String>,
+    override: Map<String, String>,
+): Map<String, String> {
+    val merged = base.toMutableMap()
+    for ((key, value) in override) {
+        if (merged[key] != "true") {
+            merged[key] = normalizePrivacyValue(value)
+        }
+    }
+    return merged
+}
+
+internal fun extractSandboxValue(attributes: Map<String, String>): String? {
+    val exact = attributes[ROKT_ATTRIBUTE_SANDBOX_MODE]
+    if (!exact.isNullOrEmpty()) return exact
+    for (key in attributes.keys.sorted()) {
+        if (key.equals(ROKT_ATTRIBUTE_SANDBOX_MODE, ignoreCase = true)) {
+            val value = attributes[key]
+            if (!value.isNullOrEmpty()) return value
+        }
+    }
+    return null
+}
 
 /**
  * MParticle embedded implementation of the Rokt Library.
@@ -286,13 +363,31 @@ class RoktKit :
 
         filterUser?.userAttributes?.let { userAttrs ->
             for ((key, value) in userAttrs) {
-                if (value != null) {
+                if (value != null && canonicalPrivacyKey(key) == null) {
                     finalAttributes[key] = convertValueToString(value)
                 }
             }
         }
 
-        finalAttributes.putAll(filterAttributes(attributes, configuration))
+        val profilePrivacy = mergePrivacyMapsWithOptOutPrecedence(
+            extractPrivacyAttributesFromObjects(filterUser?.userAttributes),
+            extractPrivacyAttributesFromObjects(filterUser?.mpUser?.userAttributes),
+        )
+        val filteredCaller = filterAttributes(attributes, configuration)
+        val callerPrivacy = extractPrivacyAttributesFromStrings(filteredCaller)
+
+        for ((key, value) in filteredCaller) {
+            if (canonicalPrivacyKey(key) == null) {
+                finalAttributes[key] = value
+            }
+        }
+        val effectivePrivacy = mergePrivacyMapsWithOptOutPrecedence(profilePrivacy, callerPrivacy)
+        finalAttributes.putAll(effectivePrivacy)
+        // The profile write of $NoTargeting is asynchronous and may be filtered, so set it here too.
+        when (effectivePrivacy[ROKT_ATTRIBUTE_NO_TARGETING]) {
+            "true" -> finalAttributes[NO_TARGETING_USER_ATTRIBUTE] = "true"
+            "false" -> finalAttributes.keys.removeAll { it.equals(NO_TARGETING_USER_ATTRIBUTE, ignoreCase = true) }
+        }
 
         filterUser?.id?.toString()?.let { mpid ->
             finalAttributes[MPID] = mpid
@@ -316,15 +411,24 @@ class RoktKit :
 
     private fun filterAttributes(
         attributes: Map<String, String>,
-        kitConfiguration: KitConfiguration,
+        kitConfiguration: KitConfiguration?,
     ): MutableMap<String, String> {
         val userAttributes = mutableMapOf<String, String>()
+        val extractedPrivacy = extractPrivacyAttributesFromStrings(attributes)
+        val explicitSandbox = extractSandboxValue(attributes)
         for ((key, value) in attributes) {
+            if (isReservedAttributeKey(key)) {
+                continue
+            }
             val hashKey = KitUtils.hashForFiltering(key)
-            if (kitConfiguration.mUserAttributeFilters.get(hashKey, true)) {
+            if (kitConfiguration?.mUserAttributeFilters?.get(hashKey, true) != false) {
                 userAttributes[key] = value
             }
         }
+        if (explicitSandbox != null) {
+            userAttributes[ROKT_ATTRIBUTE_SANDBOX_MODE] = explicitSandbox
+        }
+        userAttributes.putAll(extractedPrivacy)
         return userAttributes
     }
 
@@ -441,14 +545,18 @@ class RoktKit :
     }
 
     suspend fun prepareComposableAttributes(attributes: Map<String, String>, onResult: (Map<String, String>) -> Unit) {
-        deferredAttributes = CompletableDeferred()
+        val requestDeferred = CompletableDeferred<Map<String, String>>()
         RoktKitRequestHelper.prepareAttributesAsync(
             kitIntegration = this,
             roktListener = this,
             attributes = attributes,
+            onEnriched = { enrichedAttributes, filterUser ->
+                val finalAttributes = prepareFinalAttributes(filterUser, enrichedAttributes)
+                requestDeferred.complete(finalAttributes)
+            },
         )
         CoroutineScope(Dispatchers.Default).launch {
-            val resultAttributes = deferredAttributes!!.await()
+            val resultAttributes = requestDeferred.await()
             onResult(resultAttributes)
         }
     }

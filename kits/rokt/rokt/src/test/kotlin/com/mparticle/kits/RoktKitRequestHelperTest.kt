@@ -3,12 +3,15 @@ package com.mparticle.kits
 import com.mparticle.MParticle
 import com.mparticle.MParticle.IdentityType
 import com.mparticle.MParticleTask
+import com.mparticle.TypedUserAttributeListener
+import com.mparticle.UserAttributeListenerType
 import com.mparticle.identity.IdentityApi
 import com.mparticle.identity.IdentityApiRequest
 import com.mparticle.identity.IdentityApiResult
 import com.mparticle.identity.IdentityHttpResponse
 import com.mparticle.identity.MParticleUser
 import com.mparticle.identity.TaskFailureListener
+import com.mparticle.identity.TaskSuccessListener
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -29,6 +32,7 @@ class RoktKitRequestHelperTest {
     private val userIdentities = HashMap<IdentityType, String>()
     private val identifyRequests = mutableListOf<IdentityApiRequest>()
     private val failureListeners = mutableListOf<TaskFailureListener>()
+    private val successListeners = mutableListOf<TaskSuccessListener>()
 
     @Before
     fun setUp() {
@@ -67,7 +71,35 @@ class RoktKitRequestHelperTest {
             failureListeners.add(failure.captured)
             task
         }
+        val success = slot<TaskSuccessListener>()
+        every { task.addSuccessListener(capture(success)) } answers {
+            successListeners.add(success.captured)
+            task
+        }
         return task
+    }
+
+    private fun completeIdentify(index: Int, identifiedUser: MParticleUser) {
+        val result = mockk<IdentityApiResult>(relaxed = true)
+        every { result.user } returns identifiedUser
+        successListeners[index].onSuccess(result)
+    }
+
+    // An identified user whose profile reflects its own attribute writes.
+    private fun identifiedUser(stored: MutableMap<String, Any?>, mpid: Long = 2L): MParticleUser {
+        val identifiedUser = mockk<MParticleUser>(relaxed = true)
+        every { identifiedUser.id } returns mpid
+        every { identifiedUser.userIdentities } returns HashMap()
+        every { identifiedUser.userAttributes } answers { HashMap(stored) }
+        every { identifiedUser.setUserAttribute(any(), any()) } answers {
+            stored[firstArg()] = secondArg()
+            true
+        }
+        every { identifiedUser.removeUserAttribute(any()) } answers {
+            stored.remove(firstArg<String>())
+            true
+        }
+        return identifiedUser
     }
 
     private fun selectPlacements(attributes: Map<String, String>) {
@@ -192,5 +224,333 @@ class RoktKitRequestHelperTest {
 
         assertEquals(1, identifyRequests.size)
         verify(exactly = 1) { roktListener.selectShoppableAds(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun selectPlacements_excludesPrivacyAttributesFromSetUserAttributes_andNormalizesKeys() {
+        val capturedAttributes = slot<Map<String, String>>()
+        val capturedUserAttributes = slot<Map<String, Any>>()
+
+        selectPlacements(
+            mapOf(
+                "noFunctional" to "true",
+                "NoTargeting" to "true",
+                "doNotShareOrSell" to "false",
+                "GPCENABLED" to "true",
+                "country" to "US",
+            ),
+        )
+
+        verify(exactly = 1) { user.setUserAttributes(capture(capturedUserAttributes)) }
+        assertEquals(mapOf<String, Any>("country" to "US"), capturedUserAttributes.captured)
+
+        verify(exactly = 1) {
+            roktListener.selectPlacements(
+                any(),
+                capture(capturedAttributes),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        }
+        assertEquals("true", capturedAttributes.captured["noFunctional"])
+        assertEquals("true", capturedAttributes.captured["noTargeting"])
+        assertEquals("false", capturedAttributes.captured["doNotShareOrSell"])
+        assertEquals("true", capturedAttributes.captured["gpcEnabled"])
+        assertEquals("US", capturedAttributes.captured["country"])
+        assertFalse(capturedAttributes.captured.containsKey("NoTargeting"))
+        assertFalse(capturedAttributes.captured.containsKey("GPCENABLED"))
+        verify(exactly = 1) { user.setUserAttribute("\$NoTargeting", true) }
+    }
+
+    @Test
+    fun selectPlacements_whenOnlyPrivacyAttributesPassed_doesNotCallSetUserAttributes() {
+        every { user.userAttributes } returns mapOf("\$NoTargeting" to true)
+
+        selectPlacements(
+            mapOf(
+                "noFunctional" to "true",
+                "noTargeting" to "false",
+                "doNotShareOrSell" to "true",
+                "gpcEnabled" to "false",
+            ),
+        )
+
+        verify(exactly = 0) { user.setUserAttributes(any()) }
+        verify(exactly = 1) { user.removeUserAttribute("\$NoTargeting") }
+        verify(exactly = 0) { user.setUserAttribute("\$NoTargeting", any()) }
+    }
+
+    @Test
+    fun selectPlacements_whenProfileHasPrivacyAttributes_mergesIntoPlacementAttributesAndSyncsNoTargeting() {
+        every { user.userAttributes } returns mapOf(
+            "noTargeting" to "true",
+            "noFunctional" to "true",
+        )
+        val capturedAttributes = slot<Map<String, String>>()
+
+        selectPlacements(emptyMap())
+
+        verify(exactly = 0) { user.setUserAttributes(any()) }
+        verify(exactly = 1) { user.setUserAttribute("\$NoTargeting", true) }
+        verify(exactly = 1) {
+            roktListener.selectPlacements(
+                any(),
+                capture(capturedAttributes),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        }
+        assertEquals("true", capturedAttributes.captured["noTargeting"])
+        assertEquals("true", capturedAttributes.captured["noFunctional"])
+    }
+
+    @Test
+    fun selectPlacements_whenProfileHasNoTargetingFalse_removesNoTargetingUserAttributeWhenPresent() {
+        every { user.userAttributes } returns mapOf(
+            "noTargeting" to "false",
+            "\$NoTargeting" to true,
+        )
+
+        selectPlacements(emptyMap())
+
+        verify(exactly = 1) { user.removeUserAttribute("\$NoTargeting") }
+        verify(exactly = 0) { user.setUserAttribute("\$NoTargeting", any()) }
+    }
+
+    @Test
+    fun selectPlacements_whenBothProfileAndPerCallHavePrivacyAttributes_optOutWinsFromEitherSource() {
+        every { user.userAttributes } returns mapOf(
+            "noTargeting" to "true",
+            "noFunctional" to "false",
+        )
+        val capturedAttributes = slot<Map<String, String>>()
+
+        selectPlacements(
+            mapOf(
+                "notargeting" to "false",
+                "nofunctional" to "true",
+            ),
+        )
+
+        verify(exactly = 0) { user.setUserAttributes(any()) }
+        verify(exactly = 0) { user.removeUserAttribute("\$NoTargeting") }
+        verify(exactly = 1) { user.setUserAttribute("\$NoTargeting", true) }
+        verify(exactly = 1) {
+            roktListener.selectPlacements(
+                any(),
+                capture(capturedAttributes),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        }
+        assertEquals("true", capturedAttributes.captured["noTargeting"])
+        assertEquals("true", capturedAttributes.captured["noFunctional"])
+    }
+
+    @Test
+    fun selectPlacements_whenStoredLegacyFalsePrivacyValueIsOverriddenByPerCallTrue_clearsStoredValue() {
+        val storedMap = mutableMapOf<String, Any?>(
+            "Notargeting" to "false",
+            "NoFunctional" to "false",
+        )
+        every { user.userAttributes } answers { HashMap(storedMap) }
+        every { user.removeUserAttribute(any()) } answers {
+            storedMap.remove(firstArg<String>())
+            true
+        }
+        every { user.setUserAttribute(any(), any()) } answers {
+            storedMap[firstArg<String>()] = secondArg()
+            true
+        }
+        val capturedAttributes = mutableListOf<Map<String, String>>()
+
+        selectPlacements(
+            mapOf(
+                "noFunctional" to "false",
+            ),
+        )
+        assertTrue(storedMap.containsKey("NoFunctional"))
+
+        selectPlacements(
+            mapOf(
+                "noTargeting" to "TRUE",
+                "noFunctional" to "True",
+                "Sandbox" to "true",
+            ),
+        )
+        selectPlacements(emptyMap())
+
+        verify(exactly = 3) {
+            roktListener.selectPlacements(
+                any(),
+                capture(capturedAttributes),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        }
+        assertEquals("true", capturedAttributes[1]["noTargeting"])
+        assertEquals("true", capturedAttributes[1]["noFunctional"])
+        assertEquals("true", capturedAttributes[1]["sandbox"])
+        assertFalse(capturedAttributes[1].containsKey("Sandbox"))
+        assertFalse(storedMap.containsKey("Notargeting"))
+        assertFalse(storedMap.containsKey("NoFunctional"))
+        assertEquals(true, storedMap["\$NoTargeting"])
+        assertFalse(capturedAttributes[2].containsKey("noTargeting"))
+    }
+
+    @Test
+    fun selectPlacements_whenPendingProfileWriteQueuesOptOut_resolvesAfterPendingWrites() {
+        every { user.userAttributes } returns mapOf("noTargeting" to "false")
+        every { user.getUserAttributes(any<UserAttributeListenerType>()) } answers {
+            val listener = firstArg<UserAttributeListenerType>()
+            if (listener is TypedUserAttributeListener) {
+                listener.onUserAttributesReceived(
+                    mapOf("noTargeting" to "true"),
+                    emptyMap(),
+                    1L,
+                )
+            }
+            mapOf("noTargeting" to "true")
+        }
+        val capturedAttributes = slot<Map<String, String>>()
+
+        selectPlacements(emptyMap())
+
+        verify(exactly = 1) { user.setUserAttribute("\$NoTargeting", true) }
+        verify(exactly = 0) { user.removeUserAttribute("\$NoTargeting") }
+        verify(exactly = 1) {
+            roktListener.selectPlacements(
+                any(),
+                capture(capturedAttributes),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        }
+        assertEquals("true", capturedAttributes.captured["noTargeting"])
+    }
+
+    @Test
+    fun selectPlacements_whenIdentifyCompletes_clearsOverriddenPrivacyValueAndSyncsNoTargetingOnIdentifiedUser() {
+        userIdentities[IdentityType.Email] = "old@example.com"
+        val identifiedUser = identifiedUser(mutableMapOf("NoTargeting" to "false"))
+
+        selectPlacements(mapOf("email" to "new@example.com", "noTargeting" to "true"))
+        completeIdentify(0, identifiedUser)
+
+        verify(exactly = 1) { identifiedUser.removeUserAttribute("NoTargeting") }
+        verify(exactly = 1) { identifiedUser.setUserAttribute("\$NoTargeting", true) }
+    }
+
+    @Test
+    fun selectPlacements_whenOlderIdentifyCompletesAfterNewerOneForSameUser_skipsStaleIdentifiedUserSync() {
+        userIdentities[IdentityType.Email] = "old@example.com"
+        val stored = mutableMapOf<String, Any?>()
+        val identifiedUser = identifiedUser(stored)
+
+        selectPlacements(mapOf("email" to "new@example.com", "noTargeting" to "false"))
+        selectPlacements(mapOf("email" to "new@example.com", "noTargeting" to "true"))
+        completeIdentify(1, identifiedUser)
+        completeIdentify(0, identifiedUser)
+
+        assertEquals(true, stored["\$NoTargeting"])
+    }
+
+    @Test
+    fun selectPlacements_whenCallWithoutEmailRunsBeforeIdentifyCompletes_stillSyncsIdentifiedUser() {
+        userIdentities[IdentityType.Email] = "old@example.com"
+        val stored = mutableMapOf<String, Any?>()
+        val identifiedUser = identifiedUser(stored)
+
+        selectPlacements(mapOf("email" to "new@example.com", "noTargeting" to "true"))
+        selectPlacements(emptyMap())
+        completeIdentify(0, identifiedUser)
+
+        assertEquals(true, stored["\$NoTargeting"])
+    }
+
+    @Test
+    fun selectPlacements_whenIdentifyKeepsTheCurrentUserAndANewerCallRan_skipsStaleSync() {
+        userIdentities[IdentityType.Email] = "old@example.com"
+
+        selectPlacements(mapOf("email" to "new@example.com", "noTargeting" to "true"))
+        selectPlacements(mapOf("noTargeting" to "false"))
+        completeIdentify(0, user)
+
+        // Only the first call's own preparation sets it; the stale identify callback does not.
+        verify(exactly = 1) { user.setUserAttribute("\$NoTargeting", true) }
+    }
+
+    @Test
+    fun selectPlacements_whenCallWithoutPrivacyRunsForIdentifiedUserFirst_stillSyncsIdentifiedUser() {
+        userIdentities[IdentityType.Email] = "old@example.com"
+        val stored = mutableMapOf<String, Any?>()
+        val identifiedUser = identifiedUser(stored)
+
+        selectPlacements(mapOf("email" to "new@example.com", "noTargeting" to "true"))
+        // The SDK notifies identity listeners of the new user before identify's success listener.
+        every { identityApi.currentUser } returns identifiedUser
+        selectPlacements(emptyMap())
+        completeIdentify(0, identifiedUser)
+
+        assertEquals(true, stored["\$NoTargeting"])
+    }
+
+    @Test
+    fun selectPlacements_whenNewerOptOutRanForIdentifiedUser_skipsOlderCallWithoutPrivacy() {
+        userIdentities[IdentityType.Email] = "old@example.com"
+        val identifiedUser = identifiedUser(mutableMapOf("noTargeting" to "false"))
+        // Removals stay queued, as they are in the SDK.
+        every { identifiedUser.removeUserAttribute(any()) } returns true
+
+        selectPlacements(mapOf("email" to "new@example.com"))
+        every { identityApi.currentUser } returns identifiedUser
+        selectPlacements(mapOf("noTargeting" to "true"))
+        completeIdentify(0, identifiedUser)
+
+        verify(exactly = 0) { identifiedUser.removeUserAttribute("\$NoTargeting") }
+    }
+
+    @Test
+    fun selectPlacements_whenNewerCallPassesOnlyNoFunctional_stillSyncsNoTargetingOnIdentifiedUser() {
+        userIdentities[IdentityType.Email] = "old@example.com"
+        val stored = mutableMapOf<String, Any?>()
+        val identifiedUser = identifiedUser(stored)
+
+        selectPlacements(mapOf("email" to "new@example.com", "noTargeting" to "true"))
+        every { identityApi.currentUser } returns identifiedUser
+        selectPlacements(mapOf("noFunctional" to "true"))
+        completeIdentify(0, identifiedUser)
+
+        assertEquals(true, stored["\$NoTargeting"])
+    }
+
+    @Test
+    fun selectPlacements_whenNewerCallPassesOneKey_identifySyncSkipsOnlyThatKey() {
+        userIdentities[IdentityType.Email] = "old@example.com"
+        val stored = mutableMapOf<String, Any?>("noFunctional" to "false")
+        val identifiedUser = identifiedUser(stored)
+
+        selectPlacements(mapOf("email" to "new@example.com", "noTargeting" to "true", "noFunctional" to "true"))
+        every { identityApi.currentUser } returns identifiedUser
+        selectPlacements(mapOf("noFunctional" to "false"))
+        completeIdentify(0, identifiedUser)
+
+        assertEquals(true, stored["\$NoTargeting"])
+        assertEquals("false", stored["noFunctional"])
     }
 }
