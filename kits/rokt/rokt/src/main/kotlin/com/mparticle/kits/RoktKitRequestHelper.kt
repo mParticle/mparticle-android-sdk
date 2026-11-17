@@ -1,8 +1,10 @@
 package com.mparticle.kits
 
 import android.graphics.Typeface
+import android.os.Looper
 import com.mparticle.MParticle
 import com.mparticle.MParticleTask
+import com.mparticle.TypedUserAttributeListener
 import com.mparticle.identity.IdentityApi
 import com.mparticle.identity.IdentityApiRequest
 import com.mparticle.identity.IdentityApiResult
@@ -14,8 +16,32 @@ import com.rokt.roktsdk.RoktConfig
 import org.json.JSONException
 import java.lang.ref.WeakReference
 import java.util.Objects
+import java.util.concurrent.atomic.AtomicLong
 
 internal object RoktKitRequestHelper {
+    private val placementSequence = AtomicLong()
+
+    // Newest call that passed each canonical privacy key, per MPID. At most four entries per MPID
+    // seen in this process, so it stays small and is never pruned.
+    private val lastPrivacySequence = HashMap<Pair<Long, String>, Long>()
+
+    // Records `sequence` for each of `keys` on `mpid` and returns the keys that no newer call has
+    // passed for that user.
+    private fun claimPrivacyKeys(mpid: Long, keys: Set<String>, sequence: Long): Set<String> =
+        synchronized(lastPrivacySequence) {
+            keys.filterTo(mutableSetOf()) { key ->
+                val newest = lastPrivacySequence[mpid to key]
+                (newest == null || newest <= sequence).also { claimed ->
+                    if (claimed) lastPrivacySequence[mpid to key] = sequence
+                }
+            }
+        }
+
+    private fun isPrivacyKeySuperseded(mpid: Long, key: String, sequence: Long): Boolean =
+        synchronized(lastPrivacySequence) {
+            (lastPrivacySequence[mpid to key] ?: 0L) > sequence
+        }
+
     fun selectPlacements(
         kitIntegration: KitIntegration,
         roktListener: RoktKitBridge,
@@ -37,17 +63,25 @@ internal object RoktKitRequestHelper {
         val hashedEmail = getValueIgnoreCase(mutableAttributes, "emailsha256")
         val kitConfig = kitIntegration.configuration
 
-        confirmEmail(email, hashedEmail, user, instance.Identity(), kitConfig) {
-            val finalAttributes = prepareAttributes(mutableAttributes, user, kitConfig)
-            roktListener.selectPlacements(
-                viewName,
-                finalAttributes,
-                placeHolders?.toMutableMap(),
-                fontTypefaces?.toMutableMap(),
-                FilteredMParticleUser.getInstance(user?.id ?: 0L, kitIntegration),
-                config,
-                options,
-            )
+        confirmEmail(
+            email = email,
+            hashedEmail = hashedEmail,
+            user = user,
+            identityApi = instance.Identity(),
+            kitConfiguration = kitConfig,
+            callerAttributes = attributes,
+        ) {
+            prepareAttributes(mutableAttributes, user, kitConfig) { finalAttributes ->
+                roktListener.selectPlacements(
+                    viewName,
+                    finalAttributes,
+                    placeHolders?.toMutableMap(),
+                    fontTypefaces?.toMutableMap(),
+                    FilteredMParticleUser.getInstance(user?.id ?: 0L, kitIntegration),
+                    config,
+                    options,
+                )
+            }
         }
     }
 
@@ -55,6 +89,7 @@ internal object RoktKitRequestHelper {
         kitIntegration: KitIntegration,
         roktListener: RoktKitBridge,
         attributes: Map<String, String>,
+        onEnriched: ((MutableMap<String, String>, FilteredMParticleUser?) -> Unit)? = null,
     ) {
         val mutableAttributes = attributes.toMutableMap()
         val instance = MParticle.getInstance()
@@ -67,12 +102,22 @@ internal object RoktKitRequestHelper {
         val hashedEmail = getValueIgnoreCase(mutableAttributes, "emailsha256")
         val kitConfig = kitIntegration.configuration
 
-        confirmEmail(email, hashedEmail, user, instance.Identity(), kitConfig) {
-            val finalAttributes = prepareAttributes(mutableAttributes, user, kitConfig)
-            roktListener.enrichAttributes(
-                finalAttributes,
-                FilteredMParticleUser.getInstance(user?.id ?: 0L, kitIntegration),
-            )
+        confirmEmail(
+            email = email,
+            hashedEmail = hashedEmail,
+            user = user,
+            identityApi = instance.Identity(),
+            kitConfiguration = kitConfig,
+            callerAttributes = attributes,
+        ) {
+            prepareAttributes(mutableAttributes, user, kitConfig) { finalAttributes ->
+                val filterUser = FilteredMParticleUser.getInstance(user?.id ?: 0L, kitIntegration)
+                if (onEnriched != null) {
+                    onEnriched(finalAttributes, filterUser)
+                } else {
+                    roktListener.enrichAttributes(finalAttributes, filterUser)
+                }
+            }
         }
     }
 
@@ -94,14 +139,22 @@ internal object RoktKitRequestHelper {
         val hashedEmail = getValueIgnoreCase(mutableAttributes, "emailsha256")
         val kitConfig = kitIntegration.configuration
 
-        confirmEmail(email, hashedEmail, user, instance.Identity(), kitConfig) {
-            val finalAttributes = prepareAttributes(mutableAttributes, user, kitConfig)
-            roktListener.selectShoppableAds(
-                viewName,
-                finalAttributes,
-                FilteredMParticleUser.getInstance(user?.id ?: 0L, kitIntegration),
-                config,
-            )
+        confirmEmail(
+            email = email,
+            hashedEmail = hashedEmail,
+            user = user,
+            identityApi = instance.Identity(),
+            kitConfiguration = kitConfig,
+            callerAttributes = attributes,
+        ) {
+            prepareAttributes(mutableAttributes, user, kitConfig) { finalAttributes ->
+                roktListener.selectShoppableAds(
+                    viewName,
+                    finalAttributes,
+                    FilteredMParticleUser.getInstance(user?.id ?: 0L, kitIntegration),
+                    config,
+                )
+            }
         }
     }
 
@@ -122,7 +175,8 @@ internal object RoktKitRequestHelper {
         finalAttributes: MutableMap<String, String>,
         user: MParticleUser?,
         kitConfig: KitConfiguration?,
-    ): MutableMap<String, String> {
+        onPrepared: (MutableMap<String, String>) -> Unit,
+    ) {
         val jsonArray = try {
             kitConfig?.placementAttributesMapping ?: org.json.JSONArray()
         } catch (e: JSONException) {
@@ -142,19 +196,191 @@ internal object RoktKitRequestHelper {
             }
         }
 
+        val callerPrivacy = extractPrivacyAttributesFromStrings(finalAttributes)
+        val explicitSandbox = extractSandboxValue(finalAttributes)
+
+        val iterator = finalAttributes.entries.iterator()
+        while (iterator.hasNext()) {
+            val (key, _) = iterator.next()
+            if (isReservedAttributeKey(key)) {
+                iterator.remove()
+            }
+        }
+
         val objectAttributes = mutableMapOf<String, Any>()
         for ((key, value) in finalAttributes) {
-            if (key != ROKT_ATTRIBUTE_SANDBOX_MODE && !isRoktOnlyAttribute(key)) {
+            if (value.isNotEmpty() && !isRoktOnlyAttribute(key)) {
                 objectAttributes[key] = value
             }
         }
-        user?.setUserAttributes(objectAttributes)
-
-        if (!finalAttributes.containsKey(ROKT_ATTRIBUTE_SANDBOX_MODE)) {
-            finalAttributes[ROKT_ATTRIBUTE_SANDBOX_MODE] =
-                Objects.toString(MPUtility.isDevEnv(), "false")
+        if (objectAttributes.isNotEmpty()) {
+            user?.setUserAttributes(objectAttributes)
         }
-        return finalAttributes
+
+        resolveUserAttributes(user) { profileAttributes ->
+            clearOverriddenPrivacyAttributes(user, callerPrivacy, profileAttributes)
+
+            val profilePrivacy = extractPrivacyAttributesFromObjects(profileAttributes)
+            val effectivePrivacy = mergePrivacyMapsWithOptOutPrecedence(profilePrivacy, callerPrivacy)
+            finalAttributes.putAll(effectivePrivacy)
+
+            syncNoTargetingToUser(
+                user = user,
+                noTargetingValue = finalAttributes[ROKT_ATTRIBUTE_NO_TARGETING],
+                profileAttributes = profileAttributes,
+            )
+
+            finalAttributes[ROKT_ATTRIBUTE_SANDBOX_MODE] =
+                explicitSandbox ?: Objects.toString(MPUtility.isDevEnv(), "false")
+            onPrepared(finalAttributes)
+        }
+    }
+
+    private fun resolveUserAttributes(user: MParticleUser?, onResolved: (Map<String, Any?>?) -> Unit) {
+        if (user == null) {
+            onResolved(null)
+            return
+        }
+        var completed = false
+        val listener = object : TypedUserAttributeListener {
+            override fun onUserAttributesReceived(
+                userAttributes: Map<String, Any?>,
+                userAttributeLists: Map<String, List<String?>?>,
+                mpid: Long,
+            ) {
+                if (!completed) {
+                    completed = true
+                    val merged = LinkedHashMap<String, Any?>()
+                    merged.putAll(userAttributes)
+                    merged.putAll(userAttributeLists)
+                    onResolved(merged)
+                }
+            }
+        }
+        var readScheduled = true
+        val immediate = try {
+            user.getUserAttributes(listener)
+        } catch (_: Exception) {
+            readScheduled = false
+            null
+        }
+        if (!completed) {
+            val mainLooper = try {
+                Looper.getMainLooper()
+            } catch (_: Exception) {
+                null
+            }
+            // On the main looper the core queues the read behind pending writes and returns null.
+            val asyncScheduledOnMainLooper = readScheduled &&
+                immediate == null &&
+                mainLooper != null &&
+                mainLooper === Looper.myLooper() &&
+                MParticle.getInstance() != null
+            if (!asyncScheduledOnMainLooper) {
+                completed = true
+                val fallback = try {
+                    user.userAttributes
+                } catch (_: Exception) {
+                    immediate
+                }
+                onResolved(fallback ?: immediate)
+            }
+        }
+    }
+
+    private fun callerPrivacyAttributes(
+        rawCallerAttributes: Map<String, String>,
+        kitConfig: KitConfiguration?,
+    ): Map<String, String> {
+        val mappedCaller = rawCallerAttributes.toMutableMap()
+        val jsonArray = try {
+            kitConfig?.placementAttributesMapping ?: org.json.JSONArray()
+        } catch (_: JSONException) {
+            org.json.JSONArray()
+        }
+        for (i in 0 until jsonArray.length()) {
+            val obj = jsonArray.optJSONObject(i) ?: continue
+            val mapFrom = obj.optString("map")
+            val mapTo = obj.optString("value")
+            if (mappedCaller.containsKey(mapFrom)) {
+                val value = mappedCaller.remove(mapFrom)
+                if (value != null) {
+                    mappedCaller[mapTo] = value
+                }
+            }
+        }
+        return extractPrivacyAttributesFromStrings(mappedCaller)
+    }
+
+    // Applies an identifying call's privacy attributes to the user that identify returned. Keys a
+    // newer call has passed for that user are left to the newer call.
+    private fun syncIdentifiedUserPrivacy(
+        identifiedUser: MParticleUser,
+        rawCallerPrivacy: Map<String, String>,
+        sequence: Long,
+    ) {
+        val claimedKeys = claimPrivacyKeys(identifiedUser.id, rawCallerPrivacy.keys, sequence)
+        val callerPrivacy = rawCallerPrivacy.filterKeys { it in claimedKeys }
+        val identifiedProfileAttrs = identifiedUser.userAttributes
+        clearOverriddenPrivacyAttributes(identifiedUser, callerPrivacy, identifiedProfileAttrs)
+        if (isPrivacyKeySuperseded(identifiedUser.id, ROKT_ATTRIBUTE_NO_TARGETING, sequence)) return
+        val identifiedProfilePrivacy = extractPrivacyAttributesFromObjects(identifiedProfileAttrs)
+        val effectivePrivacy = mergePrivacyMapsWithOptOutPrecedence(identifiedProfilePrivacy, callerPrivacy)
+        syncNoTargetingToUser(
+            user = identifiedUser,
+            noTargetingValue = effectivePrivacy[ROKT_ATTRIBUTE_NO_TARGETING],
+            profileAttributes = identifiedProfileAttrs,
+        )
+    }
+
+    // A per-call opt-out removes stored non-"true" copies so they cannot loosen a later call.
+    private fun clearOverriddenPrivacyAttributes(
+        user: MParticleUser?,
+        callerPrivacy: Map<String, String>,
+        profileAttributes: Map<String, Any?>?,
+    ) {
+        if (user == null || profileAttributes == null) return
+        val optOutCallerKeys = callerPrivacy.filterValues { it.equals("true", ignoreCase = true) }.keys
+        if (optOutCallerKeys.isEmpty()) return
+        for ((existingKey, existingValue) in profileAttributes) {
+            val canonical = canonicalPrivacyKey(existingKey) ?: continue
+            if (canonical in optOutCallerKeys && !existingValue?.toString().equals("true", ignoreCase = true)) {
+                MParticle.withoutRoktApiUsage {
+                    user.removeUserAttribute(existingKey)
+                }
+            }
+        }
+    }
+
+    private fun syncNoTargetingToUser(
+        user: MParticleUser?,
+        noTargetingValue: String?,
+        profileAttributes: Map<String, Any?>?,
+    ) {
+        if (user == null) return
+        when {
+            noTargetingValue.equals("true", ignoreCase = true) -> {
+                val alreadySet = profileAttributes?.entries?.any {
+                    it.key.equals(NO_TARGETING_USER_ATTRIBUTE, ignoreCase = true) &&
+                        it.value?.toString().equals("true", ignoreCase = true)
+                } == true
+                if (!alreadySet) {
+                    MParticle.withoutRoktApiUsage {
+                        user.setUserAttribute(NO_TARGETING_USER_ATTRIBUTE, true)
+                    }
+                }
+            }
+            noTargetingValue.equals("false", ignoreCase = true) -> {
+                val existingKeys = profileAttributes?.keys?.filter {
+                    it.equals(NO_TARGETING_USER_ATTRIBUTE, ignoreCase = true)
+                }.orEmpty()
+                for (existingKey in existingKeys) {
+                    MParticle.withoutRoktApiUsage {
+                        user.removeUserAttribute(existingKey)
+                    }
+                }
+            }
+        }
     }
 
     private fun confirmEmail(
@@ -163,8 +389,12 @@ internal object RoktKitRequestHelper {
         user: MParticleUser?,
         identityApi: IdentityApi,
         kitConfiguration: KitConfiguration?,
+        callerAttributes: Map<String, String>,
         runnable: Runnable,
     ) {
+        val callerPrivacy = callerPrivacyAttributes(callerAttributes, kitConfiguration)
+        val sequence = placementSequence.incrementAndGet()
+        user?.let { claimPrivacyKeys(it.id, callerPrivacy.keys, sequence) }
         val hasEmail = !email.isNullOrEmpty()
         val hasHashedEmail = !hashedEmail.isNullOrEmpty()
 
@@ -209,13 +439,19 @@ internal object RoktKitRequestHelper {
                 if (hashedEmailMismatch && selectedIdentityType != null) {
                     identityBuilder.userIdentity(selectedIdentityType, hashedEmail)
                 }
-                identifyInBackground(identityApi, identityBuilder.build())
+                identifyInBackground(identityApi, identityBuilder.build()) { identifiedUser ->
+                    syncIdentifiedUserPrivacy(identifiedUser, callerPrivacy, sequence)
+                }
             }
         }
         runnable.run()
     }
 
-    private fun identifyInBackground(identityApi: IdentityApi, identityRequest: IdentityApiRequest) {
+    private fun identifyInBackground(
+        identityApi: IdentityApi,
+        identityRequest: IdentityApiRequest,
+        onIdentifiedUser: ((MParticleUser) -> Unit)? = null,
+    ) {
         val task: MParticleTask<IdentityApiResult>?
         try {
             // Kit-internal identity sync (email carried on selectPlacement) — suppress so it
@@ -235,6 +471,7 @@ internal object RoktKitRequestHelper {
                 "Updated email identity in the background based on selectPlacement's attributes: " +
                     result.user.userIdentities[MParticle.IdentityType.Email],
             )
+            result?.user?.let { onIdentifiedUser?.invoke(it) }
         }
     }
 }

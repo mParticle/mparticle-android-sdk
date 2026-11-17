@@ -14,6 +14,7 @@ import com.mparticle.MParticleOptions.DataplanOptions
 import com.mparticle.WrapperSdk
 import com.mparticle.WrapperSdkVersion
 import com.mparticle.identity.IdentityApi
+import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.CoreCallbacks
 import com.mparticle.internal.CoreCallbacks.KitListener
 import com.mparticle.kits.mocks.MockKitConfiguration
@@ -2047,5 +2048,185 @@ class RoktKitTests {
         roktKit.configuration =
             MockKitConfiguration.createKitConfiguration(JSONObject().put("hs", JSONObject()))
         return filterUser
+    }
+
+    @Test
+    fun testFilterAttributes_exemptsReservedPrivacyAttributesAndNormalizesKeys() {
+        val uaFilters = JSONObject()
+        for (key in listOf(
+            "noFunctional",
+            "noTargeting",
+            "doNotShareOrSell",
+            "gpcEnabled",
+            "NoTargeting",
+            "GPCENABLED",
+            "sandbox",
+            "ShouldFilter",
+        )) {
+            uaFilters.put(KitUtils.hashForFiltering(key).toString(), 0)
+        }
+        val hsJson = JSONObject().put("ua", uaFilters)
+        roktKit.configuration = MockKitConfiguration.createKitConfiguration(JSONObject().put("hs", hsJson))
+
+        val method: Method = RoktKit::class.java.getDeclaredMethod(
+            "filterAttributes",
+            Map::class.java,
+            KitConfiguration::class.java,
+        )
+        method.isAccessible = true
+
+        val attributes = mapOf(
+            "noFunctional" to "true",
+            "NoTargeting" to "TRUE",
+            "doNotShareOrSell" to "FALSE",
+            "GPCENABLED" to "true",
+            "Sandbox" to "true",
+            "ShouldFilter" to "blocked_value",
+            "allowed_key" to "allowed_value",
+        )
+
+        @Suppress("UNCHECKED_CAST")
+        val result = method.invoke(roktKit, attributes, roktKit.configuration) as Map<String, String>
+
+        assertFalse(result.containsKey("ShouldFilter"))
+        assertFalse(result.containsKey("NoTargeting"))
+        assertFalse(result.containsKey("GPCENABLED"))
+        assertFalse(result.containsKey("Sandbox"))
+        assertEquals("true", result["noFunctional"])
+        assertEquals("true", result["noTargeting"])
+        assertEquals("false", result["doNotShareOrSell"])
+        assertEquals("true", result["gpcEnabled"])
+        assertEquals("true", result["sandbox"])
+        assertEquals("allowed_value", result["allowed_key"])
+    }
+
+    @Test
+    fun testSelectPlacements_exemptsProfilePrivacyAttributesFromFilters_andPerCallOverridesProfile() {
+        mockkObject(Rokt)
+        try {
+            val capturedAttributesList = mutableListOf<Map<String, String>>()
+            every {
+                Rokt.selectPlacements(
+                    any<String>(),
+                    capture(capturedAttributesList),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            } just runs
+
+            val uaFilters = JSONObject()
+            for (key in listOf("noTargeting", "noFunctional", "notargeting", "ShouldFilter")) {
+                uaFilters.put(KitUtils.hashForFiltering(key).toString(), 0)
+            }
+            val hsJson = JSONObject().put("ua", uaFilters)
+            roktKit.configuration = MockKitConfiguration.createKitConfiguration(JSONObject().put("hs", hsJson))
+
+            val mockMpUser = mock(MParticleUser::class.java)
+            Mockito.`when`(mockMpUser.id).thenReturn(12345L)
+            Mockito.`when`(mockMpUser.userIdentities).thenReturn(HashMap())
+            val profileAttributes = hashMapOf<String, Any?>(
+                "noTargeting" to "true",
+                "noFunctional" to "false",
+                "ShouldFilter" to "blocked_profile_value",
+                "allowedProfileAttr" to "allowed_profile_value",
+            )
+            Mockito.`when`(mockMpUser.userAttributes).thenReturn(profileAttributes)
+
+            val filterUser = FilteredMParticleUser.getInstance(mockMpUser, roktKit)
+
+            roktKit.selectPlacements(
+                viewName = "test_view",
+                attributes = emptyMap(),
+                placeHolders = null,
+                fontTypefaces = null,
+                filterUser = filterUser,
+                roktConfig = null,
+                placementOptions = null,
+            )
+
+            val firstCaptured = capturedAttributesList[0]
+            assertEquals("true", firstCaptured["noTargeting"])
+            assertEquals("false", firstCaptured["noFunctional"])
+            assertEquals("allowed_profile_value", firstCaptured["allowedProfileAttr"])
+            assertFalse(firstCaptured.containsKey("ShouldFilter"))
+
+            roktKit.selectPlacements(
+                viewName = "test_view",
+                attributes = mapOf(
+                    "notargeting" to "false",
+                    "nofunctional" to "true",
+                ),
+                placeHolders = null,
+                fontTypefaces = null,
+                filterUser = filterUser,
+                roktConfig = null,
+                placementOptions = null,
+            )
+
+            val secondCaptured = capturedAttributesList[1]
+            assertEquals("true", secondCaptured["noTargeting"])
+            assertEquals("true", secondCaptured["noFunctional"])
+            assertFalse(secondCaptured.containsKey("notargeting"))
+            assertFalse(secondCaptured.containsKey("nofunctional"))
+            assertFalse(secondCaptured.containsKey("ShouldFilter"))
+        } finally {
+            unmockkObject(Rokt)
+        }
+    }
+
+    @Test
+    fun testSelectPlacements_forwardsNoTargetingUserAttributeFromEffectiveNoTargeting() {
+        mockkObject(Rokt)
+        try {
+            val capturedAttributesList = mutableListOf<Map<String, String>>()
+            every {
+                Rokt.selectPlacements(
+                    any<String>(),
+                    capture(capturedAttributesList),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            } just runs
+            roktKit.configuration = MockKitConfiguration.createKitConfiguration(JSONObject().put("hs", JSONObject()))
+
+            val mockMpUser = mock(MParticleUser::class.java)
+            Mockito.`when`(mockMpUser.id).thenReturn(12345L)
+            Mockito.`when`(mockMpUser.userIdentities).thenReturn(HashMap())
+            val profileAttributes = hashMapOf<String, Any?>()
+            Mockito.`when`(mockMpUser.userAttributes).thenReturn(profileAttributes)
+            val filterUser = FilteredMParticleUser.getInstance(mockMpUser, roktKit)
+
+            roktKit.selectPlacements(
+                viewName = "test_view",
+                attributes = mapOf("noTargeting" to "true"),
+                placeHolders = null,
+                fontTypefaces = null,
+                filterUser = filterUser,
+                roktConfig = null,
+                placementOptions = null,
+            )
+            assertEquals("true", capturedAttributesList[0]["\$NoTargeting"])
+
+            profileAttributes["\$NoTargeting"] = true
+            roktKit.selectPlacements(
+                viewName = "test_view",
+                attributes = mapOf("noTargeting" to "false"),
+                placeHolders = null,
+                fontTypefaces = null,
+                filterUser = filterUser,
+                roktConfig = null,
+                placementOptions = null,
+            )
+            assertEquals("false", capturedAttributesList[1]["noTargeting"])
+            assertFalse(capturedAttributesList[1].containsKey("\$NoTargeting"))
+        } finally {
+            unmockkObject(Rokt)
+        }
     }
 }
