@@ -157,6 +157,14 @@
 -keep class com.mparticle.identity.MParticleIdentityClientImpl {
     public static java.lang.String getStringValue(com.mparticle.MParticle$IdentityType);
 }
+# Rokt kit calls these AppStateManager screen_view_id helpers across the published AAR boundary.
+-keep class com.mparticle.internal.AppStateManager {
+    public java.lang.String getCurrentScreenViewId();
+    public java.lang.String reservePendingScreenViewId();
+    public java.lang.String mintOrAdoptScreenViewId();
+    public java.lang.String mintOrAdoptScreenViewId(java.lang.String);
+    public java.lang.String getOrCreateScreenViewIdForPlacement();
+}
 -keep class com.mparticle.identity.IdentityApiRequest { *; }
 -keep class com.mparticle.identity.IdentityApiRequest$* { *; }
 -keep class com.mparticle.identity.IdentityApiResult { *; }

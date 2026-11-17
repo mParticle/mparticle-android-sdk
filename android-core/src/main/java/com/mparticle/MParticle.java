@@ -727,7 +727,13 @@ public class MParticle {
         }
         mAppStateManager.ensureActiveSession();
         if (mConfigManager.isEnabled() && screenEvent.isShouldUploadEvent()) {
-            mMessageManager.logScreen(screenEvent, screenEvent.getNavigationDirection());
+            String screenViewId = null;
+            if (screenEvent.getNavigationDirection()) {
+                Map<String, String> customAttributes = screenEvent.getCustomAttributeStrings();
+                String callerScreenViewId = customAttributes != null ? customAttributes.get("screen_view_id") : null;
+                screenViewId = mAppStateManager.mintOrAdoptScreenViewId(callerScreenViewId);
+            }
+            mMessageManager.logScreen(screenEvent, screenEvent.getNavigationDirection(), screenViewId);
             Logger.debug("Logged screen: ", screenEvent.toString());
         }
         if (screenEvent.getNavigationDirection()) {

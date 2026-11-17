@@ -55,6 +55,14 @@
 -keep,allowshrinking class com.mparticle.internal.listeners.InternalListenerManager {
     *** onKitApiCalled(...);
 }
+# Preserve AppStateManager screen_view_id entry points invoked across core and the Rokt kit.
+-keep,allowoptimization class com.mparticle.internal.AppStateManager {
+    public java.lang.String getCurrentScreenViewId();
+    public java.lang.String reservePendingScreenViewId();
+    public java.lang.String mintOrAdoptScreenViewId();
+    public java.lang.String mintOrAdoptScreenViewId(java.lang.String);
+    public java.lang.String getOrCreateScreenViewIdForPlacement();
+}
 # The stack-name fallback reflects on this interface and its reporting methods.
 -keep interface com.mparticle.internal.KitManager {
     *** setLocation(...);

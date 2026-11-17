@@ -82,6 +82,14 @@ open class MessageManager :
     private var delayedStartOccurred = false
 
     /**
+     * Only apps that ship the Rokt kit upload `screen_view_id`. This reads the classpath rather than
+     * `isKitActive(ROKT)` because kits load asynchronously after `start()`, which the first screen view would race.
+     */
+    @VisibleForTesting
+    internal var attachScreenViewId: Boolean =
+        runCatching { Class.forName("com.mparticle.kits.RoktKit", false, MessageManager::class.java.classLoader) }.isSuccess
+
+    /**
      * Used solely for unit testing
      */
     constructor() {
@@ -284,16 +292,29 @@ open class MessageManager :
         return null
     }
 
-    open fun logScreen(event: MPEvent?, started: Boolean): BaseMPMessage? {
+    open fun logScreen(event: MPEvent?, started: Boolean): BaseMPMessage? =
+        logScreen(event, started, if (started) mAppStateManager?.getCurrentScreenViewId() else null)
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    open fun logScreen(event: MPEvent?, started: Boolean, screenViewId: String?): BaseMPMessage? {
         if (event != null && event.eventName != null) {
             try {
+                var attributes = MPUtility.enforceAttributeConstraints(event.customAttributeStrings)
+                if (started && attachScreenViewId && !screenViewId.isNullOrBlank() && screenViewId.length <= Constants.LIMIT_ATTR_VALUE) {
+                    if (attributes == null) {
+                        attributes = JSONObject()
+                    }
+                    if (attributes.optString(SCREEN_VIEW_ID_KEY, "").isBlank()) {
+                        attributes.put(SCREEN_VIEW_ID_KEY, screenViewId)
+                    }
+                }
                 val message =
                     BaseMPMessage
                         .Builder(MessageType.SCREEN_VIEW)
                         .timestamp(mAppStateManager!!.session.mLastEventTime)
                         .name(event.eventName)
                         .flags(event.customFlags)
-                        .attributes(MPUtility.enforceAttributeConstraints(event.customAttributeStrings))
+                        .attributes(attributes)
                         .build(mAppStateManager!!.session, mLocation, mConfigManager!!.mpid)
 
                 message.put(MessageKey.EVENT_START_TIME, mAppStateManager!!.session.mLastEventTime)
@@ -1193,5 +1214,7 @@ open class MessageManager :
             }
             startThreads()
         }
+
+        private const val SCREEN_VIEW_ID_KEY: String = "screen_view_id"
     }
 }
