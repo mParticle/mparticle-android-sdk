@@ -56,7 +56,10 @@ public class FilteredMParticleUser implements MParticleUser {
      */
     @Override
     public Map<String, Object> getUserAttributes() {
-        Map<String, Object> userAttributes = mpUser.getUserAttributes();
+        return filterUserAttributes(mpUser.getUserAttributes());
+    }
+
+    private Map<String, Object> filterUserAttributes(Map<String, Object> userAttributes) {
         KitManagerImpl kitManager = provider.getKitManager();
         if (kitManager != null) {
             userAttributes = kitManager.getDataplanFilter().transformUserAttributes(userAttributes);
@@ -67,9 +70,13 @@ public class FilteredMParticleUser implements MParticleUser {
         );
     }
 
+    /**
+     * Retrieve filtered user attributes. The listener receives them filtered, and so does the
+     * return value, which is null when the attributes are only delivered to the listener.
+     */
     @Override
     public Map<String, Object> getUserAttributes(final UserAttributeListenerType listener) {
-        return mpUser.getUserAttributes(new TypedUserAttributeListener() {
+        Map<String, Object> returnedAttributes = mpUser.getUserAttributes(new TypedUserAttributeListener() {
             @Override
             public void onUserAttributesReceived(@NonNull Map<String, ?> userAttributes, @NonNull Map<String, ? extends List<String>> userAttributeLists, long mpid) {
                 KitManagerImpl kitManager = provider.getKitManager();
@@ -89,6 +96,10 @@ public class FilteredMParticleUser implements MParticleUser {
                 }
             }
         });
+        if (returnedAttributes == null) {
+            return null;
+        }
+        return filterUserAttributes(returnedAttributes);
     }
 
     @Override
