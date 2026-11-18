@@ -38,6 +38,16 @@ subprojects {
         }
         tasks.withType(Test).configureEach { test ->
             maxHeapSize = '2g'
+            // JDK 17's C2 compiler intermittently crashes these test JVMs (SIGSEGV in Node::uncast). C1 alone avoids
+            // it, and short-lived test JVMs gain little from C2.
+            jvmArgs '-XX:TieredStopAtLevel=1'
+            // A hung case otherwise runs into the CI job's own timeout, which leaves no reports and no name. With these,
+            // the task fails first and its last STARTED line names the case.
+            timeout = java.time.Duration.ofMinutes(12)
+            testLogging {
+                events 'started', 'failed', 'skipped'
+                exceptionFormat 'short'
+            }
             // Mockito attaches its agent on first use, and once a Robolectric test has run that attach times out, failing
             // every later unit test that mocks. Load the agent at JVM start instead, as Mockito documents.
             jvmArgumentProviders.add({

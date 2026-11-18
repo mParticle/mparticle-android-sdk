@@ -1,6 +1,7 @@
 package com.mparticle
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.mparticle.internal.AccessUtils
 import com.mparticle.internal.Constants
 import com.mparticle.networking.Matcher
 import com.mparticle.testutils.BaseCleanInstallEachTest
@@ -114,15 +115,10 @@ class BatchCreationCallbackTests : BaseCleanInstallEachTest() {
             upload()
         }
 
-        mServer.waitForVerify(
-            Matcher(mServer.Endpoints().eventsUrl).bodyMatch {
-                it
-                    .optJSONArray("msgs")
-                    ?.toList()
-                    ?.filterIsInstance<JSONObject>()
-                    ?.any { it.optString("n") == targetEventName } ?: false
-            },
-        )
+        // The listener drops every batch, so no request arrives to wait for. Wait instead until the message handler has
+        // stored the event and queued the upload, and the upload handler has run it.
+        AccessUtils.awaitMessageHandler()
+        AccessUtils.awaitUploadHandler()
 
         mServer
             .Requests()

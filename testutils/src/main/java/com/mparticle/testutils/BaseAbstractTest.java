@@ -33,6 +33,7 @@ import com.mparticle.testutils.AndroidUtils.Mutable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 
@@ -81,6 +82,13 @@ public abstract class BaseAbstractTest {
         mStartingMpid = new Random().nextLong();
         mServer = MockServer.getNewInstance(mContext);
         checkStorageCleared(3);
+    }
+
+    @After
+    public void afterImpl() {
+        // Run callbacks already queued on the main looper, so a failure in one fails this test.
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+        MockServer.throwCallbackFailure();
     }
 
     protected boolean useInMemoryDatabase() {
