@@ -21,23 +21,24 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class MockServer {
 
     private static MockServer instance;
+    private static final AtomicReference<Throwable> callbackFailure = new AtomicReference<>();
 
     private Context context;
-    private List<MPConnectionTestImpl> requests = new LinkedList<>();
-    private LinkedHashMap<Matcher, Object> serverLogic = new LinkedHashMap<>();
-    private Map<Matcher, CountDownLatch> blockers = new HashMap<>();
+    // The SDK's upload thread records requests and reads and removes matchers while the test thread adds matchers.
+    private final List<MPConnectionTestImpl> requests = new CopyOnWriteArrayList<>();
+    private final Map<Matcher, Object> serverLogic = Collections.synchronizedMap(new LinkedHashMap<Matcher, Object>());
     private MParticleBaseClientImpl baseClient;
     private Random ran = new Random();
     private ConfigManager mConfigManager;
@@ -49,6 +50,7 @@ public class MockServer {
     private String MODIFY = AccessUtils.MODIFY_PATH;
 
     public static MockServer getNewInstance(Context context) {
+        callbackFailure.set(null);
         stop();
         if (instance == null) {
             instance = new MockServer(context);
@@ -84,6 +86,21 @@ public class MockServer {
         instance = null;
     }
 
+    static void recordCallbackFailure(Throwable failure) {
+        Logger.error(failure, "A request callback failed on the main looper");
+        callbackFailure.compareAndSet(null, failure);
+    }
+
+    /**
+     * Fails the test if a {@link RequestReceivedCallback} threw on the main looper since this server was created.
+     */
+    public static void throwCallbackFailure() {
+        Throwable failure = callbackFailure.getAndSet(null);
+        if (failure != null) {
+            throw new AssertionError("A request callback failed on the main looper", failure);
+        }
+    }
+
     private void start() {
         setUpHappyConfig();
         setupHappyEvents();
@@ -112,6 +129,7 @@ public class MockServer {
             //try to get a match FILO style
             reverseAndUpdateKey(logicList);
             long delay = 0;
+            CountDownLatch release = null;
             boolean found = false;
             for (Map.Entry<Matcher, Object> entry : logicList) {
                 if (entry.getKey().isMatch(mockConnection)) {
@@ -124,6 +142,7 @@ public class MockServer {
                             serverLogic.remove(entry.getKey());
                         }
                         delay = response.delay;
+                        release = response.release;
                         found = true;
                         break;
                     }
@@ -140,10 +159,8 @@ public class MockServer {
                 Logger.error("response not found for request: " + mockConnection.url.toString());
             }
 
-            for (Map.Entry<Matcher, CountDownLatch> entry : new HashSet<>(blockers.entrySet())) {
-                if (entry.getKey().isMatch(mockConnection)) {
-                    blockers.remove(entry.getKey()).countDown();
-                }
+            if (release != null && !release.await(MPLatch.TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+                Logger.error("held response was never released: " + mockConnection.url.toString());
             }
             if (delay > 0) {
                 try {
@@ -193,6 +210,19 @@ public class MockServer {
         response.responseCode = 200;
         response.responseBody = responseString;
         response.delay = delay;
+        serverLogic.put(match, response);
+        return this;
+    }
+
+    /**
+     * Answers config requests with {@code responseString}, but holds each answer until {@code release} counts down, so a
+     * test can check the state before the fetch completes and register its listeners without racing it.
+     */
+    public MockServer setupConfigResponse(String responseString, CountDownLatch release) {
+        Matcher match = new Matcher(getUrl(CONFIG));
+        match.keepAfterMatch = true;
+        Response response = new Response(200, responseString);
+        response.release = release;
         serverLogic.put(match, response);
         return this;
     }

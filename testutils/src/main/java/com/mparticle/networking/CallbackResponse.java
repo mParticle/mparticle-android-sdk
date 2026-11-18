@@ -14,7 +14,13 @@ public class CallbackResponse {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
 
             public void run() {
-                callback.onRequestReceived(new Request(connection));
+                try {
+                    callback.onRequestReceived(new Request(connection));
+                } catch (Throwable t) {
+                    // Thrown here, on the main looper, it would end the looper's thread instead of failing the test,
+                    // and every later test that waits on the main looper would hang. The test fails in its @After.
+                    MockServer.recordCallbackFailure(t);
+                }
             }
         });
     }

@@ -8,6 +8,7 @@ import com.mparticle.testutils.MPLatch
 import org.json.JSONObject
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.concurrent.CountDownLatch
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -27,55 +28,31 @@ class ConfigStalenessCheckTest : BaseCleanInstallEachTest() {
     fun testNeverStale() {
         val config1 = randomJson(4)
         val config2 = randomJson(4)
-        var latch = MPLatch(1)
         val options =
             MParticleOptions
                 .builder(mContext)
                 .addCredentials()
                 .build()
 
-        mServer.setupConfigResponse(config1.toString())
-
-        MParticle.start(options)
-        configManager.onNewConfig { latch.countDown() }
-        latch.await()
-
-        assertEquals(config1.toString(), configManager.config)
+        startAndFetch(options, config1)
         val etag = configManager.etag
         val lastModified = configManager.ifModified
         val timestamp = configManager.configTimestamp
 
         MParticle.setInstance(null)
-        mServer.setupConfigResponse(config2.toString())
-
-        MParticle.start(options)
-        latch = MPLatch(1)
-        configManager.onNewConfig { latch.countDown() }
-
-        // after restart, we should still have config1
-        assertEquals(config1.toString(), configManager.config)
-        assertEquals(etag, configManager.etag)
-        assertEquals(lastModified, configManager.ifModified)
-        assertEquals(timestamp, configManager.configTimestamp)
-
-        configManager.onNewConfig { latch.countDown() }
-        latch.await()
-
-        assertEquals(
-            config2.toString(),
-            MParticle
-                .getInstance()
-                ?.Internal()
-                ?.configManager
-                ?.config,
-        )
+        startAndFetch(options, config2) {
+            // after restart, we should still have config1
+            assertEquals(config1.toString(), configManager.config)
+            assertEquals(etag, configManager.etag)
+            assertEquals(lastModified, configManager.ifModified)
+            assertEquals(timestamp, configManager.configTimestamp)
+        }
     }
 
     @Test
     fun testExceedStalenessThreshold() {
         val config1 = randomJson(4)
         val config2 = randomJson(4)
-        var latch = MPLatch(1)
         val options =
             MParticleOptions
                 .builder(mContext)
@@ -83,56 +60,22 @@ class ConfigStalenessCheckTest : BaseCleanInstallEachTest() {
                 .configMaxAgeSeconds(1)
                 .build()
 
-        mServer.setupConfigResponse(config1.toString())
-
-        MParticle.start(options)
-
-        configManager.onNewConfig { latch.countDown() }
-        latch.await()
-
-        assertEquals(
-            config1.toString(),
-            MParticle
-                .getInstance()
-                ?.Internal()
-                ?.configManager
-                ?.config,
-        )
+        startAndFetch(options, config1)
 
         MParticle.setInstance(null)
-
+        // Staleness is measured with System.currentTimeMillis(), so this has to be real time.
         Thread.sleep(1010)
 
-        mServer.setupConfigResponse(config2.toString())
-
-        MParticle.start(options)
-        latch = MPLatch(1)
-
-        // after configMaxAge time has elapsed, config should be cleared after restart
-        assertTrue(configManager.config?.isEmpty()!!)
-        assertNull(configManager.etag)
-        assertNull(configManager.ifModified)
-        assertNull(configManager.configTimestamp)
-
-        configManager.onNewConfig { latch.countDown() }
-        latch.await()
-
-        // after config has been fetched, we should see config2
-        assertEquals(
-            config2.toString(),
-            MParticle
-                .getInstance()
-                ?.Internal()
-                ?.configManager
-                ?.config,
-        )
+        startAndFetch(options, config2) {
+            // after configMaxAge time has elapsed, config should be cleared after restart
+            assertConfigCleared()
+        }
     }
 
     @Test
     fun testDoesntExceedStalenessThreshold() {
         val config1 = randomJson(4)
         val config2 = randomJson(4)
-        var latch = MPLatch(1)
         val options =
             MParticleOptions
                 .builder(mContext)
@@ -140,48 +83,25 @@ class ConfigStalenessCheckTest : BaseCleanInstallEachTest() {
                 .configMaxAgeSeconds(100)
                 .build()
 
-        mServer.setupConfigResponse(config1.toString())
-
-        MParticle.start(options)
-        configManager.onNewConfig { latch.countDown() }
-        latch.await()
-
-        assertEquals(config1.toString(), configManager.config)
+        startAndFetch(options, config1)
         val etag = configManager.etag
         val lastModified = configManager.ifModified
         val timestamp = configManager.configTimestamp
 
         MParticle.setInstance(null)
-        mServer.setupConfigResponse(config2.toString())
-
-        MParticle.start(options)
-        latch = MPLatch(1)
-        configManager.onNewConfig { latch.countDown() }
-
-        // after restart, we should still have config1
-        assertEquals(config1.toString(), configManager.config)
-        assertEquals(etag, configManager.etag)
-        assertEquals(lastModified, configManager.ifModified)
-        assertEquals(timestamp, configManager.configTimestamp)
-
-        configManager.onNewConfig { latch.countDown() }
-        latch.await()
-
-        assertEquals(
-            config2.toString(),
-            MParticle
-                .getInstance()
-                ?.Internal()
-                ?.configManager
-                ?.config,
-        )
+        startAndFetch(options, config2) {
+            // after restart, we should still have config1
+            assertEquals(config1.toString(), configManager.config)
+            assertEquals(etag, configManager.etag)
+            assertEquals(lastModified, configManager.ifModified)
+            assertEquals(timestamp, configManager.configTimestamp)
+        }
     }
 
     @Test
     fun testAlwaysStale() {
         val config1 = randomJson(4)
         val config2 = randomJson(4)
-        var latch = MPLatch(1)
         val options =
             MParticleOptions
                 .builder(mContext)
@@ -189,40 +109,43 @@ class ConfigStalenessCheckTest : BaseCleanInstallEachTest() {
                 .configMaxAgeSeconds(0)
                 .build()
 
-        mServer.setupConfigResponse(config1.toString())
-
-        MParticle.start(options)
-
-        configManager.onNewConfig { latch.countDown() }
-        latch.await()
-
-        assertEquals(
-            config1.toString(),
-            MParticle
-                .getInstance()
-                ?.Internal()
-                ?.configManager
-                ?.config,
-        )
+        startAndFetch(options, config1)
 
         MParticle.setInstance(null)
+        startAndFetch(options, config2) {
+            // directly after restart, config should be cleared
+            assertConfigCleared()
+        }
+    }
 
-        mServer.setupConfigResponse(config2.toString())
-
+    /**
+     * Starts the SDK with its config fetch held, runs [whileHeld] against the state start left, then lets the fetch
+     * answer with [config] and waits until the SDK has applied it.
+     */
+    private fun startAndFetch(
+        options: MParticleOptions,
+        config: JSONObject,
+        whileHeld: () -> Unit = {},
+    ) {
+        val release = CountDownLatch(1)
+        mServer.setupConfigResponse(config.toString(), release)
         MParticle.start(options)
-        latch = MPLatch(1)
+        val applied = MPLatch(1)
+        configManager.onNewConfig { applied.countDown() }
+        try {
+            whileHeld()
+        } finally {
+            release.countDown()
+        }
+        applied.await()
+        assertEquals(config.toString(), configManager.config)
+    }
 
-        // directly after restart, config should be cleared
+    private fun assertConfigCleared() {
         assertTrue(configManager.config?.isEmpty()!!)
         assertNull(configManager.etag)
         assertNull(configManager.ifModified)
         assertNull(configManager.configTimestamp)
-
-        configManager.onNewConfig { latch.countDown() }
-        latch.await()
-
-        // after config has been fetched, we should see config2
-        assertEquals(config2.toString(), configManager.config)
     }
 
     private fun randomJson(size: Int) = (1..size)

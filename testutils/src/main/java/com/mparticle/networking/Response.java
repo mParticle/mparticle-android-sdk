@@ -1,10 +1,14 @@
 package com.mparticle.networking;
 
+import java.util.concurrent.CountDownLatch;
+
 class Response {
 
     int responseCode = 200;
     String responseBody = "";
     long delay;
+    // When set, the response is held until it counts down.
+    CountDownLatch release;
 
     Response() {
     }
