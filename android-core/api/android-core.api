@@ -2220,13 +2220,20 @@ public class com/mparticle/internal/DatabaseHelper : android/database/sqlite/SQL
 }
 
 public class com/mparticle/internal/DeviceAttributes {
-	public static fun addAndroidId (Lorg/json/JSONObject;Landroid/content/Context;)V
+	public static final field Companion Lcom/mparticle/internal/DeviceAttributes$Companion;
+	public static final fun addAndroidId (Lorg/json/JSONObject;Landroid/content/Context;)V
 	public fun getAppInfo (Landroid/content/Context;)Lorg/json/JSONObject;
-	public static fun getDeviceImei ()Ljava/lang/String;
+	public static final fun getDeviceImei ()Ljava/lang/String;
 	public fun getDeviceInfo (Landroid/content/Context;)Lorg/json/JSONObject;
 	public fun getStaticApplicationInfo (Landroid/content/Context;)Lorg/json/JSONObject;
-	public static fun setDeviceImei (Ljava/lang/String;)V
+	public static final fun setDeviceImei (Ljava/lang/String;)V
 	public fun updateDeviceInfo (Landroid/content/Context;Lorg/json/JSONObject;)V
+}
+
+public final class com/mparticle/internal/DeviceAttributes$Companion {
+	public final fun addAndroidId (Lorg/json/JSONObject;Landroid/content/Context;)V
+	public final fun getDeviceImei ()Ljava/lang/String;
+	public final fun setDeviceImei (Ljava/lang/String;)V
 }
 
 public class com/mparticle/internal/InternalSession {
