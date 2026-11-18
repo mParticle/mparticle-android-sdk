@@ -243,6 +243,9 @@ class ApptentiveKit :
     }
 
     override fun onUserIdentified(mParticleUser: MParticleUser?) {
+        if (!isCurrentUser(mParticleUser)) {
+            return
+        }
         bindUser(mParticleUser?.id)
     }
 
@@ -260,7 +263,26 @@ class ApptentiveKit :
             null -> LogLevel.Info
         }
 
+    /**
+     * True when [user] is the current mParticle user. An identity callback can arrive late, for
+     * example a modify that completes after a logout, and name a user who is no longer current.
+     * Such a callback is ignored, so it cannot rebind the Apptentive person to the previous user
+     * or remove the current user's custom person data.
+     */
+    private fun isCurrentUser(user: MParticleUser?): Boolean {
+        val mpid = user?.id ?: return false
+        val currentMpid = currentUser?.id
+        if (mpid != currentMpid) {
+            Logger.debug("Ignoring an identity callback for an mParticle user who is not the current user")
+            return false
+        }
+        return true
+    }
+
     private fun setUserIdentity(user: MParticleUser?) {
+        if (!isCurrentUser(user)) {
+            return
+        }
         bindUser(user?.id)
         user?.userIdentities?.entries?.let {
             for (i in it.indices) {

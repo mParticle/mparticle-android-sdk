@@ -5,6 +5,7 @@ import apptentive.com.android.feedback.Apptentive
 import apptentive.com.android.util.InternalUseOnly
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
+import com.mparticle.identity.IdentityApi
 import com.mparticle.identity.MParticleUser
 import io.mockk.every
 import io.mockk.mockk
@@ -22,6 +23,7 @@ class ApptentiveKitTest {
 
     @After
     fun tearDown() {
+        MParticle.setInstance(null)
         unmockkAll()
     }
 
@@ -170,10 +172,18 @@ class ApptentiveKitTest {
 
     // user change tests
 
+    private var currentMParticleUser: MParticleUser? = null
+
     private fun fakeUser(mpid: Long): MParticleUser {
         val user = mockk<MParticleUser>()
         every { user.id } returns mpid
         every { user.userIdentities } returns emptyMap()
+        return user
+    }
+
+    // The core makes a user current before it sends that user's identity callbacks.
+    private fun makeCurrent(user: MParticleUser?): MParticleUser? {
+        currentMParticleUser = user
         return user
     }
 
@@ -185,6 +195,13 @@ class ApptentiveKitTest {
         every { Apptentive.addCustomPersonData(any<String>(), any<Number>()) } returns Unit
         every { Apptentive.addCustomPersonData(any<String>(), any<Boolean>()) } returns Unit
         every { Apptentive.setPersonName(any()) } returns Unit
+        every { Apptentive.setPersonEmail(any()) } returns Unit
+
+        val identityApi = mockk<IdentityApi>()
+        every { identityApi.currentUser } answers { currentMParticleUser }
+        val mParticle = mockk<MParticle>()
+        every { mParticle.Identity() } returns identityApi
+        MParticle.setInstance(mParticle)
     }
 
     @Test
@@ -192,8 +209,8 @@ class ApptentiveKitTest {
         stubApptentivePersonCalls()
         val apptentiveKit = ApptentiveKit()
 
-        apptentiveKit.onLoginCompleted(fakeUser(1001L), null)
-        apptentiveKit.onLogoutCompleted(fakeUser(2002L), null)
+        apptentiveKit.onLoginCompleted(makeCurrent(fakeUser(1001L)), null)
+        apptentiveKit.onLogoutCompleted(makeCurrent(fakeUser(2002L)), null)
 
         verify(exactly = 1) { Apptentive.setMParticleId("1001") }
         verify(exactly = 1) { Apptentive.setMParticleId("2002") }
@@ -204,10 +221,10 @@ class ApptentiveKitTest {
         stubApptentivePersonCalls()
         val apptentiveKit = ApptentiveKit()
 
-        apptentiveKit.onLoginCompleted(fakeUser(1001L), null)
+        apptentiveKit.onLoginCompleted(makeCurrent(fakeUser(1001L)), null)
         apptentiveKit.onSetUserAttribute("plan", "basic")
         apptentiveKit.onSetUserAttribute("visits", "30")
-        apptentiveKit.onLogoutCompleted(fakeUser(2002L), null)
+        apptentiveKit.onLogoutCompleted(makeCurrent(fakeUser(2002L)), null)
 
         verify(exactly = 1) { Apptentive.removeCustomPersonData("plan") }
         verify(exactly = 1) { Apptentive.removeCustomPersonData("visits") }
@@ -219,11 +236,12 @@ class ApptentiveKitTest {
         stubApptentivePersonCalls()
         val apptentiveKit = ApptentiveKit()
 
-        apptentiveKit.onLoginCompleted(fakeUser(1001L), null)
+        val user = makeCurrent(fakeUser(1001L))
+        apptentiveKit.onLoginCompleted(user, null)
         apptentiveKit.onSetUserAttribute("plan", "basic")
-        apptentiveKit.onIdentifyCompleted(fakeUser(1001L), null)
-        apptentiveKit.onModifyCompleted(fakeUser(1001L), null)
-        apptentiveKit.onUserIdentified(fakeUser(1001L))
+        apptentiveKit.onIdentifyCompleted(user, null)
+        apptentiveKit.onModifyCompleted(user, null)
+        apptentiveKit.onUserIdentified(user)
 
         verify(exactly = 0) { Apptentive.removeCustomPersonData(any()) }
         verify(exactly = 1) { Apptentive.setMParticleId("1001") }
@@ -234,10 +252,10 @@ class ApptentiveKitTest {
         stubApptentivePersonCalls()
         val apptentiveKit = ApptentiveKit()
 
-        apptentiveKit.onLoginCompleted(fakeUser(1001L), null)
+        apptentiveKit.onLoginCompleted(makeCurrent(fakeUser(1001L)), null)
         apptentiveKit.onSetUserAttribute("plan", "basic")
         apptentiveKit.onRemoveUserAttribute("plan")
-        apptentiveKit.onUserIdentified(fakeUser(2002L))
+        apptentiveKit.onUserIdentified(makeCurrent(fakeUser(2002L)))
 
         verify(exactly = 1) { Apptentive.removeCustomPersonData("plan") }
     }
@@ -247,9 +265,9 @@ class ApptentiveKitTest {
         stubApptentivePersonCalls()
         val apptentiveKit = ApptentiveKit()
 
-        apptentiveKit.onLoginCompleted(fakeUser(1001L), null)
+        apptentiveKit.onLoginCompleted(makeCurrent(fakeUser(1001L)), null)
         apptentiveKit.onSetUserAttribute(MParticle.UserAttributes.FIRSTNAME, "Firstone")
-        apptentiveKit.onUserIdentified(fakeUser(2002L))
+        apptentiveKit.onUserIdentified(makeCurrent(fakeUser(2002L)))
         apptentiveKit.onSetUserAttribute(MParticle.UserAttributes.LASTNAME, "Lasttwo")
 
         verify(exactly = 1) { Apptentive.setPersonName("Lasttwo") }
@@ -261,12 +279,47 @@ class ApptentiveKitTest {
         stubApptentivePersonCalls()
         val apptentiveKit = ApptentiveKit()
 
-        apptentiveKit.onLoginCompleted(fakeUser(1001L), null)
+        apptentiveKit.onLoginCompleted(makeCurrent(fakeUser(1001L)), null)
         apptentiveKit.onSetUserAttribute("plan", "basic")
         apptentiveKit.onUserIdentified(null)
         apptentiveKit.onUserIdentified(fakeUser(0L))
 
         verify(exactly = 0) { Apptentive.removeCustomPersonData(any()) }
         verify(exactly = 0) { Apptentive.setMParticleId("0") }
+    }
+
+    @Test
+    fun testLateModifyForThePreviousUserIsIgnored() {
+        stubApptentivePersonCalls()
+        val apptentiveKit = ApptentiveKit()
+        val previousUser = fakeUser(1001L)
+        every { previousUser.userIdentities } returns mapOf(MParticle.IdentityType.Email to "previous@example.com")
+
+        apptentiveKit.onLoginCompleted(makeCurrent(previousUser), null)
+        apptentiveKit.onLogoutCompleted(makeCurrent(fakeUser(2002L)), null)
+        apptentiveKit.onSetUserAttribute("plan", "premium")
+        // A modify for the previous user completes after the logout.
+        apptentiveKit.onModifyCompleted(previousUser, null)
+
+        verify(exactly = 1) { Apptentive.setMParticleId("1001") }
+        verify(exactly = 0) { Apptentive.removeCustomPersonData("plan") }
+        verify(exactly = 1) { Apptentive.setPersonEmail("previous@example.com") }
+        verify(exactly = 1) { Apptentive.setMParticleId("2002") }
+    }
+
+    @Test
+    fun testCallbackForAUserWhoIsNotCurrentIsIgnored() {
+        stubApptentivePersonCalls()
+        val apptentiveKit = ApptentiveKit()
+
+        apptentiveKit.onLoginCompleted(makeCurrent(fakeUser(2002L)), null)
+        apptentiveKit.onSetUserAttribute("plan", "premium")
+        apptentiveKit.onIdentifyCompleted(fakeUser(1001L), null)
+        apptentiveKit.onLoginCompleted(fakeUser(1001L), null)
+        apptentiveKit.onLogoutCompleted(fakeUser(1001L), null)
+        apptentiveKit.onUserIdentified(fakeUser(1001L))
+
+        verify(exactly = 0) { Apptentive.setMParticleId("1001") }
+        verify(exactly = 0) { Apptentive.removeCustomPersonData(any()) }
     }
 }
