@@ -209,7 +209,7 @@ internal object RoktKitRequestHelper {
 
         val objectAttributes = mutableMapOf<String, Any>()
         for ((key, value) in finalAttributes) {
-            if (value.isNotEmpty() && !isRoktOnlyAttribute(key)) {
+            if (value.isNotEmpty() && key != RoktKit.SCREEN_VIEW_ID && !isRoktOnlyAttribute(key)) {
                 objectAttributes[key] = value
             }
         }

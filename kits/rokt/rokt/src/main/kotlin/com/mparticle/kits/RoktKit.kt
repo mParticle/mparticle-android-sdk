@@ -363,7 +363,7 @@ class RoktKit :
 
         filterUser?.userAttributes?.let { userAttrs ->
             for ((key, value) in userAttrs) {
-                if (value != null && canonicalPrivacyKey(key) == null) {
+                if (value != null && key != SCREEN_VIEW_ID && canonicalPrivacyKey(key) == null) {
                     finalAttributes[key] = convertValueToString(value)
                 }
             }
@@ -393,6 +393,20 @@ class RoktKit :
             finalAttributes[MPID] = mpid
         } ?: Logger.warning("RoktKit: No user ID available for placement")
 
+        if (isAttributeAllowed(SCREEN_VIEW_ID, configuration)) {
+            val callerScreenViewId = filteredCaller[SCREEN_VIEW_ID]?.takeIf { it.isNotBlank() }
+            if (callerScreenViewId != null) {
+                finalAttributes[SCREEN_VIEW_ID] = callerScreenViewId
+            } else {
+                finalAttributes.remove(SCREEN_VIEW_ID)
+                resolveScreenViewId()?.takeIf { it.isNotBlank() }?.let { screenViewId ->
+                    finalAttributes[SCREEN_VIEW_ID] = screenViewId
+                }
+            }
+        } else {
+            finalAttributes.remove(SCREEN_VIEW_ID)
+        }
+
         addIdentityAttributes(finalAttributes, filterUser)
 
         verifyHashedEmail(finalAttributes)
@@ -407,6 +421,11 @@ class RoktKit :
         is Int -> BigDecimal.valueOf(value.toLong()).toPlainString()
         is Number -> BigDecimal(value.toString()).toPlainString()
         else -> value.toString()
+    }
+
+    private fun isAttributeAllowed(key: String, kitConfiguration: KitConfiguration?): Boolean {
+        val filters = kitConfiguration?.mUserAttributeFilters ?: return true
+        return filters.get(KitUtils.hashForFiltering(key), true)
     }
 
     private fun filterAttributes(
@@ -623,6 +642,15 @@ class RoktKit :
         }
     }
 
+    internal fun resolveScreenViewId(): String? = try {
+        MParticle.getInstance()
+            ?.Internal()
+            ?.appStateManager
+            ?.getOrCreateScreenViewIdForPlacement()
+    } catch (_: Throwable) {
+        null
+    }
+
     private fun getStringForIdentity(identityType: IdentityType): String? = when (identityType) {
         IdentityType.Other -> "other"
         IdentityType.CustomerId -> "customerid"
@@ -670,6 +698,7 @@ class RoktKit :
         const val STRIPE_PUBLISHABLE_KEY = "stripePublishableKey"
         const val STRIPE_KEY_ALIAS = "stripeKey"
         const val MPID = "mpid"
+        const val SCREEN_VIEW_ID = "screen_view_id"
         const val EVENT_NAME_SELECT_PLACEMENTS = "selectPlacements"
         const val EVENT_NAME_SELECT_SHOPPABLE_ADS = "selectShoppableAds"
         const val NO_ROKT_ACCOUNT_ID = "No Rokt account ID provided, can't initialize kit."
