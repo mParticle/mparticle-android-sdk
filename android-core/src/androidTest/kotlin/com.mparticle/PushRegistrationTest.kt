@@ -1,6 +1,7 @@
 package com.mparticle
 
 import android.content.Context
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.internal.ConfigManager
 import com.mparticle.internal.Logger
 import com.mparticle.internal.PushRegistrationHelper
@@ -13,8 +14,11 @@ import com.mparticle.testutils.TestingUtils
 import org.json.JSONException
 import org.junit.Assert
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
+@RunWith(AndroidJUnit4::class)
 class PushRegistrationTest : BaseCleanStartedEachTest() {
     // So other classes can use the test fields
     fun setContext(context: Context) {
@@ -206,7 +210,12 @@ class PushRegistrationTest : BaseCleanStartedEachTest() {
                     }
                     // this method setting push is async, so wait for confirmation before continuing
                     val configManager = ConfigManager.getInstance(mContext)
-                    while (!configManager.isPushEnabled) {
+                    val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5)
+                    while (!configManager.isPushEnabled ||
+                        configManager.pushSenderId != pushRegistration.senderId ||
+                        configManager.pushInstanceId != pushRegistration.instanceId
+                    ) {
+                        Assert.assertTrue("push registration did not complete", System.nanoTime() < deadline)
                         try {
                             Thread.sleep(10)
                         } catch (e: InterruptedException) {

@@ -1,5 +1,6 @@
 package com.mparticle.kits
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.Utils.randomAttributes
@@ -22,8 +23,10 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import kotlin.random.Random
 
+@RunWith(AndroidJUnit4::class)
 class DataplanBlockingUserTests : BaseKitOptionsTest() {
     private lateinit var attributeListenerKitKit: ModifyIdentityListenerTestKit
     private lateinit var identityListenerKitKit: IdentityListenerTestKit

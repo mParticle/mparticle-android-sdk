@@ -2,6 +2,7 @@ package com.mparticle.internal.database.services
 
 import android.os.Handler
 import android.os.Looper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.MParticle
 import com.mparticle.TypedUserAttributeListener
 import com.mparticle.identity.UserAttributeListenerWrapper
@@ -17,10 +18,12 @@ import com.mparticle.testutils.BaseCleanInstallEachTest
 import com.mparticle.testutils.MPLatch
 import org.junit.Assert
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.util.TreeMap
 import java.util.UUID
 
-class MParticleDBManagerTest : BaseCleanInstallEachTest() {
+@RunWith(AndroidJUnit4::class)
+class MParticleDBManagerITest : BaseCleanInstallEachTest() {
     @Test
     @Throws(Exception::class)
     fun testRemoveUserAttributes() {
@@ -115,7 +118,7 @@ class MParticleDBManagerTest : BaseCleanInstallEachTest() {
         val callbackThread = AndroidUtils.Mutable<Thread?>(null)
 
         // when not on the main thread, it should callback on the current thread, and access the DB on the same thread
-        Assert.assertNotEquals("main", Thread.currentThread().name)
+        Assert.assertNotSame(Looper.getMainLooper().thread, Thread.currentThread())
 
         val listener: TypedUserAttributeListener =
             object : TypedUserAttributeListener {
@@ -156,8 +159,8 @@ class MParticleDBManagerTest : BaseCleanInstallEachTest() {
         }
         latch.value.await()
         Assert.assertNotNull(callbackThread.value)
-        Assert.assertEquals("main", callbackThread.value?.name)
-        Assert.assertNotEquals("main", dbAccessThread.value?.name)
+        Assert.assertSame(Looper.getMainLooper().thread, callbackThread.value)
+        Assert.assertNotSame(Looper.getMainLooper().thread, dbAccessThread.value)
         // it's ok if this value changes in the future, if you know what you're doing. previously
         // this was being run on an AsyncTask, but it may have been leading to db locks, "messages"
         // thread is know to not be an issue w/db access

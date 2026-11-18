@@ -2,13 +2,16 @@ package com.mparticle.internal
 
 import android.content.Context
 import android.telephony.TelephonyManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.testutils.BaseCleanInstallEachTest
 import org.junit.Assert
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.util.Hashtable
 import java.util.TreeMap
 
-class MPUtilityTest : BaseCleanInstallEachTest() {
+@RunWith(AndroidJUnit4::class)
+class MPUtilityITest : BaseCleanInstallEachTest() {
     @Test
     fun testInstantAppDetectionTest() {
         Assert.assertFalse(MPUtility.isInstantApp(mContext))

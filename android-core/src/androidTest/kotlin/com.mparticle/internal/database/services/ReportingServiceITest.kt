@@ -1,5 +1,6 @@
 package com.mparticle.internal.database.services
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.internal.Constants
 import com.mparticle.internal.JsonReportingMessage
 import com.mparticle.internal.Logger
@@ -7,9 +8,11 @@ import com.mparticle.testutils.TestingUtils
 import org.json.JSONException
 import org.junit.Assert
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.util.Collections
 
-class ReportingServiceTest : BaseMPServiceTest() {
+@RunWith(AndroidJUnit4::class)
+class ReportingServiceITest : BaseMPServiceTest() {
     @Test
     @Throws(JSONException::class)
     fun testInsertReportingMessage() {

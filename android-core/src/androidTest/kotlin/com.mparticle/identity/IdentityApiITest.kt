@@ -3,6 +3,7 @@ package com.mparticle.identity
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.MParticle
 import com.mparticle.MParticle.IdentityType
 import com.mparticle.internal.ConfigManager
@@ -16,10 +17,12 @@ import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
 
-class IdentityApiTest : BaseCleanStartedEachTest() {
+@RunWith(AndroidJUnit4::class)
+class IdentityApiITest : BaseCleanStartedEachTest() {
     var mConfigManager: ConfigManager? = null
     var handler: Handler? = null
     var mpid1: Long = 0
@@ -48,7 +51,7 @@ class IdentityApiTest : BaseCleanStartedEachTest() {
         val identities: MutableMap<IdentityType, String> = HashMap()
         identities[IdentityType.Facebook] = "facebooker.me"
         identities[IdentityType.Email] = "tester@mparticle.gov"
-        identities[IdentityType.Google] = "hello@googlemail.com"
+        identities[IdentityType.Google] = "hello@example.com"
         val identities2: MutableMap<IdentityType, String> = HashMap()
         identities2[IdentityType.CustomerId] = "12345"
         identities2[IdentityType.Microsoft] = "microsoftUser"

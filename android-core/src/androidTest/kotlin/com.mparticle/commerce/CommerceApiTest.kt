@@ -1,10 +1,13 @@
 package com.mparticle.commerce
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.MParticle
 import com.mparticle.networking.Matcher
 import com.mparticle.testutils.BaseCleanStartedEachTest
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 class CommerceApiTest : BaseCleanStartedEachTest() {
     // just verify that we can log an event and it will get sent to the server. Not testing the event message
     @Test

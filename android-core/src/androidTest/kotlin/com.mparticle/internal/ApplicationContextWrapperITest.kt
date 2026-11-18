@@ -4,11 +4,16 @@ import android.app.Activity
 import android.app.Application
 import android.os.Bundle
 import android.os.Looper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mparticle.OrchestratorOnly
 import org.junit.Assert.assertNull
 import org.junit.Test
+import org.junit.runner.RunWith
+import java.util.concurrent.FutureTask
+import java.util.concurrent.TimeUnit
 
+@RunWith(AndroidJUnit4::class)
 class ApplicationContextWrapperITest {
     /**
      * This test specifically addresses a problem we had where a callback was being registered on a
@@ -18,6 +23,13 @@ class ApplicationContextWrapperITest {
     @OrchestratorOnly
     @Test
     fun testRegisterListenerBackgroundThread() {
+        // A fresh thread: the test runner's thread may already have a looper from an earlier test.
+        val task = FutureTask { registerListenerTwice() }
+        Thread(task, "unprepared-looper-test").start()
+        task.get(5, TimeUnit.SECONDS)
+    }
+
+    private fun registerListenerTwice() {
         val applicationContextWrapper =
             ApplicationContextWrapper(
                 InstrumentationRegistry

@@ -121,6 +121,42 @@ jobs:
           name: "unit-tests-results"
           path: ./**/build/reports/**
 
+  robolectric-pilot:
+    name: "Robolectric Pilot (API ${{ matrix.api }})"
+    # Advisory. Runs the instrumented suites of android-core, android-kit-base and testutils on the JVM under
+    # Robolectric (gradle/robolectric/robolectric.gradle), beside the unit tests and without an emulator: all of
+    # them on API 28, the emulator jobs' API, and a sample on API 35. The JavaScript bridge and startup suites stay
+    # on the emulator. Deliberately absent from every other job's `needs`; the instrumented jobs remain the gate.
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        api: [28, 35]
+    steps:
+      - name: "Checkout Branch"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: "Install JDK 17"
+        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+        with:
+          distribution: "zulu"
+          java-version: "17"
+      - name: "Setup Gradle"
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+      - name: "Run the instrumented suites on the JVM"
+        env:
+          API: ${{ matrix.api }}
+        run: ./gradlew -Probolectric="$API" :android-core:testDebugUnitTest :android-kit-base:testDebugUnitTest :testutils:testDebugUnitTest --continue
+      - name: "Archive Robolectric Pilot Results"
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: "robolectric-pilot-api-${{ matrix.api }}-results"
+          path: ./**/build/reports/tests/testDebugUnitTest/**
+
   lint-checks:
     name: "Lint Checks"
     timeout-minutes: 20
@@ -186,7 +222,7 @@ jobs:
   security-checks:
     name: "Security Lint Checks"
     if: github.event_name == 'pull_request'
-    uses: mparticle/mparticle-workflows/.github/workflows/security-checks.yml@a78c8b34f5811be7c046a27cae900a844094f1cf # main
+    uses: mparticle/mparticle-workflows/.github/workflows/security-checks.yml@24cbccf9fe6f6134356a26708a0434454aa2157d # main
     with:
       base_branch: main
 
@@ -405,7 +441,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    uses: ROKT/rokt-workflows/.github/workflows/oss_pr_opened_notification.yml@da0c5fd5d38e9cf113a24ec9aaea079cc7d0bc40 # main
+    uses: ROKT/rokt-workflows/.github/workflows/oss_pr_opened_notification.yml@0ad580625a32045b0cc54fabdc04188842c5e75b # main
     secrets:
       gchat_webhook: ${{ secrets.GCHAT_PRS_WEBHOOK }}
 

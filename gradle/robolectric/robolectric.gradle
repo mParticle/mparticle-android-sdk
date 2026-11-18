@@ -1,0 +1,65 @@
+// Robolectric pilot. `-Probolectric=<sdk>` (28 or 35) also runs the instrumented suites of android-core,
+// android-kit-base and testutils on the JVM, in each module's testDebugUnitTest beside its unit tests:
+//   ./gradlew -Probolectric=28 :android-core:testDebugUnitTest :android-kit-base:testDebugUnitTest :testutils:testDebugUnitTest
+// Without the property this script changes nothing, so `./gradlew test` and the emulator jobs are as before.
+def robolectricSdk = findProperty('robolectric')
+if (robolectricSdk == null) {
+    return
+}
+def robolectricSdks = ['28', '35']
+if (!(robolectricSdk in robolectricSdks)) {
+    // Any other value matches no SDK in robolectric.properties, and every instrumented test would be skipped.
+    throw new GradleException("-Probolectric must be one of ${robolectricSdks}, not '${robolectricSdk}'")
+}
+
+def pilotDir = file('gradle/robolectric')
+subprojects {
+    if (!(path in [':android-core', ':android-kit-base', ':testutils'])) {
+        return
+    }
+    plugins.withId('com.android.library') {
+        android {
+            testOptions.unitTests.includeAndroidResources = true
+            sourceSets.test {
+                java.srcDirs += ['src/androidTest/java', 'src/androidTest/kotlin']
+                manifest.srcFile new File(pilotDir, 'AndroidManifest.xml')
+                resources.srcDir new File(pilotDir, 'resources')
+            }
+        }
+        configurations.testImplementation.extendsFrom(configurations.androidTestImplementation)
+        dependencies {
+            testImplementation 'org.robolectric:robolectric:4.17'
+            // PushRegistrationHelper links against Task; on a device the class is resolved lazily, the JVM needs it.
+            testImplementation 'com.google.android.gms:play-services-tasks:18.4.0'
+        }
+        // The JavaScript bridge cases need a real WebView: Robolectric records the script without running it.
+        tasks.matching { it.name ==~ /compile.*UnitTest(Kotlin|JavaWithJavac)/ }.configureEach {
+            exclude '**/MParticleJSInterfaceITest.java', '**/WebViewActivity.kt'
+        }
+        tasks.withType(Test).configureEach { test ->
+            maxHeapSize = '2g'
+            // Mockito attaches its agent on first use, and once a Robolectric test has run that attach times out, failing
+            // every later unit test that mocks. Load the agent at JVM start instead, as Mockito documents.
+            jvmArgumentProviders.add({
+                test.classpath.filter { it.name.startsWith('mockito-core-') }.collect { "-javaagent:$it" }
+            } as CommandLineArgumentProvider)
+            systemProperty 'robolectric.enabledSdks', robolectricSdk
+            // Main-looper callbacks run on their own thread, as on a device; several cases block waiting for them.
+            systemProperty 'robolectric.looperMode', 'INSTRUMENTATION_TEST'
+            filter {
+                // The startup suites are not discovered on the JVM yet (their rules are Kotlin properties) and time
+                // a device; the next stage of the pilot takes them.
+                excludeTestsMatching 'com.mparticle.startup.StartupTest'
+                excludeTestsMatching 'com.mparticle.LegacyStartupTest'
+                if (robolectricSdk == '35') {
+                    // API 28 runs everything, as the emulator jobs do; API 35 runs a sample: the database, commerce,
+                    // kit-base and Firebase-detection cases, with the unit tests in those packages.
+                    includeTestsMatching 'com.mparticle.internal.database.*'
+                    includeTestsMatching 'com.mparticle.commerce.CommerceApiTest'
+                    includeTestsMatching 'com.mparticle.kits.*'
+                    includeTestsMatching 'com.mparticle.MPUtilityVariantTest'
+                }
+            }
+        }
+    }
+}

@@ -1,5 +1,6 @@
 package com.mparticle
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.internal.Constants
 import com.mparticle.networking.Matcher
 import com.mparticle.testutils.BaseCleanInstallEachTest
@@ -7,10 +8,12 @@ import com.mparticle.testutils.TestingUtils.assertJsonEqual
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Test
+import org.junit.runner.RunWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+@RunWith(AndroidJUnit4::class)
 class BatchCreationCallbackTests : BaseCleanInstallEachTest() {
     @Test
     fun testListenerNoChange() {

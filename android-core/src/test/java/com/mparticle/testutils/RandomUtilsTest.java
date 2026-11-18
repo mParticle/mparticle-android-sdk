@@ -17,7 +17,7 @@ import java.util.Map;
  * short-circuits and returns 200 without issuing an HTTP request when there are no identity
  * changes, so a test that awaits the modify request hangs and then fails on an unrelated
  * assertion. That was the cause of the intermittent
- * {@code MParticleIdentityClientImplTest.testModifyMessage} failures.
+ * {@code MParticleIdentityClientImplITest.testModifyMessage} failures.
  */
 public class RandomUtilsTest {
     private static final int ITERATIONS = 1000;

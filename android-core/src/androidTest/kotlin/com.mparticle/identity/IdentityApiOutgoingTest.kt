@@ -1,12 +1,15 @@
 package com.mparticle.identity
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.MParticle
 import com.mparticle.networking.IdentityRequest.IdentityRequestBody
 import com.mparticle.networking.Matcher
 import com.mparticle.networking.MockServer.IdentityMatcher
 import com.mparticle.testutils.BaseCleanStartedEachTest
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 class IdentityApiOutgoingTest : BaseCleanStartedEachTest() {
     @Test
     @Throws(Exception::class)

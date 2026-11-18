@@ -10,6 +10,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -33,7 +34,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Rule;
 
 import java.util.ArrayList;
@@ -43,6 +43,16 @@ import java.util.concurrent.CountDownLatch;
 
 public abstract class BaseAbstractTest {
     protected MockServer mServer;
+
+    // Not @BeforeClass: Robolectric sets up the Android environment per test, after @BeforeClass has run. The looper
+    // must exist before the Activity below is constructed, because Activity creates a Handler.
+    {
+        if (Looper.myLooper() == null) {
+            Looper.prepare();
+        }
+        Thread.setDefaultUncaughtExceptionHandler(new TestingUncaughtExceptionHandler());
+    }
+
     Activity activity = new Activity();
     protected Context mContext;
     protected Random ran = new Random();
@@ -53,14 +63,6 @@ public abstract class BaseAbstractTest {
     @Rule
     public CaptureLogcatOnFailingTest captureFailingTestLogcat = new CaptureLogcatOnFailingTest();
 
-    @BeforeClass
-    public static void beforeClassImpl() {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-        Thread.setDefaultUncaughtExceptionHandler(new TestingUncaughtExceptionHandler());
-    }
-
     @Before
     public void beforeImpl() throws Exception {
         if (useInMemoryDatabase()) {
@@ -70,6 +72,10 @@ public abstract class BaseAbstractTest {
         }
         Logger.setLogHandler(null);
         mContext = new TestingContext(InstrumentationRegistry.getInstrumentation().getContext());
+        // A device always has an Android ID; Robolectric has none until one is set.
+        if (Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID) == null) {
+            Settings.Secure.putString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID, "0123456789abcdef");
+        }
         clearStorage();
 
         mStartingMpid = new Random().nextLong();

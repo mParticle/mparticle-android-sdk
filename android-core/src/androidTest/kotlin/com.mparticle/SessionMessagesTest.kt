@@ -2,6 +2,7 @@ package com.mparticle
 
 import android.os.Handler
 import android.os.Looper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.internal.AccessUtils
 import com.mparticle.internal.AppStateManager
 import com.mparticle.internal.Constants
@@ -13,7 +14,9 @@ import com.mparticle.testutils.BaseCleanStartedEachTest
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 class SessionMessagesTest : BaseCleanStartedEachTest() {
     private lateinit var mAppStateManager: AppStateManager
     private lateinit var mHandler: Handler

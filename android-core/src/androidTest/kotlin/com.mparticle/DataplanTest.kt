@@ -1,5 +1,6 @@
 package com.mparticle
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.internal.Constants
 import com.mparticle.networking.Matcher
 import com.mparticle.networking.MockServer
@@ -13,7 +14,9 @@ import org.json.JSONException
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 class DataplanTest : BaseCleanInstallEachTest() {
     var testingUtils: TestingUtils = TestingUtils.getInstance()
 

@@ -6,6 +6,7 @@ import android.location.LocationManager
 import android.os.Handler
 import android.os.Looper
 import android.webkit.WebView
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.identity.IdentityApiRequest
 import com.mparticle.identity.IdentityStateListener
 import com.mparticle.internal.AppStateManager
@@ -27,13 +28,15 @@ import org.json.JSONException
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.io.File
 import java.util.Arrays
 import java.util.concurrent.CountDownLatch
 import kotlin.test.assertTrue
 import com.mparticle.internal.database.services.AccessUtils as DbAccessUtils
 
-class MParticleTest : BaseCleanStartedEachTest() {
+@RunWith(AndroidJUnit4::class)
+class MParticleITest : BaseCleanStartedEachTest() {
     private val configResponse = """
         {
             "dt": "ac",

@@ -1,6 +1,7 @@
 package com.mparticle.networking
 
 import android.net.Uri
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mparticle.BuildConfig
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
@@ -12,9 +13,11 @@ import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.net.MalformedURLException
 
-class MParticleBaseClientImplTest : BaseCleanInstallEachTest() {
+@RunWith(AndroidJUnit4::class)
+class MParticleBaseClientImplITest : BaseCleanInstallEachTest() {
     var defaultUrls = HashMap<MParticleBaseClientImpl.Endpoint, MPUrl>()
     var apiKey = mRandomUtils.getAlphaString(10)
 

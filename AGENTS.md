@@ -94,6 +94,9 @@ JDK 17 — `gradle.properties` sets `JAVA_VERSION` and every CI job installs Zul
   consumers.
 - Instrumented tests — `./gradlew :android-core:cAT :android-kit-base:cAT --stacktrace`, needs an
   API 28 emulator
+- Instrumented tests on the JVM (Robolectric pilot, no emulator) —
+  `./gradlew -Probolectric=28 :android-core:testDebugUnitTest :android-kit-base:testDebugUnitTest :testutils:testDebugUnitTest`;
+  `-Probolectric=35` runs a sample. `gradle/robolectric/robolectric.gradle` says what it runs and skips.
 - Kit unit tests — `./gradlew -p kits testRelease -c ../settings-kits.gradle -Pmparticle.kit.mparticleFromMavenLocalOnly=true`
 - Everything trunk gates — `trunk check`
 
@@ -105,8 +108,8 @@ JDK 17 — `gradle.properties` sets `JAVA_VERSION` and every CI job installs Zul
    all — only `src/androidTest` — so `./gradlew :testutils:test` succeeds having run nothing. Read
    the test report, not the exit code, when you expect a specific test to have run.
 3. **Unit tests are not the bulk of the suite.** `android-core` and `android-kit-base` both keep
-   substantial suites under `src/androidTest`, which only `cAT` on an emulator executes. "Tests
-   pass" is ambiguous here — say which of the two you ran.
+   substantial suites under `src/androidTest`, which only `cAT` on an emulator, or the Robolectric
+   pilot on the JVM, executes. "Tests pass" is ambiguous here — say which you ran.
 4. **Some kits are commented out of `settings-kits.gradle`** because they need a newer Kotlin than
    the root plugin, and they build standalone from their own directory with their own wrapper. The
    commented-out lines name the current set; see

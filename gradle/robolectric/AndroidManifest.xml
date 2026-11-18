@@ -1,0 +1,21 @@
+<!-- The test manifest of the Robolectric pilot (robolectric.gradle beside it): what the instrumented test manifests
+     declare that the JVM run needs, MPService included because the push path checks that it is declared. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-sdk tools:overrideLibrary="com.mparticle.testutils,androidx.test.ext.junit,androidx.test.core,androidx.test.monitor,androidx.test.services.storage,androidx.test.runner,androidx.test.rules,androidx.test.espresso.idling.resource,com.google.android.gms.tasks,com.google.android.gms.common" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+
+    <application>
+        <service
+            android:exported="false"
+            android:name="com.mparticle.MPService" />
+    </application>
+
+</manifest>

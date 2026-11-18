@@ -1,7 +1,10 @@
 package com.mparticle.internal
 
 import android.content.Context
+import android.os.SystemClock
 import android.util.MutableBoolean
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.internal.database.services.AccessUtils
@@ -14,8 +17,10 @@ import org.json.JSONException
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 
+@RunWith(AndroidJUnit4::class)
 class AppStateManagerInstrumentedTest : BaseCleanStartedEachTest() {
     var mAppStateManager: AppStateManager? = null
 
@@ -115,7 +120,12 @@ class AppStateManagerInstrumentedTest : BaseCleanStartedEachTest() {
         com.mparticle.AccessUtils.setKitManager(kitManagerTester)
         goToBackground()
         Assert.assertNull(mAppStateManager?.currentActivity)
-        Thread.sleep(AppStateManager.ACTIVITY_DELAY + 100)
+        // Wait out the delayed background check on the main thread, then let it run. Under Robolectric only
+        // SystemClock.sleep moves the clock that check is scheduled on, and moving it from another thread can leave
+        // the main looper asleep.
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        instrumentation.runOnMainSync { SystemClock.sleep(AppStateManager.ACTIVITY_DELAY + 100) }
+        instrumentation.waitForIdleSync()
         goToForeground()
         Assert.assertNotNull(mAppStateManager?.currentActivity?.get())
         latch.await()

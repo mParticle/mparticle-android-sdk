@@ -1,9 +1,12 @@
 package com.mparticle.internal.database.services
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert
 import org.junit.Test
+import org.junit.runner.RunWith
 
-class UserAttributesServiceTest : BaseMPServiceTest() {
+@RunWith(AndroidJUnit4::class)
+class UserAttributesServiceITest : BaseMPServiceTest() {
     @Test
     fun testStoreByMpid() {
         for (i in 0..19) {
