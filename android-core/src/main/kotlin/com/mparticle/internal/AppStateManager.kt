@@ -11,6 +11,9 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
+import androidx.annotation.RestrictTo
 import com.mparticle.MParticle
 import com.mparticle.identity.IdentityApi.SingleUserIdentificationCallback
 import com.mparticle.identity.IdentityApiRequest
@@ -21,6 +24,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.lang.ref.WeakReference
+import java.util.UUID
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 
@@ -65,11 +69,23 @@ constructor(context: Context, unitTesting: Boolean = false) {
     private var mLastForegroundTime: Long = 0
 
     var mUnitTesting: Boolean = false
+    internal var clockOverrideMs: (() -> Long)? = null
     private var mMessageManager: MessageManager? = null
     open var launchUri: Uri? = null
         set
     var launchAction: String? = null
         private set
+
+    @Volatile
+    private var currentScreenViewIdValue: String? = null
+
+    @Volatile
+    private var currentScreenViewActivityHash: Int? = null
+
+    @Volatile
+    private var pendingScreenViewId: PendingScreenViewId? = null
+
+    private class PendingScreenViewId(val id: String, val activityHash: Int?, val mintedAtElapsedRealtimeMs: Long)
 
     init {
         mUnitTesting = unitTesting
@@ -99,11 +115,146 @@ constructor(context: Context, unitTesting: Boolean = false) {
 
     private val time: Long
         get() =
-            if (mUnitTesting) {
-                System.currentTimeMillis()
+            clockOverrideMs?.invoke()
+                ?: if (mUnitTesting) {
+                    System.currentTimeMillis()
+                } else {
+                    SystemClock.elapsedRealtime()
+                }
+
+    private fun currentActivityIdentityHash(): Int? = currentActivity?.get()?.let { System.identityHashCode(it) }
+
+    private fun isPendingScreenViewIdValid(pending: PendingScreenViewId, activityHash: Int?, nowMs: Long): Boolean {
+        val elapsedMs = nowMs - pending.mintedAtElapsedRealtimeMs
+        if (elapsedMs < 0L || elapsedMs > PENDING_SCREEN_VIEW_ID_TTL_MS) {
+            return false
+        }
+        return pending.activityHash == null || pending.activityHash == activityHash
+    }
+
+    private fun clearScreenViewIds() {
+        synchronized(this) {
+            currentScreenViewIdValue = null
+            currentScreenViewActivityHash = null
+            pendingScreenViewId = null
+        }
+    }
+
+    private fun clearScreenViewIdsOnSessionStart() {
+        synchronized(this) {
+            val nowMs = time
+            val activityHash = currentActivityIdentityHash()
+            val pending = pendingScreenViewId
+            if (pending != null && isPendingScreenViewIdValid(pending, activityHash, nowMs)) {
+                if (currentScreenViewIdValue != pending.id) {
+                    currentScreenViewIdValue = null
+                    currentScreenViewActivityHash = null
+                }
             } else {
-                SystemClock.elapsedRealtime()
+                currentScreenViewIdValue = null
+                currentScreenViewActivityHash = null
+                pendingScreenViewId = null
             }
+        }
+    }
+
+    // Binds pre-resume IDs to this Activity; an ID bound to another Activity survives so it returns after an overlay closes.
+    private fun reconcileScreenViewIdsOnActivityResumed(activity: Activity?) {
+        val resumedActivityHash = activity?.let { System.identityHashCode(it) } ?: return
+        synchronized(this) {
+            val pending = pendingScreenViewId
+            if (pending != null) {
+                if (!isPendingScreenViewIdValid(pending, resumedActivityHash, time)) {
+                    pendingScreenViewId = null
+                } else if (pending.activityHash == null) {
+                    pendingScreenViewId = PendingScreenViewId(pending.id, resumedActivityHash, pending.mintedAtElapsedRealtimeMs)
+                }
+            }
+            if (currentScreenViewIdValue != null && currentScreenViewActivityHash == null) {
+                currentScreenViewActivityHash = resumedActivityHash
+            }
+        }
+    }
+
+    /**
+     * Returns the active per-screen visit identifier, or null when no screen is active.
+     *
+     * Supported ordering:
+     * - Multi-Activity apps: placements called before or after `MParticle.logScreen` on the same
+     *   Activity instance share one `screen_view_id` within the 2,000 ms pending window.
+     * - Single-Activity apps (Fragment or Compose navigation): the app-facing contract is to call
+     *   `MParticle.logScreen` on screen entry before `selectPlacements` ([reservePendingScreenViewId]
+     *   is an internal library-group hook for SDK navigation integrations).
+     * - Configuration changes (rotation, theme, locale): recreating an Activity gives it a new
+     *   instance identity that no longer matches the previous ID, so apps that re-request placements
+     *   after recreation must also re-log the screen.
+     */
+    @Nullable
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    open fun getCurrentScreenViewId(): String? = currentScreenViewIdValue
+
+    @NonNull
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    open fun reservePendingScreenViewId(): String = synchronized(this) {
+        val nowMs = time
+        val activityHash = currentActivityIdentityHash()
+        val existing = pendingScreenViewId
+        if (existing != null && isPendingScreenViewIdValid(existing, activityHash, nowMs)) {
+            return existing.id
+        }
+        val minted = UUID.randomUUID().toString()
+        pendingScreenViewId = PendingScreenViewId(minted, activityHash, nowMs)
+        currentScreenViewIdValue = null
+        currentScreenViewActivityHash = null
+        minted
+    }
+
+    @NonNull
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @JvmOverloads
+    open fun mintOrAdoptScreenViewId(callerScreenViewId: String? = null): String = synchronized(this) {
+        val nowMs = time
+        val activityHash = currentActivityIdentityHash()
+        val pending = pendingScreenViewId
+        pendingScreenViewId = null
+        val nonBlankCallerId = callerScreenViewId?.takeIf { it.isNotBlank() && it.length <= Constants.LIMIT_ATTR_VALUE }
+        val resolved =
+            if (nonBlankCallerId != null) {
+                nonBlankCallerId
+            } else if (pending != null && isPendingScreenViewIdValid(pending, activityHash, nowMs)) {
+                pending.id
+            } else {
+                UUID.randomUUID().toString()
+            }
+        currentScreenViewIdValue = resolved
+        currentScreenViewActivityHash = activityHash
+        resolved
+    }
+
+    @NonNull
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    open fun getOrCreateScreenViewIdForPlacement(): String = synchronized(this) {
+        val nowMs = time
+        val activityHash = currentActivityIdentityHash()
+        val pending = pendingScreenViewId
+        if (pending != null) {
+            if (isPendingScreenViewIdValid(pending, activityHash, nowMs)) {
+                currentScreenViewIdValue = pending.id
+                currentScreenViewActivityHash = activityHash ?: pending.activityHash
+                return pending.id
+            }
+            pendingScreenViewId = null
+        }
+        val current = currentScreenViewIdValue
+        if (current != null && currentScreenViewActivityHash == activityHash) {
+            return current
+        }
+        val minted = UUID.randomUUID().toString()
+        pendingScreenViewId = PendingScreenViewId(minted, activityHash, nowMs)
+        currentScreenViewIdValue = minted
+        currentScreenViewActivityHash = activityHash
+        minted
+    }
 
     fun onActivityResumed(activity: Activity?) {
         try {
@@ -174,6 +325,8 @@ constructor(context: Context, unitTesting: Boolean = false) {
                 mConfigManager?.setPreviousAdId()
             }
             mLastForegroundTime = time
+
+            reconcileScreenViewIdsOnActivityResumed(activity)
 
             if (currentActivity != null) {
                 currentActivity?.clear()
@@ -347,6 +500,7 @@ constructor(context: Context, unitTesting: Boolean = false) {
     }
 
     private fun logBackgrounded() {
+        clearScreenViewIds()
         val instance = MParticle.getInstance()
         if (instance != null) {
             logStateTransition(Constants.StateTransitionType.STATE_TRANS_BG, currentActivityName)
@@ -372,6 +526,7 @@ constructor(context: Context, unitTesting: Boolean = false) {
         lifecycleCallbacks?.let { (mContext as Application).unregisterActivityLifecycleCallbacks(it) }
         lifecycleCallbacks = null
         delayedBackgroundCheckHandler.removeCallbacksAndMessages(null)
+        clearScreenViewIds()
         mInitialized = false
     }
 
@@ -384,6 +539,7 @@ constructor(context: Context, unitTesting: Boolean = false) {
         mMessageManager?.endSession(session)
         disableLocationTracking()
         session = InternalSession()
+        clearScreenViewIds()
         val instance = MParticle.getInstance()
         instance?.Internal()?.kitManager?.onSessionEnd()
         InternalListenerManager.listener.onSessionUpdated(session)
@@ -402,6 +558,7 @@ constructor(context: Context, unitTesting: Boolean = false) {
 
     fun startSession() {
         session = InternalSession().start(mContext)
+        clearScreenViewIdsOnSessionStart()
         mLastStoppedTime = AtomicLong(time)
         enableLocationTracking()
         val instance = MParticle.getInstance()
@@ -487,6 +644,7 @@ constructor(context: Context, unitTesting: Boolean = false) {
         const val APP_STATE_FOREGROUND: String = "foreground"
         const val APP_STATE_BACKGROUND: String = "background"
         const val APP_STATE_NOTRUNNING: String = "not_running"
+        private const val PENDING_SCREEN_VIEW_ID_TTL_MS: Long = 2000L
 
         private fun getActivityName(activity: Activity?): String = activity?.javaClass?.canonicalName ?: ""
     }
