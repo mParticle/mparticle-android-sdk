@@ -10,16 +10,16 @@ import android.content.Intent;
  * In order to use this class:
  *
  * 1. Create your own class which extends this one, for example MyPushReceiver.java
- * 2. Add the following to your <code>AndroidManifest.xml</code>, replacing <code>YOURPACKAGENAME</code> and the name of your <code>BroadcastReceiver</code>:
+ * 2. Register an instance via {@link MPMessagingAPI#registerPushAnalyticsReceiver(PushAnalyticsReceiver)}:
  * <pre>
- *  {@code <receiver android:exported="true" android:name="YOURPACKAGENAME.MyPushReceiver">
- *      <intent-filter>
- *          <action android:name="com.mparticle.push.RECEIVE" />
- *          <action android:name="com.mparticle.push.TAP" />
- *          <category android:name="YOURPACKAGENAME"/>
- *      </intent-filter>
- *  </receiver> }</pre>
+ *  {@code MParticle.getInstance().Messaging().registerPushAnalyticsReceiver(new MyPushReceiver());}</pre>
  *
+ * Note: {@code com.mparticle.push.RECEIVE} and {@code com.mparticle.push.TAP} are dispatched internally via
+ * {@link androidx.localbroadcastmanager.content.LocalBroadcastManager} to receivers registered through
+ * {@link MPMessagingAPI#registerPushAnalyticsReceiver(PushAnalyticsReceiver)} rather than manifest-declared receivers.
+ *
+ * @see MPMessagingAPI#registerPushAnalyticsReceiver(PushAnalyticsReceiver)
+ * @see MPMessagingAPI#unregisterPushAnalyticsReceiver(PushAnalyticsReceiver)
  * @see #onNotificationReceived(ProviderCloudMessage)
  * @see #onNotificationTapped(ProviderCloudMessage)
  */

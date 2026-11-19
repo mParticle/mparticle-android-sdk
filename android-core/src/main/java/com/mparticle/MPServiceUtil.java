@@ -13,6 +13,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 
 import androidx.annotation.RequiresApi;
+import androidx.annotation.RestrictTo;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.mparticle.internal.ConfigManager;
@@ -21,6 +22,7 @@ import com.mparticle.internal.KitsLoadedListener;
 import com.mparticle.internal.KitsLoadedListenerConfiguration;
 import com.mparticle.internal.Logger;
 import com.mparticle.messaging.MPMessagingAPI;
+import com.mparticle.messaging.MPMessagingRouter;
 import com.mparticle.messaging.ProviderCloudMessage;
 
 public class MPServiceUtil {
@@ -90,11 +92,19 @@ public class MPServiceUtil {
             } else if (action.startsWith(INTERNAL_NOTIFICATION_TAP)) {
                 handleNotificationTapInternal(intent);
             } else if (action.equals(MPMessagingAPI.BROADCAST_NOTIFICATION_TAPPED)) {
-                handleNotificationTap(intent);
+                if (MPMessagingRouter.isInternalBroadcast(intent)) {
+                    handleNotificationTap(intent);
+                } else {
+                    Logger.warning("MPService", "Ignoring unauthenticated notification tap broadcast.");
+                }
             } else if (action.equals(MPMessagingAPI.BROADCAST_NOTIFICATION_RECEIVED)) {
-                final ProviderCloudMessage message = getCloudMessage(intent);
-                if (message != null) {
-                    showNotification(message);
+                if (MPMessagingRouter.isInternalBroadcast(intent)) {
+                    final ProviderCloudMessage message = getCloudMessage(intent);
+                    if (message != null) {
+                        showNotification(message);
+                    }
+                } else {
+                    Logger.warning("MPService", "Ignoring unauthenticated notification received broadcast.");
                 }
             }
         } finally {
@@ -137,13 +147,8 @@ public class MPServiceUtil {
     }
 
     private static ProviderCloudMessage getCloudMessage(Intent intent) {
-        ProviderCloudMessage message = null;
-        try {
-            message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
-        } catch (Exception e) {
-            Logger.warning("MPService", "Unable to read the cloud message extra: " + e);
-        }
-        if (message == null) {
+        ProviderCloudMessage message = MPMessagingRouter.extractCloudMessage(intent);
+        if (message == null && intent != null) {
             Logger.warning("MPService", "Ignoring action " + intent.getAction() + " with no cloud message extra.");
         }
         return message;
@@ -204,9 +209,15 @@ public class MPServiceUtil {
         }
     }
 
-    private void broadcastNotificationReceived(ProviderCloudMessage message) {
-        Intent intent = new Intent(MPMessagingAPI.BROADCAST_NOTIFICATION_RECEIVED);
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    public static Intent createInternalPushBroadcast(String action, ProviderCloudMessage message) {
+        Intent intent = new Intent(action);
         intent.putExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA, message);
+        return MPMessagingRouter.markInternalBroadcast(intent);
+    }
+
+    private void broadcastNotificationReceived(ProviderCloudMessage message) {
+        Intent intent = createInternalPushBroadcast(MPMessagingAPI.BROADCAST_NOTIFICATION_RECEIVED, message);
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
         onHandleIntent(intent);
     }
@@ -222,8 +233,7 @@ public class MPServiceUtil {
         manager.cancel(message.getId());
 
         MParticle.start(MParticleOptions.builder(mContext.getApplicationContext()).buildForInternalRestart());
-        Intent broadcast = new Intent(MPMessagingAPI.BROADCAST_NOTIFICATION_TAPPED);
-        broadcast.putExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA, message);
+        Intent broadcast = createInternalPushBroadcast(MPMessagingAPI.BROADCAST_NOTIFICATION_TAPPED, message);
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(broadcast);
         onHandleIntent(broadcast);
     }

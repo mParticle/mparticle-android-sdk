@@ -589,6 +589,9 @@ open class MessageManager :
     }
 
     open fun logNotification(cloudMessage: ProviderCloudMessage?, appState: String?) {
+        if (cloudMessage == null) {
+            return
+        }
         try {
             val message =
                 BaseMPMessage
@@ -597,7 +600,7 @@ open class MessageManager :
                     .name("gcm")
                     .build(mAppStateManager!!.session, mLocation, mConfigManager!!.mpid)
 
-            message.put(MessageKey.PAYLOAD, cloudMessage!!.redactedJsonPayload.toString())
+            message.put(MessageKey.PAYLOAD, getRedactedJsonPayload(cloudMessage))
             message.put(MessageKey.PUSH_TYPE, Constants.Push.MESSAGE_TYPE_RECEIVED)
 
             val instanceId = mConfigManager!!.pushRegistration?.instanceId
@@ -608,6 +611,14 @@ open class MessageManager :
             mMessageHandler!!.sendMessage(mMessageHandler!!.obtainMessage(MessageHandler.STORE_MESSAGE, message))
         } catch (e: JSONException) {
         }
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun getRedactedJsonPayload(cloudMessage: ProviderCloudMessage?): String {
+        if (cloudMessage == null || cloudMessage.extras == null) {
+            return JSONObject().toString()
+        }
+        return cloudMessage.redactedJsonPayload.toString()
     }
 
     override fun logNotification(contentId: Int, payload: String?, appState: String?, behavior: Int) {
