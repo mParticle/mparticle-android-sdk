@@ -55,7 +55,8 @@ public class ProviderCloudMessage implements Parcelable {
         mExtras = pc.readBundle();
         mActualDeliveryTime = pc.readLong();
         mDisplayed = pc.readInt() == 1;
-        mPrimaryText = pc.readString();
+        String primaryText = pc.readString();
+        mPrimaryText = primaryText != null ? primaryText : "";
     }
 
     @NonNull
@@ -92,7 +93,7 @@ public class ProviderCloudMessage implements Parcelable {
 
     @NonNull
     public int getId() {
-        return mPrimaryText.hashCode();
+        return mPrimaryText != null ? mPrimaryText.hashCode() : 0;
     }
 
     @NonNull
@@ -108,7 +109,13 @@ public class ProviderCloudMessage implements Parcelable {
     @NonNull
     public JSONObject getRedactedJsonPayload() {
         JSONObject json = new JSONObject();
+        if (mExtras == null) {
+            return json;
+        }
         Set<String> keys = mExtras.keySet();
+        if (keys == null) {
+            return json;
+        }
         for (String key : keys) {
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -243,7 +250,7 @@ public class ProviderCloudMessage implements Parcelable {
      * @return
      */
     private String findProviderMessage(JSONArray possibleKeys) {
-        if (possibleKeys != null) {
+        if (possibleKeys != null && mExtras != null) {
             for (int i = 0; i < possibleKeys.length(); i++) {
                 try {
                     String message = mExtras.getString(possibleKeys.getString(i));
