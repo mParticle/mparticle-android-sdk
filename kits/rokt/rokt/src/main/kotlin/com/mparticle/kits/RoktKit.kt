@@ -231,30 +231,35 @@ class RoktKit :
     override fun logEvent(commerceEvent: CommerceEvent): List<ReportingMessage> = emptyList()
 
     /*
-     * Overrides for IdentityListener
+     * Overrides for IdentityListener. $NoTargeting belongs to an MPID, so every identity change re-syncs it for the
+     * user it switched to.
      */
     override fun onIdentifyCompleted(
         mParticleUser: MParticleUser,
         filteredIdentityApiRequest: FilteredIdentityApiRequest,
     ) {
+        RoktKitRequestHelper.syncNoTargetingAfterIdentityChange(mParticleUser)
     }
 
     override fun onLoginCompleted(
         mParticleUser: MParticleUser,
         filteredIdentityApiRequest: FilteredIdentityApiRequest,
     ) {
+        RoktKitRequestHelper.syncNoTargetingAfterIdentityChange(mParticleUser)
     }
 
     override fun onLogoutCompleted(
         mParticleUser: MParticleUser,
         filteredIdentityApiRequest: FilteredIdentityApiRequest,
     ) {
+        RoktKitRequestHelper.syncNoTargetingAfterIdentityChange(mParticleUser)
     }
 
     override fun onModifyCompleted(
         mParticleUser: MParticleUser,
         filteredIdentityApiRequest: FilteredIdentityApiRequest,
     ) {
+        RoktKitRequestHelper.syncNoTargetingAfterIdentityChange(mParticleUser)
     }
 
     override fun onUserIdentified(mParticleUser: MParticleUser) {}
@@ -384,9 +389,10 @@ class RoktKit :
         val effectivePrivacy = mergePrivacyMapsWithOptOutPrecedence(profilePrivacy, callerPrivacy)
         finalAttributes.putAll(effectivePrivacy)
         // The profile write of $NoTargeting is asynchronous and may be filtered, so set it here too.
-        when (effectivePrivacy[ROKT_ATTRIBUTE_NO_TARGETING]) {
-            "true" -> finalAttributes[NO_TARGETING_USER_ATTRIBUTE] = "true"
-            "false" -> finalAttributes.keys.removeAll { it.equals(NO_TARGETING_USER_ATTRIBUTE, ignoreCase = true) }
+        if (effectivePrivacy[ROKT_ATTRIBUTE_NO_TARGETING].equals("true", ignoreCase = true)) {
+            finalAttributes[NO_TARGETING_USER_ATTRIBUTE] = "true"
+        } else {
+            finalAttributes.keys.removeAll { it.equals(NO_TARGETING_USER_ATTRIBUTE, ignoreCase = true) }
         }
 
         filterUser?.id?.toString()?.let { mpid ->

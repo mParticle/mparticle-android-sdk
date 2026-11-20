@@ -98,6 +98,22 @@ class RoktKitTests {
     }
 
     @Test
+    fun identity_callbacks_resync_NoTargeting_for_the_user_they_switched_to() {
+        mockkObject(RoktKitRequestHelper)
+        every { RoktKitRequestHelper.syncNoTargetingAfterIdentityChange(any()) } just runs
+        val newUser = mockk<MParticleUser>(relaxed = true)
+        val request = mockk<FilteredIdentityApiRequest>(relaxed = true)
+
+        roktKit.onIdentifyCompleted(newUser, request)
+        roktKit.onLoginCompleted(newUser, request)
+        roktKit.onLogoutCompleted(newUser, request)
+        roktKit.onModifyCompleted(newUser, request)
+
+        verify(exactly = 4) { RoktKitRequestHelper.syncNoTargetingAfterIdentityChange(newUser) }
+        unmockkObject(RoktKitRequestHelper)
+    }
+
+    @Test
     fun onKitDestroy_closes_Rokt_and_unregisters_the_kit_even_if_close_fails() {
         mockkObject(Rokt)
         every { Rokt.close() } throws IllegalStateException("Rokt not initialized")
