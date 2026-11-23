@@ -56,6 +56,7 @@ class RoktKitRequestHelperTest {
         kitIntegration = mockk(relaxed = true)
         every { kitIntegration.configuration } returns kitConfiguration
         roktListener = mockk(relaxed = true)
+        RoktKitRequestHelper.requestedNoTargetingTag.clear()
     }
 
     @After
@@ -406,8 +407,10 @@ class RoktKitRequestHelperTest {
         assertFalse(capturedAttributes[1].containsKey("Sandbox"))
         assertFalse(storedMap.containsKey("Notargeting"))
         assertFalse(storedMap.containsKey("NoFunctional"))
-        assertEquals(true, storedMap["\$NoTargeting"])
+        verify(exactly = 1) { user.setUserAttribute("\$NoTargeting", true) }
         assertFalse(capturedAttributes[2].containsKey("noTargeting"))
+        // The last call passes no privacy key and the profile holds none, so the tag goes, as on web.
+        assertFalse(storedMap.containsKey("\$NoTargeting"))
     }
 
     @Test
@@ -496,7 +499,7 @@ class RoktKitRequestHelperTest {
     }
 
     @Test
-    fun selectPlacements_whenCallWithoutPrivacyRunsForIdentifiedUserFirst_stillSyncsIdentifiedUser() {
+    fun selectPlacements_whenCallWithoutPrivacyRunsForIdentifiedUserFirst_newerCallDecidesNoTargeting() {
         userIdentities[IdentityType.Email] = "old@example.com"
         val stored = mutableMapOf<String, Any?>()
         val identifiedUser = identifiedUser(stored)
@@ -507,7 +510,8 @@ class RoktKitRequestHelperTest {
         selectPlacements(emptyMap())
         completeIdentify(0, identifiedUser)
 
-        assertEquals(true, stored["\$NoTargeting"])
+        // That newer call's sync wrote $NoTargeting for this user, so the older identify leaves it alone.
+        assertFalse(stored.containsKey("\$NoTargeting"))
     }
 
     @Test
@@ -526,7 +530,7 @@ class RoktKitRequestHelperTest {
     }
 
     @Test
-    fun selectPlacements_whenNewerCallPassesOnlyNoFunctional_stillSyncsNoTargetingOnIdentifiedUser() {
+    fun selectPlacements_whenNewerCallForTheIdentifiedUserPassesOnlyNoFunctional_newerSyncDecidesNoTargeting() {
         userIdentities[IdentityType.Email] = "old@example.com"
         val stored = mutableMapOf<String, Any?>()
         val identifiedUser = identifiedUser(stored)
@@ -536,11 +540,27 @@ class RoktKitRequestHelperTest {
         selectPlacements(mapOf("noFunctional" to "true"))
         completeIdentify(0, identifiedUser)
 
-        assertEquals(true, stored["\$NoTargeting"])
+        // Every placement sync now writes $NoTargeting, so the newer call for this user decides it.
+        assertFalse(stored.containsKey("\$NoTargeting"))
     }
 
     @Test
-    fun selectPlacements_whenNewerCallPassesOneKey_identifySyncSkipsOnlyThatKey() {
+    fun selectPlacements_whenNewerCallClearsTheTag_olderIdentifyDoesNotRestoreIt() {
+        userIdentities[IdentityType.Email] = "old@example.com"
+        val stored = mutableMapOf<String, Any?>("\$NoTargeting" to true)
+        val identifiedUser = identifiedUser(stored)
+
+        selectPlacements(mapOf("email" to "new@example.com", "noTargeting" to "true"))
+        every { identityApi.currentUser } returns identifiedUser
+        selectPlacements(mapOf("shippingcountry" to "US"))
+        assertFalse(stored.containsKey("\$NoTargeting"))
+        completeIdentify(0, identifiedUser)
+
+        assertFalse(stored.containsKey("\$NoTargeting"))
+    }
+
+    @Test
+    fun selectPlacements_whenNewerCallPassesOneKey_identifySyncSkipsThatKeyAndNoTargeting() {
         userIdentities[IdentityType.Email] = "old@example.com"
         val stored = mutableMapOf<String, Any?>("noFunctional" to "false")
         val identifiedUser = identifiedUser(stored)
@@ -550,7 +570,8 @@ class RoktKitRequestHelperTest {
         selectPlacements(mapOf("noFunctional" to "false"))
         completeIdentify(0, identifiedUser)
 
-        assertEquals(true, stored["\$NoTargeting"])
+        // noTargeting is skipped too: the newer call's sync wrote $NoTargeting for this user.
+        assertFalse(stored.containsKey("\$NoTargeting"))
         assertEquals("false", stored["noFunctional"])
     }
 
@@ -576,5 +597,114 @@ class RoktKitRequestHelperTest {
         assertFalse(persistedAttributes.captured.containsKey("screen_view_id"))
         assertEquals("42.00", persistedAttributes.captured["cart_value"])
         assertEquals("caller-sv-123", forwardedAttributes.captured["screen_view_id"])
+    }
+
+    // What the kit's identity callbacks receive: a filtered, read-only view of the user.
+    private fun readOnlyViewOf(user: MParticleUser): MParticleUser {
+        val view = mockk<MParticleUser>(relaxed = true)
+        every { view.id } returns user.id
+        every { view.userAttributes } returns emptyMap()
+        every { view.setUserAttribute(any(), any()) } returns false
+        every { view.removeUserAttribute(any()) } returns false
+        return view
+    }
+
+    private fun currentUserWith(id: Long, attributes: Map<String, Any?>): MParticleUser {
+        val newUser = mockk<MParticleUser>(relaxed = true)
+        every { newUser.id } returns id
+        every { newUser.userAttributes } returns attributes
+        every { newUser.userIdentities } returns HashMap()
+        every { identityApi.currentUser } returns newUser
+        every { identityApi.getUser(any()) } returns newUser
+        return newUser
+    }
+
+    @Test
+    fun selectPlacements_whenNoSourceSaysTrue_removesStaleNoTargeting() {
+        val capturedAttributes = slot<Map<String, String>>()
+        every { user.userAttributes } returns mapOf("\$NoTargeting" to true)
+        every {
+            roktListener.selectPlacements(any(), capture(capturedAttributes), any(), any(), any(), any(), any())
+        } returns Unit
+
+        selectPlacements(mapOf("shippingcountry" to "US"))
+
+        verify(exactly = 1) { user.removeUserAttribute("\$NoTargeting") }
+        assertFalse(capturedAttributes.captured.containsKey("\$NoTargeting"))
+    }
+
+    // The stored profile below never changes, as when core has not yet applied the kit's queued write.
+    @Test
+    fun selectPlacements_optOutAfterAQueuedRemoval_stillSetsTag() {
+        val currentUser = currentUserWith(508L, mapOf("\$NoTargeting" to true))
+
+        selectPlacements(mapOf("shippingcountry" to "US"))
+        verify(exactly = 1) { currentUser.removeUserAttribute("\$NoTargeting") }
+        selectPlacements(mapOf("noTargeting" to "true"))
+
+        verify(exactly = 1) { currentUser.setUserAttribute("\$NoTargeting", true) }
+    }
+
+    @Test
+    fun selectPlacements_removalAfterAQueuedSet_stillRemovesTag() {
+        val currentUser = currentUserWith(509L, emptyMap())
+
+        selectPlacements(mapOf("noTargeting" to "true"))
+        verify(exactly = 1) { currentUser.setUserAttribute("\$NoTargeting", true) }
+        selectPlacements(mapOf("shippingcountry" to "US"))
+
+        verify(exactly = 1) { currentUser.removeUserAttribute("\$NoTargeting") }
+    }
+
+    @Test
+    fun syncNoTargetingAfterIdentityChange_whenNewUsersProfileOptsOut_setsTag() {
+        val newUser = currentUserWith(501L, mapOf("noTargeting" to "true"))
+
+        RoktKitRequestHelper.syncNoTargetingAfterIdentityChange(readOnlyViewOf(newUser))
+
+        verify(exactly = 1) { newUser.setUserAttribute("\$NoTargeting", true) }
+    }
+
+    @Test
+    fun syncNoTargetingAfterIdentityChange_whenNoSourceSaysTrue_removesHandSetTag() {
+        val newUser = currentUserWith(502L, mapOf("\$NoTargeting" to true))
+
+        RoktKitRequestHelper.syncNoTargetingAfterIdentityChange(readOnlyViewOf(newUser))
+
+        verify(exactly = 1) { newUser.removeUserAttribute("\$NoTargeting") }
+    }
+
+    @Test
+    fun syncNoTargetingAfterIdentityChange_keepsPerCallOptOutFromThatUsersLastPlacement() {
+        val optedOutUser = currentUserWith(503L, mapOf("\$NoTargeting" to true))
+        selectPlacements(mapOf("noTargeting" to "true"))
+
+        RoktKitRequestHelper.syncNoTargetingAfterIdentityChange(readOnlyViewOf(optedOutUser))
+
+        verify(exactly = 0) { optedOutUser.removeUserAttribute("\$NoTargeting") }
+    }
+
+    @Test
+    fun syncNoTargetingAfterIdentityChange_toAnotherUser_ignoresPreviousUsersPerCallOptOut() {
+        currentUserWith(504L, emptyMap())
+        selectPlacements(mapOf("noTargeting" to "true"))
+        val nextUser = currentUserWith(505L, mapOf("\$NoTargeting" to true))
+
+        RoktKitRequestHelper.syncNoTargetingAfterIdentityChange(readOnlyViewOf(nextUser))
+
+        verify(exactly = 1) { nextUser.removeUserAttribute("\$NoTargeting") }
+    }
+
+    @Test
+    fun syncNoTargetingAfterIdentityChange_forAUserWhoIsNoLongerCurrent_changesNothing() {
+        val staleUser = mockk<MParticleUser>(relaxed = true)
+        every { staleUser.id } returns 506L
+        every { staleUser.userAttributes } returns mapOf("\$NoTargeting" to true)
+        currentUserWith(507L, emptyMap())
+
+        RoktKitRequestHelper.syncNoTargetingAfterIdentityChange(staleUser)
+
+        verify(exactly = 0) { staleUser.removeUserAttribute(any()) }
+        verify(exactly = 0) { staleUser.setUserAttribute(any(), any()) }
     }
 }

@@ -25,6 +25,15 @@ internal object RoktKitRequestHelper {
     // seen in this process, so it stays small and is never pruned.
     private val lastPrivacySequence = HashMap<Pair<Long, String>, Long>()
 
+    // The $NoTargeting result of the last placement-call sync, per MPID. An identity change counts it as a source, so a
+    // per-call opt-out lasts until that user's next placement call even when the identity callback runs after the
+    // call's own identify. In memory only, like the web flag.
+    private val placementNoTargeting = HashMap<Long, Boolean>()
+
+    // The $NoTargeting state the kit last asked core to store, per MPID, guarded by placementNoTargeting. Core applies
+    // attribute writes later on its message handler, so the stored profile can lag behind the kit's own last write.
+    internal val requestedNoTargetingTag = HashMap<Long, Boolean>()
+
     // Records `sequence` for each of `keys` on `mpid` and returns the keys that no newer call has
     // passed for that user.
     private fun claimPrivacyKeys(mpid: Long, keys: Set<String>, sequence: Long): Set<String> =
@@ -319,7 +328,11 @@ internal object RoktKitRequestHelper {
         rawCallerPrivacy: Map<String, String>,
         sequence: Long,
     ) {
-        val claimedKeys = claimPrivacyKeys(identifiedUser.id, rawCallerPrivacy.keys, sequence)
+        val claimedKeys = claimPrivacyKeys(
+            identifiedUser.id,
+            rawCallerPrivacy.keys + ROKT_ATTRIBUTE_NO_TARGETING,
+            sequence,
+        )
         val callerPrivacy = rawCallerPrivacy.filterKeys { it in claimedKeys }
         val identifiedProfileAttrs = identifiedUser.userAttributes
         clearOverriddenPrivacyAttributes(identifiedUser, callerPrivacy, identifiedProfileAttrs)
@@ -352,28 +365,56 @@ internal object RoktKitRequestHelper {
         }
     }
 
+    // Re-syncs $NoTargeting for the user an identity call switched to, from that user's own sources: the profile
+    // noTargeting key and that user's last placement call in this process. A callback for a user who is no longer
+    // current is ignored; the newer change syncs instead.
+    fun syncNoTargetingAfterIdentityChange(user: MParticleUser) {
+        // Identity callbacks hand kits a filtered, read-only user, so read and write the real current user instead.
+        val currentUser = MParticle.getInstance()?.Identity()?.currentUser ?: return
+        if (currentUser.id != user.id) return
+        val profileAttributes = currentUser.userAttributes
+        val profileOptedOut = extractPrivacyAttributesFromObjects(profileAttributes)[ROKT_ATTRIBUTE_NO_TARGETING]
+            .equals("true", ignoreCase = true)
+        val placementOptedOut = synchronized(placementNoTargeting) { placementNoTargeting[currentUser.id] == true }
+        syncNoTargetingToUser(
+            user = currentUser,
+            noTargetingValue = (profileOptedOut || placementOptedOut).toString(),
+            profileAttributes = profileAttributes,
+            recordsPlacementResult = false,
+        )
+    }
+
+    // Sets $NoTargeting when the effective noTargeting is true and removes it otherwise, as web does, so a tag no
+    // source asks for does not stay on the profile.
     private fun syncNoTargetingToUser(
         user: MParticleUser?,
         noTargetingValue: String?,
         profileAttributes: Map<String, Any?>?,
+        recordsPlacementResult: Boolean = true,
     ) {
         if (user == null) return
+        val optedOut = noTargetingValue.equals("true", ignoreCase = true)
+        val lastRequested = synchronized(placementNoTargeting) {
+            if (recordsPlacementResult) placementNoTargeting[user.id] = optedOut
+            requestedNoTargetingTag.put(user.id, optedOut)
+        }
+        // Decide from the kit's own last write as well as the profile, so a queued opposite write never wins.
         when {
-            noTargetingValue.equals("true", ignoreCase = true) -> {
+            optedOut -> {
                 val alreadySet = profileAttributes?.entries?.any {
                     it.key.equals(NO_TARGETING_USER_ATTRIBUTE, ignoreCase = true) &&
                         it.value?.toString().equals("true", ignoreCase = true)
                 } == true
-                if (!alreadySet) {
+                if (!alreadySet || lastRequested == false) {
                     MParticle.withoutRoktApiUsage {
                         user.setUserAttribute(NO_TARGETING_USER_ATTRIBUTE, true)
                     }
                 }
             }
-            noTargetingValue.equals("false", ignoreCase = true) -> {
+            else -> {
                 val existingKeys = profileAttributes?.keys?.filter {
                     it.equals(NO_TARGETING_USER_ATTRIBUTE, ignoreCase = true)
-                }.orEmpty()
+                }.orEmpty().ifEmpty { if (lastRequested == true) listOf(NO_TARGETING_USER_ATTRIBUTE) else emptyList() }
                 for (existingKey in existingKeys) {
                     MParticle.withoutRoktApiUsage {
                         user.removeUserAttribute(existingKey)
@@ -394,7 +435,8 @@ internal object RoktKitRequestHelper {
     ) {
         val callerPrivacy = callerPrivacyAttributes(callerAttributes, kitConfiguration)
         val sequence = placementSequence.incrementAndGet()
-        user?.let { claimPrivacyKeys(it.id, callerPrivacy.keys, sequence) }
+        // Every sync writes $NoTargeting, set or removed, so each call claims noTargeting even when it did not pass it.
+        user?.let { claimPrivacyKeys(it.id, callerPrivacy.keys + ROKT_ATTRIBUTE_NO_TARGETING, sequence) }
         val hasEmail = !email.isNullOrEmpty()
         val hasHashedEmail = !hashedEmail.isNullOrEmpty()
 
