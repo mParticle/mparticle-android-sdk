@@ -521,7 +521,12 @@ public class MockServer {
                 return o1.getKey().timestamp == o2.getKey().timestamp ? 0 : o1.getKey().timestamp < o2.getKey().timestamp ? 1 : -1;
             }
         });
-        String apiKey = ConfigManager.getInstance(context).getApiKey();
+        // Not ConfigManager.getInstance(context): with no MParticle instance it constructs a ConfigManager, which repoints
+        // the shared preferences at this server's context. A request an earlier test left running still holds that
+        // test's server, so the next MParticle start would read the earlier test's API key.
+        MParticle mParticle = MParticle.getInstance();
+        ConfigManager configManager = mParticle != null ? mParticle.Internal().getConfigManager() : mConfigManager;
+        String apiKey = configManager.getApiKey();
         if (apiKey == null) {
             apiKey = "null";
         }
