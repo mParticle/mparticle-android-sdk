@@ -65,5 +65,5 @@ allprojects {
 
 dependencies {
     api 'com.apptentive:apptentive-kit-android:[6.9.1,7.0.0)'
-    testImplementation 'io.mockk:mockk:1.13.3'
+    testImplementation 'io.mockk:mockk:1.14.11'
 }
