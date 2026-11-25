@@ -28,8 +28,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   publish-draft-release:
@@ -141,10 +140,22 @@ jobs:
           exclude-types: chore,ci,test,build
           kits-path: kits
 
+      - name: Create release App token
+        id: release-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.SDK_RELEASE_GITHUB_CLIENT_ID }}
+          private-key: ${{ secrets.SDK_RELEASE_GITHUB_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@3ffccacd46053766916f087ce41d627c0b8cf2d1 # v8.1.3
         with:
-          token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
+          token: ${{ steps.release-token.outputs.token }}
+          add-paths: |
+            VERSION
+            CHANGELOG.md
           commit-message: "chore: prepare release ${{ steps.compose-version.outputs.new-version }}"
           branch: release-prep/${{ steps.compose-version.outputs.new-version }}
           title: "chore: prepare release ${{ steps.compose-version.outputs.new-version }}"
