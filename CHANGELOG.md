@@ -2,6 +2,58 @@
 
 ## [Unreleased]
 
+## [6.1.12] - 2026-11-25
+
+### Core
+
+#### Added
+
+- Add a per-screen screen_view_id to screen views in apps using the Rokt kit ([#1031](https://github.com/mParticle/mparticle-android-sdk/pull/1031))
+
+#### Fixed
+
+- Harden push analytics receiver against foreign broadcasts ([#1040](https://github.com/mParticle/mparticle-android-sdk/pull/1040))
+- Filter the map getUserAttributes(listener) returns to kits ([#1039](https://github.com/mParticle/mparticle-android-sdk/pull/1039))
+- Notify identity task listeners added after the task completes ([#1036](https://github.com/mParticle/mparticle-android-sdk/pull/1036))
+- Stop documenting MPService as an exported service ([#1025](https://github.com/mParticle/mparticle-android-sdk/pull/1025))
+- Validate config cache headers and isolate refresh failures ([#1029](https://github.com/mParticle/mparticle-android-sdk/pull/1029))
+- Clear saved location request on disable ([#1028](https://github.com/mParticle/mparticle-android-sdk/pull/1028))
+- Keep japicmp cache in a private user directory ([#1026](https://github.com/mParticle/mparticle-android-sdk/pull/1026))
+- Keep the session-end message when session attributes are oversized ([#1024](https://github.com/mParticle/mparticle-android-sdk/pull/1024))
+
+### Kits
+
+#### Apptentive
+
+##### Fixed
+
+- Ignore identity callbacks for a non-current user ([#1038](https://github.com/mParticle/mparticle-android-sdk/pull/1038))
+- Rebind the Apptentive person when the app user changes ([#1022](https://github.com/mParticle/mparticle-android-sdk/pull/1022))
+
+#### Iterable
+
+##### Fixed
+
+- Disable push and log out of Iterable on opt-out ([#1021](https://github.com/mParticle/mparticle-android-sdk/pull/1021))
+
+#### Leanplum
+
+##### Fixed
+
+- Honour opt-out and leave the logged-out user's profile ([#1023](https://github.com/mParticle/mparticle-android-sdk/pull/1023))
+
+#### Rokt
+
+##### Added
+
+- Attach core screen_view_id to placement requests ([#1032](https://github.com/mParticle/mparticle-android-sdk/pull/1032))
+
+##### Fixed
+
+- Update SDK and payment extension to 6.4.1 ([#1044](https://github.com/mParticle/mparticle-android-sdk/pull/1044))
+- Remove $NoTargeting like web and sync it on identity changes ([#1042](https://github.com/mParticle/mparticle-android-sdk/pull/1042))
+- Exempt privacy attributes from persistence and filters and sync $NoTargeting ([#1035](https://github.com/mParticle/mparticle-android-sdk/pull/1035))
+
 ## [6.1.11] - 2026-11-16
 
 ### Core
